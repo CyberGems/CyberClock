@@ -376,6 +376,10 @@ pub struct MonitorInfo {
     label: String,
     primary: bool,
     current: bool,
+    width: u32,
+    height: u32,
+    x: i32,
+    y: i32,
 }
 
 #[tauri::command]
@@ -395,11 +399,17 @@ fn get_screens(window: WebviewWindow, app: AppHandle) -> Vec<MonitorInfo> {
                     _ => false,
                 }
             });
+            let size = m.size();
+            let pos = m.position();
             screens.push(MonitorInfo {
                 id,
                 label: m.name().unwrap_or(&format!("Display {}", i)).to_string(),
                 primary: is_primary,
                 current: settings.preferred_display_id.map_or(false, |pid| pid == id),
+                width: size.width,
+                height: size.height,
+                x: pos.x,
+                y: pos.y,
             });
         }
     }
@@ -427,6 +437,26 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
     // Broadcast update
     let _ = app.emit("settings:updated", &settings);
     true
+}
+
+#[tauri::command]
+fn reset_mini_position(app: AppHandle) {
+    let mut settings = load_settings(&app);
+    settings.mini_position = None;
+    save_settings_to_file(&app, &settings);
+    // Also move the mini window back to default center-ish position
+    if let Some(mini) = app.get_webview_window("mini") {
+        if let Ok(monitors) = mini.available_monitors() {
+            if let Some(monitor) = monitors.first() {
+                let pos = monitor.position();
+                let size = monitor.size();
+                let x = pos.x + (size.width as i32 / 2) - 130;
+                let y = pos.y + (size.height as i32 / 2) - 24;
+                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+            }
+        }
+    }
+    let _ = app.emit("settings:updated", &settings);
 }
 
 #[tauri::command]
@@ -747,6 +777,7 @@ pub fn run() {
             menu_action,
             get_screens,
             select_display,
+            reset_mini_position,
             open_file_dialog,
             set_startup
         ])

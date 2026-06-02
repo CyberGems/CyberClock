@@ -90,6 +90,9 @@
         selectDisplay: async (id) => {
             return await invoke("select_display", { id });
         },
+        resetMiniPosition: async () => {
+            await invoke("reset_mini_position");
+        },
 
         // ── Menu popup ────────────────────────────────────────────
         menuAction: async (action) => {

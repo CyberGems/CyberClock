@@ -466,6 +466,49 @@
                 letter-spacing: 1px;
             }
 
+            /* ── Screen cards ── */
+            .screen-card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 10px 12px;
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                margin-bottom: 8px;
+                transition: all 0.2s;
+            }
+            .screen-card:hover {
+                border-color: var(--border-bright);
+            }
+            .screen-card.current {
+                border-color: var(--accent-a);
+                box-shadow: var(--glow-xs);
+                background: rgba(var(--rgb-accent), 0.04);
+            }
+            .screen-info {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .screen-name {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1.5px;
+                color: var(--text-md);
+                text-transform: uppercase;
+            }
+            .screen-card.current .screen-name {
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+            }
+            .screen-res {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+            }
+
             .scanlines {
                 position: fixed;
                 inset: 0;
@@ -779,48 +822,46 @@
                     style="display: none"
                 >
                     <div class="section">
-                        <div class="sec-title">Multi-Monitor Support</div>
-                        <div
-                            style="
-                                font-family:
-                                    &quot;Share Tech Mono&quot;, monospace;
-                                font-size: 10px;
-                                color: var(--text-md);
-                                line-height: 1.7;
-                                padding: 12px;
-                                background: var(--bg-01);
-                                border: 1px solid var(--border);
-                                border-radius: 6px;
-                            "
-                        >
-                            CyberClock fully supports multi-monitor setups.<br />
-                            ·
-                            <span style="color: var(--accent-a)"
-                                >Mini Mode</span
-                            >
-                            — drag the bar to any screen. Position is
-                            remembered.<br />
-                            ·
-                            <span style="color: var(--accent-a)"
-                                >Full Mode</span
-                            >
-                            — move the window normally between monitors.<br />
-                            · All child windows (Timer, Stopwatch, Relax) open
-                            centered on the primary display.
+                        <div class="sec-title">Startup Mode</div>
+                        <div class="row">
+                            <div class="row-label">
+                                Default Window Mode<small
+                                    >Which window opens on launch</small
+                                >
+                            </div>
+                            <div class="fmt-btns" id="startup-mode-btns">
+                                <button class="fmt-btn" data-mode="mini">
+                                    Mini
+                                </button>
+                                <button class="fmt-btn" data-mode="full">
+                                    Full
+                                </button>
+                            </div>
                         </div>
-                        <div id="screens-list" style="margin-top: 12px"></div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">Mini Clock Position</div>
+                        <div class="row">
+                            <div class="row-label">
+                                Reset Position<small
+                                    >Center mini clock on primary display</small
+                                >
+                            </div>
+                            <button class="abtn" id="btn-reset-pos">
+                                <span data-ico="expand" data-ico-size="11"></span> Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">Multi-Monitor Support</div>
+                        <div id="screens-list"></div>
                     </div>
 
                     <div class="section">
                         <div class="sec-title">Coming Soon</div>
                         <div class="teaser">
-                            <div class="teaser-title">Roadmap</div>
-                            <div class="teaser-item">
-                                Custom alarm times (set by hour)<span
-                                    class="teaser-badge"
-                                    >SOON</span
-                                >
-                            </div>
                             <div class="teaser-item">
                                 Weather widget integration<span
                                     class="teaser-badge"
@@ -835,18 +876,6 @@
                             </div>
                             <div class="teaser-item">
                                 Pomodoro technique integration<span
-                                    class="teaser-badge"
-                                    >SOON</span
-                                >
-                            </div>
-                            <div class="teaser-item">
-                                Custom ambient audio import<span
-                                    class="teaser-badge"
-                                    >SOON</span
-                                >
-                            </div>
-                            <div class="teaser-item">
-                                Calendar event reminders<span
                                     class="teaser-badge"
                                     >SOON</span
                                 >
@@ -904,6 +933,16 @@
                 document.getElementById("tog-aot").checked = !!s.alwaysOnTop;
                 document.getElementById("tog-startup").checked =
                     !!s.startWithWindows;
+
+                // Startup mode
+                document
+                    .querySelectorAll("#startup-mode-btns .fmt-btn")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.mode === (s.windowMode || "mini"),
+                        ),
+                    );
 
                 // Alarms
                 const ah = s.alarmHalfHour || {};
@@ -1131,19 +1170,48 @@
             async function loadScreens() {
                 const screens = await window.cc.getScreens();
                 const el = document.getElementById("screens-list");
+                if (!screens.length) {
+                    el.innerHTML = '<div style="padding:10px;color:var(--text-lo);font-size:10px;">No displays detected.</div>';
+                    return;
+                }
                 el.innerHTML = screens
                     .map(
                         (s) =>
-                            `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-01);border:1px solid var(--border);border-radius:4px;margin-bottom:6px;">
-      <span style="font-size:11px;">${s.primary ? "⊙" : "○"}</span>
-      <div>
-        <div style="font-size:9px;letter-spacing:1.5px;color:${s.primary ? "var(--accent-a)" : "var(--text-md)"};text-shadow:${s.primary ? "var(--glow-xs)" : "none"};">${s.label}${s.primary ? " · PRIMARY" : ""}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-lo);">${s.bounds.width}×${s.bounds.height} at (${s.bounds.x}, ${s.bounds.y})</div>
+                            `<div class="screen-card${s.current ? ' current' : ''}" data-screen-id="${s.id}">
+      <div class="screen-info">
+        <div class="screen-name">${s.label}${s.primary ? ' · PRIMARY' : ''}</div>
+        <div class="screen-res">${s.width}×${s.height} at (${s.x}, ${s.y})</div>
       </div>
+      <button class="abtn screen-select">Select</button>
     </div>`,
                     )
                     .join("");
+
+                document.querySelectorAll('.screen-select').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        const card = btn.closest('.screen-card');
+                        const id = parseInt(card.dataset.screenId);
+                        await window.cc.selectDisplay(id);
+                        document.querySelectorAll('.screen-card').forEach(c => c.classList.remove('current'));
+                        card.classList.add('current');
+                    });
+                });
             }
+
+            // Startup mode buttons
+            document.querySelectorAll("#startup-mode-btns .fmt-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const mode = btn.dataset.mode;
+                    window.cc.saveSettings({ windowMode: mode });
+                    document.querySelectorAll("#startup-mode-btns .fmt-btn").forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+                });
+            });
+
+            // Reset mini position
+            document.getElementById("btn-reset-pos").addEventListener("click", () => {
+                window.cc.resetMiniPosition();
+            });
 
             // About buttons
             document.getElementById("btn-rate").addEventListener("click", () => {
