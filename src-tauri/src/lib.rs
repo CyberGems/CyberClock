@@ -5,6 +5,7 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
 use tauri::{AppHandle, Manager, WebviewWindow, Emitter, WindowEvent};
 use tauri::tray::{TrayIconBuilder, MouseButton, MouseButtonState};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri_plugin_dialog::DialogExt;
 use chrono::{Local, Timelike};
 
@@ -521,22 +522,109 @@ fn check_alarms(app: &AppHandle) {
 // ─────────────────────────────────────────────────────────────
 
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
+    // Build tray context menu
+    let menu = Menu::with_items(
+        app,
+        &[
+            &MenuItem::with_id(app, "show", "Show", true, None::<&str>)?,
+            &MenuItem::with_id(app, "hide", "Hide", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "full", "Switch to Full Mode", true, None::<&str>)?,
+            &MenuItem::with_id(app, "mini", "Switch to Mini Mode", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?,
+            &MenuItem::with_id(app, "timer", "Timer", true, None::<&str>)?,
+            &MenuItem::with_id(app, "stopwatch", "Stopwatch", true, None::<&str>)?,
+            &MenuItem::with_id(app, "relax", "Relax", true, None::<&str>)?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?,
+        ],
+    )?;
+
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
         .tooltip("CyberClock")
+        .menu(&menu)
+        .on_menu_event(|app, event| {
+            match event.id.as_ref() {
+                "show" => {
+                    let settings = load_settings(app);
+                    if settings.window_mode == "full" {
+                        if let Some(main) = app.get_webview_window("main") {
+                            let _ = main.show();
+                            let _ = main.set_focus();
+                        }
+                    } else {
+                        if let Some(mini) = app.get_webview_window("mini") {
+                            let _ = mini.show();
+                            let _ = mini.set_focus();
+                        }
+                    }
+                }
+                "hide" => {
+                    let settings = load_settings(app);
+                    if settings.window_mode == "full" {
+                        if let Some(main) = app.get_webview_window("main") {
+                            let _ = main.hide();
+                        }
+                    } else {
+                        if let Some(mini) = app.get_webview_window("mini") {
+                            let _ = mini.hide();
+                        }
+                    }
+                    // Also hide all child windows
+                    for w in ["settings", "timer", "stopwatch", "relax", "menu"] {
+                        if let Some(win) = app.get_webview_window(w) {
+                            let _ = win.hide();
+                        }
+                    }
+                }
+                "full" => switch_to_full_mode(app.clone()),
+                "mini" => switch_to_mini_mode(app.clone()),
+                "settings" => {
+                    if let Some(w) = app.get_webview_window("settings") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
+                "timer" => {
+                    if let Some(w) = app.get_webview_window("timer") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
+                "stopwatch" => {
+                    if let Some(w) = app.get_webview_window("stopwatch") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
+                "relax" => {
+                    if let Some(w) = app.get_webview_window("relax") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
+                "quit" => {
+                    app.exit(0);
+                }
+                _ => {}
+            }
+        })
         .on_tray_icon_event(|tray, event| {
+            // Left click toggles visibility of the main / mini window
             if let tauri::tray::TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
                 let app = tray.app_handle();
                 let settings = load_settings(app);
                 if settings.window_mode == "full" {
                     if let Some(main) = app.get_webview_window("main") {
-                        let _ = main.show();
-                        let _ = main.set_focus();
+                        let visible = main.is_visible().unwrap_or(false);
+                        if visible { let _ = main.hide(); } else { let _ = main.show(); let _ = main.set_focus(); }
                     }
                 } else {
                     if let Some(mini) = app.get_webview_window("mini") {
-                        let _ = mini.show();
-                        let _ = mini.set_focus();
+                        let visible = mini.is_visible().unwrap_or(false);
+                        if visible { let _ = mini.hide(); } else { let _ = mini.show(); let _ = mini.set_focus(); }
                     }
                 }
             }
