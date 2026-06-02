@@ -872,14 +872,18 @@
                             <span>◈ Auto Scheduler</span>
                             <span class="sched-status" id="sched-status">OFF</span>
                         </div>
-                        <div class="sched-row">
-                            <span class="sched-lbl" style="width:auto; padding-right:6px;">Enable</span>
-                            <label class="tog-sm">
-                                <input type="checkbox" id="sched-enable" />
-                                <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
-                            </label>
-                            <span class="sched-lbl" style="width:auto; margin-left:12px; padding-right:6px;">Start At</span>
-                            <input type="time" class="sched-time" id="sched-time" value="22:00" />
+                        <div class="sched-row" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="sched-lbl" style="width: auto;">Enable</span>
+                                <label class="tog-sm">
+                                    <input type="checkbox" id="sched-enable" />
+                                    <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
+                                </label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="sched-lbl" style="width: auto;">Start At</span>
+                                <input type="time" class="sched-time" id="sched-time" value="22:00" />
+                            </div>
                         </div>
                         <div class="sched-row">
                             <span class="sched-lbl">Repeat</span>
