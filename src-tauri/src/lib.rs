@@ -57,7 +57,7 @@ impl Default for AppSettings {
     fn default() -> Self {
         Self {
             theme: "cyber-blue".to_string(),
-            clock_format: "24h".to_string(),
+            clock_format: "12h".to_string(),
             show_seconds: true,
             always_on_top: false,
             start_with_windows: false,

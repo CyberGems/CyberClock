@@ -10,11 +10,12 @@
         <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/icons.js"></script>
+        <script src="../shared/tauri-bridge.js"></script>
         <style>
             html,
             body {
-                width: 700px;
-                height: 560px;
+                width: 100%;
+                height: 100%;
                 overflow: hidden;
             }
 
@@ -205,7 +206,7 @@
                 transform: scale(1.04);
             }
             .theme-tile.active {
-                border-color: var(--accent-a) !important;
+                border-color: var(--accent-a);
                 box-shadow: var(--glow-sm);
             }
             .theme-dot {
@@ -474,8 +475,8 @@
                     0deg,
                     transparent,
                     transparent 2px,
-                    rgba(0, 0, 0, 0.05) 2px,
-                    rgba(0, 0, 0, 0.05) 4px
+                    rgba(0, 0, 0, 0.12) 2px,
+                    rgba(0, 0, 0, 0.12) 4px
                 );
             }
             body.no-scanlines .scanlines {
@@ -1128,7 +1129,7 @@
             // Close
             document
                 .getElementById("btn-close")
-                .addEventListener("click", () => window.cc.closeWindow());
+                .addEventListener("click", () => window.cc.hideWindow("settings"));
 
             // Display tab: load screens
             async function loadScreens() {

@@ -57,6 +57,12 @@ class AudioEngine {
     this._nodes = [];
     this.isPlaying  = false;
     this.currentTrack = null;
+    // Stop any HTML5 Audio element from playFile()
+    if (this._audioEl) {
+      try { this._audioEl.pause(); } catch (_) {}
+      try { this._audioEl.currentTime = 0; } catch (_) {}
+      this._audioEl = null;
+    }
   }
 
   // ── Noise helpers ─────────────────────────────────────────
@@ -165,7 +171,7 @@ class AudioEngine {
     this.isPlaying = true; this.currentTrack = 'ocean';
   }
 
-  playCampfire() { this._fire(false); }
+  playNight() { this._fire(false); }
   playFireplace() { this._fire(true); }
 
   _fire(indoor) {
@@ -179,7 +185,7 @@ class AudioEngine {
     noise.connect(bp); bp.connect(g); g.connect(this._master);
     noise.start();
     this.isPlaying = true;
-    this.currentTrack = indoor ? 'fireplace' : 'campfire';
+    this.currentTrack = indoor ? 'fireplace' : 'night';
   }
 
   playForest() {
@@ -246,10 +252,21 @@ class AudioEngine {
 
   // ── Play from ID ──────────────────────────────────────────
   playTrack(id) {
+    // Try real audio file first, fall back to procedural synthesis
+    const realFile = `../assets/sounds/${id}.mp3`;
+    fetch(realFile, { method: 'HEAD' })
+      .then(r => {
+        if (r.ok) this.playFile(realFile);
+        else this._playSynth(id);
+      })
+      .catch(() => this._playSynth(id));
+  }
+
+  _playSynth(id) {
     switch (id) {
       case 'rain':      this.playRain();      break;
       case 'ocean':     this.playOcean();     break;
-      case 'campfire':  this.playCampfire();  break;
+      case 'night':     this.playNight();     break;
       case 'fireplace': this.playFireplace(); break;
       case 'forest':    this.playForest();    break;
       case 'space':     this.playSpace();     break;
@@ -258,7 +275,8 @@ class AudioEngine {
 
   // ── Play custom audio file ────────────────────────────────
   playFile(filePath) {
-    this.stop(); this.resume();
+    this.stop(); // Ensure nothing else is playing
+    this.resume();
     // Use HTML Audio as pass-through into Web Audio analyser
     const audio = new Audio(filePath);
     audio.loop  = true;

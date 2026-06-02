@@ -2105,10 +2105,10 @@
                     <div class="view" id="view-relax">
                         <div class="relax-L">
                             <div class="track-grid">
-                                <div class="tcard" data-track="campfire">
-                                    <div class="tcard-ico">🔥</div>
-                                    <div class="tcard-name">Campfire</div>
-                                    <div class="tcard-desc">Crackling fire</div>
+                                <div class="tcard" data-track="night">
+                                    <div class="tcard-ico"><span data-ico="stars" data-ico-size="28"></span></div>
+                                    <div class="tcard-name">Night</div>
+                                    <div class="tcard-desc">Calm night ambience</div>
                                     <div class="tcard-wave">
                                         <div class="wbar"></div>
                                         <div class="wbar"></div>
@@ -2132,7 +2132,7 @@
                                     </div>
                                 </div>
                                 <div class="tcard" data-track="space">
-                                    <div class="tcard-ico">🌌</div>
+                                    <div class="tcard-ico"><span data-ico="planet" data-ico-size="28"></span></div>
                                     <div class="tcard-name">Outer Space</div>
                                     <div class="tcard-desc">Cosmic drones</div>
                                     <div class="tcard-wave">
@@ -3624,7 +3624,7 @@
 
             function rTogglePlay() {
                 if (!rSelected) {
-                    preSelectRelaxTrack("campfire");
+                    preSelectRelaxTrack("night");
                     rPlayTrack();
                     return;
                 }

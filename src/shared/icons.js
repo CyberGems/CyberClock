@@ -187,6 +187,11 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M9 22v-7h6v7"/>
   </symbol>
+  <symbol id="cc-i-planet" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+      d="M4.5 8c3.5-1.5 12-1.5 15 0s2 7.5-1.5 9-11.5 1-15-1-3-6.5 1.5-8Z"/>
+  </symbol>
 </svg>
         `;
         document.body.appendChild(wrap);
