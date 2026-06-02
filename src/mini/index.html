@@ -1137,7 +1137,8 @@
             // ═══════════════════════════════════════════════════════
             document.getElementById("btn-full").addEventListener("click", () => window.cc.goFull());
             document.getElementById("btn-aot").addEventListener("click", async () => {
-                const on = await window.cc.toggleAlwaysOnTop();
+                const on = !document.getElementById("btn-aot").classList.contains("active");
+                window.cc.saveSettings({ alwaysOnTop: on });
                 document.getElementById("btn-aot").classList.toggle("active", on);
             });
 

@@ -1396,6 +1396,13 @@
                 if (s.scanlines === false)
                     document.body.classList.add("no-scanlines");
                 else document.body.classList.remove("no-scanlines");
+                // Sync relax volume from Settings in real time
+                if (s.relaxVolume !== undefined) {
+                    const v = Math.round(s.relaxVolume * 100);
+                    document.getElementById("vol-slider").value = v;
+                    document.getElementById("vol-val").textContent = v + "%";
+                    window.audioEngine.setVolume(s.relaxVolume);
+                }
             });
             window.cc.onThemeChanged((t) => {
                 document.body.dataset.theme = t;

@@ -765,12 +765,8 @@
                                     gap: 12px;
                                 "
                             >
-                                <button class="abtn" onclick="return false;">
-                                    ★ Rate
-                                </button>
-                                <button class="abtn" onclick="return false;">
-                                    ⬆ Check Updates
-                                </button>
+                                <button class="abtn" id="btn-rate">★ Rate</button>
+                                <button class="abtn" id="btn-updates">⬆ Check Updates</button>
                             </div>
                         </div>
                     </div>
@@ -994,8 +990,8 @@
                 );
             document
                 .getElementById("tog-aot")
-                .addEventListener("change", () =>
-                    window.cc.toggleAlwaysOnTop(),
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ alwaysOnTop: e.target.checked }),
                 );
             document
                 .getElementById("tog-startup")
@@ -1148,6 +1144,14 @@
                     )
                     .join("");
             }
+
+            // About buttons
+            document.getElementById("btn-rate").addEventListener("click", () => {
+                window.open("https://github.com/CyberGems/CyberClock", "_blank");
+            });
+            document.getElementById("btn-updates").addEventListener("click", () => {
+                window.open("https://github.com/CyberGems/CyberClock/releases", "_blank");
+            });
 
             // Init
             window.cc.onInit((s) => applySettings(s));
