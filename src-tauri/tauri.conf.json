@@ -1,0 +1,124 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "CyberClock",
+  "version": "1.0.0",
+  "identifier": "com.cybergems.cyberclock",
+  "build": {
+    "frontendDist": "../src",
+    "devUrl": null,
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "CyberClock",
+        "width": 1024,
+        "height": 768,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false,
+        "url": "main/index.html"
+      },
+      {
+        "label": "mini",
+        "title": "CyberClock Mini",
+        "width": 260,
+        "height": 48,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "url": "mini/index.html"
+      },
+      {
+        "label": "menu",
+        "title": "CyberClock Menu",
+        "width": 270,
+        "height": 420,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "url": "mini/menu.html"
+      },
+      {
+        "label": "settings",
+        "title": "CyberClock Settings",
+        "width": 700,
+        "height": 560,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false,
+        "url": "settings/index.html"
+      },
+      {
+        "label": "timer",
+        "title": "CyberClock Timer",
+        "width": 800,
+        "height": 620,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false,
+        "url": "timer/index.html"
+      },
+      {
+        "label": "stopwatch",
+        "title": "CyberClock Stopwatch",
+        "width": 800,
+        "height": 620,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false,
+        "url": "stopwatch/index.html"
+      },
+      {
+        "label": "relax",
+        "title": "CyberClock Relax",
+        "width": 960,
+        "height": 660,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": false,
+        "url": "relax/index.html"
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}

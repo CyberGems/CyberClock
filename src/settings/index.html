@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>CyberClock — Settings</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/icons.js"></script>
+        <style>
+            html,
+            body {
+                width: 700px;
+                height: 560px;
+                overflow: hidden;
+            }
+
+            .shell {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                background: var(--bg-00);
+                border: 1px solid var(--border-bright);
+                border-radius: 10px;
+                overflow: hidden;
+                position: relative;
+            }
+            .shell::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 10%;
+                right: 10%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0.9;
+                box-shadow: var(--glow-md);
+                z-index: 10;
+            }
+
+            /* ── Title bar ── */
+            .tbar {
+                height: 46px;
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                gap: 10px;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                -webkit-app-region: drag;
+                flex-shrink: 0;
+            }
+            .tbar .brand {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 3px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                text-transform: uppercase;
+            }
+            .tbar .spacer {
+                flex: 1;
+            }
+            .wmbtn {
+                -webkit-app-region: no-drag;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                width: 26px;
+                height: 26px;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.18s;
+            }
+            .wmbtn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .wmbtn.close:hover {
+                color: #ff4466;
+                border-color: #ff4466;
+                box-shadow: 0 0 8px rgba(255, 68, 102, 0.6);
+            }
+            .wmbtn .cc-ico {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* ── Tabs ── */
+            .tabs {
+                display: flex;
+                gap: 0;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+                -webkit-app-region: no-drag;
+            }
+            .tab {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--text-lo);
+                padding: 12px 22px;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+                user-select: none;
+            }
+            .tab:hover {
+                color: var(--text-md);
+            }
+            .tab.active {
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                border-bottom-color: var(--accent-a);
+            }
+
+            /* ── Content ── */
+            .content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px 24px;
+                -webkit-app-region: no-drag;
+            }
+            .panel-content {
+                animation: slide-in 0.2s ease;
+            }
+
+            /* ── Section ── */
+            .section {
+                margin-bottom: 22px;
+            }
+            .sec-title {
+                font-size: 9px;
+                letter-spacing: 2.5px;
+                text-transform: uppercase;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                margin-bottom: 12px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border);
+            }
+            .row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px dashed rgba(var(--rgb-accent), 0.08);
+            }
+            .row:last-child {
+                border-bottom: none;
+            }
+            .row-label {
+                font-size: 10px;
+                letter-spacing: 1px;
+                color: var(--text-md);
+            }
+            .row-label small {
+                display: block;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                margin-top: 2px;
+            }
+
+            /* ── Theme tiles ── */
+            .themes {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-top: 4px;
+            }
+            .theme-tile {
+                width: 110px;
+                height: 68px;
+                border-radius: 6px;
+                cursor: pointer;
+                border: 2px solid var(--border);
+                position: relative;
+                overflow: hidden;
+                transition: all 0.2s;
+                background: var(--bg-02);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+            .theme-tile:hover {
+                transform: scale(1.04);
+            }
+            .theme-tile.active {
+                border-color: var(--accent-a) !important;
+                box-shadow: var(--glow-sm);
+            }
+            .theme-dot {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                box-shadow: 0 0 8px currentColor;
+            }
+            .theme-name {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-md);
+            }
+
+            /* ── Format toggle row ── */
+            .fmt-btns {
+                display: flex;
+                gap: 6px;
+            }
+            .fmt-btn {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--text-md);
+                padding: 6px 14px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .fmt-btn.active {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .fmt-btn:hover {
+                color: var(--accent-a);
+            }
+
+            /* ── Toggle ── */
+            .tog {
+                position: relative;
+                width: 42px;
+                height: 22px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .tog input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .tog-tr {
+                position: absolute;
+                inset: 0;
+                background: var(--bg-03);
+                border: 1px solid var(--border);
+                border-radius: 11px;
+                transition: all 0.25s;
+            }
+            .tog input:checked ~ .tog-tr {
+                background: var(--accent-dim);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .tog-th {
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 14px;
+                height: 14px;
+                background: var(--text-lo);
+                border-radius: 50%;
+                transition: all 0.25s;
+            }
+            .tog input:checked ~ .tog-tr .tog-th {
+                transform: translateX(20px);
+                background: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
+
+            /* ── Select ── */
+            select {
+                -webkit-app-region: no-drag;
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                color: var(--text-hi);
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1px;
+                padding: 6px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                outline: none;
+                transition: border-color 0.18s;
+            }
+            select:hover,
+            select:focus {
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            select option {
+                background: var(--bg-02);
+            }
+
+            /* ── Alarm section ── */
+            .alarm-block {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 14px 16px;
+                margin-bottom: 12px;
+            }
+            .alarm-block-title {
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 10px;
+            }
+            .alarm-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+            }
+            .alarm-row .label {
+                font-size: 9px;
+                color: var(--text-md);
+                letter-spacing: 1px;
+                width: 60px;
+                flex-shrink: 0;
+            }
+
+            /* ── Action button ── */
+            .abtn {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--accent-a);
+                padding: 5px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .abtn:hover {
+                box-shadow: var(--glow-xs);
+                border-color: var(--border-active);
+            }
+            .abtn:active {
+                transform: scale(0.96);
+            }
+
+            /* ── Slider row ── */
+            .slider-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .slider-row input[type="range"] {
+                flex: 1;
+            }
+            .slider-val {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--accent-a);
+                min-width: 34px;
+                text-align: right;
+            }
+
+            /* ── Custom file label ── */
+            .file-label {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                font-style: italic;
+                margin-top: 4px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .file-clear {
+                cursor: pointer;
+                color: #ff4466;
+                font-size: 11px;
+            }
+            .file-clear:hover {
+                text-shadow: 0 0 6px #ff4466;
+            }
+
+            /* ── About ── */
+            .about-box {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 16px;
+                text-align: center;
+            }
+            .about-ver {
+                font-size: 11px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                letter-spacing: 2px;
+                margin-bottom: 4px;
+            }
+            .about-sub {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                letter-spacing: 1px;
+            }
+
+            /* ── Feature teaser ── */
+            .teaser {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 14px 16px;
+            }
+            .teaser-title {
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+            .teaser-item {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                opacity: 0.6;
+                font-style: italic;
+                padding: 3px 0;
+                border-bottom: 1px dashed rgba(var(--rgb-accent), 0.06);
+            }
+            .teaser-item:last-child {
+                border-bottom: none;
+            }
+            .teaser-badge {
+                font-size: 7px;
+                background: var(--accent-dim);
+                border: 1px solid var(--border);
+                color: var(--accent-a);
+                border-radius: 3px;
+                padding: 1px 5px;
+                margin-left: 6px;
+                letter-spacing: 1px;
+            }
+
+            .scanlines {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 9999;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.05) 2px,
+                    rgba(0, 0, 0, 0.05) 4px
+                );
+            }
+            body.no-scanlines .scanlines {
+                opacity: 0;
+            }
+        </style>
+    </head>
+    <body data-theme="cyber-blue">
+        <div class="shell">
+            <!-- Title bar -->
+            <div class="tbar">
+                <span class="brand"><span data-ico="gear"></span> Settings · CyberClock</span>
+                <div class="spacer"></div>
+                <button class="wmbtn close" id="btn-close"><span data-ico="x"></span></button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="appearance">Appearance</div>
+                <div class="tab" data-tab="alarms">Alarms</div>
+                <div class="tab" data-tab="general">General</div>
+                <div class="tab" data-tab="display">Display</div>
+            </div>
+
+            <!-- Content panels -->
+            <div class="content">
+                <!-- ═══ APPEARANCE ═══ -->
+                <div class="panel-content" id="tab-appearance">
+                    <div class="section">
+                        <div class="sec-title">Theme / Skin</div>
+                        <div class="themes" id="theme-tiles">
+                            <div class="theme-tile" data-theme="cyber-blue">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #00d4ff; color: #00d4ff"
+                                ></div>
+                                <div class="theme-name">Cyber Blue</div>
+                            </div>
+                            <div class="theme-tile" data-theme="neon-green">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #00ff41; color: #00ff41"
+                                ></div>
+                                <div class="theme-name">Neon Green</div>
+                            </div>
+                            <div class="theme-tile" data-theme="plasma-purple">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #c800ff; color: #c800ff"
+                                ></div>
+                                <div class="theme-name">Plasma Purple</div>
+                            </div>
+                            <div class="theme-tile" data-theme="solar-orange">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #ff6600; color: #ff6600"
+                                ></div>
+                                <div class="theme-name">Solar Orange</div>
+                            </div>
+                            <div class="theme-tile" data-theme="arctic-ice">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #d0f0ff; color: #d0f0ff"
+                                ></div>
+                                <div class="theme-name">Arctic Ice</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">Clock Display</div>
+                        <div class="row">
+                            <div class="row-label">Time Format</div>
+                            <div class="fmt-btns">
+                                <button class="fmt-btn" data-fmt="24h">
+                                    24H
+                                </button>
+                                <button class="fmt-btn" data-fmt="12h">
+                                    12H
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row-label">Show Seconds</div>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-seconds" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                        <div class="row">
+                            <div class="row-label">
+                                Scanlines Effect<small>CRT-style overlay</small>
+                            </div>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-scanlines" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ ALARMS ═══ -->
+                <div
+                    class="panel-content"
+                    id="tab-alarms"
+                    style="display: none"
+                >
+                    <div class="section">
+                        <div class="sec-title">Alarm Volume</div>
+                        <div class="slider-row">
+                            <span style="font-size: 10px; color: var(--text-md)"
+                                ><span data-ico="volume-low"></span></span
+                            >
+                            <input
+                                type="range"
+                                id="alarm-vol"
+                                min="0"
+                                max="100"
+                                value="75"
+                            />
+                            <span style="font-size: 10px; color: var(--text-md)"
+                                ><span data-ico="volume-high"></span></span
+                            >
+                            <span class="slider-val" id="alarm-vol-val"
+                                >75%</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="alarm-block">
+                        <div class="alarm-block-title">
+                            <span data-ico="bell"></span> Half-Hour Chime (:30)
+                        </div>
+                        <div class="alarm-row">
+                            <span class="label">Enable</span>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-half" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                        <div class="alarm-row">
+                            <span class="label">Sound</span>
+                            <select id="sel-half">
+                                <option value="chime-crystal">
+                                    Crystal Bell
+                                </option>
+                                <option value="chime-digital">
+                                    Digital Pulse
+                                </option>
+                                <option value="chime-neon">Neon Arp</option>
+                                <option value="chime-zen">Zen Gong</option>
+                                <option value="chime-cyber">Cyber Sweep</option>
+                            </select>
+                            <button class="abtn" id="test-half"><span data-ico="play"></span> Test</button>
+                            <button class="abtn" id="file-half">
+                                <span data-ico="folder"></span> Custom…
+                            </button>
+                        </div>
+                        <div
+                            class="file-label"
+                            id="file-half-label"
+                            style="display: none"
+                        >
+                            <span id="file-half-name"></span>
+                            <span class="file-clear" id="file-half-clear"
+                                ><span data-ico="x"></span></span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="alarm-block">
+                        <div class="alarm-block-title">
+                            <span data-ico="bell"></span> Full-Hour Chime (:00)
+                        </div>
+                        <div class="alarm-row">
+                            <span class="label">Enable</span>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-full" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                        <div class="alarm-row">
+                            <span class="label">Sound</span>
+                            <select id="sel-full">
+                                <option value="chime-crystal">
+                                    Crystal Bell
+                                </option>
+                                <option value="chime-digital" selected>
+                                    Digital Pulse
+                                </option>
+                                <option value="chime-neon">Neon Arp</option>
+                                <option value="chime-zen">Zen Gong</option>
+                                <option value="chime-cyber">Cyber Sweep</option>
+                            </select>
+                            <button class="abtn" id="test-full"><span data-ico="play"></span> Test</button>
+                            <button class="abtn" id="file-full">
+                                <span data-ico="folder"></span> Custom…
+                            </button>
+                        </div>
+                        <div
+                            class="file-label"
+                            id="file-full-label"
+                            style="display: none"
+                        >
+                            <span id="file-full-name"></span>
+                            <span class="file-clear" id="file-full-clear"
+                                ><span data-ico="x"></span></span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ GENERAL ═══ -->
+                <div
+                    class="panel-content"
+                    id="tab-general"
+                    style="display: none"
+                >
+                    <div class="section">
+                        <div class="sec-title">Behavior</div>
+                        <div class="row">
+                            <div class="row-label">
+                                Always on Top<small
+                                    >Window floats above all others</small
+                                >
+                            </div>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-aot" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                        <div class="row">
+                            <div class="row-label">
+                                Start with Windows<small
+                                    >Launch CyberClock at login</small
+                                >
+                            </div>
+                            <label class="tog"
+                                ><input type="checkbox" id="tog-startup" />
+                                <div class="tog-tr">
+                                    <div class="tog-th"></div></div
+                            ></label>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">Relaxation Volume</div>
+                        <div class="slider-row">
+                            <span style="font-size: 10px; color: var(--text-md)"
+                                ><span data-ico="volume-low"></span></span
+                            >
+                            <input
+                                type="range"
+                                id="relax-vol"
+                                min="0"
+                                max="100"
+                                value="80"
+                            />
+                            <span style="font-size: 10px; color: var(--text-md)"
+                                ><span data-ico="volume-high"></span></span
+                            >
+                            <span class="slider-val" id="relax-vol-val"
+                                >80%</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">About</div>
+                        <div class="about-box">
+                            <div class="about-ver">CyberClock v1.0.0</div>
+                            <div class="about-sub">
+                                CyberGems © 2026 · Premium Cyber-Neon Clock for
+                                Windows
+                            </div>
+                            <div
+                                style="
+                                    margin-top: 10px;
+                                    display: flex;
+                                    justify-content: center;
+                                    gap: 12px;
+                                "
+                            >
+                                <button class="abtn" onclick="return false;">
+                                    ★ Rate
+                                </button>
+                                <button class="abtn" onclick="return false;">
+                                    ⬆ Check Updates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ DISPLAY ═══ -->
+                <div
+                    class="panel-content"
+                    id="tab-display"
+                    style="display: none"
+                >
+                    <div class="section">
+                        <div class="sec-title">Multi-Monitor Support</div>
+                        <div
+                            style="
+                                font-family:
+                                    &quot;Share Tech Mono&quot;, monospace;
+                                font-size: 10px;
+                                color: var(--text-md);
+                                line-height: 1.7;
+                                padding: 12px;
+                                background: var(--bg-01);
+                                border: 1px solid var(--border);
+                                border-radius: 6px;
+                            "
+                        >
+                            CyberClock fully supports multi-monitor setups.<br />
+                            ·
+                            <span style="color: var(--accent-a)"
+                                >Mini Mode</span
+                            >
+                            — drag the bar to any screen. Position is
+                            remembered.<br />
+                            ·
+                            <span style="color: var(--accent-a)"
+                                >Full Mode</span
+                            >
+                            — move the window normally between monitors.<br />
+                            · All child windows (Timer, Stopwatch, Relax) open
+                            centered on the primary display.
+                        </div>
+                        <div id="screens-list" style="margin-top: 12px"></div>
+                    </div>
+
+                    <div class="section">
+                        <div class="sec-title">Coming Soon</div>
+                        <div class="teaser">
+                            <div class="teaser-title">Roadmap</div>
+                            <div class="teaser-item">
+                                Custom alarm times (set by hour)<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                            <div class="teaser-item">
+                                Weather widget integration<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                            <div class="teaser-item">
+                                World clock panel (multiple timezones)<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                            <div class="teaser-item">
+                                Pomodoro technique integration<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                            <div class="teaser-item">
+                                Custom ambient audio import<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                            <div class="teaser-item">
+                                Calendar event reminders<span
+                                    class="teaser-badge"
+                                    >SOON</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- .content -->
+        </div>
+        <!-- .shell -->
+
+        <div class="scanlines"></div>
+        <script src="../shared/audio-engine.js"></script>
+        <script>
+            let cfg = {};
+            let saveTimers = {};
+
+            function debounce(fn, ms, key) {
+                clearTimeout(saveTimers[key]);
+                saveTimers[key] = setTimeout(fn, ms);
+            }
+
+            function applySettings(s) {
+                cfg = s;
+                document.body.dataset.theme = s.theme || "cyber-blue";
+                if (s.scanlines === false)
+                    document.body.classList.add("no-scanlines");
+                else document.body.classList.remove("no-scanlines");
+
+                // Theme tiles
+                document.querySelectorAll(".theme-tile").forEach((t) => {
+                    t.classList.toggle("active", t.dataset.theme === s.theme);
+                    const col = t.querySelector(".theme-dot").style.background;
+                    t.style.borderColor = t.classList.contains("active")
+                        ? col
+                        : "";
+                });
+
+                // Format
+                document
+                    .querySelectorAll(".fmt-btn")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.fmt === (s.clockFormat || "24h"),
+                        ),
+                    );
+
+                // Toggles
+                document.getElementById("tog-seconds").checked =
+                    s.showSeconds !== false;
+                document.getElementById("tog-scanlines").checked =
+                    s.scanlines !== false;
+                document.getElementById("tog-aot").checked = !!s.alwaysOnTop;
+                document.getElementById("tog-startup").checked =
+                    !!s.startWithWindows;
+
+                // Alarms
+                const ah = s.alarmHalfHour || {};
+                const af = s.alarmFullHour || {};
+                document.getElementById("tog-half").checked = !!ah.enabled;
+                document.getElementById("tog-full").checked = !!af.enabled;
+                document.getElementById("sel-half").value =
+                    ah.sound || "chime-crystal";
+                document.getElementById("sel-full").value =
+                    af.sound || "chime-digital";
+                if (ah.customPath) showCustomFile("half", ah.customPath);
+                if (af.customPath) showCustomFile("full", af.customPath);
+
+                // Volumes
+                const avol = Math.round((s.alarmVolume || 0.75) * 100);
+                document.getElementById("alarm-vol").value = avol;
+                document.getElementById("alarm-vol-val").textContent =
+                    avol + "%";
+                const rvol = Math.round((s.relaxVolume || 0.8) * 100);
+                document.getElementById("relax-vol").value = rvol;
+                document.getElementById("relax-vol-val").textContent =
+                    rvol + "%";
+            }
+
+            function showCustomFile(which, filePath) {
+                const label = document.getElementById(`file-${which}-label`);
+                const name = document.getElementById(`file-${which}-name`);
+                if (filePath) {
+                    label.style.display = "flex";
+                    name.textContent = filePath.split(/[/\\]/).pop();
+                } else {
+                    label.style.display = "none";
+                }
+            }
+
+            // Tab switching
+            document.querySelectorAll(".tab").forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    document
+                        .querySelectorAll(".tab")
+                        .forEach((t) => t.classList.remove("active"));
+                    document
+                        .querySelectorAll(".panel-content")
+                        .forEach((p) => (p.style.display = "none"));
+                    tab.classList.add("active");
+                    document.getElementById(
+                        "tab-" + tab.dataset.tab,
+                    ).style.display = "block";
+
+                    if (tab.dataset.tab === "display") loadScreens();
+                });
+            });
+
+            // Theme tiles
+            document.querySelectorAll(".theme-tile").forEach((tile) => {
+                tile.addEventListener("click", () => {
+                    const t = tile.dataset.theme;
+                    window.cc.saveSettings({ theme: t });
+                    document.body.dataset.theme = t;
+                });
+            });
+
+            // Format buttons
+            document.querySelectorAll(".fmt-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    window.cc.saveSettings({ clockFormat: btn.dataset.fmt });
+                    document
+                        .querySelectorAll(".fmt-btn")
+                        .forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+                });
+            });
+
+            // Toggles
+            document
+                .getElementById("tog-seconds")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ showSeconds: e.target.checked }),
+                );
+            document
+                .getElementById("tog-scanlines")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ scanlines: e.target.checked }),
+                );
+            document
+                .getElementById("tog-aot")
+                .addEventListener("change", () =>
+                    window.cc.toggleAlwaysOnTop(),
+                );
+            document
+                .getElementById("tog-startup")
+                .addEventListener("change", (e) => {
+                    window.cc.setStartup(e.target.checked);
+                    window.cc.saveSettings({
+                        startWithWindows: e.target.checked,
+                    });
+                });
+
+            // Alarm toggles
+            document
+                .getElementById("tog-half")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmHalfHour: { enabled: e.target.checked },
+                    }),
+                );
+            document
+                .getElementById("tog-full")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmFullHour: { enabled: e.target.checked },
+                    }),
+                );
+
+            // Sound selects
+            document
+                .getElementById("sel-half")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmHalfHour: { sound: e.target.value },
+                    }),
+                );
+            document
+                .getElementById("sel-full")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmFullHour: { sound: e.target.value },
+                    }),
+                );
+
+            // Test buttons
+            document
+                .getElementById("test-half")
+                .addEventListener("click", () => {
+                    window.audioEngine.chime(
+                        document.getElementById("sel-half").value,
+                        cfg.alarmVolume || 0.75,
+                    );
+                });
+            document
+                .getElementById("test-full")
+                .addEventListener("click", () => {
+                    window.audioEngine.chime(
+                        document.getElementById("sel-full").value,
+                        cfg.alarmVolume || 0.75,
+                    );
+                });
+
+            // Custom file buttons
+            document
+                .getElementById("file-half")
+                .addEventListener("click", async () => {
+                    const p = await window.cc.openFileDialog();
+                    if (p) {
+                        window.cc.saveSettings({
+                            alarmHalfHour: { customPath: p },
+                        });
+                        showCustomFile("half", p);
+                    }
+                });
+            document
+                .getElementById("file-full")
+                .addEventListener("click", async () => {
+                    const p = await window.cc.openFileDialog();
+                    if (p) {
+                        window.cc.saveSettings({
+                            alarmFullHour: { customPath: p },
+                        });
+                        showCustomFile("full", p);
+                    }
+                });
+            document
+                .getElementById("file-half-clear")
+                .addEventListener("click", () => {
+                    window.cc.saveSettings({
+                        alarmHalfHour: { customPath: null },
+                    });
+                    showCustomFile("half", null);
+                });
+            document
+                .getElementById("file-full-clear")
+                .addEventListener("click", () => {
+                    window.cc.saveSettings({
+                        alarmFullHour: { customPath: null },
+                    });
+                    showCustomFile("full", null);
+                });
+
+            // Volume sliders
+            document
+                .getElementById("alarm-vol")
+                .addEventListener("input", (e) => {
+                    document.getElementById("alarm-vol-val").textContent =
+                        e.target.value + "%";
+                    debounce(
+                        () =>
+                            window.cc.saveSettings({
+                                alarmVolume: e.target.value / 100,
+                            }),
+                        300,
+                        "avol",
+                    );
+                });
+            document
+                .getElementById("relax-vol")
+                .addEventListener("input", (e) => {
+                    document.getElementById("relax-vol-val").textContent =
+                        e.target.value + "%";
+                    debounce(
+                        () =>
+                            window.cc.saveSettings({
+                                relaxVolume: e.target.value / 100,
+                            }),
+                        300,
+                        "rvol",
+                    );
+                });
+
+            // Close
+            document
+                .getElementById("btn-close")
+                .addEventListener("click", () => window.cc.closeWindow());
+
+            // Display tab: load screens
+            async function loadScreens() {
+                const screens = await window.cc.getScreens();
+                const el = document.getElementById("screens-list");
+                el.innerHTML = screens
+                    .map(
+                        (s) =>
+                            `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-01);border:1px solid var(--border);border-radius:4px;margin-bottom:6px;">
+      <span style="font-size:11px;">${s.primary ? "⊙" : "○"}</span>
+      <div>
+        <div style="font-size:9px;letter-spacing:1.5px;color:${s.primary ? "var(--accent-a)" : "var(--text-md)"};text-shadow:${s.primary ? "var(--glow-xs)" : "none"};">${s.label}${s.primary ? " · PRIMARY" : ""}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-lo);">${s.bounds.width}×${s.bounds.height} at (${s.bounds.x}, ${s.bounds.y})</div>
+      </div>
+    </div>`,
+                    )
+                    .join("");
+            }
+
+            // Init
+            window.cc.onInit((s) => applySettings(s));
+            window.cc.onSettingsUpdated((s) => applySettings(s));
+            window.cc.onThemeChanged((t) => {
+                document.body.dataset.theme = t;
+            });
+        </script>
+    </body>
+</html>

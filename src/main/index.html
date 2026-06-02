@@ -1,0 +1,4153 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>CyberClock</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/icons.js"></script>
+        <style>
+            /* ════════════════════════════════════════════════════
+   APP SHELL
+════════════════════════════════════════════════════ */
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                background: var(--bg-00);
+            }
+            .app {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* ════════════════════════════════════════════════════
+   TITLE BAR
+════════════════════════════════════════════════════ */
+            .tbar {
+                height: 52px;
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                gap: 12px;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+                position: relative;
+                z-index: 20;
+                -webkit-app-region: drag;
+            }
+            .tbar::before {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 5%;
+                right: 5%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(var(--rgb-accent), 0.35),
+                    transparent
+                );
+            }
+            .tbar-brand {
+                font-size: 11px;
+                font-weight: 900;
+                letter-spacing: 4px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                text-transform: uppercase;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                animation: flicker 24s infinite;
+                flex-shrink: 0;
+            }
+            .tbar-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--accent-a);
+                box-shadow: var(--glow-sm);
+                animation: pulse-dot 2.4s ease-in-out infinite;
+            }
+            @keyframes pulse-dot {
+                0%,
+                100% {
+                    opacity: 0.6;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.3);
+                }
+            }
+
+            .tbar-mid {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1px;
+                pointer-events: none;
+            }
+            #dig-time {
+                font-family: "Orbitron", monospace;
+                font-size: 19px;
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                letter-spacing: 2px;
+                line-height: 1;
+            }
+            #dig-date {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-md);
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+            .tbar-right {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                -webkit-app-region: no-drag;
+                flex-shrink: 0;
+            }
+            .wmbtn {
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                width: 28px;
+                height: 28px;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.18s;
+                font-variant-emoji: text;
+            }
+            .wmbtn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .wmbtn.close:hover {
+                color: #ff4466;
+                border-color: #ff4466;
+                box-shadow: 0 0 8px rgba(255, 68, 102, 0.6);
+            }
+            .wmbtn.on {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+
+            /* ════════════════════════════════════════════════════
+   BODY AREA (sidebar + views)
+════════════════════════════════════════════════════ */
+            .body-area {
+                flex: 1;
+                display: flex;
+                overflow: hidden;
+                min-height: 0;
+            }
+
+            /* ════════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════════ */
+            .sidebar {
+                width: 64px;
+                flex-shrink: 0;
+                background: var(--bg-01);
+                border-right: 1px solid var(--border);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 10px 0;
+                gap: 4px;
+                position: relative;
+                z-index: 5;
+                overflow: hidden;
+            }
+            .sidebar::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(
+                    to bottom,
+                    transparent,
+                    rgba(var(--rgb-accent), 0.15),
+                    transparent
+                );
+            }
+            .nav-item {
+                width: 46px;
+                height: 46px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                cursor: pointer;
+                border: 1px solid transparent;
+                transition: all 0.2s;
+                position: relative;
+                -webkit-app-region: no-drag;
+            }
+            .nav-item:hover {
+                background: var(--accent-dim);
+                border-color: var(--border);
+            }
+            .nav-item.active {
+                background: var(--accent-dim);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            /* Active left accent bar */
+            .nav-item::before {
+                content: "";
+                position: absolute;
+                left: -1px;
+                top: 22%;
+                bottom: 22%;
+                width: 3px;
+                border-radius: 0 2px 2px 0;
+                background: var(--accent-a);
+                box-shadow: var(--glow-sm);
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .nav-item.active::before {
+                opacity: 1;
+            }
+            .nav-icon {
+                width: 20px;
+                height: 20px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+            }
+            .nav-icon .cc-ico {
+                width: 18px;
+                height: 18px;
+            }
+            .nav-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 5.5px;
+                letter-spacing: 1px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                transition: color 0.2s;
+            }
+            .nav-item.active .nav-lbl,
+            .nav-item:hover .nav-lbl {
+                color: var(--accent-a);
+            }
+            .sidebar-flex {
+                flex: 1;
+            }
+
+            /* Skin dots stacked */
+            .skin-stack {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 7px;
+                padding: 12px 0;
+            }
+            .skin-dot {
+                width: 13px;
+                height: 13px;
+                border-radius: 50%;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition: all 0.2s;
+                -webkit-app-region: no-drag;
+            }
+            .skin-dot:hover {
+                transform: scale(1.25);
+            }
+            .skin-dot.active {
+                border-color: rgba(255, 255, 255, 0.85);
+                box-shadow: 0 0 6px currentColor;
+                transform: scale(1.18);
+            }
+
+            /* ════════════════════════════════════════════════════
+   VIEW CONTAINER & TRANSITIONS
+════════════════════════════════════════════════════ */
+            .vc {
+                flex: 1;
+                position: relative;
+                overflow: hidden;
+                background: var(--bg-00);
+                --view-pad-x: 24px;
+                --view-pad-y: 24px;
+            }
+
+            .view {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                opacity: 0;
+                pointer-events: none;
+                will-change: transform, opacity;
+                background: var(--bg-00);
+            }
+            .view.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+            /* transitions applied via JS inline styles */
+
+            /* ════════════════════════════════════════════════════
+   HOME VIEW
+════════════════════════════════════════════════════ */
+            #view-home {
+                flex-direction: row;
+            }
+
+            .clock-panel {
+                width: 44%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                position: relative;
+                background: radial-gradient(
+                    ellipse at 50% 45%,
+                    rgba(var(--rgb-accent), 0.04) 0%,
+                    transparent 65%
+                );
+            }
+            .clock-panel::after {
+                content: "";
+                position: absolute;
+                right: 0;
+                top: 8%;
+                bottom: 8%;
+                width: 1px;
+                background: linear-gradient(
+                    to bottom,
+                    transparent,
+                    var(--border),
+                    transparent
+                );
+            }
+            #clock-canvas {
+                display: block;
+            }
+
+            .cal-panel {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                overflow: hidden;
+            }
+            .cal-hdr {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 14px;
+                flex-shrink: 0;
+            }
+            .cal-title-lbl {
+                font-size: 9px;
+                letter-spacing: 3px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+            }
+            .cal-nav {
+                -webkit-app-region: no-drag;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--text-md);
+                width: 24px;
+                height: 24px;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.15s;
+            }
+            .cal-nav:hover {
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .cal-today-btn {
+                -webkit-app-region: no-drag;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-lo);
+                font-family: "Orbitron", monospace;
+                font-size: 7.5px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                padding: 4px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .cal-today-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+
+            .cal-months {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                flex: 1;
+                overflow: hidden;
+            }
+            .cal-month {
+                display: flex;
+                flex-direction: column;
+            }
+            .cal-month.adj {
+                opacity: 0.5;
+            }
+            .cal-mhdr {
+                font-family: "Orbitron", monospace;
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                text-align: center;
+                padding: 6px 0;
+                border-bottom: 1px solid var(--border);
+                margin-bottom: 5px;
+            }
+            .cal-month.adj .cal-mhdr {
+                color: var(--text-lo);
+                text-shadow: none;
+            }
+            .cal-dhdr {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                margin-bottom: 4px;
+            }
+            .cal-dlbl {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 1px;
+                color: var(--text-lo);
+                text-align: center;
+                padding: 3px 0;
+            }
+            .cal-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 3px;
+                flex: 1;
+            }
+            .cal-day {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--text-md);
+                text-align: center;
+                padding: 5px 1px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.14s;
+                -webkit-app-region: no-drag;
+            }
+            .cal-day:hover {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+            }
+            .cal-day.om {
+                color: var(--text-lo);
+                opacity: 0.3;
+                pointer-events: none;
+            }
+            .cal-day.today {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                border: 1px solid var(--border-bright);
+                font-weight: 700;
+                box-shadow: var(--glow-xs);
+            }
+            .cal-day.sel {
+                background: rgba(var(--rgb-accent), 0.25);
+                color: var(--accent-a);
+                border: 1px solid var(--border-active);
+            }
+
+            /* ════════════════════════════════════════════════════
+   TIMER VIEW
+════════════════════════════════════════════════════ */
+            #view-timer {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 26px;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                background: radial-gradient(
+                    ellipse at 50% 40%,
+                    rgba(var(--rgb-accent), 0.05) 0%,
+                    transparent 60%
+                );
+            }
+            .t-display {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .t-seg-wrap {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            .t-seg {
+                font-family: "Orbitron", monospace;
+                font-size: clamp(72px, 9vw, 120px);
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-lg);
+                line-height: 1;
+                background: var(--bg-02);
+                padding: 10px 20px;
+                border-radius: 10px;
+                border: 1px solid var(--border);
+                min-width: clamp(110px, 13vw, 180px);
+                text-align: center;
+                transition: all 0.3s;
+            }
+            .t-seg-lbl {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                letter-spacing: 3px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+            }
+            .t-colon {
+                font-family: "Orbitron", monospace;
+                font-size: clamp(56px, 7vw, 96px);
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                margin-bottom: 16px;
+                opacity: 0.7;
+            }
+            .t-colon.blink {
+                animation: cb 1s step-end infinite;
+            }
+            @keyframes cb {
+                0%,
+                100% {
+                    opacity: 0.7;
+                }
+                50% {
+                    opacity: 0.12;
+                }
+            }
+            .t-display.warn .t-seg {
+                color: #ff4444;
+                text-shadow:
+                    0 0 24px #ff4444,
+                    0 0 48px rgba(255, 68, 68, 0.4);
+            }
+            .t-display.warn .t-colon {
+                color: #ff4444;
+            }
+
+            .t-prog-wrap {
+                width: min(580px, 80vw);
+                height: 6px;
+                background: var(--bg-03);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .t-prog-fill {
+                height: 100%;
+                background: var(--accent-a);
+                border-radius: 3px;
+                box-shadow: var(--glow-sm);
+                transition:
+                    width 0.5s linear,
+                    background 0.3s;
+            }
+
+            .t-presets {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .preset-btn {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--text-md);
+                padding: 7px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .preset-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .preset-btn.on {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+
+            .t-manual {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .t-inp {
+                font-family: "Orbitron", monospace;
+                font-size: 20px;
+                font-weight: 700;
+                width: 62px;
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                color: var(--accent-a);
+                text-align: center;
+                border-radius: 6px;
+                padding: 5px;
+                outline: none;
+                -webkit-app-region: no-drag;
+            }
+            .t-inp:focus {
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .t-inp-lbl {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 8px;
+                color: var(--text-lo);
+                letter-spacing: 2px;
+                text-align: center;
+                display: block;
+                margin-top: 3px;
+            }
+            .t-colon-s {
+                font-family: "Orbitron", monospace;
+                font-size: 20px;
+                color: var(--text-lo);
+            }
+
+            .t-ctrls {
+                display: flex;
+                gap: 14px;
+            }
+            .abtn {
+                font-family: "Orbitron", monospace;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--accent-a);
+                padding: 13px 34px;
+                border-radius: 6px;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.18s;
+                min-width: 155px;
+            }
+            .abtn::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: var(--accent-a);
+                opacity: 0;
+                transition: 0.18s;
+            }
+            .abtn:hover {
+                box-shadow: var(--glow-md);
+                border-color: var(--border-active);
+            }
+            .abtn:hover::before {
+                opacity: 0.08;
+            }
+            .abtn:active {
+                transform: scale(0.96);
+            }
+            .abtn:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+            .abtn.red {
+                border-color: rgba(255, 68, 68, 0.45);
+                color: #ff4444;
+            }
+            .abtn.red:hover {
+                box-shadow: 0 0 14px rgba(255, 68, 68, 0.4);
+            }
+
+            /* done overlay */
+            .done-ov {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                background: rgba(0, 0, 0, 0.75);
+                backdrop-filter: blur(10px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.4s;
+                z-index: 10;
+            }
+            .done-ov.vis {
+                opacity: 1;
+                pointer-events: all;
+            }
+            .done-txt {
+                font-family: "Orbitron", monospace;
+                font-size: 42px;
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-lg);
+                letter-spacing: 5px;
+                animation: breathe 1.2s ease-in-out infinite;
+            }
+
+            /* ════════════════════════════════════════════════════
+   STOPWATCH VIEW
+════════════════════════════════════════════════════ */
+            #view-stopwatch {
+                flex-direction: column;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                gap: 0;
+                background: radial-gradient(
+                    ellipse at 50% 25%,
+                    rgba(var(--rgb-accent), 0.04) 0%,
+                    transparent 58%
+                );
+            }
+            .sw-upper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 18px;
+                flex-shrink: 0;
+            }
+            .sw-disp {
+                display: flex;
+                align-items: flex-end;
+                gap: 5px;
+                position: relative;
+            }
+            .sw-seg {
+                font-family: "Orbitron", monospace;
+                font-size: clamp(60px, 8vw, 102px);
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-lg);
+                line-height: 1;
+                background: var(--bg-02);
+                padding: 8px 14px;
+                border-radius: 10px;
+                border: 1px solid var(--border);
+                min-width: clamp(100px, 11vw, 150px);
+                text-align: center;
+            }
+            .sw-ms {
+                font-family: "Orbitron", monospace;
+                font-size: clamp(32px, 4vw, 52px);
+                font-weight: 700;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                line-height: 1;
+                background: var(--bg-02);
+                padding: 8px 10px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                min-width: clamp(68px, 8vw, 96px);
+                text-align: center;
+                opacity: 0.85;
+                align-self: flex-end;
+            }
+            .sw-colon {
+                font-family: "Orbitron", monospace;
+                font-size: clamp(48px, 6.5vw, 82px);
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                margin-bottom: 10px;
+                opacity: 0.7;
+            }
+            .sw-dot {
+                font-family: "Orbitron", monospace;
+                font-size: 34px;
+                font-weight: 900;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                margin-bottom: 7px;
+                opacity: 0.5;
+            }
+            .run-dot {
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--accent-a);
+                box-shadow: var(--glow-sm);
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .run-dot.on {
+                opacity: 1;
+                animation: pulse-dot 1s ease-in-out infinite;
+            }
+            .sw-ctrls {
+                display: flex;
+                gap: 10px;
+            }
+            .sw-lap-btn {
+                border-color: rgba(var(--rgb-b), 0.5) !important;
+                color: var(--accent-b) !important;
+            }
+            .sw-lap-btn:hover {
+                box-shadow: 0 0 14px rgba(var(--rgb-b), 0.4) !important;
+            }
+
+            .sw-lower {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                min-height: 0;
+                margin-top: 14px;
+            }
+            .lap-hdr {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 12px;
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px 6px 0 0;
+                flex-shrink: 0;
+            }
+            .lap-hdr-t {
+                font-size: 9px;
+                letter-spacing: 2.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+            }
+            .lap-hdr-btns {
+                display: flex;
+                gap: 6px;
+            }
+            .lap-act {
+                font-family: "Orbitron", monospace;
+                font-size: 7.5px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-lo);
+                padding: 4px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .lap-act:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+            .lap-col-hdr {
+                display: grid;
+                grid-template-columns: 40px 1fr 1fr 1fr;
+                padding: 5px 12px;
+                background: var(--bg-02);
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+            }
+            .col-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                text-align: right;
+            }
+            .col-lbl:first-child {
+                text-align: left;
+            }
+            .lap-list {
+                flex: 1;
+                overflow-y: auto;
+                background: var(--bg-00);
+                border: 1px solid var(--border);
+                border-top: none;
+                border-radius: 0 0 6px 6px;
+            }
+            .lap-row {
+                display: grid;
+                grid-template-columns: 40px 1fr 1fr 1fr;
+                padding: 7px 12px;
+                border-bottom: 1px solid rgba(var(--rgb-accent), 0.06);
+                animation: slide-in 0.2s ease;
+                transition: background 0.15s;
+            }
+            .lap-row:hover {
+                background: rgba(var(--rgb-accent), 0.04);
+            }
+            .lap-num {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-lo);
+            }
+            .lap-time {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 12px;
+                color: var(--text-hi);
+                text-align: right;
+            }
+            .lap-delta {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--text-md);
+                text-align: right;
+            }
+            .lap-total {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-lo);
+                text-align: right;
+            }
+            .lap-row.best .lap-time,
+            .lap-row.best .lap-delta {
+                color: var(--accent-c);
+                text-shadow: var(--glow-xs);
+            }
+            .lap-row.worst .lap-time,
+            .lap-row.worst .lap-delta {
+                color: #ff9944;
+            }
+            .lap-empty {
+                text-align: center;
+                padding: 28px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-lo);
+                letter-spacing: 1.5px;
+            }
+
+            /* ════════════════════════════════════════════════════
+   RELAX VIEW
+════════════════════════════════════════════════════ */
+            #view-relax {
+                flex-direction: row;
+            }
+            .relax-L {
+                width: 50%;
+                flex-shrink: 0;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                border-right: 1px solid var(--border);
+                overflow-y: auto;
+            }
+            .relax-R {
+                flex: 1;
+                padding: var(--view-pad-y) var(--view-pad-x);
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .track-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .tcard {
+                background: var(--bg-02);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 16px 10px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 7px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.22s;
+                -webkit-app-region: no-drag;
+            }
+            .tcard:hover {
+                border-color: var(--border-bright);
+                transform: scale(1.02);
+            }
+            .tcard.on {
+                background: var(--accent-dim);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-sm);
+                transform: scale(1.03);
+                animation: card-breathe 2.5s ease-in-out infinite;
+            }
+            @keyframes card-breathe {
+                0%,
+                100% {
+                    box-shadow: var(--glow-sm);
+                }
+                50% {
+                    box-shadow: var(--glow-md);
+                }
+            }
+            .tcard::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 20%;
+                right: 20%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0;
+                transition: 0.3s;
+            }
+            .tcard.on::before {
+                opacity: 0.6;
+            }
+            .tcard-ico {
+                font-size: 30px;
+                line-height: 1;
+            }
+            .tcard-name {
+                font-family: "Orbitron", monospace;
+                font-size: 8.5px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-md);
+                text-align: center;
+            }
+            .tcard-desc {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 8px;
+                color: var(--text-lo);
+                text-align: center;
+            }
+            .tcard.on .tcard-name {
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+            }
+
+            .tcard-wave {
+                display: flex;
+                align-items: flex-end;
+                gap: 2px;
+                height: 14px;
+                margin-top: 2px;
+            }
+            .wbar {
+                width: 3px;
+                background: var(--accent-a);
+                border-radius: 2px;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .tcard.on .wbar {
+                opacity: 0.7;
+            }
+            .tcard.on .wbar:nth-child(1) {
+                animation: w1 0.8s ease-in-out infinite;
+            }
+            .tcard.on .wbar:nth-child(2) {
+                animation: w2 0.9s ease-in-out infinite 0.1s;
+            }
+            .tcard.on .wbar:nth-child(3) {
+                animation: w3 0.7s ease-in-out infinite 0.2s;
+            }
+            .tcard.on .wbar:nth-child(4) {
+                animation: w2 0.85s ease-in-out infinite 0.05s;
+            }
+            .tcard.on .wbar:nth-child(5) {
+                animation: w1 0.75s ease-in-out infinite 0.15s;
+            }
+            @keyframes w1 {
+                0%,
+                100% {
+                    height: 4px;
+                }
+                50% {
+                    height: 14px;
+                }
+            }
+            @keyframes w2 {
+                0%,
+                100% {
+                    height: 8px;
+                }
+                50% {
+                    height: 12px;
+                }
+            }
+            @keyframes w3 {
+                0%,
+                100% {
+                    height: 12px;
+                }
+                50% {
+                    height: 4px;
+                }
+            }
+
+            .r-play-row {
+                display: flex;
+                gap: 10px;
+            }
+            .r-vol-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .r-vol-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                width: 70px;
+                flex-shrink: 0;
+            }
+            .r-vol-val {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--accent-a);
+                width: 36px;
+                text-align: right;
+            }
+            input[type="range"] {
+                flex: 1;
+                -webkit-appearance: none;
+                appearance: none;
+                height: 4px;
+                background: var(--bg-03);
+                border-radius: 2px;
+                outline: none;
+                cursor: pointer;
+            }
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: var(--accent-a);
+                box-shadow: var(--glow-sm);
+                cursor: pointer;
+                transition: box-shadow 0.15s;
+            }
+            input[type="range"]::-webkit-slider-thumb:hover {
+                box-shadow: var(--glow-md);
+            }
+            .r-ast-row {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                flex-wrap: wrap;
+            }
+            .r-ast-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                width: 70px;
+                flex-shrink: 0;
+            }
+            .ast-btn {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-lo);
+                padding: 5px 11px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.15s;
+                -webkit-app-region: no-drag;
+            }
+            .ast-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+            .ast-btn.on {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .ast-cd {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+            }
+
+            .viz-wrap {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .viz-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border);
+            }
+            #viz-canvas {
+                width: 100%;
+                display: block;
+            }
+            .ses-panel {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 16px;
+                flex: 1;
+            }
+            .ses-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 10px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border);
+            }
+            .ses-timer {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 32px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                letter-spacing: 2px;
+                line-height: 1;
+            }
+            .ses-timer-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-top: 3px;
+                margin-bottom: 12px;
+            }
+            .ndiv {
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--border-bright),
+                    transparent
+                );
+                margin: 10px 0;
+                opacity: 0.5;
+            }
+            .tip-box {
+                padding: 10px;
+                background: rgba(var(--rgb-accent), 0.04);
+                border: 1px solid rgba(var(--rgb-accent), 0.1);
+                border-radius: 6px;
+            }
+            .tip-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-bottom: 6px;
+            }
+            .tip-text {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--text-md);
+                line-height: 1.6;
+                transition: opacity 0.4s;
+            }
+            .tip-text.fade {
+                opacity: 0;
+            }
+            .r-notify {
+                position: absolute;
+                bottom: 22px;
+                left: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                border-radius: 6px;
+                padding: 11px 24px;
+                font-family: "Orbitron", monospace;
+                font-size: 10px;
+                letter-spacing: 2px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                box-shadow: var(--glow-md);
+                opacity: 0;
+                transition: opacity 0.4s;
+                pointer-events: none;
+                z-index: 10;
+            }
+            .r-notify.show {
+                opacity: 1;
+            }
+
+            /* ════════════════════════════════════════════════════
+   SETTINGS MODAL
+════════════════════════════════════════════════════ */
+            .s-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.68);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.32s ease;
+                z-index: 100;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .s-overlay.open {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .s-modal {
+                width: 700px;
+                max-height: 580px;
+                background: var(--bg-00);
+                border: 1px solid var(--border-bright);
+                border-radius: 12px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                transform: scale(0.88) translateY(18px);
+                opacity: 0;
+                transition:
+                    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.32s ease;
+                position: relative;
+                box-shadow:
+                    0 24px 80px rgba(0, 0, 0, 0.6),
+                    var(--glow-sm);
+            }
+            .s-modal::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 10%;
+                right: 10%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0.9;
+                box-shadow: var(--glow-md);
+                z-index: 10;
+            }
+            .s-overlay.open .s-modal {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+
+            .s-tbar {
+                height: 46px;
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                gap: 10px;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+            }
+            .s-brand {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 3px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                text-transform: uppercase;
+            }
+            .s-spacer {
+                flex: 1;
+            }
+            .s-close {
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                width: 26px;
+                height: 26px;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.18s;
+            }
+            .s-close:hover {
+                color: #ff4466;
+                border-color: #ff4466;
+            }
+
+            .s-tabs {
+                display: flex;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+            }
+            .s-tab {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--text-lo);
+                padding: 12px 20px;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+            }
+            .s-tab:hover {
+                color: var(--text-md);
+            }
+            .s-tab.on {
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                border-bottom-color: var(--accent-a);
+            }
+
+            .s-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px 24px;
+            }
+            .s-panel {
+                display: none;
+                animation: slide-in 0.2s ease;
+            }
+            .s-panel.on {
+                display: block;
+            }
+
+            .s-sec {
+                margin-bottom: 22px;
+            }
+            .s-sec-t {
+                font-size: 9px;
+                letter-spacing: 2.5px;
+                text-transform: uppercase;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                margin-bottom: 12px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border);
+            }
+            .s-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px dashed rgba(var(--rgb-accent), 0.08);
+            }
+            .s-row:last-child {
+                border-bottom: none;
+            }
+            .s-lbl {
+                font-size: 10px;
+                letter-spacing: 1px;
+                color: var(--text-md);
+            }
+            .s-lbl small {
+                display: block;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                margin-top: 2px;
+            }
+
+            .s-themes {
+                display: flex;
+                gap: 9px;
+                margin-top: 4px;
+            }
+            .s-ttile {
+                width: 106px;
+                height: 62px;
+                border-radius: 6px;
+                cursor: pointer;
+                border: 2px solid var(--border);
+                background: var(--bg-02);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                transition: all 0.2s;
+            }
+            .s-ttile:hover {
+                transform: scale(1.04);
+            }
+            .s-ttile.on {
+                border-color: var(--accent-a) !important;
+                box-shadow: var(--glow-sm);
+            }
+            .s-tdot {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+            }
+            .s-tname {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-md);
+            }
+
+            .s-fmts {
+                display: flex;
+                gap: 6px;
+            }
+            .s-fmt {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--text-md);
+                padding: 6px 14px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .s-fmt.on {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+
+            .s-tog {
+                position: relative;
+                width: 42px;
+                height: 22px;
+                cursor: pointer;
+            }
+            .s-tog input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .s-tog-tr {
+                position: absolute;
+                inset: 0;
+                background: var(--bg-03);
+                border: 1px solid var(--border);
+                border-radius: 11px;
+                transition: all 0.25s;
+            }
+            .s-tog input:checked ~ .s-tog-tr {
+                background: var(--accent-dim);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .s-tog-th {
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                width: 14px;
+                height: 14px;
+                background: var(--text-lo);
+                border-radius: 50%;
+                transition: all 0.25s;
+            }
+            .s-tog input:checked ~ .s-tog-tr .s-tog-th {
+                transform: translateX(20px);
+                background: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
+
+            .s-alarm-blk {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 14px 16px;
+                margin-bottom: 12px;
+            }
+            .s-alarm-t {
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 10px;
+            }
+            .s-alarm-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+            }
+            .s-alarm-lbl {
+                font-size: 9px;
+                color: var(--text-md);
+                letter-spacing: 1px;
+                width: 58px;
+                flex-shrink: 0;
+            }
+            select {
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                color: var(--text-hi);
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1px;
+                padding: 6px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                outline: none;
+                transition: 0.18s;
+            }
+            select:hover,
+            select:focus {
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            select option {
+                background: var(--bg-02);
+            }
+            .s-abtn {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--accent-a);
+                padding: 5px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .s-abtn:hover {
+                box-shadow: var(--glow-xs);
+                border-color: var(--border-active);
+            }
+            .s-flbl {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                font-style: italic;
+                margin-top: 4px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .s-fclr {
+                cursor: pointer;
+                color: #ff4466;
+                font-size: 11px;
+            }
+            .s-fclr:hover {
+                text-shadow: 0 0 6px #ff4466;
+            }
+            .s-vol-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .s-vol-row input[type="range"] {
+                flex: 1;
+            }
+            .s-vol-val {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--accent-a);
+                min-width: 34px;
+                text-align: right;
+            }
+
+            .s-about {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 16px;
+                text-align: center;
+            }
+            .s-about-v {
+                font-size: 11px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                letter-spacing: 2px;
+                margin-bottom: 4px;
+            }
+            .s-about-s {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                letter-spacing: 1px;
+            }
+            .s-teaser {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 14px 16px;
+            }
+            .s-teaser-t {
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+            .s-ti {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                opacity: 0.6;
+                font-style: italic;
+                padding: 3px 0;
+                border-bottom: 1px dashed rgba(var(--rgb-accent), 0.06);
+            }
+            .s-ti:last-child {
+                border-bottom: none;
+            }
+            .s-badge {
+                font-size: 7px;
+                background: var(--accent-dim);
+                border: 1px solid var(--border);
+                color: var(--accent-a);
+                border-radius: 3px;
+                padding: 1px 5px;
+                margin-left: 6px;
+                letter-spacing: 1px;
+            }
+
+            /* scanlines */
+            .scanlines {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 9999;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.045) 2px,
+                    rgba(0, 0, 0, 0.045) 4px
+                );
+                transition: opacity 0.4s;
+            }
+            body.no-scanlines .scanlines {
+                opacity: 0;
+            }
+        </style>
+    </head>
+    <body data-theme="cyber-blue">
+        <div class="app">
+            <div class="scanlines"></div>
+
+            <!-- ═══ TITLE BAR ═══════════════════════════════════════════ -->
+            <div class="tbar">
+                <div class="tbar-brand">
+                    <div class="tbar-dot"></div>
+                    CyberClock
+                </div>
+                <div class="tbar-mid">
+                    <div id="dig-time">00:00:00</div>
+                    <div id="dig-date">SUN · 01 JAN 2026</div>
+                </div>
+                <div class="tbar-right">
+                    <button class="wmbtn" id="btn-aot" title="Always on Top">
+                        <span data-ico="pin"></span>
+                    </button>
+                    <button class="wmbtn" id="btn-settings" title="Settings">
+                        <span data-ico="gear"></span>
+                    </button>
+                    <button class="wmbtn" id="btn-mini" title="Mini Mode">
+                        <span data-ico="expand"></span>
+                    </button>
+                    <button class="wmbtn" id="btn-min" title="Minimize">
+                        <span data-ico="minimize"></span>
+                    </button>
+                    <button class="wmbtn close" id="btn-close">
+                        <span data-ico="x"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ═══ BODY ══════════════════════════════════════════════════ -->
+            <div class="body-area">
+                <!-- SIDEBAR -->
+                <nav class="sidebar">
+                    <div class="nav-item active" data-view="home">
+                        <span class="nav-icon"><span data-ico="clock"></span></span
+                        ><span class="nav-lbl">Clock</span>
+                    </div>
+                    <div class="nav-item" data-view="timer">
+                        <span class="nav-icon"><span data-ico="timer"></span></span
+                        ><span class="nav-lbl">Timer</span>
+                    </div>
+                    <div class="nav-item" data-view="stopwatch">
+                        <span class="nav-icon"><span data-ico="stopwatch"></span></span
+                        ><span class="nav-lbl">Watch</span>
+                    </div>
+                    <div class="nav-item" data-view="relax">
+                        <span class="nav-icon"><span data-ico="lotus"></span></span
+                        ><span class="nav-lbl">Relax</span>
+                    </div>
+                    <div class="sidebar-flex"></div>
+                    <div class="skin-stack">
+                        <div
+                            class="skin-dot active"
+                            data-theme="cyber-blue"
+                            style="background: #00d4ff"
+                            title="Cyber Blue"
+                        ></div>
+                        <div
+                            class="skin-dot"
+                            data-theme="neon-green"
+                            style="background: #00ff41"
+                            title="Neon Green"
+                        ></div>
+                        <div
+                            class="skin-dot"
+                            data-theme="plasma-purple"
+                            style="background: #c800ff"
+                            title="Plasma Purple"
+                        ></div>
+                        <div
+                            class="skin-dot"
+                            data-theme="solar-orange"
+                            style="background: #ff6600"
+                            title="Solar Orange"
+                        ></div>
+                        <div
+                            class="skin-dot"
+                            data-theme="arctic-ice"
+                            style="background: #d0f0ff"
+                            title="Arctic Ice"
+                        ></div>
+                    </div>
+                </nav>
+
+                <!-- VIEW CONTAINER -->
+                <div class="vc" id="vc">
+                    <!-- HOME -->
+                    <div class="view active" id="view-home">
+                        <div class="clock-panel">
+                            <canvas id="clock-canvas"></canvas>
+                        </div>
+                        <div class="cal-panel">
+                            <div class="cal-hdr">
+                                <span class="cal-title-lbl">◈ Calendar</span>
+                                <div style="flex: 1"></div>
+                                <button class="cal-today-btn" id="cal-today">
+                                    Today
+                                </button>
+                                <button class="cal-nav" id="cal-prev">‹</button>
+                                <button class="cal-nav" id="cal-next">›</button>
+                            </div>
+                            <div class="cal-months" id="cal-months"></div>
+                        </div>
+                    </div>
+
+                    <!-- TIMER -->
+                    <div class="view" id="view-timer">
+                        <div class="t-display" id="t-disp">
+                            <div class="t-seg-wrap">
+                                <div class="t-seg" id="t-h">00</div>
+                                <span class="t-seg-lbl">HH</span>
+                            </div>
+                            <div class="t-colon" id="t-c1">:</div>
+                            <div class="t-seg-wrap">
+                                <div class="t-seg" id="t-m">00</div>
+                                <span class="t-seg-lbl">MM</span>
+                            </div>
+                            <div class="t-colon" id="t-c2">:</div>
+                            <div class="t-seg-wrap">
+                                <div class="t-seg" id="t-s">00</div>
+                                <span class="t-seg-lbl">SS</span>
+                            </div>
+                        </div>
+                        <div class="t-prog-wrap">
+                            <div
+                                class="t-prog-fill"
+                                id="t-prog"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+                        <div class="t-presets">
+                            <button class="preset-btn" data-s="60">1m</button>
+                            <button class="preset-btn" data-s="300">5m</button>
+                            <button class="preset-btn" data-s="600">10m</button>
+                            <button class="preset-btn" data-s="900">15m</button>
+                            <button class="preset-btn" data-s="1500">
+                                25m
+                            </button>
+                            <button class="preset-btn" data-s="1800">
+                                30m
+                            </button>
+                            <button class="preset-btn" data-s="2700">
+                                45m
+                            </button>
+                            <button class="preset-btn" data-s="3600">1h</button>
+                            <button class="preset-btn" data-s="7200">2h</button>
+                        </div>
+                        <div class="t-manual">
+                            <div
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                "
+                            >
+                                <input
+                                    class="t-inp"
+                                    id="t-ih"
+                                    type="number"
+                                    min="0"
+                                    max="23"
+                                    value="0"
+                                />
+                                <span class="t-inp-lbl">HOURS</span>
+                            </div>
+                            <span class="t-colon-s">:</span>
+                            <div
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                "
+                            >
+                                <input
+                                    class="t-inp"
+                                    id="t-im"
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    value="0"
+                                />
+                                <span class="t-inp-lbl">MINS</span>
+                            </div>
+                            <span class="t-colon-s">:</span>
+                            <div
+                                style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                "
+                            >
+                                <input
+                                    class="t-inp"
+                                    id="t-is"
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    value="0"
+                                />
+                                <span class="t-inp-lbl">SECS</span>
+                            </div>
+                        </div>
+                        <div class="t-ctrls">
+                            <button class="abtn" id="t-start">
+                                <span data-ico="play"></span> START
+                            </button>
+                            <button class="abtn red" id="t-reset" disabled>
+                                <span data-ico="stop"></span> RESET
+                            </button>
+                        </div>
+                        <div class="done-ov" id="t-done">
+                            <div class="done-txt">TIME'S UP!</div>
+                            <button
+                                class="abtn"
+                                id="t-dismiss"
+                                style="
+                                    min-width: 120px;
+                                    font-size: 10px;
+                                    padding: 12px 28px;
+                                "
+                            >
+                                DISMISS
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STOPWATCH -->
+                    <div class="view" id="view-stopwatch">
+                        <div class="sw-upper">
+                            <div class="sw-disp" id="sw-disp">
+                                <div class="sw-seg" id="sw-h">00</div>
+                                <div class="sw-colon">:</div>
+                                <div class="sw-seg" id="sw-m">00</div>
+                                <div class="sw-colon">:</div>
+                                <div class="sw-seg" id="sw-s">00</div>
+                                <div class="sw-dot">.</div>
+                                <div class="sw-ms" id="sw-ms">000</div>
+                                <div class="run-dot" id="run-dot"></div>
+                            </div>
+                            <div class="sw-ctrls">
+                                <button class="abtn" id="sw-start">
+                                    <span data-ico="play"></span> START
+                                </button>
+                                <button class="abtn red" id="sw-reset" disabled>
+                                    <span data-ico="stop"></span> RESET
+                                </button>
+                                <button
+                                    class="abtn sw-lap-btn"
+                                    id="sw-lap"
+                                    disabled
+                                >
+                                    <span data-ico="flag"></span> LAP
+                                </button>
+                            </div>
+                        </div>
+                        <div class="sw-lower">
+                            <div class="lap-hdr">
+                                <span class="lap-hdr-t"
+                                    ><span data-ico="flag"></span> Lap Times</span
+                                >
+                                <div class="lap-hdr-btns">
+                                    <button class="lap-act" id="sw-copy">
+                                        <span data-ico="copy"></span> Copy
+                                    </button>
+                                    <button class="lap-act" id="sw-clear" disabled>
+                                        <span data-ico="trash"></span> Clear
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="lap-col-hdr">
+                                <div class="col-lbl">#</div>
+                                <div class="col-lbl" style="text-align: right">
+                                    Lap Time
+                                </div>
+                                <div class="col-lbl" style="text-align: right">
+                                    Delta
+                                </div>
+                                <div class="col-lbl" style="text-align: right">
+                                    Total
+                                </div>
+                            </div>
+                            <div class="lap-list" id="lap-list">
+                                <div class="lap-empty" id="lap-empty">
+                                    No laps recorded yet
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RELAX -->
+                    <div class="view" id="view-relax">
+                        <div class="relax-L">
+                            <div class="track-grid">
+                                <div class="tcard" data-track="campfire">
+                                    <div class="tcard-ico">🔥</div>
+                                    <div class="tcard-name">Campfire</div>
+                                    <div class="tcard-desc">Crackling fire</div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                                <div class="tcard" data-track="forest">
+                                    <div class="tcard-ico">🌲</div>
+                                    <div class="tcard-name">Forest</div>
+                                    <div class="tcard-desc">
+                                        Birds &amp; wind
+                                    </div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                                <div class="tcard" data-track="space">
+                                    <div class="tcard-ico">🌌</div>
+                                    <div class="tcard-name">Outer Space</div>
+                                    <div class="tcard-desc">Cosmic drones</div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                                <div class="tcard" data-track="ocean">
+                                    <div class="tcard-ico">🌊</div>
+                                    <div class="tcard-name">Ocean</div>
+                                    <div class="tcard-desc">Rolling waves</div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                                <div class="tcard" data-track="rain">
+                                    <div class="tcard-ico">🌧</div>
+                                    <div class="tcard-name">Rain</div>
+                                    <div class="tcard-desc">
+                                        Steady rainfall
+                                    </div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                                <div class="tcard" data-track="fireplace">
+                                    <div class="tcard-ico">🏡</div>
+                                    <div class="tcard-name">Fireplace</div>
+                                    <div class="tcard-desc">Indoor hearth</div>
+                                    <div class="tcard-wave">
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                        <div class="wbar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="r-play-row">
+                                <button class="abtn" id="r-play" style="flex: 1">
+                                    <span data-ico="play"></span> PLAY
+                                </button>
+                                <button
+                                    class="abtn red"
+                                    id="r-stop"
+                                    style="min-width: 80px; padding: 13px 18px"
+                                >
+                                    <span data-ico="stop"></span>
+                                </button>
+                            </div>
+                            <div class="r-vol-row">
+                                <span class="r-vol-lbl">Volume</span>
+                                <span style="font-size: 11px; color: var(--text-lo)"
+                                    ><span data-ico="volume-low"></span></span
+                                >
+                                <input
+                                    type="range"
+                                    id="r-vol"
+                                    min="0"
+                                    max="100"
+                                    value="80"
+                                />
+                                <span style="font-size: 11px; color: var(--text-lo)"
+                                    ><span data-ico="volume-high"></span></span
+                                >
+                                <span class="r-vol-val" id="r-vol-val"
+                                    >80%</span
+                                >
+                            </div>
+                            <div class="r-ast-row">
+                                <span class="r-ast-lbl">Auto Stop</span>
+                                <button class="ast-btn on" data-min="0">
+                                    OFF
+                                </button>
+                                <button class="ast-btn" data-min="15">
+                                    15m
+                                </button>
+                                <button class="ast-btn" data-min="30">
+                                    30m
+                                </button>
+                                <button class="ast-btn" data-min="60">
+                                    1h
+                                </button>
+                                <button class="ast-btn" data-min="120">
+                                    2h
+                                </button>
+                                <span
+                                    class="ast-cd"
+                                    id="r-ast-cd"
+                                    style="display: none"
+                                ></span>
+                            </div>
+                        </div>
+                        <div class="relax-R">
+                            <div class="viz-wrap">
+                                <div class="viz-title">◈ Audio Spectrum</div>
+                                <canvas id="viz-canvas" height="200"></canvas>
+                            </div>
+                            <div class="ses-panel">
+                                <div class="ses-title">◈ Session</div>
+                                <div class="ses-timer" id="r-ses">
+                                    00:00:00
+                                </div>
+                                <div class="ses-timer-lbl">Session Time</div>
+                                <div class="ndiv"></div>
+                                <div class="tip-box">
+                                    <div class="tip-lbl">Mindfulness Tip</div>
+                                    <div class="tip-text" id="r-tip">
+                                        Start a track to begin your session.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="r-notify" id="r-notify">
+                            ✓ Session Complete
+                        </div>
+                    </div>
+                </div>
+                <!-- end .vc -->
+            </div>
+            <!-- end .body-area -->
+        </div>
+        <!-- end .app -->
+
+        <!-- ═══ SETTINGS MODAL ════════════════════════════════════════ -->
+        <div class="s-overlay" id="s-overlay">
+            <div class="s-modal">
+                <div class="s-tbar">
+                    <span class="s-brand"
+                        ><span data-ico="gear"></span> Settings · CyberClock</span
+                    >
+                    <div class="s-spacer"></div>
+                    <button class="s-close" id="s-close">
+                        <span data-ico="x"></span>
+                    </button>
+                </div>
+                <div class="s-tabs">
+                    <div class="s-tab on" data-stab="appearance">
+                        Appearance
+                    </div>
+                    <div class="s-tab" data-stab="alarms">Alarms</div>
+                    <div class="s-tab" data-stab="general">General</div>
+                    <div class="s-tab" data-stab="display">Display</div>
+                </div>
+                <div class="s-content">
+                    <!-- Appearance -->
+                    <div class="s-panel on" id="stab-appearance">
+                        <div class="s-sec">
+                            <div class="s-sec-t">Theme / Skin</div>
+                            <div class="s-themes">
+                                <div class="s-ttile" data-theme="cyber-blue">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #00d4ff;
+                                            box-shadow: 0 0 8px #00d4ff;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname">Cyber Blue</div>
+                                </div>
+                                <div class="s-ttile" data-theme="neon-green">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #00ff41;
+                                            box-shadow: 0 0 8px #00ff41;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname">Neon Green</div>
+                                </div>
+                                <div class="s-ttile" data-theme="plasma-purple">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #c800ff;
+                                            box-shadow: 0 0 8px #c800ff;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname">Plasma Purple</div>
+                                </div>
+                                <div class="s-ttile" data-theme="solar-orange">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #ff6600;
+                                            box-shadow: 0 0 8px #ff6600;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname">Solar Orange</div>
+                                </div>
+                                <div class="s-ttile" data-theme="arctic-ice">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #d0f0ff;
+                                            box-shadow: 0 0 8px #d0f0ff;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname">Arctic Ice</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">Clock Display</div>
+                            <div class="s-row">
+                                <div class="s-lbl">Time Format</div>
+                                <div class="s-fmts">
+                                    <button class="s-fmt on" data-fmt="24h">
+                                        24H</button
+                                    ><button class="s-fmt" data-fmt="12h">
+                                        12H
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">Show Seconds</div>
+                                <label class="s-tog"
+                                    ><input
+                                        type="checkbox"
+                                        id="s-sec"
+                                        checked />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    Scanlines<small>CRT-style overlay</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input
+                                        type="checkbox"
+                                        id="s-scan"
+                                        checked />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alarms -->
+                    <div class="s-panel" id="stab-alarms">
+                        <div class="s-sec">
+                            <div class="s-sec-t">Alarm Volume</div>
+                            <div class="s-vol-row">
+                                <span style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-low"></span></span
+                                ><input
+                                    type="range"
+                                    id="s-avol"
+                                    min="0"
+                                    max="100"
+                                    value="75"
+                                /><span
+                                    style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-high"></span></span
+                                ><span class="s-vol-val" id="s-avol-val"
+                                    >75%</span
+                                >
+                            </div>
+                        </div>
+                        <div class="s-alarm-blk">
+                            <div class="s-alarm-t">
+                                <span data-ico="bell"></span> Half-Hour Chime
+                                (:30)
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Enable</span
+                                ><label class="s-tog"
+                                    ><input type="checkbox" id="s-half-en" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Sound</span>
+                                <select id="s-half-snd">
+                                    <option value="chime-crystal">
+                                        Crystal Bell
+                                    </option>
+                                    <option value="chime-digital">
+                                        Digital Pulse
+                                    </option>
+                                    <option value="chime-neon">Neon Arp</option>
+                                    <option value="chime-zen">Zen Gong</option>
+                                    <option value="chime-cyber">
+                                        Cyber Sweep
+                                    </option>
+                                </select>
+                                <button class="s-abtn" id="s-half-test">
+                                    <span data-ico="play"></span> Test
+                                </button>
+                                <button class="s-abtn" id="s-half-file">
+                                    <span data-ico="folder"></span> Custom…
+                                </button>
+                            </div>
+                            <div
+                                class="s-flbl"
+                                id="s-half-flbl"
+                                style="display: none"
+                            >
+                                <span id="s-half-fname"></span
+                                ><span class="s-fclr" id="s-half-fclr"
+                                    ><span data-ico="x"></span></span
+                                >
+                            </div>
+                        </div>
+                        <div class="s-alarm-blk">
+                            <div class="s-alarm-t">
+                                <span data-ico="bell"></span> Full-Hour Chime
+                                (:00)
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Enable</span
+                                ><label class="s-tog"
+                                    ><input type="checkbox" id="s-full-en" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Sound</span>
+                                <select id="s-full-snd">
+                                    <option value="chime-crystal">
+                                        Crystal Bell
+                                    </option>
+                                    <option value="chime-digital" selected>
+                                        Digital Pulse
+                                    </option>
+                                    <option value="chime-neon">Neon Arp</option>
+                                    <option value="chime-zen">Zen Gong</option>
+                                    <option value="chime-cyber">
+                                        Cyber Sweep
+                                    </option>
+                                </select>
+                                <button class="s-abtn" id="s-full-test">
+                                    <span data-ico="play"></span> Test
+                                </button>
+                                <button class="s-abtn" id="s-full-file">
+                                    <span data-ico="folder"></span> Custom…
+                                </button>
+                            </div>
+                            <div
+                                class="s-flbl"
+                                id="s-full-flbl"
+                                style="display: none"
+                            >
+                                <span id="s-full-fname"></span
+                                ><span class="s-fclr" id="s-full-fclr"
+                                    ><span data-ico="x"></span></span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General -->
+                    <div class="s-panel" id="stab-general">
+                        <div class="s-sec">
+                            <div class="s-sec-t">Behavior</div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    Always on Top<small
+                                        >Float above all windows</small
+                                    >
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-aot" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    Start with Windows<small
+                                        >Launch at login</small
+                                    >
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-startup" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">Relaxation Volume</div>
+                            <div class="s-vol-row">
+                                <span style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-low"></span></span
+                                ><input
+                                    type="range"
+                                    id="s-rvol"
+                                    min="0"
+                                    max="100"
+                                    value="80"
+                                /><span
+                                    style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-high"></span></span
+                                ><span class="s-vol-val" id="s-rvol-val"
+                                    >80%</span
+                                >
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">About</div>
+                            <div class="s-about">
+                                <div class="s-about-v">CyberClock v1.0.0</div>
+                                <div class="s-about-s">
+                                    CyberGems © 2026 · Premium Cyber-Neon Clock
+                                    for Windows
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Display -->
+                    <div class="s-panel" id="stab-display">
+                        <div class="s-sec">
+                            <div class="s-sec-t">Multi-Monitor Support</div>
+                            <div
+                                style="
+                                    font-family:
+                                        &quot;Share Tech Mono&quot;, monospace;
+                                    font-size: 10px;
+                                    color: var(--text-md);
+                                    line-height: 1.7;
+                                    padding: 12px;
+                                    background: var(--bg-01);
+                                    border: 1px solid var(--border);
+                                    border-radius: 6px;
+                                "
+                            >
+                                CyberClock fills your primary display's work
+                                area, respecting the taskbar at all times.<br />
+                                ·
+                                <span style="color: var(--accent-a)"
+                                    >Mini Mode</span
+                                >
+                                — drag the bar to any monitor; position is
+                                remembered.<br />
+                                · Display changes are detected automatically and
+                                the window repositions itself.
+                            </div>
+                            <div id="s-screens" style="margin-top: 12px"></div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">Coming Soon</div>
+                            <div class="s-teaser">
+                                <div class="s-teaser-t">Roadmap</div>
+                                <div class="s-ti">
+                                    Custom alarm times<span class="s-badge"
+                                        >SOON</span
+                                    >
+                                </div>
+                                <div class="s-ti">
+                                    Weather widget<span class="s-badge"
+                                        >SOON</span
+                                    >
+                                </div>
+                                <div class="s-ti">
+                                    World clock (multiple timezones)<span
+                                        class="s-badge"
+                                        >SOON</span
+                                    >
+                                </div>
+                                <div class="s-ti">
+                                    Pomodoro integration<span class="s-badge"
+                                        >SOON</span
+                                    >
+                                </div>
+                                <div class="s-ti">
+                                    Calendar event reminders<span
+                                        class="s-badge"
+                                        >SOON</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- s-content -->
+            </div>
+            <!-- s-modal -->
+        </div>
+        <!-- s-overlay -->
+
+        <script src="../shared/audio-engine.js"></script>
+        <script>
+            "use strict";
+            // ══════════════════════════════════════════════════════════════
+            // STATE
+            // ══════════════════════════════════════════════════════════════
+            let cfg = {};
+            let curView = "home";
+            let transitioning = false;
+            const VIEW_ORDER = ["home", "timer", "stopwatch", "relax"];
+            const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+            const MONTHS_L = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ];
+            const MONTHS_S = [
+                "JAN",
+                "FEB",
+                "MAR",
+                "APR",
+                "MAY",
+                "JUN",
+                "JUL",
+                "AUG",
+                "SEP",
+                "OCT",
+                "NOV",
+                "DEC",
+            ];
+            const TIPS = [
+                "Close your eyes and focus on each breath.",
+                "Let thoughts pass like clouds — observe, don't engage.",
+                "Scan your body from head to toe. Release tension.",
+                "Count your exhales from 1 to 10, then start again.",
+                "Notice 5 things you can hear right now.",
+                "Place a hand on your chest. Feel it rise and fall.",
+            ];
+
+            function pad(n, w = 2) {
+                return String(n).padStart(w, "0");
+            }
+
+            // ══════════════════════════════════════════════════════════════
+            // NAVIGATION with cinematic transitions
+            // ══════════════════════════════════════════════════════════════
+            function navigate(to) {
+                if (to === curView || transitioning) return;
+                transitioning = true;
+
+                const from = curView;
+                const fromEl = document.getElementById("view-" + from);
+                const toEl = document.getElementById("view-" + to);
+                const dir =
+                    VIEW_ORDER.indexOf(to) > VIEW_ORDER.indexOf(from) ? 1 : -1;
+
+                curView = to;
+                document
+                    .querySelectorAll(".nav-item")
+                    .forEach((el) =>
+                        el.classList.toggle("active", el.dataset.view === to),
+                    );
+
+                // Position incoming view off-screen
+                toEl.style.transform = `translateX(${dir * 55}px) scale(0.96)`;
+                toEl.style.opacity = "0";
+                toEl.style.transition = "none";
+                toEl.style.pointerEvents = "none";
+                // Ensure it paints at off-screen position before animating
+                toEl.getBoundingClientRect();
+
+                const DUR = 400;
+                toEl.style.transition = `opacity ${DUR}ms ease, transform ${DUR}ms cubic-bezier(0.4,0,0.2,1)`;
+                toEl.style.transform = "none";
+                toEl.style.opacity = "1";
+
+                fromEl.style.transition = `opacity ${DUR * 0.88}ms ease, transform ${DUR * 0.88}ms ease`;
+                fromEl.style.transform = `translateX(${-dir * 38}px) scale(0.97)`;
+                fromEl.style.opacity = "0";
+                fromEl.style.pointerEvents = "none";
+
+                setTimeout(() => {
+                    // Commit CSS class state
+                    fromEl.classList.remove("active");
+                    toEl.classList.add("active");
+                    // Clear inline styles so CSS takes over cleanly
+                    [fromEl, toEl].forEach((el) => {
+                        el.style.transform = "";
+                        el.style.opacity = "";
+                        el.style.transition = "";
+                        el.style.pointerEvents = "";
+                    });
+                    transitioning = false;
+                    onEnter(to);
+                    onLeave(from);
+                }, DUR + 20);
+
+                // Immediate pre-transition effects
+                if (from === "home") stopClockAnim();
+                if (from === "relax") stopViz();
+            }
+
+            function onEnter(v) {
+                if (v === "home") {
+                    setTimeout(startClockAnim, 60);
+                }
+                if (v === "relax" && window.audioEngine.isPlaying) startViz();
+            }
+            function onLeave(v) {
+                if (v === "relax") stopViz();
+            }
+
+            // Sidebar nav
+            document
+                .querySelectorAll(".nav-item")
+                .forEach((el) =>
+                    el.addEventListener("click", () =>
+                        navigate(el.dataset.view),
+                    ),
+                );
+
+            // Skin dots (sidebar + settings)
+            function applySkin(t) {
+                document.body.dataset.theme = t;
+                document
+                    .querySelectorAll(".skin-dot")
+                    .forEach((d) =>
+                        d.classList.toggle("active", d.dataset.theme === t),
+                    );
+                document
+                    .querySelectorAll(".s-ttile")
+                    .forEach((d) =>
+                        d.classList.toggle("on", d.dataset.theme === t),
+                    );
+            }
+
+            document.querySelectorAll(".skin-dot").forEach((d) =>
+                d.addEventListener("click", () => {
+                    window.cc.saveSettings({ theme: d.dataset.theme });
+                    applySkin(d.dataset.theme);
+                }),
+            );
+
+            // ══════════════════════════════════════════════════════════════
+            // SETTINGS APPLICATION
+            // ══════════════════════════════════════════════════════════════
+            function applySettings(s) {
+                cfg = s;
+                document.body.dataset.theme = s.theme || "cyber-blue";
+                document.body.classList.toggle(
+                    "no-scanlines",
+                    s.scanlines === false,
+                );
+                applySkin(s.theme || "cyber-blue");
+                updateDigital();
+
+                // Settings modal controls
+                document
+                    .querySelectorAll(".s-fmt")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "on",
+                            b.dataset.fmt === (s.clockFormat || "24h"),
+                        ),
+                    );
+                const secEl = document.getElementById("s-sec");
+                if (secEl) secEl.checked = s.showSeconds !== false;
+                const scanEl = document.getElementById("s-scan");
+                if (scanEl) scanEl.checked = s.scanlines !== false;
+                const aotEl = document.getElementById("s-aot");
+                if (aotEl) aotEl.checked = !!s.alwaysOnTop;
+                const suEl = document.getElementById("s-startup");
+                if (suEl) suEl.checked = !!s.startWithWindows;
+
+                const ah = s.alarmHalfHour || {};
+                const af = s.alarmFullHour || {};
+                const hEn = document.getElementById("s-half-en");
+                if (hEn) hEn.checked = !!ah.enabled;
+                const fEn = document.getElementById("s-full-en");
+                if (fEn) fEn.checked = !!af.enabled;
+                const hSnd = document.getElementById("s-half-snd");
+                if (hSnd) hSnd.value = ah.sound || "chime-crystal";
+                const fSnd = document.getElementById("s-full-snd");
+                if (fSnd) fSnd.value = af.sound || "chime-digital";
+                if (ah.customPath) showCustomFile("half", ah.customPath);
+                if (af.customPath) showCustomFile("full", af.customPath);
+
+                const avEl = document.getElementById("s-avol");
+                if (avEl) {
+                    const v = Math.round((s.alarmVolume || 0.75) * 100);
+                    avEl.value = v;
+                    document.getElementById("s-avol-val").textContent = v + "%";
+                }
+                const rvEl = document.getElementById("s-rvol");
+                if (rvEl) {
+                    const v = Math.round((s.relaxVolume || 0.8) * 100);
+                    rvEl.value = v;
+                    document.getElementById("s-rvol-val").textContent = v + "%";
+                }
+                const rvolEl = document.getElementById("r-vol");
+                if (rvolEl) {
+                    const v = Math.round((s.relaxVolume || 0.8) * 100);
+                    rvolEl.value = v;
+                    document.getElementById("r-vol-val").textContent = v + "%";
+                }
+
+                window.audioEngine.setVolume(s.relaxVolume || 0.8);
+                if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
+            }
+
+            function showCustomFile(which, p) {
+                const lbl = document.getElementById(`s-${which}-flbl`);
+                const name = document.getElementById(`s-${which}-fname`);
+                if (p) {
+                    lbl.style.display = "flex";
+                    name.textContent = p.split(/[/\\]/).pop();
+                } else {
+                    lbl.style.display = "none";
+                }
+            }
+
+            // ══════════════════════════════════════════════════════════════
+            // DIGITAL CLOCK
+            // ══════════════════════════════════════════════════════════════
+            function updateDigital() {
+                const now = new Date();
+                let h = now.getHours(),
+                    m = now.getMinutes(),
+                    s = now.getSeconds(),
+                    t;
+                if (cfg.clockFormat === "12h") {
+                    const ap = h >= 12 ? "PM" : "AM";
+                    h = h % 12 || 12;
+                    t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""} ${ap}`;
+                } else {
+                    t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
+                }
+                document.getElementById("dig-time").textContent = t;
+                document.getElementById("dig-date").textContent =
+                    `${DAYS[now.getDay()]} · ${pad(now.getDate())} ${MONTHS_S[now.getMonth()]} ${now.getFullYear()}`;
+            }
+
+            // ══════════════════════════════════════════════════════════════
+            // ANALOG CLOCK (Canvas)
+            // ══════════════════════════════════════════════════════════════
+            let clockRaf = null;
+
+            function setupClock() {
+                const canvas = document.getElementById("clock-canvas");
+                const panel = canvas.parentElement;
+                const size = Math.min(
+                    panel.clientWidth - 36,
+                    panel.clientHeight - 36,
+                );
+                canvas.width = size;
+                canvas.height = size;
+            }
+
+            function themeColors() {
+                const cs = getComputedStyle(document.body);
+                const g = (n) => cs.getPropertyValue(n).trim();
+                return {
+                    accent: g("--accent-a") || "#00d4ff",
+                    handSec: g("--hand-sec") || "#ff4444",
+                    rgb: g("--rgb-accent") || "0,212,255",
+                };
+            }
+
+            function drawClock() {
+                const canvas = document.getElementById("clock-canvas");
+                if (!canvas || curView !== "home") {
+                    clockRaf = null;
+                    return;
+                }
+                const ctx = canvas.getContext("2d");
+                const W = canvas.width,
+                    H = canvas.height;
+                const cx = W / 2,
+                    cy = H / 2,
+                    R = Math.min(W, H) * 0.46;
+                const c = themeColors();
+
+                const now = new Date();
+                const ms = now.getMilliseconds();
+                const sec = now.getSeconds() + ms / 1000;
+                const min = now.getMinutes() + sec / 60;
+                const hr = (now.getHours() % 12) + min / 60;
+                const secA = (sec / 60) * Math.PI * 2 - Math.PI / 2;
+                const minA = (min / 60) * Math.PI * 2 - Math.PI / 2;
+                const hrA = (hr / 12) * Math.PI * 2 - Math.PI / 2;
+
+                ctx.clearRect(0, 0, W, H);
+
+                // Face glow
+                const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.1);
+                bg.addColorStop(0, `rgba(${c.rgb},.07)`);
+                bg.addColorStop(0.65, `rgba(${c.rgb},.025)`);
+                bg.addColorStop(1, "transparent");
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 1.08, 0, Math.PI * 2);
+                ctx.fillStyle = bg;
+                ctx.fill();
+
+                // Outer rings (breathing)
+                const br =
+                    0.68 +
+                    0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.985, 0, Math.PI * 2);
+                ctx.strokeStyle = c.accent;
+                ctx.lineWidth = 2.5;
+                ctx.globalAlpha = br;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 18;
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.9, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${c.rgb},.28)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+
+                // Minute ticks
+                for (let i = 0; i < 60; i++) {
+                    if (i % 5 === 0) continue;
+                    const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+                    ctx.save();
+                    ctx.strokeStyle = `rgba(${c.rgb},.32)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        cx + Math.cos(a) * R * 0.845,
+                        cy + Math.sin(a) * R * 0.845,
+                    );
+                    ctx.lineTo(
+                        cx + Math.cos(a) * R * 0.885,
+                        cy + Math.sin(a) * R * 0.885,
+                    );
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Hour markers
+                for (let i = 0; i < 12; i++) {
+                    const a = (i / 12) * Math.PI * 2 - Math.PI / 2,
+                        big = i % 3 === 0;
+                    ctx.save();
+                    ctx.strokeStyle = c.accent;
+                    ctx.lineWidth = big ? 3 : 1.5;
+                    ctx.shadowColor = c.accent;
+                    ctx.shadowBlur = big ? 14 : 5;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        cx + Math.cos(a) * R * (big ? 0.66 : 0.74),
+                        cy + Math.sin(a) * R * (big ? 0.66 : 0.74),
+                    );
+                    ctx.lineTo(
+                        cx + Math.cos(a) * R * 0.885,
+                        cy + Math.sin(a) * R * 0.885,
+                    );
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Numbers 12/3/6/9
+                ctx.save();
+                ctx.fillStyle = c.accent;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 10;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = `bold ${R * 0.098}px Orbitron,monospace`;
+                [
+                    [0, "12"],
+                    [3, "3"],
+                    [6, "6"],
+                    [9, "9"],
+                ].forEach(([i, lbl]) => {
+                    const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+                    ctx.fillText(
+                        lbl,
+                        cx + Math.cos(a) * R * 0.6,
+                        cy + Math.sin(a) * R * 0.6,
+                    );
+                });
+                ctx.restore();
+
+                // CYBERGEMS
+                ctx.save();
+                ctx.fillStyle = `rgba(${c.rgb},.52)`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = `${R * 0.066}px Orbitron,monospace`;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 7;
+                ctx.fillText("CYBERGEMS", cx, cy + R * 0.44);
+                ctx.restore();
+
+                // Hands
+                hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 16);
+                hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 12);
+                hand(ctx, cx, cy, secA, R * 0.83, 1.5, c.handSec, 22);
+                hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 15);
+
+                // Center jewel
+                ctx.save();
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.028, 0, Math.PI * 2);
+                ctx.fillStyle = c.accent;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.048, 0, Math.PI * 2);
+                ctx.strokeStyle = c.accent;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.016, 0, Math.PI * 2);
+                ctx.fillStyle = "white";
+                ctx.globalAlpha = 0.55;
+                ctx.fill();
+                ctx.restore();
+
+                clockRaf = requestAnimationFrame(drawClock);
+            }
+
+            function hand(ctx, cx, cy, angle, len, width, color, blur) {
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = width;
+                ctx.lineCap = "round";
+                ctx.shadowColor = color;
+                ctx.shadowBlur = blur;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(
+                    cx + Math.cos(angle) * len,
+                    cy + Math.sin(angle) * len,
+                );
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function startClockAnim() {
+                if (!clockRaf) drawClock();
+            }
+            function stopClockAnim() {
+                if (clockRaf) {
+                    cancelAnimationFrame(clockRaf);
+                    clockRaf = null;
+                }
+            }
+
+            // ══════════════════════════════════════════════════════════════
+            // CALENDAR
+            // ══════════════════════════════════════════════════════════════
+            let calYear,
+                calMonth,
+                selDate = null;
+
+            function renderCalendar() {
+                const container = document.getElementById("cal-months");
+                container.innerHTML = "";
+                const today = new Date();
+                for (let off = -1; off <= 1; off++) {
+                    let y = calYear,
+                        m = calMonth + off;
+                    if (m < 0) {
+                        m = 11;
+                        y--;
+                    }
+                    if (m > 11) {
+                        m = 0;
+                        y++;
+                    }
+                    const col = document.createElement("div");
+                    col.className = "cal-month" + (off === 0 ? "" : " adj");
+                    const hdr = document.createElement("div");
+                    hdr.className = "cal-mhdr";
+                    hdr.textContent = `${MONTHS_L[m]} ${y}`;
+                    col.appendChild(hdr);
+                    const dlRow = document.createElement("div");
+                    dlRow.className = "cal-dhdr";
+                    ["M", "T", "W", "T", "F", "S", "S"].forEach((l) => {
+                        const d = document.createElement("div");
+                        d.className = "cal-dlbl";
+                        d.textContent = l;
+                        dlRow.appendChild(d);
+                    });
+                    col.appendChild(dlRow);
+                    const grid = document.createElement("div");
+                    grid.className = "cal-grid";
+                    const startDow = (new Date(y, m, 1).getDay() + 6) % 7;
+                    for (let i = 0; i < startDow; i++) {
+                        const d = document.createElement("div");
+                        d.className = "cal-day om";
+                        grid.appendChild(d);
+                    }
+                    const lastDay = new Date(y, m + 1, 0).getDate();
+                    for (let d = 1; d <= lastDay; d++) {
+                        const cell = document.createElement("div");
+                        cell.className = "cal-day";
+                        cell.textContent = d;
+                        const key = `${y}-${m}-${d}`;
+                        if (
+                            y === today.getFullYear() &&
+                            m === today.getMonth() &&
+                            d === today.getDate()
+                        )
+                            cell.classList.add("today");
+                        if (selDate === key) cell.classList.add("sel");
+                        cell.addEventListener("click", () => {
+                            document
+                                .querySelectorAll(".cal-day.sel")
+                                .forEach((c) => c.classList.remove("sel"));
+                            cell.classList.add("sel");
+                            selDate = key;
+                        });
+                        grid.appendChild(cell);
+                    }
+                    col.appendChild(grid);
+                    container.appendChild(col);
+                }
+            }
+
+            document
+                .getElementById("cal-prev")
+                .addEventListener("click", () => {
+                    calMonth--;
+                    if (calMonth < 0) {
+                        calMonth = 11;
+                        calYear--;
+                    }
+                    renderCalendar();
+                });
+            document
+                .getElementById("cal-next")
+                .addEventListener("click", () => {
+                    calMonth++;
+                    if (calMonth > 11) {
+                        calMonth = 0;
+                        calYear++;
+                    }
+                    renderCalendar();
+                });
+            document
+                .getElementById("cal-today")
+                .addEventListener("click", () => {
+                    const t = new Date();
+                    calYear = t.getFullYear();
+                    calMonth = t.getMonth();
+                    renderCalendar();
+                });
+
+            // ══════════════════════════════════════════════════════════════
+            // TIMER
+            // ══════════════════════════════════════════════════════════════
+            let tAcc = 0,
+                tTotal = 0,
+                tRunning = false,
+                tLastTick = null,
+                tInterval = null,
+                tActivePreset = null;
+
+            function tSetDisplay(secs) {
+                secs = Math.max(0, Math.ceil(secs));
+                document.getElementById("t-h").textContent = pad(
+                    Math.floor(secs / 3600),
+                );
+                document.getElementById("t-m").textContent = pad(
+                    Math.floor((secs % 3600) / 60),
+                );
+                document.getElementById("t-s").textContent = pad(secs % 60);
+                const pct = tTotal > 0 ? ((tTotal - secs) / tTotal) * 100 : 0;
+                document.getElementById("t-prog").style.width = pct + "%";
+                document.getElementById("t-prog").style.background =
+                    secs <= 10 && secs > 0 ? "#ff4444" : "var(--accent-a)";
+                const disp = document.getElementById("t-disp");
+                disp.classList.toggle(
+                    "warn",
+                    secs <= 10 && secs > 0 && tRunning,
+                );
+            }
+
+            function tGetInputSecs() {
+                return (
+                    (parseInt(document.getElementById("t-ih").value) || 0) *
+                        3600 +
+                    (parseInt(document.getElementById("t-im").value) || 0) *
+                        60 +
+                    (parseInt(document.getElementById("t-is").value) || 0)
+                );
+            }
+            function tSetInputs(s) {
+                document.getElementById("t-ih").value = Math.floor(s / 3600);
+                document.getElementById("t-im").value = Math.floor(
+                    (s % 3600) / 60,
+                );
+                document.getElementById("t-is").value = s % 60;
+            }
+
+            function tStartStop() {
+                if (tRunning) {
+                    tRunning = false;
+                    tAcc = Math.max(0, tAcc - (Date.now() - tLastTick) / 1000);
+                    clearInterval(tInterval);
+                document.getElementById("t-start").innerHTML =
+                    '<span data-ico="play"></span> RESUME';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("t-start"),
+                    );
+                    document.getElementById("t-c1").classList.remove("blink");
+                    document.getElementById("t-c2").classList.remove("blink");
+                } else {
+                    if (tAcc === 0) {
+                        tTotal = tGetInputSecs();
+                        tAcc = tTotal;
+                    }
+                    if (tAcc <= 0) return;
+                    tRunning = true;
+                    tLastTick = Date.now();
+                    document.getElementById("t-start").innerHTML =
+                        '<span data-ico="pause"></span> PAUSE';
+                    window.ccIcons &&
+                        window.ccIcons.replaceIcons(
+                            document.getElementById("t-start"),
+                        );
+                    document.getElementById("t-reset").disabled = false;
+                    document.getElementById("t-c1").classList.add("blink");
+                    document.getElementById("t-c2").classList.add("blink");
+                    clearInterval(tInterval);
+                    tInterval = setInterval(() => {
+                        if (!tRunning) return;
+                        const now = Date.now();
+                        tAcc = Math.max(0, tAcc - (now - tLastTick) / 1000);
+                        tLastTick = now;
+                        tSetDisplay(tAcc);
+                        if (tAcc <= 0) {
+                            clearInterval(tInterval);
+                            tRunning = false;
+                            tAcc = 0;
+                            tOnComplete();
+                        }
+                    }, 100);
+                }
+            }
+
+            function tReset() {
+                clearInterval(tInterval);
+                tRunning = false;
+                tAcc = 0;
+                tTotal = 0;
+                tSetDisplay(0);
+                document.getElementById("t-prog").style.width = "0%";
+                document.getElementById("t-start").innerHTML =
+                    '<span data-ico="play"></span> START';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("t-start"),
+                    );
+                document.getElementById("t-reset").disabled = true;
+                document.getElementById("t-c1").classList.remove("blink");
+                document.getElementById("t-c2").classList.remove("blink");
+                document.getElementById("t-disp").classList.remove("warn");
+                document
+                    .querySelectorAll(".preset-btn")
+                    .forEach((b) => b.classList.remove("on"));
+                tActivePreset = null;
+            }
+
+            function tOnComplete() {
+                tSetDisplay(0);
+                document.getElementById("t-prog").style.width = "100%";
+                document.getElementById("t-start").innerHTML =
+                    '<span data-ico="play"></span> START';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("t-start"),
+                    );
+                document.getElementById("t-c1").classList.remove("blink");
+                document.getElementById("t-c2").classList.remove("blink");
+                window.audioEngine.chime(
+                    cfg.alarmSound || "chime-crystal",
+                    cfg.alarmVolume || 0.75,
+                );
+                let fl = 0;
+                const fi = setInterval(() => {
+                    const segs = document.querySelectorAll(".t-seg");
+                    segs.forEach(
+                        (s) =>
+                            (s.style.opacity =
+                                s.style.opacity === "0.15" ? "1" : "0.15"),
+                    );
+                    if (++fl >= 6) {
+                        clearInterval(fi);
+                        segs.forEach((s) => (s.style.opacity = "1"));
+                    }
+                }, 200);
+                document.getElementById("t-done").classList.add("vis");
+            }
+
+            document
+                .getElementById("t-start")
+                .addEventListener("click", tStartStop);
+            document.getElementById("t-reset").addEventListener("click", () => {
+                tReset();
+                if (tActivePreset) {
+                    tAcc = tActivePreset;
+                    tTotal = tActivePreset;
+                    tSetDisplay(tActivePreset);
+                    tSetInputs(tActivePreset);
+                }
+            });
+            document
+                .getElementById("t-dismiss")
+                .addEventListener("click", () => {
+                    document.getElementById("t-done").classList.remove("vis");
+                    tReset();
+                    if (tActivePreset) {
+                        tAcc = tActivePreset;
+                        tTotal = tActivePreset;
+                        tSetDisplay(tActivePreset);
+                        tSetInputs(tActivePreset);
+                    }
+                });
+            document.querySelectorAll(".preset-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    if (tRunning) return;
+                    const s = parseInt(btn.dataset.s);
+                    tTotal = s;
+                    tAcc = s;
+                    tSetDisplay(s);
+                    tSetInputs(s);
+                    document
+                        .querySelectorAll(".preset-btn")
+                        .forEach((b) => b.classList.remove("on"));
+                    btn.classList.add("on");
+                    tActivePreset = s;
+                });
+            });
+            ["t-ih", "t-im", "t-is"].forEach((id) => {
+                document.getElementById(id).addEventListener("change", () => {
+                    if (!tRunning) {
+                        const s = tGetInputSecs();
+                        tAcc = s;
+                        tTotal = s;
+                        tSetDisplay(s);
+                    }
+                });
+            });
+
+            // ══════════════════════════════════════════════════════════════
+            // STOPWATCH
+            // ══════════════════════════════════════════════════════════════
+            let swRunning = false,
+                swStart = null,
+                swPaused = 0,
+                swElapsed = 0,
+                swRaf = null;
+            let laps = [],
+                lastLapTotal = 0;
+
+            function swFmt(ms) {
+                const t = Math.floor(ms);
+                return {
+                    h: pad(Math.floor(t / 3600000)),
+                    m: pad(Math.floor((t % 3600000) / 60000)),
+                    s: pad(Math.floor((t % 60000) / 1000)),
+                    ms: pad(t % 1000, 3),
+                };
+            }
+            function swDurStr(ms) {
+                const t = swFmt(ms);
+                return `${t.h}:${t.m}:${t.s}.${t.ms}`;
+            }
+
+            function swUpdate() {
+                if (swRunning)
+                    swElapsed = performance.now() - swStart + swPaused;
+                const t = swFmt(swElapsed);
+                document.getElementById("sw-h").textContent = t.h;
+                document.getElementById("sw-m").textContent = t.m;
+                document.getElementById("sw-s").textContent = t.s;
+                document.getElementById("sw-ms").textContent = t.ms;
+                if (swRunning) swRaf = requestAnimationFrame(swUpdate);
+            }
+
+            function swStartStop() {
+                if (swRunning) {
+                    swRunning = false;
+                    swPaused = swElapsed;
+                    cancelAnimationFrame(swRaf);
+                    document.getElementById("sw-start").innerHTML =
+                        '<span data-ico="play"></span> RESUME';
+                    window.ccIcons &&
+                        window.ccIcons.replaceIcons(
+                            document.getElementById("sw-start"),
+                        );
+                    document.getElementById("sw-reset").disabled = false;
+                    document.getElementById("sw-lap").disabled = true;
+                    document.getElementById("run-dot").classList.remove("on");
+                } else {
+                    swRunning = true;
+                    swStart = performance.now();
+                    document.getElementById("sw-start").innerHTML =
+                        '<span data-ico="pause"></span> PAUSE';
+                    window.ccIcons &&
+                        window.ccIcons.replaceIcons(
+                            document.getElementById("sw-start"),
+                        );
+                    document.getElementById("sw-reset").disabled = true;
+                    document.getElementById("sw-lap").disabled = false;
+                    document.getElementById("run-dot").classList.add("on");
+                    swRaf = requestAnimationFrame(swUpdate);
+                }
+            }
+
+            function swReset() {
+                if (swRunning) return;
+                swRunning = false;
+                swPaused = 0;
+                swElapsed = 0;
+                laps = [];
+                lastLapTotal = 0;
+                swUpdate();
+                swRenderLaps();
+                document.getElementById("sw-start").innerHTML =
+                    '<span data-ico="play"></span> START';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("sw-start"),
+                    );
+                document.getElementById("sw-reset").disabled = true;
+                document.getElementById("sw-lap").disabled = true;
+                document.getElementById("sw-clear").disabled = true;
+                document.getElementById("run-dot").classList.remove("on");
+            }
+
+            function swLap() {
+                if (!swRunning) return;
+                const tot = swElapsed,
+                    time = tot - lastLapTotal;
+                lastLapTotal = tot;
+                laps.push({ n: laps.length + 1, lapTime: time, total: tot });
+                swRenderLaps();
+                document.getElementById("sw-clear").disabled = false;
+            }
+
+            function swRenderLaps() {
+                const list = document.getElementById("lap-list");
+                const empty = document.getElementById("lap-empty");
+                if (!laps.length) {
+                    empty.style.display = "block";
+                    list.querySelectorAll(".lap-row").forEach((r) =>
+                        r.remove(),
+                    );
+                    return;
+                }
+                empty.style.display = "none";
+                list.querySelectorAll(".lap-row").forEach((r) => r.remove());
+                const times = laps.map((l) => l.lapTime);
+                const best = Math.min(...times),
+                    worst = Math.max(...times);
+                const avg = times.reduce((a, b) => a + b, 0) / times.length;
+                [...laps].reverse().forEach((l) => {
+                    const row = document.createElement("div");
+                    row.className = "lap-row";
+                    if (laps.length > 1) {
+                        if (l.lapTime === best) row.classList.add("best");
+                        if (l.lapTime === worst) row.classList.add("worst");
+                    }
+                    const d = l.lapTime - avg;
+                    row.innerHTML = `<div class="lap-num">${l.n}</div><div class="lap-time">${swDurStr(l.lapTime)}</div><div class="lap-delta">${d >= 0 ? "+" : "-"}${swDurStr(Math.abs(d))}</div><div class="lap-total">${swDurStr(l.total)}</div>`;
+                    list.insertBefore(row, list.firstChild);
+                });
+            }
+
+            document
+                .getElementById("sw-start")
+                .addEventListener("click", swStartStop);
+            document
+                .getElementById("sw-reset")
+                .addEventListener("click", swReset);
+            document.getElementById("sw-lap").addEventListener("click", swLap);
+            document.getElementById("sw-copy").addEventListener("click", () => {
+                if (!laps.length) return;
+                const avg =
+                    laps.reduce((s, x) => s + x.lapTime, 0) / laps.length;
+                const lines = [
+                    "#\tLap Time\tDelta\tTotal",
+                    ...laps.map((l) => {
+                        const d = l.lapTime - avg;
+                        return `${l.n}\t${swDurStr(l.lapTime)}\t${d >= 0 ? "+" : "-"}${swDurStr(Math.abs(d))}\t${swDurStr(l.total)}`;
+                    }),
+                ];
+                navigator.clipboard.writeText(lines.join("\n")).catch(() => {});
+            });
+            document
+                .getElementById("sw-clear")
+                .addEventListener("click", () => {
+                    if (swRunning) return;
+                    laps = [];
+                    lastLapTotal = 0;
+                    swRenderLaps();
+                    document.getElementById("sw-clear").disabled = true;
+                });
+
+            // ══════════════════════════════════════════════════════════════
+            // RELAX + AUDIO ENGINE
+            // ══════════════════════════════════════════════════════════════
+            let rSelected = null,
+                rSesStart = null,
+                rSesInterval = null,
+                rTipInterval = null,
+                rTipIdx = 0;
+            let rAstMins = 0,
+                rAstRemain = 0,
+                rAstTimer = null,
+                vizRaf = null,
+                rSaveTimer = null;
+
+            function preSelectRelaxTrack(id) {
+                rSelected = id;
+                document
+                    .querySelectorAll(".tcard")
+                    .forEach((c) =>
+                        c.classList.toggle("on", c.dataset.track === id),
+                    );
+            }
+
+            function rPlayTrack() {
+                if (!rSelected) return;
+                window.audioEngine.playTrack(rSelected);
+                window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+                document.getElementById("r-play").innerHTML =
+                    '<span data-ico="pause"></span> PAUSE';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("r-play"),
+                    );
+                rStartSession();
+                startViz();
+                rStartTips();
+                window.cc.saveSettings({ lastRelaxTrack: rSelected });
+                if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
+            }
+
+            function rStop() {
+                window.audioEngine.stop();
+                document.getElementById("r-play").innerHTML =
+                    '<span data-ico="play"></span> PLAY';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("r-play"),
+                    );
+                rStopSession();
+                stopViz();
+                rStopTips();
+                rClearAutoStop();
+            }
+
+            function rTogglePlay() {
+                if (!rSelected) {
+                    preSelectRelaxTrack("campfire");
+                    rPlayTrack();
+                    return;
+                }
+                if (window.audioEngine.isPlaying) {
+                    rStop();
+                } else {
+                    rPlayTrack();
+                }
+            }
+
+            function rStartSession() {
+                if (rSesInterval) clearInterval(rSesInterval);
+                if (!rSesStart) rSesStart = Date.now();
+                rSesInterval = setInterval(() => {
+                    const ms = Date.now() - rSesStart;
+                    const h = Math.floor(ms / 3600000),
+                        m = Math.floor((ms % 3600000) / 60000),
+                        s = Math.floor((ms % 60000) / 1000);
+                    document.getElementById("r-ses").textContent =
+                        `${pad(h)}:${pad(m)}:${pad(s)}`;
+                }, 1000);
+            }
+            function rStopSession() {
+                if (rSesInterval) clearInterval(rSesInterval);
+                rSesInterval = null;
+                rSesStart = null;
+                document.getElementById("r-ses").textContent = "00:00:00";
+            }
+
+            function rStartTips() {
+                if (rTipInterval) clearInterval(rTipInterval);
+                document.getElementById("r-tip").textContent = TIPS[rTipIdx];
+                rTipInterval = setInterval(() => {
+                    rTipIdx = (rTipIdx + 1) % TIPS.length;
+                    const el = document.getElementById("r-tip");
+                    el.classList.add("fade");
+                    setTimeout(() => {
+                        el.textContent = TIPS[rTipIdx];
+                        el.classList.remove("fade");
+                    }, 400);
+                }, 30000);
+            }
+            function rStopTips() {
+                if (rTipInterval) clearInterval(rTipInterval);
+            }
+
+            function rStartAutoStop(secs) {
+                rClearAutoStop();
+                rAstRemain = secs;
+                rAstUpdateDisplay();
+                rAstTimer = setInterval(() => {
+                    if (!window.audioEngine.isPlaying) return;
+                    rAstRemain = Math.max(0, rAstRemain - 1);
+                    rAstUpdateDisplay();
+                    if (rAstRemain <= 0) {
+                        rClearAutoStop();
+                        rStop();
+                        rShowNotify("✓ Session Complete");
+                    }
+                }, 1000);
+            }
+            function rClearAutoStop() {
+                if (rAstTimer) clearInterval(rAstTimer);
+                rAstTimer = null;
+                document.getElementById("r-ast-cd").style.display = "none";
+            }
+            function rAstUpdateDisplay() {
+                const m = Math.floor(rAstRemain / 60),
+                    s = rAstRemain % 60;
+                const el = document.getElementById("r-ast-cd");
+                el.textContent = `Stops in ${pad(m)}:${pad(s)}`;
+                el.style.display = "inline";
+            }
+            function rShowNotify(msg) {
+                const el = document.getElementById("r-notify");
+                el.textContent = msg;
+                el.classList.add("show");
+                setTimeout(() => el.classList.remove("show"), 3000);
+            }
+
+            // Visualizer
+            function startViz() {
+                if (vizRaf || curView !== "relax") return;
+                const canvas = document.getElementById("viz-canvas");
+                canvas.width = canvas.offsetWidth;
+                const ctx = canvas.getContext("2d");
+                const h = canvas.height,
+                    w = canvas.width;
+                function draw() {
+                    if (curView !== "relax") {
+                        vizRaf = null;
+                        return;
+                    }
+                    ctx.clearRect(0, 0, w, h);
+                    const data = window.audioEngine.getAnalyserData();
+                    const bars = 56,
+                        gap = Math.floor(w / bars),
+                        barW = gap - 1;
+                    const acc =
+                        getComputedStyle(document.body)
+                            .getPropertyValue("--accent-a")
+                            .trim() || "#00d4ff";
+                    const rgb =
+                        getComputedStyle(document.body)
+                            .getPropertyValue("--rgb-accent")
+                            .trim() || "0,212,255";
+                    for (let i = 0; i < bars; i++) {
+                        const idx = Math.floor((i * data.length) / bars);
+                        let v = (data[idx] || 0) / 255;
+                        if (!window.audioEngine.isPlaying)
+                            v =
+                                Math.sin(Date.now() / 1400 + i * 0.28) * 0.018 +
+                                0.018;
+                        const bh = Math.max(2, v * h * 0.88),
+                            x = i * gap,
+                            y = h - bh;
+                        const g = ctx.createLinearGradient(0, y, 0, h);
+                        g.addColorStop(0, acc);
+                        g.addColorStop(1, `rgba(${rgb},.18)`);
+                        ctx.fillStyle = g;
+                        ctx.fillRect(x, y, barW, bh);
+                        ctx.fillStyle = `rgba(${rgb},.07)`;
+                        ctx.fillRect(x, h, barW, bh * 0.28);
+                        ctx.fillStyle = acc;
+                        ctx.fillRect(x, y - 2, barW, 2);
+                    }
+                    vizRaf = requestAnimationFrame(draw);
+                }
+                draw();
+            }
+            function stopViz() {
+                if (vizRaf) {
+                    cancelAnimationFrame(vizRaf);
+                    vizRaf = null;
+                }
+                const canvas = document.getElementById("viz-canvas");
+                if (canvas) {
+                    const ctx = canvas.getContext("2d");
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            // Track cards
+            document.querySelectorAll(".tcard").forEach((card) => {
+                card.addEventListener("click", () => {
+                    const t = card.dataset.track;
+                    if (rSelected === t && window.audioEngine.isPlaying) {
+                        rStop();
+                        return;
+                    }
+                    preSelectRelaxTrack(t);
+                    rSelected = t;
+                    if (window.audioEngine.isPlaying)
+                        window.audioEngine.playTrack(t);
+                    else rPlayTrack();
+                });
+            });
+
+            document
+                .getElementById("r-play")
+                .addEventListener("click", rTogglePlay);
+            document.getElementById("r-stop").addEventListener("click", () => {
+                rStop();
+                document
+                    .querySelectorAll(".tcard")
+                    .forEach((c) => c.classList.remove("on"));
+                rSelected = null;
+            });
+
+            document.getElementById("r-vol").addEventListener("input", (e) => {
+                const v = e.target.value / 100;
+                document.getElementById("r-vol-val").textContent =
+                    e.target.value + "%";
+                window.audioEngine.setVolume(v);
+                clearTimeout(rSaveTimer);
+                rSaveTimer = setTimeout(
+                    () => window.cc.saveSettings({ relaxVolume: v }),
+                    400,
+                );
+            });
+
+            document.querySelectorAll(".ast-btn").forEach((b) => {
+                b.addEventListener("click", () => {
+                    const m = parseInt(b.dataset.min);
+                    rAstMins = m;
+                    document
+                        .querySelectorAll(".ast-btn")
+                        .forEach((x) =>
+                            x.classList.toggle(
+                                "on",
+                                parseInt(x.dataset.min) === m,
+                            ),
+                        );
+                    if (m > 0 && window.audioEngine.isPlaying)
+                        rStartAutoStop(m * 60);
+                    else rClearAutoStop();
+                });
+            });
+
+            // ══════════════════════════════════════════════════════════════
+            // SETTINGS MODAL
+            // ══════════════════════════════════════════════════════════════
+            let sDebounce = {};
+
+            function openSettings() {
+                document.getElementById("s-overlay").classList.add("open");
+                loadScreensList();
+            }
+
+            function loadScreensList() {
+                window.cc.getScreens().then((screens) => {
+                    const el = document.getElementById("s-screens");
+                    el.innerHTML = "";
+                    screens.forEach((s) => {
+                        const card = document.createElement("div");
+                        card.style.cssText = `
+                          display:flex;align-items:center;gap:12px;
+                          padding:12px 14px;
+                          background:${s.current ? "var(--accent-dim)" : "var(--bg-01)"};
+                          border:1px solid ${s.current ? "var(--border-active)" : "var(--border)"};
+                          border-radius:6px;margin-bottom:8px;
+                          box-shadow:${s.current ? "var(--glow-xs)" : "none"};
+                          transition:all .2s;
+                        `;
+                        card.innerHTML = `
+                          <div style="font-size:22px;flex-shrink:0;">${s.primary ? "🖥️" : "📺"}</div>
+                          <div style="flex:1;min-width:0;">
+                            <div style="font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1.5px;
+                              color:${s.current ? "var(--accent-a)" : "var(--text-md)"};
+                              text-shadow:${s.current ? "var(--glow-xs)" : "none"};
+                              text-transform:uppercase;margin-bottom:3px;">
+                              ${s.label}
+                              ${s.primary ? '<span style="font-size:7px;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:6px;">PRIMARY</span>' : ""}
+                              ${s.current ? '<span style="font-size:7px;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:4px;">ACTIVE</span>' : ""}
+                            </div>
+                            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-lo);">
+                              ${s.workArea.width} × ${s.workArea.height} px  &nbsp;·&nbsp;
+                              pos (${s.workArea.x}, ${s.workArea.y})
+                            </div>
+                          </div>
+                          ${
+                              s.current
+                                  ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">✓ IN USE</span>`
+                                  : `<button data-did="${s.id}" class="s-move-btn"
+                                style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+                                  background:transparent;border:1px solid var(--border-bright);color:var(--accent-a);
+                                  padding:7px 14px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:all .18s;"
+                                onmouseover="this.style.boxShadow='var(--glow-sm)';this.style.borderColor='var(--border-active)';"
+                                onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border-bright)';"
+                              >⊞ Move Here</button>`
+                          }
+                        `;
+                        el.appendChild(card);
+                    });
+
+                    // Wire Move Here buttons
+                    el.querySelectorAll(".s-move-btn").forEach((btn) => {
+                        btn.addEventListener("click", async () => {
+                            const id = parseInt(btn.dataset.did);
+                            btn.textContent = "…";
+                            btn.disabled = true;
+                            const res = await window.cc.selectDisplay(id);
+                            if (res.ok) {
+                                // Refresh list to show new ACTIVE state
+                                setTimeout(loadScreensList, 150);
+                            } else {
+                                btn.textContent = "✕ Error";
+                            }
+                        });
+                    });
+                });
+            }
+            function closeSettings() {
+                document.getElementById("s-overlay").classList.remove("open");
+            }
+
+            document
+                .getElementById("btn-settings")
+                .addEventListener("click", openSettings);
+            document
+                .getElementById("s-close")
+                .addEventListener("click", closeSettings);
+            document
+                .getElementById("s-overlay")
+                .addEventListener("click", (e) => {
+                    if (e.target === e.currentTarget) closeSettings();
+                });
+
+            // Settings tabs
+            document.querySelectorAll(".s-tab").forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    document
+                        .querySelectorAll(".s-tab")
+                        .forEach((t) => t.classList.remove("on"));
+                    document
+                        .querySelectorAll(".s-panel")
+                        .forEach((p) => p.classList.remove("on"));
+                    tab.classList.add("on");
+                    document
+                        .getElementById("stab-" + tab.dataset.stab)
+                        .classList.add("on");
+                });
+            });
+
+            // Theme tiles
+            document.querySelectorAll(".s-ttile").forEach((t) => {
+                t.addEventListener("click", () => {
+                    window.cc.saveSettings({ theme: t.dataset.theme });
+                    applySkin(t.dataset.theme);
+                });
+            });
+
+            // Format
+            document.querySelectorAll(".s-fmt").forEach((b) => {
+                b.addEventListener("click", () => {
+                    window.cc.saveSettings({ clockFormat: b.dataset.fmt });
+                    document
+                        .querySelectorAll(".s-fmt")
+                        .forEach((x) => x.classList.remove("on"));
+                    b.classList.add("on");
+                });
+            });
+
+            // Toggles
+            document
+                .getElementById("s-sec")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ showSeconds: e.target.checked }),
+                );
+            document
+                .getElementById("s-scan")
+                .addEventListener("change", (e) => {
+                    window.cc.saveSettings({ scanlines: e.target.checked });
+                    document.body.classList.toggle(
+                        "no-scanlines",
+                        !e.target.checked,
+                    );
+                });
+            document
+                .getElementById("s-aot")
+                .addEventListener("change", () =>
+                    window.cc.toggleAlwaysOnTop(),
+                );
+            document
+                .getElementById("s-startup")
+                .addEventListener("change", (e) => {
+                    window.cc.setStartup(e.target.checked);
+                    window.cc.saveSettings({
+                        startWithWindows: e.target.checked,
+                    });
+                });
+
+            // Alarms
+            document
+                .getElementById("s-half-en")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmHalfHour: { enabled: e.target.checked },
+                    }),
+                );
+            document
+                .getElementById("s-full-en")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmFullHour: { enabled: e.target.checked },
+                    }),
+                );
+            document
+                .getElementById("s-half-snd")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmHalfHour: { sound: e.target.value },
+                    }),
+                );
+            document
+                .getElementById("s-full-snd")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmFullHour: { sound: e.target.value },
+                    }),
+                );
+            document
+                .getElementById("s-half-test")
+                .addEventListener("click", () =>
+                    window.audioEngine.chime(
+                        document.getElementById("s-half-snd").value,
+                        cfg.alarmVolume || 0.75,
+                    ),
+                );
+            document
+                .getElementById("s-full-test")
+                .addEventListener("click", () =>
+                    window.audioEngine.chime(
+                        document.getElementById("s-full-snd").value,
+                        cfg.alarmVolume || 0.75,
+                    ),
+                );
+            document
+                .getElementById("s-half-file")
+                .addEventListener("click", async () => {
+                    const p = await window.cc.openFileDialog();
+                    if (p) {
+                        window.cc.saveSettings({
+                            alarmHalfHour: { customPath: p },
+                        });
+                        showCustomFile("half", p);
+                    }
+                });
+            document
+                .getElementById("s-full-file")
+                .addEventListener("click", async () => {
+                    const p = await window.cc.openFileDialog();
+                    if (p) {
+                        window.cc.saveSettings({
+                            alarmFullHour: { customPath: p },
+                        });
+                        showCustomFile("full", p);
+                    }
+                });
+            document
+                .getElementById("s-half-fclr")
+                .addEventListener("click", () => {
+                    window.cc.saveSettings({
+                        alarmHalfHour: { customPath: null },
+                    });
+                    showCustomFile("half", null);
+                });
+            document
+                .getElementById("s-full-fclr")
+                .addEventListener("click", () => {
+                    window.cc.saveSettings({
+                        alarmFullHour: { customPath: null },
+                    });
+                    showCustomFile("full", null);
+                });
+
+            // Volumes
+            document.getElementById("s-avol").addEventListener("input", (e) => {
+                document.getElementById("s-avol-val").textContent =
+                    e.target.value + "%";
+                clearTimeout(sDebounce.av);
+                sDebounce.av = setTimeout(
+                    () =>
+                        window.cc.saveSettings({
+                            alarmVolume: e.target.value / 100,
+                        }),
+                    300,
+                );
+            });
+            document.getElementById("s-rvol").addEventListener("input", (e) => {
+                document.getElementById("s-rvol-val").textContent =
+                    e.target.value + "%";
+                window.audioEngine.setVolume(e.target.value / 100);
+                clearTimeout(sDebounce.rv);
+                sDebounce.rv = setTimeout(
+                    () =>
+                        window.cc.saveSettings({
+                            relaxVolume: e.target.value / 100,
+                        }),
+                    300,
+                );
+            });
+
+            // ══════════════════════════════════════════════════════════════
+            // TITLE BAR BUTTONS
+            // ══════════════════════════════════════════════════════════════
+            document.querySelector(".tbar").addEventListener("mousedown", (e) => {
+                if (e.target.closest(".tbar-right, .tbar-brand")) return;
+                if (e.button === 0 && window.cc && window.cc.startDragging) {
+                    window.cc.startDragging();
+                }
+            });
+
+            document
+                .getElementById("btn-aot")
+                .addEventListener("click", async () => {
+                    const on = await window.cc.toggleAlwaysOnTop();
+                    document
+                        .getElementById("btn-aot")
+                        .classList.toggle("on", on);
+                });
+            document
+                .getElementById("btn-mini")
+                .addEventListener("click", () => window.cc.goMini());
+            document
+                .getElementById("btn-min")
+                .addEventListener("click", () => window.cc.minimizeWindow());
+            document
+                .getElementById("btn-close")
+                .addEventListener("click", () => window.cc.closeWindow());
+
+            // ══════════════════════════════════════════════════════════════
+            // IPC
+            // ══════════════════════════════════════════════════════════════
+            window.cc.onInit((s) => {
+                applySettings(s);
+                setInterval(updateDigital, 1000);
+                updateDigital();
+                const now = new Date();
+                calYear = now.getFullYear();
+                calMonth = now.getMonth();
+                renderCalendar();
+                requestAnimationFrame(() => {
+                    setupClock();
+                    startClockAnim();
+                });
+                window.addEventListener("resize", () => {
+                    stopClockAnim();
+                    setupClock();
+                    startClockAnim();
+                });
+            });
+
+            window.cc.onSettingsUpdated((s) => applySettings(s));
+
+            window.cc.onAlarmChime((p) => {
+                if (p.customPath) window.audioEngine.playFile(p.customPath);
+                else
+                    window.audioEngine.chime(
+                        p.sound || "chime-digital",
+                        cfg.alarmVolume || 0.75,
+                    );
+            });
+        </script>
+    </body>
+</html>

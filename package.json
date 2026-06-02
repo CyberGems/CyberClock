@@ -1,0 +1,15 @@
+{
+  "name": "cyberclock",
+  "productName": "CyberClock",
+  "version": "1.0.0",
+  "description": "Premium Cyber-Neon Clock for Windows — by CyberGems",
+  "author": "CyberGems",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2"
+  }
+}

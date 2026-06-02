@@ -1,0 +1,171 @@
+/* ═══════════════════════════════════════════════════════════
+   CyberClock — Theme System  ·  CyberGems © 2026
+   5 Skins: cyber-blue | neon-green | plasma-purple |
+            solar-orange | arctic-ice
+═══════════════════════════════════════════════════════════ */
+
+/* ── Cyber Blue (default) ───────────────────────────────── */
+:root,
+[data-theme="cyber-blue"] {
+  --bg-00: #020810;
+  --bg-01: #050e1e;
+  --bg-02: #07152a;
+  --bg-03: #0a1e3c;
+  --bg-04: #0c2550;
+
+  --accent-a:   #00d4ff;
+  --accent-b:   #0066ff;
+  --accent-c:   #00ffcc;
+  --accent-dim: rgba(0, 212, 255, 0.12);
+
+  --text-hi:  #eaf8ff;
+  --text-md:  #7ec8e3;
+  --text-lo:  #2a5060;
+
+  --glow-xs: 0 0 4px rgba(0,212,255,0.5);
+  --glow-sm: 0 0 8px rgba(0,212,255,0.65), 0 0 16px rgba(0,212,255,0.25);
+  --glow-md: 0 0 14px rgba(0,212,255,0.75), 0 0 30px rgba(0,212,255,0.35), 0 0 60px rgba(0,212,255,0.12);
+  --glow-lg: 0 0 20px rgba(0,212,255,0.85), 0 0 50px rgba(0,212,255,0.45), 0 0 100px rgba(0,212,255,0.15);
+
+  --border:        rgba(0, 212, 255, 0.20);
+  --border-bright: rgba(0, 212, 255, 0.55);
+  --border-active: rgba(0, 212, 255, 0.90);
+
+  --rgb-accent: 0, 212, 255;
+  --rgb-b:      0, 102, 255;
+
+  --hand-sec: #ff4444;
+  --rgb-sec:  255, 68, 68;
+}
+
+/* ── Neon Green ─────────────────────────────────────────── */
+[data-theme="neon-green"] {
+  --bg-00: #010d03;
+  --bg-01: #021807;
+  --bg-02: #03220b;
+  --bg-03: #042e0e;
+  --bg-04: #063c12;
+
+  --accent-a:   #00ff41;
+  --accent-b:   #00cc33;
+  --accent-c:   #39ff14;
+  --accent-dim: rgba(0, 255, 65, 0.10);
+
+  --text-hi:  #e0ffe8;
+  --text-md:  #5ec870;
+  --text-lo:  #1a3820;
+
+  --glow-xs: 0 0 4px rgba(0,255,65,0.5);
+  --glow-sm: 0 0 8px rgba(0,255,65,0.65), 0 0 16px rgba(0,255,65,0.25);
+  --glow-md: 0 0 14px rgba(0,255,65,0.75), 0 0 30px rgba(0,255,65,0.35), 0 0 60px rgba(0,255,65,0.12);
+  --glow-lg: 0 0 20px rgba(0,255,65,0.85), 0 0 50px rgba(0,255,65,0.45), 0 0 100px rgba(0,255,65,0.15);
+
+  --border:        rgba(0, 255, 65, 0.20);
+  --border-bright: rgba(0, 255, 65, 0.55);
+  --border-active: rgba(0, 255, 65, 0.90);
+
+  --rgb-accent: 0, 255, 65;
+  --rgb-b:      0, 204, 51;
+
+  --hand-sec: #ff6600;
+  --rgb-sec:  255, 102, 0;
+}
+
+/* ── Plasma Purple ──────────────────────────────────────── */
+[data-theme="plasma-purple"] {
+  --bg-00: #06010f;
+  --bg-01: #0d021e;
+  --bg-02: #13032b;
+  --bg-03: #1b0439;
+  --bg-04: #240547;
+
+  --accent-a:   #c800ff;
+  --accent-b:   #7700cc;
+  --accent-c:   #ff00bb;
+  --accent-dim: rgba(200, 0, 255, 0.10);
+
+  --text-hi:  #f5e8ff;
+  --text-md:  #b870d8;
+  --text-lo:  #450d60;
+
+  --glow-xs: 0 0 4px rgba(200,0,255,0.5);
+  --glow-sm: 0 0 8px rgba(200,0,255,0.65), 0 0 16px rgba(200,0,255,0.25);
+  --glow-md: 0 0 14px rgba(200,0,255,0.75), 0 0 30px rgba(200,0,255,0.35), 0 0 60px rgba(200,0,255,0.12);
+  --glow-lg: 0 0 20px rgba(200,0,255,0.85), 0 0 50px rgba(200,0,255,0.45), 0 0 100px rgba(200,0,255,0.15);
+
+  --border:        rgba(200, 0, 255, 0.20);
+  --border-bright: rgba(200, 0, 255, 0.55);
+  --border-active: rgba(200, 0, 255, 0.90);
+
+  --rgb-accent: 200, 0, 255;
+  --rgb-b:      119, 0, 204;
+
+  --hand-sec: #00ffcc;
+  --rgb-sec:  0, 255, 204;
+}
+
+/* ── Solar Orange ───────────────────────────────────────── */
+[data-theme="solar-orange"] {
+  --bg-00: #0e0400;
+  --bg-01: #1c0800;
+  --bg-02: #280d00;
+  --bg-03: #361400;
+  --bg-04: #441c00;
+
+  --accent-a:   #ff6600;
+  --accent-b:   #ff2200;
+  --accent-c:   #ffcc00;
+  --accent-dim: rgba(255, 102, 0, 0.10);
+
+  --text-hi:  #fff2e8;
+  --text-md:  #e09060;
+  --text-lo:  #602810;
+
+  --glow-xs: 0 0 4px rgba(255,102,0,0.5);
+  --glow-sm: 0 0 8px rgba(255,102,0,0.65), 0 0 16px rgba(255,102,0,0.25);
+  --glow-md: 0 0 14px rgba(255,102,0,0.75), 0 0 30px rgba(255,102,0,0.35), 0 0 60px rgba(255,102,0,0.12);
+  --glow-lg: 0 0 20px rgba(255,102,0,0.85), 0 0 50px rgba(255,102,0,0.45), 0 0 100px rgba(255,102,0,0.15);
+
+  --border:        rgba(255, 102, 0, 0.20);
+  --border-bright: rgba(255, 102, 0, 0.55);
+  --border-active: rgba(255, 102, 0, 0.90);
+
+  --rgb-accent: 255, 102, 0;
+  --rgb-b:      255, 34, 0;
+
+  --hand-sec: #ffcc00;
+  --rgb-sec:  255, 204, 0;
+}
+
+/* ── Arctic Ice ─────────────────────────────────────────── */
+[data-theme="arctic-ice"] {
+  --bg-00: #010c14;
+  --bg-01: #031624;
+  --bg-02: #051e30;
+  --bg-03: #07283e;
+  --bg-04: #09324c;
+
+  --accent-a:   #d0f0ff;
+  --accent-b:   #70d0f0;
+  --accent-c:   #a0e8ff;
+  --accent-dim: rgba(208, 240, 255, 0.08);
+
+  --text-hi:  #ffffff;
+  --text-md:  #9ccce0;
+  --text-lo:  #2a5870;
+
+  --glow-xs: 0 0 4px rgba(208,240,255,0.45);
+  --glow-sm: 0 0 8px rgba(208,240,255,0.55), 0 0 16px rgba(208,240,255,0.20);
+  --glow-md: 0 0 14px rgba(208,240,255,0.65), 0 0 30px rgba(208,240,255,0.28), 0 0 60px rgba(208,240,255,0.10);
+  --glow-lg: 0 0 20px rgba(208,240,255,0.75), 0 0 50px rgba(208,240,255,0.35), 0 0 100px rgba(208,240,255,0.12);
+
+  --border:        rgba(208, 240, 255, 0.18);
+  --border-bright: rgba(208, 240, 255, 0.50);
+  --border-active: rgba(208, 240, 255, 0.85);
+
+  --rgb-accent: 208, 240, 255;
+  --rgb-b:      112, 208, 240;
+
+  --hand-sec: #ff6699;
+  --rgb-sec:  255, 102, 153;
+}

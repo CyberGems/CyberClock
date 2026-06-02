@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>CyberClock — Relax</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/icons.js"></script>
+        <style>
+            html,
+            body {
+                width: 960px;
+                height: 660px;
+                overflow: hidden;
+            }
+            .shell {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                background: var(--bg-00);
+                border: 1px solid var(--border-bright);
+                border-radius: 10px;
+                overflow: hidden;
+                position: relative;
+            }
+            .shell::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 10%;
+                right: 10%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0.9;
+                box-shadow: var(--glow-md);
+                z-index: 10;
+            }
+
+            /* Title bar */
+            .tbar {
+                height: 46px;
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                gap: 10px;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                -webkit-app-region: drag;
+                flex-shrink: 0;
+            }
+            .brand {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 3px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                text-transform: uppercase;
+            }
+            .tbar .spacer {
+                flex: 1;
+            }
+            .wmbtn {
+                -webkit-app-region: no-drag;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                width: 26px;
+                height: 26px;
+                border-radius: 4px;
+                font-size: 12px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.18s;
+            }
+            .wmbtn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .wmbtn.close:hover {
+                color: #ff4466;
+                border-color: #ff4466;
+            }
+            .back-btn {
+                -webkit-app-region: no-drag;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                letter-spacing: 1.5px;
+                padding: 5px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.18s;
+            }
+            .back-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+
+            /* Layout */
+            .body {
+                flex: 1;
+                display: flex;
+                gap: 0;
+                overflow: hidden;
+                -webkit-app-region: no-drag;
+            }
+
+            /* ── Left column ── */
+            .left {
+                width: 540px;
+                flex-shrink: 0;
+                padding: 18px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                border-right: 1px solid var(--border);
+            }
+
+            /* Track grid */
+            .track-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .track-card {
+                background: var(--bg-02);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 14px 10px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.22s;
+            }
+            .track-card:hover {
+                border-color: var(--border-bright);
+                transform: scale(1.02);
+            }
+            .track-card.active {
+                background: var(--accent-dim);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-sm);
+                transform: scale(1.03);
+                animation: card-breathe 2.5s ease-in-out infinite;
+            }
+            @keyframes card-breathe {
+                0%,
+                100% {
+                    box-shadow: var(--glow-sm);
+                }
+                50% {
+                    box-shadow: var(--glow-md);
+                }
+            }
+            .track-card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 20%;
+                right: 20%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .track-card.active::before {
+                opacity: 0.6;
+            }
+
+            /* Wave bars on active card */
+            .track-wave {
+                display: flex;
+                align-items: flex-end;
+                gap: 2px;
+                height: 14px;
+                margin-top: 2px;
+            }
+            .wave-bar {
+                width: 3px;
+                background: var(--accent-a);
+                border-radius: 2px;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .track-card.active .wave-bar {
+                opacity: 0.7;
+            }
+            .track-card.active .wave-bar:nth-child(1) {
+                animation: wave-1 0.8s ease-in-out infinite;
+            }
+            .track-card.active .wave-bar:nth-child(2) {
+                animation: wave-2 0.9s ease-in-out infinite 0.1s;
+            }
+            .track-card.active .wave-bar:nth-child(3) {
+                animation: wave-3 0.7s ease-in-out infinite 0.2s;
+            }
+            .track-card.active .wave-bar:nth-child(4) {
+                animation: wave-2 0.85s ease-in-out infinite 0.05s;
+            }
+            .track-card.active .wave-bar:nth-child(5) {
+                animation: wave-1 0.75s ease-in-out infinite 0.15s;
+            }
+            @keyframes wave-1 {
+                0%,
+                100% {
+                    height: 4px;
+                }
+                50% {
+                    height: 14px;
+                }
+            }
+            @keyframes wave-2 {
+                0%,
+                100% {
+                    height: 8px;
+                }
+                50% {
+                    height: 12px;
+                }
+            }
+            @keyframes wave-3 {
+                0%,
+                100% {
+                    height: 12px;
+                }
+                50% {
+                    height: 4px;
+                }
+            }
+
+            .track-icon {
+                font-size: 28px;
+                line-height: 1;
+            }
+            .track-name {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-md);
+                text-align: center;
+            }
+            .track-desc {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 8px;
+                color: var(--text-lo);
+                text-align: center;
+                line-height: 1.3;
+            }
+            .track-card.active .track-name {
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+            }
+
+            /* Playback controls */
+            .play-row {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            .pbtn {
+                font-family: "Orbitron", monospace;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border-bright);
+                color: var(--accent-a);
+                padding: 10px 26px;
+                border-radius: 6px;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.18s;
+                flex: 1;
+            }
+            .pbtn::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: var(--accent-a);
+                opacity: 0;
+                transition: 0.18s;
+            }
+            .pbtn:hover {
+                box-shadow: var(--glow-md);
+                border-color: var(--border-active);
+            }
+            .pbtn:hover::before {
+                opacity: 0.08;
+            }
+            .pbtn:active {
+                transform: scale(0.96);
+            }
+            .pbtn.stop {
+                border-color: rgba(255, 68, 68, 0.4);
+                color: #ff8888;
+                flex: none;
+                padding: 10px 18px;
+            }
+            .pbtn.stop:hover {
+                box-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+            }
+
+            /* Volume */
+            .vol-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .vol-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                width: 55px;
+                flex-shrink: 0;
+            }
+            .vol-val {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--accent-a);
+                width: 38px;
+                text-align: right;
+                flex-shrink: 0;
+            }
+            input[type="range"] {
+                flex: 1;
+                -webkit-appearance: none;
+                appearance: none;
+                height: 4px;
+                background: var(--bg-03);
+                border-radius: 2px;
+                outline: none;
+                cursor: pointer;
+            }
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: var(--accent-a);
+                box-shadow: var(--glow-sm);
+                cursor: pointer;
+                transition: box-shadow 0.15s;
+            }
+            input[type="range"]::-webkit-slider-thumb:hover {
+                box-shadow: var(--glow-md);
+            }
+
+            /* Auto-stop */
+            .autostop-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .autostop-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                width: 72px;
+                flex-shrink: 0;
+            }
+            .ast-btn {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-lo);
+                padding: 4px 10px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .ast-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+            .ast-btn.active {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                border-color: var(--border-active);
+                box-shadow: var(--glow-xs);
+            }
+            .ast-countdown {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                margin-left: 4px;
+            }
+
+            /* ── Right column ── */
+            .right {
+                flex: 1;
+                padding: 18px 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            /* Visualizer */
+            .viz-wrap {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                overflow: hidden;
+                position: relative;
+            }
+            .viz-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                padding: 8px 10px;
+                border-bottom: 1px solid var(--border);
+            }
+            #viz-canvas {
+                width: 100%;
+                display: block;
+            }
+
+            /* Session info */
+            .session-panel {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 14px 16px;
+                flex: 1;
+            }
+            .session-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 10px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border);
+            }
+            .session-timer {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 32px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-md);
+                letter-spacing: 2px;
+                line-height: 1;
+            }
+            .session-timer-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-top: 3px;
+                margin-bottom: 12px;
+            }
+
+            .neon-div {
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--border-bright),
+                    transparent
+                );
+                margin: 10px 0;
+                opacity: 0.5;
+            }
+
+            /* Tip */
+            .tip-box {
+                padding: 10px;
+                background: rgba(var(--rgb-accent), 0.04);
+                border: 1px solid rgba(var(--rgb-accent), 0.1);
+                border-radius: 6px;
+            }
+            .tip-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 7px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+                margin-bottom: 6px;
+            }
+            .tip-text {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-md);
+                line-height: 1.5;
+                transition: opacity 0.4s;
+            }
+            .tip-text.fade {
+                opacity: 0;
+            }
+
+            /* Complete notification */
+            .notify {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                border-radius: 6px;
+                padding: 10px 22px;
+                font-family: "Orbitron", monospace;
+                font-size: 10px;
+                letter-spacing: 2px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+                box-shadow: var(--glow-md);
+                opacity: 0;
+                transition: opacity 0.4s;
+                pointer-events: none;
+                z-index: 50;
+                white-space: nowrap;
+            }
+            .notify.show {
+                opacity: 1;
+            }
+
+            .scanlines {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 9999;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.05) 2px,
+                    rgba(0, 0, 0, 0.05) 4px
+                );
+            }
+            body.no-scanlines .scanlines {
+                opacity: 0;
+            }
+
+            .cd {
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border-color: var(--accent-a);
+                border-style: solid;
+                opacity: 0.4;
+            }
+            .cd.tl {
+                top: 54px;
+                left: 6px;
+                border-width: 2px 0 0 2px;
+            }
+            .cd.tr {
+                top: 54px;
+                right: 6px;
+                border-width: 2px 2px 0 0;
+            }
+            .cd.bl {
+                bottom: 6px;
+                left: 6px;
+                border-width: 0 0 2px 2px;
+            }
+            .cd.br {
+                bottom: 6px;
+                right: 6px;
+                border-width: 0 2px 2px 0;
+            }
+        </style>
+    </head>
+    <body data-theme="cyber-blue">
+        <div class="shell">
+            <div class="cd tl"></div>
+            <div class="cd tr"></div>
+            <div class="cd bl"></div>
+            <div class="cd br"></div>
+
+            <div class="tbar">
+                <button class="back-btn" id="btn-back">
+                    <span data-ico="back"></span> BACK
+                </button>
+                <span class="brand"><span data-ico="lotus"></span> Relax · CyberClock</span>
+                <div class="spacer"></div>
+                <button class="wmbtn" id="btn-min"><span data-ico="minimize"></span></button>
+                <button class="wmbtn close" id="btn-close"><span data-ico="x"></span></button>
+            </div>
+
+            <div class="body">
+                <!-- ── LEFT ── -->
+                <div class="left">
+                    <!-- Track cards -->
+                    <div class="track-grid" id="track-grid">
+                        <div class="track-card" data-track="campfire">
+                            <div class="track-icon"><span data-ico="flame"></span></div>
+                            <div class="track-name">Campfire</div>
+                            <div class="track-desc">Crackling wood fire</div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="track-card" data-track="forest">
+                            <div class="track-icon"><span data-ico="trees"></span></div>
+                            <div class="track-name">Forest</div>
+                            <div class="track-desc">
+                                Birds &amp; gentle wind
+                            </div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="track-card" data-track="space">
+                            <div class="track-icon"><span data-ico="stars"></span></div>
+                            <div class="track-name">Outer Space</div>
+                            <div class="track-desc">Deep cosmic drones</div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="track-card" data-track="ocean">
+                            <div class="track-icon"><span data-ico="waves"></span></div>
+                            <div class="track-name">Ocean</div>
+                            <div class="track-desc">Rolling waves</div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="track-card" data-track="rain">
+                            <div class="track-icon"><span data-ico="cloud-rain"></span></div>
+                            <div class="track-name">Rain</div>
+                            <div class="track-desc">Steady rainfall</div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                        <div class="track-card" data-track="fireplace">
+                            <div class="track-icon"><span data-ico="home"></span></div>
+                            <div class="track-name">Fireplace</div>
+                            <div class="track-desc">
+                                Indoor crackling hearth
+                            </div>
+                            <div class="track-wave">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Playback controls -->
+                    <div class="play-row">
+                        <button class="pbtn" id="btn-play"><span data-ico="play"></span> PLAY</button>
+                        <button class="pbtn stop" id="btn-stop"><span data-ico="stop"></span></button>
+                    </div>
+
+                    <!-- Volume -->
+                    <div class="vol-row">
+                        <span class="vol-lbl">Volume</span>
+                        <span style="font-size: 11px; color: var(--text-lo)"><span data-ico="volume-low"></span></span>
+                        <input
+                            type="range"
+                            id="vol-slider"
+                            min="0"
+                            max="100"
+                            value="80"
+                        />
+                        <span style="font-size: 11px; color: var(--text-lo)"><span data-ico="volume-high"></span></span>
+                        <span class="vol-val" id="vol-val">80%</span>
+                    </div>
+
+                    <!-- Auto-stop -->
+                    <div class="autostop-row">
+                        <span class="autostop-lbl">Auto Stop</span>
+                        <button class="ast-btn active" data-min="0">OFF</button>
+                        <button class="ast-btn" data-min="15">15m</button>
+                        <button class="ast-btn" data-min="30">30m</button>
+                        <button class="ast-btn" data-min="60">1h</button>
+                        <button class="ast-btn" data-min="120">2h</button>
+                        <span
+                            class="ast-countdown"
+                            id="ast-countdown"
+                            style="display: none"
+                        ></span>
+                    </div>
+                </div>
+
+                <!-- ── RIGHT ── -->
+                <div class="right">
+                    <!-- Visualizer -->
+                    <div class="viz-wrap">
+                        <div class="viz-title">◈ Audio Spectrum</div>
+                        <canvas id="viz-canvas" height="140"></canvas>
+                    </div>
+
+                    <!-- Session panel -->
+                    <div class="session-panel">
+                        <div class="session-title">◈ Session</div>
+                        <div class="session-timer" id="ses-timer">00:00:00</div>
+                        <div class="session-timer-lbl">Session Time</div>
+                        <div class="neon-div"></div>
+                        <div class="tip-box">
+                            <div class="tip-lbl">Mindfulness Tip</div>
+                            <div class="tip-text" id="tip-text">
+                                Start a track to begin your session.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete notification -->
+            <div class="notify" id="notify">✓ Session Complete</div>
+        </div>
+
+        <div class="scanlines"></div>
+        <script src="../shared/audio-engine.js"></script>
+        <script>
+            const TIPS = [
+                "Close your eyes and focus on each breath.",
+                "Let thoughts pass like clouds — observe, don't engage.",
+                "Scan your body from head to toe. Release any tension.",
+                "Count your exhales from 1 to 10, then start again.",
+                "Notice 5 things you can hear right now.",
+                "Place a hand on your chest. Feel it rise and fall.",
+            ];
+
+            let cfg = {};
+            let selectedTrack = null;
+            let sessionStart = null;
+            let sessionInterval = null;
+            let autoStopMins = 0;
+            let autoStopTimer = null;
+            let autoStopRemain = 0;
+            let tipIndex = 0;
+            let tipInterval = null;
+            let vizRaf = null;
+            let saveTimer = null;
+
+            function pad(n) {
+                return String(n).padStart(2, "0");
+            }
+
+            function applySettings(s) {
+                cfg = s;
+                document.body.dataset.theme = s.theme || "cyber-blue";
+                if (s.scanlines === false)
+                    document.body.classList.add("no-scanlines");
+                else document.body.classList.remove("no-scanlines");
+                const v = Math.round((s.relaxVolume || 0.8) * 100);
+                document.getElementById("vol-slider").value = v;
+                document.getElementById("vol-val").textContent = v + "%";
+                window.audioEngine.setVolume(s.relaxVolume || 0.8);
+                if (s.lastRelaxTrack) selectTrack(s.lastRelaxTrack, false);
+            }
+
+            function selectTrack(id, autoPlay = true) {
+                selectedTrack = id;
+                document.querySelectorAll(".track-card").forEach((c) => {
+                    c.classList.toggle("active", c.dataset.track === id);
+                });
+                if (autoPlay && !window.audioEngine.isPlaying) {
+                    playTrack();
+                } else if (autoPlay && window.audioEngine.isPlaying) {
+                    window.audioEngine.playTrack(id);
+                    window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+                }
+            }
+
+            function playTrack() {
+                if (!selectedTrack) return;
+                window.audioEngine.playTrack(selectedTrack);
+                window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+                document.getElementById("btn-play").textContent = "⏸ PAUSE";
+                startSession();
+                startViz();
+                startTips();
+                // Save last track
+                window.cc.saveSettings({ lastRelaxTrack: selectedTrack });
+            }
+
+            function stopAll() {
+                window.audioEngine.stop();
+                document.getElementById("btn-play").innerHTML =
+                    '<span data-ico="play"></span> PLAY';
+                window.ccIcons &&
+                    window.ccIcons.replaceIcons(
+                        document.getElementById("btn-play"),
+                    );
+                stopSession();
+                stopViz();
+                stopTips();
+                clearAutoStop();
+            }
+
+            function togglePlay() {
+                if (!selectedTrack) {
+                    // pick first track
+                    selectTrack("campfire", true);
+                    return;
+                }
+                if (window.audioEngine.isPlaying) {
+                    // Pause
+                    window.audioEngine.stop();
+                    document.getElementById("btn-play").innerHTML =
+                        '<span data-ico="play"></span> PLAY';
+                    window.ccIcons &&
+                        window.ccIcons.replaceIcons(
+                            document.getElementById("btn-play"),
+                        );
+                    pauseSession();
+                    stopViz();
+                    if (autoStopTimer) clearInterval(autoStopTimer);
+                } else {
+                    playTrack();
+                }
+            }
+
+            // Session timer
+            function startSession() {
+                if (sessionInterval) clearInterval(sessionInterval);
+                if (!sessionStart) sessionStart = Date.now();
+                sessionInterval = setInterval(updateSessionTimer, 1000);
+            }
+            function pauseSession() {
+                if (sessionInterval) clearInterval(sessionInterval);
+            }
+            function stopSession() {
+                if (sessionInterval) clearInterval(sessionInterval);
+                sessionInterval = null;
+                sessionStart = null;
+                document.getElementById("ses-timer").textContent = "00:00:00";
+            }
+            function updateSessionTimer() {
+                if (!sessionStart) return;
+                const ms = Date.now() - sessionStart;
+                const h = Math.floor(ms / 3600000),
+                    m = Math.floor((ms % 3600000) / 60000),
+                    s = Math.floor((ms % 60000) / 1000);
+                document.getElementById("ses-timer").textContent =
+                    `${pad(h)}:${pad(m)}:${pad(s)}`;
+            }
+
+            // Tips
+            function startTips() {
+                if (tipInterval) clearInterval(tipInterval);
+                showTip(TIPS[tipIndex]);
+                tipInterval = setInterval(() => {
+                    tipIndex = (tipIndex + 1) % TIPS.length;
+                    const el = document.getElementById("tip-text");
+                    el.classList.add("fade");
+                    setTimeout(() => {
+                        showTip(TIPS[tipIndex]);
+                        el.classList.remove("fade");
+                    }, 400);
+                }, 30000);
+            }
+            function stopTips() {
+                if (tipInterval) clearInterval(tipInterval);
+            }
+            function showTip(t) {
+                document.getElementById("tip-text").textContent = t;
+            }
+
+            // Visualizer
+            function startViz() {
+                if (vizRaf) cancelAnimationFrame(vizRaf);
+                const canvas = document.getElementById("viz-canvas");
+                canvas.width = canvas.offsetWidth;
+                const ctx = canvas.getContext("2d");
+                const h = canvas.height;
+                const w = canvas.width;
+
+                function draw() {
+                    ctx.clearRect(0, 0, w, h);
+                    const data = window.audioEngine.getAnalyserData();
+                    const bars = 60;
+                    const barW = Math.floor(w / bars) - 1;
+                    const gap = Math.floor(w / bars);
+                    const accentColor =
+                        getComputedStyle(document.body)
+                            .getPropertyValue("--accent-a")
+                            .trim() || "#00d4ff";
+                    const rgbAccent =
+                        getComputedStyle(document.body)
+                            .getPropertyValue("--rgb-accent")
+                            .trim() || "0,212,255";
+
+                    for (let i = 0; i < bars; i++) {
+                        const idx = Math.floor((i * data.length) / bars);
+                        let v = (data[idx] || 0) / 255;
+                        if (!window.audioEngine.isPlaying)
+                            v =
+                                Math.sin(Date.now() / 1200 + i * 0.3) * 0.02 +
+                                0.02;
+                        const barH = Math.max(2, v * h * 0.85);
+                        const x = i * gap;
+                        const y = h - barH;
+
+                        // Bar
+                        const grad = ctx.createLinearGradient(0, y, 0, h);
+                        grad.addColorStop(0, accentColor);
+                        grad.addColorStop(1, `rgba(${rgbAccent},0.2)`);
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(x, y, barW, barH);
+
+                        // Mirror (below, dimmed)
+                        ctx.fillStyle = `rgba(${rgbAccent},0.08)`;
+                        ctx.fillRect(x, h, barW, barH * 0.3);
+
+                        // Cap
+                        ctx.fillStyle = accentColor;
+                        ctx.fillRect(x, y - 2, barW, 2);
+                    }
+                    vizRaf = requestAnimationFrame(draw);
+                }
+                draw();
+            }
+            function stopViz() {
+                if (vizRaf) cancelAnimationFrame(vizRaf);
+                // Draw idle state
+                const canvas = document.getElementById("viz-canvas");
+                const ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Auto-stop
+            function setAutoStop(mins) {
+                clearAutoStop();
+                autoStopMins = mins;
+                document.querySelectorAll(".ast-btn").forEach((b) => {
+                    b.classList.toggle(
+                        "active",
+                        parseInt(b.dataset.min) === mins,
+                    );
+                });
+                if (mins > 0 && window.audioEngine.isPlaying) {
+                    startAutoStop(mins * 60);
+                }
+                document.getElementById("ast-countdown").style.display =
+                    mins > 0 ? "inline" : "none";
+            }
+
+            function startAutoStop(secs) {
+                clearAutoStop();
+                autoStopRemain = secs;
+                updateAutoStopDisplay();
+                autoStopTimer = setInterval(() => {
+                    if (!window.audioEngine.isPlaying) return;
+                    autoStopRemain--;
+                    updateAutoStopDisplay();
+                    if (autoStopRemain <= 0) {
+                        clearAutoStop();
+                        stopAll();
+                        showNotify("✓ Session Complete");
+                    }
+                }, 1000);
+            }
+
+            function clearAutoStop() {
+                if (autoStopTimer) clearInterval(autoStopTimer);
+                autoStopTimer = null;
+                document.getElementById("ast-countdown").style.display = "none";
+            }
+
+            function updateAutoStopDisplay() {
+                const m = Math.floor(autoStopRemain / 60),
+                    s = autoStopRemain % 60;
+                document.getElementById("ast-countdown").textContent =
+                    `Stops in ${pad(m)}:${pad(s)}`;
+                document.getElementById("ast-countdown").style.display =
+                    "inline";
+            }
+
+            function showNotify(msg) {
+                const el = document.getElementById("notify");
+                el.textContent = msg;
+                el.classList.add("show");
+                setTimeout(() => el.classList.remove("show"), 3000);
+            }
+
+            // Track card clicks
+            document.querySelectorAll(".track-card").forEach((card) => {
+                card.addEventListener("click", () => {
+                    const t = card.dataset.track;
+                    if (selectedTrack === t && window.audioEngine.isPlaying) {
+                        stopAll();
+                        return;
+                    }
+                    selectTrack(t, true);
+                });
+            });
+
+            // Volume slider
+            document
+                .getElementById("vol-slider")
+                .addEventListener("input", (e) => {
+                    const v = e.target.value / 100;
+                    document.getElementById("vol-val").textContent =
+                        e.target.value + "%";
+                    window.audioEngine.setVolume(v);
+                    clearTimeout(saveTimer);
+                    saveTimer = setTimeout(
+                        () => window.cc.saveSettings({ relaxVolume: v }),
+                        400,
+                    );
+                });
+
+            // Auto-stop buttons
+            document.querySelectorAll(".ast-btn").forEach((b) => {
+                b.addEventListener("click", () =>
+                    setAutoStop(parseInt(b.dataset.min)),
+                );
+            });
+
+            // Play/Stop buttons
+            document
+                .getElementById("btn-play")
+                .addEventListener("click", togglePlay);
+            document
+                .getElementById("btn-stop")
+                .addEventListener("click", stopAll);
+            document
+                .getElementById("btn-back")
+                .addEventListener("click", () => window.cc.closeWindow());
+            document
+                .getElementById("btn-close")
+                .addEventListener("click", () => window.cc.closeWindow());
+            document
+                .getElementById("btn-min")
+                .addEventListener("click", () => window.cc.minimizeWindow());
+
+            window.cc.onInit((s) => applySettings(s));
+            window.cc.onSettingsUpdated((s) => {
+                cfg = s;
+                document.body.dataset.theme = s.theme || "cyber-blue";
+                if (s.scanlines === false)
+                    document.body.classList.add("no-scanlines");
+                else document.body.classList.remove("no-scanlines");
+            });
+            window.cc.onThemeChanged((t) => {
+                document.body.dataset.theme = t;
+            });
+        </script>
+    </body>
+</html>

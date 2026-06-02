@@ -1,0 +1,338 @@
+/* ═══════════════════════════════════════════════════════════
+   CyberClock — Base / Reset / Shared Components
+   CyberGems © 2026
+═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Orbitron', 'Consolas', 'Courier New', monospace;
+  background: transparent;
+  color: var(--text-hi);
+  font-size: 13px;
+}
+
+body {
+  background: var(--bg-00);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-01); }
+::-webkit-scrollbar-thumb {
+  background: var(--accent-a);
+  border-radius: 3px;
+  box-shadow: var(--glow-xs);
+}
+
+/* ── Drag / no-drag ─────────────────────────────────────── */
+.drag    { -webkit-app-region: drag; }
+.no-drag { -webkit-app-region: no-drag; }
+
+/* ── Scanlines overlay ──────────────────────────────────── */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.4s;
+}
+body.no-scanlines .scanlines { opacity: 0; }
+
+/* ── Window shell ───────────────────────────────────────── */
+.window-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-00);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top neon bar */
+.window-shell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--accent-a) 30%, var(--accent-a) 70%, transparent);
+  opacity: 0.8;
+  z-index: 10;
+  box-shadow: var(--glow-md);
+}
+
+/* ── Title bar ──────────────────────────────────────────── */
+.titlebar {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  background: var(--bg-01);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+  -webkit-app-region: drag;
+}
+
+.titlebar .brand {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent-a);
+  text-shadow: var(--glow-sm);
+  text-transform: uppercase;
+}
+
+.titlebar .spacer { flex: 1; }
+
+.titlebar .wm-btn {
+  -webkit-app-region: no-drag;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-md);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+.titlebar .wm-btn:hover {
+  color: var(--accent-a);
+  border-color: var(--border-bright);
+  box-shadow: var(--glow-xs);
+}
+.titlebar .wm-btn.close:hover {
+  color: #ff4466;
+  border-color: #ff4466;
+  box-shadow: 0 0 8px rgba(255,68,102,0.6);
+}
+
+/* ── Neon Button ────────────────────────────────────────── */
+.btn {
+  -webkit-app-region: no-drag;
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  color: var(--accent-a);
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.18s;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-a);
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.btn:hover {
+  box-shadow: var(--glow-sm);
+  text-shadow: var(--glow-xs);
+  border-color: var(--border-active);
+}
+.btn:hover::before { opacity: 0.08; }
+.btn:active { transform: scale(0.96); box-shadow: var(--glow-md); }
+.btn.active {
+  background: var(--accent-dim);
+  box-shadow: var(--glow-sm);
+  border-color: var(--border-active);
+}
+.btn.danger {
+  border-color: rgba(255,68,68,0.5);
+  color: #ff4444;
+}
+.btn.danger:hover { box-shadow: 0 0 12px rgba(255,68,68,0.5); }
+
+/* Large action button */
+.btn-xl {
+  font-size: 13px;
+  padding: 14px 34px;
+  letter-spacing: 2px;
+  border-radius: 6px;
+}
+
+/* ── Icon Button ────────────────────────────────────────── */
+.btn-icon {
+  -webkit-app-region: no-drag;
+  background: transparent;
+  border: none;
+  color: var(--text-md);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+.btn-icon:hover { color: var(--accent-a); text-shadow: var(--glow-sm); }
+
+/* ── Panel / Card ───────────────────────────────────────── */
+.panel {
+  background: var(--bg-01);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-a), transparent);
+  opacity: 0.5;
+}
+
+/* ── Toggle switch ──────────────────────────────────────── */
+.toggle {
+  -webkit-app-region: no-drag;
+  position: relative;
+  width: 42px;
+  height: 22px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-03);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  transition: all 0.25s;
+}
+.toggle input:checked ~ .toggle-track {
+  background: var(--accent-dim);
+  border-color: var(--border-bright);
+  box-shadow: var(--glow-xs);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  background: var(--text-lo);
+  border-radius: 50%;
+  transition: all 0.25s;
+}
+.toggle input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(20px);
+  background: var(--accent-a);
+  box-shadow: var(--glow-xs);
+}
+
+/* ── Range slider ───────────────────────────────────────── */
+input[type=range] {
+  -webkit-app-region: no-drag;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--bg-03);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-a);
+  box-shadow: var(--glow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
+
+/* ── Neon text ──────────────────────────────────────────── */
+.neon    { color: var(--accent-a); text-shadow: var(--glow-sm); }
+.neon-lg { color: var(--accent-a); text-shadow: var(--glow-lg); }
+.dim     { color: var(--text-lo); }
+
+/* ── Status dot ─────────────────────────────────────────── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-a);
+  box-shadow: var(--glow-sm);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.2); box-shadow: var(--glow-md); }
+}
+
+/* ── Corner decorations ─────────────────────────────────── */
+.corner-deco {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--accent-a);
+  border-style: solid;
+  opacity: 0.6;
+}
+.corner-deco.tl { top: 8px;    left: 8px;    border-width: 2px 0 0 2px; }
+.corner-deco.tr { top: 8px;    right: 8px;   border-width: 2px 2px 0 0; }
+.corner-deco.bl { bottom: 8px; left: 8px;    border-width: 0 0 2px 2px; }
+.corner-deco.br { bottom: 8px; right: 8px;   border-width: 0 2px 2px 0; }
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes flicker {
+  0%,100%{ opacity:1 }
+  92%    { opacity:1 }
+  93%    { opacity:.6 }
+  95%    { opacity:1 }
+  97%    { opacity:.7 }
+  98%    { opacity:1 }
+}
+@keyframes breathe {
+  0%,100%{ opacity:.65 }
+  50%    { opacity:1 }
+}
+@keyframes slide-in {
+  from { opacity:0; transform:translateY(-8px) }
+  to   { opacity:1; transform:translateY(0) }
+}
+@keyframes glow-pulse {
+  0%,100%{ box-shadow: var(--glow-sm) }
+  50%    { box-shadow: var(--glow-md) }
+}

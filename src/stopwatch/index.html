@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberClock — Stopwatch</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/themes.css">
+<link rel="stylesheet" href="../shared/base.css">
+<script src="../shared/icons.js"></script>
+<style>
+  html,body{width:800px;height:620px;overflow:hidden;}
+  .shell{width:100%;height:100%;display:flex;flex-direction:column;
+    background:var(--bg-00);border:1px solid var(--border-bright);
+    border-radius:10px;overflow:hidden;position:relative;}
+  .shell::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent-a),transparent);
+    opacity:.9;box-shadow:var(--glow-md);z-index:10;}
+
+  /* Title bar */
+  .tbar{height:46px;display:flex;align-items:center;padding:0 16px;gap:10px;
+    background:var(--bg-01);border-bottom:1px solid var(--border);
+    -webkit-app-region:drag;flex-shrink:0;}
+  .brand{font-size:11px;font-weight:700;letter-spacing:3px;
+    color:var(--accent-a);text-shadow:var(--glow-sm);text-transform:uppercase;}
+  .tbar .spacer{flex:1;}
+  .wmbtn{-webkit-app-region:no-drag;background:transparent;border:1px solid var(--border);
+    color:var(--text-md);width:26px;height:26px;border-radius:4px;font-size:12px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .wmbtn:hover{color:var(--accent-a);border-color:var(--border-bright);box-shadow:var(--glow-xs);}
+  .wmbtn.close:hover{color:#ff4466;border-color:#ff4466;}
+  .back-btn{-webkit-app-region:no-drag;background:transparent;border:1px solid var(--border);
+    color:var(--text-md);font-family:'Orbitron',monospace;font-size:9px;
+    letter-spacing:1.5px;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .18s;}
+  .back-btn:hover{color:var(--accent-a);border-color:var(--border-bright);}
+
+  /* Upper: display + controls */
+  .upper{display:flex;flex-direction:column;align-items:center;
+    padding:22px 30px 16px;gap:18px;-webkit-app-region:no-drag;flex-shrink:0;
+    position:relative;}
+  .upper::before{content:'';position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);width:450px;height:200px;border-radius:50%;
+    background:radial-gradient(ellipse,rgba(var(--rgb-accent),.05) 0%,transparent 70%);
+    pointer-events:none;}
+
+  /* Main time display */
+  .sw-display{display:flex;align-items:flex-end;gap:4px;position:relative;}
+  .sw-seg{font-family:'Orbitron',monospace;font-size:82px;font-weight:900;
+    color:var(--accent-a);text-shadow:var(--glow-lg);line-height:1;
+    background:var(--bg-02);padding:6px 12px;border-radius:8px;
+    border:1px solid var(--border);min-width:122px;text-align:center;}
+  .sw-ms{font-family:'Orbitron',monospace;font-size:42px;font-weight:700;
+    color:var(--accent-a);text-shadow:var(--glow-md);line-height:1;
+    background:var(--bg-02);padding:6px 10px;border-radius:6px;
+    border:1px solid var(--border);min-width:80px;text-align:center;
+    opacity:.85;align-self:flex-end;}
+  .sw-colon{font-family:'Orbitron',monospace;font-size:64px;font-weight:900;
+    color:var(--accent-a);text-shadow:var(--glow-md);margin-bottom:10px;opacity:.7;}
+  .sw-dot{font-family:'Orbitron',monospace;font-size:40px;font-weight:900;
+    color:var(--accent-a);text-shadow:var(--glow-sm);margin-bottom:6px;opacity:.5;}
+
+  /* Running indicator */
+  .run-indicator{width:8px;height:8px;border-radius:50%;
+    background:var(--accent-a);box-shadow:var(--glow-sm);opacity:0;
+    position:absolute;top:8px;right:8px;transition:opacity .3s;}
+  .run-indicator.active{opacity:1;animation:pulse-dot 1s ease-in-out infinite;}
+  @keyframes pulse-dot{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.3);box-shadow:var(--glow-md)}}
+
+  /* Control buttons */
+  .controls{display:flex;gap:10px;align-items:center;}
+  .cbtn{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;background:transparent;
+    border:1px solid var(--border-bright);color:var(--accent-a);
+    padding:11px 24px;border-radius:6px;cursor:pointer;
+    position:relative;overflow:hidden;transition:all .18s;min-width:120px;}
+  .cbtn::before{content:'';position:absolute;inset:0;background:var(--accent-a);opacity:0;transition:opacity .18s;}
+  .cbtn:hover{box-shadow:var(--glow-md);border-color:var(--border-active);}
+  .cbtn:hover::before{opacity:.08;}
+  .cbtn:active{transform:scale(.96);}
+  .cbtn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
+  .cbtn.danger{border-color:rgba(255,68,68,.4);color:#ff4444;}
+  .cbtn.danger:hover{box-shadow:0 0 12px rgba(255,68,68,.4);}
+  .cbtn.lap-btn{border-color:rgba(var(--rgb-b),.5);color:var(--accent-b);}
+  .cbtn.lap-btn:hover{box-shadow:0 0 12px rgba(var(--rgb-b),.4);}
+
+  /* Lower: lap list */
+  .lower{flex:1;padding:0 18px 16px;display:flex;flex-direction:column;overflow:hidden;}
+
+  .lap-header{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 10px;background:var(--bg-01);border:1px solid var(--border);
+    border-radius:6px 6px 0 0;flex-shrink:0;}
+  .lap-title{font-size:9px;letter-spacing:2.5px;color:var(--accent-a);
+    text-shadow:var(--glow-xs);text-transform:uppercase;}
+  .lap-actions{display:flex;gap:6px;}
+  .lap-act-btn{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:1px;
+    text-transform:uppercase;background:transparent;border:1px solid var(--border);
+    color:var(--text-lo);padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .15s;}
+  .lap-act-btn:hover{color:var(--accent-a);border-color:var(--border-bright);}
+
+  .lap-col-hdr{display:grid;grid-template-columns:36px 1fr 1fr 1fr;
+    padding:5px 10px;background:var(--bg-02);
+    border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .col-lbl{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;
+    color:var(--text-lo);text-transform:uppercase;text-align:right;}
+  .col-lbl:first-child{text-align:left;}
+
+  .lap-list{flex:1;overflow-y:auto;background:var(--bg-00);
+    border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;}
+
+  .lap-row{display:grid;grid-template-columns:36px 1fr 1fr 1fr;
+    padding:6px 10px;border-bottom:1px solid rgba(var(--rgb-accent),.06);
+    animation:slide-in .2s ease;transition:background .15s;}
+  .lap-row:hover{background:rgba(var(--rgb-accent),.04);}
+  .lap-row:last-child{border-bottom:none;}
+  .lap-num{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-lo);}
+  .lap-time{font-family:'Share Tech Mono',monospace;font-size:11px;
+    color:var(--text-hi);text-align:right;}
+  .lap-delta{font-family:'Share Tech Mono',monospace;font-size:10px;
+    color:var(--text-md);text-align:right;}
+  .lap-total{font-family:'Share Tech Mono',monospace;font-size:10px;
+    color:var(--text-lo);text-align:right;}
+
+  .lap-row.best .lap-time{color:var(--accent-c);text-shadow:var(--glow-xs);}
+  .lap-row.best .lap-delta{color:var(--accent-c);}
+  .lap-row.worst .lap-time{color:#ff9944;}
+  .lap-row.worst .lap-delta{color:#ff9944;}
+
+  .lap-empty{text-align:center;padding:24px;font-family:'Share Tech Mono',monospace;
+    font-size:10px;color:var(--text-lo);letter-spacing:1.5px;}
+
+  .scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);}
+  body.no-scanlines .scanlines{opacity:0;}
+
+  .cd{position:absolute;width:16px;height:16px;border-color:var(--accent-a);
+    border-style:solid;opacity:.5;}
+  .cd.tl{top:54px;left:6px;border-width:2px 0 0 2px;}
+  .cd.tr{top:54px;right:6px;border-width:2px 2px 0 0;}
+  .cd.bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
+  .cd.br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
+</style>
+</head>
+<body data-theme="cyber-blue">
+<div class="shell">
+  <div class="cd tl"></div><div class="cd tr"></div>
+  <div class="cd bl"></div><div class="cd br"></div>
+
+  <div class="tbar">
+    <button class="back-btn" id="btn-back"><span data-ico="back"></span> BACK</button>
+    <span class="brand"><span data-ico="stopwatch"></span> Stopwatch · CyberClock</span>
+    <div class="spacer"></div>
+    <button class="wmbtn" id="btn-min"><span data-ico="minimize"></span></button>
+    <button class="wmbtn close" id="btn-close"><span data-ico="x"></span></button>
+  </div>
+
+  <div class="upper">
+    <div class="sw-display" id="sw-display">
+      <div class="sw-seg" id="sw-h">00</div>
+      <div class="sw-colon">:</div>
+      <div class="sw-seg" id="sw-m">00</div>
+      <div class="sw-colon">:</div>
+      <div class="sw-seg" id="sw-s">00</div>
+      <div class="sw-dot">.</div>
+      <div class="sw-ms" id="sw-ms">000</div>
+      <div class="run-indicator" id="run-dot"></div>
+    </div>
+
+    <div class="controls">
+      <button class="cbtn" id="btn-start"><span data-ico="play"></span> START</button>
+      <button class="cbtn danger" id="btn-reset" disabled><span data-ico="stop"></span> RESET</button>
+      <button class="cbtn lap-btn" id="btn-lap" disabled><span data-ico="flag"></span> LAP</button>
+    </div>
+  </div>
+
+  <div class="lower">
+    <div class="lap-header">
+      <span class="lap-title"><span data-ico="flag"></span> Lap Times</span>
+      <div class="lap-actions">
+        <button class="lap-act-btn" id="btn-copy"><span data-ico="copy"></span> Copy</button>
+        <button class="lap-act-btn" id="btn-clear" disabled><span data-ico="trash"></span> Clear</button>
+      </div>
+    </div>
+    <div class="lap-col-hdr">
+      <div class="col-lbl">#</div>
+      <div class="col-lbl" style="text-align:right;">Lap Time</div>
+      <div class="col-lbl" style="text-align:right;">Delta</div>
+      <div class="col-lbl" style="text-align:right;">Total</div>
+    </div>
+    <div class="lap-list" id="lap-list">
+      <div class="lap-empty" id="lap-empty">No laps recorded yet</div>
+    </div>
+  </div>
+</div>
+
+<div class="scanlines"></div>
+<script>
+let cfg = {};
+let running = false;
+let startTimestamp = null;
+let pausedAt = 0;
+let elapsed = 0;
+let rafId = null;
+let laps = [];
+let lastLapTotal = 0;
+
+function pad(n,w=2){ return String(n).padStart(w,'0'); }
+
+function applySettings(s){
+  cfg = s;
+  document.body.dataset.theme = s.theme || 'cyber-blue';
+  if(s.scanlines===false) document.body.classList.add('no-scanlines');
+  else document.body.classList.remove('no-scanlines');
+}
+
+function fmtMs(ms){
+  const totalMs = Math.floor(ms);
+  const h   = Math.floor(totalMs/3600000);
+  const m   = Math.floor((totalMs%3600000)/60000);
+  const s   = Math.floor((totalMs%60000)/1000);
+  const mil = totalMs%1000;
+  return { h:pad(h), m:pad(m), s:pad(s), ms:pad(mil,3) };
+}
+
+function fmtDuration(ms){
+  const t = fmtMs(ms);
+  return `${t.h}:${t.m}:${t.s}.${t.ms}`;
+}
+
+function updateDisplay(){
+  if(running){
+    elapsed = performance.now() - startTimestamp + pausedAt;
+  }
+  const t = fmtMs(elapsed);
+  document.getElementById('sw-h').textContent  = t.h;
+  document.getElementById('sw-m').textContent  = t.m;
+  document.getElementById('sw-s').textContent  = t.s;
+  document.getElementById('sw-ms').textContent = t.ms;
+  if(running) rafId = requestAnimationFrame(updateDisplay);
+}
+
+function startStop(){
+  if(running){
+    // PAUSE
+    running = false;
+    pausedAt = elapsed;
+    cancelAnimationFrame(rafId);
+    document.getElementById('btn-start').innerHTML = '<span data-ico="play"></span> RESUME';
+    window.ccIcons && window.ccIcons.replaceIcons(document.getElementById('btn-start'));
+    document.getElementById('btn-reset').disabled = false;
+    document.getElementById('btn-lap').disabled = true;
+    document.getElementById('run-dot').classList.remove('active');
+  } else {
+    // START / RESUME
+    running = true;
+    startTimestamp = performance.now();
+    document.getElementById('btn-start').textContent = '⏸ PAUSE';
+    document.getElementById('btn-reset').disabled = true;
+    document.getElementById('btn-lap').disabled = false;
+    document.getElementById('run-dot').classList.add('active');
+    rafId = requestAnimationFrame(updateDisplay);
+  }
+}
+
+function reset(){
+  if(running) return;
+  running = false;
+  pausedAt = 0;
+  elapsed = 0;
+  laps = [];
+  lastLapTotal = 0;
+  updateDisplay();
+  renderLaps();
+  document.getElementById('btn-start').innerHTML = '<span data-ico="play"></span> START';
+  window.ccIcons && window.ccIcons.replaceIcons(document.getElementById('btn-start'));
+  document.getElementById('btn-reset').disabled = true;
+  document.getElementById('btn-lap').disabled = true;
+  document.getElementById('btn-clear').disabled = true;
+  document.getElementById('run-dot').classList.remove('active');
+}
+
+function lap(){
+  if(!running) return;
+  const lapTotal   = elapsed;
+  const lapTime    = lapTotal - lastLapTotal;
+  lastLapTotal     = lapTotal;
+  laps.push({ n: laps.length+1, lapTime, total: lapTotal });
+  renderLaps();
+  document.getElementById('btn-clear').disabled = false;
+}
+
+function renderLaps(){
+  const list = document.getElementById('lap-list');
+  const empty = document.getElementById('lap-empty');
+  if(laps.length === 0){
+    empty.style.display = 'block';
+    list.querySelectorAll('.lap-row').forEach(r=>r.remove());
+    return;
+  }
+  empty.style.display = 'none';
+
+  // find best/worst
+  const times = laps.map(l=>l.lapTime);
+  const best  = Math.min(...times);
+  const worst = Math.max(...times);
+
+  list.querySelectorAll('.lap-row').forEach(r=>r.remove());
+
+  // Prepend (newest first)
+  const sorted = [...laps].reverse();
+  sorted.forEach(l => {
+    const row = document.createElement('div');
+    row.className = 'lap-row';
+    if(laps.length > 1){
+      if(l.lapTime === best)  row.classList.add('best');
+      if(l.lapTime === worst) row.classList.add('worst');
+    }
+    // delta vs average
+    const avg = laps.reduce((s,x)=>s+x.lapTime,0)/laps.length;
+    const delta = l.lapTime - avg;
+    const deltaStr = (delta>=0?'+':'-') + fmtDuration(Math.abs(delta));
+    row.innerHTML = `
+      <div class="lap-num">${l.n}</div>
+      <div class="lap-time">${fmtDuration(l.lapTime)}</div>
+      <div class="lap-delta">${deltaStr}</div>
+      <div class="lap-total">${fmtDuration(l.total)}</div>`;
+    list.insertBefore(row, list.firstChild);
+  });
+}
+
+function copyLaps(){
+  if(laps.length === 0) return;
+  const lines = ['#\tLap Time\tDelta (vs avg)\tTotal'];
+  const avg = laps.reduce((s,x)=>s+x.lapTime,0)/laps.length;
+  laps.forEach(l => {
+    const d = l.lapTime - avg;
+    lines.push(`${l.n}\t${fmtDuration(l.lapTime)}\t${d>=0?'+':'-'}${fmtDuration(Math.abs(d))}\t${fmtDuration(l.total)}`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).catch(()=>{});
+}
+
+document.getElementById('btn-start').addEventListener('click', startStop);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-lap').addEventListener('click', lap);
+document.getElementById('btn-back').addEventListener('click', ()=>window.cc.closeWindow());
+document.getElementById('btn-close').addEventListener('click', ()=>window.cc.closeWindow());
+document.getElementById('btn-min').addEventListener('click', ()=>window.cc.minimizeWindow());
+document.getElementById('btn-copy').addEventListener('click', copyLaps);
+document.getElementById('btn-clear').addEventListener('click', ()=>{
+  if(running) return;
+  laps=[]; lastLapTotal=0; renderLaps();
+  document.getElementById('btn-clear').disabled=true;
+});
+
+window.cc.onInit(s=>applySettings(s));
+window.cc.onSettingsUpdated(s=>applySettings(s));
+window.cc.onThemeChanged(t=>{ document.body.dataset.theme=t; });
+</script>
+</body>
+</html>

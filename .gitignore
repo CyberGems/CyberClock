@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Tauri build output
+src-tauri/target/
+src-tauri/gen/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Private instruction files (agent configs)
+AGENTS.md
+CLAUDE.md
+.cursorrules
+.cursor/
+.github/copilot-instructions.md
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en" style="background: #1e1e23;">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CyberClock Menu</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/icons.js"></script>
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                width: 100vw;
+                height: 100vh;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+            body {
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+            }
+            .ctx-menu {
+                background: rgba(30, 30, 35, 0.96);
+                backdrop-filter: blur(40px) saturate(1.8);
+                -webkit-backdrop-filter: blur(40px) saturate(1.8);
+                padding: 6px;
+                width: 250px;
+                box-shadow:
+                    0 16px 48px rgba(0, 0, 0, 0.6),
+                    0 0 15px rgba(var(--rgb-accent), 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                animation: ctx-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes ctx-fade-in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            .ctx-item {
+                padding: 6px 10px;
+                font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+                font-size: 12px;
+                font-weight: 400;
+                color: rgba(255, 255, 255, 0.85);
+                cursor: pointer;
+                transition: background 0.12s, color 0.12s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border-radius: 6px;
+                min-height: 28px;
+            }
+            .ctx-item:hover {
+                background: rgba(var(--rgb-accent), 0.12);
+                color: #ffffff;
+            }
+            .ctx-item:active {
+                background: rgba(var(--rgb-accent), 0.2);
+            }
+            .ctx-sep {
+                height: 1px;
+                background: rgba(255, 255, 255, 0.08);
+                margin: 6px 4px;
+            }
+            .ctx-item .ico {
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                opacity: 0.8;
+            }
+            .ctx-item .ico .cc-ico {
+                width: 14px;
+                height: 14px;
+            }
+            .ctx-item .label {
+                flex: 1;
+            }
+            .ctx-item .shortcut {
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.3);
+                margin-left: auto;
+                padding-left: 20px;
+            }
+            .ctx-item .check {
+                width: 14px;
+                text-align: center;
+                flex-shrink: 0;
+                font-size: 11px;
+                color: var(--accent-a, #00d4ff);
+                visibility: hidden;
+            }
+            .ctx-item.checked .check {
+                visibility: visible;
+            }
+            .ctx-item.danger {
+                color: rgba(255, 100, 100, 0.9);
+            }
+            .ctx-item.danger:hover {
+                background: rgba(255, 68, 68, 0.12);
+            }
+
+            /* --- CUSTOM CONTROLS --- */
+            .ctx-section {
+                padding: 6px 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .ctx-section-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                color: var(--accent-a);
+                text-transform: uppercase;
+                text-shadow: 0 0 6px rgba(var(--rgb-accent), 0.3);
+            }
+            
+            /* Design picker grid */
+            .design-picker {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 6px;
+                margin-top: 2px;
+            }
+            .design-btn {
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.6);
+                border-radius: 4px;
+                height: 24px;
+                font-family: "Orbitron", monospace;
+                font-size: 10px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.15s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .design-btn:hover {
+                border-color: rgba(var(--rgb-accent), 0.5);
+                color: #ffffff;
+            }
+            .design-btn.active {
+                background: rgba(var(--rgb-accent), 0.2);
+                border-color: var(--accent-a);
+                color: var(--accent-a);
+                box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+            }
+
+            /* Opacity Slider Control */
+            .slider-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 2px;
+            }
+            .slider-row input[type="range"] {
+                flex: 1;
+                cursor: pointer;
+            }
+            .slider-val {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-md);
+                width: 26px;
+                text-align: right;
+            }
+
+            /* Custom inline Switch Toggle */
+            .switch-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 10px;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: background 0.12s;
+            }
+            .switch-row:hover {
+                background: rgba(var(--rgb-accent), 0.08);
+            }
+            .switch-lbl {
+                font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.85);
+            }
+
+            /* Toggle Switch Styles */
+            .toggle {
+                position: relative;
+                display: inline-block;
+                width: 36px;
+                height: 20px;
+                flex-shrink: 0;
+                cursor: pointer;
+                vertical-align: middle;
+            }
+            .toggle input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                position: absolute;
+            }
+            .toggle-track {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.15);
+                border-radius: 20px;
+                transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .toggle-track:hover {
+                background-color: rgba(255, 255, 255, 0.25);
+            }
+            .toggle-thumb {
+                position: absolute;
+                height: 16px;
+                width: 16px;
+                left: 2px;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: #ffffff;
+                border-radius: 50%;
+                transition: left 0.2s ease;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            }
+            .toggle.on .toggle-track {
+                background-color: var(--accent-a, #00d4ff);
+                box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+            }
+            .toggle.on .toggle-thumb {
+                left: 18px;
+            }
+        </style>
+    </head>
+    <body style="background: #1e1e23;">
+        <div class="ctx-menu" id="ctx-menu">
+            <div class="ctx-item" data-action="full">
+                <span class="ico"><span data-ico="expand"></span></span>
+                <span class="label">Full Mode</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" data-action="timer">
+                <span class="ico"><span data-ico="timer"></span></span>
+                <span class="label">Timer</span>
+            </div>
+            <div class="ctx-item" data-action="stopwatch">
+                <span class="ico"><span data-ico="stopwatch"></span></span>
+                <span class="label">Stopwatch</span>
+            </div>
+            <div class="ctx-item" data-action="relax">
+                <span class="ico"><span data-ico="lotus"></span></span>
+                <span class="label">Relax</span>
+            </div>
+            
+            <div class="ctx-sep"></div>
+            
+            <!-- SECTION: Design Mode -->
+            <div class="ctx-section">
+                <div class="ctx-section-title">Design Mode</div>
+                <div class="design-picker" id="design-picker">
+                    <button class="design-btn" data-mode="1">1</button>
+                    <button class="design-btn" data-mode="2">2</button>
+                    <button class="design-btn" data-mode="3">3</button>
+                    <button class="design-btn" data-mode="4">4</button>
+                    <button class="design-btn" data-mode="5">5</button>
+                    <button class="design-btn" data-mode="6">6</button>
+                    <button class="design-btn" data-mode="7">7</button>
+                    <button class="design-btn" data-mode="8">8</button>
+                    <button class="design-btn" data-mode="9">9</button>
+                    <button class="design-btn" data-mode="10">10</button>
+                    <button class="design-btn" data-mode="11">11</button>
+                    <button class="design-btn" data-mode="12">12</button>
+                </div>
+            </div>
+
+            <!-- SECTION: Transparency -->
+            <div class="ctx-section">
+                <div class="ctx-section-title">Opacity</div>
+                <div class="slider-row">
+                    <input type="range" id="opacity-slider" min="15" max="100" value="100" />
+                    <span class="slider-val" id="opacity-val">100%</span>
+                </div>
+            </div>
+
+            <!-- SECTION: Position Lock Switch -->
+            <div class="switch-row" id="ctx-lock">
+                <span class="switch-lbl">Position Lock</span>
+                <div class="toggle" id="toggle-lock">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SECTION: Always on Top Toggle -->
+            <div class="switch-row" id="ctx-aot">
+                <span class="switch-lbl">Always on Top</span>
+                <div class="toggle" id="toggle-aot">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ctx-item" data-action="settings">
+                <span class="ico"><span data-ico="gear"></span></span>
+                <span class="label">Settings</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item danger" data-action="close">
+                <span class="ico"><span data-ico="x"></span></span>
+                <span class="label">Close</span>
+                <span class="shortcut">Alt+F4</span>
+            </div>
+        </div>
+
+        <script>
+            let currentDesign = 1;
+            let alwaysOnTop = false;
+
+            function updateAotState(on) {
+                alwaysOnTop = on;
+                document.getElementById("toggle-aot").classList.toggle("on", on);
+            }
+
+            // Sync menu options with saved configurations
+            if (window.cc && window.cc.getSettings) {
+                window.cc.getSettings().then((cfg) => {
+                    if (cfg) {
+                        // Theme
+                        if (cfg.theme) document.body.dataset.theme = cfg.theme;
+                        
+                        // Active Design
+                        const activeDesign = cfg.miniDesign || 1;
+                        document.querySelectorAll(".design-btn").forEach((btn) => {
+                            btn.classList.toggle("active", parseInt(btn.dataset.mode) === activeDesign);
+                        });
+                        
+                        // Active Opacity
+                        const activeOpacity = Math.round((cfg.miniOpacity ?? 1.0) * 100);
+                        document.getElementById("opacity-slider").value = activeOpacity;
+                        document.getElementById("opacity-val").textContent = `${activeOpacity}%`;
+                        
+                        // Position Lock
+                        document.getElementById("toggle-lock").classList.toggle("on", cfg.miniPositionLocked || false);
+                        
+                        // AOT
+                        updateAotState(cfg.alwaysOnTop || false);
+                    }
+                });
+            }
+
+            // Design Mode click handlers
+            document.querySelectorAll(".design-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const mode = parseInt(btn.dataset.mode);
+                    document.querySelectorAll(".design-btn").forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    
+                    if (window.cc && window.cc.saveSettings) {
+                        window.cc.saveSettings({ miniDesign: mode });
+                    }
+                    if (window.cc && window.cc.closeMenuPopup) {
+                        setTimeout(() => window.cc.closeMenuPopup(), 200);
+                    }
+                });
+            });
+
+            // Opacity slider handler
+            const slider = document.getElementById("opacity-slider");
+            const sliderVal = document.getElementById("opacity-val");
+            slider.addEventListener("input", (e) => {
+                const val = parseInt(e.target.value);
+                sliderVal.textContent = `${val}%`;
+                
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ miniOpacity: val / 100 });
+                }
+            });
+
+            // Lock toggle handler
+            const lockRow = document.getElementById("ctx-lock");
+            lockRow.addEventListener("click", () => {
+                const tgl = document.getElementById("toggle-lock");
+                const on = tgl.classList.toggle("on");
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ miniPositionLocked: on });
+                }
+                if (window.cc && window.cc.closeMenuPopup) {
+                    setTimeout(() => window.cc.closeMenuPopup(), 200);
+                }
+            });
+
+            // Always on Top toggle handler
+            const aotRow = document.getElementById("ctx-aot");
+            aotRow.addEventListener("click", () => {
+                const tgl = document.getElementById("toggle-aot");
+                const on = tgl.classList.toggle("on");
+                updateAotState(on);
+                if (window.cc && window.cc.menuAction) {
+                    window.cc.menuAction("aot");
+                }
+                if (window.cc && window.cc.closeMenuPopup) {
+                    setTimeout(() => window.cc.closeMenuPopup(), 200);
+                }
+            });
+
+            // Menu action click handlers (full, timer, settings, etc.)
+            document.querySelectorAll(".ctx-item[data-action]").forEach((el) => {
+                el.addEventListener("click", () => {
+                    const action = el.dataset.action;
+                    if (window.cc && window.cc.menuAction) {
+                        window.cc.menuAction(action);
+                    }
+                });
+            });
+
+            // Close context menu on outside click
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".ctx-menu, input, button, label, span")) {
+                    if (window.cc && window.cc.closeMenuPopup) {
+                        window.cc.closeMenuPopup();
+                    }
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    if (window.cc && window.cc.closeMenuPopup) {
+                        window.cc.closeMenuPopup();
+                    }
+                }
+            });
+
+            // Close menu popup when it loses focus (click on other windows)
+            window.addEventListener("blur", () => {
+                if (window.cc && window.cc.closeMenuPopup) {
+                    window.cc.closeMenuPopup();
+                }
+            });
+        </script>
+    </body>
+</html>
