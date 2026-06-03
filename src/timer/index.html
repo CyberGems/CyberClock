@@ -52,6 +52,7 @@
     background:var(--bg-02);padding:8px 16px;border-radius:8px;
     border:1px solid var(--border);min-width:140px;text-align:center;
     transition:text-shadow .3s;}
+  .digit{display:inline-block;width:1ch;text-align:center;}
   .seg-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;
     letter-spacing:3px;color:var(--text-lo);text-transform:uppercase;}
   .colon{font-family:'Orbitron',monospace;font-size:80px;font-weight:900;
@@ -238,13 +239,17 @@ function applySettings(s){
   else document.body.classList.remove('no-scanlines');
 }
 
+function setDigits(el, val){
+  el.innerHTML = val.split('').map(c => `<span class="digit">${c}</span>`).join('');
+}
+
 function setDisplay(secs){
   const h = Math.floor(secs/3600);
   const m = Math.floor((secs%3600)/60);
   const s2 = secs%60;
-  document.getElementById('seg-h').textContent = pad(h);
-  document.getElementById('seg-m').textContent = pad(m);
-  document.getElementById('seg-s').textContent = pad(s2);
+  setDigits(document.getElementById('seg-h'), pad(h));
+  setDigits(document.getElementById('seg-m'), pad(m));
+  setDigits(document.getElementById('seg-s'), pad(s2));
 
   const display = document.getElementById('display');
   display.classList.toggle('warning', secs <= 10 && secs > 0 && running);

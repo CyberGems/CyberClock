@@ -111,8 +111,15 @@
                 text-shadow: var(--glow-md);
                 letter-spacing: 2px;
                 line-height: 1;
-                font-variant-numeric: tabular-nums;
-                font-feature-settings: "tnum" 1;
+            }
+            /* Fixed-width digit cells — Orbitron has no tabular figures,
+               so each glyph gets its own equal-width box to stop wobble.
+               1ch = advance width of "0" in the active font, so cells match
+               the glyph exactly: no overlap, no shifting, scales per size. */
+            .digit {
+                display: inline-block;
+                width: 1ch;
+                text-align: center;
             }
             #dig-date {
                 font-family: "Share Tech Mono", monospace;
@@ -626,8 +633,6 @@
                 min-width: clamp(110px, 13vw, 180px);
                 text-align: center;
                 transition: all 0.3s;
-                font-variant-numeric: tabular-nums;
-                font-feature-settings: "tnum" 1;
             }
             .t-seg-lbl {
                 font-family: "Share Tech Mono", monospace;
@@ -874,8 +879,6 @@
                 border: 1px solid var(--border);
                 min-width: clamp(100px, 11vw, 150px);
                 text-align: center;
-                font-variant-numeric: tabular-nums;
-                font-feature-settings: "tnum" 1;
             }
             .sw-ms {
                 font-family: "Orbitron", monospace;
@@ -892,8 +895,6 @@
                 text-align: center;
                 opacity: 0.85;
                 align-self: flex-end;
-                font-variant-numeric: tabular-nums;
-                font-feature-settings: "tnum" 1;
             }
             .sw-colon {
                 font-family: "Orbitron", monospace;
@@ -2932,6 +2933,16 @@
                 return String(n).padStart(w, "0");
             }
 
+            // Render a time string into an element, wrapping each digit in a
+            // fixed-width .digit cell so narrow glyphs (1) don't shift the
+            // layout. Separators (: . space, AM/PM) are left untouched.
+            function setDigits(el, val) {
+                el.innerHTML = val.replace(
+                    /\d/g,
+                    (d) => `<span class="digit">${d}</span>`,
+                );
+            }
+
             // ══════════════════════════════════════════════════════════════
             // NAVIGATION with cinematic transitions
             // ══════════════════════════════════════════════════════════════
@@ -3127,7 +3138,7 @@
                 } else {
                     t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
                 }
-                document.getElementById("dig-time").textContent = t;
+                setDigits(document.getElementById("dig-time"), t);
                 document.getElementById("dig-date").textContent =
                     `${DAYS[now.getDay()]}·${pad(now.getDate())} ${MONTHS_S[now.getMonth()]} ${now.getFullYear()}`;
             }
@@ -3461,13 +3472,15 @@
 
             function tSetDisplay(secs) {
                 secs = Math.max(0, Math.ceil(secs));
-                document.getElementById("t-h").textContent = pad(
-                    Math.floor(secs / 3600),
+                setDigits(
+                    document.getElementById("t-h"),
+                    pad(Math.floor(secs / 3600)),
                 );
-                document.getElementById("t-m").textContent = pad(
-                    Math.floor((secs % 3600) / 60),
+                setDigits(
+                    document.getElementById("t-m"),
+                    pad(Math.floor((secs % 3600) / 60)),
                 );
-                document.getElementById("t-s").textContent = pad(secs % 60);
+                setDigits(document.getElementById("t-s"), pad(secs % 60));
                 const pct = tTotal > 0 ? ((tTotal - secs) / tTotal) * 100 : 0;
                 document.getElementById("t-prog").style.width = pct + "%";
                 document.getElementById("t-prog").style.background =
@@ -3676,10 +3689,10 @@
                 if (swRunning)
                     swElapsed = performance.now() - swStart + swPaused;
                 const t = swFmt(swElapsed);
-                document.getElementById("sw-h").textContent = t.h;
-                document.getElementById("sw-m").textContent = t.m;
-                document.getElementById("sw-s").textContent = t.s;
-                document.getElementById("sw-ms").textContent = t.ms;
+                setDigits(document.getElementById("sw-h"), t.h);
+                setDigits(document.getElementById("sw-m"), t.m);
+                setDigits(document.getElementById("sw-s"), t.s);
+                setDigits(document.getElementById("sw-ms"), t.ms);
                 if (swRunning) swRaf = requestAnimationFrame(swUpdate);
             }
 
