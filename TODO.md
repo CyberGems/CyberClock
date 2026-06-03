@@ -1,0 +1,7 @@
+- [ ] Extend Rust AppSettings to include custom alarms (2-3 slots)
+- [ ] Implement custom alarm scheduler in Rust and emit `alarm:chime` with payload `{type:"custom", sound, customPath, volume}`
+- [ ] Update renderer `src/main/index.html` alarm handler if needed to support `type:"custom"` payload (should already work)
+- [ ] Add Settings UI for custom alarm slots (enable + HH/MM + days mask + sound + custom mp3 + clear)
+- [ ] Persist settings changes via existing `saveSettings` / `settings:updated`
+- [ ] Verify half-hour and full-hour alarms still work (no duplicate events)
+- [ ] Smoke test custom alarms: trigger at next minute, repeat on enabled days, persistence after restart

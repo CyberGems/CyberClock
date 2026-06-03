@@ -181,6 +181,16 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M10 20l-1 2M14 20l-1 2M18 20l-1 2"/>
   </symbol>
+  <symbol id="cc-i-compact" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M4 14h6v6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M3 21l7-7"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M20 10h-6V4"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M21 3l-7 7"/>
+  </symbol>
   <symbol id="cc-i-home" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M3 11 12 3l9 8v10a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V11Z"/>

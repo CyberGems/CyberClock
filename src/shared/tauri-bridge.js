@@ -93,6 +93,9 @@
         resetMiniPosition: async () => {
             await invoke("reset_mini_position");
         },
+        saveMiniPosition: async () => {
+            return await invoke("save_mini_position");
+        },
 
         // ── Menu popup ────────────────────────────────────────────
         menuAction: async (action) => {

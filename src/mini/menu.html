@@ -293,9 +293,14 @@
 
             <!-- SECTION: Transparency -->
             <div class="ctx-section">
-                <div class="ctx-section-title">Opacity</div>
+                <div class="ctx-section-title">Background</div>
                 <div class="slider-row">
-                    <input type="range" id="opacity-slider" min="15" max="100" value="100" />
+                    <input type="range" id="bg-opacity-slider" min="0" max="100" value="100" />
+                    <span class="slider-val" id="bg-opacity-val">100%</span>
+                </div>
+                <div class="ctx-section-title">Content</div>
+                <div class="slider-row">
+                    <input type="range" id="opacity-slider" min="20" max="100" value="100" />
                     <span class="slider-val" id="opacity-val">100%</span>
                 </div>
             </div>
@@ -353,10 +358,15 @@
                             btn.classList.toggle("active", parseInt(btn.dataset.mode) === activeDesign);
                         });
                         
-                        // Active Opacity
+                        // Active Opacity (Content)
                         const activeOpacity = Math.round((cfg.miniOpacity ?? 1.0) * 100);
                         document.getElementById("opacity-slider").value = activeOpacity;
                         document.getElementById("opacity-val").textContent = `${activeOpacity}%`;
+
+                        // Active Background Opacity
+                        const activeBgOpacity = Math.round((cfg.miniBgOpacity ?? 1.0) * 100);
+                        document.getElementById("bg-opacity-slider").value = activeBgOpacity;
+                        document.getElementById("bg-opacity-val").textContent = `${activeBgOpacity}%`;
                         
                         // Position Lock
                         document.getElementById("toggle-lock").classList.toggle("on", cfg.miniPositionLocked || false);
@@ -383,15 +393,27 @@
                 });
             });
 
-            // Opacity slider handler
+            // Opacity slider handler (Content)
             const slider = document.getElementById("opacity-slider");
             const sliderVal = document.getElementById("opacity-val");
             slider.addEventListener("input", (e) => {
                 const val = parseInt(e.target.value);
                 sliderVal.textContent = `${val}%`;
-                
+
                 if (window.cc && window.cc.saveSettings) {
                     window.cc.saveSettings({ miniOpacity: val / 100 });
+                }
+            });
+
+            // Background opacity slider handler
+            const bgSlider = document.getElementById("bg-opacity-slider");
+            const bgSliderVal = document.getElementById("bg-opacity-val");
+            bgSlider.addEventListener("input", (e) => {
+                const val = parseInt(e.target.value);
+                bgSliderVal.textContent = `${val}%`;
+
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ miniBgOpacity: val / 100 });
                 }
             });
 

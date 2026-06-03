@@ -42,7 +42,7 @@
         "label": "menu",
         "title": "CyberClock Menu",
         "width": 270,
-        "height": 420,
+        "height": 470,
         "resizable": false,
         "fullscreen": false,
         "decorations": false,
@@ -52,54 +52,6 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "url": "mini/menu.html"
-      },
-      {
-        "label": "settings",
-        "title": "CyberClock Settings",
-        "width": 700,
-        "height": 560,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "visible": false,
-        "url": "settings/index.html"
-      },
-      {
-        "label": "timer",
-        "title": "CyberClock Timer",
-        "width": 800,
-        "height": 620,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "visible": false,
-        "url": "timer/index.html"
-      },
-      {
-        "label": "stopwatch",
-        "title": "CyberClock Stopwatch",
-        "width": 800,
-        "height": 620,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "visible": false,
-        "url": "stopwatch/index.html"
-      },
-      {
-        "label": "relax",
-        "title": "CyberClock Relax",
-        "width": 960,
-        "height": 660,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "visible": false,
-        "url": "relax/index.html"
       }
     ],
     "security": {

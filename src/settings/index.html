@@ -1223,7 +1223,13 @@
 
             // Init
             window.cc.onInit((s) => applySettings(s));
-            window.cc.onSettingsUpdated((s) => applySettings(s));
+            window.cc.onSettingsUpdated((s) => {
+                applySettings(s);
+                const activeTab = document.querySelector(".tab.active");
+                if (activeTab && activeTab.dataset.tab === "display") {
+                    loadScreens();
+                }
+            });
             window.cc.onThemeChanged((t) => {
                 document.body.dataset.theme = t;
             });

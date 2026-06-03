@@ -157,140 +157,218 @@
                 box-shadow: var(--glow-xs);
             }
 
+            /* ── Mini Mode Pill Button ── */
+            .btn-mini-pill {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 0 14px;
+                height: 30px;
+                border-radius: 15px;
+                background: rgba(var(--rgb-accent), 0.06);
+                border: 1px solid rgba(var(--rgb-accent), 0.25);
+                color: var(--accent-a);
+                cursor: pointer;
+                font-family: 'Orbitron', monospace;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+                flex-shrink: 0;
+                text-shadow: var(--glow-xs);
+            }
+            .btn-mini-pill::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 15px;
+                background: linear-gradient(
+                    135deg,
+                    rgba(var(--rgb-accent), 0.08) 0%,
+                    transparent 50%,
+                    rgba(var(--rgb-accent), 0.04) 100%
+                );
+                opacity: 0;
+                transition: opacity 0.28s;
+            }
+            .btn-mini-pill:hover::before {
+                opacity: 1;
+            }
+            .btn-mini-pill:hover {
+                border-color: rgba(var(--rgb-accent), 0.55);
+                box-shadow: 0 0 16px rgba(var(--rgb-accent), 0.2),
+                            0 0 4px rgba(var(--rgb-accent), 0.1),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+                transform: scale(0.95);
+                background: rgba(var(--rgb-accent), 0.1);
+            }
+            .btn-mini-pill:active {
+                transform: scale(0.9);
+                transition-duration: 0.1s;
+            }
+            .btn-mini-pill .mini-ico {
+                width: 14px;
+                height: 14px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .btn-mini-pill:hover .mini-ico {
+                transform: scale(0.85);
+            }
+            .btn-mini-pill .mini-ico .cc-ico {
+                width: 14px;
+                height: 14px;
+            }
+            .btn-mini-pill .mini-lbl {
+                position: relative;
+                z-index: 1;
+            }
+            /* Subtle breathing glow animation */
+            @keyframes mini-glow {
+                0%, 100% { box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.05); }
+                50% { box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.12); }
+            }
+            .btn-mini-pill {
+                animation: mini-glow 4s ease-in-out infinite;
+            }
+            .btn-mini-pill:hover {
+                animation: none;
+            }
+
             /* ════════════════════════════════════════════════════
-   BODY AREA (sidebar + views)
-════════════════════════════════════════════════════ */
+   BODY AREA (views and navigation)
+ ════════════════════════════════════════════════════ */
             .body-area {
                 flex: 1;
                 display: flex;
                 overflow: hidden;
                 min-height: 0;
+                position: relative;
             }
 
             /* ════════════════════════════════════════════════════
-   SIDEBAR
-════════════════════════════════════════════════════ */
-            .sidebar {
-                width: 64px;
-                flex-shrink: 0;
-                background: var(--bg-01);
-                border-right: 1px solid var(--border);
+   FLOATING NAV BAR (Bottom)
+ ════════════════════════════════════════════════════ */
+            .floating-nav {
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                height: 56px;
+                background: rgba(var(--rgb-accent), 0.04);
+                border: 1px solid rgba(var(--rgb-accent), 0.15);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 28px;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
-                padding: 10px 0;
-                gap: 4px;
-                position: relative;
-                z-index: 5;
-                overflow: hidden;
+                padding: 0 10px;
+                gap: 6px;
+                z-index: 50;
+                box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 
+                            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                            0 0 20px rgba(var(--rgb-accent), 0.05);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            .sidebar::after {
-                content: "";
-                position: absolute;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                width: 1px;
-                background: linear-gradient(
-                    to bottom,
-                    transparent,
-                    rgba(var(--rgb-accent), 0.15),
-                    transparent
-                );
+            .floating-nav:hover {
+                border-color: rgba(var(--rgb-accent), 0.3);
+                box-shadow: 0 20px 50px -8px rgba(0, 0, 0, 0.8), 
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                            0 0 30px rgba(var(--rgb-accent), 0.12);
             }
             .nav-item {
-                width: 46px;
-                height: 46px;
-                border-radius: 8px;
+                height: 40px;
+                padding: 0 16px;
+                border-radius: 20px;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 3px;
+                gap: 6px;
                 cursor: pointer;
                 border: 1px solid transparent;
-                transition: all 0.2s;
-                position: relative;
+                background: transparent;
+                transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
                 -webkit-app-region: no-drag;
+                position: relative;
             }
             .nav-item:hover {
-                background: var(--accent-dim);
-                border-color: var(--border);
+                background: rgba(var(--rgb-accent), 0.08);
+                border-color: rgba(var(--rgb-accent), 0.15);
+                transform: translateY(-2px);
             }
             .nav-item.active {
-                background: var(--accent-dim);
-                border-color: var(--border-active);
-                box-shadow: var(--glow-xs);
+                background: rgba(var(--rgb-accent), 0.14);
+                border-color: rgba(var(--rgb-accent), 0.35);
+                box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.15),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.08);
             }
-            /* Active left accent bar */
+            /* Active glowing bottom bar */
             .nav-item::before {
                 content: "";
                 position: absolute;
-                left: -1px;
-                top: 22%;
-                bottom: 22%;
-                width: 3px;
-                border-radius: 0 2px 2px 0;
+                bottom: 3px;
+                left: 25%;
+                right: 25%;
+                height: 2px;
+                border-radius: 1px;
                 background: var(--accent-a);
-                box-shadow: var(--glow-sm);
+                box-shadow: var(--glow-xs);
                 opacity: 0;
-                transition: opacity 0.2s;
+                transform: scaleX(0.5);
+                transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .nav-item.active::before {
                 opacity: 1;
+                transform: scaleX(1);
             }
             .nav-icon {
-                width: 20px;
-                height: 20px;
+                width: 18px;
+                height: 18px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 line-height: 1;
+                transition: transform 0.22s;
+            }
+            .nav-item:hover .nav-icon {
+                transform: scale(1.1);
             }
             .nav-icon .cc-ico {
-                width: 18px;
-                height: 18px;
+                width: 16px;
+                height: 16px;
             }
             .nav-lbl {
                 font-family: "Orbitron", monospace;
-                font-size: 5.5px;
+                font-size: 7.5px;
+                font-weight: 700;
                 letter-spacing: 1px;
                 color: var(--text-lo);
                 text-transform: uppercase;
-                transition: color 0.2s;
+                transition: color 0.22s;
             }
             .nav-item.active .nav-lbl,
             .nav-item:hover .nav-lbl {
                 color: var(--accent-a);
-            }
-            .sidebar-flex {
-                flex: 1;
+                text-shadow: var(--glow-xs);
             }
 
-            /* Skin dots stacked */
-            .skin-stack {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 7px;
-                padding: 12px 0;
+            /* View adjustments for bottom nav clearing */
+            #view-timer {
+                padding-bottom: 96px !important;
             }
-            .skin-dot {
-                width: 13px;
-                height: 13px;
-                border-radius: 50%;
-                cursor: pointer;
-                border: 2px solid transparent;
-                transition: all 0.2s;
-                -webkit-app-region: no-drag;
+            #view-stopwatch {
+                padding-bottom: 96px !important;
             }
-            .skin-dot:hover {
-                transform: scale(1.25);
+            .relax-L, .relax-R {
+                padding-bottom: 96px !important;
             }
-            .skin-dot.active {
-                border-color: rgba(255, 255, 255, 0.85);
-                box-shadow: 0 0 6px currentColor;
-                transform: scale(1.18);
+            .clock-panel, .cal-panel {
+                padding-bottom: 96px !important;
             }
 
             /* ════════════════════════════════════════════════════
@@ -1350,6 +1428,125 @@
                 opacity: 1;
             }
 
+            /* Auto Scheduler */
+            .sched-panel {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 14px 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 14px;
+            }
+            .sched-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8.5px;
+                letter-spacing: 2.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .sched-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .sched-lbl {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                color: var(--text-md);
+                text-transform: uppercase;
+                width: 72px;
+                flex-shrink: 0;
+            }
+            .sched-select {
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                color: var(--text-hi);
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 1px;
+                padding: 5px 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                outline: none;
+                flex: 1;
+                min-width: 0;
+            }
+            .sched-select option {
+                background: var(--bg-02);
+            }
+            .sched-time {
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                color: var(--text-hi);
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                padding: 4px 6px;
+                border-radius: 4px;
+                outline: none;
+                cursor: pointer;
+            }
+            .sched-status {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                color: var(--text-lo);
+                letter-spacing: 0.5px;
+            }
+            .sched-status.on {
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+            }
+            .tog-sm {
+                position: relative;
+                width: 34px;
+                height: 18px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .tog-sm input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .tog-sm-tr {
+                position: absolute;
+                inset: 0;
+                background: var(--bg-03);
+                border: 1px solid var(--border);
+                border-radius: 9px;
+                transition: all 0.25s;
+            }
+            .tog-sm input:checked ~ .tog-sm-tr {
+                background: var(--accent-dim);
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .tog-sm-th {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 12px;
+                height: 12px;
+                background: var(--text-lo);
+                border-radius: 50%;
+                transition: all 0.25s;
+            }
+            .tog-sm input:checked ~ .tog-sm-tr .tog-sm-th {
+                transform: translateX(16px);
+                background: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
+
             /* ════════════════════════════════════════════════════
    SETTINGS MODAL
 ════════════════════════════════════════════════════ */
@@ -1823,14 +2020,9 @@
                     <div id="dig-date">SUN · 01 JAN 2026</div>
                 </div>
                 <div class="tbar-right">
-                    <button class="wmbtn" id="btn-aot" title="Always on Top">
-                        <span data-ico="pin"></span>
-                    </button>
-                    <button class="wmbtn" id="btn-settings" title="Settings">
-                        <span data-ico="gear"></span>
-                    </button>
-                    <button class="wmbtn" id="btn-mini" title="Mini Mode">
-                        <span data-ico="expand"></span>
+                    <button class="btn-mini-pill" id="btn-mini" title="Switch to Mini Mode">
+                        <span class="mini-ico"><span data-ico="compact"></span></span>
+                        <span class="mini-lbl">Mini</span>
                     </button>
                     <button class="wmbtn" id="btn-min" title="Minimize">
                         <span data-ico="minimize"></span>
@@ -1843,56 +2035,27 @@
 
             <!-- ═══ BODY ══════════════════════════════════════════════════ -->
             <div class="body-area">
-                <!-- SIDEBAR -->
-                <nav class="sidebar">
+                <!-- FLOATING BOTTOM NAV BAR -->
+                <nav class="floating-nav">
                     <div class="nav-item active" data-view="home">
-                        <span class="nav-icon"><span data-ico="clock"></span></span
-                        ><span class="nav-lbl">Clock</span>
+                        <span class="nav-icon"><span data-ico="clock"></span></span>
+                        <span class="nav-lbl">Clock</span>
                     </div>
                     <div class="nav-item" data-view="timer">
-                        <span class="nav-icon"><span data-ico="timer"></span></span
-                        ><span class="nav-lbl">Timer</span>
+                        <span class="nav-icon"><span data-ico="timer"></span></span>
+                        <span class="nav-lbl">Timer</span>
                     </div>
                     <div class="nav-item" data-view="stopwatch">
-                        <span class="nav-icon"><span data-ico="stopwatch"></span></span
-                        ><span class="nav-lbl">Watch</span>
+                        <span class="nav-icon"><span data-ico="stopwatch"></span></span>
+                        <span class="nav-lbl">Watch</span>
                     </div>
                     <div class="nav-item" data-view="relax">
-                        <span class="nav-icon"><span data-ico="lotus"></span></span
-                        ><span class="nav-lbl">Relax</span>
+                        <span class="nav-icon"><span data-ico="lotus"></span></span>
+                        <span class="nav-lbl">Relax</span>
                     </div>
-                    <div class="sidebar-flex"></div>
-                    <div class="skin-stack">
-                        <div
-                            class="skin-dot active"
-                            data-theme="cyber-blue"
-                            style="background: #00d4ff"
-                            title="Cyber Blue"
-                        ></div>
-                        <div
-                            class="skin-dot"
-                            data-theme="neon-green"
-                            style="background: #00ff41"
-                            title="Neon Green"
-                        ></div>
-                        <div
-                            class="skin-dot"
-                            data-theme="plasma-purple"
-                            style="background: #c800ff"
-                            title="Plasma Purple"
-                        ></div>
-                        <div
-                            class="skin-dot"
-                            data-theme="solar-orange"
-                            style="background: #ff6600"
-                            title="Solar Orange"
-                        ></div>
-                        <div
-                            class="skin-dot"
-                            data-theme="arctic-ice"
-                            style="background: #d0f0ff"
-                            title="Arctic Ice"
-                        ></div>
+                    <div class="nav-item" id="nav-btn-settings" title="Settings">
+                        <span class="nav-icon"><span data-ico="gear"></span></span>
+                        <span class="nav-lbl">Setup</span>
                     </div>
                 </nav>
 
@@ -2235,6 +2398,65 @@
                                     id="r-ast-cd"
                                     style="display: none"
                                 ></span>
+                            </div>
+
+                            <!-- Auto Scheduler -->
+                            <div class="sched-panel" id="sched-panel">
+                                <div class="sched-title">
+                                    <span>◈ Auto Scheduler</span>
+                                    <span class="sched-status" id="sched-status">OFF</span>
+                                </div>
+                                <div class="sched-row" style="justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="sched-lbl" style="width: auto;">Enable</span>
+                                        <label class="tog-sm">
+                                            <input type="checkbox" id="sched-enable" />
+                                            <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
+                                        </label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="sched-lbl" style="width: auto;">Start At</span>
+                                        <input type="time" class="sched-time" id="sched-time" value="22:00" />
+                                    </div>
+                                </div>
+                                <div class="sched-row">
+                                    <span class="sched-lbl">Repeat</span>
+                                    <select class="sched-select" id="sched-repeat">
+                                        <option value="0">Once</option>
+                                        <option value="15">Every 15 min</option>
+                                        <option value="30">Every 30 min</option>
+                                        <option value="60" selected>Every 1 hour</option>
+                                        <option value="120">Every 2 hours</option>
+                                        <option value="240">Every 4 hours</option>
+                                    </select>
+                                </div>
+                                <div class="sched-row">
+                                    <span class="sched-lbl">Track</span>
+                                    <select class="sched-select" id="sched-track">
+                                        <option value="night">Night</option>
+                                        <option value="forest">Forest</option>
+                                        <option value="space">Outer Space</option>
+                                        <option value="ocean">Ocean</option>
+                                        <option value="rain">Rain</option>
+                                        <option value="fireplace">Fireplace</option>
+                                        <option value="random-one" selected>Random One</option>
+                                        <option value="shuffle-all">Shuffle All</option>
+                                    </select>
+                                </div>
+                                <div class="sched-row">
+                                    <span class="sched-lbl">Duration</span>
+                                    <select class="sched-select" id="sched-duration">
+                                        <option value="5">5 minutes</option>
+                                        <option value="10">10 minutes</option>
+                                        <option value="15" selected>15 minutes</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="60">1 hour</option>
+                                        <option value="0">Until stopped</option>
+                                    </select>
+                                </div>
+                                <div class="sched-status" id="sched-next" style="margin-top:4px;text-align:center;">
+                                    Next run: —
+                                </div>
                             </div>
                         </div>
                         <div class="relax-R">
@@ -2769,7 +2991,7 @@
 
             // Sidebar nav
             document
-                .querySelectorAll(".nav-item")
+                .querySelectorAll(".nav-item[data-view]")
                 .forEach((el) =>
                     el.addEventListener("click", () =>
                         navigate(el.dataset.view),
@@ -3861,8 +4083,8 @@
                               ${s.current ? '<span style="font-size:7px;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:4px;">ACTIVE</span>' : ""}
                             </div>
                             <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-lo);">
-                              ${s.workArea.width} × ${s.workArea.height} px  &nbsp;·&nbsp;
-                              pos (${s.workArea.x}, ${s.workArea.y})
+                              ${s.width} × ${s.height} px  &nbsp;·&nbsp;
+                              pos (${s.x}, ${s.y})
                             </div>
                           </div>
                           ${
@@ -3887,7 +4109,7 @@
                             btn.textContent = "…";
                             btn.disabled = true;
                             const res = await window.cc.selectDisplay(id);
-                            if (res.ok) {
+                            if (res) {
                                 // Refresh list to show new ACTIVE state
                                 setTimeout(loadScreensList, 150);
                             } else {
@@ -3901,8 +4123,10 @@
                 document.getElementById("s-overlay").classList.remove("open");
             }
 
+            const btnSettings = document.getElementById("btn-settings");
+            if (btnSettings) btnSettings.addEventListener("click", openSettings);
             document
-                .getElementById("btn-settings")
+                .getElementById("nav-btn-settings")
                 .addEventListener("click", openSettings);
             document
                 .getElementById("s-close")
@@ -4098,14 +4322,13 @@
                 }
             });
 
-            document
-                .getElementById("btn-aot")
-                .addEventListener("click", async () => {
+            const btnAot = document.getElementById("btn-aot");
+            if (btnAot) {
+                btnAot.addEventListener("click", async () => {
                     const on = await window.cc.toggleAlwaysOnTop();
-                    document
-                        .getElementById("btn-aot")
-                        .classList.toggle("on", on);
+                    btnAot.classList.toggle("on", on);
                 });
+            }
             document
                 .getElementById("btn-mini")
                 .addEventListener("click", () => window.cc.goMini());
@@ -4114,13 +4337,136 @@
                 .addEventListener("click", () => window.cc.minimizeWindow());
             document
                 .getElementById("btn-close")
-                .addEventListener("click", () => window.cc.closeWindow());
+                .addEventListener("click", () => window.cc.hideWindow("main"));
+
+            // ═══════════════════════════════════════════════════════════
+            // AUTO SCHEDULER
+            // ═══════════════════════════════════════════════════════════
+            const SCHED_KEY = 'cyberclock_relax_scheduler';
+            const ALL_TRACKS = ['night','forest','space','ocean','rain','fireplace'];
+            let schedConfig = { enabled: false, time: '22:00', repeat: 60, track: 'random-one', duration: 15 };
+            let schedChecker = null;
+            let schedNextRun = null;
+            let shuffleQueue = [];
+
+            function loadSched() {
+                try { const raw = localStorage.getItem(SCHED_KEY); if (raw) schedConfig = JSON.parse(raw); } catch (_) {}
+                applySchedUI();
+                startSchedChecker();
+            }
+            function saveSched() {
+                localStorage.setItem(SCHED_KEY, JSON.stringify(schedConfig));
+                updateSchedStatus();
+            }
+            function applySchedUI() {
+                document.getElementById('sched-enable').checked = schedConfig.enabled;
+                document.getElementById('sched-time').value = schedConfig.time || '22:00';
+                document.getElementById('sched-repeat').value = String(schedConfig.repeat || 60);
+                document.getElementById('sched-track').value = schedConfig.track || 'random-one';
+                document.getElementById('sched-duration').value = String(schedConfig.duration || 15);
+                updateSchedStatus();
+            }
+            function getSchedTrack() {
+                const t = schedConfig.track;
+                if (t === 'random-one') return ALL_TRACKS[Math.floor(Math.random() * ALL_TRACKS.length)];
+                if (t === 'shuffle-all') {
+                    if (shuffleQueue.length === 0) shuffleQueue = [...ALL_TRACKS].sort(() => Math.random() - 0.5);
+                    return shuffleQueue.shift();
+                }
+                return t;
+            }
+            function calcNextRun() {
+                if (!schedConfig.enabled) { schedNextRun = null; return; }
+                const [h, m] = (schedConfig.time || '22:00').split(':').map(Number);
+                const now = new Date();
+                let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+                if (next <= now) next.setDate(next.getDate() + 1);
+                schedNextRun = next;
+            }
+            function updateSchedStatus() {
+                const statusEl = document.getElementById('sched-status');
+                const nextEl = document.getElementById('sched-next');
+                if (!schedConfig.enabled) {
+                    statusEl.textContent = 'OFF';
+                    statusEl.classList.remove('on');
+                    nextEl.textContent = 'Next run: —';
+                    return;
+                }
+                statusEl.textContent = 'ON';
+                statusEl.classList.add('on');
+                if (schedNextRun) {
+                    nextEl.textContent = `Next: ${pad(schedNextRun.getHours())}:${pad(schedNextRun.getMinutes())}`;
+                } else { nextEl.textContent = 'Next run: —'; }
+            }
+            function checkSched() {
+                if (!schedConfig.enabled || !schedNextRun) return;
+                const now = new Date();
+                if (now >= schedNextRun) {
+                    // Trigger!
+                    const track = getSchedTrack();
+                    preSelectRelaxTrack(track);
+                    rSelected = track;
+                    rPlayTrack();
+                    // Duration auto-stop
+                    const dur = parseInt(schedConfig.duration);
+                    if (dur > 0) {
+                        rAstMins = dur;
+                        rStartAutoStop(dur * 60);
+                        document.querySelectorAll(".ast-btn").forEach((x) =>
+                            x.classList.toggle("on", parseInt(x.dataset.min) === dur)
+                        );
+                    }
+                    // Calculate next
+                    const repeat = parseInt(schedConfig.repeat) || 0;
+                    if (repeat > 0) {
+                        schedNextRun = new Date(now.getTime() + repeat * 60000);
+                    } else {
+                        schedConfig.enabled = false;
+                        document.getElementById('sched-enable').checked = false;
+                        saveSched();
+                    }
+                    updateSchedStatus();
+                }
+            }
+            function startSchedChecker() {
+                if (schedChecker) clearInterval(schedChecker);
+                calcNextRun();
+                updateSchedStatus();
+                schedChecker = setInterval(checkSched, 1000);
+            }
+
+            // Scheduler event listeners
+            document.getElementById('sched-enable').addEventListener('change', (e) => {
+                schedConfig.enabled = e.target.checked;
+                calcNextRun();
+                saveSched();
+            });
+            document.getElementById('sched-time').addEventListener('change', (e) => {
+                schedConfig.time = e.target.value;
+                calcNextRun();
+                saveSched();
+            });
+            document.getElementById('sched-repeat').addEventListener('change', (e) => {
+                schedConfig.repeat = parseInt(e.target.value);
+                calcNextRun();
+                saveSched();
+            });
+            document.getElementById('sched-track').addEventListener('change', (e) => {
+                schedConfig.track = e.target.value;
+                if (schedConfig.track === 'shuffle-all') shuffleQueue = [];
+                saveSched();
+            });
+            document.getElementById('sched-duration').addEventListener('change', (e) => {
+                schedConfig.duration = parseInt(e.target.value);
+                saveSched();
+            });
 
             // ══════════════════════════════════════════════════════════════
             // IPC
             // ══════════════════════════════════════════════════════════════
             window.cc.onInit((s) => {
                 applySettings(s);
+                loadSched();
                 setInterval(updateDigital, 1000);
                 updateDigital();
                 const now = new Date();
@@ -4138,7 +4484,21 @@
                 });
             });
 
-            window.cc.onSettingsUpdated((s) => applySettings(s));
+            window.cc.onSettingsUpdated((s) => {
+                applySettings(s);
+                const overlay = document.getElementById("s-overlay");
+                if (overlay && overlay.classList.contains("open")) {
+                    loadScreensList();
+                }
+            });
+
+            window.cc.onMiniMenuAction((action) => {
+                if (action === "settings") {
+                    openSettings();
+                } else if (VIEW_ORDER.includes(action)) {
+                    navigate(action);
+                }
+            });
 
             window.cc.onAlarmChime((p) => {
                 if (p.customPath) window.audioEngine.playFile(p.customPath);
