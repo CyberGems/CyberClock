@@ -53,6 +53,7 @@
     background:var(--bg-02);padding:6px 10px;border-radius:6px;
     border:1px solid var(--border);min-width:80px;text-align:center;
     opacity:.85;align-self:flex-end;}
+  .digit{display:inline-block;width:1ch;text-align:center;}
   .sw-colon{font-family:'Orbitron',monospace;font-size:64px;font-weight:900;
     color:var(--accent-a);text-shadow:var(--glow-md);margin-bottom:10px;opacity:.7;}
   .sw-dot{font-family:'Orbitron',monospace;font-size:40px;font-weight:900;
@@ -225,15 +226,19 @@ function fmtDuration(ms){
   return `${t.h}:${t.m}:${t.s}.${t.ms}`;
 }
 
+function setDigits(el, val){
+  el.innerHTML = val.split('').map(c => `<span class="digit">${c}</span>`).join('');
+}
+
 function updateDisplay(){
   if(running){
     elapsed = performance.now() - startTimestamp + pausedAt;
   }
   const t = fmtMs(elapsed);
-  document.getElementById('sw-h').textContent  = t.h;
-  document.getElementById('sw-m').textContent  = t.m;
-  document.getElementById('sw-s').textContent  = t.s;
-  document.getElementById('sw-ms').textContent = t.ms;
+  setDigits(document.getElementById('sw-h'), t.h);
+  setDigits(document.getElementById('sw-m'), t.m);
+  setDigits(document.getElementById('sw-s'), t.s);
+  setDigits(document.getElementById('sw-ms'), t.ms);
   if(running) rafId = requestAnimationFrame(updateDisplay);
 }
 
