@@ -1141,11 +1141,13 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                     let settings = load_settings(app);
                     if settings.window_mode == "full" {
                         if let Some(main) = app.get_webview_window("main") {
+                            let _ = main.unminimize();
                             let _ = main.show();
                             let _ = main.set_focus();
                         }
                     } else {
                         if let Some(mini) = app.get_webview_window("mini") {
+                            let _ = mini.unminimize();
                             let _ = mini.show();
                             let _ = mini.set_focus();
                         }
