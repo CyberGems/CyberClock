@@ -59,6 +59,28 @@ impl Default for AlarmSettings {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
+pub struct RelaxSchedulerSettings {
+    pub enabled: bool,
+    pub time: String,
+    pub repeat: u32,
+    pub track: String,
+    pub duration: u32,
+}
+
+impl Default for RelaxSchedulerSettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            time: "22:00".to_string(),
+            repeat: 60,
+            track: "random-one".to_string(),
+            duration: 15,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(default, rename_all = "camelCase")]
 pub struct AppSettings {
     pub theme: String,
     pub clock_format: String,
@@ -83,6 +105,8 @@ pub struct AppSettings {
     // Roadmap B: Custom alarm times (HH:MM) with day-of-week repetition
     // (No snooze for now)
     pub custom_alarms: Vec<CustomAlarm>,
+
+    pub relax_scheduler: RelaxSchedulerSettings,
 }
 
 impl Default for AppSettings {
@@ -112,6 +136,7 @@ impl Default for AppSettings {
             last_relax_track: None,
             scanlines: true,
             custom_alarms: vec![CustomAlarm::default(), CustomAlarm::default(), CustomAlarm::default()],
+            relax_scheduler: RelaxSchedulerSettings::default(),
         }
     }
 }
@@ -157,6 +182,7 @@ fn save_settings_to_file(app: &AppHandle, settings: &AppSettings) {
 pub struct AlarmState {
     pub last_half_hour: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub last_full_hour: Mutex<Option<u32>>,         // hour
+    pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -181,10 +207,20 @@ fn get_settings(app: AppHandle) -> AppSettings {
 fn save_settings(app: AppHandle, settings: AppSettings) -> AppSettings {
     save_settings_to_file(&app, &settings);
     
-    // Update always on top for all windows
+    // Reset next run for relax scheduler
+    let state = app.state::<AlarmState>();
+    if let Ok(mut next_run) = state.relax_next_run.lock() {
+        *next_run = None;
+    }
+    
+    // Update always on top for always-on-top windows only (mini, menu)
     let aot = settings.always_on_top;
-    for window in app.webview_windows().values() {
-        let _ = window.set_always_on_top(aot);
+    for (label, window) in app.webview_windows() {
+        if label == "mini" || label == "menu" {
+            let _ = window.set_always_on_top(aot);
+        } else if label == "main" {
+            let _ = window.set_always_on_top(false);
+        }
     }
     
     settings
@@ -289,12 +325,86 @@ fn find_monitor_for_window(window: &WebviewWindow) -> Option<(usize, tauri::Moni
         }
     }
     
-    // Second fallback: return first monitor if available
-    if !monitors.is_empty() {
-        return Some((0, monitors[0].clone()));
-    }
-    
     None
+}
+
+fn compute_next_relax_run(time_str: &str) -> chrono::DateTime<Local> {
+    let parts: Vec<&str> = time_str.split(':').collect();
+    if parts.len() != 2 {
+        return Local::now();
+    }
+    let h: u32 = parts[0].parse().unwrap_or(22);
+    let m: u32 = parts[1].parse().unwrap_or(0);
+    
+    let now = Local::now();
+    let today_candidate = now
+        .date_naive()
+        .and_hms_opt(h, m, 0)
+        .unwrap_or_else(|| now.naive_local());
+        
+    let today_dt = Local.from_local_datetime(&today_candidate)
+        .single()
+        .unwrap_or_else(|| now);
+        
+    if today_dt > now {
+        today_dt
+    } else {
+        today_dt + chrono::Duration::days(1)
+    }
+}
+
+fn relax_scheduler_loop(app: AppHandle) {
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        
+        let settings = load_settings(&app);
+        if !settings.relax_scheduler.enabled {
+            continue;
+        }
+        
+        let state = app.state::<AlarmState>();
+        let now = Local::now();
+        
+        let mut next_run_opt = match state.relax_next_run.lock() {
+            Ok(guard) => guard,
+            Err(_) => continue,
+        };
+        
+        let next_run = match *next_run_opt {
+            Some(dt) => dt,
+            None => {
+                let dt = compute_next_relax_run(&settings.relax_scheduler.time);
+                *next_run_opt = Some(dt);
+                dt
+            }
+        };
+        
+        if now >= next_run {
+            // Trigger!
+            let trigger_data = serde_json::json!({
+                "track": settings.relax_scheduler.track,
+                "duration": settings.relax_scheduler.duration,
+            });
+            let _ = app.emit("relax:trigger", trigger_data);
+            
+            // Compute next run
+            let repeat = settings.relax_scheduler.repeat;
+            let next_dt = if repeat > 0 {
+                now + chrono::Duration::minutes(repeat as i64)
+            } else {
+                // One-shot: disable scheduler in settings
+                let mut updated_settings = settings.clone();
+                updated_settings.relax_scheduler.enabled = false;
+                save_settings_to_file(&app, &updated_settings);
+                let _ = app.emit("settings:updated", &updated_settings);
+                
+                // Fallback to one year from now
+                now + chrono::Duration::days(365)
+            };
+            
+            *next_run_opt = Some(next_dt);
+        }
+    }
 }
 
 fn watch_monitors(app: AppHandle) {
@@ -643,10 +753,14 @@ fn menu_action(app: AppHandle, action: String) -> bool {
             settings.always_on_top = !settings.always_on_top;
             save_settings_to_file(&app, &settings);
             
-            // Apply to all windows
+            // Apply to always-on-top windows only (mini, menu)
             let aot = settings.always_on_top;
-            for window in app.webview_windows().values() {
-                let _ = window.set_always_on_top(aot);
+            for (label, window) in app.webview_windows() {
+                if label == "mini" || label == "menu" {
+                    let _ = window.set_always_on_top(aot);
+                } else if label == "main" {
+                    let _ = window.set_always_on_top(false);
+                }
             }
             
             // Broadcast update
@@ -1233,6 +1347,12 @@ pub fn run() {
             let app_for_monitors = app.handle().clone();
             std::thread::spawn(move || {
                 watch_monitors(app_for_monitors);
+            });
+
+            // Relax scheduler loop (robust backend time check)
+            let app_for_relax = app.handle().clone();
+            std::thread::spawn(move || {
+                relax_scheduler_loop(app_for_relax);
             });
 
             Ok(())

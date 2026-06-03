@@ -3085,6 +3085,7 @@
 
                 window.audioEngine.setVolume(s.relaxVolume || 0.8);
                 if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
+                if (typeof applySchedUI === "function") applySchedUI(s);
             }
 
             function showCustomFile(which, p) {
@@ -4340,34 +4341,23 @@
                 .addEventListener("click", () => window.cc.hideWindow("main"));
 
             // ═══════════════════════════════════════════════════════════
-            // AUTO SCHEDULER
+            // AUTO SCHEDULER (Backend Assisted)
             // ═══════════════════════════════════════════════════════════
-            const SCHED_KEY = 'cyberclock_relax_scheduler';
             const ALL_TRACKS = ['night','forest','space','ocean','rain','fireplace'];
-            let schedConfig = { enabled: false, time: '22:00', repeat: 60, track: 'random-one', duration: 15 };
-            let schedChecker = null;
-            let schedNextRun = null;
             let shuffleQueue = [];
 
-            function loadSched() {
-                try { const raw = localStorage.getItem(SCHED_KEY); if (raw) schedConfig = JSON.parse(raw); } catch (_) {}
-                applySchedUI();
-                startSchedChecker();
+            function applySchedUI(s) {
+                const sched = s.relaxScheduler || {};
+                document.getElementById('sched-enable').checked = !!sched.enabled;
+                document.getElementById('sched-time').value = sched.time || '22:00';
+                document.getElementById('sched-repeat').value = String(sched.repeat || 60);
+                document.getElementById('sched-track').value = sched.track || 'random-one';
+                document.getElementById('sched-duration').value = String(sched.duration || 15);
+                updateSchedStatus(sched);
             }
-            function saveSched() {
-                localStorage.setItem(SCHED_KEY, JSON.stringify(schedConfig));
-                updateSchedStatus();
-            }
-            function applySchedUI() {
-                document.getElementById('sched-enable').checked = schedConfig.enabled;
-                document.getElementById('sched-time').value = schedConfig.time || '22:00';
-                document.getElementById('sched-repeat').value = String(schedConfig.repeat || 60);
-                document.getElementById('sched-track').value = schedConfig.track || 'random-one';
-                document.getElementById('sched-duration').value = String(schedConfig.duration || 15);
-                updateSchedStatus();
-            }
-            function getSchedTrack() {
-                const t = schedConfig.track;
+            function getSchedTrack(trackOverride) {
+                const sched = cfg.relaxScheduler || {};
+                const t = trackOverride || sched.track || 'random-one';
                 if (t === 'random-one') return ALL_TRACKS[Math.floor(Math.random() * ALL_TRACKS.length)];
                 if (t === 'shuffle-all') {
                     if (shuffleQueue.length === 0) shuffleQueue = [...ALL_TRACKS].sort(() => Math.random() - 0.5);
@@ -4375,18 +4365,10 @@
                 }
                 return t;
             }
-            function calcNextRun() {
-                if (!schedConfig.enabled) { schedNextRun = null; return; }
-                const [h, m] = (schedConfig.time || '22:00').split(':').map(Number);
-                const now = new Date();
-                let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-                if (next <= now) next.setDate(next.getDate() + 1);
-                schedNextRun = next;
-            }
-            function updateSchedStatus() {
+            function updateSchedStatus(sched) {
                 const statusEl = document.getElementById('sched-status');
                 const nextEl = document.getElementById('sched-next');
-                if (!schedConfig.enabled) {
+                if (!sched || !sched.enabled) {
                     statusEl.textContent = 'OFF';
                     statusEl.classList.remove('on');
                     nextEl.textContent = 'Next run: —';
@@ -4394,71 +4376,40 @@
                 }
                 statusEl.textContent = 'ON';
                 statusEl.classList.add('on');
-                if (schedNextRun) {
-                    nextEl.textContent = `Next: ${pad(schedNextRun.getHours())}:${pad(schedNextRun.getMinutes())}`;
-                } else { nextEl.textContent = 'Next run: —'; }
-            }
-            function checkSched() {
-                if (!schedConfig.enabled || !schedNextRun) return;
+                
+                // Estimate next run (handled precisely by backend)
+                const [h, m] = (sched.time || '22:00').split(':').map(Number);
                 const now = new Date();
-                if (now >= schedNextRun) {
-                    // Trigger!
-                    const track = getSchedTrack();
-                    preSelectRelaxTrack(track);
-                    rSelected = track;
-                    rPlayTrack();
-                    // Duration auto-stop
-                    const dur = parseInt(schedConfig.duration);
-                    if (dur > 0) {
-                        rAstMins = dur;
-                        rStartAutoStop(dur * 60);
-                        document.querySelectorAll(".ast-btn").forEach((x) =>
-                            x.classList.toggle("on", parseInt(x.dataset.min) === dur)
-                        );
-                    }
-                    // Calculate next
-                    const repeat = parseInt(schedConfig.repeat) || 0;
-                    if (repeat > 0) {
-                        schedNextRun = new Date(now.getTime() + repeat * 60000);
-                    } else {
-                        schedConfig.enabled = false;
-                        document.getElementById('sched-enable').checked = false;
-                        saveSched();
-                    }
-                    updateSchedStatus();
-                }
-            }
-            function startSchedChecker() {
-                if (schedChecker) clearInterval(schedChecker);
-                calcNextRun();
-                updateSchedStatus();
-                schedChecker = setInterval(checkSched, 1000);
+                let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+                if (next <= now) next.setDate(next.getDate() + 1);
+                nextEl.textContent = `Next: ${pad(next.getHours())}:${pad(next.getMinutes())}`;
             }
 
             // Scheduler event listeners
             document.getElementById('sched-enable').addEventListener('change', (e) => {
-                schedConfig.enabled = e.target.checked;
-                calcNextRun();
-                saveSched();
+                window.cc.saveSettings({
+                    relaxScheduler: { ...cfg.relaxScheduler, enabled: e.target.checked }
+                });
             });
             document.getElementById('sched-time').addEventListener('change', (e) => {
-                schedConfig.time = e.target.value;
-                calcNextRun();
-                saveSched();
+                window.cc.saveSettings({
+                    relaxScheduler: { ...cfg.relaxScheduler, time: e.target.value }
+                });
             });
             document.getElementById('sched-repeat').addEventListener('change', (e) => {
-                schedConfig.repeat = parseInt(e.target.value);
-                calcNextRun();
-                saveSched();
+                window.cc.saveSettings({
+                    relaxScheduler: { ...cfg.relaxScheduler, repeat: parseInt(e.target.value) }
+                });
             });
             document.getElementById('sched-track').addEventListener('change', (e) => {
-                schedConfig.track = e.target.value;
-                if (schedConfig.track === 'shuffle-all') shuffleQueue = [];
-                saveSched();
+                window.cc.saveSettings({
+                    relaxScheduler: { ...cfg.relaxScheduler, track: e.target.value }
+                });
             });
             document.getElementById('sched-duration').addEventListener('change', (e) => {
-                schedConfig.duration = parseInt(e.target.value);
-                saveSched();
+                window.cc.saveSettings({
+                    relaxScheduler: { ...cfg.relaxScheduler, duration: parseInt(e.target.value) }
+                });
             });
 
             // ══════════════════════════════════════════════════════════════
@@ -4466,7 +4417,6 @@
             // ══════════════════════════════════════════════════════════════
             window.cc.onInit((s) => {
                 applySettings(s);
-                loadSched();
                 setInterval(updateDigital, 1000);
                 updateDigital();
                 const now = new Date();
@@ -4507,6 +4457,21 @@
                         p.sound || "chime-digital",
                         cfg.alarmVolume || 0.75,
                     );
+            });
+
+            window.cc.onRelaxTrigger((p) => {
+                const track = getSchedTrack(p.track);
+                preSelectRelaxTrack(track);
+                rSelected = track;
+                rPlayTrack();
+                const dur = parseInt(p.duration);
+                if (dur > 0) {
+                    rAstMins = dur;
+                    rStartAutoStop(dur * 60);
+                    document.querySelectorAll(".ast-btn").forEach((x) =>
+                        x.classList.toggle("on", parseInt(x.dataset.min) === dur)
+                    );
+                }
             });
         </script>
     </body>

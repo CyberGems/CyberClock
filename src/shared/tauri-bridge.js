@@ -118,6 +118,9 @@
         onAlarmChime: (cb) => {
             listen("alarm:chime", (event) => cb(event.payload));
         },
+        onRelaxTrigger: (cb) => {
+            listen("relax:trigger", (event) => cb(event.payload));
+        },
         onMiniContextMenu: (cb) => {
             listen("mini:context-menu", (event) => cb(event.payload));
         },
