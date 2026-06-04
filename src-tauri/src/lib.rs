@@ -107,6 +107,9 @@ pub struct AppSettings {
     pub custom_alarms: Vec<CustomAlarm>,
 
     pub relax_scheduler: RelaxSchedulerSettings,
+
+    pub language: String,
+    pub breathe_pattern: String,
 }
 
 impl Default for AppSettings {
@@ -137,6 +140,8 @@ impl Default for AppSettings {
             scanlines: true,
             custom_alarms: vec![CustomAlarm::default(), CustomAlarm::default(), CustomAlarm::default()],
             relax_scheduler: RelaxSchedulerSettings::default(),
+            language: "auto".to_string(),
+            breathe_pattern: "box".to_string(),
         }
     }
 }

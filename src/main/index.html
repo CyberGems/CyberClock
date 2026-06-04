@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <style>
             /* ════════════════════════════════════════════════════
@@ -368,6 +369,99 @@
             .nav-item:hover .nav-lbl {
                 color: var(--accent-a);
                 text-shadow: var(--glow-xs);
+            }
+
+            /* ════════════════════════════════════════════════════
+   PREMIUM ICON SYSTEM (inline SVG from icons.js)
+   ════════════════════════════════════════════════════ */
+            /* Gradient stops follow the active theme */
+            #cc-grad-main .g0 { stop-color: var(--accent-a); }
+            #cc-grad-main .g1 { stop-color: var(--accent-c); }
+
+            /* Base: duotone stroke + neon glow */
+            .cc-ico {
+                overflow: visible;
+                transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                            filter 0.2s ease;
+            }
+            /* Stroke-based icons → gradient */
+            .cc-ico path[stroke],
+            .cc-ico circle[stroke],
+            .cc-ico line[stroke],
+            .cc-ico polyline[stroke],
+            .cc-ico rect[stroke] {
+                stroke: url(#cc-grad-main) !important;
+            }
+            /* Fill-based icons → accent colour + glow */
+            .cc-ico path[fill]:not([fill="none"]),
+            .cc-ico rect[fill]:not([fill="none"]) {
+                fill: var(--accent-a) !important;
+            }
+            /* Default neon glow */
+            .cc-ico {
+                filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.45));
+            }
+            /* Hover: brighter + scale */
+            .nav-item:hover .cc-ico,
+            .wmbtn:hover .cc-ico,
+            .btn-mini-pill:hover .cc-ico,
+            .abtn:hover .cc-ico,
+            .tcard:hover .cc-ico,
+            .s-close:hover .cc-ico,
+            .s-abtn:hover .cc-ico,
+            .s-fclr:hover .cc-ico,
+            .s-brand:hover .cc-ico,
+            .r-vol-row .cc-ico,
+            .s-vol-row .cc-ico,
+            .ctx-item:hover .cc-ico {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.8))
+                        drop-shadow(0 0 12px rgba(var(--rgb-accent), 0.35));
+            }
+            /* Active nav glow */
+            .nav-item.active .cc-ico {
+                filter: drop-shadow(0 0 5px rgba(var(--rgb-accent), 0.65))
+                            drop-shadow(0 0 10px rgba(var(--rgb-accent), 0.3));
+            }
+            /* Danger icons (close X) */
+            .cc-ico.danger,
+            .wmbtn.close .cc-ico,
+            .s-close .cc-ico,
+            .s-fclr .cc-ico {
+                filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.45));
+            }
+            .wmbtn.close:hover .cc-ico,
+            .s-close:hover .cc-ico,
+            .s-fclr:hover .cc-ico {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 6px rgba(255, 68, 102, 0.8))
+                        drop-shadow(0 0 12px rgba(255, 68, 102, 0.35));
+            }
+            .wmbtn.close .cc-ico path[stroke],
+            .wmbtn.close .cc-ico circle[stroke],
+            .s-close .cc-ico path[stroke],
+            .s-close .cc-ico circle[stroke],
+            .s-fclr .cc-ico path[stroke],
+            .s-fclr .cc-ico circle[stroke] {
+                stroke: url(#cc-grad-danger) !important;
+            }
+
+            /* Explicit icon sizes where font-size would make 1em too small */
+            .wmbtn .cc-ico,
+            .s-close .cc-ico {
+                width: 14px;
+                height: 14px;
+            }
+            .abtn .cc-ico,
+            .s-abtn .cc-ico {
+                width: 13px;
+                height: 13px;
+                vertical-align: -0.18em;
+            }
+            .r-vol-row .cc-ico,
+            .s-vol-row .cc-ico {
+                width: 13px;
+                height: 13px;
             }
 
             /* View adjustments for bottom nav clearing */
@@ -1283,21 +1377,25 @@
                 transition: opacity 0.3s;
             }
             .tcard.on .wbar {
+                opacity: 0.38;
+                height: 3px;
+            }
+            .tcard.playing .wbar {
                 opacity: 0.7;
             }
-            .tcard.on .wbar:nth-child(1) {
+            .tcard.playing .wbar:nth-child(1) {
                 animation: w1 0.8s ease-in-out infinite;
             }
-            .tcard.on .wbar:nth-child(2) {
+            .tcard.playing .wbar:nth-child(2) {
                 animation: w2 0.9s ease-in-out infinite 0.1s;
             }
-            .tcard.on .wbar:nth-child(3) {
+            .tcard.playing .wbar:nth-child(3) {
                 animation: w3 0.7s ease-in-out infinite 0.2s;
             }
-            .tcard.on .wbar:nth-child(4) {
+            .tcard.playing .wbar:nth-child(4) {
                 animation: w2 0.85s ease-in-out infinite 0.05s;
             }
-            .tcard.on .wbar:nth-child(5) {
+            .tcard.playing .wbar:nth-child(5) {
                 animation: w1 0.75s ease-in-out infinite 0.15s;
             }
             @keyframes w1 {
@@ -1327,6 +1425,7 @@
                     height: 4px;
                 }
             }
+
 
             .r-play-row {
                 display: flex;
@@ -1448,6 +1547,116 @@
                 padding: 16px;
                 flex: 1;
             }
+            /* Breathing Pacer */
+            .breathe-wrap {
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 12px 16px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 20px;
+                min-height: 120px;
+            }
+            .breathe-left {
+                width: 110px;
+                height: 110px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .breathe-right {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+            .breathe-right-title {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                letter-spacing: 2px;
+                color: var(--text-lo);
+                text-transform: uppercase;
+            }
+            .breathe-desc {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--text-md);
+                line-height: 1.4;
+                margin-top: 2px;
+            }
+            .breathe-circle {
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                border: 3px solid var(--accent-a);
+                background: rgba(var(--rgb-accent), 0.03);
+                box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.25),
+                            inset 0 0 12px rgba(var(--rgb-accent), 0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.1s linear, border-color 0.4s, box-shadow 0.4s;
+                position: relative;
+                cursor: pointer;
+            }
+            .breathe-circle:hover {
+                border-color: var(--accent-b);
+                box-shadow: 0 0 16px rgba(var(--rgb-accent), 0.4),
+                            inset 0 0 16px rgba(var(--rgb-accent), 0.25);
+            }
+            .breathe-circle::before {
+                content: "";
+                position: absolute;
+                inset: -6px;
+                border-radius: 50%;
+                border: 1px dashed rgba(var(--rgb-accent), 0.25);
+                opacity: 0.5;
+            }
+            #breathe-phase {
+                font-family: "Orbitron", monospace;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-align: center;
+            }
+            .breathe-pat-toggle {
+                display: flex;
+                background: var(--bg-02);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 2px;
+            }
+            .breathe-pat-btn {
+                font-family: "Orbitron", monospace;
+                font-size: 7.5px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                background: transparent;
+                border: none;
+                color: var(--text-lo);
+                padding: 4px 10px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+                -webkit-app-region: no-drag;
+            }
+            .breathe-pat-btn:hover {
+                color: var(--text-md);
+            }
+            .breathe-pat-btn.on {
+                background: var(--accent-dim);
+                color: var(--accent-a);
+                box-shadow: var(--glow-xs);
+                font-weight: 700;
+            }
             .ses-title {
                 font-family: "Orbitron", monospace;
                 font-size: 8px;
@@ -1503,7 +1712,7 @@
             }
             .tip-text {
                 font-family: "Share Tech Mono", monospace;
-                font-size: 11px;
+                font-size: 12.5px;
                 color: var(--text-md);
                 line-height: 1.6;
                 transition: opacity 0.4s;
@@ -2093,6 +2302,50 @@
                 letter-spacing: 1px;
             }
 
+            /* ── Premium Tooltips ── */
+            [data-tooltip] {
+                position: relative;
+            }
+            [data-tooltip]::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                transform: translate(-50%, 6px);
+                background: rgba(10, 16, 26, 0.95);
+                border: 1px solid rgba(var(--rgb-accent), 0.35);
+                color: var(--accent-a);
+                padding: 6px 12px;
+                border-radius: 5px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                letter-spacing: 1px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                            transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), var(--glow-xs);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                z-index: 999;
+            }
+            [data-tooltip]:not([data-tooltip=""]):hover::after {
+                opacity: 1;
+                transform: translate(-50%, 0);
+                transition-delay: 0.85s;
+            }
+            /* Direction modifiers */
+            [data-tooltip-dir="bottom"]::after {
+                bottom: auto;
+                top: calc(100% + 8px);
+                transform: translate(-50%, -6px);
+            }
+            [data-tooltip-dir="bottom"]:not([data-tooltip=""]):hover::after {
+                transform: translate(-50%, 0);
+                transition-delay: 0.85s;
+            }
+
             /* scanlines */
             .scanlines {
                 position: fixed;
@@ -2114,6 +2367,33 @@
         </style>
     </head>
     <body data-theme="cyber-blue">
+        <!-- Theme-aware gradients for the premium icon system -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+                <linearGradient
+                    id="cc-grad-main"
+                    gradientUnits="userSpaceOnUse"
+                    x1="2"
+                    y1="2"
+                    x2="22"
+                    y2="22"
+                >
+                    <stop class="g0" offset="0" />
+                    <stop class="g1" offset="1" />
+                </linearGradient>
+                <linearGradient
+                    id="cc-grad-danger"
+                    gradientUnits="userSpaceOnUse"
+                    x1="2"
+                    y1="2"
+                    x2="22"
+                    y2="22"
+                >
+                    <stop offset="0" stop-color="#ff6680" />
+                    <stop offset="1" stop-color="#ff2d55" />
+                </linearGradient>
+            </defs>
+        </svg>
         <div class="app">
             <div class="scanlines"></div>
 
@@ -2383,10 +2663,10 @@
                     <div class="view" id="view-relax">
                         <div class="relax-L">
                             <div class="track-grid">
-                                <div class="tcard" data-track="night">
+                                <div class="tcard" data-track="night" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
                                     <div class="tcard-ico"><span data-ico="stars" data-ico-size="28"></span></div>
-                                    <div class="tcard-name">Night</div>
-                                    <div class="tcard-desc">Calm night ambience</div>
+                                    <div class="tcard-name" data-i18n="relax.track.night">Night</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.night.desc">Calm night ambience</div>
                                     <div class="tcard-wave">
                                         <div class="wbar"></div>
                                         <div class="wbar"></div>
@@ -2395,10 +2675,10 @@
                                         <div class="wbar"></div>
                                     </div>
                                 </div>
-                                <div class="tcard" data-track="forest">
-                                    <div class="tcard-ico">🌲</div>
-                                    <div class="tcard-name">Forest</div>
-                                    <div class="tcard-desc">
+                                <div class="tcard" data-track="forest" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
+                                    <div class="tcard-ico"><span data-ico="trees" data-ico-size="28"></span></div>
+                                    <div class="tcard-name" data-i18n="relax.track.forest">Forest</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.forest.desc">
                                         Birds &amp; wind
                                     </div>
                                     <div class="tcard-wave">
@@ -2409,10 +2689,10 @@
                                         <div class="wbar"></div>
                                     </div>
                                 </div>
-                                <div class="tcard" data-track="space">
+                                <div class="tcard" data-track="space" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
                                     <div class="tcard-ico"><span data-ico="planet" data-ico-size="28"></span></div>
-                                    <div class="tcard-name">Outer Space</div>
-                                    <div class="tcard-desc">Cosmic drones</div>
+                                    <div class="tcard-name" data-i18n="relax.track.space">Outer Space</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.space.desc">Cosmic drones</div>
                                     <div class="tcard-wave">
                                         <div class="wbar"></div>
                                         <div class="wbar"></div>
@@ -2421,10 +2701,10 @@
                                         <div class="wbar"></div>
                                     </div>
                                 </div>
-                                <div class="tcard" data-track="ocean">
-                                    <div class="tcard-ico">🌊</div>
-                                    <div class="tcard-name">Ocean</div>
-                                    <div class="tcard-desc">Rolling waves</div>
+                                <div class="tcard" data-track="ocean" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
+                                    <div class="tcard-ico"><span data-ico="waves" data-ico-size="28"></span></div>
+                                    <div class="tcard-name" data-i18n="relax.track.ocean">Ocean</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.ocean.desc">Rolling waves</div>
                                     <div class="tcard-wave">
                                         <div class="wbar"></div>
                                         <div class="wbar"></div>
@@ -2433,10 +2713,10 @@
                                         <div class="wbar"></div>
                                     </div>
                                 </div>
-                                <div class="tcard" data-track="rain">
-                                    <div class="tcard-ico">🌧</div>
-                                    <div class="tcard-name">Rain</div>
-                                    <div class="tcard-desc">
+                                <div class="tcard" data-track="rain" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
+                                    <div class="tcard-ico"><span data-ico="cloud-rain" data-ico-size="28"></span></div>
+                                    <div class="tcard-name" data-i18n="relax.track.rain">Rain</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.rain.desc">
                                         Steady rainfall
                                     </div>
                                     <div class="tcard-wave">
@@ -2447,10 +2727,10 @@
                                         <div class="wbar"></div>
                                     </div>
                                 </div>
-                                <div class="tcard" data-track="fireplace">
-                                    <div class="tcard-ico">🏡</div>
-                                    <div class="tcard-name">Fireplace</div>
-                                    <div class="tcard-desc">Indoor hearth</div>
+                                <div class="tcard" data-track="fireplace" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
+                                    <div class="tcard-ico"><span data-ico="flame" data-ico-size="28"></span></div>
+                                    <div class="tcard-name" data-i18n="relax.track.fireplace">Fireplace</div>
+                                    <div class="tcard-desc" data-i18n="relax.track.fireplace.desc">Warm crackling hearth</div>
                                     <div class="tcard-wave">
                                         <div class="wbar"></div>
                                         <div class="wbar"></div>
@@ -2461,16 +2741,20 @@
                                 </div>
                             </div>
                             <div class="r-play-row">
-                                <button class="abtn" id="r-play" style="flex: 1">
-                                    <span data-ico="play"></span> PLAY
-                                </button>
-                                <button
-                                    class="abtn red"
-                                    id="r-stop"
-                                    style="min-width: 80px; padding: 13px 18px"
-                                >
-                                    <span data-ico="stop"></span>
-                                </button>
+                                <div id="r-play-wrap" style="flex: 1;" data-tooltip="Activate continuous playlist mode (Zen Flow)" data-i18n-attr="data-tooltip:relax.tooltip.play">
+                                    <button class="abtn" id="r-play" style="width: 100%;">
+                                        <span data-ico="play"></span> <span id="r-play-text" data-i18n="relax.play">Zen Flow</span>
+                                    </button>
+                                </div>
+                                <div id="r-stop-wrap" data-tooltip="Stop playback and reset to Zen Flow" data-i18n-attr="data-tooltip:relax.tooltip.stop">
+                                    <button
+                                        class="abtn red"
+                                        id="r-stop"
+                                        style="min-width: 80px; padding: 13px 18px; width: 100%;"
+                                    >
+                                        <span data-ico="stop" data-ico-size="16"></span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="r-vol-row">
                                 <span class="r-vol-lbl">Volume</span>
@@ -2483,6 +2767,8 @@
                                     min="0"
                                     max="100"
                                     value="80"
+                                    data-tooltip="Adjust relaxation volume"
+                                    data-i18n-attr="data-tooltip:relax.tooltip.vol"
                                 />
                                 <span style="font-size: 11px; color: var(--text-lo)"
                                     ><span data-ico="volume-high"></span></span
@@ -2492,20 +2778,20 @@
                                 >
                             </div>
                             <div class="r-ast-row">
-                                <span class="r-ast-lbl">Auto Stop</span>
-                                <button class="ast-btn on" data-min="0">
+                                <span class="r-ast-lbl" data-i18n="relax.autoStop">Auto Stop</span>
+                                <button class="ast-btn on" data-min="0" data-tooltip="Disable auto-stop timer" data-i18n-attr="data-tooltip:relax.tooltip.ast.off">
                                     OFF
                                 </button>
-                                <button class="ast-btn" data-min="15">
+                                <button class="ast-btn" data-min="15" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                     15m
                                 </button>
-                                <button class="ast-btn" data-min="30">
+                                <button class="ast-btn" data-min="30" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                     30m
                                 </button>
-                                <button class="ast-btn" data-min="60">
+                                <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                     1h
                                 </button>
-                                <button class="ast-btn" data-min="120">
+                                <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                     2h
                                 </button>
                                 <span
@@ -2524,7 +2810,7 @@
                                 <div class="sched-row" style="justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <span class="sched-lbl" style="width: auto;">Enable</span>
-                                        <label class="tog-sm">
+                                        <label class="tog-sm" data-tooltip="Schedule automatic playback times" data-i18n-attr="data-tooltip:relax.tooltip.scheduler">
                                             <input type="checkbox" id="sched-enable" />
                                             <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
                                         </label>
@@ -2576,25 +2862,45 @@
                         </div>
                         <div class="relax-R">
                             <div class="viz-wrap">
-                                <div class="viz-title">◈ Audio Spectrum</div>
+                                <div class="viz-title" data-i18n="relax.audioSpectrum">◈ Audio Spectrum</div>
                                 <canvas id="viz-canvas" height="200"></canvas>
                             </div>
+                            <div class="breathe-wrap">
+                                <div class="breathe-left">
+                                    <div class="breathe-circle" id="breathe-circle" data-tooltip="Click to toggle playback and breathing guide" data-i18n-attr="data-tooltip:relax.tooltip.breatheCircle">
+                                        <span id="breathe-phase" data-i18n="relax.breathe.start">Ready</span>
+                                    </div>
+                                </div>
+                                <div class="breathe-right">
+                                    <div class="breathe-right-title" data-i18n="relax.breathePattern">Breathing Pattern</div>
+                                    <div class="breathe-pat-toggle">
+                                        <button class="breathe-pat-btn" id="breathe-btn-box" data-pat="box" data-i18n="relax.box">Box 4-4-4-4</button>
+                                        <button class="breathe-pat-btn" id="breathe-btn-478" data-pat="478" data-i18n="relax.relax478">4-7-8</button>
+                                    </div>
+                                    <div class="breathe-desc" id="breathe-guide-text" data-i18n="relax.breathe.guide.ready">Click circle or Zen Flow to start</div>
+                                </div>
+                            </div>
                             <div class="ses-panel">
-                                <div class="ses-title">◈ Session</div>
+                                <div class="ses-title" data-i18n="relax.sessionTitle">◈ Session</div>
                                 <div class="ses-timer" id="r-ses">
                                     00:00:00
                                 </div>
-                                <div class="ses-timer-lbl">Session Time</div>
+                                <div class="ses-timer-lbl" data-i18n="relax.sessionTime">Session Time</div>
                                 <div class="ndiv"></div>
                                 <div class="tip-box">
-                                    <div class="tip-lbl">Mindfulness Tip</div>
-                                    <div class="tip-text" id="r-tip">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <div class="tip-lbl" data-i18n="relax.tipLabel">Mindfulness Tip</div>
+                                        <button id="r-next-tip" class="lap-act" style="padding: 2px 8px; font-size: 7.5px; height: 18px;" data-i18n="relax.nextTip" data-tooltip="Show next mindfulness tip" data-i18n-attr="data-tooltip:relax.tooltip.nextTip">Next</button>
+                                    </div>
+                                    <div class="tip-text" id="r-tip" aria-live="polite">
                                         Start a track to begin your session.
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="r-notify" id="r-notify">
+
+
+                        <div class="r-notify" id="r-notify" data-i18n="relax.complete">
                             ✓ Session Complete
                         </div>
                     </div>
@@ -2855,6 +3161,17 @@
                     <!-- General -->
                     <div class="s-panel" id="stab-general">
                         <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.langTitle">Language</div>
+                            <div class="s-row">
+                                <div class="s-lbl" data-i18n="settings.langTitle">Language</div>
+                                <select id="s-lang">
+                                    <option value="auto" data-i18n="settings.langAuto">System default</option>
+                                    <option value="en" data-i18n="settings.langEn">English</option>
+                                    <option value="es" data-i18n="settings.langEs">Español</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="s-sec">
                             <div class="s-sec-t">Behavior</div>
                             <div class="s-row">
                                 <div class="s-lbl">
@@ -3022,14 +3339,7 @@
                 "NOV",
                 "DEC",
             ];
-            const TIPS = [
-                "Close your eyes and focus on each breath.",
-                "Let thoughts pass like clouds — observe, don't engage.",
-                "Scan your body from head to toe. Release tension.",
-                "Count your exhales from 1 to 10, then start again.",
-                "Notice 5 things you can hear right now.",
-                "Place a hand on your chest. Feel it rise and fall.",
-            ];
+            // TIPS is now structured inside i18n.js
 
             function pad(n, w = 2) {
                 return String(n).padStart(w, "0");
@@ -3108,7 +3418,7 @@
                 if (v === "home") {
                     setTimeout(startClockAnim, 60);
                 }
-                if (v === "relax" && window.audioEngine.isPlaying) startViz();
+                if (v === "relax") startViz();
             }
             function onLeave(v) {
                 if (v === "relax") stopViz();
@@ -3176,6 +3486,26 @@
                 const suEl = document.getElementById("s-startup");
                 if (suEl) suEl.checked = !!s.startWithWindows;
 
+                const langEl = document.getElementById("s-lang");
+                if (langEl) langEl.value = s.language || "auto";
+                window.ccI18n.setLang(s.language || "auto");
+                window.ccI18n.apply(document);
+
+                // Update the Play/Pause button text and guide text for the new language
+                if (typeof updatePlayButtonUI === "function") {
+                    updatePlayButtonUI(window.audioEngine.isPlaying);
+                }
+                if (!rPacerActive) {
+                    const guideLabel = document.getElementById("breathe-guide-text");
+                    if (guideLabel) guideLabel.textContent = window.ccI18n.t("relax.breathe.guide.ready");
+                }
+
+                // Apply breathing pattern active button class
+                const breathePat = s.breathePattern || "box";
+                document.querySelectorAll(".breathe-pat-btn").forEach((btn) => {
+                    btn.classList.toggle("on", btn.dataset.pat === breathePat);
+                });
+
                 const ah = s.alarmHalfHour || {};
                 const af = s.alarmFullHour || {};
                 const hEn = document.getElementById("s-half-en");
@@ -3210,6 +3540,9 @@
 
                 window.audioEngine.setVolume(s.relaxVolume || 0.8);
                 if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
+                if (typeof updatePlayingTrackCardClass === "function") {
+                    updatePlayingTrackCardClass(window.audioEngine.isPlaying);
+                }
                 if (typeof applySchedUI === "function") applySchedUI(s);
             }
 
@@ -4014,6 +4347,8 @@
             // ══════════════════════════════════════════════════════════════
             // RELAX + AUDIO ENGINE
             // ══════════════════════════════════════════════════════════════
+            const ZEN_FLOW_TRACK_DURATION = 15 * 60 * 1000; // 15 minutes per track
+
             let rSelected = null,
                 rSesStart = null,
                 rSesInterval = null,
@@ -4024,8 +4359,212 @@
                 rAstTimer = null,
                 vizRaf = null,
                 rSaveTimer = null;
+            let rPacerActive = false,
+                rPacerTimer = null,
+                rPacerStart = null;
+            let zenFlowActive = false,
+                zenFlowTimer = null,
+                zenFlowQueue = [];
+
+            function startZenFlow() {
+                zenFlowActive = true;
+                if (zenFlowTimer) clearTimeout(zenFlowTimer);
+                
+                const track = nextZenFlowTrack();
+                preSelectRelaxTrack(track);
+                rSelected = track;
+                
+                window.audioEngine.playTrack(track);
+                window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+                updatePlayButtonUI(true);
+                
+                rStartSession();
+                startViz();
+                startBreathePacer();
+                rStartTips();
+                window.cc.saveSettings({ lastRelaxTrack: rSelected });
+                if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
+                
+                updatePlayingTrackCardClass(true);
+                scheduleNextZenFlowTrack();
+            }
+
+            function stopZenFlow() {
+                zenFlowActive = false;
+                zenFlowQueue = [];
+                if (zenFlowTimer) {
+                    clearTimeout(zenFlowTimer);
+                    zenFlowTimer = null;
+                }
+            }
+
+            function scheduleNextZenFlowTrack() {
+                if (zenFlowTimer) clearTimeout(zenFlowTimer);
+                zenFlowTimer = setTimeout(() => {
+                    if (zenFlowActive && window.audioEngine.isPlaying) {
+                        const track = nextZenFlowTrack();
+                        preSelectRelaxTrack(track);
+                        rSelected = track;
+                        
+                        window.audioEngine.playTrack(track);
+                        window.cc.saveSettings({ lastRelaxTrack: rSelected });
+                        showNextTip();
+                        
+                        updatePlayingTrackCardClass(true);
+                        scheduleNextZenFlowTrack();
+                    }
+                }, ZEN_FLOW_TRACK_DURATION);
+            }
+
+            function nextZenFlowTrack() {
+                const tracks = ['night', 'forest', 'space', 'ocean', 'rain', 'fireplace'];
+                if (zenFlowQueue.length === 0) {
+                    // Create shuffled list of all 6 tracks
+                    zenFlowQueue = [...tracks].sort(() => Math.random() - 0.5);
+                    // Ensure the first track of the new set doesn't match the last played track
+                    if (rSelected && zenFlowQueue[0] === rSelected && zenFlowQueue.length > 1) {
+                        const tmp = zenFlowQueue[0];
+                        zenFlowQueue[0] = zenFlowQueue[1];
+                        zenFlowQueue[1] = tmp;
+                    }
+                }
+                return zenFlowQueue.shift();
+            }
+
+            function updatePlayButtonUI(isPlaying) {
+                const playBtn = document.getElementById("r-play");
+                if (!playBtn) return;
+                const iconName = isPlaying ? "pause" : "play";
+                
+                let text = "";
+                let labelKey = "";
+                let tooltipKey = "";
+                if (isPlaying) {
+                    if (zenFlowActive) {
+                        labelKey = "relax.pauseZenFlow";
+                        text = window.ccI18n.t("relax.pauseZenFlow");
+                        tooltipKey = "relax.tooltip.pauseZenFlow";
+                    } else {
+                        labelKey = "relax.pauseTrack";
+                        const trackName = window.ccI18n.t("relax.track." + rSelected);
+                        text = window.ccI18n.t("relax.pauseTrack", { track: trackName });
+                        tooltipKey = "relax.tooltip.pauseTrack";
+                    }
+                } else {
+                    labelKey = "relax.play";
+                    text = window.ccI18n.t("relax.play");
+                    tooltipKey = "relax.tooltip.play";
+                }
+                
+                playBtn.innerHTML = `<span data-ico="${iconName}"></span> <span id="r-play-text" data-i18n="${labelKey}">${text}</span>`;
+                if (window.ccIcons) {
+                    window.ccIcons.replaceIcons(playBtn);
+                }
+                
+                // Update dynamic tooltip wrapper
+                const playWrap = document.getElementById("r-play-wrap");
+                if (playWrap) {
+                    playWrap.setAttribute("data-i18n-attr", `data-tooltip:${tooltipKey}`);
+                    if (tooltipKey === "relax.tooltip.pauseTrack") {
+                        const trackName = window.ccI18n.t("relax.track." + rSelected);
+                        playWrap.setAttribute("data-tooltip", window.ccI18n.t("relax.tooltip.pauseTrack", { track: trackName }));
+                    } else {
+                        playWrap.setAttribute("data-tooltip", window.ccI18n.t(tooltipKey));
+                    }
+                }
+            }
+
+            const boxPhases = [
+                { name: "inhale", duration: 4000, startScale: 1.0, endScale: 1.5 },
+                { name: "hold", duration: 4000, startScale: 1.5, endScale: 1.5 },
+                { name: "exhale", duration: 4000, startScale: 1.5, endScale: 1.0 },
+                { name: "hold", duration: 4000, startScale: 1.0, endScale: 1.0 }
+            ];
+            const relax478Phases = [
+                { name: "inhale", duration: 4000, startScale: 1.0, endScale: 1.5 },
+                { name: "hold", duration: 7000, startScale: 1.5, endScale: 1.5 },
+                { name: "exhale", duration: 8000, startScale: 1.5, endScale: 1.0 }
+            ];
+
+            function easeInOut(t) {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            }
+
+            function startBreathePacer() {
+                stopBreathePacer();
+                rPacerActive = true;
+                const pattern = cfg.breathePattern || "box";
+                const phases = pattern === "478" ? relax478Phases : boxPhases;
+                const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
+                rPacerStart = performance.now();
+                
+                function tick() {
+                    if (!rPacerActive) return;
+                    const elapsed = (performance.now() - rPacerStart) % totalDuration;
+                    
+                    let accumulated = 0;
+                    let currentPhase = phases[0];
+                    let phaseElapsed = 0;
+                    
+                    for (const p of phases) {
+                        if (elapsed < accumulated + p.duration) {
+                            currentPhase = p;
+                            phaseElapsed = elapsed - accumulated;
+                            break;
+                        }
+                        accumulated += p.duration;
+                    }
+                    
+                    const progress = phaseElapsed / currentPhase.duration;
+                    const easedProgress = easeInOut(progress);
+                    const scale = currentPhase.startScale + (currentPhase.endScale - currentPhase.startScale) * easedProgress;
+                    
+                    const circle = document.getElementById("breathe-circle");
+                    if (circle) {
+                        circle.style.transform = `scale(${scale})`;
+                    }
+                    const phaseLabel = document.getElementById("breathe-phase");
+                    if (phaseLabel) {
+                        const phaseText = window.ccI18n.t(`relax.breathe.${currentPhase.name}`);
+                        if (phaseLabel.textContent !== phaseText) {
+                            phaseLabel.textContent = phaseText;
+                        }
+                    }
+                    const guideLabel = document.getElementById("breathe-guide-text");
+                    if (guideLabel) {
+                        const guideText = window.ccI18n.t(`relax.breathe.guide.${currentPhase.name}`);
+                        if (guideLabel.textContent !== guideText) {
+                            guideLabel.textContent = guideText;
+                        }
+                    }
+                    
+                    rPacerTimer = requestAnimationFrame(tick);
+                }
+                rPacerTimer = requestAnimationFrame(tick);
+            }
+
+            function stopBreathePacer() {
+                rPacerActive = false;
+                if (rPacerTimer) {
+                    cancelAnimationFrame(rPacerTimer);
+                    rPacerTimer = null;
+                }
+                const circle = document.getElementById("breathe-circle");
+                if (circle) {
+                    circle.style.transform = "";
+                }
+                const phaseLabel = document.getElementById("breathe-phase");
+                if (phaseLabel) {
+                    phaseLabel.textContent = window.ccI18n.t("relax.breathe.start");
+                }
+                const guideLabel = document.getElementById("breathe-guide-text");
+                if (guideLabel) {
+                    guideLabel.textContent = window.ccI18n.t("relax.breathe.guide.ready");
+                }
+            }
 
             function preSelectRelaxTrack(id) {
+                console.log("[DEBUG] preSelectRelaxTrack called with:", id);
                 rSelected = id;
                 document
                     .querySelectorAll(".tcard")
@@ -4034,47 +4573,50 @@
                     );
             }
 
+            function updatePlayingTrackCardClass(isPlaying) {
+                const playing = typeof isPlaying === "boolean" ? isPlaying : window.audioEngine.isPlaying;
+                console.log("[DEBUG] updatePlayingTrackCardClass called. isPlaying:", isPlaying, "playing:", playing, "rSelected:", rSelected);
+                document.querySelectorAll(".tcard").forEach((c) => {
+                    const shouldPlay = playing && c.dataset.track === rSelected;
+                    c.classList.toggle("playing", shouldPlay);
+                    if (c.dataset.track === rSelected) {
+                        console.log("[DEBUG] Card " + c.dataset.track + " playing class set to:", shouldPlay, "classList:", c.className);
+                    }
+                });
+            }
+
+            // Normal track play (triggered when a track is clicked manually)
             function rPlayTrack() {
                 if (!rSelected) return;
+                stopZenFlow();
                 window.audioEngine.playTrack(rSelected);
                 window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
-                document.getElementById("r-play").innerHTML =
-                    '<span data-ico="pause"></span> PAUSE';
-                window.ccIcons &&
-                    window.ccIcons.replaceIcons(
-                        document.getElementById("r-play"),
-                    );
+                updatePlayButtonUI(true);
                 rStartSession();
                 startViz();
+                startBreathePacer();
                 rStartTips();
                 window.cc.saveSettings({ lastRelaxTrack: rSelected });
                 if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
+                updatePlayingTrackCardClass(true);
             }
 
             function rStop() {
+                stopZenFlow();
                 window.audioEngine.stop();
-                document.getElementById("r-play").innerHTML =
-                    '<span data-ico="play"></span> PLAY';
-                window.ccIcons &&
-                    window.ccIcons.replaceIcons(
-                        document.getElementById("r-play"),
-                    );
+                updatePlayButtonUI(false);
                 rStopSession();
-                stopViz();
+                stopBreathePacer();
                 rStopTips();
                 rClearAutoStop();
+                updatePlayingTrackCardClass(false);
             }
 
             function rTogglePlay() {
-                if (!rSelected) {
-                    preSelectRelaxTrack("night");
-                    rPlayTrack();
-                    return;
-                }
                 if (window.audioEngine.isPlaying) {
                     rStop();
                 } else {
-                    rPlayTrack();
+                    startZenFlow();
                 }
             }
 
@@ -4097,21 +4639,90 @@
                 document.getElementById("r-ses").textContent = "00:00:00";
             }
 
-            function rStartTips() {
-                if (rTipInterval) clearInterval(rTipInterval);
-                document.getElementById("r-tip").textContent = TIPS[rTipIdx];
-                rTipInterval = setInterval(() => {
-                    rTipIdx = (rTipIdx + 1) % TIPS.length;
-                    const el = document.getElementById("r-tip");
+            // Mindfulness Tips Shuffled progressive logic
+            let rTipsShufflePool = [];
+            let rCurrentTipPhase = null;
+            let rCurrentTipTrack = null;
+
+            function getCurrentPhase() {
+                if (!rSesStart) return "opening";
+                const elapsedMs = Date.now() - rSesStart;
+                
+                // If auto-stop is active, determine by remaining time and total duration
+                if (rAstMins > 0 && rAstRemain > 0) {
+                    if (rAstRemain <= 60) {
+                        return "closing";
+                    }
+                    const totalSecs = rAstMins * 60;
+                    const elapsedSecs = totalSecs - rAstRemain;
+                    if (elapsedSecs < totalSecs / 3) {
+                        return "opening";
+                    } else if (elapsedSecs < (2 * totalSecs) / 3) {
+                        return "deepening";
+                    } else {
+                        return "closing";
+                    }
+                }
+                
+                // Fallback (infinite session): use elapsed thresholds
+                if (elapsedMs < 120000) { // 2 minutes
+                    return "opening";
+                } else if (elapsedMs < 420000) { // 7 minutes
+                    return "deepening";
+                } else {
+                    return "closing";
+                }
+            }
+
+            function getTipsPool(phase, track) {
+                let specificPool = window.ccI18n.t(`tips.${phase}.${track}`);
+                let defaultPool = window.ccI18n.t(`tips.${phase}.default`);
+                if (!Array.isArray(specificPool)) specificPool = [];
+                if (!Array.isArray(defaultPool)) defaultPool = [];
+                return [...specificPool, ...defaultPool];
+            }
+
+            function showNextTip() {
+                const phase = getCurrentPhase();
+                const track = rSelected || "default";
+                
+                if (phase !== rCurrentTipPhase || track !== rCurrentTipTrack || rTipsShufflePool.length === 0) {
+                    rCurrentTipPhase = phase;
+                    rCurrentTipTrack = track;
+                    rTipsShufflePool = getTipsPool(phase, track);
+                    // Shuffling
+                    rTipsShufflePool.sort(() => Math.random() - 0.5);
+                }
+                
+                const tip = rTipsShufflePool.pop() || "Focus on your breath.";
+                const el = document.getElementById("r-tip");
+                if (el) {
                     el.classList.add("fade");
                     setTimeout(() => {
-                        el.textContent = TIPS[rTipIdx];
+                        el.textContent = tip;
                         el.classList.remove("fade");
                     }, 400);
-                }, 30000);
+                }
             }
+
+            function rStartTips() {
+                if (rTipInterval) clearInterval(rTipInterval);
+                
+                // Reset shuffle state for the session
+                rTipsShufflePool = [];
+                rCurrentTipPhase = null;
+                rCurrentTipTrack = null;
+                
+                // Show first tip immediately
+                showNextTip();
+                
+                // Set cycle loop (30s)
+                rTipInterval = setInterval(showNextTip, 30000);
+            }
+
             function rStopTips() {
                 if (rTipInterval) clearInterval(rTipInterval);
+                rTipInterval = null;
             }
 
             function rStartAutoStop(secs) {
@@ -4162,10 +4773,6 @@
                         return;
                     }
                     ctx.clearRect(0, 0, w, h);
-                    const data = window.audioEngine.getAnalyserData();
-                    const bars = 56,
-                        gap = Math.floor(w / bars),
-                        barW = gap - 1;
                     const acc =
                         getComputedStyle(document.body)
                             .getPropertyValue("--accent-a")
@@ -4174,25 +4781,65 @@
                         getComputedStyle(document.body)
                             .getPropertyValue("--rgb-accent")
                             .trim() || "0,212,255";
-                    for (let i = 0; i < bars; i++) {
-                        const idx = Math.floor((i * data.length) / bars);
-                        let v = (data[idx] || 0) / 255;
-                        if (!window.audioEngine.isPlaying)
-                            v =
-                                Math.sin(Date.now() / 1400 + i * 0.28) * 0.018 +
-                                0.018;
-                        const bh = Math.max(2, v * h * 0.88),
-                            x = i * gap,
-                            y = h - bh;
-                        const g = ctx.createLinearGradient(0, y, 0, h);
-                        g.addColorStop(0, acc);
-                        g.addColorStop(1, `rgba(${rgb},.18)`);
-                        ctx.fillStyle = g;
-                        ctx.fillRect(x, y, barW, bh);
-                        ctx.fillStyle = `rgba(${rgb},.07)`;
-                        ctx.fillRect(x, h, barW, bh * 0.28);
-                        ctx.fillStyle = acc;
-                        ctx.fillRect(x, y - 2, barW, 2);
+                    if (window.audioEngine.isPlaying) {
+                        const data = window.audioEngine.getAnalyserData();
+                        const bars = 56;
+                        const gap = w / bars;
+                        for (let i = 0; i < bars; i++) {
+                            const percent = i / (bars - 1 || 1);
+                            const maxActiveBin = Math.floor(data.length * 0.32);
+                            const idx = Math.floor(Math.pow(percent, 1.8) * maxActiveBin);
+                            let v = (data[idx] || 0) / 255;
+                            // Boost higher frequencies slightly for visual balance
+                            v = Math.min(1.0, v * (1 + percent * 0.8));
+                            const bh = Math.max(2, v * h * 0.88),
+                                x = Math.floor(i * gap),
+                                nextX = Math.floor((i + 1) * gap),
+                                barW = Math.max(1, nextX - x - 1),
+                                y = h - bh;
+                            const g = ctx.createLinearGradient(0, y, 0, h);
+                            g.addColorStop(0, acc);
+                            g.addColorStop(1, `rgba(${rgb},.18)`);
+                            ctx.fillStyle = g;
+                            ctx.fillRect(x, y, barW, bh);
+                            ctx.fillStyle = `rgba(${rgb},.07)`;
+                            ctx.fillRect(x, h, barW, bh * 0.28);
+                            ctx.fillStyle = acc;
+                            ctx.fillRect(x, y - 2, barW, 2);
+                        }
+                    } else {
+                        const time = Date.now() * 0.001;
+                        ctx.lineWidth = 1.5;
+                        
+                        ctx.strokeStyle = `rgba(${rgb}, 0.08)`;
+                        ctx.beginPath();
+                        ctx.moveTo(0, h / 2);
+                        ctx.lineTo(w, h / 2);
+                        ctx.stroke();
+
+                        for (let wIdx = 0; wIdx < 3; wIdx++) {
+                            ctx.beginPath();
+                            const opacity = 0.05 + (wIdx * 0.04);
+                            ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
+                            
+                            const freq = 0.008 + (wIdx * 0.004);
+                            const amp = 15 + (wIdx * 8);
+                            const speed = 1.2 + (wIdx * 0.5);
+                            
+                            for (let x = 0; x < w; x++) {
+                                const angle = (x * freq) + (time * speed);
+                                const y = (h / 2) + Math.sin(angle) * amp * Math.cos(x * 0.002);
+                                if (x === 0) ctx.moveTo(x, y);
+                                else ctx.lineTo(x, y);
+                            }
+                            ctx.stroke();
+                        }
+                        
+                        ctx.fillStyle = `rgba(${rgb}, 0.5)`;
+                        ctx.font = "9px 'Share Tech Mono', monospace";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText("SYSTEM STANDBY  ◈  ZEN FLOW READY", w / 2, h - 15);
                     }
                     vizRaf = requestAnimationFrame(draw);
                 }
@@ -4214,15 +4861,21 @@
             document.querySelectorAll(".tcard").forEach((card) => {
                 card.addEventListener("click", () => {
                     const t = card.dataset.track;
+                    console.log("[DEBUG] Card clicked:", t, "rSelected:", rSelected, "isPlaying:", window.audioEngine.isPlaying);
+                    stopZenFlow();
                     if (rSelected === t && window.audioEngine.isPlaying) {
                         rStop();
                         return;
                     }
                     preSelectRelaxTrack(t);
                     rSelected = t;
-                    if (window.audioEngine.isPlaying)
+                    if (window.audioEngine.isPlaying) {
                         window.audioEngine.playTrack(t);
-                    else rPlayTrack();
+                        updatePlayButtonUI(true);
+                        updatePlayingTrackCardClass(true);
+                    } else {
+                        rPlayTrack();
+                    }
                 });
             });
 
@@ -4235,6 +4888,15 @@
                     .querySelectorAll(".tcard")
                     .forEach((c) => c.classList.remove("on"));
                 rSelected = null;
+            });
+
+            // Breathing circle click toggles playback
+            document.getElementById("breathe-circle").addEventListener("click", () => {
+                if (window.audioEngine.isPlaying) {
+                    rStop();
+                } else {
+                    startZenFlow();
+                }
             });
 
             document.getElementById("r-vol").addEventListener("input", (e) => {
@@ -4264,6 +4926,20 @@
                     if (m > 0 && window.audioEngine.isPlaying)
                         rStartAutoStop(m * 60);
                     else rClearAutoStop();
+                });
+            });
+
+            document.querySelectorAll(".breathe-pat-btn").forEach((b) => {
+                b.addEventListener("click", () => {
+                    const pat = b.dataset.pat;
+                    window.cc.saveSettings({ breathePattern: pat });
+                    document
+                        .querySelectorAll(".breathe-pat-btn")
+                        .forEach((x) =>
+                            x.classList.toggle("on", x.dataset.pat === pat),
+                        );
+                    cfg.breathePattern = pat;
+                    if (rPacerActive) startBreathePacer();
                 });
             });
 
@@ -4421,6 +5097,11 @@
                         startWithWindows: e.target.checked,
                     });
                 });
+            document
+                .getElementById("s-lang")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ language: e.target.value }),
+                );
 
             // Alarms
             document
@@ -4632,11 +5313,24 @@
                 });
             });
 
+            document.getElementById("r-next-tip").addEventListener("click", showNextTip);
+
+            window.ccI18n.onChange((effective, configured) => {
+                if (!window.audioEngine.isPlaying) {
+                    const el = document.getElementById("r-tip");
+                    if (el) el.textContent = window.ccI18n.t("relax.startPrompt");
+                } else {
+                    showNextTip();
+                }
+            });
+
             // ══════════════════════════════════════════════════════════════
             // IPC
             // ══════════════════════════════════════════════════════════════
             window.cc.onInit((s) => {
                 applySettings(s);
+                const startPromptEl = document.getElementById("r-tip");
+                if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
                 setInterval(updateDigital, 1000);
                 updateDigital();
                 const now = new Date();
@@ -4693,6 +5387,7 @@
                     );
                 }
             });
+
         </script>
     </body>
 </html>
