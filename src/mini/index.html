@@ -1047,9 +1047,9 @@
                 background: transparent;
                 border: none;
                 outline: none;
-                color: var(--text-md);
-                width: 18px;
-                height: 18px;
+                color: var(--accent-a);                  /* neon, not muted */
+                width: 20px;
+                height: 20px;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
@@ -1060,15 +1060,31 @@
             }
             .ctl-btn:hover {
                 color: var(--accent-a);
-                transform: scale(1.15);
-                background: rgba(var(--rgb-accent), 0.1);
+                transform: scale(1.18);
+                background: rgba(var(--rgb-accent), 0.12);
             }
             .ctl-btn:active {
-                transform: scale(0.95);
+                transform: scale(0.92);
             }
             #btn-aot.active {
                 color: var(--accent-a);
-                filter: drop-shadow(0 0 4px rgba(var(--rgb-accent), 0.5));
+            }
+            #btn-aot.active .ctl-ico {
+                filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.9));
+            }
+
+            /* Inline SVG icons — currentColor from the button, plus glow */
+            .ctl-ico {
+                display: block;
+                width: 16px;
+                height: 16px;
+                overflow: visible;
+                filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.5));
+                transition: filter 0.2s, transform 0.2s;
+            }
+            .ctl-btn:hover .ctl-ico {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 7px rgba(var(--rgb-accent), 0.85));
             }
 
             @keyframes pulse-dot {
@@ -1089,10 +1105,22 @@
             <div class="sep"></div>
             <div class="controls">
                 <button class="ctl-btn" id="btn-aot" title="Toggle Always on Top">
-                    <span data-ico="pin" data-ico-size="13"></span>
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <g transform="rotate(45 12 12)">
+                            <path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.58A2 2 0 0 1 15 9.18V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.18a2 2 0 0 1-.78 1.58l-2.78 3.58A2 2 0 0 0 5 15.24Z"/>
+                            <path d="M12 17v5"/>
+                        </g>
+                    </svg>
                 </button>
                 <button class="ctl-btn" id="btn-full" title="Full mode">
-                    <span data-ico="expand" data-ico-size="13"></span>
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M15 3h6v6"/>
+                        <path d="M9 21H3v-6"/>
+                        <path d="M21 3l-7 7"/>
+                        <path d="M3 21l7-7"/>
+                    </svg>
                 </button>
             </div>
         </div>

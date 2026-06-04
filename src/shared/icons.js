@@ -1,6 +1,8 @@
 /**
  * CyberClock — Shared Icon System
- * Injects an SVG sprite + replaces `[data-ico]` placeholders with `<svg><use/></svg>`.
+ * Injects an SVG sprite + replaces `[data-ico]` placeholders with inline `<svg>`
+ * cloned from the sprite symbols. This lets the consuming page style strokes
+ * and fills freely (gradients, glow filters, etc.).
  */
 (() => {
     "use strict";
@@ -14,7 +16,7 @@
         style.id = STYLE_ID;
         style.textContent = `
           .cc-ico{display:inline-block;width:1em;height:1em;flex-shrink:0;vertical-align:-0.125em}
-          .cc-ico use{pointer-events:none}
+          .cc-ico > *{pointer-events:none}
           .cc-ico{color:currentColor}
         `;
         document.head.appendChild(style);
@@ -97,14 +99,14 @@
       d="M15 18l-6-6 6-6"/>
   </symbol>
   <symbol id="cc-i-play" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M9 7.5v9l8-4.5-8-4.5Z"/>
+    <path fill="currentColor" d="M7 4v16l13-8-13-8Z"/>
   </symbol>
   <symbol id="cc-i-stop" viewBox="0 0 24 24">
-    <rect x="7.5" y="7.5" width="9" height="9" fill="currentColor" rx="1.4"/>
+    <rect x="5" y="5" width="14" height="14" fill="currentColor" rx="2"/>
   </symbol>
   <symbol id="cc-i-pause" viewBox="0 0 24 24">
-    <rect x="7" y="6" width="3.5" height="12" fill="currentColor" rx="1.2"/>
-    <rect x="13.5" y="6" width="3.5" height="12" fill="currentColor" rx="1.2"/>
+    <rect x="6" y="4" width="4" height="16" fill="currentColor" rx="1.5"/>
+    <rect x="14" y="4" width="4" height="16" fill="currentColor" rx="1.5"/>
   </symbol>
   <symbol id="cc-i-flag" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
@@ -218,19 +220,28 @@
         ensureSprite();
         root.querySelectorAll("[data-ico]").forEach((el) => {
             const name = el.getAttribute("data-ico");
-            const href = icoNameToSymbol(name);
-            if (!href) return;
+            const symId = icoNameToSymbol(name)?.replace("#", "");
+            if (!symId) return;
+            const symbol = document.getElementById(symId);
+            if (!symbol) return;
+
             const size = el.getAttribute("data-ico-size"); // optional numeric px
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("class", "cc-ico");
             svg.setAttribute("aria-hidden", "true");
+            const vb = symbol.getAttribute("viewBox");
+            if (vb) svg.setAttribute("viewBox", vb);
             if (size) {
                 svg.style.width = `${size}px`;
                 svg.style.height = `${size}px`;
             }
-            const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-            use.setAttribute("href", href);
-            svg.appendChild(use);
+
+            // Clone every child node from the symbol so the icon is fully
+            // independent and can be styled by the page (gradients, glow, etc.).
+            symbol.childNodes.forEach((node) => {
+                svg.appendChild(node.cloneNode(true));
+            });
+
             el.replaceChildren(svg);
             el.removeAttribute("data-ico");
             el.removeAttribute("data-ico-size");
