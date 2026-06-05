@@ -501,7 +501,7 @@
                 });
             }
 
-            // Design Mode click handlers
+            // Design Mode click handlers (allows previewing multiple layouts without closing)
             document.querySelectorAll(".design-btn").forEach((btn) => {
                 btn.addEventListener("click", () => {
                     const mode = parseInt(btn.dataset.mode);
@@ -510,9 +510,6 @@
                     
                     if (window.cc && window.cc.saveSettings) {
                         window.cc.saveSettings({ miniDesign: mode });
-                    }
-                    if (window.cc && window.cc.closeMenuPopup) {
-                        setTimeout(() => window.cc.closeMenuPopup(), 200);
                     }
                 });
             });

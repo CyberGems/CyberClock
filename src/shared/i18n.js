@@ -150,7 +150,28 @@
             "tips.closing.fireplace": [
                 "The embers are warm and safe. Keep this comfort in your heart.",
                 "Gently stretch your body as the fire rests."
-            ]
+            ],
+
+            // Calendar
+            "calendar.label": "◈ Calendar",
+            "calendar.today": "Today",
+            "calendar.upcoming": "◈ Upcoming",
+            "calendar.todayPanel": "◈ Today",
+            "calendar.noNotes": "No notes yet — click any day to add one.",
+            "calendar.noNotesTip": "Click any day in the calendar to attach a note. The first line will appear as a preview in your agenda.",
+            "calendar.notePlaceholder": "Write a note for this day…",
+            "calendar.save": "Save",
+            "calendar.delete": "Delete",
+            "calendar.note": "Note",
+            "calendar.stat.dayOfYear": "Day of year",
+            "calendar.stat.week": "ISO week",
+            "calendar.stat.daysLeftYear": "Days left in year",
+            "calendar.stat.daysLeftMonth": "Left in month",
+            "calendar.stat.moon": "Moon phase",
+            "mini.tooltip.aot": "Toggle Always on Top",
+            "mini.tooltip.full": "Full mode",
+            "mini.tip.todaysNote": "Today's note",
+            "mini.tip.upcoming": "upcoming"
         },
         es: {
             "relax.sessionTitle": "◈ Sesión",
@@ -297,7 +318,28 @@
             "tips.closing.fireplace": [
                 "Las brasas están cálidas y seguras. Guarda este confort en tu corazón.",
                 "Estira suavemente tu cuerpo mientras el fuego descansa."
-            ]
+            ],
+
+            // Calendar
+            "calendar.label": "◈ Calendario",
+            "calendar.today": "Hoy",
+            "calendar.upcoming": "◈ Próximos",
+            "calendar.todayPanel": "◈ Hoy",
+            "calendar.noNotes": "Sin notas aún — haz clic en un día para añadir una.",
+            "calendar.noNotesTip": "Haz clic en cualquier día del calendario para adjuntar una nota. La primera línea aparecerá como vista previa en tu agenda.",
+            "calendar.notePlaceholder": "Escribe una nota para este día…",
+            "calendar.save": "Guardar",
+            "calendar.delete": "Eliminar",
+            "calendar.note": "Nota",
+            "calendar.stat.dayOfYear": "Día del año",
+            "calendar.stat.week": "Semana ISO",
+            "calendar.stat.daysLeftYear": "Días restantes del año",
+            "calendar.stat.daysLeftMonth": "Restantes del mes",
+            "calendar.stat.moon": "Fase lunar",
+            "mini.tooltip.aot": "Alternar siempre visible",
+            "mini.tooltip.full": "Modo completo",
+            "mini.tip.todaysNote": "Nota de hoy",
+            "mini.tip.upcoming": "próximos"
         }
     };
 

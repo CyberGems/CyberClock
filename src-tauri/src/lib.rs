@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -87,6 +88,7 @@ pub struct AppSettings {
     pub show_seconds: bool,
     pub always_on_top: bool,
     pub start_with_windows: bool,
+    pub start_in_mini_mode: bool,
     pub window_mode: String,
     pub mini_position: Option<(i32, i32)>,
     pub mini_opacity: f64,
@@ -96,11 +98,15 @@ pub struct AppSettings {
     pub preferred_display_id: Option<u32>,
     pub alarm_half_hour: AlarmSettings,
     pub alarm_full_hour: AlarmSettings,
+    pub alarm_quarter_hour: AlarmSettings,
+    pub alarm_schedule_enabled: bool,
+    pub alarm_schedule_start: String,
+    pub alarm_schedule_end: String,
     pub alarm_volume: f64,
     pub relax_volume: f64,
     pub relax_auto_timer: u32,
     pub last_relax_track: Option<String>,
-    pub scanlines: bool,
+    pub mini_scanlines: bool,
 
     // Roadmap B: Custom alarm times (HH:MM) with day-of-week repetition
     // (No snooze for now)
@@ -110,6 +116,9 @@ pub struct AppSettings {
 
     pub language: String,
     pub breathe_pattern: String,
+
+    // Calendar day notes: ISO date key "YYYY-MM-DD" -> note text
+    pub calendar_notes: HashMap<String, String>,
 }
 
 impl Default for AppSettings {
@@ -119,7 +128,8 @@ impl Default for AppSettings {
             clock_format: "12h".to_string(),
             show_seconds: true,
             always_on_top: false,
-            start_with_windows: false,
+            start_with_windows: true,
+            start_in_mini_mode: true,
             window_mode: "mini".to_string(),
             mini_position: None,
             mini_opacity: 1.0,
@@ -133,15 +143,20 @@ impl Default for AppSettings {
                 sound: "chime-digital".to_string(),
                 custom_path: None,
             },
+            alarm_quarter_hour: AlarmSettings::default(),
+            alarm_schedule_enabled: false,
+            alarm_schedule_start: "08:00".to_string(),
+            alarm_schedule_end: "17:00".to_string(),
             alarm_volume: 0.75,
             relax_volume: 0.8,
             relax_auto_timer: 0,
             last_relax_track: None,
-            scanlines: true,
+            mini_scanlines: true,
             custom_alarms: vec![CustomAlarm::default(), CustomAlarm::default(), CustomAlarm::default()],
             relax_scheduler: RelaxSchedulerSettings::default(),
             language: "auto".to_string(),
             breathe_pattern: "box".to_string(),
+            calendar_notes: HashMap::new(),
         }
     }
 }
@@ -187,6 +202,7 @@ fn save_settings_to_file(app: &AppHandle, settings: &AppSettings) {
 pub struct AlarmState {
     pub last_half_hour: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub last_full_hour: Mutex<Option<u32>>,         // hour
+    pub last_quarter_hour: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
 }
 
@@ -739,9 +755,11 @@ fn close_mini_context_menu(app: AppHandle) {
 
 #[tauri::command]
 fn menu_action(app: AppHandle, action: String) -> bool {
-    // Hide menu first
-    if let Some(menu) = app.get_webview_window("menu") {
-        let _ = menu.hide();
+    // Hide menu first (except for "aot" which needs a visual delay in the UI)
+    if action != "aot" {
+        if let Some(menu) = app.get_webview_window("menu") {
+            let _ = menu.hide();
+        }
     }
     
     match action.as_str() {
@@ -779,7 +797,17 @@ fn menu_action(app: AppHandle, action: String) -> bool {
             }
             true
         }
-        _ => false
+        _ => {
+            if action.starts_with("open-note:") {
+                switch_to_full_mode(app.clone());
+                if let Some(main) = app.get_webview_window("main") {
+                    let _ = main.emit("mini:menu-action", &action);
+                }
+                true
+            } else {
+                false
+            }
+        }
     }
 }
 
@@ -915,11 +943,12 @@ fn set_startup(app: AppHandle, on: bool) {
     {
         use std::process::Command;
         if on {
-            // Add to startup via registry
+            // Add to startup via registry with --startup flag
             let exe_path = std::env::current_exe().ok().map(|p| p.to_string_lossy().to_string()).unwrap_or_default();
+            let reg_value = format!("\"{}\" --startup", exe_path);
             let _ = Command::new("reg")
                 .args(["add", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 
-                       "/v", "CyberClock", "/d", &exe_path, "/f"])
+                       "/v", "CyberClock", "/d", &reg_value, "/f"])
                 .output();
         } else {
             let _ = Command::new("reg")
@@ -934,16 +963,67 @@ fn set_startup(app: AppHandle, on: bool) {
 // Alarm System
 // ─────────────────────────────────────────────────────────────
 
+fn parse_time(time_str: &str) -> (u32, u32) {
+    let parts: Vec<&str> = time_str.split(':').collect();
+    if parts.len() == 2 {
+        let h = parts[0].parse().unwrap_or(0);
+        let m = parts[1].parse().unwrap_or(0);
+        (h, m)
+    } else {
+        (0, 0)
+    }
+}
+
+fn is_time_in_alarm_schedule(now: chrono::DateTime<Local>, settings: &AppSettings) -> bool {
+    if !settings.alarm_schedule_enabled {
+        return true;
+    }
+    let (sh, sm) = parse_time(&settings.alarm_schedule_start);
+    let (eh, em) = parse_time(&settings.alarm_schedule_end);
+    let now_minutes = now.hour() * 60 + now.minute();
+    let start_minutes = sh * 60 + sm;
+    let end_minutes = eh * 60 + em;
+    if start_minutes <= end_minutes {
+        now_minutes >= start_minutes && now_minutes <= end_minutes
+    } else {
+        // Crosses midnight
+        now_minutes >= start_minutes || now_minutes <= end_minutes
+    }
+}
+
 fn check_alarms(app: &AppHandle) {
     let settings = load_settings(app);
     let now = Local::now();
     let minute = now.minute();
     let hour = now.hour();
 
+    if !is_time_in_alarm_schedule(now, &settings) {
+        return;
+    }
+
     let alarm_state = app.state::<AlarmState>();
 
-    // Check half-hour alarm
-    if settings.alarm_half_hour.enabled && minute == 30 {
+    // Check quarter-hour alarm (at :00, :15, :30, and :45)
+    if settings.alarm_quarter_hour.enabled && (minute == 0 || minute == 15 || minute == 30 || minute == 45) {
+        let mut last = alarm_state.last_quarter_hour.lock().unwrap();
+        if last.map_or(true, |(h, m)| h != hour || m != minute) {
+            *last = Some((hour, minute));
+            drop(last);
+
+            // Emit alarm event
+            let alarm_data = serde_json::json!({
+                "type": "quarter-hour",
+                "sound": settings.alarm_quarter_hour.sound,
+                "customPath": settings.alarm_quarter_hour.custom_path,
+                "volume": settings.alarm_volume
+            });
+
+            let _ = app.emit("alarm:chime", alarm_data);
+        }
+    }
+
+    // Check half-hour alarm (at :00 and :30)
+    if settings.alarm_half_hour.enabled && (minute == 0 || minute == 30) {
         let mut last = alarm_state.last_half_hour.lock().unwrap();
         if last.map_or(true, |(h, m)| h != hour || m != minute) {
             *last = Some((hour, minute));
@@ -1232,8 +1312,15 @@ fn show_initial_window(app: &AppHandle) {
         let _ = window.hide();
     }
     
+    let is_startup = std::env::args().any(|arg| arg == "--startup");
+    let is_mini = if is_startup && settings.start_in_mini_mode {
+        true
+    } else {
+        settings.window_mode != "full"
+    };
+
     // Show appropriate window based on mode
-    if settings.window_mode == "full" {
+    if !is_mini {
         if let Some(main) = app.get_webview_window("main") {
             // Find preferred display or fallback to first
             let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
