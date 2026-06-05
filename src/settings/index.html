@@ -533,7 +533,7 @@
             }
         </style>
     </head>
-    <body data-theme="cyber-blue">
+    <body data-theme="arctic-ice">
         <div class="shell">
             <!-- Title bar -->
             <div class="tbar">
@@ -557,6 +557,13 @@
                     <div class="section">
                         <div class="sec-title">Theme / Skin</div>
                         <div class="themes" id="theme-tiles">
+                            <div class="theme-tile" data-theme="arctic-ice">
+                                <div
+                                    class="theme-dot"
+                                    style="background: #d0f0ff; color: #d0f0ff"
+                                ></div>
+                                <div class="theme-name">Arctic Ice</div>
+                            </div>
                             <div class="theme-tile" data-theme="cyber-blue">
                                 <div
                                     class="theme-dot"
@@ -584,13 +591,6 @@
                                     style="background: #ff6600; color: #ff6600"
                                 ></div>
                                 <div class="theme-name">Solar Orange</div>
-                            </div>
-                            <div class="theme-tile" data-theme="arctic-ice">
-                                <div
-                                    class="theme-dot"
-                                    style="background: #d0f0ff; color: #d0f0ff"
-                                ></div>
-                                <div class="theme-name">Arctic Ice</div>
                             </div>
                         </div>
                     </div>
@@ -907,7 +907,7 @@
 
             function applySettings(s) {
                 cfg = s;
-                document.body.dataset.theme = s.theme || "cyber-blue";
+                document.body.dataset.theme = s.theme || "arctic-ice";
                 if (s.scanlines === false)
                     document.body.classList.add("no-scanlines");
                 else document.body.classList.remove("no-scanlines");

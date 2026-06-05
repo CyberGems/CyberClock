@@ -1110,6 +1110,11 @@
                 justify-content: center;
                 gap: 26px;
                 padding: var(--view-pad-y) var(--view-pad-x);
+                /* NOTE: do NOT set position here — .view is already
+                   position:absolute (filling the container), which both keeps
+                   justify-content:center working AND anchors the .t-hint
+                   snackbar. An id-level position:relative collapses the view to
+                   content height and pins everything to the top. */
                 background: radial-gradient(
                     ellipse at 50% 40%,
                     rgba(var(--rgb-accent), 0.05) 0%,
@@ -1120,6 +1125,55 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
+                position: relative;
+            }
+
+            /* ── Module title plate (Timer / Stopwatch) ──────────────
+               Floats above the digits via absolute positioning, so it
+               takes NO layout space and the carefully-aligned display
+               positions never move. There is no box — the engraved-well idiom
+               of the calendar's month field (.cal-grid) is carried by the
+               GLYPHS themselves: a soft shadow above each letter and a hairline
+               highlight on its lower edge press the type INTO the dark plane.
+               The letters ARE the recess. */
+            .module-title {
+                position: absolute;
+                left: 50%;
+                bottom: 100%;
+                transform: translateX(-50%);
+                margin-bottom: 28px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                pointer-events: none;
+                white-space: nowrap;
+            }
+            .module-title span {
+                font-family: "Orbitron", monospace;
+                font-size: 40px; /* ~3× the former 13px */
+                font-weight: 700;
+                letter-spacing: 8px;
+                padding-left: 8px; /* absorb trailing letter-spacing → true centre */
+                text-transform: uppercase;
+                /* Engraved type: glyph sits a touch dimmer than full accent, a
+                   dark shadow rides its upper inner edge while a light lip
+                   catches the lower edge — the carved-into-the-surface read of
+                   the well, now in the letters, no frame. */
+                color: rgba(var(--rgb-accent), 0.5);
+                text-shadow:
+                    0 -1px 1px rgba(0, 0, 0, 0.7),
+                    0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            /* Warning countdown turns the whole display red — keep the
+               title in sync so it doesn't read as a disconnected accent. */
+            .t-display.warn .module-title span {
+                /* same engraved cut, recoloured to the alarm red + a faint halo
+                   so it keeps presence without breaking the carved read */
+                color: rgba(255, 80, 80, 0.7);
+                text-shadow:
+                    0 -1px 1px rgba(0, 0, 0, 0.7),
+                    0 1px 0 rgba(255, 255, 255, 0.08),
+                    0 0 10px rgba(255, 68, 68, 0.35);
             }
             .t-seg-wrap {
                 display: flex;
@@ -1272,6 +1326,74 @@
                 box-shadow: var(--glow-xs);
             }
 
+            /* ── First-run "attract" sweep ────────────────────────────
+               A light travels across the presets in sequence — an elegant
+               slot-machine chase that invites the first pick. Each button
+               peaks ~0.6s after the previous (a tight ~2-button comet trail
+               so the left→right direction reads clearly), loops with a brief
+               pause, and is killed the instant the user touches a preset or
+               the custom inputs (not Start/Reset). */
+            .t-presets.attract .preset-btn {
+                animation: t-attract 8s ease-in-out infinite;
+            }
+            .t-presets.attract .preset-btn:nth-child(1) {
+                animation-delay: 0s;
+            }
+            .t-presets.attract .preset-btn:nth-child(2) {
+                animation-delay: 0.6s;
+            }
+            .t-presets.attract .preset-btn:nth-child(3) {
+                animation-delay: 1.2s;
+            }
+            .t-presets.attract .preset-btn:nth-child(4) {
+                animation-delay: 1.8s;
+            }
+            .t-presets.attract .preset-btn:nth-child(5) {
+                animation-delay: 2.4s;
+            }
+            .t-presets.attract .preset-btn:nth-child(6) {
+                animation-delay: 3s;
+            }
+            .t-presets.attract .preset-btn:nth-child(7) {
+                animation-delay: 3.6s;
+            }
+            .t-presets.attract .preset-btn:nth-child(8) {
+                animation-delay: 4.2s;
+            }
+            .t-presets.attract .preset-btn:nth-child(9) {
+                animation-delay: 4.8s;
+            }
+            /* A hovered button must NOT leave the sweep. Killing the animation
+               (animation: none) or pausing it desyncs that button for good —
+               on un-hover the browser restarts its timeline from zero, so its
+               animation-delay no longer lines up with its neighbours and the
+               comet's order falls apart. Instead we let the chase keep running
+               underneath and give hover feedback through `background` — the one
+               property the t-attract keyframe never touches — so nothing the
+               animation drives (glow/border/color/transform) is fought over. */
+            .t-presets.attract .preset-btn:hover {
+                background: var(--accent-dim);
+            }
+            @keyframes t-attract {
+                0%,
+                100% {
+                    box-shadow: none;
+                    border-color: var(--border-bright);
+                    color: var(--text-md);
+                }
+                5% {
+                    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.35);
+                    border-color: var(--border-active);
+                    color: var(--accent-a);
+                    transform: translateY(-1px);
+                }
+                15% {
+                    box-shadow: none;
+                    border-color: var(--border-bright);
+                    color: var(--text-md);
+                }
+            }
+
             .t-manual {
                 display: flex;
                 align-items: center;
@@ -1360,6 +1482,91 @@
             }
             .abtn.red:hover {
                 box-shadow: 0 0 14px rgba(255, 68, 68, 0.4);
+            }
+
+            /* ── START readiness states (Timer) ──────────────────────
+               A timer with no duration can't run, so the button shows it:
+               dim & quiet when there's nothing armed, then a gentle
+               breathing glow once a duration is set — turning a formerly
+               "dead" click into a clear, inviting affordance. */
+            .abtn.dormant {
+                opacity: 0.55;
+                border-color: var(--border);
+                color: var(--text-md);
+                box-shadow: none;
+            }
+            .abtn.dormant:hover {
+                opacity: 0.8;
+                box-shadow: none;
+                border-color: var(--border-bright);
+            }
+            .abtn.ready {
+                border-color: var(--border-active);
+                animation: t-ready 2.4s ease-in-out infinite;
+            }
+            @keyframes t-ready {
+                0%,
+                100% {
+                    box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.25);
+                }
+                50% {
+                    box-shadow: 0 0 16px rgba(var(--rgb-accent), 0.5);
+                }
+            }
+
+            /* Guidance shake — fired on the presets + custom inputs when
+               START is pressed with nothing set, pointing the eye to where
+               the time is chosen. Transform-only, so layout never moves. */
+            .shake {
+                animation: t-shake 0.42s ease;
+            }
+            @keyframes t-shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                20% {
+                    transform: translateX(-6px);
+                }
+                40% {
+                    transform: translateX(6px);
+                }
+                60% {
+                    transform: translateX(-4px);
+                }
+                80% {
+                    transform: translateX(4px);
+                }
+            }
+
+            /* Transient hint snackbar (absolute → zero layout impact). Sits
+               above the bottom nav, surfaced only at the moment of confusion. */
+            .t-hint {
+                position: absolute;
+                bottom: 112px;
+                left: 50%;
+                transform: translateX(-50%) translateY(8px);
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10.5px;
+                letter-spacing: 1px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                white-space: nowrap;
+                background: var(--bg-02);
+                border: 1px solid var(--border-bright);
+                padding: 8px 18px;
+                border-radius: 18px;
+                opacity: 0;
+                pointer-events: none;
+                transition:
+                    opacity 0.35s,
+                    transform 0.35s;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+                z-index: 5;
+            }
+            .t-hint.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
             }
 
             /* done overlay */
@@ -2985,7 +3192,7 @@
             }
         </style>
     </head>
-    <body data-theme="cyber-blue">
+    <body data-theme="arctic-ice">
         <!-- Theme-aware gradients for the premium icon system -->
         <svg width="0" height="0" style="position:absolute" aria-hidden="true">
             <defs>
@@ -3117,6 +3324,7 @@
                     <!-- TIMER -->
                     <div class="view" id="view-timer">
                         <div class="t-display" id="t-disp">
+                            <div class="module-title"><span>Timer</span></div>
                             <div class="t-seg-wrap">
                                 <div class="t-seg" id="t-h">00</div>
                                 <span class="t-seg-lbl">HH</span>
@@ -3146,7 +3354,7 @@
                                 style="width: 0%"
                             ></div>
                         </div>
-                        <div class="t-presets">
+                        <div class="t-presets attract" id="t-presets">
                             <button class="preset-btn" data-s="60">1m</button>
                             <button class="preset-btn" data-s="300">5m</button>
                             <button class="preset-btn" data-s="600">10m</button>
@@ -3163,7 +3371,7 @@
                             <button class="preset-btn" data-s="3600">1h</button>
                             <button class="preset-btn" data-s="7200">2h</button>
                         </div>
-                        <div class="t-manual">
+                        <div class="t-manual" id="t-manual">
                             <div
                                 style="
                                     display: flex;
@@ -3226,6 +3434,9 @@
                                 <span data-ico="stop"></span> RESET
                             </button>
                         </div>
+                        <div class="t-hint" id="t-hint">
+                            ◈ Pick a preset or set a custom time to start
+                        </div>
                         <div class="done-ov" id="t-done">
                             <div class="done-txt">TIME'S UP!</div>
                             <button
@@ -3246,6 +3457,7 @@
                     <div class="view" id="view-stopwatch">
                         <div class="sw-upper">
                             <div class="sw-disp" id="sw-disp">
+                                <div class="module-title"><span>Stopwatch</span></div>
                                 <div class="sw-seg" id="sw-h">00</div>
                                 <div class="sw-colon">:</div>
                                 <div class="sw-seg" id="sw-m">00</div>
@@ -3595,6 +3807,19 @@
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.appearance.themeTitle">Theme / Skin</div>
                             <div class="s-themes">
+                                <div class="s-ttile" data-theme="arctic-ice">
+                                    <div
+                                        class="s-tdot"
+                                        style="
+                                            background: #d0f0ff;
+                                            box-shadow: 0 0 8px #d0f0ff;
+                                            border-radius: 50%;
+                                            width: 20px;
+                                            height: 20px;
+                                        "
+                                    ></div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.arcticIce">Arctic Ice</div>
+                                </div>
                                 <div class="s-ttile" data-theme="cyber-blue">
                                     <div
                                         class="s-tdot"
@@ -3646,19 +3871,6 @@
                                         "
                                     ></div>
                                     <div class="s-tname" data-i18n="settings.appearance.theme.warmEmber">Warm Ember</div>
-                                </div>
-                                <div class="s-ttile" data-theme="arctic-ice">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #d0f0ff;
-                                            box-shadow: 0 0 8px #d0f0ff;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.arcticIce">Arctic Ice</div>
                                 </div>
                             </div>
                         </div>
@@ -4173,16 +4385,7 @@
                 <span class="label" data-i18n="menu.relax">Relax</span>
             </div>
             <div class="ctx-sep"></div>
-            <div class="ctx-item" id="ctx-btn-aot">
-                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg></span>
-                <span class="label" data-i18n="menu.alwaysOnTop">Always on Top</span>
-                <div class="toggle" id="ctx-toggle-aot">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="ctx-item" id="ctx-btn-settings">
+             <div class="ctx-item" id="ctx-btn-settings">
                 <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="M19.4 15a1.9 1.9 0 0 0 .4 2.1l.1.1-1.5 2.6-.1-.1a2 2 0 0 0-2.3.8l-.1.2h-3l-.1-.2a2 2 0 0 0-1.7-1 2 2 0 0 0-1 .2l-.1.1-2.6-1.5.1-.1a1.9 1.9 0 0 0 .4-2.1l-.1-.2-2.2-1.3.1-.2a2 2 0 0 0 0-2.1l-.1-.2 2.2-1.3.1-.2a1.9 1.9 0 0 0-.4-2.1l-.1-.1 2.6-1.5.1.1a2 2 0 0 0 2.3-.8l.1-.2h3l.1.2a2 2 0 0 0 2.7.8l.1-.1 1.5 2.6-.1.1a1.9 1.9 0 0 0-.4 2.1l.1.2 2.2 1.3-.1.2a2 2 0 0 0 0 2.1l.1.2-2.2 1.3Z" /></svg></span>
                 <span class="label" data-i18n="menu.settings">Settings</span>
             </div>
@@ -4439,9 +4642,9 @@
             // ══════════════════════════════════════════════════════════════
             function applySettings(s) {
                 cfg = s;
-                document.body.dataset.theme = s.theme || "cyber-blue";
+                document.body.dataset.theme = s.theme || "arctic-ice";
                 // Scanlines are mini-mode only — full mode never has them
-                applySkin(s.theme || "cyber-blue");
+                applySkin(s.theme || "arctic-ice");
                 updateDigital();
 
                 // Settings modal controls
@@ -5364,6 +5567,52 @@
                 document.getElementById("t-is").value = s % 60;
             }
 
+            // Reflects whether a duration is armed: START glows & invites the
+            // click when there's something to run, stays dim & quiet otherwise.
+            let tHintTimer = null;
+            function tRefreshReady() {
+                if (tRunning) return; // running/paused state owns the button
+                const ready = tAcc > 0 || tGetInputSecs() > 0;
+                const startBtn = document.getElementById("t-start");
+                startBtn.classList.toggle("ready", ready);
+                startBtn.classList.toggle("dormant", !ready);
+                document.getElementById("t-reset").disabled = !ready;
+            }
+
+            // Pressed START with nothing set: instead of a dead no-op, guide the
+            // user to where time is chosen (shake + focus + transient hint).
+            function tNudge() {
+                ["t-presets", "t-manual"].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.classList.remove("shake");
+                    void el.offsetWidth; // reflow so the animation restarts
+                    el.classList.add("shake");
+                });
+                const hint = document.getElementById("t-hint");
+                hint.classList.add("show");
+                clearTimeout(tHintTimer);
+                tHintTimer = setTimeout(
+                    () => hint.classList.remove("show"),
+                    3400,
+                );
+                const im = document.getElementById("t-im");
+                im.focus();
+                im.select();
+            }
+
+            // The attract sweep retires for good once the user engages with
+            // time-setting (a preset or the custom inputs). Start/Reset do NOT
+            // set a time, so they deliberately leave the invitation running.
+            let tAttractStopped = false;
+            function tStopAttract() {
+                if (tAttractStopped) return;
+                tAttractStopped = true;
+                document
+                    .getElementById("t-presets")
+                    .classList.remove("attract");
+            }
+
             function tStartStop() {
                 if (tRunning) {
                     tRunning = false;
@@ -5377,14 +5626,21 @@
                     );
                     document.getElementById("t-c1").classList.remove("blink");
                     document.getElementById("t-c2").classList.remove("blink");
+                    tRefreshReady(); // RESUME stays armed & inviting
                 } else {
                     if (tAcc === 0) {
                         tTotal = tGetInputSecs();
                         tAcc = tTotal;
                     }
-                    if (tAcc <= 0) return;
+                    if (tAcc <= 0) {
+                        tNudge();
+                        return;
+                    }
                     tRunning = true;
                     tLastTick = Date.now();
+                    document
+                        .getElementById("t-start")
+                        .classList.remove("dormant", "ready");
                     document.getElementById("t-start").innerHTML =
                         '<span data-ico="pause"></span> PAUSE';
                     window.ccIcons &&
@@ -5432,6 +5688,7 @@
                     .querySelectorAll(".preset-btn")
                     .forEach((b) => b.classList.remove("on"));
                 tActivePreset = null;
+                tRefreshReady(); // back to the dim, "set a time" resting state
             }
 
             function tOnComplete() {
@@ -5463,6 +5720,7 @@
                     }
                 }, 200);
                 document.getElementById("t-done").classList.add("vis");
+                tRefreshReady(); // inputs still hold the value → re-run is armed
             }
 
             document
@@ -5502,18 +5760,27 @@
                         .forEach((b) => b.classList.remove("on"));
                     btn.classList.add("on");
                     tActivePreset = s;
+                    tStopAttract(); // user engaged → end the invitation
+                    tRefreshReady(); // a preset just armed the timer → light up START
                 });
             });
             ["t-ih", "t-im", "t-is"].forEach((id) => {
-                document.getElementById(id).addEventListener("change", () => {
+                const onEdit = () => {
                     if (!tRunning) {
                         const s = tGetInputSecs();
                         tAcc = s;
                         tTotal = s;
                         tSetDisplay(s);
+                        tStopAttract(); // editing a custom time ends the invitation
+                        tRefreshReady();
                     }
-                });
+                };
+                const el = document.getElementById(id);
+                el.addEventListener("input", onEdit); // live, as digits change
+                el.addEventListener("change", onEdit);
             });
+
+            tRefreshReady(); // initial resting state: START dim until a time is set
 
             // ══════════════════════════════════════════════════════════════
             // STOPWATCH
@@ -5928,9 +6195,10 @@
                 updatePlayingTrackCardClass(true);
             }
 
-            function rStop() {
+            function rStop(isManual = false) {
                 stopZenFlow();
-                window.audioEngine.stop();
+                const fade = isManual ? 1.0 : 2.0;
+                window.audioEngine.stop(fade);
                 updatePlayButtonUI(false);
                 rStopSession();
                 stopBreathePacer();
@@ -5941,7 +6209,7 @@
 
             function rTogglePlay() {
                 if (window.audioEngine.isPlaying) {
-                    rStop();
+                    rStop(true);
                 } else {
                     startZenFlow();
                 }
@@ -6191,7 +6459,7 @@
                     console.log("[DEBUG] Card clicked:", t, "rSelected:", rSelected, "isPlaying:", window.audioEngine.isPlaying);
                     stopZenFlow();
                     if (rSelected === t && window.audioEngine.isPlaying) {
-                        rStop();
+                        rStop(true);
                         return;
                     }
                     preSelectRelaxTrack(t);
@@ -6210,7 +6478,7 @@
                 .getElementById("r-play")
                 .addEventListener("click", rTogglePlay);
             document.getElementById("r-stop").addEventListener("click", () => {
-                rStop();
+                rStop(true);
                 document
                     .querySelectorAll(".tcard")
                     .forEach((c) => c.classList.remove("on"));
@@ -6220,7 +6488,7 @@
             // Breathing circle click toggles playback
             document.getElementById("breathe-circle").addEventListener("click", () => {
                 if (window.audioEngine.isPlaying) {
-                    rStop();
+                    rStop(true);
                 } else {
                     startZenFlow();
                 }
@@ -6724,15 +6992,16 @@
 
             function showFullContextMenu(x, y) {
                 // Ensure menu position stays on screen
-                fullCtxMenu.style.left = `${x}px`;
-                fullCtxMenu.style.top = `${y}px`;
                 fullCtxMenu.style.display = "block";
                 
-                // Keep AOT toggle switch in sync with settings
-                const aotToggle = document.getElementById("ctx-toggle-aot");
-                if (aotToggle) {
-                    aotToggle.classList.toggle("on", !!cfg.alwaysOnTop);
-                }
+                const menuWidth = fullCtxMenu.offsetWidth;
+                const menuHeight = fullCtxMenu.offsetHeight;
+                
+                const posX = (x + menuWidth > window.innerWidth) ? Math.max(8, window.innerWidth - menuWidth - 8) : Math.max(8, x);
+                const posY = (y + menuHeight > window.innerHeight) ? Math.max(8, window.innerHeight - menuHeight - 8) : Math.max(8, y);
+                
+                fullCtxMenu.style.left = `${posX}px`;
+                fullCtxMenu.style.top = `${posY}px`;
             }
 
             function hideFullContextMenu() {
@@ -6786,25 +7055,6 @@
             document.getElementById("ctx-btn-relax").addEventListener("click", () => {
                 hideFullContextMenu();
                 navigate("relax");
-            });
-            document.getElementById("ctx-btn-aot").addEventListener("click", async (e) => {
-                e.stopPropagation(); // Don't close immediately so toggle visual shows
-                const on = await window.cc.toggleAlwaysOnTop();
-                cfg.alwaysOnTop = on;
-                
-                const tgl = document.getElementById("ctx-toggle-aot");
-                if (tgl) tgl.classList.toggle("on", on);
-                
-                // Sync the main header btnAot in UI if it exists
-                const headerAot = document.getElementById("btn-aot");
-                if (headerAot) headerAot.classList.toggle("on", on);
-                
-                // Sync the Settings dialog checkbox
-                const sAot = document.getElementById("s-aot");
-                if (sAot) sAot.checked = on;
-
-                // Auto-close menu after toggle action
-                setTimeout(hideFullContextMenu, 200);
             });
             document.getElementById("ctx-btn-settings").addEventListener("click", () => {
                 hideFullContextMenu();

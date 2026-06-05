@@ -736,7 +736,7 @@
             }
         </style>
     </head>
-    <body data-theme="cyber-blue">
+    <body data-theme="arctic-ice">
         <div class="shell">
             <div class="cd tl"></div>
             <div class="cd tr"></div>
@@ -990,7 +990,7 @@
 
             function applySettings(s) {
                 cfg = s;
-                document.body.dataset.theme = s.theme || "cyber-blue";
+                document.body.dataset.theme = s.theme || "arctic-ice";
                 if (s.scanlines === false)
                     document.body.classList.add("no-scanlines");
                 else document.body.classList.remove("no-scanlines");
@@ -1398,7 +1398,7 @@
             window.cc.onInit((s) => { applySettings(s); loadSched(); });
             window.cc.onSettingsUpdated((s) => {
                 cfg = s;
-                document.body.dataset.theme = s.theme || "cyber-blue";
+                document.body.dataset.theme = s.theme || "arctic-ice";
                 if (s.scanlines === false)
                     document.body.classList.add("no-scanlines");
                 else document.body.classList.remove("no-scanlines");
