@@ -872,15 +872,31 @@
                 padding: 12px 8px;
             }
             .agenda-empty-ico {
-                font-size: 28px;
-                opacity: 0.45;
-                margin-bottom: 2px;
-                transition: opacity 0.5s;
-                animation: empty-pulse 2.8s ease-in-out infinite;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 6px;
+                animation: empty-neon-breathe 4s ease-in-out infinite;
+                cursor: pointer;
+                transition: transform 0.2s, filter 0.2s, opacity 0.2s;
             }
-            @keyframes empty-pulse {
-                0%, 100% { opacity: 0.35; }
-                50% { opacity: 0.62; }
+            .agenda-empty-ico:hover {
+                animation-play-state: paused;
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 12px rgba(var(--rgb-accent), 0.95));
+                opacity: 1;
+            }
+            @keyframes empty-neon-breathe {
+                0%, 100% {
+                    transform: scale(1);
+                    filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.35));
+                    opacity: 0.5;
+                }
+                50% {
+                    transform: scale(1.06);
+                    filter: drop-shadow(0 0 10px rgba(var(--rgb-accent), 0.75));
+                    opacity: 0.85;
+                }
             }
             .agenda-empty-title {
                 font-family: "Share Tech Mono", monospace;
@@ -933,6 +949,9 @@
                 font-family: inherit;
                 font-size: 15px;
                 text-shadow: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
             /* ════════════════════════════════════════════════════
@@ -2746,10 +2765,20 @@
                 -webkit-backdrop-filter: blur(8px);
                 z-index: 999;
             }
+            @keyframes tooltip-autohide {
+                0%, 80% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0;
+                }
+            }
             [data-tooltip]:not([data-tooltip=""]):hover::after {
                 opacity: 1;
                 transform: translate(-50%, 0);
                 transition-delay: 0.85s;
+                animation: tooltip-autohide 4s forwards;
+                animation-delay: 0.85s;
             }
             /* Direction modifiers */
             [data-tooltip-dir="bottom"]::after {
@@ -2789,8 +2818,170 @@
                 );
                 transition: opacity 0.4s;
             }
-            body.no-scanlines .scanlines {
+            /* ════════════════════════════════════════════════════
+   CUSTOM CONTEXT MENU
+════════════════════════════════════════════════════ */
+            .ctx-menu {
+                position: fixed;
+                background: rgba(30, 30, 35, 0.96);
+                backdrop-filter: blur(40px) saturate(1.8);
+                -webkit-backdrop-filter: blur(40px) saturate(1.8);
+                padding: 6px;
+                width: 230px;
+                box-shadow:
+                    0 16px 48px rgba(0, 0, 0, 0.6),
+                    0 0 15px rgba(var(--rgb-accent), 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+                z-index: 1000;
+                display: none;
+                animation: ctx-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes ctx-fade-in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            .ctx-item {
+                padding: 6px 10px;
+                font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+                font-size: 12px;
+                font-weight: 400;
+                color: rgba(255, 255, 255, 0.85);
+                cursor: pointer;
+                transition: background 0.12s, color 0.12s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border-radius: 6px;
+                min-height: 28px;
+            }
+            .ctx-item:hover {
+                background: rgba(var(--rgb-accent), 0.12);
+                color: #ffffff;
+            }
+            .ctx-item:active {
+                background: rgba(var(--rgb-accent), 0.2);
+            }
+            .ctx-sep {
+                height: 1px;
+                background: rgba(255, 255, 255, 0.08);
+                margin: 6px 4px;
+            }
+            .ctx-item .ico {
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .ctx-item .ico .cc-ico-fx {
+                width: 14px;
+                height: 14px;
+                fill: none;
+                stroke: url(#cc-grad-main);
+                stroke-width: 1.9;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.5));
+                transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s;
+            }
+            .ctx-item:hover .ico .cc-ico-fx {
+                transform: scale(1.18);
+            }
+            .ctx-item .label {
+                flex: 1;
+            }
+            .ctx-item .shortcut {
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.3);
+                margin-left: auto;
+                padding-left: 20px;
+            }
+            .ctx-item.danger {
+                color: rgba(255, 100, 100, 0.9);
+            }
+            .ctx-item.danger:hover {
+                background: rgba(255, 68, 68, 0.12);
+            }
+            .ctx-item.danger .ico .cc-ico-fx {
+                stroke: url(#cc-grad-danger);
+                filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
+            }
+            /* Custom inline Switch Toggle inside Context Menu */
+            .ctx-item .toggle {
+                position: relative;
+                display: inline-block;
+                width: 30px;
+                height: 16px;
+                flex-shrink: 0;
+                cursor: pointer;
+            }
+            .ctx-item .toggle-track {
+                position: absolute;
+                inset: 0;
+                background-color: rgba(255, 255, 255, 0.15);
+                border-radius: 10px;
+                transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .ctx-item .toggle-thumb {
+                position: absolute;
+                height: 12px;
+                width: 12px;
+                left: 2px;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: #ffffff;
+                border-radius: 50%;
+                transition: left 0.2s ease;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            }
+            .ctx-item .toggle.on .toggle-track {
+                background-color: var(--accent-a, #00d4ff);
+                box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.3);
+            }
+            .ctx-item .toggle.on .toggle-thumb {
+                left: 16px;
+            }
+
+            /* Delete button for upcoming events */
+            .agenda-row {
+                position: relative;
+            }
+            .agenda-del-btn {
+                background: transparent;
+                border: none;
+                color: var(--text-lo);
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 opacity: 0;
+                transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+                margin-left: auto;
+                flex-shrink: 0;
+            }
+            .agenda-row:hover .agenda-del-btn {
+                opacity: 0.6;
+            }
+            .agenda-del-btn:hover {
+                opacity: 1 !important;
+                color: #ff4466;
+                background-color: rgba(255, 68, 102, 0.1);
+            }
+            .agenda-del-btn .cc-ico {
+                width: 12px;
+                height: 12px;
+                margin: 0;
+                padding: 0;
             }
         </style>
     </head>
@@ -3244,10 +3435,10 @@
                                     <button class="ast-btn" data-min="30" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                         30m
                                     </button>
-                                    <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                    <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val" data-tooltip-dir="left">
                                         1h
                                     </button>
-                                    <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                    <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val" data-tooltip-dir="left">
                                         2h
                                     </button>
                                 </div>
@@ -3332,8 +3523,8 @@
                                 <canvas id="viz-canvas" height="200"></canvas>
                             </div>
                             <div class="breathe-wrap">
-                                <div class="breathe-left">
-                                    <div class="breathe-circle" id="breathe-circle" data-tooltip="Click to toggle playback and breathing guide" data-i18n-attr="data-tooltip:relax.tooltip.breatheCircle">
+                                <div class="breathe-left" data-tooltip="Click to toggle playback and breathing guide" data-i18n-attr="data-tooltip:relax.tooltip.breatheCircle">
+                                    <div class="breathe-circle" id="breathe-circle">
                                         <span id="breathe-phase" data-i18n="relax.breathe.start">Ready</span>
                                     </div>
                                 </div>
@@ -3382,7 +3573,7 @@
             <div class="s-modal">
                 <div class="s-tbar">
                     <span class="s-brand"
-                        ><span data-ico="gear"></span> Settings · CyberClock</span
+                        ><span data-ico="gear"></span> <span data-i18n="menu.settings">Settings</span> · CyberClock</span
                     >
                     <div class="s-spacer"></div>
                     <button class="s-close" id="s-close">
@@ -3390,19 +3581,19 @@
                     </button>
                 </div>
                 <div class="s-tabs">
-                    <div class="s-tab on" data-stab="appearance">
+                    <div class="s-tab on" data-stab="appearance" data-i18n="settings.tab.appearance">
                         Appearance
                     </div>
-                    <div class="s-tab" data-stab="alarms">Alarms</div>
-                    <div class="s-tab" data-stab="general">General</div>
-                    <div class="s-tab" data-stab="display">Display</div>
-                    <div class="s-tab" data-stab="mini">mini mode</div>
+                    <div class="s-tab" data-stab="alarms" data-i18n="settings.tab.alarms">Alarms</div>
+                    <div class="s-tab" data-stab="general" data-i18n="settings.tab.general">General</div>
+                    <div class="s-tab" data-stab="display" data-i18n="settings.tab.display">Display</div>
+                    <div class="s-tab" data-stab="mini" data-i18n="settings.tab.mini">mini mode</div>
                 </div>
                 <div class="s-content">
                     <!-- Appearance -->
                     <div class="s-panel on" id="stab-appearance">
                         <div class="s-sec">
-                            <div class="s-sec-t">Theme / Skin</div>
+                            <div class="s-sec-t" data-i18n="settings.appearance.themeTitle">Theme / Skin</div>
                             <div class="s-themes">
                                 <div class="s-ttile" data-theme="cyber-blue">
                                     <div
@@ -3415,7 +3606,7 @@
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Cyber Blue</div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.cyberBlue">Cyber Blue</div>
                                 </div>
                                 <div class="s-ttile" data-theme="neon-green">
                                     <div
@@ -3428,7 +3619,7 @@
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Forest Mist</div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.forestMist">Forest Mist</div>
                                 </div>
                                 <div class="s-ttile" data-theme="plasma-purple">
                                     <div
@@ -3441,7 +3632,7 @@
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Twilight Haze</div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.twilightHaze">Twilight Haze</div>
                                 </div>
                                 <div class="s-ttile" data-theme="solar-orange">
                                     <div
@@ -3454,7 +3645,7 @@
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Warm Ember</div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.warmEmber">Warm Ember</div>
                                 </div>
                                 <div class="s-ttile" data-theme="arctic-ice">
                                     <div
@@ -3467,14 +3658,14 @@
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Arctic Ice</div>
+                                    <div class="s-tname" data-i18n="settings.appearance.theme.arcticIce">Arctic Ice</div>
                                 </div>
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">Clock Display</div>
+                            <div class="s-sec-t" data-i18n="settings.appearance.clockDisplay">Clock Display</div>
                             <div class="s-row">
-                                <div class="s-lbl">Time Format</div>
+                                <div class="s-lbl" data-i18n="settings.appearance.timeFormat">Time Format</div>
                                 <div class="s-fmts">
                                     <button class="s-fmt on" data-fmt="24h">
                                         24H</button
@@ -3484,7 +3675,7 @@
                                 </div>
                             </div>
                             <div class="s-row">
-                                <div class="s-lbl">Show Seconds</div>
+                                <div class="s-lbl" data-i18n="settings.appearance.showSeconds">Show Seconds</div>
                                 <label class="s-tog"
                                     ><input
                                         type="checkbox"
@@ -3500,7 +3691,7 @@
                     <!-- Alarms -->
                     <div class="s-panel" id="stab-alarms">
                         <div class="s-sec">
-                            <div class="s-sec-t">Alarm Volume</div>
+                            <div class="s-sec-t" data-i18n="settings.alarms.volume">Alarm Volume</div>
                             <div class="s-vol-row">
                                 <span style="font-size: 10px; color: var(--text-md)"
                                     ><span data-ico="volume-low"></span></span
@@ -3524,7 +3715,7 @@
                                     <input type="checkbox" id="s-alarm-sched-en" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
-                                <span class="s-lbl" style="width: auto;">Play sound from</span>
+                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playFrom">Play sound from</span>
                                 <div class="sched-time" id="s-alarm-sched-start" style="margin: 0 4px;">
                                     <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
                                     <span class="sched-time-sep">:</span>
@@ -3534,7 +3725,7 @@
                                         <option value="PM">PM</option>
                                     </select>
                                 </div>
-                                <span class="s-lbl" style="width: auto;">to</span>
+                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playTo">to</span>
                                 <div class="sched-time" id="s-alarm-sched-end" style="margin: 0 4px;">
                                     <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
                                     <span class="sched-time-sep">:</span>
@@ -3544,17 +3735,17 @@
                                         <option value="PM">PM</option>
                                     </select>
                                 </div>
-                                <span class="s-lbl" style="width: auto;">only</span>
+                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playOnly">only</span>
                             </div>
                         </div>
 
                         <!-- Top of the hour -->
                         <div class="s-alarm-blk">
                             <div class="s-alarm-t">
-                                <span data-ico="bell"></span> Top of the hour
+                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.topOfHour">Top of the hour</span>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Enable</span
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
                                 ><label class="s-tog"
                                     ><input type="checkbox" id="s-full-en" />
                                     <div class="s-tog-tr">
@@ -3562,26 +3753,26 @@
                                 ></label>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Sound</span>
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
                                 <select id="s-full-snd">
-                                    <option value="chime-crystal">
+                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
                                         Crystal Bell
                                     </option>
-                                    <option value="chime-digital" selected>
+                                    <option value="chime-digital" selected data-i18n="settings.alarms.sound.digital">
                                         Soft Chime
                                     </option>
-                                    <option value="chime-neon">Neon Arp</option>
-                                    <option value="chime-zen">Zen Gong</option>
-                                    <option value="chime-cyber">
+                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
                                         Aurora
                                     </option>
-                                    <option value="chime-music">Music Box</option>
+                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
                                 </select>
                                 <button class="s-abtn" id="s-full-test">
-                                    <span data-ico="play"></span> Test
+                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
                                 </button>
                                 <button class="s-abtn" id="s-full-file">
-                                    <span data-ico="folder"></span> Custom…
+                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
                                 </button>
                             </div>
                             <div
@@ -3599,10 +3790,10 @@
                         <!-- Half hour -->
                         <div class="s-alarm-blk">
                             <div class="s-alarm-t">
-                                <span data-ico="bell"></span> Half hour
+                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.halfHour">Half hour</span>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Enable</span
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
                                 ><label class="s-tog"
                                     ><input type="checkbox" id="s-half-en" />
                                     <div class="s-tog-tr">
@@ -3610,26 +3801,26 @@
                                 ></label>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Sound</span>
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
                                 <select id="s-half-snd">
-                                    <option value="chime-crystal">
+                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
                                         Crystal Bell
                                     </option>
-                                    <option value="chime-digital">
+                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">
                                         Soft Chime
                                     </option>
-                                    <option value="chime-neon">Neon Arp</option>
-                                    <option value="chime-zen">Zen Gong</option>
-                                    <option value="chime-cyber">
+                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
                                         Aurora
                                     </option>
-                                    <option value="chime-music">Music Box</option>
+                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
                                 </select>
                                 <button class="s-abtn" id="s-half-test">
-                                    <span data-ico="play"></span> Test
+                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
                                 </button>
                                 <button class="s-abtn" id="s-half-file">
-                                    <span data-ico="folder"></span> Custom…
+                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
                                 </button>
                             </div>
                             <div
@@ -3647,10 +3838,10 @@
                         <!-- Quarter hour -->
                         <div class="s-alarm-blk">
                             <div class="s-alarm-t">
-                                <span data-ico="bell"></span> Quarter hour
+                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.quarterHour">Quarter hour</span>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Enable</span
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
                                 ><label class="s-tog"
                                     ><input type="checkbox" id="s-quart-en" />
                                     <div class="s-tog-tr">
@@ -3658,26 +3849,26 @@
                                 ></label>
                             </div>
                             <div class="s-alarm-row">
-                                <span class="s-alarm-lbl">Sound</span>
+                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
                                 <select id="s-quart-snd">
-                                    <option value="chime-crystal">
+                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
                                         Crystal Bell
                                     </option>
-                                    <option value="chime-digital">
+                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">
                                         Soft Chime
                                     </option>
-                                    <option value="chime-neon">Neon Arp</option>
-                                    <option value="chime-zen">Zen Gong</option>
-                                    <option value="chime-cyber">
+                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
                                         Aurora
                                     </option>
-                                    <option value="chime-music">Music Box</option>
+                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
                                 </select>
                                 <button class="s-abtn" id="s-quart-test">
-                                    <span data-ico="play"></span> Test
+                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
                                 </button>
                                 <button class="s-abtn" id="s-quart-file">
-                                    <span data-ico="folder"></span> Custom…
+                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
                                 </button>
                             </div>
                             <div
@@ -3707,12 +3898,11 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">Behavior</div>
+                            <div class="s-sec-t" data-i18n="settings.general.behavior">Behavior</div>
                             <div class="s-row">
                                 <div class="s-lbl">
-                                    Start with Windows<small
-                                        >Launch at login</small
-                                    >
+                                    <span data-i18n="settings.general.startWithWindows">Start with Windows</span>
+                                    <small data-i18n="settings.general.launchAtLogin">Launch at login</small>
                                 </div>
                                 <label class="s-tog"
                                     ><input type="checkbox" id="s-startup" />
@@ -3722,9 +3912,8 @@
                             </div>
                             <div class="s-row" id="s-startup-mini-row" style="display: none; padding-left: 20px;">
                                 <div class="s-lbl">
-                                    Start in Mini Mode<small
-                                        >Launch in compact view</small
-                                    >
+                                    <span data-i18n="settings.general.startInMini">Start in Mini Mode</span>
+                                    <small data-i18n="settings.general.launchCompact">Launch in compact view</small>
                                 </div>
                                 <label class="s-tog"
                                     ><input type="checkbox" id="s-startup-mini" />
@@ -3734,7 +3923,7 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">Relaxation Volume</div>
+                            <div class="s-sec-t" data-i18n="settings.general.relaxVolume">Relaxation Volume</div>
                             <div class="s-vol-row">
                                 <span style="font-size: 10px; color: var(--text-md)"
                                     ><span data-ico="volume-low"></span></span
@@ -3753,10 +3942,10 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">About</div>
+                            <div class="s-sec-t" data-i18n="settings.general.about">About</div>
                             <div class="s-about">
-                                <div class="s-about-v">CyberClock v1.0.0</div>
-                                <div class="s-about-s">
+                                <div class="s-about-v" data-i18n="settings.general.aboutVersion">CyberClock v1.0.0</div>
+                                <div class="s-about-s" data-i18n="settings.general.aboutSub">
                                     CyberGems © 2026 · Premium Cyber-Neon Clock
                                     for Windows
                                 </div>
@@ -3767,7 +3956,7 @@
                     <!-- Display -->
                     <div class="s-panel" id="stab-display">
                         <div class="s-sec">
-                            <div class="s-sec-t">Multi-Monitor Support</div>
+                            <div class="s-sec-t" data-i18n="settings.display.multiMonitor">Multi-Monitor Support</div>
                             <div
                                 style="
                                     font-family:
@@ -3781,16 +3970,11 @@
                                     border-radius: 6px;
                                 "
                             >
-                                CyberClock fills your primary display's work
-                                area, respecting the taskbar at all times.<br />
+                                <span data-i18n="settings.display.desc1">CyberClock fills your primary display's work area, respecting the taskbar at all times.</span><br />
                                 ·
-                                <span style="color: var(--accent-a)"
-                                    >Mini Mode</span
-                                >
-                                — drag the bar to any monitor; position is
-                                remembered.<br />
-                                · Display changes are detected automatically and
-                                the window repositions itself.
+                                <span style="color: var(--accent-a)" data-i18n="settings.tab.mini">Mini Mode</span>
+                                <span data-i18n="settings.display.desc2">— drag the bar to any monitor; position is remembered.</span><br />
+                                · <span data-i18n="settings.display.desc3">Display changes are detected automatically and the window repositions itself.</span>
                             </div>
                             <div id="s-screens" style="margin-top: 12px"></div>
                         </div>
@@ -3832,7 +4016,7 @@
                     <!-- Mini Mode -->
                     <div class="s-panel" id="stab-mini">
                         <div class="s-sec">
-                            <div class="s-sec-t">Design Mode</div>
+                            <div class="s-sec-t" data-i18n="settings.mini.designMode">Design Mode</div>
                             <div class="s-row" style="flex-wrap: wrap; gap: 8px; padding: 8px 0;">
                                 <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;">
                                     <button class="s-fmt" data-mini-design="1">1</button>
@@ -3851,9 +4035,9 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">Transparency</div>
+                            <div class="s-sec-t" data-i18n="settings.mini.transparency">Transparency</div>
                             <div class="s-row">
-                                <div class="s-lbl">Background</div>
+                                <div class="s-lbl" data-i18n="settings.mini.bg">Background</div>
                                 <div class="s-vol-row" style="flex:1;max-width:200px;">
                                     <span style="font-size:10px;color:var(--text-md)"><span data-ico="compact"></span></span>
                                     <input type="range" id="s-minibg-op" min="0" max="100" value="100" />
@@ -3861,7 +4045,7 @@
                                 </div>
                             </div>
                             <div class="s-row">
-                                <div class="s-lbl">Content</div>
+                                <div class="s-lbl" data-i18n="settings.mini.content">Content</div>
                                 <div class="s-vol-row" style="flex:1;max-width:200px;">
                                     <span style="font-size:10px;color:var(--text-md)"><span data-ico="compact"></span></span>
                                     <input type="range" id="s-mini-op" min="20" max="100" value="100" />
@@ -3870,24 +4054,33 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">Position & Behavior</div>
+                            <div class="s-sec-t" data-i18n="settings.mini.posBehavior">Position & Behavior</div>
                             <div class="s-row">
-                                <div class="s-lbl">Always on Top<small>Float above all windows</small></div>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.aot">Always on Top</span>
+                                    <small data-i18n="settings.mini.aotDesc">Float above all windows</small>
+                                </div>
                                 <label class="s-tog"><input type="checkbox" id="s-aot" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
                             <div class="s-row">
-                                <div class="s-lbl">Lock Position<small>Prevent dragging</small></div>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.lockPos">Lock Position</span>
+                                    <small data-i18n="settings.mini.lockDesc">Prevent dragging</small>
+                                </div>
                                 <label class="s-tog"><input type="checkbox" id="s-mini-lock" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t">CRT Overlay</div>
+                            <div class="s-sec-t" data-i18n="settings.mini.crtOverlay">CRT Overlay</div>
                             <div class="s-row">
-                                <div class="s-lbl">Scanlines<small>Mini mode only</small></div>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.scanlines">Scanlines</span>
+                                    <small data-i18n="settings.mini.scanlinesDesc">Mini mode only</small>
+                                </div>
                                 <label class="s-tog"><input type="checkbox" id="s-mini-scan" checked />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
@@ -3934,6 +4127,72 @@
             <!-- note-modal -->
         </div>
         <!-- note-overlay -->
+        
+        <!-- ═══ DELETION CONFIRMATION MODAL ═══════════════════════════ -->
+        <div class="note-overlay" id="confirm-overlay">
+            <div class="note-modal" style="width: 360px;">
+                <div class="note-head">
+                    <span class="note-date" id="confirm-title-lbl" data-i18n="calendar.confirmDeleteTitle">Confirm Deletion</span>
+                    <div class="note-spacer"></div>
+                    <button class="s-close" id="confirm-close">
+                        <span data-ico="x"></span>
+                    </button>
+                </div>
+                <div class="note-body" style="padding: 22px; font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text-hi); line-height: 1.6; text-align: center;">
+                    <span id="confirm-msg-lbl" data-i18n="calendar.confirmDeleteMsg">Are you sure you want to delete this event?</span>
+                </div>
+                <div class="note-foot">
+                    <button class="note-btn" id="confirm-cancel" data-i18n="calendar.cancel">Cancel</button>
+                    <div class="note-spacer"></div>
+                    <button class="note-btn danger" id="confirm-ok" data-i18n="calendar.delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ CUSTOM CONTEXT MENU ═══════════════════════════════════ -->
+        <div class="ctx-menu" id="full-ctx-menu">
+            <div class="ctx-item" id="ctx-btn-mini">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6" /><path d="M9 21H3v-6" /><path d="M21 3l-7 7" /><path d="M3 21l7-7" /></svg></span>
+                <span class="label" data-i18n="menu.miniMode">Mini Mode</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" id="ctx-btn-home">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg></span>
+                <span class="label" data-i18n="menu.home">Home</span>
+            </div>
+            <div class="ctx-item" id="ctx-btn-timer">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6" /><path d="M12 8a9 9 0 1 0 9 9" /><path d="M17 5l-2 2" /><path d="M12 12l-3 3" /></svg></span>
+                <span class="label" data-i18n="menu.timer">Timer</span>
+            </div>
+            <div class="ctx-item" id="ctx-btn-stopwatch">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6" /><path d="M12 7a9 9 0 1 0 9 9" /><path d="M19 4l-2 2" /><path d="M12 12l0-4" /></svg></span>
+                <span class="label" data-i18n="menu.stopwatch">Stopwatch</span>
+            </div>
+            <div class="ctx-item" id="ctx-btn-relax">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4 0-7-2.5-9-6 3.5.2 6-1.2 9-4 3 2.8 5.5 4.2 9 4-2 3.5-5 6-9 6Z" /><path d="M12 10c-1.8-2.2-2.6-4.4-2.4-6.6 1.2.8 2 .8 2.4.8s1.2 0 2.4-.8c.2 2.2-.6 4.4-2.4 6.6Z" /></svg></span>
+                <span class="label" data-i18n="menu.relax">Relax</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" id="ctx-btn-aot">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg></span>
+                <span class="label" data-i18n="menu.alwaysOnTop">Always on Top</span>
+                <div class="toggle" id="ctx-toggle-aot">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ctx-item" id="ctx-btn-settings">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="M19.4 15a1.9 1.9 0 0 0 .4 2.1l.1.1-1.5 2.6-.1-.1a2 2 0 0 0-2.3.8l-.1.2h-3l-.1-.2a2 2 0 0 0-1.7-1 2 2 0 0 0-1 .2l-.1.1-2.6-1.5.1-.1a1.9 1.9 0 0 0 .4-2.1l-.1-.2-2.2-1.3.1-.2a2 2 0 0 0 0-2.1l-.1-.2 2.2-1.3.1-.2a1.9 1.9 0 0 0-.4-2.1l-.1-.1 2.6-1.5.1.1a2 2 0 0 0 2.3-.8l.1-.2h3l.1.2a2 2 0 0 0 2.7.8l.1-.1 1.5 2.6-.1.1a1.9 1.9 0 0 0-.4 2.1l.1.2 2.2 1.3-.1.2a2 2 0 0 0 0 2.1l.1.2-2.2 1.3Z" /></svg></span>
+                <span class="label" data-i18n="menu.settings">Settings</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item danger" id="ctx-btn-close">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="M6 6l12 12" /></svg></span>
+                <span class="label" data-i18n="menu.close">Close</span>
+                <span class="shortcut">Alt+F4</span>
+            </div>
+        </div>
 
         <script src="../shared/audio-engine.js"></script>
         <script>
@@ -3975,6 +4234,33 @@
                 "DEC",
             ];
             // TIPS is now structured inside i18n.js
+            function getDays() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"]
+                    : ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+            }
+
+            function getMonths() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
+                    : ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            }
+
+            function getCalDays() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["L", "M", "M", "J", "V", "S", "D"]
+                    : ["M", "T", "W", "T", "F", "S", "S"];
+            }
+
+            function getCalMonthsLong() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+                    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            }
 
             function pad(n, w = 2) {
                 return String(n).padStart(w, "0");
@@ -4182,6 +4468,14 @@
                 if (langEl) langEl.value = s.language || "auto";
                 window.ccI18n.setLang(s.language || "auto");
                 window.ccI18n.apply(document);
+                updateDigital();
+                if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
+                    renderCalendar();
+                }
+
+                if (document.getElementById("s-overlay").classList.contains("open")) {
+                    loadScreensList();
+                }
 
                 // Update the Play/Pause button text and guide text for the new language
                 if (typeof updatePlayButtonUI === "function") {
@@ -4301,8 +4595,10 @@
                     t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
                 }
                 setDigits(document.getElementById("dig-time"), t);
+                const days = getDays();
+                const months = getMonths();
                 document.getElementById("dig-date").textContent =
-                    `${DAYS[now.getDay()]}·${pad(now.getDate())} ${MONTHS_S[now.getMonth()]} ${now.getFullYear()}`;
+                    `${days[now.getDay()]}·${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
             }
 
             // ══════════════════════════════════════════════════════════════
@@ -4638,11 +4934,12 @@
                     col.className = "cal-month" + (off === 0 ? "" : " adj");
                     const hdr = document.createElement("div");
                     hdr.className = "cal-mhdr";
-                    hdr.textContent = `${MONTHS_L[m]} ${y}`;
+                    const monthsLong = getCalMonthsLong();
+                    hdr.textContent = `${monthsLong[m]} ${y}`;
                     col.appendChild(hdr);
                     const dlRow = document.createElement("div");
                     dlRow.className = "cal-dhdr";
-                    ["M", "T", "W", "T", "F", "S", "S"].forEach((l) => {
+                    getCalDays().forEach((l) => {
                         const d = document.createElement("div");
                         d.className = "cal-dlbl";
                         d.textContent = l;
@@ -4735,8 +5032,11 @@
             let noteEditKey = null;
 
             function longDateLabel(y, m, d) {
-                const dow = new Date(y, m, d).getDay();
-                return `${DAYS[dow]} · ${pad(d)} ${MONTHS_S[m]} ${y}`;
+                const dt = new Date(y, m, d);
+                const lang = window.ccI18n.getEffectiveLang();
+                const locale = lang === "es" ? "es-ES" : "en-US";
+                let dateStr = dt.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+                return dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
             }
 
             function openNoteModal(y, m, d) {
@@ -4809,8 +5109,53 @@
                     }
                 });
 
+            // ── Event deletion confirmation ────────────────────────────────
+            let eventDeleteKey = null;
+
+            function showConfirmModal(key) {
+                eventDeleteKey = key;
+                document.getElementById("confirm-overlay").classList.add("open");
+            }
+
+            function closeConfirmModal() {
+                document.getElementById("confirm-overlay").classList.remove("open");
+                eventDeleteKey = null;
+            }
+
+            document.getElementById("confirm-ok").addEventListener("click", () => {
+                if (eventDeleteKey) {
+                    delete calNotes[eventDeleteKey];
+                    persistNotes();
+                    closeConfirmModal();
+                    renderCalendar();
+                }
+            });
+
+            document.getElementById("confirm-cancel").addEventListener("click", closeConfirmModal);
+            document.getElementById("confirm-close").addEventListener("click", closeConfirmModal);
+            document.getElementById("confirm-overlay").addEventListener("click", (e) => {
+                if (e.target === e.currentTarget) closeConfirmModal();
+            });
+
             // ── Dashboard: Agenda (upcoming notes) + Today stats ──────────
-            const MOONS = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+            const MOON_SVGS = [
+                // 0: New Moon
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" stroke="var(--border-bright)" stroke-width="1.2" fill="rgba(var(--rgb-accent), 0.08)" style="filter:drop-shadow(0 0 2px var(--border-bright));" /></svg>`,
+                // 1: Waxing Crescent
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 1 12 20 A 4 8 0 0 0 12 4" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`,
+                // 2: First Quarter
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 1 12 20 Z" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`,
+                // 3: Waxing Gibbous
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 1 12 20 A 4 8 0 0 1 12 4 Z" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`,
+                // 4: Full Moon
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="var(--accent-a)" stroke="var(--accent-a)" stroke-width="1" style="filter:drop-shadow(0 0 4px var(--accent-a));" /></svg>`,
+                // 5: Waning Gibbous
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 0 12 20 A 4 8 0 0 0 12 4 Z" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`,
+                // 6: Last Quarter
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 0 12 20 Z" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`,
+                // 7: Waning Crescent
+                `<svg viewBox="0 0 24 24" class="moon-svg" style="width:16px;height:16px;overflow:visible;"><circle cx="12" cy="12" r="8" fill="rgba(var(--rgb-accent), 0.08)" stroke="var(--border)" stroke-width="1" /><path d="M 12 4 A 8 8 0 0 0 12 20 A 4 8 0 0 1 12 4" fill="var(--accent-a)" style="filter:drop-shadow(0 0 3px var(--accent-a));" /></svg>`
+            ];
 
             function isoWeek(date) {
                 const t = new Date(
@@ -4851,7 +5196,36 @@
                     empty.className = "agenda-empty";
                     const ico = document.createElement("div");
                     ico.className = "agenda-empty-ico";
-                    ico.textContent = "📝";
+                    ico.innerHTML = `
+                        <svg class="cc-ico" viewBox="0 0 24 24" fill="none" style="width: 48px; height: 48px;">
+                            <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="14 2 14 8 20 8" />
+                            <line stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x1="16" y1="13" x2="8" y2="13" />
+                            <line stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x1="16" y1="17" x2="8" y2="17" />
+                            <polyline stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="10 9 9 9 8 9" />
+                        </svg>
+                    `;
+                    ico.addEventListener("click", () => {
+                        let y, m, d;
+                        if (selDate) {
+                            [y, m, d] = selDate.split("-").map(Number);
+                            m = m - 1;
+                        } else {
+                            const today = new Date();
+                            y = today.getFullYear();
+                            m = today.getMonth();
+                            d = today.getDate();
+                            selDate = isoKey(y, m, d);
+                            document
+                                .querySelectorAll(".cal-day.sel")
+                                .forEach((c) => c.classList.remove("sel"));
+                            const todayCell = Array.from(document.querySelectorAll(".cal-day")).find(cell => 
+                                cell.textContent == d && !cell.classList.contains("om")
+                            );
+                            if (todayCell) todayCell.classList.add("sel");
+                        }
+                        openNoteModal(y, m, d);
+                    });
                     const title = document.createElement("div");
                     title.className = "agenda-empty-title";
                     title.textContent = window.ccI18n.t("calendar.noNotes");
@@ -4878,6 +5252,12 @@
                             .trim();
                         row.appendChild(chip);
                         row.appendChild(prev);
+                        
+                        const delBtn = document.createElement("button");
+                        delBtn.className = "agenda-del-btn";
+                        delBtn.innerHTML = `<span data-ico="x"></span>`;
+                        row.appendChild(delBtn);
+
                         row.addEventListener("click", () => {
                             calYear = yy;
                             calMonth = m0;
@@ -4885,7 +5265,17 @@
                             renderCalendar();
                             openNoteModal(yy, m0, dd);
                         });
+
+                        delBtn.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showConfirmModal(k);
+                        });
+
                         list.appendChild(row);
+                        
+                        // Parse icons for newly injected tags
+                        window.ccIcons && window.ccIcons.replaceIcons(row);
                     });
                 }
 
@@ -4903,15 +5293,18 @@
                     now.getMonth() + 1,
                     0,
                 ).getDate();
-                const set = (id, v) => {
+                const set = (id, v, isHtml = false) => {
                     const el = document.getElementById(id);
-                    if (el) el.textContent = v;
+                    if (el) {
+                        if (isHtml) el.innerHTML = v;
+                        else el.textContent = v;
+                    }
                 };
                 set("stat-doy", `${dayOfYear} / ${daysInYear}`);
                 set("stat-week", isoWeek(now));
                 set("stat-dly", daysInYear - dayOfYear);
                 set("stat-dlm", lastOfMonth - now.getDate());
-                set("stat-moon", MOONS[moonPhaseIdx(now)]);
+                set("stat-moon", MOON_SVGS[moonPhaseIdx(now)], true);
             }
 
             // ══════════════════════════════════════════════════════════════
@@ -5902,6 +6295,11 @@
                           box-shadow:${s.current ? "var(--glow-xs)" : "none"};
                           transition:all .2s;
                         `;
+                        const primaryText = window.ccI18n.t('settings.display.primary');
+                        const activeText = window.ccI18n.t('settings.display.active');
+                        const inUseText = window.ccI18n.t('settings.display.inUse');
+                        const moveHereText = window.ccI18n.t('settings.display.moveHere');
+
                         card.innerHTML = `
                           <div style="font-size:22px;flex-shrink:0;">${s.primary ? "🖥️" : "📺"}</div>
                           <div style="flex:1;min-width:0;">
@@ -5910,8 +6308,8 @@
                               text-shadow:${s.current ? "var(--glow-xs)" : "none"};
                               text-transform:uppercase;margin-bottom:3px;">
                               ${s.label}
-                              ${s.primary ? '<span style="font-size:7px;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:6px;">PRIMARY</span>' : ""}
-                              ${s.current ? '<span style="font-size:7px;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:4px;">ACTIVE</span>' : ""}
+                              ${s.primary ? `<span style="font-size:7px;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:6px;">${primaryText}</span>` : ""}
+                              ${s.current ? `<span style="font-size:7px;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:4px;">${activeText}</span>` : ""}
                             </div>
                             <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-lo);">
                               ${s.width} × ${s.height} px  &nbsp;·&nbsp;
@@ -5920,14 +6318,14 @@
                           </div>
                           ${
                               s.current
-                                  ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">✓ IN USE</span>`
+                                  ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">${inUseText}</span>`
                                   : `<button data-did="${s.id}" class="s-move-btn"
                                 style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
                                   background:transparent;border:1px solid var(--border-bright);color:var(--accent-a);
                                   padding:7px 14px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:all .18s;"
                                 onmouseover="this.style.boxShadow='var(--glow-sm)';this.style.borderColor='var(--border-active)';"
                                 onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border-bright)';"
-                              >⊞ Move Here</button>`
+                              >${moveHereText}</button>`
                           }
                         `;
                         el.appendChild(card);
@@ -5944,7 +6342,7 @@
                                 // Refresh list to show new ACTIVE state
                                 setTimeout(loadScreensList, 150);
                             } else {
-                                btn.textContent = "✕ Error";
+                                btn.textContent = window.ccI18n.t('settings.display.error');
                             }
                         });
                     });
@@ -6318,6 +6716,105 @@
             document
                 .getElementById("btn-close")
                 .addEventListener("click", () => window.cc.hideWindow("main"));
+
+            // ══════════════════════════════════════════════════════════════
+            // CUSTOM CONTEXT MENU (Full Mode)
+            // ══════════════════════════════════════════════════════════════
+            const fullCtxMenu = document.getElementById("full-ctx-menu");
+
+            function showFullContextMenu(x, y) {
+                // Ensure menu position stays on screen
+                fullCtxMenu.style.left = `${x}px`;
+                fullCtxMenu.style.top = `${y}px`;
+                fullCtxMenu.style.display = "block";
+                
+                // Keep AOT toggle switch in sync with settings
+                const aotToggle = document.getElementById("ctx-toggle-aot");
+                if (aotToggle) {
+                    aotToggle.classList.toggle("on", !!cfg.alwaysOnTop);
+                }
+            }
+
+            function hideFullContextMenu() {
+                fullCtxMenu.style.display = "none";
+            }
+
+            document.addEventListener("contextmenu", (e) => {
+                // Ignore context menu on inputs/textareas so default behaves normally
+                if (e.target.closest("input, textarea")) return;
+                
+                e.preventDefault();
+                showFullContextMenu(e.clientX, e.clientY);
+            });
+
+            // Close context menu on outside click
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".ctx-menu")) {
+                    hideFullContextMenu();
+                }
+            });
+
+            // Close context menu on escape key
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    hideFullContextMenu();
+                }
+            });
+
+            // Close context menu on blur (when clicking outside window)
+            window.addEventListener("blur", () => {
+                hideFullContextMenu();
+            });
+
+            // Wire context menu items
+            document.getElementById("ctx-btn-mini").addEventListener("click", () => {
+                hideFullContextMenu();
+                window.cc.goMini();
+            });
+            document.getElementById("ctx-btn-home").addEventListener("click", () => {
+                hideFullContextMenu();
+                navigate("home");
+            });
+            document.getElementById("ctx-btn-timer").addEventListener("click", () => {
+                hideFullContextMenu();
+                navigate("timer");
+            });
+            document.getElementById("ctx-btn-stopwatch").addEventListener("click", () => {
+                hideFullContextMenu();
+                navigate("stopwatch");
+            });
+            document.getElementById("ctx-btn-relax").addEventListener("click", () => {
+                hideFullContextMenu();
+                navigate("relax");
+            });
+            document.getElementById("ctx-btn-aot").addEventListener("click", async (e) => {
+                e.stopPropagation(); // Don't close immediately so toggle visual shows
+                const on = await window.cc.toggleAlwaysOnTop();
+                cfg.alwaysOnTop = on;
+                
+                const tgl = document.getElementById("ctx-toggle-aot");
+                if (tgl) tgl.classList.toggle("on", on);
+                
+                // Sync the main header btnAot in UI if it exists
+                const headerAot = document.getElementById("btn-aot");
+                if (headerAot) headerAot.classList.toggle("on", on);
+                
+                // Sync the Settings dialog checkbox
+                const sAot = document.getElementById("s-aot");
+                if (sAot) sAot.checked = on;
+
+                // Auto-close menu after toggle action
+                setTimeout(hideFullContextMenu, 200);
+            });
+            document.getElementById("ctx-btn-settings").addEventListener("click", () => {
+                hideFullContextMenu();
+                openSettings();
+            });
+            document.getElementById("ctx-btn-close").addEventListener("click", () => {
+                hideFullContextMenu();
+                window.cc.hideWindow("main");
+            });
+
 
             // ═══════════════════════════════════════════════════════════
             // AUTO SCHEDULER (Backend Assisted)
