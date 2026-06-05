@@ -351,21 +351,50 @@ class AudioEngine {
     }
   }
 
-  // ── Play custom audio file ────────────────────────────────
-  // fade defaults to 0 (instant) so alarm chimes fire immediately; relax
-  // tracks route through playTrack() which passes the crossfade time.
-  playFile(filePath, { id = null, fade = 0 } = {}) {
+  playFile(filePath, { id = null, fade = 0, loop = true } = {}) {
     this.isPlaying = true;
     if (id) this.currentTrack = id;
     this.resume();
     const voice = this._startVoice(id || 'file');
-    // Use HTML Audio as pass-through into Web Audio, routed through the voice bus
-    const audio = new Audio(filePath);
-    audio.loop  = true;
+    // Resolve absolute path in Tauri
+    let resolvedPath = filePath;
+    if (typeof window !== 'undefined' && window.__TAURI__ && (String(filePath).match(/^[A-Za-z]:[\\/]/) || String(filePath).startsWith('/') || String(filePath).startsWith('\\'))) {
+      resolvedPath = window.__TAURI__.core.convertFileSrc(filePath);
+    }
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    audio.src = resolvedPath;
+    audio.loop  = false;
     audio.volume = 1;            // level is governed by the voice bus + _master
     const src  = this._ctx.createMediaElementSource(audio);
     src.connect(voice.bus);
     voice.audioEl = audio;
+
+    let loopTriggered = false;
+    audio.addEventListener('timeupdate', () => {
+      if (!voice.alive || loopTriggered || !loop) return;
+      const timeLeft = audio.duration - audio.currentTime;
+      if (audio.duration > this.crossfadeTime && timeLeft <= this.crossfadeTime) {
+        loopTriggered = true;
+        this.playFile(filePath, { id, fade: this.crossfadeTime, loop });
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      if (!voice.alive || loopTriggered) return;
+      loopTriggered = true;
+      if (loop) {
+        this.playFile(filePath, { id, fade: 0, loop });
+      } else {
+        this._destroyVoice(voice);
+        if (this._current === voice) {
+          this._current = null;
+          this.isPlaying = false;
+          this.currentTrack = null;
+        }
+      }
+    });
+
     audio.play().catch(e => console.warn('[AudioEngine] File playback:', e));
     this._commitVoice(voice, fade);
   }
@@ -380,6 +409,7 @@ class AudioEngine {
       case 'chime-neon':    this._chimeNeon(vol);     break;
       case 'chime-zen':     this._chimeZen(vol);      break;
       case 'chime-cyber':   this._chimeCyber(vol);    break;
+      case 'chime-music':   this._chimeMusic(vol);    break;
       default:              this._chimeDigital(vol);
     }
   }
@@ -399,16 +429,24 @@ class AudioEngine {
   }
 
   _chimeDigital(v) {
-    const t  = this._ctx.currentTime;
-    const o  = this._ctx.createOscillator();
-    const g  = this._ctx.createGain();
-    o.type = 'square';
-    o.frequency.setValueAtTime(880, t);
-    o.frequency.setValueAtTime(440, t + 0.12);
-    g.gain.setValueAtTime(v * 0.28, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
-    o.connect(g); g.connect(this._ctx.destination);
-    o.start(t); o.stop(t + 0.6);
+    const t = this._ctx.currentTime;
+    const notes = [659.25, 880.00]; // E5, A5
+    notes.forEach((f, i) => {
+      const startTime = t + i * 0.15;
+      const osc = this._ctx.createOscillator();
+      const gain = this._ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, startTime);
+      
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(v * 0.35, startTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 1.2);
+      
+      osc.connect(gain);
+      gain.connect(this._ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 1.3);
+    });
   }
 
   _chimeNeon(v) {
@@ -439,17 +477,55 @@ class AudioEngine {
   }
 
   _chimeCyber(v) {
-    [880, 1100, 1320, 1760].forEach((f, i) => {
-      const t = this._ctx.currentTime + i * 0.09;
-      const o = this._ctx.createOscillator();
-      const g = this._ctx.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(f, t);
-      o.frequency.exponentialRampToValueAtTime(f * 0.45, t + 0.35);
-      g.gain.setValueAtTime(v * 0.22, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
-      o.connect(g); g.connect(this._ctx.destination);
-      o.start(t); o.stop(t + 0.5);
+    const t = this._ctx.currentTime;
+    const notes = [293.66, 369.99, 440.00, 587.33]; // D Major Chord Detuned Aurora style
+    notes.forEach((f) => {
+      [-1.5, 1.5].forEach(detuneVal => {
+        const osc = this._ctx.createOscillator();
+        const gain = this._ctx.createGain();
+        const filter = this._ctx.createBiquadFilter();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, t);
+        osc.detune.setValueAtTime(detuneVal, t);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, t);
+        
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(v * 0.15, t + 0.4);
+        gain.gain.setValueAtTime(v * 0.15, t + 1.8);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this._ctx.destination);
+        
+        osc.start(t);
+        osc.stop(t + 3.3);
+      });
+    });
+  }
+
+  _chimeMusic(v) {
+    const t = this._ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((f, i) => {
+      const startTime = t + i * 0.12;
+      const osc = this._ctx.createOscillator();
+      const gain = this._ctx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, startTime);
+      
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(v * 0.4, startTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.8);
+      
+      osc.connect(gain);
+      gain.connect(this._ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.9);
     });
   }
 }

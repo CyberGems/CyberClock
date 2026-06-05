@@ -630,7 +630,7 @@
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 12px;
-                flex: 1;
+                flex-shrink: 0;
                 overflow: hidden;
             }
             .cal-month {
@@ -673,8 +673,9 @@
             .cal-grid {
                 display: grid;
                 grid-template-columns: repeat(7, 1fr);
+                grid-auto-rows: 1fr;
                 gap: 3px;
-                flex: 1;
+                align-content: start;
                 /* Engraved well: the day field is pressed into the panel (inner
                    top shadow + faint bottom highlight), so elevated keys like
                    "today" visibly rise out of it. */
@@ -686,15 +687,34 @@
                     inset 0 -1px 0 rgba(255, 255, 255, 0.03);
             }
             .cal-day {
+                position: relative;
                 font-family: "Share Tech Mono", monospace;
                 font-size: 11px;
                 color: var(--text-md);
                 text-align: center;
-                padding: 5px 1px;
+                padding: 4px 1px;
                 border-radius: 4px;
                 cursor: pointer;
                 transition: all 0.14s;
                 -webkit-app-region: no-drag;
+            }
+            /* A day carrying a note shows a small accent dot under its number. */
+            .cal-day.has-note::after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: 2px;
+                transform: translateX(-50%);
+                width: 3px;
+                height: 3px;
+                border-radius: 50%;
+                background: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
+            .cal-day.today.has-note::after,
+            .cal-day.sel.has-note::after {
+                background: #fff;
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
             }
             .cal-day:hover {
                 background: var(--accent-dim);
@@ -732,6 +752,334 @@
                 box-shadow:
                     0 1px 4px rgba(0, 0, 0, 0.5),
                     inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            }
+
+            /* ════════════════════════════════════════════════════
+   CALENDAR DASHBOARD (Agenda + Today stats)
+   Fills the space freed by the now-compact month grids.
+════════════════════════════════════════════════════ */
+            .cal-bottom {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                gap: 14px;
+                margin-top: 16px;
+            }
+            .cal-dash {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                /* Same engraved well as the day field for a coherent surface. */
+                padding: 12px 14px;
+                border-radius: 8px;
+                background: rgba(0, 0, 0, 0.22);
+                box-shadow:
+                    inset 0 2px 5px rgba(0, 0, 0, 0.5),
+                    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+            }
+            .cal-agenda {
+                flex: 1.7;
+                min-width: 0;
+            }
+            .cal-stats {
+                flex: 1;
+                min-width: 0;
+            }
+            .cal-dash-t {
+                font-size: 9px;
+                letter-spacing: 2.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                text-transform: uppercase;
+                margin-bottom: 10px;
+                padding-bottom: 7px;
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+            }
+            .cal-agenda-list {
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+                /* The hover slide on a row must never spawn a horizontal
+                   scrollbar — clip the 2px overshoot instead. */
+                overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                /* Slim, themed scrollbar */
+                scrollbar-width: thin;
+                scrollbar-color: var(--border-bright) transparent;
+            }
+            .cal-agenda-list::-webkit-scrollbar {
+                width: 5px;
+            }
+            .cal-agenda-list::-webkit-scrollbar-thumb {
+                background: var(--border-bright);
+                border-radius: 3px;
+            }
+            .agenda-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 8px;
+                border-radius: 5px;
+                cursor: pointer;
+                background: var(--bg-01);
+                border: 1px solid transparent;
+                transition: all 0.14s;
+                -webkit-app-region: no-drag;
+            }
+            .agenda-row:hover {
+                border-color: var(--border-bright);
+                background: var(--accent-dim);
+                transform: translateX(2px);
+            }
+            .agenda-chip {
+                font-family: "Orbitron", monospace;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                white-space: nowrap;
+                flex-shrink: 0;
+                width: 52px;
+            }
+            .agenda-chip .agenda-chip-d {
+                font-size: 12px;
+                display: block;
+                line-height: 1.1;
+            }
+            .agenda-prev {
+                flex: 1;
+                min-width: 0;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                color: var(--text-md);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .agenda-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 10px;
+                padding: 12px 8px;
+            }
+            .agenda-empty-ico {
+                font-size: 28px;
+                opacity: 0.45;
+                margin-bottom: 2px;
+                transition: opacity 0.5s;
+                animation: empty-pulse 2.8s ease-in-out infinite;
+            }
+            @keyframes empty-pulse {
+                0%, 100% { opacity: 0.35; }
+                50% { opacity: 0.62; }
+            }
+            .agenda-empty-title {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 12px;
+                color: var(--text-md);
+                line-height: 1.5;
+            }
+            .agenda-empty-tip {
+                font-family: "Share Tech Mono", monospace;
+                font-size: 10px;
+                color: var(--text-lo);
+                line-height: 1.6;
+                max-width: 280px;
+            }
+            .agenda-empty-tip::before {
+                content: "";
+                display: block;
+                width: 40px;
+                margin: 0 auto 8px auto;
+                border-top: 1px solid var(--border-bright);
+                opacity: 0.5;
+            }
+            .stat-row {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 8px;
+                padding: 5px 0;
+                border-bottom: 1px dashed rgba(var(--rgb-accent), 0.08);
+            }
+            .stat-row:last-child {
+                border-bottom: none;
+            }
+            .stat-lbl {
+                font-size: 8px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-lo);
+            }
+            .stat-val {
+                font-family: "Orbitron", monospace;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                color: var(--accent-a);
+                text-shadow: var(--glow-xs);
+                white-space: nowrap;
+            }
+            .stat-val.moon {
+                font-family: inherit;
+                font-size: 15px;
+                text-shadow: none;
+            }
+
+            /* ════════════════════════════════════════════════════
+   NOTE MODAL (day note editor — mirrors the Settings modal)
+════════════════════════════════════════════════════ */
+            .note-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.68);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.28s ease;
+                z-index: 110;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .note-overlay.open {
+                opacity: 1;
+                pointer-events: all;
+            }
+            .note-modal {
+                width: 460px;
+                max-width: 90vw;
+                background: var(--bg-00);
+                border: 1px solid var(--border-bright);
+                border-radius: 12px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                transform: scale(0.9) translateY(16px);
+                opacity: 0;
+                transition:
+                    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.28s ease;
+                box-shadow:
+                    0 24px 80px rgba(0, 0, 0, 0.6),
+                    var(--glow-sm);
+            }
+            .note-modal::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 10%;
+                right: 10%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-a),
+                    transparent
+                );
+                opacity: 0.9;
+                box-shadow: var(--glow-md);
+                z-index: 10;
+            }
+            .note-overlay.open .note-modal {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            .note-head {
+                display: flex;
+                align-items: center;
+                padding: 0 16px;
+                height: 50px;
+                gap: 10px;
+                background: var(--bg-01);
+                border-bottom: 1px solid var(--border);
+                flex-shrink: 0;
+            }
+            .note-date {
+                font-family: "Orbitron", monospace;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--accent-a);
+                text-shadow: var(--glow-sm);
+            }
+            .note-body {
+                padding: 18px 18px 8px;
+            }
+            .note-text {
+                width: 100%;
+                height: 120px;
+                resize: none;
+                box-sizing: border-box;
+                padding: 12px 14px;
+                background: var(--bg-01);
+                border: 1px solid var(--border);
+                border-radius: 7px;
+                color: var(--text-hi, var(--accent-a));
+                font-family: "Share Tech Mono", monospace;
+                font-size: 13px;
+                line-height: 1.55;
+                outline: none;
+                transition: border-color 0.18s, box-shadow 0.18s;
+            }
+            .note-text::placeholder {
+                color: var(--text-lo);
+            }
+            .note-text:focus {
+                border-color: var(--border-bright);
+                box-shadow: var(--glow-xs);
+            }
+            .note-foot {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 18px 18px;
+            }
+            .note-spacer {
+                flex: 1;
+            }
+            .note-btn {
+                -webkit-app-region: no-drag;
+                font-family: "Orbitron", monospace;
+                font-size: 8.5px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                padding: 9px 18px;
+                border-radius: 5px;
+                cursor: pointer;
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text-md);
+                transition: all 0.16s;
+            }
+            .note-btn:hover {
+                color: var(--accent-a);
+                border-color: var(--border-bright);
+            }
+            .note-btn.primary {
+                background: var(--accent-dim);
+                border-color: var(--border-bright);
+                color: var(--accent-a);
+            }
+            .note-btn.primary:hover {
+                box-shadow: var(--glow-sm);
+                border-color: var(--border-active);
+            }
+            .note-btn.danger:hover {
+                color: #ff4466;
+                border-color: #ff4466;
             }
 
             /* ════════════════════════════════════════════════════
@@ -1177,6 +1525,19 @@
                 color: var(--accent-a);
                 border-color: var(--border-bright);
             }
+            #r-next-tip {
+                color: var(--accent-a);
+                background: var(--accent-dim);
+                border-color: var(--border-active);
+                font-size: 8.5px;
+                letter-spacing: 1px;
+                padding: 3px 10px;
+                height: 20px;
+            }
+            #r-next-tip:hover {
+                border-color: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
             .lap-col-hdr {
                 display: grid;
                 grid-template-columns: 40px 1fr 1fr 1fr;
@@ -1268,9 +1629,9 @@
                 padding: var(--view-pad-y) var(--view-pad-x);
                 display: flex;
                 flex-direction: column;
-                gap: 14px;
+                gap: 12px;
                 border-right: 1px solid var(--border);
-                overflow-y: auto;
+                overflow: hidden;
             }
             .relax-R {
                 flex: 1;
@@ -1289,12 +1650,12 @@
                 background: var(--bg-02);
                 border: 1px solid var(--border);
                 border-radius: 10px;
-                padding: 16px 10px;
+                padding: 13px 10px;
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 7px;
+                gap: 5px;
                 position: relative;
                 overflow: hidden;
                 transition: all 0.22s;
@@ -1353,8 +1714,10 @@
             }
             .tcard-desc {
                 font-family: "Share Tech Mono", monospace;
-                font-size: 8px;
-                color: var(--text-lo);
+                font-size: 9.5px;
+                letter-spacing: 0.4px;
+                color: var(--text-md);
+                text-shadow: 0 0 5px rgba(var(--rgb-accent), 0.08);
                 text-align: center;
             }
             .tcard.on .tcard-name {
@@ -1478,8 +1841,7 @@
             .r-ast-row {
                 display: flex;
                 align-items: center;
-                gap: 7px;
-                flex-wrap: wrap;
+                gap: 10px;
             }
             .r-ast-lbl {
                 font-family: "Orbitron", monospace;
@@ -1487,32 +1849,44 @@
                 letter-spacing: 2px;
                 color: var(--text-lo);
                 text-transform: uppercase;
-                width: 70px;
+                width: 60px;
                 flex-shrink: 0;
             }
+            .ast-group {
+                display: flex;
+                flex: 1;
+                gap: 4px;
+                background: var(--bg-02);
+                border: 1px solid var(--border);
+                border-radius: 11px;
+                padding: 3px;
+            }
             .ast-btn {
+                flex: 1;
                 font-family: "Orbitron", monospace;
-                font-size: 8px;
+                font-size: 9px;
                 letter-spacing: 1px;
                 text-transform: uppercase;
+                text-align: center;
                 background: transparent;
-                border: 1px solid var(--border);
-                color: var(--text-lo);
-                padding: 5px 11px;
-                border-radius: 12px;
+                border: 1px solid transparent;
+                color: var(--text-md);
+                padding: 7px 0;
+                border-radius: 8px;
                 cursor: pointer;
                 transition: all 0.15s;
                 -webkit-app-region: no-drag;
             }
             .ast-btn:hover {
                 color: var(--accent-a);
-                border-color: var(--border-bright);
+                background: rgba(var(--rgb-accent), 0.06);
             }
             .ast-btn.on {
                 background: var(--accent-dim);
                 color: var(--accent-a);
                 border-color: var(--border-active);
                 box-shadow: var(--glow-xs);
+                font-weight: 700;
             }
             .ast-cd {
                 font-family: "Share Tech Mono", monospace;
@@ -1750,11 +2124,12 @@
                 background: var(--bg-01);
                 border: 1px solid var(--border);
                 border-radius: 8px;
-                padding: 14px 16px;
+                padding: 13px 16px;
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
-                margin-top: 14px;
+                gap: 9px;
+                flex: 1;
+                min-height: 0;
             }
             .sched-title {
                 font-family: "Orbitron", monospace;
@@ -1803,15 +2178,47 @@
                 background: var(--bg-02);
             }
             .sched-time {
+                display: flex;
+                align-items: center;
+                gap: 2px;
                 background: var(--bg-02);
                 border: 1px solid var(--border-bright);
-                color: var(--text-hi);
-                font-family: "Share Tech Mono", monospace;
-                font-size: 11px;
-                padding: 4px 6px;
                 border-radius: 4px;
+                padding: 3px 6px;
+            }
+            .sched-time-sel {
+                -webkit-appearance: none;
+                appearance: none;
+                background: transparent;
+                border: none;
+                color: var(--text-hi);
+                font-family: "Orbitron", monospace;
+                font-size: 11px;
+                letter-spacing: 0.5px;
+                padding: 1px 1px;
                 outline: none;
                 cursor: pointer;
+                text-align: center;
+                -webkit-app-region: no-drag;
+            }
+            .sched-time-sel:hover {
+                color: var(--accent-a);
+            }
+            .sched-time-sel option {
+                background: var(--bg-02);
+                color: var(--text-hi);
+                font-family: "Orbitron", monospace;
+                font-size: 11px;
+            }
+            .sched-time-sep {
+                color: var(--accent-a);
+                font-family: "Orbitron", monospace;
+                font-size: 11px;
+                line-height: 1;
+            }
+            .sched-time-ap {
+                color: var(--accent-a);
+                margin-left: 3px;
             }
             .sched-status {
                 font-family: "Share Tech Mono", monospace;
@@ -2107,14 +2514,18 @@
 
             .s-tog {
                 position: relative;
+                display: inline-block;
                 width: 42px;
                 height: 22px;
                 cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
             }
             .s-tog input {
                 opacity: 0;
                 width: 0;
                 height: 0;
+                position: absolute;
+                pointer-events: none;
             }
             .s-tog-tr {
                 position: absolute;
@@ -2123,6 +2534,7 @@
                 border: 1px solid var(--border);
                 border-radius: 11px;
                 transition: all 0.25s;
+                pointer-events: none;
             }
             .s-tog input:checked ~ .s-tog-tr {
                 background: var(--accent-dim);
@@ -2138,6 +2550,7 @@
                 background: var(--text-lo);
                 border-radius: 50%;
                 transition: all 0.25s;
+                pointer-events: none;
             }
             .s-tog input:checked ~ .s-tog-tr .s-tog-th {
                 transform: translateX(20px);
@@ -2197,7 +2610,7 @@
             }
             .s-abtn {
                 font-family: "Orbitron", monospace;
-                font-size: 8px;
+                font-size: 9.5px;
                 letter-spacing: 1.5px;
                 text-transform: uppercase;
                 background: transparent;
@@ -2207,6 +2620,9 @@
                 border-radius: 4px;
                 cursor: pointer;
                 transition: all 0.18s;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
             }
             .s-abtn:hover {
                 box-shadow: var(--glow-xs);
@@ -2345,6 +2761,18 @@
                 transform: translate(-50%, 0);
                 transition-delay: 0.85s;
             }
+            /* Right-anchored: tooltip grows leftward so it stays inside
+               scroll/clip containers (e.g. .relax-L has overflow-y:auto,
+               which makes overflow-x clip the centered tooltip). */
+            [data-tooltip-dir="left"]::after {
+                left: auto;
+                right: 0;
+                transform: translate(6px, 6px);
+            }
+            [data-tooltip-dir="left"]:not([data-tooltip=""]):hover::after {
+                transform: translate(0, 0);
+                transition-delay: 0.85s;
+            }
 
             /* scanlines */
             .scanlines {
@@ -2395,8 +2823,6 @@
             </defs>
         </svg>
         <div class="app">
-            <div class="scanlines"></div>
-
             <!-- ═══ TITLE BAR ═══════════════════════════════════════════ -->
             <div class="tbar">
                 <div class="tbar-brand">
@@ -2456,15 +2882,44 @@
                         </div>
                         <div class="cal-panel">
                             <div class="cal-hdr">
-                                <span class="cal-title-lbl">◈ Calendar</span>
+                                <span class="cal-title-lbl" data-i18n="calendar.label">◈ Calendar</span>
                                 <div style="flex: 1"></div>
-                                <button class="cal-today-btn" id="cal-today">
+                                <button class="cal-today-btn" id="cal-today" data-i18n="calendar.today">
                                     Today
                                 </button>
                                 <button class="cal-nav" id="cal-prev">‹</button>
                                 <button class="cal-nav" id="cal-next">›</button>
                             </div>
                             <div class="cal-months" id="cal-months"></div>
+                            <div class="cal-bottom">
+                                <div class="cal-dash cal-agenda">
+                                    <div class="cal-dash-t" data-i18n="calendar.upcoming">◈ Upcoming</div>
+                                    <div class="cal-agenda-list" id="cal-agenda-list"></div>
+                                </div>
+                                <div class="cal-dash cal-stats">
+                                    <div class="cal-dash-t" data-i18n="calendar.todayPanel">◈ Today</div>
+                                    <div class="stat-row">
+                                        <span class="stat-lbl" data-i18n="calendar.stat.dayOfYear">Day of year</span>
+                                        <span class="stat-val" id="stat-doy">—</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-lbl" data-i18n="calendar.stat.week">ISO week</span>
+                                        <span class="stat-val" id="stat-week">—</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-lbl" data-i18n="calendar.stat.daysLeftYear">Days left in year</span>
+                                        <span class="stat-val" id="stat-dly">—</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-lbl" data-i18n="calendar.stat.daysLeftMonth">Left in month</span>
+                                        <span class="stat-val" id="stat-dlm">—</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-lbl" data-i18n="calendar.stat.moon">Moon phase</span>
+                                        <span class="stat-val moon" id="stat-moon">—</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -2746,7 +3201,7 @@
                                         <span data-ico="play"></span> <span id="r-play-text" data-i18n="relax.play">Zen Flow</span>
                                     </button>
                                 </div>
-                                <div id="r-stop-wrap" data-tooltip="Stop playback and reset to Zen Flow" data-i18n-attr="data-tooltip:relax.tooltip.stop">
+                                <div id="r-stop-wrap" data-tooltip-dir="left" data-tooltip="Stop playback and reset to Zen Flow" data-i18n-attr="data-tooltip:relax.tooltip.stop">
                                     <button
                                         class="abtn red"
                                         id="r-stop"
@@ -2779,21 +3234,23 @@
                             </div>
                             <div class="r-ast-row">
                                 <span class="r-ast-lbl" data-i18n="relax.autoStop">Auto Stop</span>
-                                <button class="ast-btn on" data-min="0" data-tooltip="Disable auto-stop timer" data-i18n-attr="data-tooltip:relax.tooltip.ast.off">
-                                    OFF
-                                </button>
-                                <button class="ast-btn" data-min="15" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
-                                    15m
-                                </button>
-                                <button class="ast-btn" data-min="30" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
-                                    30m
-                                </button>
-                                <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
-                                    1h
-                                </button>
-                                <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
-                                    2h
-                                </button>
+                                <div class="ast-group">
+                                    <button class="ast-btn on" data-min="0" data-tooltip="Disable auto-stop timer" data-i18n-attr="data-tooltip:relax.tooltip.ast.off">
+                                        OFF
+                                    </button>
+                                    <button class="ast-btn" data-min="15" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                        15m
+                                    </button>
+                                    <button class="ast-btn" data-min="30" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                        30m
+                                    </button>
+                                    <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                        1h
+                                    </button>
+                                    <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                        2h
+                                    </button>
+                                </div>
                                 <span
                                     class="ast-cd"
                                     id="r-ast-cd"
@@ -2817,7 +3274,15 @@
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <span class="sched-lbl" style="width: auto;">Start At</span>
-                                        <input type="time" class="sched-time" id="sched-time" value="22:00" />
+                                        <div class="sched-time" id="sched-time">
+                                            <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
+                                            <span class="sched-time-sep">:</span>
+                                            <select class="sched-time-sel" id="sched-time-m" aria-label="Minute"></select>
+                                            <select class="sched-time-sel sched-time-ap" id="sched-time-ap" aria-label="AM/PM" style="display:none">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="sched-row">
@@ -2829,6 +3294,7 @@
                                         <option value="60" selected>Every 1 hour</option>
                                         <option value="120">Every 2 hours</option>
                                         <option value="240">Every 4 hours</option>
+                                        <option value="1440">Daily</option>
                                     </select>
                                 </div>
                                 <div class="sched-row">
@@ -2855,7 +3321,7 @@
                                         <option value="0">Until stopped</option>
                                     </select>
                                 </div>
-                                <div class="sched-status" id="sched-next" style="margin-top:4px;text-align:center;">
+                                <div class="sched-status" id="sched-next" style="margin-top:2px;text-align:center;padding-top:4px;">
                                     Next run: —
                                 </div>
                             </div>
@@ -2890,7 +3356,7 @@
                                 <div class="tip-box">
                                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                         <div class="tip-lbl" data-i18n="relax.tipLabel">Mindfulness Tip</div>
-                                        <button id="r-next-tip" class="lap-act" style="padding: 2px 8px; font-size: 7.5px; height: 18px;" data-i18n="relax.nextTip" data-tooltip="Show next mindfulness tip" data-i18n-attr="data-tooltip:relax.tooltip.nextTip">Next</button>
+                                        <button id="r-next-tip" class="lap-act" data-i18n="relax.nextTip" data-tooltip="Show next mindfulness tip" data-i18n-attr="data-tooltip:relax.tooltip.nextTip">Next</button>
                                     </div>
                                     <div class="tip-text" id="r-tip" aria-live="polite">
                                         Start a track to begin your session.
@@ -2930,6 +3396,7 @@
                     <div class="s-tab" data-stab="alarms">Alarms</div>
                     <div class="s-tab" data-stab="general">General</div>
                     <div class="s-tab" data-stab="display">Display</div>
+                    <div class="s-tab" data-stab="mini">mini mode</div>
                 </div>
                 <div class="s-content">
                     <!-- Appearance -->
@@ -2954,40 +3421,40 @@
                                     <div
                                         class="s-tdot"
                                         style="
-                                            background: #00ff41;
-                                            box-shadow: 0 0 8px #00ff41;
+                                            background: #add9ce;
+                                            box-shadow: 0 0 8px #add9ce;
                                             border-radius: 50%;
                                             width: 20px;
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Neon Green</div>
+                                    <div class="s-tname">Forest Mist</div>
                                 </div>
                                 <div class="s-ttile" data-theme="plasma-purple">
                                     <div
                                         class="s-tdot"
                                         style="
-                                            background: #c800ff;
-                                            box-shadow: 0 0 8px #c800ff;
+                                            background: #ccb2d9;
+                                            box-shadow: 0 0 8px #ccb2d9;
                                             border-radius: 50%;
                                             width: 20px;
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Plasma Purple</div>
+                                    <div class="s-tname">Twilight Haze</div>
                                 </div>
                                 <div class="s-ttile" data-theme="solar-orange">
                                     <div
                                         class="s-tdot"
                                         style="
-                                            background: #ff6600;
-                                            box-shadow: 0 0 8px #ff6600;
+                                            background: #d9c2a9;
+                                            box-shadow: 0 0 8px #d9c2a9;
                                             border-radius: 50%;
                                             width: 20px;
                                             height: 20px;
                                         "
                                     ></div>
-                                    <div class="s-tname">Solar Orange</div>
+                                    <div class="s-tname">Warm Ember</div>
                                 </div>
                                 <div class="s-ttile" data-theme="arctic-ice">
                                     <div
@@ -3027,19 +3494,6 @@
                                         <div class="s-tog-th"></div></div
                                 ></label>
                             </div>
-                            <div class="s-row">
-                                <div class="s-lbl">
-                                    Scanlines<small>CRT-style overlay</small>
-                                </div>
-                                <label class="s-tog"
-                                    ><input
-                                        type="checkbox"
-                                        id="s-scan"
-                                        checked />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
                         </div>
                     </div>
 
@@ -3064,10 +3518,88 @@
                                 >
                             </div>
                         </div>
+                        <div class="s-sec" style="margin-bottom: 20px;">
+                            <div class="s-row" style="align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0;">
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-alarm-sched-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                                <span class="s-lbl" style="width: auto;">Play sound from</span>
+                                <div class="sched-time" id="s-alarm-sched-start" style="margin: 0 4px;">
+                                    <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
+                                    <span class="sched-time-sep">:</span>
+                                    <select class="sched-time-sel" id="s-alarm-sched-start-m" aria-label="Start Minute"></select>
+                                    <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-start-ap" aria-label="Start AM/PM" style="display:none">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                                <span class="s-lbl" style="width: auto;">to</span>
+                                <div class="sched-time" id="s-alarm-sched-end" style="margin: 0 4px;">
+                                    <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
+                                    <span class="sched-time-sep">:</span>
+                                    <select class="sched-time-sel" id="s-alarm-sched-end-m" aria-label="End Minute"></select>
+                                    <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-end-ap" aria-label="End AM/PM" style="display:none">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                                <span class="s-lbl" style="width: auto;">only</span>
+                            </div>
+                        </div>
+
+                        <!-- Top of the hour -->
                         <div class="s-alarm-blk">
                             <div class="s-alarm-t">
-                                <span data-ico="bell"></span> Half-Hour Chime
-                                (:30)
+                                <span data-ico="bell"></span> Top of the hour
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Enable</span
+                                ><label class="s-tog"
+                                    ><input type="checkbox" id="s-full-en" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-alarm-row">
+                                <span class="s-alarm-lbl">Sound</span>
+                                <select id="s-full-snd">
+                                    <option value="chime-crystal">
+                                        Crystal Bell
+                                    </option>
+                                    <option value="chime-digital" selected>
+                                        Soft Chime
+                                    </option>
+                                    <option value="chime-neon">Neon Arp</option>
+                                    <option value="chime-zen">Zen Gong</option>
+                                    <option value="chime-cyber">
+                                        Aurora
+                                    </option>
+                                    <option value="chime-music">Music Box</option>
+                                </select>
+                                <button class="s-abtn" id="s-full-test">
+                                    <span data-ico="play"></span> Test
+                                </button>
+                                <button class="s-abtn" id="s-full-file">
+                                    <span data-ico="folder"></span> Custom…
+                                </button>
+                            </div>
+                            <div
+                                class="s-flbl"
+                                id="s-full-flbl"
+                                style="display: none"
+                            >
+                                <span id="s-full-fname"></span
+                                ><span class="s-fclr" id="s-full-fclr"
+                                    ><span data-ico="x"></span></span
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Half hour -->
+                        <div class="s-alarm-blk">
+                            <div class="s-alarm-t">
+                                <span data-ico="bell"></span> Half hour
                             </div>
                             <div class="s-alarm-row">
                                 <span class="s-alarm-lbl">Enable</span
@@ -3084,13 +3616,14 @@
                                         Crystal Bell
                                     </option>
                                     <option value="chime-digital">
-                                        Digital Pulse
+                                        Soft Chime
                                     </option>
                                     <option value="chime-neon">Neon Arp</option>
                                     <option value="chime-zen">Zen Gong</option>
                                     <option value="chime-cyber">
-                                        Cyber Sweep
+                                        Aurora
                                     </option>
+                                    <option value="chime-music">Music Box</option>
                                 </select>
                                 <button class="s-abtn" id="s-half-test">
                                     <span data-ico="play"></span> Test
@@ -3110,48 +3643,50 @@
                                 >
                             </div>
                         </div>
+
+                        <!-- Quarter hour -->
                         <div class="s-alarm-blk">
                             <div class="s-alarm-t">
-                                <span data-ico="bell"></span> Full-Hour Chime
-                                (:00)
+                                <span data-ico="bell"></span> Quarter hour
                             </div>
                             <div class="s-alarm-row">
                                 <span class="s-alarm-lbl">Enable</span
                                 ><label class="s-tog"
-                                    ><input type="checkbox" id="s-full-en" />
+                                    ><input type="checkbox" id="s-quart-en" />
                                     <div class="s-tog-tr">
                                         <div class="s-tog-th"></div></div
                                 ></label>
                             </div>
                             <div class="s-alarm-row">
                                 <span class="s-alarm-lbl">Sound</span>
-                                <select id="s-full-snd">
+                                <select id="s-quart-snd">
                                     <option value="chime-crystal">
                                         Crystal Bell
                                     </option>
-                                    <option value="chime-digital" selected>
-                                        Digital Pulse
+                                    <option value="chime-digital">
+                                        Soft Chime
                                     </option>
                                     <option value="chime-neon">Neon Arp</option>
                                     <option value="chime-zen">Zen Gong</option>
                                     <option value="chime-cyber">
-                                        Cyber Sweep
+                                        Aurora
                                     </option>
+                                    <option value="chime-music">Music Box</option>
                                 </select>
-                                <button class="s-abtn" id="s-full-test">
+                                <button class="s-abtn" id="s-quart-test">
                                     <span data-ico="play"></span> Test
                                 </button>
-                                <button class="s-abtn" id="s-full-file">
+                                <button class="s-abtn" id="s-quart-file">
                                     <span data-ico="folder"></span> Custom…
                                 </button>
                             </div>
                             <div
                                 class="s-flbl"
-                                id="s-full-flbl"
+                                id="s-quart-flbl"
                                 style="display: none"
                             >
-                                <span id="s-full-fname"></span
-                                ><span class="s-fclr" id="s-full-fclr"
+                                <span id="s-quart-fname"></span
+                                ><span class="s-fclr" id="s-quart-fclr"
                                     ><span data-ico="x"></span></span
                                 >
                             </div>
@@ -3175,24 +3710,24 @@
                             <div class="s-sec-t">Behavior</div>
                             <div class="s-row">
                                 <div class="s-lbl">
-                                    Always on Top<small
-                                        >Float above all windows</small
-                                    >
-                                </div>
-                                <label class="s-tog"
-                                    ><input type="checkbox" id="s-aot" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-row">
-                                <div class="s-lbl">
                                     Start with Windows<small
                                         >Launch at login</small
                                     >
                                 </div>
                                 <label class="s-tog"
                                     ><input type="checkbox" id="s-startup" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row" id="s-startup-mini-row" style="display: none; padding-left: 20px;">
+                                <div class="s-lbl">
+                                    Start in Mini Mode<small
+                                        >Launch in compact view</small
+                                    >
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-startup-mini" />
                                     <div class="s-tog-tr">
                                         <div class="s-tog-th"></div></div
                                 ></label>
@@ -3293,12 +3828,112 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Mini Mode -->
+                    <div class="s-panel" id="stab-mini">
+                        <div class="s-sec">
+                            <div class="s-sec-t">Design Mode</div>
+                            <div class="s-row" style="flex-wrap: wrap; gap: 8px; padding: 8px 0;">
+                                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;">
+                                    <button class="s-fmt" data-mini-design="1">1</button>
+                                    <button class="s-fmt" data-mini-design="2">2</button>
+                                    <button class="s-fmt" data-mini-design="3">3</button>
+                                    <button class="s-fmt" data-mini-design="4">4</button>
+                                    <button class="s-fmt" data-mini-design="5">5</button>
+                                    <button class="s-fmt" data-mini-design="6">6</button>
+                                    <button class="s-fmt" data-mini-design="7">7</button>
+                                    <button class="s-fmt" data-mini-design="8">8</button>
+                                    <button class="s-fmt" data-mini-design="9">9</button>
+                                    <button class="s-fmt" data-mini-design="10">10</button>
+                                    <button class="s-fmt" data-mini-design="11">11</button>
+                                    <button class="s-fmt" data-mini-design="12">12</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">Transparency</div>
+                            <div class="s-row">
+                                <div class="s-lbl">Background</div>
+                                <div class="s-vol-row" style="flex:1;max-width:200px;">
+                                    <span style="font-size:10px;color:var(--text-md)"><span data-ico="compact"></span></span>
+                                    <input type="range" id="s-minibg-op" min="0" max="100" value="100" />
+                                    <span class="s-vol-val" id="s-minibg-op-val">100%</span>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">Content</div>
+                                <div class="s-vol-row" style="flex:1;max-width:200px;">
+                                    <span style="font-size:10px;color:var(--text-md)"><span data-ico="compact"></span></span>
+                                    <input type="range" id="s-mini-op" min="20" max="100" value="100" />
+                                    <span class="s-vol-val" id="s-mini-op-val">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">Position & Behavior</div>
+                            <div class="s-row">
+                                <div class="s-lbl">Always on Top<small>Float above all windows</small></div>
+                                <label class="s-tog"><input type="checkbox" id="s-aot" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">Lock Position<small>Prevent dragging</small></div>
+                                <label class="s-tog"><input type="checkbox" id="s-mini-lock" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t">CRT Overlay</div>
+                            <div class="s-row">
+                                <div class="s-lbl">Scanlines<small>Mini mode only</small></div>
+                                <label class="s-tog"><input type="checkbox" id="s-mini-scan" checked />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- s-content -->
             </div>
             <!-- s-modal -->
         </div>
         <!-- s-overlay -->
+
+        <!-- ═══ NOTE MODAL (day note editor) ════════════════════════════ -->
+        <div class="note-overlay" id="note-overlay">
+            <div class="note-modal">
+                <div class="note-head">
+                    <span class="note-date" id="note-date-lbl">—</span>
+                    <div class="note-spacer"></div>
+                    <button class="s-close" id="note-close">
+                        <span data-ico="x"></span>
+                    </button>
+                </div>
+                <div class="note-body">
+                    <textarea
+                        class="note-text"
+                        id="note-text"
+                        maxlength="500"
+                        spellcheck="false"
+                        data-i18n-attr="placeholder:calendar.notePlaceholder"
+                        placeholder="Write a note for this day…"
+                    ></textarea>
+                </div>
+                <div class="note-foot">
+                    <button class="note-btn danger" id="note-delete" data-i18n="calendar.delete">
+                        Delete
+                    </button>
+                    <div class="note-spacer"></div>
+                    <button class="note-btn primary" id="note-save" data-i18n="calendar.save">
+                        Save
+                    </button>
+                </div>
+            </div>
+            <!-- note-modal -->
+        </div>
+        <!-- note-overlay -->
 
         <script src="../shared/audio-engine.js"></script>
         <script>
@@ -3456,15 +4091,70 @@
             );
 
             // ══════════════════════════════════════════════════════════════
+            // ALARM SCHEDULER TIME HELPERS
+            // ══════════════════════════════════════════════════════════════
+            function buildAlarmSchedTimeOptions() {
+                const is12 = cfg.clockFormat === '12h';
+                ['start', 'end'].forEach(prefix => {
+                    const hSel = document.getElementById(`s-alarm-sched-${prefix}-h`);
+                    const mSel = document.getElementById(`s-alarm-sched-${prefix}-m`);
+                    const apSel = document.getElementById(`s-alarm-sched-${prefix}-ap`);
+                    if (!hSel || !mSel || !apSel) return;
+                    hSel.innerHTML = '';
+                    const hStart = is12 ? 1 : 0, hEnd = is12 ? 12 : 23;
+                    for (let h = hStart; h <= hEnd; h++) {
+                        const o = document.createElement('option');
+                        o.value = String(h); o.textContent = pad(h);
+                        hSel.appendChild(o);
+                    }
+                    if (!mSel.options.length) {
+                        for (let m = 0; m <= 59; m++) {
+                            const o = document.createElement('option');
+                            o.value = String(m); o.textContent = pad(m);
+                            mSel.appendChild(o);
+                        }
+                    }
+                    apSel.style.display = is12 ? '' : 'none';
+                });
+            }
+            function setAlarmSchedTime(prefix, hhmm) {
+                const [H, M] = (hhmm || '08:00').split(':').map(Number);
+                const is12 = cfg.clockFormat === '12h';
+                const hSel = document.getElementById(`s-alarm-sched-${prefix}-h`);
+                const mSel = document.getElementById(`s-alarm-sched-${prefix}-m`);
+                const apSel = document.getElementById(`s-alarm-sched-${prefix}-ap`);
+                if (!hSel) return;
+                mSel.value = String(M);
+                if (is12) {
+                    let h12 = H % 12; if (h12 === 0) h12 = 12;
+                    hSel.value = String(h12);
+                    apSel.value = H >= 12 ? 'PM' : 'AM';
+                } else {
+                    hSel.value = String(H);
+                }
+            }
+            function getAlarmSchedTime(prefix) {
+                const is12 = cfg.clockFormat === '12h';
+                const hSel = document.getElementById(`s-alarm-sched-${prefix}-h`);
+                const mSel = document.getElementById(`s-alarm-sched-${prefix}-m`);
+                const apSel = document.getElementById(`s-alarm-sched-${prefix}-ap`);
+                if (!hSel) return '08:00';
+                let H = parseInt(hSel.value, 10);
+                const M = parseInt(mSel.value, 10);
+                if (is12) {
+                    if (apSel.value === 'AM') { if (H === 12) H = 0; }
+                    else { if (H !== 12) H += 12; }
+                }
+                return pad(H) + ':' + pad(M);
+            }
+
+            // ══════════════════════════════════════════════════════════════
             // SETTINGS APPLICATION
             // ══════════════════════════════════════════════════════════════
             function applySettings(s) {
                 cfg = s;
                 document.body.dataset.theme = s.theme || "cyber-blue";
-                document.body.classList.toggle(
-                    "no-scanlines",
-                    s.scanlines === false,
-                );
+                // Scanlines are mini-mode only — full mode never has them
                 applySkin(s.theme || "cyber-blue");
                 updateDigital();
 
@@ -3479,12 +4169,14 @@
                     );
                 const secEl = document.getElementById("s-sec");
                 if (secEl) secEl.checked = s.showSeconds !== false;
-                const scanEl = document.getElementById("s-scan");
-                if (scanEl) scanEl.checked = s.scanlines !== false;
                 const aotEl = document.getElementById("s-aot");
                 if (aotEl) aotEl.checked = !!s.alwaysOnTop;
                 const suEl = document.getElementById("s-startup");
-                if (suEl) suEl.checked = !!s.startWithWindows;
+                if (suEl) suEl.checked = s.startWithWindows !== false;
+                const suMiniRow = document.getElementById("s-startup-mini-row");
+                if (suMiniRow) suMiniRow.style.display = (s.startWithWindows !== false) ? "flex" : "none";
+                const suMiniEl = document.getElementById("s-startup-mini");
+                if (suMiniEl) suMiniEl.checked = s.startInMiniMode !== false;
 
                 const langEl = document.getElementById("s-lang");
                 if (langEl) langEl.value = s.language || "auto";
@@ -3508,16 +4200,29 @@
 
                 const ah = s.alarmHalfHour || {};
                 const af = s.alarmFullHour || {};
+                const aq = s.alarmQuarterHour || {};
                 const hEn = document.getElementById("s-half-en");
                 if (hEn) hEn.checked = !!ah.enabled;
                 const fEn = document.getElementById("s-full-en");
                 if (fEn) fEn.checked = !!af.enabled;
+                const qEn = document.getElementById("s-quart-en");
+                if (qEn) qEn.checked = !!aq.enabled;
                 const hSnd = document.getElementById("s-half-snd");
                 if (hSnd) hSnd.value = ah.sound || "chime-crystal";
                 const fSnd = document.getElementById("s-full-snd");
                 if (fSnd) fSnd.value = af.sound || "chime-digital";
-                if (ah.customPath) showCustomFile("half", ah.customPath);
-                if (af.customPath) showCustomFile("full", af.customPath);
+                const qSnd = document.getElementById("s-quart-snd");
+                if (qSnd) qSnd.value = aq.sound || "chime-crystal";
+                if (ah.customPath) showCustomFile("half", ah.customPath); else showCustomFile("half", null);
+                if (af.customPath) showCustomFile("full", af.customPath); else showCustomFile("full", null);
+                if (aq.customPath) showCustomFile("quart", aq.customPath); else showCustomFile("quart", null);
+
+                // Apply alarm time restriction schedule controls
+                buildAlarmSchedTimeOptions();
+                const alSchedEn = document.getElementById("s-alarm-sched-en");
+                if (alSchedEn) alSchedEn.checked = !!s.alarmScheduleEnabled;
+                setAlarmSchedTime("start", s.alarmScheduleStart || "08:00");
+                setAlarmSchedTime("end", s.alarmScheduleEnd || "17:00");
 
                 const avEl = document.getElementById("s-avol");
                 if (avEl) {
@@ -3544,6 +4249,28 @@
                     updatePlayingTrackCardClass(window.audioEngine.isPlaying);
                 }
                 if (typeof applySchedUI === "function") applySchedUI(s);
+
+                // Mini mode controls
+                const miniDesign = s.miniDesign || 1;
+                document.querySelectorAll('[data-mini-design]').forEach((b) => {
+                    b.classList.toggle('on', parseInt(b.dataset.miniDesign) === miniDesign);
+                });
+                const miniBgOp = document.getElementById('s-minibg-op');
+                if (miniBgOp) {
+                    const v = Math.round((s.miniBgOpacity ?? 1.0) * 100);
+                    miniBgOp.value = v;
+                    document.getElementById('s-minibg-op-val').textContent = v + '%';
+                }
+                const miniOp = document.getElementById('s-mini-op');
+                if (miniOp) {
+                    const v = Math.round((s.miniOpacity ?? 1.0) * 100);
+                    miniOp.value = v;
+                    document.getElementById('s-mini-op-val').textContent = v + '%';
+                }
+                const miniLock = document.getElementById('s-mini-lock');
+                if (miniLock) miniLock.checked = s.miniPositionLocked || false;
+                const miniScan = document.getElementById('s-mini-scan');
+                if (miniScan) miniScan.checked = s.miniScanlines !== false;
             }
 
             function showCustomFile(which, p) {
@@ -3884,7 +4611,13 @@
             // ══════════════════════════════════════════════════════════════
             let calYear,
                 calMonth,
-                selDate = null;
+                selDate = null,
+                calNotes = {};
+
+            // ISO date key "YYYY-MM-DD" (m is 0-based)
+            function isoKey(y, m, d) {
+                return `${y}-${pad(m + 1)}-${pad(d)}`;
+            }
 
             function renderCalendar() {
                 const container = document.getElementById("cal-months");
@@ -3929,7 +4662,7 @@
                         const cell = document.createElement("div");
                         cell.className = "cal-day";
                         cell.textContent = d;
-                        const key = `${y}-${m}-${d}`;
+                        const key = isoKey(y, m, d);
                         if (
                             y === today.getFullYear() &&
                             m === today.getMonth() &&
@@ -3937,18 +4670,36 @@
                         )
                             cell.classList.add("today");
                         if (selDate === key) cell.classList.add("sel");
+                        if (calNotes[key] && calNotes[key].trim())
+                            cell.classList.add("has-note");
+                        const cy = y,
+                            cm = m,
+                            cd = d;
                         cell.addEventListener("click", () => {
                             document
                                 .querySelectorAll(".cal-day.sel")
                                 .forEach((c) => c.classList.remove("sel"));
                             cell.classList.add("sel");
                             selDate = key;
+                            openNoteModal(cy, cm, cd);
+                        });
+                        cell.addEventListener("contextmenu", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // Right-click on a day with a note → quick-delete it.
+                            const ck = isoKey(cy, cm, cd);
+                            if (calNotes[ck] && calNotes[ck].trim()) {
+                                delete calNotes[ck];
+                                persistNotes();
+                                renderCalendar();
+                            }
                         });
                         grid.appendChild(cell);
                     }
                     col.appendChild(grid);
                     container.appendChild(col);
                 }
+                renderDashboard();
             }
 
             document
@@ -3979,6 +4730,189 @@
                     calMonth = t.getMonth();
                     renderCalendar();
                 });
+
+            // ── Note modal ────────────────────────────────────────────────
+            let noteEditKey = null;
+
+            function longDateLabel(y, m, d) {
+                const dow = new Date(y, m, d).getDay();
+                return `${DAYS[dow]} · ${pad(d)} ${MONTHS_S[m]} ${y}`;
+            }
+
+            function openNoteModal(y, m, d) {
+                noteEditKey = isoKey(y, m, d);
+                document.getElementById("note-date-lbl").textContent =
+                    longDateLabel(y, m, d);
+                const ta = document.getElementById("note-text");
+                ta.value = calNotes[noteEditKey] || "";
+                document.getElementById("note-delete").style.display = (
+                    calNotes[noteEditKey] || ""
+                ).trim()
+                    ? ""
+                    : "none";
+                document.getElementById("note-overlay").classList.add("open");
+                setTimeout(() => ta.focus(), 60);
+            }
+
+            function closeNoteModal() {
+                document
+                    .getElementById("note-overlay")
+                    .classList.remove("open");
+                noteEditKey = null;
+            }
+
+            function persistNotes() {
+                window.cc.saveSettings({ calendarNotes: calNotes });
+            }
+
+            function saveNote() {
+                if (!noteEditKey) return;
+                const text = document.getElementById("note-text").value.trim();
+                if (text) calNotes[noteEditKey] = text;
+                else delete calNotes[noteEditKey];
+                persistNotes();
+                closeNoteModal();
+                renderCalendar();
+            }
+
+            function deleteNote() {
+                if (!noteEditKey) return;
+                delete calNotes[noteEditKey];
+                persistNotes();
+                closeNoteModal();
+                renderCalendar();
+            }
+
+            document
+                .getElementById("note-save")
+                .addEventListener("click", saveNote);
+            document
+                .getElementById("note-delete")
+                .addEventListener("click", deleteNote);
+            document
+                .getElementById("note-close")
+                .addEventListener("click", closeNoteModal);
+            document
+                .getElementById("note-overlay")
+                .addEventListener("click", (e) => {
+                    if (e.target === e.currentTarget) closeNoteModal();
+                });
+            document
+                .getElementById("note-text")
+                .addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        saveNote();
+                    } else if (e.key === "Escape") {
+                        e.preventDefault();
+                        closeNoteModal();
+                    }
+                });
+
+            // ── Dashboard: Agenda (upcoming notes) + Today stats ──────────
+            const MOONS = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+
+            function isoWeek(date) {
+                const t = new Date(
+                    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+                );
+                // Thursday of the current week determines the ISO year/week
+                t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+                const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+                return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+            }
+
+            function moonPhaseIdx(date) {
+                const synodic = 29.53058867;
+                const ref = Date.UTC(2000, 0, 6, 18, 14); // known new moon
+                let days = (date.getTime() - ref) / 86400000;
+                let phase = (days % synodic) / synodic;
+                if (phase < 0) phase += 1;
+                return Math.round(phase * 8) % 8;
+            }
+
+            function renderDashboard() {
+                const now = new Date();
+                const todayKey = isoKey(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                );
+
+                // Agenda — upcoming days (today onward) that carry a note
+                const list = document.getElementById("cal-agenda-list");
+                list.innerHTML = "";
+                const upcoming = Object.keys(calNotes)
+                    .filter((k) => (calNotes[k] || "").trim() && k >= todayKey)
+                    .sort()
+                    .slice(0, 12);
+                if (!upcoming.length) {
+                    const empty = document.createElement("div");
+                    empty.className = "agenda-empty";
+                    const ico = document.createElement("div");
+                    ico.className = "agenda-empty-ico";
+                    ico.textContent = "📝";
+                    const title = document.createElement("div");
+                    title.className = "agenda-empty-title";
+                    title.textContent = window.ccI18n.t("calendar.noNotes");
+                    const tip = document.createElement("div");
+                    tip.className = "agenda-empty-tip";
+                    tip.textContent = window.ccI18n.t("calendar.noNotesTip");
+                    empty.appendChild(ico);
+                    empty.appendChild(title);
+                    empty.appendChild(tip);
+                    list.appendChild(empty);
+                } else {
+                    upcoming.forEach((k) => {
+                        const [yy, mm, dd] = k.split("-").map(Number);
+                        const m0 = mm - 1;
+                        const row = document.createElement("div");
+                        row.className = "agenda-row";
+                        const chip = document.createElement("div");
+                        chip.className = "agenda-chip";
+                        chip.innerHTML = `${MONTHS_S[m0]}<span class="agenda-chip-d">${pad(dd)}</span>`;
+                        const prev = document.createElement("div");
+                        prev.className = "agenda-prev";
+                        prev.textContent = (calNotes[k] || "")
+                            .split("\n")[0]
+                            .trim();
+                        row.appendChild(chip);
+                        row.appendChild(prev);
+                        row.addEventListener("click", () => {
+                            calYear = yy;
+                            calMonth = m0;
+                            selDate = k;
+                            renderCalendar();
+                            openNoteModal(yy, m0, dd);
+                        });
+                        list.appendChild(row);
+                    });
+                }
+
+                // Today stats
+                const yearStart = new Date(now.getFullYear(), 0, 1);
+                const dayOfYear =
+                    Math.floor((now - yearStart) / 86400000) + 1;
+                const isLeap =
+                    (now.getFullYear() % 4 === 0 &&
+                        now.getFullYear() % 100 !== 0) ||
+                    now.getFullYear() % 400 === 0;
+                const daysInYear = isLeap ? 366 : 365;
+                const lastOfMonth = new Date(
+                    now.getFullYear(),
+                    now.getMonth() + 1,
+                    0,
+                ).getDate();
+                const set = (id, v) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = v;
+                };
+                set("stat-doy", `${dayOfYear} / ${daysInYear}`);
+                set("stat-week", isoWeek(now));
+                set("stat-dly", daysInYear - dayOfYear);
+                set("stat-dlm", lastOfMonth - now.getDate());
+                set("stat-moon", MOONS[moonPhaseIdx(now)]);
+            }
 
             // ══════════════════════════════════════════════════════════════
             // TIMER
@@ -5075,26 +6009,63 @@
                 .addEventListener("change", (e) =>
                     window.cc.saveSettings({ showSeconds: e.target.checked }),
                 );
-            document
-                .getElementById("s-scan")
-                .addEventListener("change", (e) => {
-                    window.cc.saveSettings({ scanlines: e.target.checked });
-                    document.body.classList.toggle(
-                        "no-scanlines",
-                        !e.target.checked,
-                    );
+            // Mini mode settings
+            document.querySelectorAll('[data-mini-design]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const mode = parseInt(btn.dataset.miniDesign);
+                    document.querySelectorAll('[data-mini-design]').forEach((b) => b.classList.remove('on'));
+                    btn.classList.add('on');
+                    window.cc.saveSettings({ miniDesign: mode });
                 });
+            });
+            const sMiniBgOp = document.getElementById('s-minibg-op');
+            if (sMiniBgOp) {
+                sMiniBgOp.addEventListener('input', (e) => {
+                    const v = parseInt(e.target.value);
+                    document.getElementById('s-minibg-op-val').textContent = v + '%';
+                    window.cc.saveSettings({ miniBgOpacity: v / 100 });
+                });
+            }
+            const sMiniOp = document.getElementById('s-mini-op');
+            if (sMiniOp) {
+                sMiniOp.addEventListener('input', (e) => {
+                    const v = parseInt(e.target.value);
+                    document.getElementById('s-mini-op-val').textContent = v + '%';
+                    window.cc.saveSettings({ miniOpacity: v / 100 });
+                });
+            }
+            const sMiniLock = document.getElementById('s-mini-lock');
+            if (sMiniLock) {
+                sMiniLock.addEventListener('change', (e) => {
+                    window.cc.saveSettings({ miniPositionLocked: e.target.checked });
+                });
+            }
+            const sMiniScan = document.getElementById('s-mini-scan');
+            if (sMiniScan) {
+                sMiniScan.addEventListener('change', (e) => {
+                    window.cc.saveSettings({ miniScanlines: e.target.checked });
+                });
+            }
             document
                 .getElementById("s-aot")
-                .addEventListener("change", () =>
-                    window.cc.toggleAlwaysOnTop(),
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({ alwaysOnTop: e.target.checked }),
                 );
             document
                 .getElementById("s-startup")
                 .addEventListener("change", (e) => {
-                    window.cc.setStartup(e.target.checked);
+                    const checked = e.target.checked;
+                    window.cc.setStartup(checked);
+                    document.getElementById("s-startup-mini-row").style.display = checked ? "flex" : "none";
                     window.cc.saveSettings({
-                        startWithWindows: e.target.checked,
+                        startWithWindows: checked,
+                    });
+                });
+            document
+                .getElementById("s-startup-mini")
+                .addEventListener("change", (e) => {
+                    window.cc.saveSettings({
+                        startInMiniMode: e.target.checked,
                     });
                 });
             document
@@ -5106,55 +6077,122 @@
             // Alarms
             document
                 .getElementById("s-half-en")
-                .addEventListener("change", (e) =>
-                    window.cc.saveSettings({
-                        alarmHalfHour: { enabled: e.target.checked },
-                    }),
-                );
+                .addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        document.getElementById("s-full-en").checked = false;
+                        document.getElementById("s-quart-en").checked = false;
+                        window.cc.saveSettings({
+                            alarmHalfHour: { ...cfg.alarmHalfHour, enabled: true },
+                            alarmFullHour: { ...cfg.alarmFullHour, enabled: false },
+                            alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
+                        });
+                    } else {
+                        window.cc.saveSettings({
+                            alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false }
+                        });
+                    }
+                });
             document
                 .getElementById("s-full-en")
-                .addEventListener("change", (e) =>
-                    window.cc.saveSettings({
-                        alarmFullHour: { enabled: e.target.checked },
-                    }),
-                );
+                .addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        document.getElementById("s-half-en").checked = false;
+                        document.getElementById("s-quart-en").checked = false;
+                        window.cc.saveSettings({
+                            alarmFullHour: { ...cfg.alarmFullHour, enabled: true },
+                            alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
+                            alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
+                        });
+                    } else {
+                        window.cc.saveSettings({
+                            alarmFullHour: { ...cfg.alarmFullHour, enabled: false }
+                        });
+                    }
+                });
+            document
+                .getElementById("s-quart-en")
+                .addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        document.getElementById("s-half-en").checked = false;
+                        document.getElementById("s-full-en").checked = false;
+                        window.cc.saveSettings({
+                            alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: true },
+                            alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
+                            alarmFullHour: { ...cfg.alarmFullHour, enabled: false }
+                        });
+                    } else {
+                        window.cc.saveSettings({
+                            alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
+                        });
+                    }
+                });
             document
                 .getElementById("s-half-snd")
                 .addEventListener("change", (e) =>
                     window.cc.saveSettings({
-                        alarmHalfHour: { sound: e.target.value },
+                        alarmHalfHour: { ...cfg.alarmHalfHour, sound: e.target.value },
                     }),
                 );
             document
                 .getElementById("s-full-snd")
                 .addEventListener("change", (e) =>
                     window.cc.saveSettings({
-                        alarmFullHour: { sound: e.target.value },
+                        alarmFullHour: { ...cfg.alarmFullHour, sound: e.target.value },
+                    }),
+                );
+            document
+                .getElementById("s-quart-snd")
+                .addEventListener("change", (e) =>
+                    window.cc.saveSettings({
+                        alarmQuarterHour: { ...cfg.alarmQuarterHour, sound: e.target.value },
                     }),
                 );
             document
                 .getElementById("s-half-test")
-                .addEventListener("click", () =>
-                    window.audioEngine.chime(
-                        document.getElementById("s-half-snd").value,
-                        cfg.alarmVolume || 0.75,
-                    ),
-                );
+                .addEventListener("click", () => {
+                    const ah = cfg.alarmHalfHour || {};
+                    if (ah.customPath) {
+                        window.audioEngine.playFile(ah.customPath, { loop: false });
+                    } else {
+                        window.audioEngine.chime(
+                            document.getElementById("s-half-snd").value,
+                            cfg.alarmVolume || 0.75,
+                        );
+                    }
+                });
             document
                 .getElementById("s-full-test")
-                .addEventListener("click", () =>
-                    window.audioEngine.chime(
-                        document.getElementById("s-full-snd").value,
-                        cfg.alarmVolume || 0.75,
-                    ),
-                );
+                .addEventListener("click", () => {
+                    const af = cfg.alarmFullHour || {};
+                    if (af.customPath) {
+                        window.audioEngine.playFile(af.customPath, { loop: false });
+                    } else {
+                        window.audioEngine.chime(
+                            document.getElementById("s-full-snd").value,
+                            cfg.alarmVolume || 0.75,
+                        );
+                    }
+                });
+            document
+                .getElementById("s-quart-test")
+                .addEventListener("click", () => {
+                    const aq = cfg.alarmQuarterHour || {};
+                    if (aq.customPath) {
+                        window.audioEngine.playFile(aq.customPath, { loop: false });
+                    } else {
+                        window.audioEngine.chime(
+                            document.getElementById("s-quart-snd").value,
+                            cfg.alarmVolume || 0.75,
+                        );
+                    }
+                });
             document
                 .getElementById("s-half-file")
                 .addEventListener("click", async () => {
                     const p = await window.cc.openFileDialog();
                     if (p) {
                         window.cc.saveSettings({
-                            alarmHalfHour: { customPath: p },
+                            alarmHalfHour: { ...cfg.alarmHalfHour, customPath: p },
                         });
                         showCustomFile("half", p);
                     }
@@ -5165,16 +6203,27 @@
                     const p = await window.cc.openFileDialog();
                     if (p) {
                         window.cc.saveSettings({
-                            alarmFullHour: { customPath: p },
+                            alarmFullHour: { ...cfg.alarmFullHour, customPath: p },
                         });
                         showCustomFile("full", p);
+                    }
+                });
+            document
+                .getElementById("s-quart-file")
+                .addEventListener("click", async () => {
+                    const p = await window.cc.openFileDialog();
+                    if (p) {
+                        window.cc.saveSettings({
+                            alarmQuarterHour: { ...cfg.alarmQuarterHour, customPath: p },
+                        });
+                        showCustomFile("quart", p);
                     }
                 });
             document
                 .getElementById("s-half-fclr")
                 .addEventListener("click", () => {
                     window.cc.saveSettings({
-                        alarmHalfHour: { customPath: null },
+                        alarmHalfHour: { ...cfg.alarmHalfHour, customPath: null },
                     });
                     showCustomFile("half", null);
                 });
@@ -5182,10 +6231,39 @@
                 .getElementById("s-full-fclr")
                 .addEventListener("click", () => {
                     window.cc.saveSettings({
-                        alarmFullHour: { customPath: null },
+                        alarmFullHour: { ...cfg.alarmFullHour, customPath: null },
                     });
                     showCustomFile("full", null);
                 });
+            document
+                .getElementById("s-quart-fclr")
+                .addEventListener("click", () => {
+                    window.cc.saveSettings({
+                        alarmQuarterHour: { ...cfg.alarmQuarterHour, customPath: null },
+                    });
+                    showCustomFile("quart", null);
+                });
+
+            // Alarm Schedule Restrictions
+            document.getElementById("s-alarm-sched-en").addEventListener("change", (e) => {
+                window.cc.saveSettings({ alarmScheduleEnabled: e.target.checked });
+            });
+            ['s-alarm-sched-start-h', 's-alarm-sched-start-m', 's-alarm-sched-start-ap'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("change", () => {
+                        window.cc.saveSettings({ alarmScheduleStart: getAlarmSchedTime("start") });
+                    });
+                }
+            });
+            ['s-alarm-sched-end-h', 's-alarm-sched-end-m', 's-alarm-sched-end-ap'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("change", () => {
+                        window.cc.saveSettings({ alarmScheduleEnd: getAlarmSchedTime("end") });
+                    });
+                }
+            });
 
             // Volumes
             document.getElementById("s-avol").addEventListener("input", (e) => {
@@ -5247,13 +6325,75 @@
             const ALL_TRACKS = ['night','forest','space','ocean','rain','fireplace'];
             let shuffleQueue = [];
 
+            // Custom time selector (honours 12h/24h from settings; stores 24h "HH:MM")
+            function buildSchedTimeOptions() {
+                const is12 = cfg.clockFormat === '12h';
+                const hSel = document.getElementById('sched-time-h');
+                const mSel = document.getElementById('sched-time-m');
+                const apSel = document.getElementById('sched-time-ap');
+                if (!hSel || !mSel || !apSel) return;
+                hSel.innerHTML = '';
+                const hStart = is12 ? 1 : 0, hEnd = is12 ? 12 : 23;
+                for (let h = hStart; h <= hEnd; h++) {
+                    const o = document.createElement('option');
+                    o.value = String(h); o.textContent = pad(h);
+                    hSel.appendChild(o);
+                }
+                if (!mSel.options.length) {
+                    for (let m = 0; m <= 59; m++) {
+                        const o = document.createElement('option');
+                        o.value = String(m); o.textContent = pad(m);
+                        mSel.appendChild(o);
+                    }
+                }
+                apSel.style.display = is12 ? '' : 'none';
+            }
+            function setSchedTime(hhmm) {
+                const [H, M] = (hhmm || '22:00').split(':').map(Number);
+                const is12 = cfg.clockFormat === '12h';
+                const hSel = document.getElementById('sched-time-h');
+                const mSel = document.getElementById('sched-time-m');
+                const apSel = document.getElementById('sched-time-ap');
+                if (!hSel) return;
+                mSel.value = String(M);
+                if (is12) {
+                    let h12 = H % 12; if (h12 === 0) h12 = 12;
+                    hSel.value = String(h12);
+                    apSel.value = H >= 12 ? 'PM' : 'AM';
+                } else {
+                    hSel.value = String(H);
+                }
+            }
+            function getSchedTime() {
+                const is12 = cfg.clockFormat === '12h';
+                const hSel = document.getElementById('sched-time-h');
+                const mSel = document.getElementById('sched-time-m');
+                const apSel = document.getElementById('sched-time-ap');
+                let H = parseInt(hSel.value, 10);
+                const M = parseInt(mSel.value, 10);
+                if (is12) {
+                    if (apSel.value === 'AM') { if (H === 12) H = 0; }
+                    else { if (H !== 12) H += 12; }
+                }
+                return pad(H) + ':' + pad(M);
+            }
+            function fmtSchedDisplay(H, M) {
+                if (cfg.clockFormat === '12h') {
+                    const ap = H >= 12 ? 'PM' : 'AM';
+                    let h12 = H % 12; if (h12 === 0) h12 = 12;
+                    return `${pad(h12)}:${pad(M)} ${ap}`;
+                }
+                return `${pad(H)}:${pad(M)}`;
+            }
+
             function applySchedUI(s) {
                 const sched = s.relaxScheduler || {};
                 document.getElementById('sched-enable').checked = !!sched.enabled;
-                document.getElementById('sched-time').value = sched.time || '22:00';
-                document.getElementById('sched-repeat').value = String(sched.repeat || 60);
+                buildSchedTimeOptions();
+                setSchedTime(sched.time || '22:00');
+                document.getElementById('sched-repeat').value = String(sched.repeat !== undefined ? sched.repeat : 60);
                 document.getElementById('sched-track').value = sched.track || 'random-one';
-                document.getElementById('sched-duration').value = String(sched.duration || 15);
+                document.getElementById('sched-duration').value = String(sched.duration !== undefined ? sched.duration : 15);
                 updateSchedStatus(sched);
             }
             function getSchedTrack(trackOverride) {
@@ -5283,7 +6423,7 @@
                 const now = new Date();
                 let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
                 if (next <= now) next.setDate(next.getDate() + 1);
-                nextEl.textContent = `Next: ${pad(next.getHours())}:${pad(next.getMinutes())}`;
+                nextEl.textContent = `Next: ${fmtSchedDisplay(next.getHours(), next.getMinutes())}`;
             }
 
             // Scheduler event listeners
@@ -5292,9 +6432,11 @@
                     relaxScheduler: { ...cfg.relaxScheduler, enabled: e.target.checked }
                 });
             });
-            document.getElementById('sched-time').addEventListener('change', (e) => {
-                window.cc.saveSettings({
-                    relaxScheduler: { ...cfg.relaxScheduler, time: e.target.value }
+            ['sched-time-h', 'sched-time-m', 'sched-time-ap'].forEach((id) => {
+                document.getElementById(id).addEventListener('change', () => {
+                    window.cc.saveSettings({
+                        relaxScheduler: { ...cfg.relaxScheduler, time: getSchedTime() }
+                    });
                 });
             });
             document.getElementById('sched-repeat').addEventListener('change', (e) => {
@@ -5333,6 +6475,7 @@
                 if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
                 setInterval(updateDigital, 1000);
                 updateDigital();
+                calNotes = s.calendarNotes || {};
                 const now = new Date();
                 calYear = now.getFullYear();
                 calMonth = now.getMonth();
@@ -5350,6 +6493,23 @@
 
             window.cc.onSettingsUpdated((s) => {
                 applySettings(s);
+                // Keep calendar notes in sync if changed elsewhere.
+                let notesChanged = false;
+                if (s.calendarNotes) {
+                    if (
+                        JSON.stringify(s.calendarNotes) !==
+                        JSON.stringify(calNotes)
+                    ) {
+                        calNotes = s.calendarNotes;
+                        notesChanged = true;
+                    }
+                }
+                if (typeof calYear === "number") {
+                    // Full re-render when notes changed; otherwise just refresh
+                    // the dashboard so agenda/stats follow a language switch.
+                    if (notesChanged) renderCalendar();
+                    else renderDashboard();
+                }
                 const overlay = document.getElementById("s-overlay");
                 if (overlay && overlay.classList.contains("open")) {
                     loadScreensList();
@@ -5359,13 +6519,24 @@
             window.cc.onMiniMenuAction((action) => {
                 if (action === "settings") {
                     openSettings();
+                } else if (action.startsWith("open-note:")) {
+                    const dateStr = action.split(":")[1];
+                    const [y, m, d] = dateStr.split("-").map(Number);
+                    const m0 = m - 1;
+                    
+                    navigate("home");
+                    calYear = y;
+                    calMonth = m0;
+                    selDate = dateStr;
+                    renderCalendar();
+                    openNoteModal(y, m0, d);
                 } else if (VIEW_ORDER.includes(action)) {
                     navigate(action);
                 }
             });
 
             window.cc.onAlarmChime((p) => {
-                if (p.customPath) window.audioEngine.playFile(p.customPath);
+                if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false });
                 else
                     window.audioEngine.chime(
                         p.sound || "chime-digital",

@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <style>
             /* ═══════════════════════════════════════════════════════
@@ -49,6 +50,7 @@
                 cursor: grab;
                 position: relative;
                 outline: none;
+                box-shadow: none !important;
             }
             .mini-shell:focus, .mini-shell:focus-visible { outline: none; }
             .mini-shell:active { cursor: grabbing; }
@@ -1087,6 +1089,106 @@
                 filter: drop-shadow(0 0 7px rgba(var(--rgb-accent), 0.85));
             }
 
+            /* ── Day-note tooltip (child of <body>, outside shell) ── */
+            .mini-tip {
+                position: fixed;
+                pointer-events: auto;
+                cursor: pointer;
+                opacity: 0;
+                transition: opacity 0.2s ease, transform 0.18s ease, border-color 0.2s, box-shadow 0.2s;
+                transform: translate(-50%, 3px);
+                background: #18181c;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 10px;
+                padding: 12px 14px;
+                width: 240px;
+                text-align: center;
+                white-space: normal;
+                z-index: 999;
+                font-family: "Outfit", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.85);
+                line-height: 1.5;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            .mini-tip:hover {
+                border-color: rgba(var(--rgb-accent), 0.5);
+                box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.15);
+            }
+            .mini-tip::after {
+                content: "";
+                position: absolute;
+                top: -6px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 10px;
+                height: 10px;
+                background: #18181c;
+                border-left: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                rotate: 45deg;
+            }
+            .mini-tip.show {
+                opacity: 0.98;
+                transform: translate(-50%, 0);
+            }
+            .mini-tip-date {
+                font-size: 10px;
+                font-weight: 600;
+                color: var(--accent-a);
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                margin-bottom: 6px;
+                text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+            }
+            .mini-tip-divider {
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, transparent);
+                margin-bottom: 8px;
+            }
+            .mini-tip-note {
+                color: #ffffff;
+                font-weight: 500;
+                margin-bottom: 6px;
+                font-size: 11px;
+            }
+            .mini-tip-note.empty {
+                color: rgba(255, 255, 255, 0.45);
+                font-style: italic;
+                font-weight: 400;
+                margin-bottom: 8px;
+            }
+            .mini-tip-action-btn {
+                display: inline-block;
+                margin: 4px auto 10px auto;
+                padding: 4px 12px;
+                background: rgba(var(--rgb-accent), 0.12);
+                border: 1px solid var(--accent-a);
+                color: var(--accent-a);
+                border-radius: 4px;
+                font-size: 9px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                transition: all 0.2s ease;
+                text-shadow: 0 0 6px rgba(var(--rgb-accent), 0.4);
+                box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.1);
+            }
+            .mini-tip:hover .mini-tip-action-btn {
+                background: rgba(var(--rgb-accent), 0.25);
+                box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.35);
+                transform: scale(1.04);
+            }
+            .mini-tip-stat {
+                font-size: 9.5px;
+                color: rgba(255, 255, 255, 0.5);
+                letter-spacing: 0.5px;
+            }
+            .mini-tip-stat b {
+                color: var(--accent-a);
+            }
+
             @keyframes pulse-dot {
                 0%, 100% { opacity: 0.6; transform: scale(1); }
                 50% { opacity: 1; transform: scale(1.2); }
@@ -1125,11 +1227,39 @@
             </div>
         </div>
 
+        <div class="mini-tip" id="mini-tip"></div>
+
         <script src="../shared/audio-engine.js"></script>
         <script>
             let cfg = {};
-            const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-            const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            let calNotes = {};
+            
+            function getDays() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"]
+                    : ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+            }
+
+            function getMonths() {
+                const lang = window.ccI18n.getEffectiveLang();
+                return lang === "es"
+                    ? ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
+                    : ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            }
+
+            function isoNow() {
+                const n = new Date();
+                return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`;
+            }
+            function countUpcoming() {
+                const todayKey = isoNow();
+                let c = 0;
+                for (const k in calNotes) {
+                    if ((calNotes[k]||"").trim() && k >= todayKey) c++;
+                }
+                return c;
+            }
 
             function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -1150,8 +1280,10 @@
                 document.getElementById("mini-time").textContent = timeStr;
 
                 const d = now;
+                const days = getDays();
+                const months = getMonths();
                 document.getElementById("mini-date").textContent =
-                    `${DAYS[d.getDay()]} · ${pad(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+                    `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
             }
 
             // ═══════════════════════════════════════════════════════
@@ -1168,7 +1300,14 @@
                 lastDesign = s.miniDesign;
 
                 cfg = s;
+                calNotes = s.calendarNotes || {};
                 document.body.dataset.theme = s.theme || "cyber-blue";
+
+                window.ccI18n.setLang(s.language || "auto");
+                const btnAot = document.getElementById("btn-aot");
+                if (btnAot) btnAot.title = window.ccI18n.t("mini.tooltip.aot");
+                const btnFull = document.getElementById("btn-full");
+                if (btnFull) btnFull.title = window.ccI18n.t("mini.tooltip.full");
 
                 const shell = document.getElementById("shell");
                 if (shell) {
@@ -1177,7 +1316,7 @@
                     shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
                 }
 
-                if (s.scanlines === false)
+                if (s.miniScanlines === false)
                     document.body.classList.add("no-scanlines");
                 else document.body.classList.remove("no-scanlines");
 
@@ -1194,6 +1333,89 @@
             }
 
             // ═══════════════════════════════════════════════════════
+            // HOVER TOOLTIP — today's note + upcoming count
+            // ═══════════════════════════════════════════════════════
+            const timeBlock = document.querySelector(".time-block");
+            const tipEl = document.getElementById("mini-tip");
+            const shellEl = document.getElementById("shell");
+            let tipTimer = null;
+
+            function refreshTipContent() {
+                const now = new Date();
+                const lang = window.ccI18n.getEffectiveLang();
+                
+                const locale = lang === "es" ? "es-ES" : "en-US";
+                let dateStr = now.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+                dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+                
+                const todayKey = isoNow();
+                const note = (calNotes[todayKey] || "").trim();
+                const upcoming = countUpcoming();
+                
+                let html = `<div class="mini-tip-date">${dateStr}</div>`;
+                html += `<div class="mini-tip-divider"></div>`;
+                
+                if (note) {
+                    const firstLine = note.split("\n")[0].trim();
+                    html += `<div class="mini-tip-note">📝 ${firstLine}</div>`;
+                } else {
+                    const noNotesText = lang === "es" ? "Sin notas para hoy" : "No notes for today";
+                    const createText = lang === "es" ? "＋ Crear nota" : "＋ Create note";
+                    html += `<div class="mini-tip-note empty">🌸 ${noNotesText}</div>`;
+                    html += `<div class="mini-tip-action-btn">${createText}</div>`;
+                }
+                
+                let statText = "";
+                if (upcoming === 0) {
+                    statText = lang === "es" ? "Tu agenda está despejada" : "Your schedule is clear";
+                } else if (upcoming === 1) {
+                    statText = lang === "es" ? "1 evento próximo" : "1 upcoming event";
+                } else {
+                    statText = lang === "es" ? `<b>${upcoming}</b> eventos próximos` : `<b>${upcoming}</b> upcoming events`;
+                }
+                
+                html += `<div class="mini-tip-stat">${statText}</div>`;
+                tipEl.innerHTML = html;
+            }
+
+            function positionTip() {
+                const r = shellEl.getBoundingClientRect();
+                tipEl.style.left = r.left + r.width / 2 + "px";
+                tipEl.style.top = r.bottom + 8 + "px";
+            }
+
+            timeBlock.addEventListener("mouseenter", () => {
+                refreshTipContent();
+                positionTip();
+                
+                const tipHeight = tipEl.offsetHeight || 80;
+                const currentHeight = DESIGN_HEIGHTS[cfg.miniDesign] || 48;
+                const currentWidth = DESIGN_WIDTHS[cfg.miniDesign] || 260;
+                window.cc.setWindowSize({ width: currentWidth, height: currentHeight + tipHeight + 16 });
+                
+                tipTimer = setTimeout(() => {
+                    positionTip();
+                    tipEl.classList.add("show");
+                }, 800);
+            });
+
+            document.body.addEventListener("mouseleave", () => {
+                clearTimeout(tipTimer);
+                tipTimer = null;
+                tipEl.classList.remove("show");
+                
+                const currentHeight = DESIGN_HEIGHTS[cfg.miniDesign] || 48;
+                const currentWidth = DESIGN_WIDTHS[cfg.miniDesign] || 260;
+                window.cc.setWindowSize({ width: currentWidth, height: currentHeight });
+            });
+
+            tipEl.addEventListener("click", () => {
+                const todayKey = isoNow();
+                window.cc.goFull();
+                window.cc.menuAction("open-note:" + todayKey);
+            });
+
+            // ═══════════════════════════════════════════════════════
             // INITIALIZATION
             // ═══════════════════════════════════════════════════════
             window.cc.onInit((s) => {
@@ -1206,7 +1428,7 @@
             window.cc.onSettingsUpdated((s) => applySettings(s));
 
             window.cc.onAlarmChime((p) => {
-                if (p.customPath) window.audioEngine.playFile(p.customPath);
+                if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false });
                 else window.audioEngine.chime(p.sound || "chime-digital", cfg.alarmVolume || 0.75);
             });
 

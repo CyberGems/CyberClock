@@ -38,103 +38,103 @@
   --rgb-sec:  255, 68, 68;
 }
 
-/* ── Neon Green ─────────────────────────────────────────── */
+/* ── Neon Green → Forest Mist ─────────────────────────── */
 [data-theme="neon-green"] {
-  --bg-00: #010d03;
-  --bg-01: #021807;
-  --bg-02: #03220b;
-  --bg-03: #042e0e;
-  --bg-04: #063c12;
+  --bg-00: #040e0a;
+  --bg-01: #06140e;
+  --bg-02: #081a12;
+  --bg-03: #0a2016;
+  --bg-04: #0c261a;
 
-  --accent-a:   #33cc5a;
-  --accent-b:   #29a347;
-  --accent-c:   #59d043;
-  --accent-dim: rgba(51, 204, 90, 0.10);
+  --accent-a:   #add9ce;
+  --accent-b:   #74a695;
+  --accent-c:   #c3e6e0;
+  --accent-dim: rgba(173, 217, 206, 0.10);
 
-  --text-hi:  #d4e8d8;
-  --text-md:  #4a9050;
-  --text-lo:  #162e1a;
+  --text-hi:  #dff2ed;
+  --text-md:  #93b8ab;
+  --text-lo:  #47665c;
 
-  --glow-xs: 0 0 4px rgba(51,204,90,0.40);
-  --glow-sm: 0 0 8px rgba(51,204,90,0.55), 0 0 16px rgba(51,204,90,0.20);
-  --glow-md: 0 0 14px rgba(51,204,90,0.65), 0 0 30px rgba(51,204,90,0.28), 0 0 60px rgba(51,204,90,0.08);
-  --glow-lg: 0 0 20px rgba(51,204,90,0.75), 0 0 50px rgba(51,204,90,0.35), 0 0 100px rgba(51,204,90,0.10);
+  --glow-xs: 0 0 4px rgba(173,217,206,0.40);
+  --glow-sm: 0 0 8px rgba(173,217,206,0.50), 0 0 16px rgba(173,217,206,0.18);
+  --glow-md: 0 0 14px rgba(173,217,206,0.60), 0 0 30px rgba(173,217,206,0.25), 0 0 60px rgba(173,217,206,0.08);
+  --glow-lg: 0 0 20px rgba(173,217,206,0.70), 0 0 50px rgba(173,217,206,0.30), 0 0 100px rgba(173,217,206,0.10);
 
-  --border:        rgba(51, 204, 90, 0.20);
-  --border-bright: rgba(51, 204, 90, 0.45);
-  --border-active: rgba(51, 204, 90, 0.80);
+  --border:        rgba(173, 217, 206, 0.20);
+  --border-bright: rgba(173, 217, 206, 0.50);
+  --border-active: rgba(173, 217, 206, 0.85);
 
-  --rgb-accent: 51, 204, 90;
-  --rgb-b:      41, 163, 71;
+  --rgb-accent: 173, 217, 206;
+  --rgb-b:      116, 166, 149;
 
-  --hand-sec: #ff6600;
-  --rgb-sec:  255, 102, 0;
+  --hand-sec: #cc8f7a;
+  --rgb-sec:  204, 143, 122;
 }
 
-/* ── Plasma Purple ──────────────────────────────────────── */
+/* ── Plasma Purple → Twilight Haze ─────────────────────── */
 [data-theme="plasma-purple"] {
-  --bg-00: #06010f;
-  --bg-01: #0d021e;
-  --bg-02: #13032b;
-  --bg-03: #1b0439;
-  --bg-04: #240547;
+  --bg-00: #0c080e;
+  --bg-01: #120c14;
+  --bg-02: #18101a;
+  --bg-03: #1e1420;
+  --bg-04: #241826;
 
-  --accent-a:   #ab33cc;
-  --accent-b:   #7029a3;
-  --accent-c:   #cc33a3;
-  --accent-dim: rgba(171, 51, 204, 0.10);
+  --accent-a:   #ccb2d9;
+  --accent-b:   #9277a6;
+  --accent-c:   #e4ceeb;
+  --accent-dim: rgba(204, 178, 217, 0.10);
 
-  --text-hi:  #e8dce8;
-  --text-md:  #9058a0;
-  --text-lo:  #3a1050;
+  --text-hi:  #ede4f2;
+  --text-md:  #ad97b8;
+  --text-lo:  #5c4966;
 
-  --glow-xs: 0 0 4px rgba(171,51,204,0.40);
-  --glow-sm: 0 0 8px rgba(171,51,204,0.55), 0 0 16px rgba(171,51,204,0.20);
-  --glow-md: 0 0 14px rgba(171,51,204,0.65), 0 0 30px rgba(171,51,204,0.28), 0 0 60px rgba(171,51,204,0.08);
-  --glow-lg: 0 0 20px rgba(171,51,204,0.75), 0 0 50px rgba(171,51,204,0.35), 0 0 100px rgba(171,51,204,0.10);
+  --glow-xs: 0 0 4px rgba(204,178,217,0.40);
+  --glow-sm: 0 0 8px rgba(204,178,217,0.50), 0 0 16px rgba(204,178,217,0.18);
+  --glow-md: 0 0 14px rgba(204,178,217,0.60), 0 0 30px rgba(204,178,217,0.25), 0 0 60px rgba(204,178,217,0.08);
+  --glow-lg: 0 0 20px rgba(204,178,217,0.70), 0 0 50px rgba(204,178,217,0.30), 0 0 100px rgba(204,178,217,0.10);
 
-  --border:        rgba(171, 51, 204, 0.20);
-  --border-bright: rgba(171, 51, 204, 0.45);
-  --border-active: rgba(171, 51, 204, 0.80);
+  --border:        rgba(204, 178, 217, 0.20);
+  --border-bright: rgba(204, 178, 217, 0.50);
+  --border-active: rgba(204, 178, 217, 0.85);
 
-  --rgb-accent: 171, 51, 204;
-  --rgb-b:      112, 41, 163;
+  --rgb-accent: 204, 178, 217;
+  --rgb-b:      146, 119, 166;
 
-  --hand-sec: #00ffcc;
-  --rgb-sec:  0, 255, 204;
+  --hand-sec: #86bfac;
+  --rgb-sec:  134, 191, 172;
 }
 
-/* ── Solar Orange ───────────────────────────────────────── */
+/* ── Solar Orange → Warm Ember ────────────────────────────── */
 [data-theme="solar-orange"] {
-  --bg-00: #0e0400;
-  --bg-01: #1c0800;
-  --bg-02: #280d00;
-  --bg-03: #361400;
-  --bg-04: #441c00;
+  --bg-00: #0e0a06;
+  --bg-01: #140e08;
+  --bg-02: #1a120a;
+  --bg-03: #20180e;
+  --bg-04: #261c12;
 
-  --accent-a:   #cc7033;
-  --accent-b:   #cc4733;
-  --accent-c:   #ccad33;
-  --accent-dim: rgba(204, 112, 51, 0.10);
+  --accent-a:   #d9c2a9;
+  --accent-b:   #a68971;
+  --accent-c:   #ebdcc7;
+  --accent-dim: rgba(217, 194, 169, 0.10);
 
-  --text-hi:  #f0e0d0;
-  --text-md:  #b07848;
-  --text-lo:  #4a2010;
+  --text-hi:  #f2ebe4;
+  --text-md:  #b8a797;
+  --text-lo:  #665849;
 
-  --glow-xs: 0 0 4px rgba(204,112,51,0.40);
-  --glow-sm: 0 0 8px rgba(204,112,51,0.55), 0 0 16px rgba(204,112,51,0.20);
-  --glow-md: 0 0 14px rgba(204,112,51,0.65), 0 0 30px rgba(204,112,51,0.28), 0 0 60px rgba(204,112,51,0.08);
-  --glow-lg: 0 0 20px rgba(204,112,51,0.75), 0 0 50px rgba(204,112,51,0.35), 0 0 100px rgba(204,112,51,0.10);
+  --glow-xs: 0 0 4px rgba(217,194,169,0.40);
+  --glow-sm: 0 0 8px rgba(217,194,169,0.50), 0 0 16px rgba(217,194,169,0.18);
+  --glow-md: 0 0 14px rgba(217,194,169,0.60), 0 0 30px rgba(217,194,169,0.25), 0 0 60px rgba(217,194,169,0.08);
+  --glow-lg: 0 0 20px rgba(217,194,169,0.70), 0 0 50px rgba(217,194,169,0.30), 0 0 100px rgba(217,194,169,0.10);
 
-  --border:        rgba(204, 112, 51, 0.20);
-  --border-bright: rgba(204, 112, 51, 0.45);
-  --border-active: rgba(204, 112, 51, 0.80);
+  --border:        rgba(217, 194, 169, 0.20);
+  --border-bright: rgba(217, 194, 169, 0.50);
+  --border-active: rgba(217, 194, 169, 0.85);
 
-  --rgb-accent: 204, 112, 51;
-  --rgb-b:      204, 71, 51;
+  --rgb-accent: 217, 194, 169;
+  --rgb-b:      166, 137, 113;
 
-  --hand-sec: #ffcc00;
-  --rgb-sec:  255, 204, 0;
+  --hand-sec: #7da1b3;
+  --rgb-sec:  125, 161, 179;
 }
 
 /* ── Arctic Ice ─────────────────────────────────────────── */
