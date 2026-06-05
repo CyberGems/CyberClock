@@ -20,7 +20,7 @@ class AudioEngine {
     this.currentTrack = null;
     this.volume      = 0.8;
     this.crossfadeTime = 2.0;  // seconds, track-to-track
-    this.stopFadeTime  = 0.35; // seconds, on explicit stop
+    this.stopFadeTime  = 2.0;  // seconds, on explicit stop
   }
 
   // ── Init (lazy — needs user gesture on first call) ────────
@@ -130,8 +130,8 @@ class AudioEngine {
   }
 
   // ── Stop all (fade out, click-free) ───────────────────────
-  stop() {
-    this._voices.slice().forEach(v => this._retireVoice(v, this.stopFadeTime));
+  stop(fadeTime = this.stopFadeTime) {
+    this._voices.slice().forEach(v => this._retireVoice(v, fadeTime));
     this._current     = null;
     this.isPlaying    = false;
     this.currentTrack = null;

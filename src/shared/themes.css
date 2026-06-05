@@ -1,11 +1,44 @@
 /* ═══════════════════════════════════════════════════════════
    CyberClock — Theme System  ·  CyberGems © 2026
-   5 Skins: cyber-blue | neon-green | plasma-purple |
-            solar-orange | arctic-ice
+   5 Skins: arctic-ice | cyber-blue | neon-green |
+            plasma-purple | solar-orange
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Cyber Blue (default) ───────────────────────────────── */
+/* ── Arctic Ice (default) ──────────────────────────────── */
 :root,
+[data-theme="arctic-ice"] {
+  --bg-00: #010c14;
+  --bg-01: #031624;
+  --bg-02: #051e30;
+  --bg-03: #07283e;
+  --bg-04: #09324c;
+
+  --accent-a:   #c8dce8;
+  --accent-b:   #78b8cc;
+  --accent-c:   #a4d0e0;
+  --accent-dim: rgba(200, 220, 232, 0.08);
+
+  --text-hi:  #f0f4f6;
+  --text-md:  #90b0c0;
+  --text-lo:  #2a5060;
+
+  --glow-xs: 0 0 4px rgba(200,220,232,0.40);
+  --glow-sm: 0 0 8px rgba(200,220,232,0.50), 0 0 16px rgba(200,220,232,0.18);
+  --glow-md: 0 0 14px rgba(200,220,232,0.60), 0 0 30px rgba(200,220,232,0.25), 0 0 60px rgba(200,220,232,0.08);
+  --glow-lg: 0 0 20px rgba(200,220,232,0.70), 0 0 50px rgba(200,220,232,0.30), 0 0 100px rgba(200,220,232,0.10);
+
+  --border:        rgba(200, 220, 232, 0.18);
+  --border-bright: rgba(200, 220, 232, 0.45);
+  --border-active: rgba(200, 220, 232, 0.80);
+
+  --rgb-accent: 200, 220, 232;
+  --rgb-b:      120, 184, 204;
+
+  --hand-sec: #ff6699;
+  --rgb-sec:  255, 102, 153;
+}
+
+/* ── Cyber Blue ────────────────────────────────────────── */
 [data-theme="cyber-blue"] {
   --bg-00: #020810;
   --bg-01: #050e1e;
@@ -137,35 +170,4 @@
   --rgb-sec:  125, 161, 179;
 }
 
-/* ── Arctic Ice ─────────────────────────────────────────── */
-[data-theme="arctic-ice"] {
-  --bg-00: #010c14;
-  --bg-01: #031624;
-  --bg-02: #051e30;
-  --bg-03: #07283e;
-  --bg-04: #09324c;
 
-  --accent-a:   #c8dce8;
-  --accent-b:   #78b8cc;
-  --accent-c:   #a4d0e0;
-  --accent-dim: rgba(200, 220, 232, 0.08);
-
-  --text-hi:  #f0f4f6;
-  --text-md:  #90b0c0;
-  --text-lo:  #2a5060;
-
-  --glow-xs: 0 0 4px rgba(200,220,232,0.40);
-  --glow-sm: 0 0 8px rgba(200,220,232,0.50), 0 0 16px rgba(200,220,232,0.18);
-  --glow-md: 0 0 14px rgba(200,220,232,0.60), 0 0 30px rgba(200,220,232,0.25), 0 0 60px rgba(200,220,232,0.08);
-  --glow-lg: 0 0 20px rgba(200,220,232,0.70), 0 0 50px rgba(200,220,232,0.30), 0 0 100px rgba(200,220,232,0.10);
-
-  --border:        rgba(200, 220, 232, 0.18);
-  --border-bright: rgba(200, 220, 232, 0.45);
-  --border-active: rgba(200, 220, 232, 0.80);
-
-  --rgb-accent: 200, 220, 232;
-  --rgb-b:      120, 184, 204;
-
-  --hand-sec: #ff6699;
-  --rgb-sec:  255, 102, 153;
-}
