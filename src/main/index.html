@@ -96,6 +96,16 @@
                 }
             }
 
+            /* When the main window is not the active window (hidden in mini mode),
+               WebView2 keeps compositing it off-screen, so freeze every decorative
+               animation to stop wasted GPU/CPU. The analog-clock canvas loop is
+               gated separately via the mainActive flag. */
+            body.cc-inactive *,
+            body.cc-inactive *::before,
+            body.cc-inactive *::after {
+                animation-play-state: paused !important;
+            }
+
             .tbar-mid {
                 flex: 1;
                 display: flex;
@@ -142,7 +152,7 @@
             }
             .wmbtn {
                 background: transparent;
-                border: 1px solid var(--border);
+                border: 1px solid transparent;
                 color: var(--text-md);
                 width: 28px;
                 height: 28px;
@@ -242,16 +252,10 @@
                 position: relative;
                 z-index: 1;
             }
-            /* Subtle breathing glow animation */
-            @keyframes mini-glow {
-                0%, 100% { box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.05); }
-                50% { box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.12); }
-            }
+            /* Static accent glow — no infinite animation (was mini-glow, a
+               continuous box-shadow repaint and a minor idle CPU source). */
             .btn-mini-pill {
-                animation: mini-glow 4s ease-in-out infinite;
-            }
-            .btn-mini-pill:hover {
-                animation: none;
+                box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.08);
             }
 
             /* ════════════════════════════════════════════════════
@@ -1334,7 +1338,7 @@
                pause, and is killed the instant the user touches a preset or
                the custom inputs (not Start/Reset). */
             .t-presets.attract .preset-btn {
-                animation: t-attract 8s ease-in-out infinite;
+                animation: t-attract 5.4s linear infinite;
             }
             .t-presets.attract .preset-btn:nth-child(1) {
                 animation-delay: 0s;
@@ -1375,22 +1379,24 @@
                 background: var(--accent-dim);
             }
             @keyframes t-attract {
-                0%,
-                100% {
+                0% {
                     box-shadow: none;
                     border-color: var(--border-bright);
                     color: var(--text-md);
+                    transform: translateY(0);
                 }
-                5% {
+                5.5% {
                     box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.35);
                     border-color: var(--border-active);
                     color: var(--accent-a);
                     transform: translateY(-1px);
                 }
-                15% {
+                11%,
+                100% {
                     box-shadow: none;
                     border-color: var(--border-bright);
                     color: var(--text-md);
+                    transform: translateY(0);
                 }
             }
 
@@ -3192,7 +3198,7 @@
             }
         </style>
     </head>
-    <body data-theme="arctic-ice">
+    <body data-theme="arctic-ice" class="cc-inactive">
         <!-- Theme-aware gradients for the premium icon system -->
         <svg width="0" height="0" style="position:absolute" aria-hidden="true">
             <defs>
@@ -3235,9 +3241,6 @@
                     <button class="btn-mini-pill" id="btn-mini" title="Switch to Mini Mode">
                         <span class="mini-ico"><span data-ico="compact"></span></span>
                         <span class="mini-lbl">Mini</span>
-                    </button>
-                    <button class="wmbtn" id="btn-min" title="Minimize">
-                        <span data-ico="minimize"></span>
                     </button>
                     <button class="wmbtn close" id="btn-close">
                         <span data-ico="x"></span>
@@ -4540,7 +4543,7 @@
 
             function onEnter(v) {
                 if (v === "home") {
-                    setTimeout(startClockAnim, 60);
+                    setTimeout(syncHomeClock, 60);
                 }
                 if (v === "relax") startViz();
             }
@@ -4784,6 +4787,59 @@
             // ══════════════════════════════════════════════════════════════
             // DIGITAL CLOCK
             // ══════════════════════════════════════════════════════════════
+            let digInterval = null;
+
+            function isMainWindowVisible() {
+                return mainActive;
+            }
+
+            function syncDigitalClock() {
+                if (digInterval) clearInterval(digInterval);
+                digInterval = null;
+                if (isMainWindowVisible()) {
+                    updateDigital();
+                    digInterval = setInterval(updateDigital, 1000);
+                }
+            }
+
+            // WebView2 on Windows does not reliably expose visibility/focus to
+            // the page: document.hidden, document.hasFocus() and even Tauri's
+            // native isFocused() all keep reporting this window as visible+
+            // focused after it is hidden via .hide() in mini mode. That left
+            // the analog-clock rAF loop painting off-screen and the GPU process
+            // compositing those wasted frames (~5% CPU while "idle" in mini).
+            // The Rust backend is the only reliable source of truth for which
+            // window is on screen, so it drives this flag via "cc:active-window"
+            // (see broadcast_active_window). The heavy canvas loop runs only
+            // while the main window is the active one and resumes instantly
+            // (with the correct time) when it is shown again.
+            let mainActive = false;
+            function isMainActive() {
+                return mainActive;
+            }
+            function setMainActive(v) {
+                const nv = !!v;
+                mainActive = nv;
+                document.body.classList.toggle("cc-inactive", !nv);
+                syncHomeClock();
+                syncDigitalClock();
+            }
+
+            function syncHomeClock() {
+                if (isMainActive() && curView === "home") {
+                    startClockAnim();
+                } else {
+                    stopClockAnim();
+                }
+            }
+
+            document.addEventListener("visibilitychange", () => {
+                syncHomeClock();
+                syncDigitalClock();
+            });
+
+            window.cc.onActiveWindow((label) => setMainActive(label === "main"));
+
             function updateDigital() {
                 const now = new Date();
                 let h = now.getHours(),
@@ -4808,6 +4864,14 @@
             // ANALOG CLOCK (Canvas)
             // ══════════════════════════════════════════════════════════════
             let clockRaf = null;
+            // Cap the analog clock to ~30fps. The sweeping second hand and the
+            // breathing rim look identical to the eye at 30fps, but on 60/120/144Hz
+            // displays this avoids redrawing shadowBlur'd hands + glow every vsync.
+            const CLOCK_FRAME_MS = 1000 / 30;
+            let clockLastFrame = 0;
+            let cybergemsCacheKey = null;
+            let cybergemsWidths = null;
+            let cybergemsTotal = 0;
 
             function setupClock() {
                 const canvas = document.getElementById("clock-canvas");
@@ -4818,6 +4882,7 @@
                 );
                 canvas.width = size;
                 canvas.height = size;
+                cybergemsCacheKey = null;
             }
 
             function themeColors() {
@@ -4830,30 +4895,21 @@
                 };
             }
 
-            function drawClock() {
-                const canvas = document.getElementById("clock-canvas");
-                if (!canvas || curView !== "home") {
-                    clockRaf = null;
-                    return;
-                }
-                const ctx = canvas.getContext("2d");
-                const W = canvas.width,
-                    H = canvas.height;
-                const cx = W / 2,
-                    cy = H / 2,
-                    R = Math.min(W, H) * 0.46;
-                const c = themeColors();
+            // ── Static face cache ──
+            // The clock face (glow, dome, bezel, lip, 60 ticks, 12 hour markers,
+            // 12/3/6/9 numerals) never changes between frames, but the original
+            // drawClock() redrew all of it — including dozens of shadowBlur
+            // strokes — 60 times per second. That continuous repaint was the main
+            // idle CPU sink. We render it once to an offscreen canvas and only
+            // rebuild when the canvas size or accent color changes.
+            let clockFaceCanvas = null;
+            let clockFaceKey = null;
 
-                const now = new Date();
-                const ms = now.getMilliseconds();
-                const sec = now.getSeconds() + ms / 1000;
-                const min = now.getMinutes() + sec / 60;
-                const hr = (now.getHours() % 12) + min / 60;
-                const secA = (sec / 60) * Math.PI * 2 - Math.PI / 2;
-                const minA = (min / 60) * Math.PI * 2 - Math.PI / 2;
-                const hrA = (hr / 12) * Math.PI * 2 - Math.PI / 2;
-
-                ctx.clearRect(0, 0, W, H);
+            function buildClockFace(W, H, cx, cy, R, c) {
+                const off = document.createElement("canvas");
+                off.width = W;
+                off.height = H;
+                const ctx = off.getContext("2d");
 
                 // Face glow
                 const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.1);
@@ -4917,21 +4973,6 @@
                 ctx.arc(cx, cy, R * 0.892, 0, Math.PI * 2);
                 ctx.lineWidth = R * 0.018;
                 ctx.strokeStyle = lip;
-                ctx.stroke();
-                ctx.restore();
-
-                // ── Breathing outer rim highlight (signature glow) ──
-                const br =
-                    0.68 +
-                    0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(cx, cy, R * 0.985, 0, Math.PI * 2);
-                ctx.strokeStyle = c.accent;
-                ctx.lineWidth = 2;
-                ctx.globalAlpha = br;
-                ctx.shadowColor = c.accent;
-                ctx.shadowBlur = 18;
                 ctx.stroke();
                 ctx.restore();
 
@@ -5000,21 +5041,92 @@
                 });
                 ctx.restore();
 
+                return off;
+            }
+
+            function drawClock(ts) {
+                const canvas = document.getElementById("clock-canvas");
+                if (!canvas || curView !== "home" || !mainActive) {
+                    clockRaf = null;
+                    return;
+                }
+                // Schedule the next frame first, then bail out early if we are
+                // still inside the current frame budget (framerate cap).
+                clockRaf = requestAnimationFrame(drawClock);
+                if (ts === undefined) ts = performance.now();
+                if (ts - clockLastFrame < CLOCK_FRAME_MS - 0.5) {
+                    return;
+                }
+                clockLastFrame = ts;
+
+                const ctx = canvas.getContext("2d");
+                const W = canvas.width,
+                    H = canvas.height;
+                const cx = W / 2,
+                    cy = H / 2,
+                    R = Math.min(W, H) * 0.46;
+                const c = themeColors();
+
+                const now = new Date();
+                const ms = now.getMilliseconds();
+                const sec = now.getSeconds() + ms / 1000;
+                const min = now.getMinutes() + sec / 60;
+                const hr = (now.getHours() % 12) + min / 60;
+                const secA = (sec / 60) * Math.PI * 2 - Math.PI / 2;
+                const minA = (min / 60) * Math.PI * 2 - Math.PI / 2;
+                const hrA = (hr / 12) * Math.PI * 2 - Math.PI / 2;
+
+                ctx.clearRect(0, 0, W, H);
+
+                // Static face: rendered once to an offscreen canvas and reused
+                // every frame (see buildClockFace). Rebuilt only when the canvas
+                // size or accent color changes — the ticks/markers/numerals and
+                // their shadowBlur strokes no longer redraw at 60fps.
+                const faceKey = `${W}x${H}|${c.accent}|${c.rgb}`;
+                if (faceKey !== clockFaceKey) {
+                    clockFaceCanvas = buildClockFace(W, H, cx, cy, R, c);
+                    clockFaceKey = faceKey;
+                }
+                ctx.drawImage(clockFaceCanvas, 0, 0);
+
+                // ── Breathing outer rim highlight (signature glow) ──
+                const br =
+                    0.68 +
+                    0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.985, 0, Math.PI * 2);
+                ctx.strokeStyle = c.accent;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = br;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 10;
+                ctx.stroke();
+                ctx.restore();
+
                 // CYBERGEMS — pendulum sweep: a soft glow walks across the word
                 // one letter per exact second, swinging left↔right like a metronome.
                 ctx.save();
                 ctx.textAlign = "left";
                 ctx.textBaseline = "middle";
-                ctx.font = `${R * 0.066}px Orbitron,monospace`;
+                const wordFont = `${R * 0.066}px Orbitron,monospace`;
+                ctx.font = wordFont;
                 const word = "CYBERGEMS";
                 const tracking = R * 0.004;
-                const widths = [];
-                let total = 0;
-                for (let i = 0; i < word.length; i++) {
-                    const w = ctx.measureText(word[i]).width;
-                    widths.push(w);
-                    total += w + (i < word.length - 1 ? tracking : 0);
+                const gemsKey = `${wordFont}|${tracking}`;
+                if (gemsKey !== cybergemsCacheKey) {
+                    cybergemsCacheKey = gemsKey;
+                    cybergemsWidths = [];
+                    cybergemsTotal = 0;
+                    for (let i = 0; i < word.length; i++) {
+                        const w = ctx.measureText(word[i]).width;
+                        cybergemsWidths.push(w);
+                        cybergemsTotal +=
+                            w + (i < word.length - 1 ? tracking : 0);
+                    }
                 }
+                const widths = cybergemsWidths;
+                const total = cybergemsTotal;
                 // Triangle wave over 16s: 0→8 then 8→0, advancing 1 unit/sec, so
                 // the peak lands exactly on a letter on every whole second.
                 const ph = sec % 16;
@@ -5026,22 +5138,22 @@
                     const a = 0.34 + 0.58 * lit;
                     ctx.fillStyle = `rgba(${c.rgb},${a})`;
                     ctx.shadowColor = c.accent;
-                    ctx.shadowBlur = 3 + 11 * lit;
+                    ctx.shadowBlur = 2 + 6 * lit;
                     ctx.fillText(word[i], wx, wy);
                     wx += widths[i] + tracking;
                 }
                 ctx.restore();
 
                 // Hands
-                hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 16);
-                hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 12);
-                hand(ctx, cx, cy, secA, R * 0.83, 1.5, c.handSec, 22);
-                hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 15);
+                hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
+                hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
+                hand(ctx, cx, cy, secA, R * 0.83, 1.5, c.handSec, 12);
+                hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 8);
 
                 // Center jewel
                 ctx.save();
                 ctx.shadowColor = c.accent;
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 12;
                 ctx.beginPath();
                 ctx.arc(cx, cy, R * 0.028, 0, Math.PI * 2);
                 ctx.fillStyle = c.accent;
@@ -5057,8 +5169,6 @@
                 ctx.globalAlpha = 0.55;
                 ctx.fill();
                 ctx.restore();
-
-                clockRaf = requestAnimationFrame(drawClock);
             }
 
             function hand(ctx, cx, cy, angle, len, width, color, blur) {
@@ -5074,7 +5184,7 @@
                 ctx.lineWidth = width;
                 ctx.lineCap = "round";
                 ctx.shadowColor = "rgba(0,0,0,.45)";
-                ctx.shadowBlur = 7;
+                ctx.shadowBlur = 4;
                 ctx.beginPath();
                 ctx.moveTo(cx, cy);
                 ctx.lineTo(ex, ey);
@@ -5096,6 +5206,7 @@
             }
 
             function startClockAnim() {
+                if (!mainActive || curView !== "home") return;
                 if (!clockRaf) drawClock();
             }
             function stopClockAnim() {
@@ -6979,9 +7090,6 @@
                 .getElementById("btn-mini")
                 .addEventListener("click", () => window.cc.goMini());
             document
-                .getElementById("btn-min")
-                .addEventListener("click", () => window.cc.minimizeWindow());
-            document
                 .getElementById("btn-close")
                 .addEventListener("click", () => window.cc.hideWindow("main"));
 
@@ -7220,8 +7328,10 @@
                 applySettings(s);
                 const startPromptEl = document.getElementById("r-tip");
                 if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
-                setInterval(updateDigital, 1000);
-                updateDigital();
+                // Initial active state from saved mode; live updates arrive via
+                // the backend "cc:active-window" broadcast.
+                setMainActive((s.windowMode || s.window_mode) === "full");
+                syncDigitalClock();
                 calNotes = s.calendarNotes || {};
                 const now = new Date();
                 calYear = now.getFullYear();
@@ -7229,12 +7339,12 @@
                 renderCalendar();
                 requestAnimationFrame(() => {
                     setupClock();
-                    startClockAnim();
+                    syncHomeClock();
                 });
                 window.addEventListener("resize", () => {
                     stopClockAnim();
                     setupClock();
-                    startClockAnim();
+                    syncHomeClock();
                 });
             });
 

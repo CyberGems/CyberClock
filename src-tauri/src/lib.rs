@@ -195,6 +195,20 @@ fn save_settings_to_file(app: &AppHandle, settings: &AppSettings) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Active-window broadcast
+// ─────────────────────────────────────────────────────────────
+// WebView2 on Windows does not reliably expose visibility/focus to the
+// page (document.hidden / document.hasFocus() / native isFocused() all
+// keep reporting a window hidden via .hide() as visible+focused). That
+// left the main window's analog-clock rAF loop painting off-screen while
+// in mini mode. The backend is the only component that knows for certain
+// which window is active, so it broadcasts that here. Frontends gate their
+// render loops on this signal. `label` is "main", "mini" or "none".
+fn broadcast_active_window(app: &AppHandle, label: &str) {
+    let _ = app.emit("cc:active-window", label);
+}
+
+// ─────────────────────────────────────────────────────────────
 // Alarm State
 // ─────────────────────────────────────────────────────────────
 
@@ -252,6 +266,25 @@ fn close_window(window: WebviewWindow) {
     let _ = window.close();
 }
 
+// ─────────────────────────────────────────────────────────────
+// Clean application exit
+// ─────────────────────────────────────────────────────────────
+// Closing every WebviewWindow BEFORE calling app.exit() lets each
+// HWND be destroyed first. Otherwise Chromium's static teardown
+// races to UnregisterClass("Chrome_WidgetWin_0") while windows of
+// that class still exist, producing:
+//   "Failed to unregister class Chrome_WidgetWin_0. Error = 1412"
+// (ERROR_CLASS_HAS_WINDOWS) in the terminal on exit.
+fn exit_app(app: &AppHandle) {
+    for window in app.webview_windows().values() {
+        let _ = window.close();
+    }
+    // give the webview runtime a beat to actually destroy the HWNDs
+    // before we tear the process down.
+    std::thread::sleep(std::time::Duration::from_millis(150));
+    app.exit(0);
+}
+
 #[tauri::command]
 fn minimize_window(window: WebviewWindow) {
     let _ = window.minimize();
@@ -306,6 +339,9 @@ fn open_window(app: AppHandle, name: String) -> bool {
 fn hide_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.hide();
+        if name == "main" || name == "mini" {
+            broadcast_active_window(&app, "none");
+        }
         return true;
     }
     false
@@ -585,6 +621,7 @@ fn switch_to_full_mode(app: AppHandle) {
     
     save_settings_to_file(&app, &settings);
     let _ = app.emit("settings:updated", &settings);
+    broadcast_active_window(&app, "main");
 }
 
 #[tauri::command]
@@ -639,6 +676,7 @@ fn switch_to_mini_mode(app: AppHandle) {
     
     save_settings_to_file(&app, &settings);
     let _ = app.emit("settings:updated", &settings);
+    broadcast_active_window(&app, "mini");
 }
 
 #[tauri::command]
@@ -768,7 +806,7 @@ fn menu_action(app: AppHandle, action: String) -> bool {
             true
         }
         "close" => {
-            app.exit(0);
+            exit_app(&app);
             true
         }
         "aot" => {
@@ -1237,6 +1275,7 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                             let _ = mini.set_focus();
                         }
                     }
+                    broadcast_active_window(app, if settings.window_mode == "full" { "main" } else { "mini" });
                 }
                 "hide" => {
                     let settings = load_settings(app);
@@ -1255,6 +1294,7 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                             let _ = win.hide();
                         }
                     }
+                    broadcast_active_window(app, "none");
                 }
                 "full" => switch_to_full_mode(app.clone()),
                 "mini" => switch_to_mini_mode(app.clone()),
@@ -1272,7 +1312,7 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                     }
                 }
                 "quit" => {
-                    app.exit(0);
+                    exit_app(app);
                 }
                 _ => {}
             }
@@ -1285,12 +1325,26 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                 if settings.window_mode == "full" {
                     if let Some(main) = app.get_webview_window("main") {
                         let visible = main.is_visible().unwrap_or(false);
-                        if visible { let _ = main.hide(); } else { let _ = main.show(); let _ = main.set_focus(); }
+                        if visible {
+                            let _ = main.hide();
+                            broadcast_active_window(app, "none");
+                        } else {
+                            let _ = main.show();
+                            let _ = main.set_focus();
+                            broadcast_active_window(app, "main");
+                        }
                     }
                 } else {
                     if let Some(mini) = app.get_webview_window("mini") {
                         let visible = mini.is_visible().unwrap_or(false);
-                        if visible { let _ = mini.hide(); } else { let _ = mini.show(); let _ = mini.set_focus(); }
+                        if visible {
+                            let _ = mini.hide();
+                            broadcast_active_window(app, "none");
+                        } else {
+                            let _ = mini.show();
+                            let _ = mini.set_focus();
+                            broadcast_active_window(app, "mini");
+                        }
                     }
                 }
             }
@@ -1365,6 +1419,8 @@ fn show_initial_window(app: &AppHandle) {
             let _ = mini.show();
         }
     }
+
+    broadcast_active_window(app, if is_mini { "mini" } else { "main" });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1390,6 +1446,7 @@ pub fn run() {
                     let _ = mini.set_focus();
                 }
             }
+            broadcast_active_window(app, if settings.window_mode == "full" { "main" } else { "mini" });
         }))
         .plugin(tauri_plugin_dialog::init())
         .manage(AlarmState::default())
