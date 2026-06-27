@@ -87,6 +87,24 @@
         getScreens: async () => {
             return await invoke("get_screens");
         },
+
+        // ── App info & updates ────────────────────────────────────
+        getAppVersion: async () => {
+            return await invoke("get_app_version");
+        },
+        checkForUpdates: async () => {
+            return await invoke("check_for_updates");
+        },
+        downloadUpdate: async () => {
+            return await invoke("download_update");
+        },
+        installUpdate: async () => {
+            return await invoke("install_update");
+        },
+        onUpdateStatus: (cb) => {
+            return listen("update:status", (event) => cb(event.payload));
+        },
+
         selectDisplay: async (id) => {
             return await invoke("select_display", { id });
         },
