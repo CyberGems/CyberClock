@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "CyberClock",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "identifier": "com.cybergems.cyberclock",
   "build": {
     "frontendDist": "../src",
@@ -76,7 +76,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "nsis"
+    ],
     "createUpdaterArtifacts": true,
     "publisher": "CyberGems",
     "icon": [
