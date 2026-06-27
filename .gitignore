@@ -4,6 +4,7 @@ node_modules/
 # Tauri build output
 src-tauri/target/
 src-tauri/gen/
+src-tauri/.tauri/
 
 # IDE
 .vs/

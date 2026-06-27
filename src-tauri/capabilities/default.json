@@ -29,6 +29,8 @@
     "core:window:allow-unminimize",
     "core:window:allow-is-visible",
     "core:event:default",
-    "dialog:default"
+    "dialog:default",
+    "updater:default",
+    "process:default"
   ]
 }

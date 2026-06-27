@@ -11,6 +11,12 @@ use tauri_plugin_dialog::DialogExt;
 use chrono::{Local, Timelike};
 use chrono::{Datelike, TimeZone};
 
+mod updater;
+use updater::{
+    check_for_updates, download_update, get_app_version, init_updater, install_update,
+    set_auto_update, UpdaterState,
+};
+
 // ─────────────────────────────────────────────────────────────
 // Settings Structures
 // ─────────────────────────────────────────────────────────────
@@ -116,6 +122,7 @@ pub struct AppSettings {
 
     pub language: String,
     pub breathe_pattern: String,
+    pub auto_update: bool,
 
     // Calendar day notes: ISO date key "YYYY-MM-DD" -> note text
     pub calendar_notes: HashMap<String, String>,
@@ -156,6 +163,7 @@ impl Default for AppSettings {
             relax_scheduler: RelaxSchedulerSettings::default(),
             language: "auto".to_string(),
             breathe_pattern: "box".to_string(),
+            auto_update: true,
             calendar_notes: HashMap::new(),
         }
     }
@@ -241,7 +249,8 @@ fn get_settings(app: AppHandle) -> AppSettings {
 #[tauri::command]
 fn save_settings(app: AppHandle, settings: AppSettings) -> AppSettings {
     save_settings_to_file(&app, &settings);
-    
+    set_auto_update(settings.auto_update);
+
     // Reset next run for relax scheduler
     let state = app.state::<AlarmState>();
     if let Ok(mut next_run) = state.relax_next_run.lock() {
@@ -1256,7 +1265,7 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
 
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
-        .tooltip("CyberClock")
+        .tooltip(format!("CyberClock v{}", app.package_info().version))
         .menu(&menu)
         .on_menu_event(|app, event| {
             match event.id.as_ref() {
@@ -1449,7 +1458,10 @@ pub fn run() {
             broadcast_active_window(app, if settings.window_mode == "full" { "main" } else { "mini" });
         }))
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(AlarmState::default())
+        .manage(UpdaterState::default())
         .setup(|app| {
             // Setup tray icon
             setup_tray(app.handle())?;
@@ -1477,6 +1489,8 @@ pub fn run() {
             }
 
             // Load settings and show initial window
+            let settings = load_settings(app.handle());
+            init_updater(app.handle(), settings.auto_update);
             show_initial_window(app.handle());
 
             // Setup alarm check interval (every 30 seconds) for fixed (:30 / :00)
@@ -1529,7 +1543,11 @@ pub fn run() {
             reset_mini_position,
             save_mini_position,
             open_file_dialog,
-            set_startup
+            set_startup,
+            get_app_version,
+            check_for_updates,
+            download_update,
+            install_update
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

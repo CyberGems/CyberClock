@@ -188,6 +188,7 @@
             "settings.tab.appearance": "Appearance",
             "settings.tab.alarms": "Alarms",
             "settings.tab.general": "General",
+            "settings.tab.about": "About",
             "settings.tab.display": "Display",
             "settings.tab.mini": "Mini Mode",
 
@@ -229,8 +230,20 @@
             "settings.general.launchCompact": "Launch in compact view",
             "settings.general.relaxVolume": "Relaxation Volume",
             "settings.general.about": "About",
-            "settings.general.aboutVersion": "CyberClock v1.0.0",
             "settings.general.aboutSub": "CyberGems © 2026 · Premium Cyber-Neon Clock for Windows",
+
+            "about.version": "Version {version}",
+            "about.maintenance": "Maintenance",
+            "about.autoUpdates": "Auto-updates",
+            "about.checkUpdates": "Check Updates",
+            "about.downloadBtn": "Download",
+            "about.installBtn": "Install & Restart",
+            "about.statuses.checking": "Checking for updates…",
+            "about.statuses.latest": "You are on the latest version.",
+            "about.statuses.available": "Update available — click Download.",
+            "about.statuses.downloaded": "Update ready — click Install & Restart.",
+            "about.statuses.downloading": "Downloading… {percent}%",
+            "about.statuses.error": "Update check failed",
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Multi-Monitor Support",
@@ -440,6 +453,7 @@
             "settings.tab.appearance": "Apariencia",
             "settings.tab.alarms": "Alarmas",
             "settings.tab.general": "General",
+            "settings.tab.about": "Acerca de",
             "settings.tab.display": "Pantalla",
             "settings.tab.mini": "Modo Mini",
 
@@ -481,8 +495,20 @@
             "settings.general.launchCompact": "Iniciar en vista compacta",
             "settings.general.relaxVolume": "Volumen de Relajación",
             "settings.general.about": "Acerca de",
-            "settings.general.aboutVersion": "CyberClock v1.0.0",
             "settings.general.aboutSub": "CyberGems © 2026 · Reloj Cyber-Neón Premium para Windows",
+
+            "about.version": "Versión {version}",
+            "about.maintenance": "Mantenimiento",
+            "about.autoUpdates": "Actualizaciones automáticas",
+            "about.checkUpdates": "Buscar actualizaciones",
+            "about.downloadBtn": "Descargar",
+            "about.installBtn": "Instalar y reiniciar",
+            "about.statuses.checking": "Buscando actualizaciones…",
+            "about.statuses.latest": "Tienes la última versión.",
+            "about.statuses.available": "Actualización disponible — pulsa Descargar.",
+            "about.statuses.downloaded": "Actualización lista — pulsa Instalar y reiniciar.",
+            "about.statuses.downloading": "Descargando… {percent}%",
+            "about.statuses.error": "Error al buscar actualizaciones",
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Soporte Multi-Monitor",

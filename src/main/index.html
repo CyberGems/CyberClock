@@ -2914,6 +2914,55 @@
                 color: var(--text-lo);
                 letter-spacing: 1px;
             }
+            .s-about-divider {
+                font-size: 9px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--text-lo);
+                margin: 14px 0 8px;
+                opacity: 0.8;
+            }
+            .s-about-status {
+                min-height: 16px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 9px;
+                letter-spacing: 0.5px;
+                margin-bottom: 10px;
+            }
+            .s-about-status.ok { color: #44ff88; }
+            .s-about-status.info { color: var(--accent-a); }
+            .s-about-status.warn { color: var(--text-md); }
+            .s-about-status.err { color: #ff4466; }
+            .s-about-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 8px;
+            }
+            .s-about-autoup {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+            }
+            .s-about-autoup span {
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: var(--text-md);
+                white-space: nowrap;
+            }
+            .s-abtn:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+            .s-abtn.spin .cc-ico {
+                animation: cc-spin 0.8s linear infinite;
+            }
+            @keyframes cc-spin {
+                to { transform: rotate(360deg); }
+            }
             .s-teaser {
                 background: var(--bg-01);
                 border: 1px solid var(--border);
@@ -3801,6 +3850,7 @@
                     </div>
                     <div class="s-tab" data-stab="alarms" data-i18n="settings.tab.alarms">Alarms</div>
                     <div class="s-tab" data-stab="general" data-i18n="settings.tab.general">General</div>
+                    <div class="s-tab" data-stab="about" data-i18n="settings.tab.about">About</div>
                     <div class="s-tab" data-stab="display" data-i18n="settings.tab.display">Display</div>
                     <div class="s-tab" data-stab="mini" data-i18n="settings.tab.mini">mini mode</div>
                 </div>
@@ -4156,13 +4206,32 @@
                                 >
                             </div>
                         </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="s-panel" id="stab-about">
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.general.about">About</div>
                             <div class="s-about">
-                                <div class="s-about-v" data-i18n="settings.general.aboutVersion">CyberClock v1.0.0</div>
+                                <div class="s-about-v" id="s-about-version">CyberClock v…</div>
                                 <div class="s-about-s" data-i18n="settings.general.aboutSub">
                                     CyberGems © 2026 · Premium Cyber-Neon Clock
                                     for Windows
+                                </div>
+                                <div class="s-about-divider" data-i18n="about.maintenance">Maintenance</div>
+                                <div class="s-about-status" id="s-update-status"></div>
+                                <div class="s-about-actions">
+                                    <button class="s-abtn" id="s-update-btn" type="button">
+                                        <span data-i18n="about.checkUpdates">Check Updates</span>
+                                    </button>
+                                    <div class="s-about-autoup">
+                                        <label class="s-tog">
+                                            <input type="checkbox" id="s-autoupdate" />
+                                            <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                        </label>
+                                        <span data-i18n="about.autoUpdates">Auto-updates</span>
+                                    </div>
+                                    <button class="s-abtn" id="s-github-btn" type="button" title="GitHub">GitHub</button>
                                 </div>
                             </div>
                         </div>
@@ -4672,8 +4741,12 @@
 
                 const langEl = document.getElementById("s-lang");
                 if (langEl) langEl.value = s.language || "auto";
+                const autoUpEl = document.getElementById("s-autoupdate");
+                if (autoUpEl) autoUpEl.checked = s.autoUpdate !== false;
                 window.ccI18n.setLang(s.language || "auto");
                 window.ccI18n.apply(document);
+                if (typeof renderAboutVersion === "function") renderAboutVersion();
+                if (typeof renderUpdateStatus === "function") renderUpdateStatus();
                 updateDigital();
                 if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
                     renderCalendar();
@@ -6850,6 +6923,147 @@
                 .addEventListener("change", (e) =>
                     window.cc.saveSettings({ language: e.target.value }),
                 );
+
+            // ── About / Updates ─────────────────────────────────────
+            let updateStatus = { state: "idle" };
+            let appVersion = "";
+
+            function renderAboutVersion() {
+                const el = document.getElementById("s-about-version");
+                if (!el) return;
+                const label = window.ccI18n.t("about.version").replace(
+                    "{version}",
+                    appVersion || "…",
+                );
+                el.textContent = "CyberClock · " + label;
+            }
+
+            function renderUpdateStatus() {
+                const el = document.getElementById("s-update-status");
+                const btn = document.getElementById("s-update-btn");
+                if (!el || !btn) return;
+
+                el.className = "s-about-status";
+                btn.disabled = false;
+                btn.classList.remove("spin");
+
+                const t = (k) => window.ccI18n.t(k);
+                const s = updateStatus;
+
+                if (s.state === "idle") {
+                    el.textContent = "";
+                    btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
+                    return;
+                }
+                if (s.state === "checking") {
+                    el.className += " warn";
+                    el.textContent = t("about.statuses.checking");
+                    btn.disabled = true;
+                    return;
+                }
+                if (s.state === "not-available") {
+                    el.className += " ok";
+                    el.textContent = t("about.statuses.latest");
+                    btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
+                    return;
+                }
+                if (s.state === "available") {
+                    el.className += " info";
+                    el.textContent = t("about.statuses.available");
+                    btn.innerHTML = `<span data-i18n="about.downloadBtn">${t("about.downloadBtn")}</span>`;
+                    return;
+                }
+                if (s.state === "downloading") {
+                    el.className += " warn";
+                    el.textContent = t("about.statuses.downloading").replace(
+                        "{percent}",
+                        String(s.percent ?? 0),
+                    );
+                    btn.disabled = true;
+                    return;
+                }
+                if (s.state === "downloaded") {
+                    el.className += " ok";
+                    el.textContent = t("about.statuses.downloaded");
+                    btn.innerHTML = `<span data-i18n="about.installBtn">${t("about.installBtn")}</span>`;
+                    return;
+                }
+                if (s.state === "error") {
+                    el.className += " err";
+                    el.textContent = t("about.statuses.error");
+                    if (s.message) {
+                        const detail = document.createElement("div");
+                        detail.style.marginTop = "4px";
+                        detail.style.fontSize = "8px";
+                        detail.style.opacity = "0.75";
+                        detail.style.wordBreak = "break-word";
+                        detail.textContent = s.message;
+                        el.appendChild(detail);
+                    }
+                    btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
+                    return;
+                }
+            }
+
+            async function handleUpdateAction() {
+                if (updateStatus.state === "available") {
+                    await window.cc.downloadUpdate();
+                    return;
+                }
+                if (updateStatus.state === "downloaded") {
+                    await window.cc.installUpdate();
+                    return;
+                }
+
+                updateStatus = { state: "checking" };
+                renderUpdateStatus();
+                try {
+                    const res = await window.cc.checkForUpdates();
+                    if (!res?.ok) {
+                        updateStatus = {
+                            state: "error",
+                            message: res?.error || "Update check failed",
+                        };
+                    } else if (updateStatus.state === "checking") {
+                        updateStatus = {
+                            state: "not-available",
+                            version: res.version || appVersion,
+                        };
+                    }
+                } catch (e) {
+                    updateStatus = {
+                        state: "error",
+                        message: String(e?.message || e),
+                    };
+                }
+                renderUpdateStatus();
+            }
+
+            window.cc.getAppVersion().then((v) => {
+                appVersion = v;
+                renderAboutVersion();
+            });
+            window.cc.onUpdateStatus((payload) => {
+                updateStatus = payload || { state: "idle" };
+                renderUpdateStatus();
+            });
+
+            const updateBtn = document.getElementById("s-update-btn");
+            if (updateBtn) {
+                updateBtn.addEventListener("click", () => handleUpdateAction());
+            }
+            const githubBtn = document.getElementById("s-github-btn");
+            if (githubBtn) {
+                githubBtn.addEventListener("click", () => {
+                    window.open("https://github.com/CyberGems/CyberClock", "_blank");
+                });
+            }
+            const autoUpEl = document.getElementById("s-autoupdate");
+            if (autoUpEl) {
+                autoUpEl.addEventListener("change", (e) => {
+                    window.cc.saveSettings({ autoUpdate: e.target.checked });
+                });
+            }
 
             // Alarms
             document
