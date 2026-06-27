@@ -133,6 +133,9 @@
         onMiniMenuAction: (cb) => {
             listen("mini:menu-action", (event) => cb(event.payload));
         },
+        onActiveWindow: (cb) => {
+            listen("cc:active-window", (event) => cb(event.payload));
+        },
 
         // ── Cleanup ───────────────────────────────────────────────
         off: (channel) => {

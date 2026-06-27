@@ -442,12 +442,15 @@
                 border: 2px solid var(--accent-a);
                 background: transparent;
                 border-radius: 50%;
+                /* Static glow painted once; transform:scale grows it on the GPU
+                   (composite-only) instead of animating box-shadow (repaint). */
+                box-shadow: 0 0 10px 2px rgba(var(--rgb-accent), 0.3);
+                will-change: transform, opacity;
                 animation: zen-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
             }
             @keyframes zen-pulse {
-                0% { transform: scale(0.85); opacity: 0.5; box-shadow: 0 0 0 0 rgba(var(--rgb-accent), 0.4); }
-                50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 12px 3px rgba(var(--rgb-accent), 0.3); }
-                100% { transform: scale(0.85); opacity: 0.5; box-shadow: 0 0 0 0 rgba(var(--rgb-accent), 0); }
+                0%, 100% { transform: scale(0.85); opacity: 0.5; }
+                50% { transform: scale(1.15); opacity: 1; }
             }
             .mini-shell[data-design="6"] .sep {
                 width: 1px;
@@ -573,11 +576,12 @@
                 border-radius: 50%;
                 background: #ff6b8a;
                 box-shadow: 0 0 12px #ff6b8a, 0 0 24px rgba(255, 107, 138, 0.5);
+                will-change: transform, opacity;
                 animation: sunset-pulse 2.5s ease-in-out infinite;
             }
             @keyframes sunset-pulse {
-                0%, 100% { transform: scale(1); opacity: 0.9; box-shadow: 0 0 8px #ff6b8a; }
-                50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px #ff6b8a, 0 0 40px rgba(255, 107, 138, 0.5); }
+                0%, 100% { transform: scale(1); opacity: 0.9; }
+                50% { transform: scale(1.3); opacity: 1; }
             }
             .mini-shell[data-design="7"] .ctl-btn {
                 color: rgba(255, 180, 140, 0.5);
@@ -627,6 +631,8 @@
                 width: 200%;
                 height: 200%;
                 background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(100, 200, 255, 0.03) 60deg, transparent 120deg, rgba(100, 200, 255, 0.02) 180deg, transparent 240deg, rgba(100, 200, 255, 0.03) 300deg, transparent 360deg);
+                /* Conic painted once into its own layer; only rotated on the GPU. */
+                will-change: transform;
                 animation: frost-rotate 12s linear infinite;
                 pointer-events: none;
             }
@@ -905,13 +911,14 @@
                 border-radius: 50%;
                 background: #00ffff;
                 box-shadow: 0 0 14px #00ffff, 0 0 30px rgba(0, 255, 255, 0.5);
+                will-change: transform, opacity;
                 animation: synth-pulse 1.8s ease-in-out infinite;
                 position: relative;
                 z-index: 1;
             }
             @keyframes synth-pulse {
-                0%, 100% { transform: scale(1); box-shadow: 0 0 8px #00ffff; }
-                50% { transform: scale(1.35); box-shadow: 0 0 22px #00ffff, 0 0 40px rgba(0, 255, 255, 0.5); }
+                0%, 100% { transform: scale(1); opacity: 0.85; }
+                50% { transform: scale(1.35); opacity: 1; }
             }
             .mini-shell[data-design="11"] .ctl-btn {
                 color: rgba(255, 0, 128, 0.5);
@@ -999,6 +1006,7 @@
                 border-radius: 0;
                 transform: rotate(45deg);
                 box-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
+                will-change: transform;
                 animation: quantum-spin 3s linear infinite;
             }
             @keyframes quantum-spin {
@@ -1192,6 +1200,22 @@
             @keyframes pulse-dot {
                 0%, 100% { opacity: 0.6; transform: scale(1); }
                 50% { opacity: 1; transform: scale(1.2); }
+            }
+
+            /* Pause decorative animations when hidden or user prefers reduced motion */
+            @media (prefers-reduced-motion: reduce) {
+                .mini-shell,
+                .mini-shell::before,
+                .mini-shell::after,
+                .mini-shell * {
+                    animation: none !important;
+                }
+            }
+            body.mini-paused .mini-shell,
+            body.mini-paused .mini-shell::before,
+            body.mini-paused .mini-shell::after,
+            body.mini-paused .mini-shell * {
+                animation-play-state: paused !important;
             }
         </style>
     </head>
@@ -1418,8 +1442,33 @@
             // ═══════════════════════════════════════════════════════
             // INITIALIZATION
             // ═══════════════════════════════════════════════════════
+            // Decorative CSS animations keep the (transparent, always-on-top)
+            // window recompositing every vsync, which is the main idle-CPU cost
+            // of the mini view. Pause them whenever the window is hidden, or it
+            // is unfocused and the cursor isn't over it. The clock text still
+            // updates every second regardless, so the time is never stale.
+            let miniHovered = false;
+            function syncMiniMotion() {
+                const shouldPause =
+                    document.hidden || (!document.hasFocus() && !miniHovered);
+                document.body.classList.toggle("mini-paused", shouldPause);
+            }
+
+            document.addEventListener("visibilitychange", syncMiniMotion);
+            window.addEventListener("focus", syncMiniMotion);
+            window.addEventListener("blur", syncMiniMotion);
+            shellEl.addEventListener("mouseenter", () => {
+                miniHovered = true;
+                syncMiniMotion();
+            });
+            shellEl.addEventListener("mouseleave", () => {
+                miniHovered = false;
+                syncMiniMotion();
+            });
+
             window.cc.onInit((s) => {
                 applySettings(s);
+                syncMiniMotion();
                 requestAnimationFrame(() => {
                     setInterval(updateClock, 1000);
                 });
