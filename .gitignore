@@ -17,6 +17,8 @@ CLAUDE.md
 .cursorrules
 .cursor/
 .github/copilot-instructions.md
+.claude/
+.qodo/
 
 # OS files
 .DS_Store
