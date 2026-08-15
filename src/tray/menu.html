@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CyberClock Tray Menu</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/i18n.js"></script>
+        <script src="../shared/icons.js"></script>
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                width: 100vw;
+                height: 100vh;
+                background: transparent !important;
+                user-select: none;
+                -webkit-user-select: none;
+                font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Outer root includes shadow bleed — measured for window size */
+            .tray-root {
+                display: inline-block;
+                background: transparent;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+
+            .tray-card {
+                width: 250px;
+                background: rgba(10, 14, 25, 0.96);
+                backdrop-filter: blur(28px) saturate(1.8);
+                -webkit-backdrop-filter: blur(28px) saturate(1.8);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.55),
+                    0 0 20px rgba(var(--rgb-accent), 0.12),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                animation: tray-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes tray-fade-in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.96) translateY(4px);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+
+            /* Header */
+            .tray-header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 11px 12px 9px;
+                font-family: "Outfit", "Segoe UI Variable", system-ui, sans-serif;
+                font-size: 11.5px;
+                font-weight: 600;
+                letter-spacing: 0.8px;
+                color: var(--text-md);
+                text-transform: uppercase;
+            }
+
+            .tray-header .app-ver {
+                color: var(--text-lo);
+                font-weight: 500;
+                font-size: 11px;
+                letter-spacing: 0.5px;
+            }
+
+            .update-badge {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981, 0 0 16px rgba(16, 185, 129, 0.5);
+                animation: pulse-update 2s infinite ease-in-out;
+            }
+
+            @keyframes pulse-update {
+                0%, 100% { transform: scale(0.9); opacity: 0.8; }
+                50% { transform: scale(1.2); opacity: 1; }
+            }
+
+            /* Divider */
+            .tray-divider {
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--border), transparent);
+                margin: 2px 10px;
+            }
+
+            /* Groups & Items */
+            .tray-group {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                padding: 5px 6px;
+            }
+
+            .tray-group-exit {
+                padding-bottom: 6px;
+            }
+
+            .tray-item {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                width: 100%;
+                border: none;
+                background: transparent;
+                padding: 6px 10px;
+                border-radius: 10px;
+                font-family: inherit;
+                font-size: 12.5px;
+                font-weight: 500;
+                color: var(--text-hi);
+                cursor: pointer;
+                text-align: left;
+                transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+                min-height: 30px;
+                box-sizing: border-box;
+                outline: none;
+            }
+
+            .tray-item:hover {
+                background: rgba(var(--rgb-accent), 0.12);
+                color: #ffffff;
+                transform: translateX(2px);
+            }
+
+            .tray-item:active {
+                background: rgba(var(--rgb-accent), 0.22);
+                transform: scale(0.98);
+            }
+
+            .tray-item .ico {
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                color: var(--accent-a);
+                filter: drop-shadow(0 0 4px rgba(var(--rgb-accent), 0.45));
+                transition: transform 0.15s ease;
+            }
+
+            .tray-item:hover .ico {
+                transform: scale(1.08);
+            }
+
+            .tray-item .label {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* Exit Button */
+            .tray-item-exit {
+                color: #fca5a5;
+            }
+
+            .tray-item-exit .ico {
+                color: #ff4d6d;
+                filter: drop-shadow(0 0 5px rgba(255, 77, 109, 0.6));
+            }
+
+            .tray-item-exit:hover {
+                background: rgba(255, 77, 109, 0.14);
+                color: #ffffff;
+            }
+
+            .tray-item-exit:active {
+                background: rgba(255, 77, 109, 0.25);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="tray-root" id="tray-root">
+            <div class="tray-card" role="menu">
+                <!-- Header -->
+                <div class="tray-header">
+                    <span class="app-title">CyberClock <span class="app-ver" id="app-ver">v1.0.3</span></span>
+                    <span class="update-badge" id="update-badge" style="display: none;" title="Update available"></span>
+                </div>
+
+                <div class="tray-divider"></div>
+
+                <!-- Primary Controls -->
+                <div class="tray-group">
+                    <button type="button" class="tray-item" data-action="toggle_visibility" id="btn-visibility">
+                        <span class="ico" data-ico="eye" id="ico-visibility"></span>
+                        <span class="label" id="lbl-visibility">Show Clock</span>
+                    </button>
+
+                    <button type="button" class="tray-item" data-action="toggle_mode" id="btn-mode">
+                        <span class="ico" data-ico="expand" id="ico-mode"></span>
+                        <span class="label" id="lbl-mode">Switch to Full Mode</span>
+                    </button>
+                </div>
+
+                <div class="tray-divider"></div>
+
+                <!-- Navigation Group -->
+                <div class="tray-group">
+                    <button type="button" class="tray-item" data-action="timer">
+                        <span class="ico" data-ico="timer"></span>
+                        <span class="label" id="lbl-timer">Timer</span>
+                    </button>
+
+                    <button type="button" class="tray-item" data-action="stopwatch">
+                        <span class="ico" data-ico="stopwatch"></span>
+                        <span class="label" id="lbl-stopwatch">Stopwatch</span>
+                    </button>
+
+                    <button type="button" class="tray-item" data-action="relax">
+                        <span class="ico" data-ico="lotus"></span>
+                        <span class="label" id="lbl-relax">Relax</span>
+                    </button>
+
+                    <button type="button" class="tray-item" data-action="settings">
+                        <span class="ico" data-ico="gear"></span>
+                        <span class="label" id="lbl-settings">Settings...</span>
+                    </button>
+                </div>
+
+                <div class="tray-divider"></div>
+
+                <!-- Exit Group -->
+                <div class="tray-group tray-group-exit">
+                    <button type="button" class="tray-item tray-item-exit" data-action="quit">
+                        <span class="ico" data-ico="power"></span>
+                        <span class="label" id="lbl-quit">Exit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let currentMenuState = null;
+            const rootEl = document.getElementById("tray-root");
+
+            function reportSize() {
+                if (!rootEl) return;
+                const r = rootEl.getBoundingClientRect();
+                if (r.width < 10 || r.height < 10) return;
+                if (window.cc && window.cc.trayMenuReady) {
+                    window.cc.trayMenuReady({ width: r.width, height: r.height });
+                }
+            }
+
+            function applyTheme(theme) {
+                document.body.dataset.theme = theme || "arctic-ice";
+            }
+
+            function renderState(state) {
+                if (!state) return;
+                currentMenuState = state;
+
+                // Theme
+                if (state.theme) applyTheme(state.theme);
+
+                // Language
+                if (window.ccI18n) {
+                    window.ccI18n.setLang(state.language || "auto");
+                }
+
+                // Version
+                const verEl = document.getElementById("app-ver");
+                if (verEl && state.version) {
+                    verEl.textContent = "v" + state.version;
+                }
+
+                // Update badge
+                const badgeEl = document.getElementById("update-badge");
+                if (badgeEl) {
+                    badgeEl.style.display = state.update_available ? "inline-block" : "none";
+                }
+
+                // Visibility Item
+                const lblVis = document.getElementById("lbl-visibility");
+                const icoVis = document.getElementById("ico-visibility");
+                const isVis = state.is_visible;
+                if (lblVis) {
+                    lblVis.textContent = window.ccI18n ? window.ccI18n.t(isVis ? "tray.hide" : "tray.show") : (isVis ? "Hide Clock" : "Show Clock");
+                }
+                if (icoVis) {
+                    icoVis.setAttribute("data-ico", isVis ? "eye-off" : "eye");
+                }
+
+                // Mode Item
+                const isFull = state.window_mode === "full";
+                const lblMode = document.getElementById("lbl-mode");
+                const icoMode = document.getElementById("ico-mode");
+                if (lblMode) {
+                    lblMode.textContent = window.ccI18n ? window.ccI18n.t(isFull ? "tray.miniMode" : "tray.fullMode") : (isFull ? "Mini Mode" : "Full Mode");
+                }
+                if (icoMode) {
+                    icoMode.setAttribute("data-ico", isFull ? "compact" : "expand");
+                }
+
+                // Features
+                const lblTimer = document.getElementById("lbl-timer");
+                if (lblTimer) lblTimer.textContent = window.ccI18n ? window.ccI18n.t("tray.timer") : "Timer";
+                const lblSw = document.getElementById("lbl-stopwatch");
+                if (lblSw) lblSw.textContent = window.ccI18n ? window.ccI18n.t("tray.stopwatch") : "Stopwatch";
+                const lblRelax = document.getElementById("lbl-relax");
+                if (lblRelax) lblRelax.textContent = window.ccI18n ? window.ccI18n.t("tray.relax") : "Relax";
+                const lblSettings = document.getElementById("lbl-settings");
+                if (lblSettings) lblSettings.textContent = window.ccI18n ? window.ccI18n.t("tray.settings") : "Settings...";
+                const lblQuit = document.getElementById("lbl-quit");
+                if (lblQuit) lblQuit.textContent = window.ccI18n ? window.ccI18n.t("tray.quit") : "Exit";
+
+                // Re-render icons if data-ico changed
+                if (window.ccIcons) {
+                    window.ccIcons.replaceIcons();
+                }
+            }
+
+            function runAction(action) {
+                if (window.cc && window.cc.trayMenuAction) {
+                    window.cc.trayMenuAction(action);
+                }
+            }
+
+            // Click handlers
+            document.querySelectorAll(".tray-item").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    if (action === "toggle_mode") {
+                        const targetMode = currentMenuState && currentMenuState.window_mode === "full" ? "mini" : "full";
+                        runAction(targetMode);
+                    } else {
+                        runAction(action);
+                    }
+                });
+            });
+
+            // Prevent context menu
+            document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+            // Dismiss on Escape
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    if (window.cc && window.cc.hideTrayMenu) {
+                        window.cc.hideTrayMenu();
+                    }
+                }
+            });
+
+            // Dismiss on blur
+            window.addEventListener("blur", () => {
+                setTimeout(() => {
+                    if (window.cc && window.cc.hideTrayMenu) {
+                        window.cc.hideTrayMenu();
+                    }
+                }, 100);
+            });
+
+            // Tauri event subscriptions
+            if (window.cc) {
+                if (window.cc.onTrayMenuState) {
+                    window.cc.onTrayMenuState((state) => {
+                        renderState(state);
+                    });
+                }
+
+                if (window.cc.onTrayMenuShow) {
+                    window.cc.onTrayMenuShow(() => {
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(reportSize);
+                        });
+                    });
+                }
+
+                if (window.cc.getTrayMenuState) {
+                    window.cc.getTrayMenuState().then((state) => {
+                        renderState(state);
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(reportSize);
+                        });
+                    }).catch(console.error);
+                }
+            }
+        </script>
+    </body>
+</html>

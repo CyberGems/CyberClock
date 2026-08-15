@@ -271,7 +271,17 @@
             "settings.mini.scanlinesDesc": "Mini mode only",
             "settings.mini.collapseDate": "Collapse Date",
             "settings.mini.collapseDateDesc": "Show date only on hover",
-            "menu.collapseDate": "Collapse Date"
+            "menu.collapseDate": "Collapse Date",
+            "tray.show": "Show Clock",
+            "tray.hide": "Hide Clock",
+            "tray.fullMode": "Full Mode",
+            "tray.miniMode": "Mini Mode",
+            "tray.timer": "Timer",
+            "tray.stopwatch": "Stopwatch",
+            "tray.relax": "Relax",
+            "tray.settings": "Settings...",
+            "tray.quit": "Exit",
+            "tray.updateAvailable": "Update available"
         },
         es: {
             "relax.sessionTitle": "◈ Sesión",
@@ -539,7 +549,17 @@
             "settings.mini.scanlinesDesc": "Solo modo mini",
             "settings.mini.collapseDate": "Colapsar Fecha",
             "settings.mini.collapseDateDesc": "Mostrar fecha solo al pasar el cursor",
-            "menu.collapseDate": "Colapsar Fecha"
+            "menu.collapseDate": "Colapsar Fecha",
+            "tray.show": "Mostrar Reloj",
+            "tray.hide": "Ocultar Reloj",
+            "tray.fullMode": "Modo Completo",
+            "tray.miniMode": "Modo Mini",
+            "tray.timer": "Temporizador",
+            "tray.stopwatch": "Cronómetro",
+            "tray.relax": "Relajación",
+            "tray.settings": "Configuración...",
+            "tray.quit": "Salir",
+            "tray.updateAvailable": "Actualización disponible"
         }
     };
 
