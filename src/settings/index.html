@@ -434,6 +434,38 @@
                 color: var(--text-lo);
                 letter-spacing: 1px;
             }
+            .abtn {
+                font-family: 'Share Tech Mono', monospace;
+                font-size: 10px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                background: var(--bg-02);
+                border: 1px solid var(--border);
+                color: var(--text-hi);
+                padding: 6px 14px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .abtn:hover {
+                border-color: var(--accent-a);
+                color: var(--accent-a);
+                box-shadow: var(--glow-xs);
+            }
+            .abtn.danger {
+                background: rgba(239, 68, 68, 0.08);
+                border: 1px solid rgba(239, 68, 68, 0.35);
+                color: #f87171;
+            }
+            .abtn.danger:hover {
+                background: rgba(239, 68, 68, 0.18);
+                border-color: #ef4444;
+                box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+                color: #fff;
+            }
 
             /* ── Feature teaser ── */
             .teaser {
@@ -799,6 +831,19 @@
                     </div>
 
                     <div class="section">
+                        <div class="sec-title" data-i18n="settings.general.reset">Factory Reset</div>
+                        <div class="row">
+                            <div class="row-label">
+                                <span data-i18n="settings.general.reset">Factory Reset</span>
+                                <small data-i18n="settings.general.resetDesc">Restore all settings to default values</small>
+                            </div>
+                            <button class="abtn danger" id="btn-factory-reset">
+                                <span data-ico="rotate-ccw" data-ico-size="11"></span> <span data-i18n="settings.general.resetBtn">Reset</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="section">
                         <div class="sec-title">About</div>
                         <div class="about-box">
                             <div class="about-ver">CyberClock v1.0.3</div>
@@ -1147,6 +1192,18 @@
             document
                 .getElementById("btn-close")
                 .addEventListener("click", () => window.cc.hideWindow("settings"));
+
+            // Factory Reset
+            const btnFactoryReset = document.getElementById("btn-factory-reset");
+            if (btnFactoryReset) {
+                btnFactoryReset.addEventListener("click", async () => {
+                    const msg = window.ccI18n ? window.ccI18n.t("settings.general.resetConfirmMsg") : "Are you sure you want to reset all settings to defaults?";
+                    const confirmed = window.confirm(msg);
+                    if (!confirmed) return;
+                    const newSettings = await window.cc.resetSettings();
+                    populateSettings(newSettings);
+                });
+            }
 
             // Display tab: load screens
             async function loadScreens() {

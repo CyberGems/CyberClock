@@ -2913,6 +2913,17 @@
             .s-abtn:active {
                 transform: translateY(0);
             }
+            .s-abtn.danger {
+                background: rgba(239, 68, 68, 0.08);
+                border: 1px solid rgba(239, 68, 68, 0.35);
+                color: #f87171;
+            }
+            .s-abtn.danger:hover {
+                background: rgba(239, 68, 68, 0.18);
+                border-color: #ef4444;
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+                color: #ffffff;
+            }
             .s-flbl {
                 font-family: "JetBrains Mono", "Share Tech Mono", monospace;
                 font-size: 11px;
@@ -4291,6 +4302,19 @@
                                 >
                             </div>
                         </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.general.reset">Factory Reset</div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.reset">Factory Reset</span>
+                                    <small data-i18n="settings.general.resetDesc">Restore all settings to default values</small>
+                                </div>
+                                <button class="s-abtn danger" id="s-btn-reset" type="button">
+                                    <span data-ico="rotate-ccw"></span>
+                                    <span data-i18n="settings.general.resetBtn">Reset to Defaults</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- About -->
@@ -5563,20 +5587,40 @@
                 });
 
             // ── Event deletion confirmation ────────────────────────────────
+            // ── Confirmation modal ─────────────────────────────────────────
             let eventDeleteKey = null;
+            let confirmCustomCallback = null;
 
             function showConfirmModal(key) {
                 eventDeleteKey = key;
+                confirmCustomCallback = null;
+                document.getElementById("confirm-title-lbl").textContent = window.ccI18n.t("calendar.confirmDeleteTitle");
+                document.getElementById("confirm-msg-lbl").textContent = window.ccI18n.t("calendar.confirmDeleteMsg");
+                document.getElementById("confirm-ok").textContent = window.ccI18n.t("calendar.delete");
+                document.getElementById("confirm-overlay").classList.add("open");
+            }
+
+            function openCustomConfirm({ title, msg, okText, onOk }) {
+                eventDeleteKey = null;
+                confirmCustomCallback = onOk;
+                document.getElementById("confirm-title-lbl").textContent = title;
+                document.getElementById("confirm-msg-lbl").textContent = msg;
+                document.getElementById("confirm-ok").textContent = okText;
                 document.getElementById("confirm-overlay").classList.add("open");
             }
 
             function closeConfirmModal() {
                 document.getElementById("confirm-overlay").classList.remove("open");
                 eventDeleteKey = null;
+                confirmCustomCallback = null;
             }
 
-            document.getElementById("confirm-ok").addEventListener("click", () => {
-                if (eventDeleteKey) {
+            document.getElementById("confirm-ok").addEventListener("click", async () => {
+                if (confirmCustomCallback) {
+                    const cb = confirmCustomCallback;
+                    closeConfirmModal();
+                    await cb();
+                } else if (eventDeleteKey) {
                     delete calNotes[eventDeleteKey];
                     persistNotes();
                     closeConfirmModal();
@@ -7146,6 +7190,21 @@
             if (autoUpEl) {
                 autoUpEl.addEventListener("change", (e) => {
                     window.cc.saveSettings({ autoUpdate: e.target.checked });
+                });
+            }
+            const sBtnReset = document.getElementById("s-btn-reset");
+            if (sBtnReset) {
+                sBtnReset.addEventListener("click", () => {
+                    openCustomConfirm({
+                        title: window.ccI18n.t("settings.general.resetConfirmTitle"),
+                        msg: window.ccI18n.t("settings.general.resetConfirmMsg"),
+                        okText: window.ccI18n.t("settings.general.resetBtn"),
+                        onOk: async () => {
+                            const newSettings = await window.cc.resetSettings();
+                            applySettings(newSettings);
+                            renderCalendar();
+                        },
+                    });
                 });
             }
 
