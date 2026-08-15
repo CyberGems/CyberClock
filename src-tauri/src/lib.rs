@@ -1323,12 +1323,11 @@ fn tray_menu_geometry(
 
 pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     let settings = load_settings(app);
-    let active_win_name = if settings.window_mode == "full" { "main" } else { "mini" };
-    let is_visible = if let Some(win) = app.get_webview_window(active_win_name) {
-        win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false)
-    } else {
-        false
-    };
+    let main_vis = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+        && !app.get_webview_window("main").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+    let mini_vis = app.get_webview_window("mini").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+        && !app.get_webview_window("mini").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+    let is_visible = main_vis || mini_vis;
 
     TrayMenuState {
         version: app.package_info().version.to_string(),
@@ -1383,27 +1382,40 @@ fn tray_menu_action(app: AppHandle, action: String) {
 
     match action.as_str() {
         "toggle_visibility" => {
-            let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
-            if let Some(win) = app.get_webview_window(active_win) {
-                let vis = win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false);
-                if vis {
-                    let _ = win.hide();
-                    broadcast_active_window(&app, "none");
-                } else {
+            let main_vis = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+                && !app.get_webview_window("main").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+            let mini_vis = app.get_webview_window("mini").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+                && !app.get_webview_window("mini").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+            let is_vis = main_vis || mini_vis;
+
+            if is_vis {
+                if let Some(main) = app.get_webview_window("main") {
+                    let _ = main.hide();
+                }
+                if let Some(mini) = app.get_webview_window("mini") {
+                    let _ = mini.hide();
+                }
+                if let Some(menu) = app.get_webview_window("menu") {
+                    let _ = menu.hide();
+                }
+                broadcast_active_window(&app, "none");
+            } else {
+                let target_win = if settings.window_mode == "full" { "main" } else { "mini" };
+                if let Some(win) = app.get_webview_window(target_win) {
                     let _ = win.unminimize();
                     let _ = win.show();
                     let _ = win.set_focus();
-                    broadcast_active_window(&app, active_win);
+                    broadcast_active_window(&app, target_win);
                 }
             }
         }
         "show" => {
-            let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
-            if let Some(win) = app.get_webview_window(active_win) {
+            let target_win = if settings.window_mode == "full" { "main" } else { "mini" };
+            if let Some(win) = app.get_webview_window(target_win) {
                 let _ = win.unminimize();
                 let _ = win.show();
                 let _ = win.set_focus();
-                broadcast_active_window(&app, active_win);
+                broadcast_active_window(&app, target_win);
             }
         }
         "hide" => {
@@ -1476,17 +1488,30 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                     let app = tray.app_handle();
                     hide_tray_menu(app.clone());
                     let settings = load_settings(app);
-                    let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
-                    if let Some(win) = app.get_webview_window(active_win) {
-                        let visible = win.is_visible().unwrap_or(false);
-                        if visible {
-                            let _ = win.hide();
-                            broadcast_active_window(app, "none");
-                        } else {
+                    let main_vis = app.get_webview_window("main").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+                        && !app.get_webview_window("main").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+                    let mini_vis = app.get_webview_window("mini").and_then(|w| w.is_visible().ok()).unwrap_or(false)
+                        && !app.get_webview_window("mini").and_then(|w| w.is_minimized().ok()).unwrap_or(false);
+                    let is_vis = main_vis || mini_vis;
+
+                    if is_vis {
+                        if let Some(main) = app.get_webview_window("main") {
+                            let _ = main.hide();
+                        }
+                        if let Some(mini) = app.get_webview_window("mini") {
+                            let _ = mini.hide();
+                        }
+                        if let Some(menu) = app.get_webview_window("menu") {
+                            let _ = menu.hide();
+                        }
+                        broadcast_active_window(app, "none");
+                    } else {
+                        let target_win = if settings.window_mode == "full" { "main" } else { "mini" };
+                        if let Some(win) = app.get_webview_window(target_win) {
                             let _ = win.unminimize();
                             let _ = win.show();
                             let _ = win.set_focus();
-                            broadcast_active_window(app, active_win);
+                            broadcast_active_window(app, target_win);
                         }
                     }
                 }
