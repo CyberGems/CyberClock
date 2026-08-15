@@ -1324,10 +1324,11 @@ fn tray_menu_geometry(
 pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     let settings = load_settings(app);
     let active_win_name = if settings.window_mode == "full" { "main" } else { "mini" };
-    let is_visible = app
-        .get_webview_window(active_win_name)
-        .and_then(|w| w.is_visible().ok())
-        .unwrap_or(false);
+    let is_visible = if let Some(win) = app.get_webview_window(active_win_name) {
+        win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false)
+    } else {
+        false
+    };
 
     TrayMenuState {
         version: app.package_info().version.to_string(),
@@ -1384,7 +1385,7 @@ fn tray_menu_action(app: AppHandle, action: String) {
         "toggle_visibility" => {
             let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
             if let Some(win) = app.get_webview_window(active_win) {
-                let vis = win.is_visible().unwrap_or(false);
+                let vis = win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false);
                 if vis {
                     let _ = win.hide();
                     broadcast_active_window(&app, "none");
@@ -1423,7 +1424,7 @@ fn tray_menu_action(app: AppHandle, action: String) {
         "mini" => {
             switch_to_mini_mode(app);
         }
-        "timer" | "stopwatch" | "relax" | "settings" => {
+        "timer" | "stopwatch" | "relax" | "settings" | "about" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);
