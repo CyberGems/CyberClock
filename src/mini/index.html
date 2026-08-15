@@ -1033,6 +1033,65 @@
             /* ═══════════════════════════════════════════════════════
                COMMON ELEMENTS
                ═══════════════════════════════════════════════════════ */
+            #mini-date {
+                transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                            max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                            opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                            transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                            margin 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            /* Collapsed heights for vertical skins (1 to 6) */
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="1"] { height: 34px; gap: 8px; padding: 0 10px 0 8px; }
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="2"] { height: 38px; gap: 8px; padding: 0 10px; }
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="3"] { height: 34px; gap: 8px; padding: 0 10px; }
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="4"] { height: 36px; gap: 8px; padding: 0 10px; }
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="5"] { height: 34px; gap: 8px; padding: 0 10px; }
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="6"] { height: 34px; gap: 8px; padding: 0 10px; }
+
+            /* Keep controls in a stable compact row for vertical skins in collapse-date mode */
+            .mini-shell.collapse-date[data-design="1"] .controls,
+            .mini-shell.collapse-date[data-design="2"] .controls,
+            .mini-shell.collapse-date[data-design="3"] .controls,
+            .mini-shell.collapse-date[data-design="4"] .controls,
+            .mini-shell.collapse-date[data-design="5"] .controls,
+            .mini-shell.collapse-date[data-design="6"] .controls {
+                flex-direction: row;
+                gap: 4px;
+            }
+
+            /* In vertical skins (1-6), hide date vertically when not expanded */
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="1"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="2"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="3"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="4"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="5"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="6"] #mini-date {
+                max-height: 0;
+                opacity: 0;
+                transform: translateY(-4px);
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+                pointer-events: none;
+            }
+
+            /* In horizontal single-row skins (7-12), hide date horizontally when not expanded */
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="7"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="8"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="9"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="10"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="11"] #mini-date,
+            .mini-shell.collapse-date:not(.is-expanded)[data-design="12"] #mini-date {
+                max-width: 0;
+                opacity: 0;
+                transform: scaleX(0.8);
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+                pointer-events: none;
+            }
+
             .time-block {
                 display: flex;
                 flex-direction: column;
@@ -1311,17 +1370,56 @@
             }
 
             // ═══════════════════════════════════════════════════════
-            // WINDOW SIZING — Each skin has its own height.
-            // Only resize when the design changes, never on every render.
+            // WINDOW SIZING — Each skin has its own dimensions.
             // ═══════════════════════════════════════════════════════
 
             const DESIGN_HEIGHTS = { 1: 48, 2: 56, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
             const DESIGN_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
 
+            const COLLAPSED_HEIGHTS = { 1: 34, 2: 38, 3: 34, 4: 36, 5: 34, 6: 34, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
+            const COLLAPSED_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 165, 8: 165, 9: 175, 10: 155, 11: 175, 12: 170 };
+
+            let isHovered = false;
+            let isTipVisible = false;
+            let lastAppliedWidth = 0;
+            let lastAppliedHeight = 0;
+
+            function getCurrentTargetSize() {
+                const design = cfg.miniDesign || 1;
+                const isCollapsible = cfg.miniCollapseDate === true;
+
+                let baseWidth = DESIGN_WIDTHS[design] || 260;
+                let baseHeight = DESIGN_HEIGHTS[design] || 48;
+
+                if (isCollapsible && !isHovered) {
+                    baseWidth = COLLAPSED_WIDTHS[design] || baseWidth;
+                    baseHeight = COLLAPSED_HEIGHTS[design] || baseHeight;
+                }
+
+                if (isTipVisible) {
+                    const tipHeight = tipEl.offsetHeight || 80;
+                    baseHeight += tipHeight + 16;
+                }
+
+                return { width: baseWidth, height: baseHeight };
+            }
+
+            function syncWindowSize(force = false) {
+                const target = getCurrentTargetSize();
+                if (force || target.width !== lastAppliedWidth || target.height !== lastAppliedHeight) {
+                    lastAppliedWidth = target.width;
+                    lastAppliedHeight = target.height;
+                    window.cc.setWindowSize(target);
+                }
+            }
+
             let lastDesign = null;
+            let lastCollapse = null;
             function applySettings(s) {
                 const designChanged = s.miniDesign !== lastDesign;
+                const collapseChanged = s.miniCollapseDate !== lastCollapse;
                 lastDesign = s.miniDesign;
+                lastCollapse = s.miniCollapseDate;
 
                 cfg = s;
                 calNotes = s.calendarNotes || {};
@@ -1336,6 +1434,7 @@
                 const shell = document.getElementById("shell");
                 if (shell) {
                     shell.dataset.design = s.miniDesign || "1";
+                    shell.classList.toggle("collapse-date", s.miniCollapseDate === true);
                     shell.style.setProperty("--bg-op", s.miniBgOpacity ?? 1.0);
                     shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
                 }
@@ -1348,11 +1447,9 @@
                 document.getElementById("btn-aot").classList.toggle("active", aotOn);
                 updateClock();
 
-                // Resize window to match the skin height when design changes
-                if (designChanged) {
-                    const h = DESIGN_HEIGHTS[s.miniDesign] || 48;
-                    const w = DESIGN_WIDTHS[s.miniDesign] || 260;
-                    window.cc.setWindowSize({ width: w, height: h });
+                // Resize window to match the skin height/width when design or collapse setting changes
+                if (designChanged || collapseChanged || lastAppliedWidth === 0) {
+                    syncWindowSize(true);
                 }
             }
 
@@ -1408,29 +1505,86 @@
                 tipEl.style.top = r.bottom + 8 + "px";
             }
 
+            const controlsEl = document.querySelector(".controls");
+
+            function expandDate() {
+                if (isHovered) return;
+                isHovered = true;
+                shellEl.classList.add("is-expanded");
+                if (cfg.miniCollapseDate) {
+                    syncWindowSize();
+                }
+            }
+
+            function collapseDate() {
+                if (!isHovered) return;
+                isHovered = false;
+                shellEl.classList.remove("is-expanded");
+                if (cfg.miniCollapseDate) {
+                    syncWindowSize();
+                }
+            }
+
             timeBlock.addEventListener("mouseenter", () => {
+                expandDate();
                 refreshTipContent();
                 positionTip();
                 
-                const tipHeight = tipEl.offsetHeight || 80;
-                const currentHeight = DESIGN_HEIGHTS[cfg.miniDesign] || 48;
-                const currentWidth = DESIGN_WIDTHS[cfg.miniDesign] || 260;
-                window.cc.setWindowSize({ width: currentWidth, height: currentHeight + tipHeight + 16 });
-                
                 tipTimer = setTimeout(() => {
                     positionTip();
+                    isTipVisible = true;
                     tipEl.classList.add("show");
+                    syncWindowSize();
                 }, 800);
             });
+
+            timeBlock.addEventListener("mouseleave", (e) => {
+                clearTimeout(tipTimer);
+                tipTimer = null;
+                isTipVisible = false;
+                tipEl.classList.remove("show");
+                if (e.relatedTarget && e.relatedTarget.closest(".controls")) {
+                    collapseDate();
+                }
+            });
+
+            // Status dot also triggers date expand
+            const statusDot = document.querySelector(".status-dot");
+            if (statusDot) {
+                statusDot.addEventListener("mouseenter", expandDate);
+            }
+
+            // Controls (buttons): DO NOT expand date. If already expanded, collapse it so buttons stay rock solid!
+            if (controlsEl) {
+                controlsEl.addEventListener("mouseenter", () => {
+                    clearTimeout(tipTimer);
+                    tipTimer = null;
+                    isTipVisible = false;
+                    tipEl.classList.remove("show");
+                    collapseDate();
+                });
+            }
 
             document.body.addEventListener("mouseleave", () => {
                 clearTimeout(tipTimer);
                 tipTimer = null;
+                isTipVisible = false;
                 tipEl.classList.remove("show");
-                
-                const currentHeight = DESIGN_HEIGHTS[cfg.miniDesign] || 48;
-                const currentWidth = DESIGN_WIDTHS[cfg.miniDesign] || 260;
-                window.cc.setWindowSize({ width: currentWidth, height: currentHeight });
+                miniHovered = false;
+                collapseDate();
+                syncMiniMotion();
+                syncWindowSize();
+            });
+
+            shellEl.addEventListener("mouseenter", () => {
+                miniHovered = true;
+                syncMiniMotion();
+            });
+
+            shellEl.addEventListener("mouseleave", () => {
+                miniHovered = false;
+                syncMiniMotion();
+                collapseDate();
             });
 
             tipEl.addEventListener("click", () => {
@@ -1457,14 +1611,6 @@
             document.addEventListener("visibilitychange", syncMiniMotion);
             window.addEventListener("focus", syncMiniMotion);
             window.addEventListener("blur", syncMiniMotion);
-            shellEl.addEventListener("mouseenter", () => {
-                miniHovered = true;
-                syncMiniMotion();
-            });
-            shellEl.addEventListener("mouseleave", () => {
-                miniHovered = false;
-                syncMiniMotion();
-            });
 
             window.cc.onInit((s) => {
                 applySettings(s);

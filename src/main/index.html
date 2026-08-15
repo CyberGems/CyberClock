@@ -4357,6 +4357,15 @@
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.collapseDate">Collapse Date</span>
+                                    <small data-i18n="settings.mini.collapseDateDesc">Show date only on hover</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-mini-collapse" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
                         </div>
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.mini.crtOverlay">CRT Overlay</div>
@@ -4842,6 +4851,8 @@
                 }
                 const miniLock = document.getElementById('s-mini-lock');
                 if (miniLock) miniLock.checked = s.miniPositionLocked || false;
+                const miniCollapse = document.getElementById('s-mini-collapse');
+                if (miniCollapse) miniCollapse.checked = s.miniCollapseDate || false;
                 const miniScan = document.getElementById('s-mini-scan');
                 if (miniScan) miniScan.checked = s.miniScanlines !== false;
             }
@@ -6888,6 +6899,12 @@
             if (sMiniLock) {
                 sMiniLock.addEventListener('change', (e) => {
                     window.cc.saveSettings({ miniPositionLocked: e.target.checked });
+                });
+            }
+            const sMiniCollapse = document.getElementById('s-mini-collapse');
+            if (sMiniCollapse) {
+                sMiniCollapse.addEventListener('change', (e) => {
+                    window.cc.saveSettings({ miniCollapseDate: e.target.checked });
                 });
             }
             const sMiniScan = document.getElementById('s-mini-scan');

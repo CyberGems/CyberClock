@@ -113,6 +113,7 @@ pub struct AppSettings {
     pub relax_auto_timer: u32,
     pub last_relax_track: Option<String>,
     pub mini_scanlines: bool,
+    pub mini_collapse_date: bool,
 
     // Roadmap B: Custom alarm times (HH:MM) with day-of-week repetition
     // (No snooze for now)
@@ -159,6 +160,7 @@ impl Default for AppSettings {
             relax_auto_timer: 0,
             last_relax_track: None,
             mini_scanlines: true,
+            mini_collapse_date: false,
             custom_alarms: vec![CustomAlarm::default(), CustomAlarm::default(), CustomAlarm::default()],
             relax_scheduler: RelaxSchedulerSettings::default(),
             language: "auto".to_string(),
@@ -710,7 +712,7 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
 
                 // Menu dimensions (logical px in tauri.conf.json) → physical
                 let menu_width = (270.0 * scale) as i32;
-                let menu_height = (470.0 * scale) as i32;
+                let menu_height = (500.0 * scale) as i32;
                 let gap = (8.0 * scale) as i32;
 
                 // Monitor edges
