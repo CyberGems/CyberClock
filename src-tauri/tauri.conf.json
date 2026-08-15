@@ -52,6 +52,21 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "url": "mini/menu.html"
+      },
+      {
+        "label": "tray_menu",
+        "title": "CyberClock Tray Menu",
+        "width": 290,
+        "height": 380,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "visible": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "url": "tray/menu.html"
       }
     ],
     "security": {

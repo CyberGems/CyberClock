@@ -123,6 +123,20 @@
             await invoke("close_mini_context_menu");
         },
 
+        // ── Tray Menu popup (CyberPaste style) ────────────────────
+        getTrayMenuState: async () => {
+            return await invoke("get_tray_menu_state");
+        },
+        hideTrayMenu: async () => {
+            await invoke("hide_tray_menu");
+        },
+        trayMenuReady: async (size) => {
+            await invoke("tray_menu_ready", { width: size.width, height: size.height });
+        },
+        trayMenuAction: async (action) => {
+            await invoke("tray_menu_action", { action });
+        },
+
         // ── Events (renderer ← main) ──────────────────────────────
         onInit: (cb) => {
             invoke("get_settings").then(s => cb(s));
@@ -153,6 +167,15 @@
         },
         onActiveWindow: (cb) => {
             listen("cc:active-window", (event) => cb(event.payload));
+        },
+        onTrayMenuState: (cb) => {
+            listen("tray-menu-state", (event) => cb(event.payload));
+        },
+        onTrayMenuShow: (cb) => {
+            listen("tray-menu-show", () => cb());
+        },
+        onTrayMenuHide: (cb) => {
+            listen("tray-menu-hide", () => cb());
         },
 
         // ── Cleanup ───────────────────────────────────────────────

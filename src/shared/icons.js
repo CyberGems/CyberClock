@@ -204,6 +204,26 @@
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
       d="M4.5 8c3.5-1.5 12-1.5 15 0s2 7.5-1.5 9-11.5 1-15-1-3-6.5 1.5-8Z"/>
   </symbol>
+  <symbol id="cc-i-power" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+      d="M12 2v10"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+      d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+  </symbol>
+  <symbol id="cc-i-eye" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+  </symbol>
+  <symbol id="cc-i-eye-off" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+    <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+  </symbol>
 </svg>
         `;
         document.body.appendChild(wrap);

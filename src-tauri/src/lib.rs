@@ -5,8 +5,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
 use tauri::{AppHandle, Manager, WebviewWindow, Emitter, WindowEvent};
-use tauri::tray::{TrayIconBuilder, MouseButton, MouseButtonState};
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::TrayIconBuilder;
 use tauri_plugin_dialog::DialogExt;
 use chrono::{Local, Timelike};
 use chrono::{Datelike, TimeZone};
@@ -1241,127 +1240,273 @@ fn custom_alarms_scheduler(app: AppHandle) {
     }
 }
 
+
 // ─────────────────────────────────────────────────────────────
-// Tray Icon Setup
+// Custom HTML Tray Menu (CyberPaste style)
 // ─────────────────────────────────────────────────────────────
+
+#[derive(Clone, serde::Serialize)]
+pub struct TrayMenuState {
+    pub version: String,
+    pub is_visible: bool,
+    pub window_mode: String,
+    pub language: String,
+    pub update_available: bool,
+    pub theme: String,
+}
+
+static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
+static TRAY_MENU_PENDING_SHOW: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+const TRAY_MENU_WIDTH: f64 = 250.0;
+const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
+const TRAY_MENU_EST_HEIGHT: f64 = 330.0;
+
+fn tray_menu_geometry(
+    win: &tauri::WebviewWindow,
+    anchor_x: i32,
+    anchor_y: i32,
+    logical_w: f64,
+    logical_h: f64,
+) -> (i32, i32, u32, u32) {
+    let scale = win.scale_factor().unwrap_or(1.0);
+    let width_px = (logical_w * scale).round() as i32;
+    let height_px = (logical_h * scale).round() as i32;
+
+    let monitor = win
+        .available_monitors()
+        .unwrap_or_default()
+        .into_iter()
+        .find(|m| {
+            let pos = m.position();
+            let size = m.size();
+            anchor_x >= pos.x
+                && anchor_x < pos.x + size.width as i32
+                && anchor_y >= pos.y
+                && anchor_y < pos.y + size.height as i32
+        })
+        .or_else(|| win.primary_monitor().ok().flatten())
+        .or_else(|| win.current_monitor().ok().flatten());
+
+    let (min_x, min_y, max_x, max_y) = if let Some(m) = monitor {
+        let pos = m.position();
+        let size = m.size();
+        (
+            pos.x,
+            pos.y,
+            pos.x + size.width as i32,
+            pos.y + size.height as i32,
+        )
+    } else {
+        (0, 0, 1920, 1080)
+    };
+
+    let gap = (4.0 * scale).round() as i32;
+    let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
+    let mut x = anchor_x - width_px / 2;
+    let mut y = anchor_y - height_px - gap + shadow_pad_px;
+
+    x = x.clamp(min_x + 4, (max_x - width_px - 4).max(min_x + 4));
+    if y + height_px - shadow_pad_px < min_y + 4 {
+        // Not enough room above — open below the icon
+        y = anchor_y + gap - shadow_pad_px;
+    }
+    y = y.clamp(min_y + 4, (max_y - height_px - 4).max(min_y + 4));
+
+    (
+        x,
+        y,
+        width_px.max(1) as u32,
+        height_px.max(1) as u32,
+    )
+}
+
+pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
+    let settings = load_settings(app);
+    let active_win_name = if settings.window_mode == "full" { "main" } else { "mini" };
+    let is_visible = app
+        .get_webview_window(active_win_name)
+        .and_then(|w| w.is_visible().ok())
+        .unwrap_or(false);
+
+    TrayMenuState {
+        version: app.package_info().version.to_string(),
+        is_visible,
+        window_mode: settings.window_mode.clone(),
+        language: settings.language.clone(),
+        update_available: false,
+        theme: settings.theme.clone(),
+    }
+}
+
+#[tauri::command]
+fn get_tray_menu_state(app: AppHandle) -> TrayMenuState {
+    collect_tray_menu_state(&app)
+}
+
+#[tauri::command]
+fn hide_tray_menu(app: AppHandle) {
+    if let Some(win) = app.get_webview_window("tray_menu") {
+        let _ = win.hide();
+        let _ = app.emit("tray-menu-hide", ());
+    }
+}
+
+#[tauri::command]
+fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
+    let Some(win) = app.get_webview_window("tray_menu") else {
+        return;
+    };
+
+    if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
+        let (anchor_x, anchor_y) = TRAY_MENU_ANCHOR
+            .lock()
+            .ok()
+            .and_then(|g| *g)
+            .unwrap_or((100, 100));
+        let (x, y, w, h) = tray_menu_geometry(&win, anchor_x, anchor_y, width, height);
+        let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+            width: w,
+            height: h,
+        }));
+        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+        let _ = win.show();
+        let _ = win.set_focus();
+    }
+}
+
+#[tauri::command]
+fn tray_menu_action(app: AppHandle, action: String) {
+    hide_tray_menu(app.clone());
+    let settings = load_settings(&app);
+
+    match action.as_str() {
+        "toggle_visibility" => {
+            let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
+            if let Some(win) = app.get_webview_window(active_win) {
+                let vis = win.is_visible().unwrap_or(false);
+                if vis {
+                    let _ = win.hide();
+                    broadcast_active_window(&app, "none");
+                } else {
+                    let _ = win.unminimize();
+                    let _ = win.show();
+                    let _ = win.set_focus();
+                    broadcast_active_window(&app, active_win);
+                }
+            }
+        }
+        "show" => {
+            let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
+            if let Some(win) = app.get_webview_window(active_win) {
+                let _ = win.unminimize();
+                let _ = win.show();
+                let _ = win.set_focus();
+                broadcast_active_window(&app, active_win);
+            }
+        }
+        "hide" => {
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.hide();
+            }
+            if let Some(mini) = app.get_webview_window("mini") {
+                let _ = mini.hide();
+            }
+            if let Some(menu) = app.get_webview_window("menu") {
+                let _ = menu.hide();
+            }
+            broadcast_active_window(&app, "none");
+        }
+        "full" => {
+            switch_to_full_mode(app);
+        }
+        "mini" => {
+            switch_to_mini_mode(app);
+        }
+        "timer" | "stopwatch" | "relax" | "settings" => {
+            switch_to_full_mode(app.clone());
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.emit("mini:menu-action", &action);
+            }
+        }
+        "quit" => {
+            exit_app(&app);
+        }
+        _ => {}
+    }
+}
+
+pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
+    if let Ok(mut slot) = TRAY_MENU_ANCHOR.lock() {
+        *slot = Some((anchor_x, anchor_y));
+    }
+
+    let state = collect_tray_menu_state(&app);
+    let _ = app.emit("tray-menu-state", &state);
+    let _ = app.emit("tray-menu-show", ());
+
+    let window_label = "tray_menu";
+    let est_w = TRAY_MENU_WIDTH + 2.0 * TRAY_MENU_SHADOW_PAD;
+    let est_h = TRAY_MENU_EST_HEIGHT + 2.0 * TRAY_MENU_SHADOW_PAD;
+
+    let Some(win) = app.get_webview_window(window_label) else {
+        return;
+    };
+
+    let (x, y, w_px, h_px) = tray_menu_geometry(&win, anchor_x, anchor_y, est_w, est_h);
+    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+        width: w_px,
+        height: h_px,
+    }));
+    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    TRAY_MENU_PENDING_SHOW.store(true, std::sync::atomic::Ordering::SeqCst);
+    let _ = win.show();
+    let _ = win.set_focus();
+}
 
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
-    // Build tray context menu
-    let menu = Menu::with_items(
-        app,
-        &[
-            &MenuItem::with_id(app, "show", "Show", true, None::<&str>)?,
-            &MenuItem::with_id(app, "hide", "Hide", true, None::<&str>)?,
-            &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "full", "Switch to Full Mode", true, None::<&str>)?,
-            &MenuItem::with_id(app, "mini", "Switch to Mini Mode", true, None::<&str>)?,
-            &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?,
-            &MenuItem::with_id(app, "timer", "Timer", true, None::<&str>)?,
-            &MenuItem::with_id(app, "stopwatch", "Stopwatch", true, None::<&str>)?,
-            &MenuItem::with_id(app, "relax", "Relax", true, None::<&str>)?,
-            &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?,
-        ],
-    )?;
-
-    let _tray = TrayIconBuilder::new()
+    let _tray = TrayIconBuilder::with_id("main")
         .icon(app.default_window_icon().unwrap().clone())
         .tooltip(format!("CyberClock v{}", app.package_info().version))
-        .menu(&menu)
-        .on_menu_event(|app, event| {
-            match event.id.as_ref() {
-                "show" => {
+        .on_tray_icon_event(|tray, event| {
+            use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
+            match event {
+                TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } => {
+                    let app = tray.app_handle();
+                    hide_tray_menu(app.clone());
                     let settings = load_settings(app);
-                    if settings.window_mode == "full" {
-                        if let Some(main) = app.get_webview_window("main") {
-                            let _ = main.unminimize();
-                            let _ = main.show();
-                            let _ = main.set_focus();
-                        }
-                    } else {
-                        if let Some(mini) = app.get_webview_window("mini") {
-                            let _ = mini.unminimize();
-                            let _ = mini.show();
-                            let _ = mini.set_focus();
-                        }
-                    }
-                    broadcast_active_window(app, if settings.window_mode == "full" { "main" } else { "mini" });
-                }
-                "hide" => {
-                    let settings = load_settings(app);
-                    if settings.window_mode == "full" {
-                        if let Some(main) = app.get_webview_window("main") {
-                            let _ = main.hide();
-                        }
-                    } else {
-                        if let Some(mini) = app.get_webview_window("mini") {
-                            let _ = mini.hide();
-                        }
-                    }
-                    // Also hide all child windows
-                    for w in ["menu"] {
-                        if let Some(win) = app.get_webview_window(w) {
+                    let active_win = if settings.window_mode == "full" { "main" } else { "mini" };
+                    if let Some(win) = app.get_webview_window(active_win) {
+                        let visible = win.is_visible().unwrap_or(false);
+                        if visible {
                             let _ = win.hide();
+                            broadcast_active_window(app, "none");
+                        } else {
+                            let _ = win.unminimize();
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                            broadcast_active_window(app, active_win);
                         }
                     }
-                    broadcast_active_window(app, "none");
                 }
-                "full" => switch_to_full_mode(app.clone()),
-                "mini" => switch_to_mini_mode(app.clone()),
-                "settings" | "timer" | "stopwatch" | "relax" => {
-                    switch_to_full_mode(app.clone());
-                    if let Some(main) = app.get_webview_window("main") {
-                        let action = match event.id.as_ref() {
-                            "settings" => "settings",
-                            "timer" => "timer",
-                            "stopwatch" => "stopwatch",
-                            "relax" => "relax",
-                            _ => "home"
-                        };
-                        let _ = main.emit("mini:menu-action", &action);
-                    }
-                }
-                "quit" => {
-                    exit_app(app);
+                TrayIconEvent::Click { button: MouseButton::Right, button_state: MouseButtonState::Up, position, rect, .. } => {
+                    let app = tray.app_handle().clone();
+                    let (x, y) = {
+                        use tauri::{Position, Size};
+                        match (rect.position, rect.size) {
+                            (Position::Physical(p), Size::Physical(s)) => {
+                                (p.x + (s.width as i32) / 2, p.y)
+                            }
+                            _ => (position.x.round() as i32, position.y.round() as i32),
+                        }
+                    };
+                    show_tray_menu_at(app, x, y);
                 }
                 _ => {}
             }
         })
-        .on_tray_icon_event(|tray, event| {
-            // Left click toggles visibility of the main / mini window
-            if let tauri::tray::TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
-                let app = tray.app_handle();
-                let settings = load_settings(app);
-                if settings.window_mode == "full" {
-                    if let Some(main) = app.get_webview_window("main") {
-                        let visible = main.is_visible().unwrap_or(false);
-                        if visible {
-                            let _ = main.hide();
-                            broadcast_active_window(app, "none");
-                        } else {
-                            let _ = main.show();
-                            let _ = main.set_focus();
-                            broadcast_active_window(app, "main");
-                        }
-                    }
-                } else {
-                    if let Some(mini) = app.get_webview_window("mini") {
-                        let visible = mini.is_visible().unwrap_or(false);
-                        if visible {
-                            let _ = mini.hide();
-                            broadcast_active_window(app, "none");
-                        } else {
-                            let _ = mini.show();
-                            let _ = mini.set_focus();
-                            broadcast_active_window(app, "mini");
-                        }
-                    }
-                }
-            }
-        })
         .build(app)?;
-    
+
     Ok(())
 }
 
@@ -1490,6 +1635,22 @@ pub fn run() {
                 });
             }
 
+            // Configure tray_menu window blur dismiss
+            if let Some(tray_menu) = app.get_webview_window("tray_menu") {
+                let tm_blur = tray_menu.clone();
+                tray_menu.on_window_event(move |event| {
+                    if let WindowEvent::Focused(false) = event {
+                        let win = tm_blur.clone();
+                        tauri::async_runtime::spawn(async move {
+                            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                            if !win.is_focused().unwrap_or(false) {
+                                let _ = win.hide();
+                            }
+                        });
+                    }
+                });
+            }
+
             // Load settings and show initial window
             let settings = load_settings(app.handle());
             init_updater(app.handle(), settings.auto_update);
@@ -1540,6 +1701,10 @@ pub fn run() {
             open_mini_context_menu,
             close_mini_context_menu,
             menu_action,
+            get_tray_menu_state,
+            hide_tray_menu,
+            tray_menu_ready,
+            tray_menu_action,
             get_screens,
             select_display,
             reset_mini_position,
