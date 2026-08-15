@@ -272,6 +272,33 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> AppSettings {
 }
 
 #[tauri::command]
+fn reset_settings(app: AppHandle) -> AppSettings {
+    let default_settings = AppSettings::default();
+    save_settings_to_file(&app, &default_settings);
+    set_auto_update(default_settings.auto_update);
+
+    // Reset next run for relax scheduler
+    let state = app.state::<AlarmState>();
+    if let Ok(mut next_run) = state.relax_next_run.lock() {
+        *next_run = None;
+    }
+
+    // Apply always on top
+    let aot = default_settings.always_on_top;
+    for (label, window) in app.webview_windows() {
+        if label == "mini" || label == "menu" {
+            let _ = window.set_always_on_top(aot);
+        } else if label == "main" {
+            let _ = window.set_always_on_top(false);
+        }
+    }
+
+    // Broadcast updated settings to all windows
+    let _ = app.emit("settings:updated", &default_settings);
+    default_settings
+}
+
+#[tauri::command]
 fn close_window(window: WebviewWindow) {
     let _ = window.close();
 }
@@ -1714,6 +1741,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_settings,
             save_settings,
+            reset_settings,
             close_window,
             minimize_window,
             get_window_position,

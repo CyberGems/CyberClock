@@ -76,6 +76,12 @@
             await emit("settings:updated", res);
             return res;
         },
+        resetSettings: async () => {
+            const res = await invoke("reset_settings");
+            const { emit } = window.__TAURI__.event;
+            await emit("settings:updated", res);
+            return res;
+        },
 
         // ── System ────────────────────────────────────────────────
         setStartup: async (on) => {

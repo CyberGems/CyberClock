@@ -229,6 +229,11 @@
             "settings.general.startInMini": "Start in Mini Mode",
             "settings.general.launchCompact": "Launch in compact view",
             "settings.general.relaxVolume": "Relaxation Volume",
+            "settings.general.reset": "Factory Reset",
+            "settings.general.resetDesc": "Restore all settings to default values",
+            "settings.general.resetBtn": "Reset to Defaults",
+            "settings.general.resetConfirmTitle": "Reset Settings?",
+            "settings.general.resetConfirmMsg": "Are you sure you want to restore all settings to factory defaults? Your preferences will be reset.",
             "settings.general.about": "About",
             "settings.general.aboutSub": "CyberGems © 2026 · Premium Cyber-Neon Clock for Windows",
 
@@ -507,6 +512,11 @@
             "settings.general.startInMini": "Iniciar en Modo Mini",
             "settings.general.launchCompact": "Iniciar en vista compacta",
             "settings.general.relaxVolume": "Volumen de Relajación",
+            "settings.general.reset": "Ajustes de Fábrica",
+            "settings.general.resetDesc": "Restablecer todas las opciones por defecto",
+            "settings.general.resetBtn": "Restablecer Ajustes",
+            "settings.general.resetConfirmTitle": "¿Restablecer Ajustes?",
+            "settings.general.resetConfirmMsg": "¿Estás seguro de que deseas restablecer todos los ajustes de fábrica? Se reiniciarán todas tus preferencias.",
             "settings.general.about": "Acerca de",
             "settings.general.aboutSub": "CyberGems © 2026 · Reloj Cyber-Neón Premium para Windows",
 
