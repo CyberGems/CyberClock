@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <style>
             html,
@@ -417,6 +418,16 @@
                 </div>
             </div>
 
+            <!-- SECTION: Collapse Date Toggle -->
+            <div class="switch-row" id="ctx-collapse">
+                <span class="switch-lbl">Collapse Date</span>
+                <div class="toggle" id="toggle-collapse">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- SECTION: Position Lock Switch -->
             <div class="switch-row" id="ctx-lock">
                 <span class="switch-lbl">Position Lock</span>
@@ -475,6 +486,28 @@
                     if (cfg) {
                         // Theme
                         if (cfg.theme) document.body.dataset.theme = cfg.theme;
+
+                        if (window.ccI18n) {
+                            window.ccI18n.setLang(cfg.language || "auto");
+                            const collapseLbl = document.querySelector("#ctx-collapse .switch-lbl");
+                            if (collapseLbl) collapseLbl.textContent = window.ccI18n.t("menu.collapseDate");
+                            const lockLbl = document.querySelector("#ctx-lock .switch-lbl");
+                            if (lockLbl) lockLbl.textContent = window.ccI18n.t("settings.mini.lockPos");
+                            const aotLbl = document.querySelector("#ctx-aot .switch-lbl");
+                            if (aotLbl) aotLbl.textContent = window.ccI18n.t("menu.alwaysOnTop");
+                            const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
+                            if (fullLbl) fullLbl.textContent = cfg.language === "es" ? "Modo Completo" : "Full Mode";
+                            const timerLbl = document.querySelector('.ctx-item[data-action="timer"] .label');
+                            if (timerLbl) timerLbl.textContent = window.ccI18n.t("menu.timer");
+                            const stopwatchLbl = document.querySelector('.ctx-item[data-action="stopwatch"] .label');
+                            if (stopwatchLbl) stopwatchLbl.textContent = window.ccI18n.t("menu.stopwatch");
+                            const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
+                            if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
+                            const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');
+                            if (settingsLbl) settingsLbl.textContent = window.ccI18n.t("menu.settings");
+                            const closeLbl = document.querySelector('.ctx-item[data-action="close"] .label');
+                            if (closeLbl) closeLbl.textContent = window.ccI18n.t("menu.close");
+                        }
                         
                         // Active Design
                         const activeDesign = cfg.miniDesign || 1;
@@ -494,6 +527,9 @@
                         
                         // Position Lock
                         document.getElementById("toggle-lock").classList.toggle("on", cfg.miniPositionLocked || false);
+
+                        // Collapse Date
+                        document.getElementById("toggle-collapse").classList.toggle("on", cfg.miniCollapseDate || false);
                         
                         // AOT
                         updateAotState(cfg.alwaysOnTop || false);
@@ -545,6 +581,19 @@
                 const on = tgl.classList.toggle("on");
                 if (window.cc && window.cc.saveSettings) {
                     window.cc.saveSettings({ miniPositionLocked: on });
+                }
+                if (window.cc && window.cc.closeMenuPopup) {
+                    setTimeout(() => window.cc.closeMenuPopup(), 200);
+                }
+            });
+
+            // Collapse Date toggle handler
+            const collapseRow = document.getElementById("ctx-collapse");
+            collapseRow.addEventListener("click", () => {
+                const tgl = document.getElementById("toggle-collapse");
+                const on = tgl.classList.toggle("on");
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ miniCollapseDate: on });
                 }
                 if (window.cc && window.cc.closeMenuPopup) {
                     setTimeout(() => window.cc.closeMenuPopup(), 200);

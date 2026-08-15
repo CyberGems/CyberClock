@@ -268,7 +268,10 @@
             "settings.mini.lockDesc": "Prevent dragging",
             "settings.mini.crtOverlay": "CRT Overlay",
             "settings.mini.scanlines": "Scanlines",
-            "settings.mini.scanlinesDesc": "Mini mode only"
+            "settings.mini.scanlinesDesc": "Mini mode only",
+            "settings.mini.collapseDate": "Collapse Date",
+            "settings.mini.collapseDateDesc": "Show date only on hover",
+            "menu.collapseDate": "Collapse Date"
         },
         es: {
             "relax.sessionTitle": "◈ Sesión",
@@ -533,7 +536,10 @@
             "settings.mini.lockDesc": "Evitar arrastre",
             "settings.mini.crtOverlay": "Superposición CRT",
             "settings.mini.scanlines": "Líneas de exploración",
-            "settings.mini.scanlinesDesc": "Solo modo mini"
+            "settings.mini.scanlinesDesc": "Solo modo mini",
+            "settings.mini.collapseDate": "Colapsar Fecha",
+            "settings.mini.collapseDateDesc": "Mostrar fecha solo al pasar el cursor",
+            "menu.collapseDate": "Colapsar Fecha"
         }
     };
 
