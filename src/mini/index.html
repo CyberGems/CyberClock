@@ -1525,12 +1525,20 @@
                 }
             }
 
+            let isDragging = false;
+
+            window.addEventListener("mouseup", () => {
+                isDragging = false;
+            });
+
             timeBlock.addEventListener("mouseenter", () => {
+                if (isDragging) return;
                 expandDate();
                 refreshTipContent();
                 positionTip();
                 
                 tipTimer = setTimeout(() => {
+                    if (isDragging) return;
                     positionTip();
                     isTipVisible = true;
                     tipEl.classList.add("show");
@@ -1551,7 +1559,9 @@
             // Status dot also triggers date expand
             const statusDot = document.querySelector(".status-dot");
             if (statusDot) {
-                statusDot.addEventListener("mouseenter", expandDate);
+                statusDot.addEventListener("mouseenter", () => {
+                    if (!isDragging) expandDate();
+                });
             }
 
             // Controls (buttons): DO NOT expand date. If already expanded, collapse it so buttons stay rock solid!
@@ -1665,11 +1675,27 @@
                 window.cc.closeMenuPopup().catch(() => {});
                 if (e.target.closest(".controls")) return;
                 if (e.button !== 0) return;
+
+                // Immediately cancel and dismiss hover popup if visible/pending
+                clearTimeout(tipTimer);
+                tipTimer = null;
+                if (isTipVisible) {
+                    isTipVisible = false;
+                    tipEl.classList.remove("show");
+                    syncWindowSize();
+                }
+
                 if (cfg.miniPositionLocked === true) return;
                 e.preventDefault();
+                isDragging = true;
                 window.cc.startDragging()
-                    .then(() => window.cc.saveMiniPosition().catch(() => {}))
-                    .catch(() => {});
+                    .then(() => {
+                        isDragging = false;
+                        window.cc.saveMiniPosition().catch(() => {});
+                    })
+                    .catch(() => {
+                        isDragging = false;
+                    });
             });
         </script>
     </body>
