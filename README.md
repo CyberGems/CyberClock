@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/version-1.0.3-00F0FF.svg" alt="Version" />
   <img src="https://img.shields.io/badge/Tauri-2-512BD4.svg?logo=tauri&logoColor=white" alt="Tauri" />
   <img src="https://img.shields.io/badge/Rust-1.77+-512BD4.svg?logo=rust&logoColor=white" alt="Rust" />
-  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/📖_Wiki-Documentation-222222.svg?logo=github&logoColor=white" alt="Wiki" /></a>
+  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222.svg?logo=github&logoColor=white" alt="Wiki" /></a>
 </p>
 
 A feature-rich desktop clock application with a futuristic cyberpunk/neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities — clock, calendar, timer, stopwatch — with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
