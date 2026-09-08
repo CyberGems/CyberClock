@@ -9,20 +9,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/CyberGems/CyberClock/releases/latest">
-    <img src="https://img.shields.io/badge/⚡_Download_Latest_Release-(Windows_64--bit)-0047B3?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Release" />
-  </a>
-  <a href="https://github.com/CyberGems/CyberClock/releases">
-    <img src="https://img.shields.io/badge/All_Releases-Changelog-18181B?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" />
-  </a>
+  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%E2%9A%A1%20RELEASE%20v&style=for-the-badge&label=&labelColor=555555&color=555555" alt="Download Latest Release" /><img src="https://img.shields.io/badge/-(WINDOWS_64--BIT)-0047B3?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 64-bit" /></a>
+  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/All_Releases-Changelog-18181B?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" /></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Windows-0078D4.svg?logo=windows&logoColor=white" alt="Platform" />
-  <img src="https://img.shields.io/badge/version-1.0.3-00F0FF.svg" alt="Version" />
-  <img src="https://img.shields.io/badge/Tauri-2-512BD4.svg?logo=tauri&logoColor=white" alt="Tauri" />
-  <img src="https://img.shields.io/badge/Rust-1.77+-512BD4.svg?logo=rust&logoColor=white" alt="Rust" />
-  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" /></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078D4.svg?logo=windows&logoColor=white" alt="Platform" height="24" />&nbsp;
+  <img src="https://img.shields.io/badge/Tauri-2-512BD4.svg?logo=tauri&logoColor=white" alt="Tauri" height="24" />&nbsp;
+  <img src="https://img.shields.io/badge/Rust-1.77+-512BD4.svg?logo=rust&logoColor=white" alt="Rust" height="24" />&nbsp;
+  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" height="24" /></a>
 </p>
 
 A feature-rich desktop clock application with a futuristic cyberpunk/neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities — clock, calendar, timer, stopwatch — with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
