@@ -326,8 +326,8 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
     update(app, |current| {
         let mut target = serde_json::to_value(&*current).map_err(|e| e.to_string())?;
         merge_json(&mut target, patch.clone());
-        let merged: AppSettings = serde_json::from_value(target)
-            .map_err(|e| format!("invalid settings patch: {}", e))?;
+        let merged: AppSettings =
+            serde_json::from_value(target).map_err(|e| format!("invalid settings patch: {}", e))?;
         *current = merged.clone();
         merged_out = Some(merged);
         Ok(())

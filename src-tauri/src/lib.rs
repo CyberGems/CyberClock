@@ -1,21 +1,23 @@
+use chrono::{Datelike, TimeZone};
+use chrono::{Local, Timelike};
 use std::fs;
 use std::path::Path;
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
-use tauri::{AppHandle, Manager, WebviewWindow, Emitter, WindowEvent};
+use std::sync::Mutex;
 use tauri::tray::TrayIconBuilder;
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow, WindowEvent};
 use tauri_plugin_dialog::DialogExt;
-use chrono::{Local, Timelike};
-use chrono::{Datelike, TimeZone};
 
 use log::{info, warn};
 
 mod settings;
 mod updater;
 
-pub use settings::{AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SettingsStore};
 use settings::{
     get_settings as load_settings, init_settings_store, persist, update as update_settings,
+};
+pub use settings::{
+    AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SettingsStore,
 };
 use updater::{
     check_for_updates, download_update, get_app_version, init_updater, install_update,
@@ -260,7 +262,9 @@ fn get_window_position(window: WebviewWindow) -> (i32, i32) {
 
 #[tauri::command]
 fn move_window(window: WebviewWindow, x: i32, y: i32) {
-    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+        x, y,
+    )));
 }
 
 #[tauri::command]
@@ -275,7 +279,10 @@ fn set_window_size(window: WebviewWindow, width: i32, height: i32) {
     MINI_TARGET_HEIGHT.store(height as u32, Ordering::Release);
     // Use Logical size so Tauri calculates the correct physical size
     // for the monitor the window is currently on.
-    let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(width as f64, height as f64)));
+    let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(
+        width as f64,
+        height as f64,
+    )));
 }
 
 #[tauri::command]
@@ -440,7 +447,12 @@ fn watch_monitors(app: AppHandle) {
                     let size = m.size();
                     sig.push_str(&format!(
                         "name:{:?};x:{};y:{};w:{};h:{};scale:{:?}|",
-                        m.name(), pos.x, pos.y, size.width, size.height, m.scale_factor()
+                        m.name(),
+                        pos.x,
+                        pos.y,
+                        size.width,
+                        size.height,
+                        m.scale_factor()
                     ));
                 }
 
@@ -499,8 +511,13 @@ fn handle_display_change(app: AppHandle) {
                     let work_area = monitor.work_area();
                     let size = work_area.size;
                     let position = work_area.position;
-                    let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(position.x, position.y)));
-                    let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, size.height)));
+                    let _ = main.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(position.x, position.y),
+                    ));
+                    let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+                        size.width,
+                        size.height,
+                    )));
                 }
             }
         }
@@ -519,7 +536,9 @@ fn handle_display_change(app: AppHandle) {
                 let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
                 if let Some(monitor) = monitors.get(display_id).or_else(|| monitors.first()) {
                     let (x, y) = center_mini_on_monitor(monitor);
-                    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
                     settings.mini_position = Some((x, y));
                     settings_changed = true;
                 }
@@ -576,8 +595,13 @@ fn switch_to_full_mode(app: AppHandle) {
             let work_area = m.work_area();
             let size = work_area.size;
             let position = work_area.position;
-            let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(position.x, position.y)));
-            let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, size.height)));
+            let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                position.x, position.y,
+            )));
+            let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+                size.width,
+                size.height,
+            )));
         }
         let _ = main.show();
         let _ = main.set_focus();
@@ -607,12 +631,16 @@ fn switch_to_mini_mode(app: AppHandle) {
         if let Some((x, y)) = settings.mini_position {
             if let Some(ref monitor) = detected_monitor {
                 if is_position_in_monitor(x, y, monitor) {
-                    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
                     positioned = true;
                 }
             } else if let Ok(monitors) = mini.available_monitors() {
                 if monitors.iter().any(|m| is_position_in_monitor(x, y, m)) {
-                    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
                     positioned = true;
                 }
             }
@@ -626,7 +654,9 @@ fn switch_to_mini_mode(app: AppHandle) {
             });
             if let Some(m) = monitor {
                 let (x, y) = center_mini_on_monitor(&m);
-                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    x, y,
+                )));
             }
         }
 
@@ -673,11 +703,9 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
                 // covers the clock while the user adjusts sliders.
                 let (clock_x, clock_y, clock_w, clock_h) = app
                     .get_webview_window("mini")
-                    .and_then(|mini| {
-                        match (mini.outer_position(), mini.outer_size()) {
-                            (Ok(p), Ok(s)) => Some((p.x, p.y, s.width as i32, s.height as i32)),
-                            _ => None,
-                        }
+                    .and_then(|mini| match (mini.outer_position(), mini.outer_size()) {
+                        (Ok(p), Ok(s)) => Some((p.x, p.y, s.width as i32, s.height as i32)),
+                        _ => None,
                     })
                     .unwrap_or((screen_x, screen_y, 0, 0));
 
@@ -727,15 +755,21 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
                 }
 
                 // Set position using physical coordinates
-                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(pos_x, pos_y)));
+                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    pos_x, pos_y,
+                )));
             } else {
                 // Fallback: just use the screen coordinates directly
                 // This handles edge cases where click is between monitors
-                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(screen_x, screen_y)));
+                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    screen_x, screen_y,
+                )));
             }
         } else {
             // Fallback if we can't get monitors
-            let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(screen_x, screen_y)));
+            let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                screen_x, screen_y,
+            )));
         }
 
         let _ = menu.show();
@@ -815,13 +849,10 @@ fn menu_action(app: AppHandle, action: String) -> bool {
 fn is_valid_note_id(id: &str) -> bool {
     let bytes = id.as_bytes();
     bytes.len() == 10
-        && bytes
-            .iter()
-            .enumerate()
-            .all(|(i, &b)| match i {
-                4 | 7 => b == b'-',
-                _ => b.is_ascii_digit(),
-            })
+        && bytes.iter().enumerate().all(|(i, &b)| match i {
+            4 | 7 => b == b'-',
+            _ => b.is_ascii_digit(),
+        })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -861,14 +892,9 @@ fn get_screens(window: WebviewWindow, app: AppHandle) -> Vec<MonitorInfo> {
             let pos = m.position();
             screens.push(MonitorInfo {
                 id,
-                label: m
-                    .name()
-                    .unwrap_or(&format!("Display {}", i))
-                    .to_string(),
+                label: m.name().unwrap_or(&format!("Display {}", i)).to_string(),
                 primary: is_primary,
-                current: settings
-                    .preferred_display_id
-                    .is_some_and(|pid| pid == id),
+                current: settings.preferred_display_id.is_some_and(|pid| pid == id),
                 width: size.width,
                 height: size.height,
                 x: pos.x,
@@ -892,8 +918,13 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
                 let work_area = monitor.work_area();
                 let size = work_area.size;
                 let position = work_area.position;
-                let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(position.x, position.y)));
-                let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, size.height)));
+                let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    position.x, position.y,
+                )));
+                let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+                    size.width,
+                    size.height,
+                )));
             }
         }
     }
@@ -913,7 +944,9 @@ fn reset_mini_position(app: AppHandle) {
         if let Ok(monitors) = mini.available_monitors() {
             if let Some(monitor) = monitors.first() {
                 let (x, y) = center_mini_on_monitor(monitor);
-                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    x, y,
+                )));
             }
         }
     }
@@ -975,7 +1008,13 @@ fn import_alarm_sound(app: &AppHandle, src: &Path) -> Result<String, String> {
         .and_then(|s| s.to_str())
         .unwrap_or("custom")
         .chars()
-        .map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect::<String>();
     let dest = dir.join(format!("{}.{}", stem, ext));
     fs::copy(src, &dest).map_err(|e| format!("copy failed: {}", e))?;
@@ -1574,13 +1613,21 @@ fn show_initial_window(app: &AppHandle) {
             // Find preferred display or fallback to first
             let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
             if let Ok(monitors) = main.available_monitors() {
-                let monitor = monitors.get(display_id).or_else(|| monitors.first()).cloned();
+                let monitor = monitors
+                    .get(display_id)
+                    .or_else(|| monitors.first())
+                    .cloned();
                 if let Some(m) = monitor {
                     let work_area = m.work_area();
                     let size = work_area.size;
                     let position = work_area.position;
-                    let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(position.x, position.y)));
-                    let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, size.height)));
+                    let _ = main.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(position.x, position.y),
+                    ));
+                    let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+                        size.width,
+                        size.height,
+                    )));
                 }
             }
             let _ = main.show();
@@ -1591,7 +1638,9 @@ fn show_initial_window(app: &AppHandle) {
         if let Some((x, y)) = settings.mini_position {
             if let Ok(monitors) = mini.available_monitors() {
                 if monitors.iter().any(|m| is_position_in_monitor(x, y, m)) {
-                    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
                     positioned = true;
                 }
             }
@@ -1600,10 +1649,15 @@ fn show_initial_window(app: &AppHandle) {
             // Center on preferred display or first
             let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
             if let Ok(monitors) = mini.available_monitors() {
-                let monitor = monitors.get(display_id).or_else(|| monitors.first()).cloned();
+                let monitor = monitors
+                    .get(display_id)
+                    .or_else(|| monitors.first())
+                    .cloned();
                 if let Some(m) = monitor {
                     let (x, y) = center_mini_on_monitor(&m);
-                    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
                 }
             }
         }
@@ -1675,17 +1729,15 @@ pub fn run() {
             // so that skin changes (which call set_window_size) work correctly.
             if let Some(mini) = app.get_webview_window("mini") {
                 let mini_for_resize = mini.clone();
-                mini.on_window_event(move |event| {
-                    match event {
-                        WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
-                            let w = MINI_TARGET_WIDTH.load(Ordering::Acquire);
-                            let h = MINI_TARGET_HEIGHT.load(Ordering::Acquire);
-                            let _ = mini_for_resize.set_size(tauri::Size::Logical(
-                                tauri::LogicalSize::new(f64::from(w), f64::from(h)),
-                            ));
-                        }
-                        _ => {}
+                mini.on_window_event(move |event| match event {
+                    WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
+                        let w = MINI_TARGET_WIDTH.load(Ordering::Acquire);
+                        let h = MINI_TARGET_HEIGHT.load(Ordering::Acquire);
+                        let _ = mini_for_resize.set_size(tauri::Size::Logical(
+                            tauri::LogicalSize::new(f64::from(w), f64::from(h)),
+                        ));
                     }
+                    _ => {}
                 });
             }
 
@@ -1713,11 +1765,9 @@ pub fn run() {
             // Fixed-interval chime checker (:00 / :15 / :30 / :45).
             // 15s cadence so a chime never fires more than 15s late.
             let app_handle = app.handle().clone();
-            std::thread::spawn(move || {
-                loop {
-                    std::thread::sleep(std::time::Duration::from_secs(15));
-                    check_alarms(&app_handle);
-                }
+            std::thread::spawn(move || loop {
+                std::thread::sleep(std::time::Duration::from_secs(15));
+                check_alarms(&app_handle);
             });
 
             // Scheduler for custom alarms

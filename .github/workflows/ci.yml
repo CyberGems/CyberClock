@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Format check
+        working-directory: src-tauri
+        run: cargo fmt --check
+
+      - name: Compile check
+        working-directory: src-tauri
+        run: cargo check
+
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy -- -D warnings
+
+      - name: Unit tests
+        working-directory: src-tauri
+        run: cargo test --lib
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Syntax-check all JS files
+        run: |
+          status=0
+          while IFS= read -r f; do
+            node --check "$f" || status=1
+          done < <(find src -name '*.js' -not -path '*/node_modules/*')
+          exit $status
+
+      - name: Verify i18n EN/ES key parity
+        run: |
+          node -e "
+          const fs = require('fs');
+          const src = fs.readFileSync('src/shared/i18n.js','utf8');
+          function keysBetween(start, end) {
+            const s = src.indexOf(start); const e = src.indexOf(end, s);
+            return [...src.slice(s, e).matchAll(/\"([a-zA-Z0-9._]+)\":/g)].map(m => m[1]);
+          }
+          const en = new Set(keysBetween('const LOCALES', 'es: {'));
+          const es = new Set(keysBetween('es: {', '};'));
+          const missES = [...en].filter(k => !es.has(k));
+          const missEN = [...es].filter(k => !en.has(k));
+          if (missES.length || missEN.length) {
+            console.error('i18n drift — missing in ES:', missES, 'missing in EN:', missEN);
+            process.exit(1);
+          }
+          console.log('i18n parity OK:', en.size, 'keys in both dictionaries');
+          "
+
+      - name: Verify every data-i18n key resolves
+        run: |
+          node -e "
+          const fs = require('fs');
+          const src = fs.readFileSync('src/shared/i18n.js','utf8');
+          const s = src.indexOf('const LOCALES'); const e = src.indexOf('es: {', s);
+          const en = new Set([...src.slice(s, e).matchAll(/\"([a-zA-Z0-9._]+)\":/g)].map(m => m[1]));
+          const files = ['src/main/index.html','src/mini/index.html','src/mini/menu.html','src/tray/menu.html'];
+          const used = new Set();
+          for (const f of files) {
+            const html = fs.readFileSync(f, 'utf8');
+            for (const m of html.matchAll(/data-i18n-attr=\"[a-zA-Z-]+:([a-zA-Z0-9._]+)\"/g)) used.add(m[1]);
+            for (const m of html.matchAll(/data-i18n=\"([a-zA-Z0-9._]+)\"/g)) used.add(m[1]);
+          }
+          const bad = [...used].filter(k => !en.has(k));
+          if (bad.length) { console.error('unresolved i18n keys in HTML:', bad); process.exit(1); }
+          console.log('all', used.size, 'HTML i18n keys resolve');
+          "

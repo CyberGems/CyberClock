@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     runs-on: windows-latest
@@ -16,10 +20,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Verify tag matches version files
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          NODE_VER=$(node -p "require('./package.json').version")
+          CONF_VER=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          CARGO_VER=$(grep '^version' src-tauri/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "tag=$TAG package.json=$NODE_VER tauri.conf=$CONF_VER Cargo.toml=$CARGO_VER"
+          if [ "$TAG" != "$NODE_VER" ] || [ "$TAG" != "$CONF_VER" ] || [ "$TAG" != "$CARGO_VER" ]; then
+            echo "::error::Version mismatch — tag v$TAG does not match package.json ($NODE_VER), tauri.conf.json ($CONF_VER) and/or Cargo.toml ($CARGO_VER)."
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -47,3 +65,15 @@ jobs:
             Download the installer below. Installed copies with auto-updates enabled will receive this version automatically.
           releaseDraft: false
           prerelease: false
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd src-tauri/target/release/bundle
+          find . -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.sig" -o -name "latest.json" \) -exec sha256sum {} \; > checksums.sha256
+          cat checksums.sha256
+
+      - name: Upload checksums to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src-tauri/target/release/bundle/checksums.sha256

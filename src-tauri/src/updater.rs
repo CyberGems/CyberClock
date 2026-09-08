@@ -222,9 +222,8 @@ async fn perform_download(app: &AppHandle) -> Result<(), String> {
         .download(
             move |chunk_length, content_length| {
                 downloaded += chunk_length as u64;
-                let percent = content_length.and_then(|total| {
-                    (downloaded * 100).checked_div(total).map(|p| p as u32)
-                });
+                let percent = content_length
+                    .and_then(|total| (downloaded * 100).checked_div(total).map(|p| p as u32));
                 emit_status(
                     &app_progress,
                     UpdateStatusPayload {
@@ -290,10 +289,7 @@ fn perform_install(app: &AppHandle) -> Result<(), String> {
         .bytes
         .ok_or_else(|| "Update has not been downloaded yet".to_string())?;
 
-    pending
-        .update
-        .install(&bytes)
-        .map_err(|e| e.to_string())?;
+    pending.update.install(&bytes).map_err(|e| e.to_string())?;
     app.request_restart();
     Ok(())
 }
