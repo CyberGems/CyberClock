@@ -334,7 +334,7 @@
             });
             const sndEl = document.getElementById(`${base}-snd`);
             if (sndEl) sndEl.value = alarm.sound || "chime-digital";
-            showCustomFile(`cust${i}`, alarm.customPath || null);
+            showCustomFile(`cust-${i}`, alarm.customPath || null);
         });
 
         // Apply alarm time restriction schedule controls
@@ -397,6 +397,7 @@
 
     function showCustomFile(which, p) {
         const lbl = document.getElementById(`s-${which}-flbl`);
+        if (!lbl) return;
         const name = document.getElementById(`s-${which}-fname`);
         if (p) {
             lbl.style.display = "flex";
@@ -521,12 +522,12 @@
                 const p = await window.cc.openFileDialog();
                 if (p) {
                     saveCustomAlarmField(i, { customPath: p });
-                    showCustomFile(`cust${i}`, p);
+                    showCustomFile(`cust-${i}`, p);
                 }
             });
             document.getElementById(`${base}-fclr`)?.addEventListener("click", () => {
                 saveCustomAlarmField(i, { customPath: null });
-                showCustomFile(`cust${i}`, null);
+                showCustomFile(`cust-${i}`, null);
             });
         }
     }
