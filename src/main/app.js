@@ -71,7 +71,12 @@
     // Render a time string into an element, wrapping each digit in a
     // fixed-width .digit cell so narrow glyphs (1) don't shift the
     // layout. Separators (: . space, AM/PM) are left untouched.
+    // Skips the DOM rebuild when the value hasn't changed — the
+    // timer/stopwatch loops call this many times per second and
+    // most digits stay identical between ticks.
     function setDigits(el, val) {
+        if (el.dataset.digitsValue === val) return;
+        el.dataset.digitsValue = val;
         el.innerHTML = val.replace(
             /\d/g,
             (d) => `<span class="digit">${d}</span>`,
@@ -1653,7 +1658,7 @@
         const avg =
             laps.reduce((s, x) => s + x.lapTime, 0) / laps.length;
         const lines = [
-            "#\tLap Time\tDelta\tTotal",
+            window.ccI18n.t("stopwatch.lapHeader"),
             ...laps.map((l) => {
                 const d = l.lapTime - avg;
                 return `${l.n}\t${swDurStr(l.lapTime)}\t${d >= 0 ? "+" : "-"}${swDurStr(Math.abs(d))}\t${swDurStr(l.total)}`;
@@ -1827,6 +1832,13 @@
         
         function tick() {
             if (!rPacerActive) return;
+            // Pause rendering while another view is active (the audio
+            // keeps playing; the circle is invisible anyway). The phase
+            // math is time-based, so it re-syncs seamlessly on return.
+            if (curView !== "relax") {
+                rPacerTimer = requestAnimationFrame(tick);
+                return;
+            }
             const elapsed = (performance.now() - rPacerStart) % totalDuration;
             
             let accumulated = 0;
@@ -1891,7 +1903,6 @@
     }
 
     function preSelectRelaxTrack(id) {
-        console.log("[DEBUG] preSelectRelaxTrack called with:", id);
         rSelected = id;
         document
             .querySelectorAll(".tcard")
@@ -1902,12 +1913,10 @@
 
     function updatePlayingTrackCardClass(isPlaying) {
         const playing = typeof isPlaying === "boolean" ? isPlaying : window.audioEngine.isPlaying;
-        console.log("[DEBUG] updatePlayingTrackCardClass called. isPlaying:", isPlaying, "playing:", playing, "rSelected:", rSelected);
         document.querySelectorAll(".tcard").forEach((c) => {
             const shouldPlay = playing && c.dataset.track === rSelected;
             c.classList.toggle("playing", shouldPlay);
             if (c.dataset.track === rSelected) {
-                console.log("[DEBUG] Card " + c.dataset.track + " playing class set to:", shouldPlay, "classList:", c.className);
             }
         });
     }
@@ -2064,7 +2073,7 @@
             if (rAstRemain <= 0) {
                 rClearAutoStop();
                 rStop();
-                rShowNotify("✓ Session Complete");
+                rShowNotify(window.ccI18n.t("relax.sessionComplete"));
             }
         }, 1000);
     }
@@ -2077,7 +2086,7 @@
         const m = Math.floor(rAstRemain / 60),
             s = rAstRemain % 60;
         const el = document.getElementById("r-ast-cd");
-        el.textContent = `Stops in ${pad(m)}:${pad(s)}`;
+        el.textContent = window.ccI18n.t("relax.stopsIn", { time: pad(m) + ":" + pad(s) });
         el.style.display = "inline";
     }
     function rShowNotify(msg) {
@@ -2101,18 +2110,21 @@
                 return;
             }
             ctx.clearRect(0, 0, w, h);
-            const acc =
-                getComputedStyle(document.body)
-                    .getPropertyValue("--accent-a")
-                    .trim() || "#00d4ff";
-            const rgb =
-                getComputedStyle(document.body)
-                    .getPropertyValue("--rgb-accent")
-                    .trim() || "0,212,255";
+            // Cache theme colors per frame (theme changes are rare;
+            // reading getComputedStyle twice per bar per frame was
+            // the single hottest cost in this loop).
+            const bodyStyle = getComputedStyle(document.body);
+            const acc = bodyStyle.getPropertyValue("--accent-a").trim() || "#00d4ff";
+            const rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "0,212,255";
             if (window.audioEngine.isPlaying) {
                 const data = window.audioEngine.getAnalyserData();
                 const bars = 56;
                 const gap = w / bars;
+                // One shared gradient per frame instead of one per bar:
+                // all bars span the same y range (0..h).
+                const g = ctx.createLinearGradient(0, 0, 0, h);
+                g.addColorStop(0, acc);
+                g.addColorStop(1, `rgba(${rgb},.18)`);
                 for (let i = 0; i < bars; i++) {
                     const percent = i / (bars - 1 || 1);
                     const maxActiveBin = Math.floor(data.length * 0.32);
@@ -2125,9 +2137,6 @@
                         nextX = Math.floor((i + 1) * gap),
                         barW = Math.max(1, nextX - x - 1),
                         y = h - bh;
-                    const g = ctx.createLinearGradient(0, y, 0, h);
-                    g.addColorStop(0, acc);
-                    g.addColorStop(1, `rgba(${rgb},.18)`);
                     ctx.fillStyle = g;
                     ctx.fillRect(x, y, barW, bh);
                     ctx.fillStyle = `rgba(${rgb},.07)`;
@@ -2167,7 +2176,7 @@
                 ctx.font = "9px 'Share Tech Mono', monospace";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText("SYSTEM STANDBY  ◈  ZEN FLOW READY", w / 2, h - 15);
+                ctx.fillText(window.ccI18n.t("relax.standby"), w / 2, h - 15);
             }
             vizRaf = requestAnimationFrame(draw);
         }
@@ -2189,7 +2198,6 @@
     document.querySelectorAll(".tcard").forEach((card) => {
         card.addEventListener("click", () => {
             const t = card.dataset.track;
-            console.log("[DEBUG] Card clicked:", t, "rSelected:", rSelected, "isPlaying:", window.audioEngine.isPlaying);
             stopZenFlow();
             if (rSelected === t && window.audioEngine.isPlaying) {
                 rStop(true);
@@ -2329,15 +2337,13 @@
                       pos (${s.x}, ${s.y})
                     </div>
                   </div>
-                  ${
+                      ${
                       s.current
                           ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">${inUseText}</span>`
                           : `<button data-did="${s.id}" class="s-move-btn"
                         style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
                           background:transparent;border:1px solid var(--border-bright);color:var(--accent-a);
                           padding:7px 14px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:all .18s;"
-                        onmouseover="this.style.boxShadow='var(--glow-sm)';this.style.borderColor='var(--border-active)';"
-                        onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border-bright)';"
                       >${moveHereText}</button>`
                   }
                 `;
@@ -3060,21 +3066,22 @@
     function updateSchedStatus(sched) {
         const statusEl = document.getElementById('sched-status');
         const nextEl = document.getElementById('sched-next');
+        const t = (key, vars) => window.ccI18n.t(key, vars);
         if (!sched || !sched.enabled) {
-            statusEl.textContent = 'OFF';
+            statusEl.textContent = t("relax.schedOff");
             statusEl.classList.remove('on');
-            nextEl.textContent = 'Next run: —';
+            nextEl.textContent = t("relax.schedNextRun");
             return;
         }
-        statusEl.textContent = 'ON';
+        statusEl.textContent = t("relax.schedOn");
         statusEl.classList.add('on');
-        
+
         // Estimate next run (handled precisely by backend)
         const [h, m] = (sched.time || '22:00').split(':').map(Number);
         const now = new Date();
         let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
         if (next <= now) next.setDate(next.getDate() + 1);
-        nextEl.textContent = `Next: ${fmtSchedDisplay(next.getHours(), next.getMinutes())}`;
+        nextEl.textContent = t("relax.schedNextRun").replace('—', fmtSchedDisplay(next.getHours(), next.getMinutes()));
     }
 
     // Scheduler event listeners

@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>CyberClock</title>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&family=Share+Tech+Mono&display=swap"
-            rel="stylesheet"
-        />
-        <link rel="stylesheet" href="../shared/themes.css" />
+                <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/tauri-bridge.js"></script>
         <script src="../shared/i18n.js"></script>
@@ -54,7 +50,7 @@
                     <div id="dig-date">SUN · 01 JAN 2026</div>
                 </div>
                 <div class="tbar-right">
-                    <button class="btn-mini-pill" id="btn-mini" title="Switch to Mini Mode">
+                    <button class="btn-mini-pill" id="btn-mini" title="Switch to Mini Mode" data-i18n-attr="title:tooltip.switchToMini">
                         <span class="mini-ico"><span data-ico="compact"></span></span>
                         <span class="mini-lbl">Mini</span>
                     </button>
@@ -84,7 +80,7 @@
                         <span class="nav-icon"><span data-ico="lotus"></span></span>
                         <span class="nav-lbl">Relax</span>
                     </div>
-                    <div class="nav-item" id="nav-btn-settings" title="Settings">
+                    <div class="nav-item" id="nav-btn-settings" title="Settings" data-i18n-attr="title:tooltip.settings">
                         <span class="nav-icon"><span data-ico="gear"></span></span>
                         <span class="nav-lbl">Setup</span>
                     </div>
@@ -143,27 +139,27 @@
                     <!-- TIMER -->
                     <div class="view" id="view-timer">
                         <div class="t-display" id="t-disp">
-                            <div class="module-title"><span>Timer</span></div>
+                            <div class="module-title"><span data-i18n="timer.title">Timer</span></div>
                             <div class="t-seg-wrap">
                                 <div class="t-seg" id="t-h">00</div>
-                                <span class="t-seg-lbl">HH</span>
+                                <span class="t-seg-lbl" data-i18n="timer.hh">HH</span>
                             </div>
                             <div class="t-colon" id="t-c1">:</div>
                             <div class="t-seg-wrap">
                                 <div class="t-seg" id="t-m">00</div>
-                                <span class="t-seg-lbl">MM</span>
+                                <span class="t-seg-lbl" data-i18n="timer.mm">MM</span>
                             </div>
                             <div class="t-colon" id="t-c2">:</div>
                             <div class="t-seg-wrap">
                                 <div class="t-seg" id="t-s">00</div>
-                                <span class="t-seg-lbl">SS</span>
+                                <span class="t-seg-lbl" data-i18n="timer.ss">SS</span>
                             </div>
                             <div class="t-ms-wrap">
                                 <div class="t-ms-row">
                                     <div class="t-dot">.</div>
                                     <div class="t-ms" id="t-ms">000</div>
                                 </div>
-                                <span class="t-seg-lbl">MS</span>
+                                <span class="t-seg-lbl" data-i18n="timer.ms">MS</span>
                             </div>
                         </div>
                         <div class="t-prog-wrap">
@@ -206,7 +202,7 @@
                                     max="23"
                                     value="0"
                                 />
-                                <span class="t-inp-lbl">HOURS</span>
+                                <span class="t-inp-lbl" data-i18n="timer.hours">HOURS</span>
                             </div>
                             <span class="t-colon-s">:</span>
                             <div
@@ -224,7 +220,7 @@
                                     max="59"
                                     value="0"
                                 />
-                                <span class="t-inp-lbl">MINS</span>
+                                <span class="t-inp-lbl" data-i18n="timer.mins">MINS</span>
                             </div>
                             <span class="t-colon-s">:</span>
                             <div
@@ -242,22 +238,22 @@
                                     max="59"
                                     value="0"
                                 />
-                                <span class="t-inp-lbl">SECS</span>
+                                <span class="t-inp-lbl" data-i18n="timer.secs">SECS</span>
                             </div>
                         </div>
                         <div class="t-ctrls">
                             <button class="abtn" id="t-start">
-                                <span data-ico="play"></span> START
+                                <span data-ico="play"></span> <span data-i18n="timer.start">START</span>
                             </button>
                             <button class="abtn red" id="t-reset" disabled>
-                                <span data-ico="stop"></span> RESET
+                                <span data-ico="stop"></span> <span data-i18n="timer.reset">RESET</span>
                             </button>
                         </div>
                         <div class="t-hint" id="t-hint">
-                            ◈ Pick a preset or set a custom time to start
+                            ◈ <span data-i18n="timer.hint">Pick a preset or set a custom time to start</span>
                         </div>
                         <div class="done-ov" id="t-done">
-                            <div class="done-txt">TIME'S UP!</div>
+                            <div class="done-txt" data-i18n="timer.timesUp">TIME'S UP!</div>
                             <button
                                 class="abtn"
                                 id="t-dismiss"
@@ -267,7 +263,7 @@
                                     padding: 12px 28px;
                                 "
                             >
-                                DISMISS
+                                <span data-i18n="timer.dismiss">DISMISS</span>
                             </button>
                         </div>
                     </div>
@@ -276,7 +272,7 @@
                     <div class="view" id="view-stopwatch">
                         <div class="sw-upper">
                             <div class="sw-disp" id="sw-disp">
-                                <div class="module-title"><span>Stopwatch</span></div>
+                                <div class="module-title"><span data-i18n="stopwatch.title">Stopwatch</span></div>
                                 <div class="sw-seg" id="sw-h">00</div>
                                 <div class="sw-colon">:</div>
                                 <div class="sw-seg" id="sw-m">00</div>
@@ -288,48 +284,48 @@
                             </div>
                             <div class="sw-ctrls">
                                 <button class="abtn" id="sw-start">
-                                    <span data-ico="play"></span> START
+                                    <span data-ico="play"></span> <span data-i18n="timer.start">START</span>
                                 </button>
                                 <button class="abtn red" id="sw-reset" disabled>
-                                    <span data-ico="stop"></span> RESET
+                                    <span data-ico="stop"></span> <span data-i18n="timer.reset">RESET</span>
                                 </button>
                                 <button
                                     class="abtn sw-lap-btn"
                                     id="sw-lap"
                                     disabled
                                 >
-                                    <span data-ico="flag"></span> LAP
+                                    <span data-ico="flag"></span> <span data-i18n="stopwatch.lap">LAP</span>
                                 </button>
                             </div>
                         </div>
                         <div class="sw-lower">
                             <div class="lap-hdr">
                                 <span class="lap-hdr-t"
-                                    ><span data-ico="flag"></span> Lap Times</span
+                                    ><span data-ico="flag"></span> <span data-i18n="stopwatch.lapTimes">Lap Times</span></span
                                 >
                                 <div class="lap-hdr-btns">
                                     <button class="lap-act" id="sw-copy">
-                                        <span data-ico="copy"></span> Copy
+                                        <span data-ico="copy"></span> <span data-i18n="stopwatch.copy">Copy</span>
                                     </button>
                                     <button class="lap-act" id="sw-clear" disabled>
-                                        <span data-ico="trash"></span> Clear
+                                        <span data-ico="trash"></span> <span data-i18n="stopwatch.clear">Clear</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="lap-col-hdr">
                                 <div class="col-lbl">#</div>
                                 <div class="col-lbl" style="text-align: right">
-                                    Lap Time
+                                    <span data-i18n="stopwatch.colLap">Lap Time</span>
                                 </div>
                                 <div class="col-lbl" style="text-align: right">
-                                    Delta
+                                    <span data-i18n="stopwatch.colDelta">Delta</span>
                                 </div>
                                 <div class="col-lbl" style="text-align: right">
-                                    Total
+                                    <span data-i18n="stopwatch.colTotal">Total</span>
                                 </div>
                             </div>
                             <div class="lap-list" id="lap-list">
-                                <div class="lap-empty" id="lap-empty">
+                                <div class="lap-empty" id="lap-empty" data-i18n="stopwatch.noLaps">
                                     No laps recorded yet
                                 </div>
                             </div>
@@ -483,19 +479,19 @@
                             <!-- Auto Scheduler -->
                             <div class="sched-panel" id="sched-panel">
                                 <div class="sched-title">
-                                    <span>◈ Auto Scheduler</span>
+                                    <span data-i18n="relax.schedulerTitle">◈ Auto Scheduler</span>
                                     <span class="sched-status" id="sched-status">OFF</span>
                                 </div>
                                 <div class="sched-row" style="justify-content: space-between;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="sched-lbl" style="width: auto;">Enable</span>
+                                        <span class="sched-lbl" style="width: auto;" data-i18n="relax.schedEnable">Enable</span>
                                         <label class="tog-sm" data-tooltip="Schedule automatic playback times" data-i18n-attr="data-tooltip:relax.tooltip.scheduler">
                                             <input type="checkbox" id="sched-enable" />
                                             <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
                                         </label>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="sched-lbl" style="width: auto;">Start At</span>
+                                        <span class="sched-lbl" style="width: auto;" data-i18n="relax.schedStartAt">Start At</span>
                                         <div class="sched-time" id="sched-time">
                                             <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
                                             <span class="sched-time-sep">:</span>
@@ -508,19 +504,19 @@
                                     </div>
                                 </div>
                                 <div class="sched-row">
-                                    <span class="sched-lbl">Repeat</span>
+                                    <span class="sched-lbl" data-i18n="relax.schedRepeat">Repeat</span>
                                     <select class="sched-select" id="sched-repeat">
-                                        <option value="0">Once</option>
-                                        <option value="15">Every 15 min</option>
-                                        <option value="30">Every 30 min</option>
-                                        <option value="60" selected>Every 1 hour</option>
-                                        <option value="120">Every 2 hours</option>
-                                        <option value="240">Every 4 hours</option>
-                                        <option value="1440">Daily</option>
+                                        <option value="0" data-i18n="relax.repeat.once">Once</option>
+                                        <option value="15" data-i18n="relax.repeat.15min">Every 15 min</option>
+                                        <option value="30" data-i18n="relax.repeat.30min">Every 30 min</option>
+                                        <option value="60" selected data-i18n="relax.repeat.1h">Every 1 hour</option>
+                                        <option value="120" data-i18n="relax.repeat.2h">Every 2 hours</option>
+                                        <option value="240" data-i18n="relax.repeat.4h">Every 4 hours</option>
+                                        <option value="1440" data-i18n="relax.repeat.daily">Daily</option>
                                     </select>
                                 </div>
                                 <div class="sched-row">
-                                    <span class="sched-lbl">Track</span>
+                                    <span class="sched-lbl" data-i18n="relax.schedTrack">Track</span>
                                     <select class="sched-select" id="sched-track">
                                         <option value="night">Night</option>
                                         <option value="forest">Forest</option>
@@ -528,22 +524,22 @@
                                         <option value="ocean">Ocean</option>
                                         <option value="rain">Rain</option>
                                         <option value="fireplace">Fireplace</option>
-                                        <option value="random-one" selected>Random One</option>
-                                        <option value="shuffle-all">Shuffle All</option>
+                                        <option value="random-one" selected data-i18n="relax.track.randomOne">Random One</option>
+                                        <option value="shuffle-all" data-i18n="relax.track.shuffleAll">Shuffle All</option>
                                     </select>
                                 </div>
                                 <div class="sched-row">
-                                    <span class="sched-lbl">Duration</span>
+                                    <span class="sched-lbl" data-i18n="relax.schedDuration">Duration</span>
                                     <select class="sched-select" id="sched-duration">
-                                        <option value="5">5 minutes</option>
-                                        <option value="10">10 minutes</option>
-                                        <option value="15" selected>15 minutes</option>
-                                        <option value="30">30 minutes</option>
-                                        <option value="60">1 hour</option>
-                                        <option value="0">Until stopped</option>
+                                        <option value="5" data-i18n="relax.duration.5m">5 minutes</option>
+                                        <option value="10" data-i18n="relax.duration.10m">10 minutes</option>
+                                        <option value="15" selected data-i18n="relax.duration.15m">15 minutes</option>
+                                        <option value="30" data-i18n="relax.duration.30m">30 minutes</option>
+                                        <option value="60" data-i18n="relax.duration.1h">1 hour</option>
+                                        <option value="0" data-i18n="relax.duration.stopped">Until stopped</option>
                                     </select>
                                 </div>
-                                <div class="sched-status" id="sched-next" style="margin-top:2px;text-align:center;padding-top:4px;">
+                                <div class="sched-status" id="sched-next" style="margin-top:2px;text-align:center;padding-top:4px;" data-i18n="relax.schedNextRun">
                                     Next run: —
                                 </div>
                             </div>

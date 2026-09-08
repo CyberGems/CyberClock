@@ -1,6 +1,17 @@
     let currentDesign = 1;
     let alwaysOnTop = false;
 
+    // Debounced settings save for slider drags: each save broadcasts
+    // the full settings object to every window, so coalesce the burst
+    // of `input` events into one trailing save.
+    const saveDebounce = {};
+    function debouncedSave(key, patch, delay = 120) {
+        clearTimeout(saveDebounce[key]);
+        saveDebounce[key] = setTimeout(() => {
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings(patch);
+        }, delay);
+    }
+
     function updateAotState(on) {
         alwaysOnTop = on;
         document.getElementById("toggle-aot").classList.toggle("on", on);
@@ -15,6 +26,8 @@
 
                 if (window.ccI18n) {
                     window.ccI18n.setLang(cfg.language || "auto");
+                    // Translate all data-i18n elements (section titles, etc.)
+                    window.ccI18n.apply(document);
                     const collapseLbl = document.querySelector("#ctx-collapse .switch-lbl");
                     if (collapseLbl) collapseLbl.textContent = window.ccI18n.t("menu.collapseDate");
                     const lockLbl = document.querySelector("#ctx-lock .switch-lbl");
@@ -22,7 +35,7 @@
                     const aotLbl = document.querySelector("#ctx-aot .switch-lbl");
                     if (aotLbl) aotLbl.textContent = window.ccI18n.t("menu.alwaysOnTop");
                     const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
-                    if (fullLbl) fullLbl.textContent = cfg.language === "es" ? "Modo Completo" : "Full Mode";
+                    if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
                     const timerLbl = document.querySelector('.ctx-item[data-action="timer"] .label');
                     if (timerLbl) timerLbl.textContent = window.ccI18n.t("menu.timer");
                     const stopwatchLbl = document.querySelector('.ctx-item[data-action="stopwatch"] .label');
@@ -83,9 +96,7 @@
         const val = parseInt(e.target.value);
         sliderVal.textContent = `${val}%`;
 
-        if (window.cc && window.cc.saveSettings) {
-            window.cc.saveSettings({ miniOpacity: val / 100 });
-        }
+        debouncedSave("miniOpacity", { miniOpacity: val / 100 });
     });
 
     // Background opacity slider handler
@@ -95,9 +106,7 @@
         const val = parseInt(e.target.value);
         bgSliderVal.textContent = `${val}%`;
 
-        if (window.cc && window.cc.saveSettings) {
-            window.cc.saveSettings({ miniBgOpacity: val / 100 });
-        }
+        debouncedSave("miniBgOpacity", { miniBgOpacity: val / 100 });
     });
 
     // Lock toggle handler

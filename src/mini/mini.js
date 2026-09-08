@@ -148,39 +148,65 @@
     function refreshTipContent() {
         const now = new Date();
         const lang = window.ccI18n.getEffectiveLang();
-        
+        const t = (key, vars) => window.ccI18n.t(key, vars);
+
         const locale = lang === "es" ? "es-ES" : "en-US";
         let dateStr = now.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-        
+
         const todayKey = isoNow();
         const note = (calNotes[todayKey] || "").trim();
         const upcoming = countUpcoming();
-        
-        let html = `<div class="mini-tip-date">${dateStr}</div>`;
-        html += `<div class="mini-tip-divider"></div>`;
-        
+
+        // Build with DOM nodes so user note text can never inject HTML.
+        tipEl.replaceChildren();
+
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "mini-tip-date";
+        dateDiv.textContent = dateStr;
+        tipEl.appendChild(dateDiv);
+        tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
+
         if (note) {
-            const firstLine = note.split("\n")[0].trim();
-            html += `<div class="mini-tip-note">📝 ${firstLine}</div>`;
+            const noteDiv = document.createElement("div");
+            noteDiv.className = "mini-tip-note";
+            noteDiv.textContent = `📝 ${note.split("\n")[0].trim()}`;
+            tipEl.appendChild(noteDiv);
         } else {
-            const noNotesText = lang === "es" ? "Sin notas para hoy" : "No notes for today";
-            const createText = lang === "es" ? "＋ Crear nota" : "＋ Create note";
-            html += `<div class="mini-tip-note empty">🌸 ${noNotesText}</div>`;
-            html += `<div class="mini-tip-action-btn">${createText}</div>`;
+            const emptyDiv = document.createElement("div");
+            emptyDiv.className = "mini-tip-note empty";
+            emptyDiv.textContent = `🌸 ${t("mini.tip.noNotes")}`;
+            tipEl.appendChild(emptyDiv);
+
+            const btnDiv = document.createElement("div");
+            btnDiv.className = "mini-tip-action-btn";
+            btnDiv.textContent = t("mini.tip.createNote");
+            tipEl.appendChild(btnDiv);
         }
-        
-        let statText = "";
+
+        let statText;
         if (upcoming === 0) {
-            statText = lang === "es" ? "Tu agenda está despejada" : "Your schedule is clear";
+            statText = t("mini.tip.scheduleClear");
         } else if (upcoming === 1) {
-            statText = lang === "es" ? "1 evento próximo" : "1 upcoming event";
+            statText = t("mini.tip.oneUpcoming");
         } else {
-            statText = lang === "es" ? `<b>${upcoming}</b> eventos próximos` : `<b>${upcoming}</b> upcoming events`;
+            statText = t("mini.tip.nUpcoming", { n: upcoming });
         }
-        
-        html += `<div class="mini-tip-stat">${statText}</div>`;
-        tipEl.innerHTML = html;
+
+        const statDiv = document.createElement("div");
+        statDiv.className = "mini-tip-stat";
+        if (upcoming > 1) {
+            // "{n} upcoming events" with the count highlighted
+            const parts = t("mini.tip.nUpcoming", { n: "\u0000" }).split("\u0000");
+            statDiv.appendChild(document.createTextNode(parts[0] || ""));
+            const countEl = document.createElement("b");
+            countEl.textContent = String(upcoming);
+            statDiv.appendChild(countEl);
+            statDiv.appendChild(document.createTextNode(parts[1] || ""));
+        } else {
+            statDiv.textContent = statText;
+        }
+        tipEl.appendChild(statDiv);
     }
 
     function positionTip() {

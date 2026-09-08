@@ -3326,3 +3326,22 @@
         margin: 0;
         padding: 0;
     }
+
+    /* Display card "Move Here" button hover (replaces old inline
+       onmouseover/onmouseout handlers — CSP forbids inline JS) */
+    .s-move-btn:hover {
+        box-shadow: var(--glow-sm);
+        border-color: var(--border-active);
+    }
+
+    /* Pause purely decorative animations for users who prefer
+       reduced motion (mirrors the mini window's support). */
+    @media (prefers-reduced-motion: reduce) {
+        .agenda-empty-ico,
+        .tcard.on,
+        .tcard,
+        .wbar,
+        .t-presets.attract {
+            animation: none !important;
+        }
+    }

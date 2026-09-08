@@ -3,7 +3,7 @@
    CyberGems © 2026
 ═══════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+@import url('fonts.css');
 
 *, *::before, *::after {
   box-sizing: border-box;

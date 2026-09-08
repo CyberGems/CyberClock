@@ -1,16 +1,47 @@
 /**
  * CyberClock — Tauri Frontend Bridge Adapter
- * Replaces Electron contextBridge exposing safe window.cc commands.
+ * Exposes safe window.cc commands to every window.
+ *
+ * In a browser (no Tauri runtime, e.g. local development), falls back
+ * to an in-memory settings store so windows can still be worked on
+ * outside the app; invoke/listen become no-ops.
  */
 
 (function () {
-    const { invoke } = window.__TAURI__.core;
-    const { listen } = window.__TAURI__.event;
-    const { getCurrentWindow } = window.__TAURI__.window;
+    const HAS_TAURI =
+        typeof window !== "undefined" &&
+        window.__TAURI__ &&
+        window.__TAURI__.core &&
+        window.__TAURI__.event;
 
-    let eventListeners = {};
+    const invoke = HAS_TAURI ? window.__TAURI__.core.invoke : async () => undefined;
+    const listen = HAS_TAURI
+        ? window.__TAURI__.event.listen
+        : async () => () => { /* unlisten no-op in browser */ };
+    const emit = HAS_TAURI ? window.__TAURI__.event.emit : async () => undefined;
+
+    // Browser fallback store (dev only — never used inside the app).
+    let browserSettings = null;
+
+    const invokeOrFallback = async (cmd, args, fallback) => {
+        if (!HAS_TAURI) return fallback;
+        return invoke(cmd, args);
+    };
+
+    // Keep unlisten handles so cc.off(channel, cb) can actually detach.
+    const listenerRegistry = new Map(); // channel -> Set<unlisten>
+
+    async function subscribe(channel, cb) {
+        const unlisten = await listen(channel, (event) => cb(event.payload));
+        if (!listenerRegistry.has(channel)) listenerRegistry.set(channel, new Set());
+        listenerRegistry.get(channel).add(unlisten);
+        return unlisten;
+    }
 
     window.cc = {
+        // ── Environment ───────────────────────────────────────────
+        isTauri: () => HAS_TAURI,
+
         // ── Window management ─────────────────────────────────────
         openWindow: async (name) => {
             await invoke("open_window", { name });
@@ -44,8 +75,8 @@
         },
         openMiniContextMenu: async (point) => {
             // Use client coordinates which are more reliable across DPI scaling
-            await invoke("open_mini_context_menu", { 
-                x: Math.round(point.x || 0), 
+            await invoke("open_mini_context_menu", {
+                x: Math.round(point.x || 0),
                 y: Math.round(point.y || 0),
                 screenX: Math.round(point.screenX),
                 screenY: Math.round(point.screenY)
@@ -55,8 +86,9 @@
             await invoke("close_mini_context_menu");
         },
         startDragging: async () => {
+            if (!HAS_TAURI) return;
             try {
-                const currentWindow = getCurrentWindow();
+                const currentWindow = window.__TAURI__.window.getCurrentWindow();
                 await currentWindow.startDragging();
             } catch (err) {
                 console.warn('startDragging failed:', err);
@@ -65,20 +97,23 @@
 
         // ── Settings ──────────────────────────────────────────────
         getSettings: async () => {
-            return await invoke("get_settings");
+            return await invokeOrFallback("get_settings", undefined, browserSettings || (browserSettings = {}));
         },
         saveSettings: async (patch) => {
-            const current = await invoke("get_settings");
-            const updated = Object.assign({}, current, patch);
-            const res = await invoke("save_settings", { settings: updated });
+            // Server-side partial merge: closes the cross-window
+            // read-modify-write race of the old get→assign→save flow.
+            const res = await invokeOrFallback("patch_settings", { patch }, null);
+            if (res === null) {
+                // Browser fallback: local shallow merge per top-level key.
+                browserSettings = Object.assign({}, browserSettings, patch);
+                return browserSettings;
+            }
             // Notify other windows via Tauri event emit
-            const { emit } = window.__TAURI__.event;
             await emit("settings:updated", res);
             return res;
         },
         resetSettings: async () => {
-            const res = await invoke("reset_settings");
-            const { emit } = window.__TAURI__.event;
+            const res = await invokeOrFallback("reset_settings", undefined, (browserSettings = {}));
             await emit("settings:updated", res);
             return res;
         },
@@ -91,12 +126,12 @@
             return await invoke("open_file_dialog");
         },
         getScreens: async () => {
-            return await invoke("get_screens");
+            return await invokeOrFallback("get_screens", undefined, []);
         },
 
-        // ── App info & updates ────────────────────────────────────
+        // ── App info & updates ───────────────────────────────────
         getAppVersion: async () => {
-            return await invoke("get_app_version");
+            return await invokeOrFallback("get_app_version", undefined, "dev");
         },
         checkForUpdates: async () => {
             return await invoke("check_for_updates");
@@ -108,7 +143,7 @@
             return await invoke("install_update");
         },
         onUpdateStatus: (cb) => {
-            return listen("update:status", (event) => cb(event.payload));
+            return subscribe("update:status", cb);
         },
 
         selectDisplay: async (id) => {
@@ -145,48 +180,62 @@
 
         // ── Events (renderer ← main) ──────────────────────────────
         onInit: (cb) => {
-            invoke("get_settings").then(s => cb(s));
+            if (!HAS_TAURI) {
+                // Browser fallback: run with whatever the store has.
+                Promise.resolve()
+                    .then(() => cb(browserSettings || (browserSettings = {})))
+                    .catch((e) => console.error("onInit fallback failed:", e));
+                return;
+            }
+            invoke("get_settings")
+                .then((s) => cb(s))
+                .catch((e) => console.error("onInit: get_settings failed:", e));
         },
         onSettingsUpdated: (cb) => {
-            listen("settings:updated", (event) => cb(event.payload));
+            return subscribe("settings:updated", cb);
         },
         onThemeChanged: (cb) => {
-            listen("theme:changed", (event) => cb(event.payload));
+            return subscribe("theme:changed", cb);
         },
         onAlarmChime: (cb) => {
-            listen("alarm:chime", (event) => cb(event.payload));
+            return subscribe("alarm:chime", cb);
         },
         onRelaxTrigger: (cb) => {
-            listen("relax:trigger", (event) => cb(event.payload));
+            return subscribe("relax:trigger", cb);
         },
         onMiniContextMenu: (cb) => {
-            listen("mini:context-menu", (event) => cb(event.payload));
+            return subscribe("mini:context-menu", cb);
         },
         onMiniContextMenuClosed: (cb) => {
-            listen("mini:context-menu-closed", () => cb());
+            return subscribe("mini:context-menu-closed", cb);
         },
         onMenuState: (cb) => {
-            listen("menu:state", (event) => cb(event.payload));
+            return subscribe("menu:state", cb);
         },
         onMiniMenuAction: (cb) => {
-            listen("mini:menu-action", (event) => cb(event.payload));
+            return subscribe("mini:menu-action", cb);
         },
         onActiveWindow: (cb) => {
-            listen("cc:active-window", (event) => cb(event.payload));
+            return subscribe("cc:active-window", cb);
         },
         onTrayMenuState: (cb) => {
-            listen("tray-menu-state", (event) => cb(event.payload));
+            return subscribe("tray-menu-state", cb);
         },
         onTrayMenuShow: (cb) => {
-            listen("tray-menu-show", () => cb());
+            return subscribe("tray-menu-show", cb);
         },
         onTrayMenuHide: (cb) => {
-            listen("tray-menu-hide", () => cb());
+            return subscribe("tray-menu-hide", cb);
         },
 
         // ── Cleanup ───────────────────────────────────────────────
-        off: (channel) => {
-            // Unlisten handles in Tauri
+        off: async (channel) => {
+            const set = listenerRegistry.get(channel);
+            if (!set) return;
+            for (const unlisten of set) {
+                try { await unlisten(); } catch (e) { /* already gone */ }
+            }
+            listenerRegistry.delete(channel);
         }
     };
 })();
