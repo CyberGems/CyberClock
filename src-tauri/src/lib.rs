@@ -1673,7 +1673,7 @@ fn show_initial_window(app: &AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // Focus existing window when second instance is launched
             let settings = load_settings(app);
@@ -1714,10 +1714,6 @@ pub fn run() {
         .manage(AlarmState::default())
         .manage(UpdaterState::default())
         .setup(|app| {
-            // The settings store must exist before anything reads
-            // settings (tray setup, background threads, updater init).
-            app.manage(init_settings_store(app.handle()));
-
             // Setup tray icon
             setup_tray(app.handle())?;
 
@@ -1828,7 +1824,15 @@ pub fn run() {
             check_for_updates,
             download_update,
             install_update
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        ]);
+
+    // Build the app without starting the event loop, so the settings
+    // store can be managed BEFORE the config windows are created (the
+    // frontend's onInit invokes get_settings as soon as a window loads
+    // — managing state inside setup() would be too late and panic).
+    let app = builder
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+    app.manage(init_settings_store(app.handle()));
+    app.run(|_, _| {});
 }
