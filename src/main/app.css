@@ -3345,3 +3345,38 @@
             animation: none !important;
         }
     }
+
+    /* Custom alarm day-of-week buttons */
+    .s-cust-days {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        flex: 1;
+        min-width: 0;
+    }
+    .s-day-btn {
+        font-family: "Orbitron", monospace;
+        font-size: 8px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        background: transparent;
+        border: 1px solid var(--border-bright);
+        color: var(--text-md);
+        padding: 5px 9px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .s-day-btn:hover {
+        border-color: var(--border-active);
+        color: var(--accent-a);
+    }
+    .s-day-btn.on {
+        background: rgba(var(--rgb-accent), 0.15);
+        border-color: var(--accent-a);
+        color: var(--accent-a);
+        text-shadow: var(--glow-xs);
+    }
+    .s-day-btn.s-day-all {
+        border-style: dashed;
+    }
