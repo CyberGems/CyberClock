@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/icon.png" width="120" alt="CyberClock logo" />
+  <img src="src/assets/images/icon.png" width="120" alt="CyberClock logo" />
 </p>
 
 <h1 align="center">CyberClock — Desktop Clock</h1>
