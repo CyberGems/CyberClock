@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "Extra permissions for the main window: file dialogs, updates and restart",
+  "windows": ["main"],
+  "permissions": [
+    "dialog:allow-open",
+    "updater:default",
+    "process:allow-restart"
+  ]
+}

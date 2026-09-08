@@ -7,6 +7,8 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_updater::UpdaterExt;
 use tokio::time::{sleep, timeout};
 
+use log::{error, info};
+
 pub struct UpdaterState {
     pending: Mutex<Option<PendingUpdate>>,
 }
@@ -26,6 +28,11 @@ impl Default for UpdaterState {
 
 static AUTO_UPDATE_ENABLED: AtomicBool = AtomicBool::new(true);
 
+/// Version of the pending update, if any has been found. Read by
+/// the tray menu state so it can show the real "update available"
+/// badge instead of a hardcoded value.
+static PENDING_VERSION: Mutex<Option<String>> = Mutex::new(None);
+
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct UpdateStatusPayload {
@@ -42,8 +49,19 @@ fn emit_status(app: &AppHandle, payload: UpdateStatusPayload) {
     let _ = app.emit("update:status", payload);
 }
 
+/// Lock a mutex without panicking on poison: if another thread
+/// panicked while holding it, we recover the inner value and keep
+/// working instead of killing this thread too.
+fn lock_or_recover<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
 pub fn set_auto_update(enabled: bool) {
     AUTO_UPDATE_ENABLED.store(enabled, Ordering::SeqCst);
+}
+
+pub fn pending_update_version() -> Option<String> {
+    lock_or_recover(&PENDING_VERSION).clone()
 }
 
 pub fn init_updater(app: &AppHandle, auto_update: bool) {
@@ -77,28 +95,21 @@ pub async fn check_for_updates(app: AppHandle) -> Result<serde_json::Value, Stri
                     message: Some("Update check timed out".into()),
                 },
             );
-            Ok(serde_json::json!({
-                "ok": false,
-                "error": "Update check timed out"
-            }))
+            Err("Update check timed out".into())
         }
     }
 }
 
 #[tauri::command]
 pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String> {
-    match perform_download(&app).await {
-        Ok(()) => Ok(serde_json::json!({ "ok": true })),
-        Err(e) => Ok(serde_json::json!({ "ok": false, "error": e })),
-    }
+    perform_download(&app)
+        .await
+        .map(|_| serde_json::json!({ "ok": true }))
 }
 
 #[tauri::command]
 pub async fn install_update(app: AppHandle) -> Result<serde_json::Value, String> {
-    match perform_install(&app) {
-        Ok(()) => Ok(serde_json::json!({ "ok": true })),
-        Err(e) => Ok(serde_json::json!({ "ok": false, "error": e })),
-    }
+    perform_install(&app).map(|_| serde_json::json!({ "ok": true }))
 }
 
 async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::Value, String> {
@@ -116,6 +127,7 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
         Ok(u) => u,
         Err(e) => {
             let msg = e.to_string();
+            error!("Updater: {}", msg);
             emit_status(
                 app,
                 UpdateStatusPayload {
@@ -125,7 +137,7 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
                     message: Some(msg.clone()),
                 },
             );
-            return Ok(serde_json::json!({ "ok": false, "error": msg }));
+            return Err(msg);
         }
     };
 
@@ -134,11 +146,12 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
             let version = update.version.clone();
             {
                 let state = app.state::<UpdaterState>();
-                *state.pending.lock().unwrap() = Some(PendingUpdate {
+                *lock_or_recover(&state.pending) = Some(PendingUpdate {
                     update,
                     bytes: None,
                 });
             }
+            *lock_or_recover(&PENDING_VERSION) = Some(version.clone());
 
             emit_status(
                 app,
@@ -154,10 +167,12 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
                 let _ = perform_download(app).await;
             }
 
+            info!("Updater: update available -> v{}", version);
             Ok(serde_json::json!({ "ok": true, "version": version }))
         }
         Ok(None) => {
             let version = app.package_info().version.to_string();
+            *lock_or_recover(&PENDING_VERSION) = None;
             emit_status(
                 app,
                 UpdateStatusPayload {
@@ -171,6 +186,7 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
         }
         Err(e) => {
             let msg = e.to_string();
+            error!("Updater: check failed: {}", msg);
             emit_status(
                 app,
                 UpdateStatusPayload {
@@ -180,7 +196,7 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
                     message: Some(msg.clone()),
                 },
             );
-            Ok(serde_json::json!({ "ok": false, "error": msg }))
+            Err(msg)
         }
     }
 }
@@ -188,8 +204,8 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
 async fn perform_download(app: &AppHandle) -> Result<(), String> {
     let pending = {
         let state = app.state::<UpdaterState>();
-        let mut guard = state.pending.lock().unwrap();
-        guard.take()
+        let taken = lock_or_recover(&state.pending).take();
+        taken
     };
 
     let Some(mut pending) = pending else {
@@ -206,12 +222,8 @@ async fn perform_download(app: &AppHandle) -> Result<(), String> {
         .download(
             move |chunk_length, content_length| {
                 downloaded += chunk_length as u64;
-                let percent = content_length.map(|total| {
-                    if total > 0 {
-                        ((downloaded * 100) / total) as u32
-                    } else {
-                        0
-                    }
+                let percent = content_length.and_then(|total| {
+                    (downloaded * 100).checked_div(total).map(|p| p as u32)
                 });
                 emit_status(
                     &app_progress,
@@ -231,7 +243,7 @@ async fn perform_download(app: &AppHandle) -> Result<(), String> {
         Ok(bytes) => {
             pending.bytes = Some(bytes);
             let state = app.state::<UpdaterState>();
-            *state.pending.lock().unwrap() = Some(pending);
+            *lock_or_recover(&state.pending) = Some(pending);
             emit_status(
                 app,
                 UpdateStatusPayload {
@@ -246,8 +258,9 @@ async fn perform_download(app: &AppHandle) -> Result<(), String> {
         Err(e) => {
             pending.bytes = None;
             let state = app.state::<UpdaterState>();
-            *state.pending.lock().unwrap() = Some(pending);
+            *lock_or_recover(&state.pending) = Some(pending);
             let msg = e.to_string();
+            error!("Updater: download failed: {}", msg);
             emit_status(
                 app,
                 UpdateStatusPayload {
@@ -265,8 +278,8 @@ async fn perform_download(app: &AppHandle) -> Result<(), String> {
 fn perform_install(app: &AppHandle) -> Result<(), String> {
     let pending = {
         let state = app.state::<UpdaterState>();
-        let mut guard = state.pending.lock().unwrap();
-        guard.take()
+        let taken = lock_or_recover(&state.pending).take();
+        taken
     };
 
     let Some(pending) = pending else {
