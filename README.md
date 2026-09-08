@@ -161,6 +161,15 @@ npm run build
 
 The installer will be in `src-tauri/target/release/`.
 
+### 🛡️ Windows SmartScreen
+
+Windows may show a SmartScreen warning the first time you run the CyberClock installer — this is expected until Windows builds enough reputation for the file.
+
+To continue:
+
+1. Click **More info**.
+2. Click **Run anyway**.
+
 ---
 
 ## 🎨 Themes & Customization
