@@ -104,6 +104,7 @@ pub struct AppSettings {
     pub last_relax_track: Option<String>,
     pub mini_scanlines: bool,
     pub mini_collapse_date: bool,
+    pub mini_solar_real: bool,
 
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
@@ -150,6 +151,7 @@ impl Default for AppSettings {
             last_relax_track: None,
             mini_scanlines: true,
             mini_collapse_date: false,
+            mini_solar_real: false,
             custom_alarms: vec![
                 CustomAlarm::default(),
                 CustomAlarm::default(),

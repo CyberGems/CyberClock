@@ -1,6 +1,14 @@
     let currentDesign = 1;
     let alwaysOnTop = false;
 
+    // The Real Sun Cycle toggle only applies to the Sunset Pulse skin
+    // (design 7); show the row only when that design is active.
+    function syncSolarVisibility(design) {
+        currentDesign = design;
+        const row = document.getElementById("ctx-solar");
+        if (row) row.style.display = design === 7 ? "flex" : "none";
+    }
+
     // Debounced settings save for slider drags: each save broadcasts
     // the full settings object to every window, so coalesce the burst
     // of `input` events into one trailing save.
@@ -34,6 +42,8 @@
                     if (lockLbl) lockLbl.textContent = window.ccI18n.t("settings.mini.lockPos");
                     const aotLbl = document.querySelector("#ctx-aot .switch-lbl");
                     if (aotLbl) aotLbl.textContent = window.ccI18n.t("menu.alwaysOnTop");
+                    const solarLbl = document.querySelector("#ctx-solar .switch-lbl");
+                    if (solarLbl) solarLbl.textContent = window.ccI18n.t("settings.mini.solarReal");
                     const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
                     if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
                     const timerLbl = document.querySelector('.ctx-item[data-action="timer"] .label');
@@ -53,6 +63,10 @@
                 document.querySelectorAll(".design-btn").forEach((btn) => {
                     btn.classList.toggle("active", parseInt(btn.dataset.mode) === activeDesign);
                 });
+                syncSolarVisibility(activeDesign);
+
+                // Real Sun Cycle (design 7 only)
+                document.getElementById("toggle-solar").classList.toggle("on", cfg.miniSolarReal || false);
                 
                 // Active Opacity (Content)
                 const activeOpacity = Math.round((cfg.miniOpacity ?? 1.0) * 100);
@@ -82,11 +96,25 @@
             const mode = parseInt(btn.dataset.mode);
             document.querySelectorAll(".design-btn").forEach((b) => b.classList.remove("active"));
             btn.classList.add("active");
-            
+            syncSolarVisibility(mode);
+
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniDesign: mode });
             }
         });
+    });
+
+    // Real Sun Cycle toggle handler (design 7 only)
+    const solarRow = document.getElementById("ctx-solar");
+    solarRow.addEventListener("click", () => {
+        const tgl = document.getElementById("toggle-solar");
+        const on = tgl.classList.toggle("on");
+        if (window.cc && window.cc.saveSettings) {
+            window.cc.saveSettings({ miniSolarReal: on });
+        }
+        if (window.cc && window.cc.closeMenuPopup) {
+            setTimeout(() => window.cc.closeMenuPopup(), 200);
+        }
     });
 
     // Opacity slider handler (Content)

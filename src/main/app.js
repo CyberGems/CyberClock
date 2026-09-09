@@ -393,6 +393,11 @@
         if (miniCollapse) miniCollapse.checked = s.miniCollapseDate || false;
         const miniScan = document.getElementById('s-mini-scan');
         if (miniScan) miniScan.checked = s.miniScanlines !== false;
+        // Real Sun Cycle row — visible only for the Sunset Pulse skin (7)
+        const solarRow = document.getElementById('s-mini-solar-row');
+        if (solarRow) solarRow.style.display = (s.miniDesign || 1) === 7 ? 'flex' : 'none';
+        const miniSolar = document.getElementById('s-mini-solar');
+        if (miniSolar) miniSolar.checked = s.miniSolarReal === true;
     }
 
     function showCustomFile(which, p) {
@@ -2574,6 +2579,9 @@
             const mode = parseInt(btn.dataset.miniDesign);
             document.querySelectorAll('[data-mini-design]').forEach((b) => b.classList.remove('on'));
             btn.classList.add('on');
+            // Real Sun Cycle row only applies to design 7 — sync its visibility
+            const solarRow = document.getElementById('s-mini-solar-row');
+            if (solarRow) solarRow.style.display = mode === 7 ? 'flex' : 'none';
             window.cc.saveSettings({ miniDesign: mode });
         });
     });
@@ -2609,6 +2617,12 @@
     if (sMiniScan) {
         sMiniScan.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniScanlines: e.target.checked });
+        });
+    }
+    const sMiniSolar = document.getElementById('s-mini-solar');
+    if (sMiniSolar) {
+        sMiniSolar.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniSolarReal: e.target.checked });
         });
     }
     document

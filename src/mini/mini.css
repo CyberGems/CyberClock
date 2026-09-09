@@ -772,6 +772,116 @@
         filter: drop-shadow(0 0 6px rgba(255, 180, 107, 0.7));
     }
 
+    /* ── Real-sun phases (design 7, optional) ───────────────
+       With miniSolarReal enabled the shell carries data-solar
+       ="dawn|day|sunset|night" (local hour windows, set by
+       mini.js once per tick). Sunset = the signature look above;
+       the other phases swap the gradient, text glow, border and
+       LED hue. Sun/horizon geometry stays identical. */
+    .mini-shell[data-design="7"][data-solar="dawn"] .mini-bg {
+        background: linear-gradient(115deg,
+            #1e1233 0%,
+            #3a1c4e 30%,
+            #8a3d68 62%,
+            #e87a6a 85%,
+            #ffc078 100%);
+    }
+    .mini-shell[data-design="7"][data-solar="dawn"] {
+        border-color: rgba(255, 170, 130, 0.4);
+    }
+    .mini-shell[data-design="7"][data-solar="dawn"] #mini-time {
+        text-shadow:
+            0 0 10px rgba(255, 170, 120, 0.55),
+            0 0 26px rgba(232, 122, 106, 0.3);
+    }
+    .mini-shell[data-design="7"][data-solar="dawn"]::before {
+        background: linear-gradient(90deg,
+            transparent 6%,
+            rgba(255, 199, 130, 0.6) 30%,
+            rgba(255, 226, 180, 0.75) 50%,
+            rgba(255, 199, 130, 0.6) 70%,
+            transparent 94%);
+    }
+    .mini-shell[data-design="7"][data-solar="dawn"] .status-dot {
+        --led-halo: #ffb066;
+        background: #ffcf9e;
+        box-shadow: 0 0 12px #ffb066, 0 0 24px rgba(232, 122, 106, 0.45);
+    }
+
+    .mini-shell[data-design="7"][data-solar="day"] .mini-bg {
+        background: linear-gradient(115deg,
+            #0e2a4a 0%,
+            #2c5e8e 40%,
+            #6fa8d2 75%,
+            #a8d4ec 100%);
+    }
+    .mini-shell[data-design="7"][data-solar="day"] {
+        border-color: rgba(147, 202, 236, 0.5);
+    }
+    .mini-shell[data-design="7"][data-solar="day"] #mini-time {
+        color: #ffffff;
+        text-shadow:
+            0 0 10px rgba(120, 180, 230, 0.6),
+            0 0 24px rgba(90, 150, 210, 0.3);
+    }
+    .mini-shell[data-design="7"][data-solar="day"] #mini-date {
+        color: rgba(240, 250, 255, 0.8);
+    }
+    .mini-shell[data-design="7"][data-solar="day"]::before {
+        background: linear-gradient(90deg,
+            transparent 6%,
+            rgba(220, 240, 255, 0.6) 30%,
+            rgba(255, 255, 255, 0.8) 50%,
+            rgba(220, 240, 255, 0.6) 70%,
+            transparent 94%);
+    }
+    .mini-shell[data-design="7"][data-solar="day"] .status-dot {
+        --led-halo: #ffd54d;
+        background: #ffe082;
+        box-shadow: 0 0 12px #ffd54d, 0 0 24px rgba(255, 213, 77, 0.45);
+    }
+
+    .mini-shell[data-design="7"][data-solar="night"] .mini-bg {
+        background: linear-gradient(115deg,
+            #05060f 0%,
+            #0b1030 45%,
+            #1a1740 75%,
+            #2a2050 100%);
+    }
+    .mini-shell[data-design="7"][data-solar="night"] {
+        border-color: rgba(122, 162, 247, 0.35);
+    }
+    .mini-shell[data-design="7"][data-solar="night"] #mini-time {
+        color: #dfe8ff;
+        text-shadow:
+            0 0 10px rgba(122, 162, 247, 0.6),
+            0 0 26px rgba(90, 120, 220, 0.3);
+    }
+    .mini-shell[data-design="7"][data-solar="night"] #mini-date {
+        color: rgba(190, 205, 245, 0.7);
+    }
+    .mini-shell[data-design="7"][data-solar="night"]::before {
+        background: linear-gradient(90deg,
+            transparent 6%,
+            rgba(122, 162, 247, 0.35) 30%,
+            rgba(170, 200, 255, 0.5) 50%,
+            rgba(122, 162, 247, 0.35) 70%,
+            transparent 94%);
+    }
+    .mini-shell[data-design="7"][data-solar="night"] .status-dot {
+        --led-halo: #7aa2f7;
+        background: #a8c1ff;
+        box-shadow: 0 0 12px #7aa2f7, 0 0 24px rgba(122, 162, 247, 0.45);
+    }
+    .mini-shell[data-design="7"][data-solar="night"]::after {
+        /* Moon instead of sun at night: same geometry, cool tint. */
+        background: radial-gradient(circle,
+            rgba(220, 230, 255, 0.8) 0%,
+            rgba(150, 175, 235, 0.55) 45%,
+            rgba(100, 130, 210, 0) 72%);
+        box-shadow: 0 0 12px rgba(160, 185, 245, 0.4);
+    }
+
     /* ═══════════════════════════════════════════════════════
        SKIN 8: Frost Crystal
        ═══════════════════════════════════════════════════════ */
