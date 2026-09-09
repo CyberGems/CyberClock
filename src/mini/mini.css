@@ -441,43 +441,75 @@
 
     /* ═══════════════════════════════════════════════════════
        SKIN 5: Neon Circuit
+       Fixed electric-cyan neon identity on a dark theme-tinted
+       board. The circuit grid is now visible (it used to render
+       at ~1.5% effective alpha) with glowing junction nodes at
+       the line crossings, plus PCB corner brackets.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="5"] .mini-bg {
-        background: var(--bg-01);
+        background:
+            radial-gradient(ellipse at 18% 50%, rgba(0, 229, 255, 0.10), transparent 55%),
+            linear-gradient(160deg, color-mix(in srgb, #040f1a 88%, var(--accent-a)) 0%, #061520 100%);
     }
     .mini-shell[data-design="5"] {
         height: 50px;
-        border: 1px solid var(--border-bright);
+        border: 1px solid rgba(0, 229, 255, 0.45);
         border-radius: 8px;
         padding: 0 14px;
         gap: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(var(--rgb-accent), 0.15);
+        box-shadow:
+            0 4px 20px rgba(0, 0, 0, 0.5),
+            0 0 18px rgba(0, 229, 255, 0.16),
+            inset 0 0 24px rgba(0, 229, 255, 0.04);
         position: relative;
         overflow: hidden;
     }
     .mini-shell[data-design="5"]::before {
+        /* Circuit grid: crossing accent lines every 20px + glowing
+           junction dots where they intersect. Two stacked
+           repeating-gradients paint lines; a third paints nodes. */
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, transparent 49.5%, rgba(var(--rgb-accent), 0.05) 49.5%, rgba(var(--rgb-accent), 0.05) 50.5%, transparent 50.5%),
-                    linear-gradient(0deg, transparent 49.5%, rgba(var(--rgb-accent), 0.05) 49.5%, rgba(var(--rgb-accent), 0.05) 50.5%, transparent 50.5%);
-        background-size: 20px 20px;
+        background:
+            radial-gradient(circle 1.6px at 10px 10px, rgba(0, 229, 255, 0.85) 0%, rgba(0, 229, 255, 0.25) 45%, transparent 60%),
+            linear-gradient(90deg, transparent 49.5%, rgba(0, 229, 255, 0.10) 49.5%, rgba(0, 229, 255, 0.10) 50.5%, transparent 50.5%),
+            linear-gradient(0deg, transparent 49.5%, rgba(0, 229, 255, 0.10) 49.5%, rgba(0, 229, 255, 0.10) 50.5%, transparent 50.5%);
+        background-size: 20px 20px, 20px 20px, 20px 20px;
         pointer-events: none;
-        opacity: 0.3;
+        opacity: 0.55;
+    }
+    .mini-shell[data-design="5"]::after {
+        /* PCB corner brackets (coppery-cyan trace ends) */
+        content: '';
+        position: absolute;
+        inset: 4px;
+        background:
+            linear-gradient(to bottom, rgba(0, 229, 255, 0.8) 0 8px, transparent 8px) top left / 12px 2px no-repeat,
+            linear-gradient(to right, rgba(0, 229, 255, 0.8) 0 8px, transparent 8px) top left / 2px 12px no-repeat,
+            linear-gradient(to top, rgba(0, 229, 255, 0.8) 0 8px, transparent 8px) bottom right / 12px 2px no-repeat,
+            linear-gradient(to left, rgba(0, 229, 255, 0.8) 0 8px, transparent 8px) bottom right / 2px 12px no-repeat;
+        pointer-events: none;
     }
     .mini-shell[data-design="5"] #mini-time {
+        position: relative;
+        z-index: 1;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
         font-size: 20px;
-        color: var(--accent-a);
+        color: #00e5ff;
         letter-spacing: 2px;
-        text-shadow: 0 0 12px rgba(var(--rgb-accent), 0.7);
+        text-shadow:
+            0 0 10px rgba(0, 229, 255, 0.8),
+            0 0 28px rgba(0, 229, 255, 0.35);
         white-space: nowrap;
     }
     .mini-shell[data-design="5"] #mini-date {
+        position: relative;
+        z-index: 1;
         font-family: "Share Tech Mono", monospace;
         font-size: 9px;
-        color: var(--text-md);
+        color: rgba(140, 220, 245, 0.68);
         letter-spacing: 1px;
         text-transform: uppercase;
         white-space: nowrap;
@@ -486,20 +518,31 @@
         width: 8px;
         height: 8px;
         border-radius: 2px;
-        background: var(--accent-a);
-        box-shadow: 0 0 8px var(--accent-a);
-        --led-halo: var(--accent-a);
+        background: #00e5ff;
+        box-shadow: 0 0 8px #00e5ff;
+        --led-halo: #00e5ff;
         --led-period: 3s;
-        animation: led-core-breathe var(--led-period, 3s) steps(16) infinite;
-    }
-    @keyframes circuit-pulse {
-        0%, 100% { opacity: 0.4; }
-        50% { opacity: 1; }
+        animation: led-core-breathe 3s steps(16) infinite;
     }
     .mini-shell[data-design="5"] .sep {
         width: 1px;
         height: 24px;
-        background: linear-gradient(to bottom, transparent, var(--border-bright), transparent);
+        background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.5), transparent);
+    }
+    .mini-shell[data-design="5"] .ctl-btn {
+        position: relative;
+        z-index: 1;
+        color: rgba(0, 229, 255, 0.55);
+    }
+    .mini-shell[data-design="5"] .ctl-btn:hover {
+        color: #00e5ff;
+        background: rgba(0, 229, 255, 0.14);
+    }
+    .mini-shell[data-design="5"] #btn-aot.active {
+        color: #00e5ff;
+    }
+    .mini-shell[data-design="5"] #btn-aot.active .ctl-ico {
+        filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8));
     }
 
     /* ═══════════════════════════════════════════════════════
