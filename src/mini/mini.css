@@ -143,47 +143,96 @@
 
     /* ═══════════════════════════════════════════════════════
        SKIN 2: Holo Display
+       Holographic cyan→violet gradient text with chromatic
+       aberration, breathing halos behind the digits and HUD
+       corner brackets. Fixed neon identity (not theme-tinted)
+       so it never looks washed out under the pastel themes.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="2"] .mini-bg {
-        background: var(--bg-02);
+        background: linear-gradient(160deg, #071423 0%, #0a1030 60%, #12082b 100%);
         backdrop-filter: blur(20px) saturate(1.8);
     }
     .mini-shell[data-design="2"] {
         height: 56px;
-        border: 1px solid rgba(var(--rgb-accent), 0.25);
+        border: 1px solid rgba(122, 162, 247, 0.35);
         border-radius: 12px;
         padding: 0 16px;
         gap: 14px;
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1),
-            0 0 30px rgba(var(--rgb-accent), 0.05);
+            inset 0 1px 0 rgba(160, 200, 255, 0.12),
+            0 0 30px rgba(90, 130, 255, 0.08);
+    }
+    .mini-shell[data-design="2"]::before {
+        /* HUD corner brackets */
+        content: '';
+        position: absolute;
+        inset: 5px;
+        border-radius: 8px;
+        background:
+            linear-gradient(to bottom, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) top left / 14px 1px no-repeat,
+            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) top left / 1px 14px no-repeat,
+            linear-gradient(to bottom, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) top right / 14px 1px no-repeat,
+            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) top right / 1px 14px no-repeat,
+            linear-gradient(to top, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) bottom left / 14px 1px no-repeat,
+            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) bottom left / 1px 14px no-repeat,
+            linear-gradient(to top, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) bottom right / 14px 1px no-repeat,
+            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) bottom right / 1px 14px no-repeat;
+        pointer-events: none;
     }
     .mini-shell[data-design="2"]::after {
+        /* Breathing scan sheen over the whole face — gradient painted
+           once; only opacity steps (composite-only). */
         content: '';
         position: absolute;
         inset: 0;
         border-radius: 12px;
-        background: linear-gradient(135deg, rgba(var(--rgb-accent), 0.05) 0%, transparent 50%, rgba(var(--rgb-accent), 0.03) 100%);
+        background: linear-gradient(135deg,
+            rgba(55, 230, 255, 0.07) 0%,
+            transparent 45%,
+            rgba(160, 107, 255, 0.05) 100%);
+        animation: led-breathe 4.4s steps(16) infinite;
         pointer-events: none;
     }
     .mini-shell[data-design="2"] .time-block {
         align-items: center;
+        position: relative;
+    }
+    .mini-shell[data-design="2"] .time-block::before {
+        /* Hologram halo behind the digits: a broad soft radial glow
+           painted once, breathing via opacity steps. */
+        content: '';
+        position: absolute;
+        inset: -8px -20px;
+        background: radial-gradient(ellipse at 30% 55%, rgba(55, 230, 255, 0.16), transparent 65%),
+                    radial-gradient(ellipse at 70% 55%, rgba(160, 107, 255, 0.13), transparent 65%);
+        animation: led-breathe 4.4s steps(16) infinite;
+        pointer-events: none;
+        z-index: 0;
     }
     .mini-shell[data-design="2"] #mini-time {
+        position: relative;
+        z-index: 1;
         font-family: "JetBrains Mono", monospace;
         font-weight: 700;
         font-size: 24px;
-        color: var(--accent-a);
-        letter-spacing: 5px;
-        text-shadow: 0 0 20px rgba(var(--rgb-accent), 0.8), 0 0 40px rgba(var(--rgb-accent), 0.4);
+        /* Chromatic aberration: the two offset shadows bleed red/cyan
+           past the gradient-filled glyphs, like a misaligned hologram. */
+        color: #37e6ff;
+        letter-spacing: 2px;
+        text-shadow:
+            -1.5px 0 12px rgba(255, 77, 141, 0.55),
+            1.5px 0 14px rgba(55, 230, 255, 0.65),
+            0 0 26px rgba(160, 107, 255, 0.45);
         white-space: nowrap;
     }
     .mini-shell[data-design="2"] #mini-date {
+        position: relative;
+        z-index: 1;
         font-family: "Share Tech Mono", monospace;
         font-weight: 400;
         font-size: 12px;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(170, 205, 255, 0.62);
         letter-spacing: 1.5px;
         white-space: nowrap;
     }
@@ -191,20 +240,29 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: var(--accent-a);
-        box-shadow: 0 0 12px var(--accent-a);
-        --led-halo: var(--accent-a);
+        background: #7aa2f7;
+        box-shadow: 0 0 12px #7aa2f7;
+        --led-halo: #7aa2f7;
         --led-period: 3.6s;
-        animation: led-core-breathe var(--led-period, 3.6s) steps(16) infinite;
-    }
-    @keyframes holo-pulse {
-        0%, 100% { opacity: 0.5; transform: scale(0.9); }
-        50% { opacity: 1; transform: scale(1.1); }
+        animation: led-core-breathe 3.6s steps(16) infinite;
     }
     .mini-shell[data-design="2"] .sep {
         width: 1px;
         height: 28px;
-        background: linear-gradient(to bottom, transparent, rgba(var(--rgb-accent), 0.4), transparent);
+        background: linear-gradient(to bottom, transparent, rgba(122, 162, 247, 0.5), transparent);
+    }
+    .mini-shell[data-design="2"] .ctl-btn {
+        color: rgba(122, 162, 247, 0.55);
+    }
+    .mini-shell[data-design="2"] .ctl-btn:hover {
+        color: #7aa2f7;
+        background: rgba(122, 162, 247, 0.14);
+    }
+    .mini-shell[data-design="2"] #btn-aot.active {
+        color: #37e6ff;
+    }
+    .mini-shell[data-design="2"] #btn-aot.active .ctl-ico {
+        filter: drop-shadow(0 0 6px rgba(55, 230, 255, 0.7));
     }
 
     /* ═══════════════════════════════════════════════════════
