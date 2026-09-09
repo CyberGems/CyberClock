@@ -33,24 +33,66 @@
     function updateClock() {
         const now = new Date();
         let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-        const designMode = cfg.miniDesign || 1;
         const noSeconds = false;
 
-        let timeStr;
+        let hh, mm, ss, ampm = "";
         if (cfg.clockFormat === "12h") {
-            const ampm = h >= 12 ? "PM" : "AM";
+            ampm = h >= 12 ? "PM" : "AM";
             h = h % 12 || 12;
-            timeStr = `${pad(h)}:${pad(m)}${!noSeconds && cfg.showSeconds !== false ? ":" + pad(s) : ""} ${ampm}`;
-        } else {
-            timeStr = `${pad(h)}:${pad(m)}${!noSeconds && cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
         }
-        document.getElementById("mini-time").textContent = timeStr;
+        hh = pad(h); mm = pad(m); ss = pad(s);
+
+        // Blinking colons: rendered as zero-width spans so the string width
+        // is identical whether the colon is "on" or "off" — no digit wobble.
+        const timeEl = document.getElementById("mini-time");
+        timeEl.replaceChildren(
+            document.createTextNode(hh),
+            makeColon(),
+            document.createTextNode(mm),
+        );
+        if (!noSeconds && cfg.showSeconds !== false) {
+            timeEl.appendChild(makeColon());
+            timeEl.appendChild(document.createTextNode(ss));
+        }
+        if (ampm) {
+            timeEl.appendChild(document.createTextNode(" " + ampm));
+        }
 
         const d = now;
         const days = getDays();
         const months = getMonths();
         document.getElementById("mini-date").textContent =
             `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+        // Keep the real-sun phase in sync across phase boundaries (the
+        // dataset attribute is a no-op write when the phase hasn't changed).
+        const shellForSolar = document.getElementById("shell");
+        if ((cfg.miniDesign || 1) == 7 && cfg.miniSolarReal === true) {
+            shellForSolar.dataset.solar = solarPhaseFor(now.getHours());
+        } else if (shellForSolar.dataset.solar) {
+            delete shellForSolar.dataset.solar;
+        }
+    }
+
+    function makeColon() {
+        // Zero-width blinking colon: <span class="t-colon">:</span>. The span
+        // collapses to 0 width and the blink animation only animates opacity
+        // (1 change/sec), so the string layout never shifts.
+        const el = document.createElement("span");
+        el.className = "t-colon";
+        el.textContent = ":";
+        return el;
+    }
+
+    // Real-sun phase for the Sunset Pulse skin (design 7). Derived from the
+    // local hour only (no geolocation), computed once per tick, and only
+    // applied when the user enabled it — see applySettings. Phases:
+    // dawn 5-8h, day 8-16h, sunset 16-19h, night 19-5h.
+    function solarPhaseFor(hour) {
+        if (hour >= 5 && hour < 8) return "dawn";
+        if (hour >= 8 && hour < 16) return "day";
+        if (hour >= 16 && hour < 19) return "sunset";
+        return "night";
     }
 
     // ═══════════════════════════════════════════════════════
@@ -130,6 +172,17 @@
         const aotOn = s.alwaysOnTop || false;
         document.getElementById("btn-aot").classList.toggle("active", aotOn);
         updateClock();
+
+        // Real-sun cycle for the Sunset Pulse skin (design 7). Applied as a
+        // data-solar phase attribute on the shell; CSS owns the palettes.
+        const shellEl = document.getElementById("shell");
+        if (shellEl) {
+            if ((s.miniDesign || 1) == 7 && s.miniSolarReal === true) {
+                shellEl.dataset.solar = solarPhaseFor(new Date().getHours());
+            } else {
+                delete shellEl.dataset.solar;
+            }
+        }
 
         // Resize window to match the skin height/width when design or collapse setting changes
         if (designChanged || collapseChanged || lastAppliedWidth === 0) {
@@ -316,17 +369,27 @@
     // ═══════════════════════════════════════════════════════
     // INITIALIZATION
     // ═══════════════════════════════════════════════════════
-    // Decorative CSS animations keep the (transparent, always-on-top)
-    // window recompositing every vsync, which is the main idle-CPU cost
-    // of the mini view. Pause them whenever the window is hidden, or it
-    // is unfocused and the cursor isn't over it. The clock text still
-    // updates every second regardless, so the time is never stale.
+    // Decorative CSS animations are cheap thanks to the steps() LED
+    // breathing (~5 frames/sec, composite-only), so they now run while
+    // the mini clock is visible even without focus or hover — the
+    // widget is the whole point of mini mode. They pause only when the
+    // window is truly hidden (document.hidden) or when the backend
+    // reports another window as the active one (full mode). The clock
+    // text still updates every second regardless.
     let miniHovered = false;
     function syncMiniMotion() {
         const shouldPause =
-            document.hidden || (!document.hasFocus() && !miniHovered);
+            document.hidden || activeBackendLabel === "main";
         document.body.classList.toggle("mini-paused", shouldPause);
     }
+    // The Rust backend is the only reliable source of truth for which
+    // window is on screen (WebView2 keeps reporting hidden windows as
+    // focused — see the main window's cc:active-window notes).
+    let activeBackendLabel = null;
+    window.cc.onActiveWindow((label) => {
+        activeBackendLabel = label;
+        syncMiniMotion();
+    });
 
     document.addEventListener("visibilitychange", syncMiniMotion);
     window.addEventListener("focus", syncMiniMotion);

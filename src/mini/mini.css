@@ -131,7 +131,9 @@
         border-radius: 50%;
         background: var(--accent-a);
         box-shadow: 0 0 8px var(--accent-a);
-        animation: pulse-dot 2s ease-in-out infinite;
+        --led-halo: var(--accent-a);
+        --led-period: 3.2s;
+        animation: led-core-breathe var(--led-period, 3.2s) steps(16) infinite;
     }
     .mini-shell[data-design="1"] .sep {
         width: 1px;
@@ -191,7 +193,9 @@
         border-radius: 50%;
         background: var(--accent-a);
         box-shadow: 0 0 12px var(--accent-a);
-        animation: holo-pulse 3s ease-in-out infinite;
+        --led-halo: var(--accent-a);
+        --led-period: 3.6s;
+        animation: led-core-breathe var(--led-period, 3.6s) steps(16) infinite;
     }
     @keyframes holo-pulse {
         0%, 100% { opacity: 0.5; transform: scale(0.9); }
@@ -254,6 +258,8 @@
         border-radius: 2px;
         background: #00ff88;
         box-shadow: 0 0 6px #00ff88;
+        --led-halo: #00ff88;
+        --led-period: 2.8s;
         animation: matrix-blink 2s step-end infinite;
     }
     @keyframes matrix-blink {
@@ -316,7 +322,9 @@
         border-radius: 50%;
         background: radial-gradient(circle at 30% 30%, #ffffff, var(--accent-a));
         box-shadow: 0 0 10px var(--accent-a);
-        animation: orb-pulse 2.5s ease-in-out infinite;
+        --led-halo: var(--accent-a);
+        --led-period: 4s;
+        animation: led-core-breathe var(--led-period, 4s) steps(16) infinite;
     }
     @keyframes orb-pulse {
         0%, 100% { transform: scale(0.9); opacity: 0.7; }
@@ -377,7 +385,9 @@
         border-radius: 2px;
         background: var(--accent-a);
         box-shadow: 0 0 8px var(--accent-a);
-        animation: circuit-pulse 1.5s ease-in-out infinite;
+        --led-halo: var(--accent-a);
+        --led-period: 3s;
+        animation: led-core-breathe var(--led-period, 3s) steps(16) infinite;
     }
     @keyframes circuit-pulse {
         0%, 100% { opacity: 0.4; }
@@ -429,8 +439,9 @@
         /* Static glow painted once; transform:scale grows it on the GPU
            (composite-only) instead of animating box-shadow (repaint). */
         box-shadow: 0 0 10px 2px rgba(var(--rgb-accent), 0.3);
-        will-change: transform, opacity;
-        animation: zen-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        --led-halo: var(--accent-a);
+        --led-period: 4.4s;
+        animation: led-core-breathe var(--led-period, 4.4s) steps(16) infinite;
     }
     @keyframes zen-pulse {
         0%, 100% { transform: scale(0.85); opacity: 0.5; }
@@ -560,8 +571,9 @@
         border-radius: 50%;
         background: #ff6b8a;
         box-shadow: 0 0 12px #ff6b8a, 0 0 24px rgba(255, 107, 138, 0.5);
-        will-change: transform, opacity;
-        animation: sunset-pulse 2.5s ease-in-out infinite;
+        --led-halo: #ff8c42;
+        --led-period: 3.6s;
+        animation: led-core-breathe var(--led-period, 3.6s) steps(16) infinite;
     }
     @keyframes sunset-pulse {
         0%, 100% { transform: scale(1); opacity: 0.9; }
@@ -656,7 +668,9 @@
         background: #3b82c4;
         border: 1.5px solid rgba(40, 90, 140, 0.6);
         box-shadow: 0 0 6px rgba(80, 150, 210, 0.45), inset 0 0 3px rgba(255, 255, 255, 0.4);
-        animation: frost-breathe 3s ease-in-out infinite;
+        --led-halo: #64c8ff;
+        --led-period: 4s;
+        animation: led-core-breathe var(--led-period, 4s) steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -733,6 +747,8 @@
         border-radius: 2px;
         background: #00fff0;
         box-shadow: 0 0 10px #00fff0, 0 0 24px rgba(0, 255, 240, 0.5);
+        --led-halo: #00fff0;
+        --led-period: 2.4s;
         animation: neotokyo-scan 1.2s step-end infinite;
     }
     @keyframes neotokyo-scan {
@@ -803,7 +819,9 @@
         border-radius: 50%;
         background: #d4a574;
         box-shadow: 0 0 6px rgba(212, 165, 116, 0.4);
-        animation: obsidian-breathe 3s ease-in-out infinite;
+        --led-halo: #d4a574;
+        --led-period: 4.8s;
+        animation: led-core-breathe var(--led-period, 4.8s) steps(16) infinite;
     }
     @keyframes obsidian-breathe {
         0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -895,8 +913,9 @@
         border-radius: 50%;
         background: #00ffff;
         box-shadow: 0 0 14px #00ffff, 0 0 30px rgba(0, 255, 255, 0.5);
-        will-change: transform, opacity;
-        animation: synth-pulse 1.8s ease-in-out infinite;
+        --led-halo: #00ffff;
+        --led-period: 3.6s;
+        animation: led-core-breathe var(--led-period, 3.6s) steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -990,6 +1009,8 @@
         border-radius: 0;
         transform: rotate(45deg);
         box-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
+        --led-halo: #00ff41;
+        --led-period: 3s;
         will-change: transform;
         animation: quantum-spin 3s linear infinite;
     }
@@ -1243,6 +1264,63 @@
     @keyframes pulse-dot {
         0%, 100% { opacity: 0.6; transform: scale(1); }
         50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SHARED LED BREATHING SYSTEM
+       Every skin's status dot = core (element itself, static
+       box-shadow painted once) + halo (::before, a radial
+       gradient painted once into its own layer) whose opacity
+       "breathes". The steps() timing makes the compositor
+       produce only ~5 frames/sec instead of one per vsync:
+       invisible in a diffuse glow, but it removes the constant
+       recompositing that used to cost idle CPU. Skins keep
+       their own color/shape/geometry — only the breathing
+       mechanics are shared. The shell animation pause rules at
+       the bottom of this file still cover these.
+       ═══════════════════════════════════════════════════════ */
+    .mini-shell .status-dot {
+        position: relative;
+    }
+    .mini-shell .status-dot::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 340%;
+        height: 340%;
+        transform: translate(-50%, -50%);
+        border-radius: inherit;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
+        pointer-events: none;
+        opacity: 0;
+    }
+    /* Halo layers per skin: each skin sets --led-halo below in its
+       own section (fixed neon or theme accent) and optionally
+       --led-halo-scale / --led-period for personality. */
+
+    @keyframes led-breathe {
+        0%, 100% { opacity: 0.12; }
+        50% { opacity: 0.55; }
+    }
+    /* Core breathing: opacity-only on the solid dot (composite-only, no
+       transform/scale layer promotion). The halo ::before carries the big
+       visual breathing; the core just dims/brightens in sync. */
+    @keyframes led-core-breathe {
+        0%, 100% { opacity: 0.75; }
+        50% { opacity: 1; }
+    }
+    @keyframes t-colon-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.25; }
+    }
+    .mini-shell .status-dot::before {
+        background: radial-gradient(circle, var(--led-halo, var(--accent-a)) 0%, transparent 70%);
+        animation: led-breathe var(--led-period, 3.6s) steps(16) infinite;
+    }
+    .t-colon {
+        display: inline-block;
+        animation: t-colon-blink 1s step-end infinite;
     }
 
     /* Pause decorative animations when hidden or user prefers reduced motion */
