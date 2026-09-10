@@ -231,6 +231,8 @@ If you're enjoying CyberClock, I'd be truly grateful for your support! You can s
 
 CyberClock is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
 
+---
+
 ## ❓ FAQ
 
 For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberClock/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cyberclock/FAQ).
