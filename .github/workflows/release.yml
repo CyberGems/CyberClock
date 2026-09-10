@@ -50,7 +50,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and release
+      # Draft release: the tauri-action builds the NSIS installer, signs the
+      # updater artifacts (.sig + latest.json, required by the app's updater
+      # endpoint), and creates the GitHub release as a DRAFT. The template
+      # render below replaces the body; publishing stays a manual step.
+      - name: Build and create draft release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,12 +63,35 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'CyberClock ${{ github.ref_name }}'
-          releaseBody: |
-            Release ${{ github.ref_name }}
-
-            Download the installer below. Installed copies with auto-updates enabled will receive this version automatically.
-          releaseDraft: false
+          releaseBody: 'Release ${{ github.ref_name }}'
+          releaseDraft: true
           prerelease: false
+
+      - name: Render release notes from template
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          VER_NUM="${TAG#v}"
+          INSTALLER=$(ls src-tauri/target/release/bundle/nsis/*-setup.exe | head -1)
+          if [ -z "$INSTALLER" ]; then
+            echo "::error::NSIS installer not found under src-tauri/target/release/bundle/nsis"
+            exit 1
+          fi
+          INSTALLER_HASH=$(sha256sum "$INSTALLER" | cut -d' ' -f1)
+          echo "installer: $INSTALLER"
+          echo "sha256:   $INSTALLER_HASH"
+
+          # Render .github/release-template.md with the release facts
+          sed -e "s/{{VERSION}}/$TAG/g" \
+              -e "s/{{VERSION_NUM}}/$VER_NUM/g" \
+              -e "s/{{INSTALLER_HASH}}/$INSTALLER_HASH/g" \
+              .github/release-template.md > FINAL_RELEASE_NOTES.md
+
+          # Update the draft release body in place (keeps draft state)
+          gh release edit "$TAG" --notes-file FINAL_RELEASE_NOTES.md
 
       - name: Generate checksums
         shell: bash
