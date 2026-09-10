@@ -714,8 +714,8 @@
         pointer-events: none;
     }
     .mini-shell[data-design="7"] #mini-time {
-        font-family: "Orbitron", sans-serif;
-        font-size: 12px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 13px;
         font-weight: 700;
         color: #fff5ec;
         letter-spacing: 1px;
@@ -1584,13 +1584,23 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0.25; }
     }
-    .mini-shell .status-dot::before {
-        background: radial-gradient(circle, var(--led-halo, var(--accent-a)) 0%, transparent 70%);
-        animation: led-breathe var(--led-period, 3.6s) steps(16) infinite;
+    /* Fixed-width digit cells (main window pattern, app.css .digit):
+       Orbitron/Outfit have no tabular figures, so digits sit in equal
+       1ch boxes, centered — the bar width never wobbles per tick. */
+    .mini-shell #mini-time .digit {
+        display: inline-block;
+        width: 1ch;
+        text-align: center;
     }
     .t-colon {
         display: inline-block;
+        width: 1ch;
+        text-align: center;
         animation: t-colon-blink 1s step-end infinite;
+    }
+    .mini-shell .status-dot::before {
+        background: radial-gradient(circle, var(--led-halo, var(--accent-a)) 0%, transparent 70%);
+        animation: led-breathe var(--led-period, 3.6s) steps(16) infinite;
     }
 
     /* Pause decorative animations when hidden or user prefers reduced motion */

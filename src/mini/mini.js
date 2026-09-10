@@ -41,22 +41,12 @@
             h = h % 12 || 12;
         }
         hh = pad(h); mm = pad(m); ss = pad(s);
+        const withSeconds = !noSeconds && cfg.showSeconds !== false;
+        const timeStr = ampm
+            ? `${hh}:${mm}${withSeconds ? ":" + ss : ""} ${ampm}`
+            : `${hh}:${mm}${withSeconds ? ":" + ss : ""}`;
 
-        // Blinking colons: rendered as zero-width spans so the string width
-        // is identical whether the colon is "on" or "off" — no digit wobble.
-        const timeEl = document.getElementById("mini-time");
-        timeEl.replaceChildren(
-            document.createTextNode(hh),
-            makeColon(),
-            document.createTextNode(mm),
-        );
-        if (!noSeconds && cfg.showSeconds !== false) {
-            timeEl.appendChild(makeColon());
-            timeEl.appendChild(document.createTextNode(ss));
-        }
-        if (ampm) {
-            timeEl.appendChild(document.createTextNode(" " + ampm));
-        }
+        setDigits(document.getElementById("mini-time"), timeStr);
 
         const d = now;
         const days = getDays();
@@ -74,14 +64,31 @@
         }
     }
 
-    function makeColon() {
-        // Zero-width blinking colon: <span class="t-colon">:</span>. The span
-        // collapses to 0 width and the blink animation only animates opacity
-        // (1 change/sec), so the string layout never shifts.
-        const el = document.createElement("span");
-        el.className = "t-colon";
-        el.textContent = ":";
-        return el;
+    // Fixed-width digit cells (same pattern as the main window's digital
+    // clock — Orbitron and other display fonts have no tabular figures,
+    // so "1" is much narrower than "0" and the layout wobbles each tick).
+    // Each digit gets its own equal-width box (1ch = the advance width of
+    // "0" in the active font), centered; the blinking colons sit in their
+    // own cells. Skips DOM work entirely when the string is unchanged.
+    function setDigits(el, val) {
+        if (el.dataset.digitsValue === val) return;
+        el.dataset.digitsValue = val;
+        el.replaceChildren();
+        for (const ch of val) {
+            if (ch === ":") {
+                const c = document.createElement("span");
+                c.className = "t-colon";
+                c.textContent = ":";
+                el.appendChild(c);
+            } else if (/\d/.test(ch)) {
+                const d = document.createElement("span");
+                d.className = "digit";
+                d.textContent = ch;
+                el.appendChild(d);
+            } else {
+                el.appendChild(document.createTextNode(ch));
+            }
+        }
     }
 
     // Real-sun phase for the Sunset Pulse skin (design 7). Derived from the
