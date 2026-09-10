@@ -6,20 +6,21 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 
 ### ✨ Key Features & Highlights
 
-- 🔦 **Living Mini Clock**:
-  - Every skin's status LED now breathes again — always visible, at a third of the previous idle CPU cost.
-  - The time colons blink once per second.
-  - Digits render in fixed-width cells, so the bar no longer wobbles as digits change.
+- 🔍 **Mini Clock Zoom**:
+  - A discrete zoom control (50 / 100 / 200 / 400%) for the mini clock — in the mini context menu, main settings, and the tray menu.
+  - The window grows around its visual center and stays fully on screen, whatever edge it sits near.
+  - The day-note tooltip stays at native size for readability at every zoom.
 
-- 🎨 **Redesigned Clock Skins**:
-  - **Holo Display** (2): holographic cyan→violet digits with chromatic aberration and HUD corner brackets.
-  - **Glass Orb** (4): real frosted glass, tinted by your color theme.
-  - **Neon Circuit** (5): electric-cyan neon with a visible circuit grid and glowing junction nodes.
-  - **Sunset Pulse** (7): a true dusk gradient with a sun on the horizon — and an optional Real Sun Cycle that follows your local time of day (dawn, day, sunset, night).
+- 🆘 **Tray Help Menu**:
+  - A new expandable **Help** section in the tray menu: Pin icon to taskbar, FAQ, Changelog, Website, Donate, About and Check for Update.
+  - **Pin icon to taskbar** opens Windows' taskbar settings straight on the tray-icons page (via a bundled UI Automation helper that also navigates to the nested page on Windows 10).
+  - **About modal** right in the tray menu: version, update flow (check / download / install), auto-update toggle, copy diagnostics, and quick links to the website, GitHub, issues, releases and donations.
 
-- 🛠 **Layout & Polish**:
-  - Collapsed single-row skins no longer clip the 12-hour time format.
-  - Sunset Pulse's time font is now Space Grotesk.
+- 🔇 **Master Audio Mute**:
+  - One toggle silences every sound source: alarms, chimes and relax audio — available from the tray menu and main settings, with live icon and status feedback.
+  - Alarms never fire while muted; the ambient audio fades out smoothly and returns to its exact previous volume on unmute.
+
+- 🏷 **Suite-standard branding**: the tray header now shows the app icon (colorizing on hover) with the centered name and version — consistent with the rest of the CyberGems suite.
 
 ---
 
