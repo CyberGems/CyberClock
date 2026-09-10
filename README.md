@@ -188,34 +188,6 @@ To continue:
 
 ---
 
-## ❓ Frequently Asked Questions
-
-### What is CyberClock?
-
-CyberClock is a desktop clock application for Windows that goes beyond simple timekeeping. It includes a calendar, timer, stopwatch, and a relaxation module with ambient sound synthesis — all in a lightweight Tauri app with a cyberpunk aesthetic.
-
-### How does the relaxation module work?
-
-The relaxation module uses **Web Audio API** to procedurally synthesize 6 ambient soundscapes (Night, Forest, Outer Space, Ocean, Rain, Fireplace). It includes a breathing guide with Box and 4-7-8 patterns, session timer with mindfulness tips, and auto-stop functionality.
-
-### What is Mini Mode?
-
-Mini Mode transforms CyberClock into a compact, always-on-top clock bar (260×48) that sits on your desktop. It features 12 unique design skins, transparency controls, and can show date on hover. Perfect for saving screen space while keeping the time visible.
-
-### How do alarms work?
-
-CyberClock supports quarter-hour, half-hour, and full-hour chimes with 6 built-in sounds plus custom audio. You can also set 3 custom alarms with day-of-week repetition and configure a schedule window to only play alarms during specific hours.
-
-### Does CyberClock support multiple monitors?
-
-Yes. You can choose which display CyberClock appears on. The mini mode position can be reset and locked to prevent accidental movement.
-
-### Is CyberClock available for macOS or Linux?
-
-Currently, Windows is the primary target. Tauri v2 supports cross-platform builds, so macOS and Linux support may be added in the future.
-
----
-
 ## ❤️ Donate
 
 **CyberClock** is one of the projects in [CyberGems](https://github.com/CyberGems#-all-apps--repositories), a personal set of daily-use tools for Windows. I've spent countless hours building and refining it for my own use, and it will continue to be maintained by me. I recently decided to share the entire suite with the world, completely free and open-source.
@@ -252,6 +224,16 @@ If you're enjoying CyberClock, I'd be truly grateful for your support! You can s
 </details>
 
 </div>
+
+---
+
+## 📄 License
+
+CyberClock is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
+
+## ❓ FAQ
+
+For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberClock/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cyberclock/FAQ).
 
 ---
 
