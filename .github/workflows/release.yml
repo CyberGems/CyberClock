@@ -101,7 +101,11 @@ jobs:
           find . -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.sig" -o -name "latest.json" \) -exec sha256sum {} \; > checksums.sha256
           cat checksums.sha256
 
-      - name: Upload checksums to release
+      # Keep the release a DRAFT: without make_draft this step publishes
+      # the release automatically once assets upload. Publishing remains a
+      # deliberate manual step for the maintainer.
+      - name: Upload checksums to release (keep draft)
         uses: softprops/action-gh-release@v2
         with:
           files: src-tauri/target/release/bundle/checksums.sha256
+          make_draft: true
