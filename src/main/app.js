@@ -2561,7 +2561,12 @@
         });
     }
     function closeSettings() {
-        document.getElementById("s-overlay").classList.remove("open");
+        const overlay = document.getElementById("s-overlay");
+        // Commit any pending field edit (e.g. the clock name) before hiding:
+        // blur fires the control's change handler while it is still live.
+        const active = document.activeElement;
+        if (active && overlay.contains(active)) active.blur();
+        overlay.classList.remove("open");
     }
 
     const btnSettings = document.getElementById("btn-settings");
@@ -2577,6 +2582,16 @@
         .addEventListener("click", (e) => {
             if (e.target === e.currentTarget) closeSettings();
         });
+    // Esc or Enter anywhere dismisses the settings modal (document-level so
+    // it also works when focus sits on the trigger outside the overlay).
+    document.addEventListener("keydown", (e) => {
+        const overlay = document.getElementById("s-overlay");
+        if (!overlay.classList.contains("open")) return;
+        if (e.key === "Escape" || e.key === "Enter") {
+            e.preventDefault();
+            closeSettings();
+        }
+    });
 
     // Settings tabs
     document.querySelectorAll(".s-tab").forEach((tab) => {
@@ -2627,13 +2642,6 @@
             const text = sClockName.value.trim().slice(0, 16);
             sClockName.value = text;
             window.cc.saveSettings({ clockBrand: text });
-        });
-        // Enter commits and drops focus (matches the save-on-change above).
-        sClockName.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                sClockName.blur();
-            }
         });
     }
     // Mini mode settings
