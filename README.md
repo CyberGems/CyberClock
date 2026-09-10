@@ -20,7 +20,7 @@
   <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" height="24" /></a>
 </p>
 
-A feature-rich desktop clock application with a futuristic cyberpunk/neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities — clock, calendar, timer, stopwatch — with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
+A feature-rich desktop clock application with a futuristic neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities — clock, calendar, timer, stopwatch — with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
 
 *Free and open source — no ads, no tracking, and no data collection. Just enjoy it.*
 
