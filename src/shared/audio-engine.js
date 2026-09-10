@@ -19,6 +19,9 @@ class AudioEngine {
     this.isPlaying   = false;
     this.currentTrack = null;
     this.volume      = 0.8;
+    this.muted       = false;   // master mute (tray toggle) — silences both
+                                // the ambient master gain and the chimes
+                                // (which bypass _master entirely)
     this.crossfadeTime = 2.0;  // seconds, track-to-track
     this.stopFadeTime  = 2.0;  // seconds, on explicit stop
   }
@@ -42,9 +45,19 @@ class AudioEngine {
 
   setVolume(v) {
     this.volume = Math.max(0, Math.min(1, v));
-    if (this._master) {
+    if (this._master && !this.muted) {
       this._master.gain.setTargetAtTime(this.volume, this._ctx.currentTime, 0.15);
     }
+  }
+
+  // Master mute: fades the ambient master gain to 0 (keeps this.volume
+  // intact) and gates the chimes, which connect straight to the
+  // destination and would otherwise ignore the gain change.
+  setMuted(muted) {
+    this.muted = !!muted;
+    if (!this._master) return;
+    const target = this.muted ? 0 : this.volume;
+    this._master.gain.setTargetAtTime(target, this._ctx.currentTime, 0.15);
   }
 
   setCrossfade(secs) {
@@ -401,6 +414,11 @@ class AudioEngine {
 
   // ── Alarm Chimes (built-in) ───────────────────────────────
   chime(id, vol = 0.7) {
+    // Chimes connect straight to the destination (not via _master), so the
+    // master mute gates them here. The Rust scheduler also never emits
+    // chime events while muted — this is the in-page safety net (test
+    // buttons, manual plays).
+    if (this.muted) return;
     this._ensureCtx();
     this.resume();
     switch (id) {

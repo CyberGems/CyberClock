@@ -270,6 +270,8 @@
         if (suMiniRow) suMiniRow.style.display = (s.startWithWindows !== false) ? "flex" : "none";
         const suMiniEl = document.getElementById("s-startup-mini");
         if (suMiniEl) suMiniEl.checked = s.startInMiniMode !== false;
+        const audioMuteEl = document.getElementById("s-audio-mute");
+        if (audioMuteEl) audioMuteEl.checked = s.audioMuted === true;
 
         const langEl = document.getElementById("s-lang");
         if (langEl) langEl.value = s.language || "auto";
@@ -364,6 +366,7 @@
         }
 
         window.audioEngine.setVolume(s.relaxVolume || 0.8);
+        window.audioEngine.setMuted(s.audioMuted === true);
         if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
         if (typeof updatePlayingTrackCardClass === "function") {
             updatePlayingTrackCardClass(window.audioEngine.isPlaying);
@@ -2667,6 +2670,13 @@
                 startInMiniMode: e.target.checked,
             });
         });
+    // Master audio mute (same setting the tray toggle drives)
+    const sAudioMute = document.getElementById("s-audio-mute");
+    if (sAudioMute) {
+        sAudioMute.addEventListener("change", (e) => {
+            window.cc.saveSettings({ audioMuted: e.target.checked });
+        });
+    }
     document
         .getElementById("s-lang")
         .addEventListener("change", (e) =>

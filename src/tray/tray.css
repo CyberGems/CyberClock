@@ -76,6 +76,9 @@
     .tray-header:hover {
         color: rgba(255, 255, 255, 0.85);
     }
+    .tray-header:hover .app-ver {
+        color: rgba(255, 255, 255, 0.8);
+    }
     .tray-header .tray-head-ico {
         width: 14px;
         height: 14px;
@@ -207,6 +210,25 @@
        the About modal both toggle it) */
     [hidden] {
         display: none !important;
+    }
+
+    /* ── Master audio toggle row ─────────────────────────────── */
+    .tray-item .audio-dot {
+        flex: 0 0 auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    #btn-audio.muted .audio-dot {
+        background: #ef4444;
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    #btn-audio.muted .ico {
+        color: var(--text-lo);
+        filter: none;
     }
 
     /* ── Help section (expandable, CyberLauncher-style) ──────── */

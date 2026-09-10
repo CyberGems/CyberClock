@@ -539,6 +539,12 @@ fn relax_scheduler_loop(app: AppHandle) {
         };
 
         if now >= next_run {
+            // Master audio mute: never trigger relax playback while muted.
+            if load_settings(&app).audio_muted {
+                *next_run_opt = Some(now + chrono::Duration::minutes(1));
+                continue;
+            }
+
             // Trigger!
             let trigger_data = serde_json::json!({
                 "track": settings.relax_scheduler.track,
@@ -1272,6 +1278,13 @@ fn check_alarms(app: &AppHandle) {
     let minute = now.minute();
     let hour = now.hour();
 
+    // Master audio mute: no chimes at all while muted (the frontend also
+    // guards its audio engine, but the scheduler is the single source of
+    // truth — it never even emits the event).
+    if settings.audio_muted {
+        return;
+    }
+
     if !is_time_in_alarm_schedule(now, &settings) {
         return;
     }
@@ -1465,6 +1478,11 @@ fn custom_alarms_scheduler(app: AppHandle) {
                             last_fired_by_idx[idx] = Some(fired_ts);
                         }
 
+                        // Master audio mute: mark as fired but play nothing.
+                        if settings.audio_muted {
+                            continue;
+                        }
+
                         let alarm_data = serde_json::json!({
                             "type": "custom",
                             "sound": alarm.sound,
@@ -1497,6 +1515,7 @@ pub struct TrayMenuState {
     pub theme: String,
     pub mini_zoom: f64,
     pub auto_update: bool,
+    pub audio_muted: bool,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -1570,6 +1589,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         theme: settings.theme.clone(),
         mini_zoom: settings.mini_zoom,
         auto_update: settings.auto_update,
+        audio_muted: settings.audio_muted,
     }
 }
 

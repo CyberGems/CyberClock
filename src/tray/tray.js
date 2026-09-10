@@ -101,6 +101,21 @@
             const el = document.getElementById(id);
             if (el) el.textContent = val;
         };
+
+        // Master audio toggle
+        const audioBtn = document.getElementById("btn-audio");
+        const audioIco = document.getElementById("ico-audio");
+        const audioLbl = document.getElementById("lbl-audio");
+        if (audioBtn) {
+            const muted = state.audio_muted === true;
+            audioBtn.classList.toggle("muted", muted);
+            audioBtn.setAttribute("aria-pressed", String(muted));
+        }
+        if (audioIco) audioIco.setAttribute("data-ico", state.audio_muted === true ? "volume-x" : "volume-high");
+        if (audioLbl) audioLbl.textContent = state.audio_muted === true
+            ? T("tray.soundOff", "Sound off")
+            : T("tray.soundOn", "Sound on");
+
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
         setLbl("lbl-faq", T("tray.faq", "FAQ"));
@@ -152,6 +167,22 @@
             return;
         }
         window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    // Master audio mute toggle: persists audioMuted (broadcast reaches the
+    // main/mini audio engines) and reflects immediately without closing.
+    const audioBtn = document.getElementById("btn-audio");
+    if (audioBtn) {
+        audioBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = !audioBtn.classList.contains("muted");
+            if (currentMenuState) currentMenuState.audio_muted = next;
+            renderState(currentMenuState);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ audioMuted: next });
+            }
+        });
     }
 
     // ── Help section ────────────────────────────────────────────

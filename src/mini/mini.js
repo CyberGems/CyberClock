@@ -198,6 +198,10 @@
 
         const aotOn = s.alwaysOnTop || false;
         document.getElementById("btn-aot").classList.toggle("active", aotOn);
+
+        // Master audio mute (tray toggle): gate chimes and ambient gain.
+        if (window.audioEngine) window.audioEngine.setMuted(s.audioMuted === true);
+
         updateClock();
 
         // Real-sun cycle for the Sunset Pulse skin (design 7). Applied as a
