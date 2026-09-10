@@ -2475,12 +2475,23 @@
             .forEach((p) => p.classList.toggle("on", p.id === "stab-" + tabName));
     }
 
-    function openSettings(targetTab) {
+    function openSettings(targetTab, focusSelector) {
         document.getElementById("s-overlay").classList.add("open");
         if (targetTab) {
             switchSettingsTab(targetTab);
         }
         loadScreensList();
+        // Focus (and select) a specific control once the modal is painted,
+        // e.g. clicking the clock opens Settings with the name field ready.
+        if (focusSelector) {
+            requestAnimationFrame(() => {
+                const el = document.querySelector(focusSelector);
+                if (el) {
+                    el.focus();
+                    if (typeof el.select === "function") el.select();
+                }
+            });
+        }
     }
 
     function loadScreensList() {
@@ -2616,6 +2627,13 @@
             const text = sClockName.value.trim().slice(0, 16);
             sClockName.value = text;
             window.cc.saveSettings({ clockBrand: text });
+        });
+        // Enter commits and drops focus (matches the save-on-change above).
+        sClockName.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sClockName.blur();
+            }
         });
     }
     // Mini mode settings
@@ -3363,6 +3381,15 @@
             setupClock();
             syncHomeClock();
         });
+        // Clicking the analog clock opens Settings on Appearance with the
+        // clock-name field focused and selected, ready to type.
+        const clockCanvas = document.getElementById("clock-canvas");
+        if (clockCanvas) {
+            clockCanvas.style.cursor = "pointer";
+            clockCanvas.addEventListener("click", () =>
+                openSettings("appearance", "#s-clock-name"),
+            );
+        }
         window.addEventListener("resize", () => {
             stopClockAnim();
             setupClock();
