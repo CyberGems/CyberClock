@@ -281,8 +281,10 @@ fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Opt
     // the top-left anchor.
     if recenter.unwrap_or(false) {
         if let (Ok(pos), Ok(old_size)) = (window.outer_position(), window.outer_size()) {
-            let new_phys_width = (width as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
-            let new_phys_height = (height as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+            let new_phys_width =
+                (width as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+            let new_phys_height =
+                (height as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
 
             // Keep the old center fixed under the new size.
             let mut new_x = pos.x + (old_size.width as i32 - new_phys_width) / 2;
@@ -413,12 +415,11 @@ fn open_external_url(url: String) -> bool {
         use std::process::Command;
         // `cmd /c start "" <url>` — the empty title argument is required
         // so cmd doesn't treat the URL as the window title.
-        let ok = Command::new("cmd")
+        Command::new("cmd")
             .args(["/C", "start", "", parsed])
             .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
             .spawn()
-            .is_ok();
-        return ok;
+            .is_ok()
     }
 
     #[cfg(not(target_os = "windows"))]

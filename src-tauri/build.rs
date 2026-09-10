@@ -40,11 +40,17 @@ fn build_open_taskbar_helper() {
         .arg(format!("/out:{}", target_exe.to_str().unwrap()))
         .arg(format!(
             "/r:{}",
-            framework.join(r"WPF\UIAutomationClient.dll").to_str().unwrap()
+            framework
+                .join(r"WPF\UIAutomationClient.dll")
+                .to_str()
+                .unwrap()
         ))
         .arg(format!(
             "/r:{}",
-            framework.join(r"WPF\UIAutomationTypes.dll").to_str().unwrap()
+            framework
+                .join(r"WPF\UIAutomationTypes.dll")
+                .to_str()
+                .unwrap()
         ))
         .arg(cs_path.to_str().unwrap())
         .status()
