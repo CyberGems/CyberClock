@@ -2694,6 +2694,29 @@
         font-style: normal;
     }
 
+    .s-inp {
+        font-family: "Orbitron", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        width: 190px;
+        background: var(--bg-02);
+        border: 1px solid var(--border);
+        color: var(--accent-a);
+        border-radius: 8px;
+        padding: 7px 12px;
+        outline: none;
+        -webkit-app-region: no-drag;
+        transition: all 0.18s ease;
+    }
+    .s-inp:focus {
+        border-color: var(--border-active);
+        box-shadow: var(--glow-xs);
+    }
+    .s-inp::placeholder {
+        color: var(--text-lo);
+    }
+
     .s-themes {
         display: flex;
         gap: 10px;

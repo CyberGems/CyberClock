@@ -262,6 +262,8 @@
             );
         const secEl = document.getElementById("s-sec");
         if (secEl) secEl.checked = s.showSeconds !== false;
+        const clockNameEl = document.getElementById("s-clock-name");
+        if (clockNameEl) clockNameEl.value = s.clockBrand || "CYBERGEMS";
         const aotEl = document.getElementById("s-aot");
         if (aotEl) aotEl.checked = !!s.alwaysOnTop;
         const suEl = document.getElementById("s-startup");
@@ -638,6 +640,7 @@
     let cybergemsCacheKey = null;
     let cybergemsWidths = null;
     let cybergemsTotal = 0;
+    let cybergemsFontPx = 0;
 
     function setupClock() {
         const canvas = document.getElementById("clock-canvas");
@@ -870,33 +873,53 @@
         ctx.stroke();
         ctx.restore();
 
-        // CYBERGEMS — pendulum sweep: a soft glow walks across the word
-        // one letter per exact second, swinging left↔right like a metronome.
+        // Brand wordmark — pendulum sweep: a soft glow walks across the
+        // word one letter per exact second, swinging left↔right like a
+        // metronome. The text is user-editable (settings: clockBrand);
+        // empty falls back to the default, and it is always uppercased.
         ctx.save();
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        const wordFont = `${R * 0.066}px Orbitron,monospace`;
-        ctx.font = wordFont;
-        const word = "CYBERGEMS";
+        const rawBrand = (cfg.clockBrand || "").trim();
+        const word = (rawBrand || "CYBERGEMS").toUpperCase().slice(0, 16);
         const tracking = R * 0.004;
-        const gemsKey = `${wordFont}|${tracking}`;
+        const gemsKey = `${R}|${tracking}|${word}`;
         if (gemsKey !== cybergemsCacheKey) {
             cybergemsCacheKey = gemsKey;
-            cybergemsWidths = [];
-            cybergemsTotal = 0;
-            for (let i = 0; i < word.length; i++) {
-                const w = ctx.measureText(word[i]).width;
-                cybergemsWidths.push(w);
-                cybergemsTotal +=
-                    w + (i < word.length - 1 ? tracking : 0);
+            // Start at the nominal size, then shrink to fit the dial so long
+            // names never overflow the face. Measured with the real font so
+            // the fit is exact per glyph.
+            let fontPx = R * 0.066;
+            const maxWidth = R * 1.18;
+            const measure = (px) => {
+                ctx.font = `${px}px Orbitron,monospace`;
+                const widths = [];
+                let total = 0;
+                for (let i = 0; i < word.length; i++) {
+                    widths.push(ctx.measureText(word[i]).width);
+                    total += widths[i] + (i < word.length - 1 ? tracking : 0);
+                }
+                return { widths, total };
+            };
+            let m = measure(fontPx);
+            if (m.total > maxWidth && m.total > 0) {
+                fontPx *= maxWidth / m.total;
+                m = measure(fontPx);
             }
+            cybergemsFontPx = fontPx;
+            cybergemsWidths = m.widths;
+            cybergemsTotal = m.total;
         }
+        ctx.font = `${cybergemsFontPx}px Orbitron,monospace`;
         const widths = cybergemsWidths;
         const total = cybergemsTotal;
-        // Triangle wave over 16s: 0→8 then 8→0, advancing 1 unit/sec, so
-        // the peak lands exactly on a letter on every whole second.
-        const ph = sec % 16;
-        const center = ph <= 8 ? ph : 16 - ph;
+        // Triangle wave: 0→span then span→0, advancing one unit per second,
+        // so the peak lands exactly on a letter on every whole second and
+        // works for any word length.
+        const span = word.length - 1;
+        const per = span * 2;
+        const ph = per > 0 ? sec % per : 0;
+        const center = span > 0 ? (ph <= span ? ph : per - ph) : 0;
         const wy = cy + R * 0.44;
         let wx = cx - total / 2;
         for (let i = 0; i < word.length; i++) {
@@ -2585,6 +2608,16 @@
         .addEventListener("change", (e) =>
             window.cc.saveSettings({ showSeconds: e.target.checked }),
         );
+    // Analog clock brand wordmark — free text, max 16 chars; blank restores
+    // the default. Saved on change (blur/Enter) to avoid a write per keystroke.
+    const sClockName = document.getElementById("s-clock-name");
+    if (sClockName) {
+        sClockName.addEventListener("change", () => {
+            const text = sClockName.value.trim().slice(0, 16);
+            sClockName.value = text;
+            window.cc.saveSettings({ clockBrand: text });
+        });
+    }
     // Mini mode settings
     document.querySelectorAll('[data-mini-design]').forEach((btn) => {
         btn.addEventListener('click', () => {

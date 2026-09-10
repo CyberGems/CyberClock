@@ -81,6 +81,8 @@ impl Default for RelaxSchedulerSettings {
 pub struct AppSettings {
     pub theme: String,
     pub clock_format: String,
+    // Brand wordmark drawn on the analog clock face (uppercased, max 16).
+    pub clock_brand: String,
     pub show_seconds: bool,
     pub always_on_top: bool,
     pub start_with_windows: bool,
@@ -126,6 +128,7 @@ impl Default for AppSettings {
         AppSettings {
             theme: "cyber-blue".to_string(),
             clock_format: "12h".to_string(),
+            clock_brand: "CYBERGEMS".to_string(),
             show_seconds: true,
             always_on_top: false,
             start_with_windows: true,

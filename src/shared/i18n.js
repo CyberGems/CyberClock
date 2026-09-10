@@ -280,6 +280,8 @@
             "settings.appearance.clockDisplay": "Clock Display",
             "settings.appearance.timeFormat": "Time Format",
             "settings.appearance.showSeconds": "Show Seconds",
+            "settings.appearance.clockName": "Clock Name",
+            "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
@@ -659,6 +661,8 @@
             "settings.appearance.clockDisplay": "Pantalla de Reloj",
             "settings.appearance.timeFormat": "Formato de Hora",
             "settings.appearance.showSeconds": "Mostrar Segundos",
+            "settings.appearance.clockName": "Nombre del Reloj",
+            "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
