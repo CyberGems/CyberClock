@@ -141,6 +141,20 @@
         getAppVersion: async () => {
             return await invokeOrFallback("get_app_version", undefined, "dev");
         },
+        openTaskbarSettings: async () => {
+            // Opens Windows taskbar settings on the tray-icon page
+            // (Win10: also navigates to the nested icon-list page).
+            if (!HAS_TAURI) return;
+            await invoke("open_taskbar_settings");
+        },
+        openExternalUrl: async (url) => {
+            // Opens an https/ms-settings URL with the OS default handler.
+            if (!HAS_TAURI) {
+                window.open(url, "_blank", "noopener,noreferrer");
+                return;
+            }
+            return await invoke("open_external_url", { url });
+        },
         checkForUpdates: async () => {
             return await invoke("check_for_updates");
         },

@@ -367,7 +367,18 @@
             "tray.relax": "Relax",
             "tray.settings": "Settings...",
             "tray.quit": "Exit",
-            "tray.updateAvailable": "Update available"
+            "tray.updateAvailable": "Update available",
+            "tray.help": "Help",
+            "tray.pinTrayIcon": "Pin icon to taskbar...",
+            "tray.faq": "FAQ",
+            "tray.changelog": "Changelog",
+            "tray.homepage": "Website",
+            "tray.donate": "Donate",
+            "tray.about": "About...",
+            "tray.checkUpdates": "Check for Update...",
+            "about.autoUpdatesDesc": "Check automatically at startup",
+            "about.copyDiag": "Copy diagnostics",
+            "about.diagCopied": "Copied ✓"
         },
         es: {
             "relax.sessionTitle": "◈ Sesión",
@@ -731,7 +742,18 @@
             "tray.relax": "Relajación",
             "tray.settings": "Configuración...",
             "tray.quit": "Salir",
-            "tray.updateAvailable": "Actualización disponible"
+            "tray.updateAvailable": "Actualización disponible",
+            "tray.help": "Ayuda",
+            "tray.pinTrayIcon": "Fijar icono en la barra...",
+            "tray.faq": "Preguntas frecuentes",
+            "tray.changelog": "Changelog",
+            "tray.homepage": "Sitio web",
+            "tray.donate": "Donar",
+            "tray.about": "Acerca de...",
+            "tray.checkUpdates": "Buscar actualizaciones...",
+            "about.autoUpdatesDesc": "Comprobar automáticamente al iniciar",
+            "about.copyDiag": "Copiar diagnóstico",
+            "about.diagCopied": "Copiado ✓"
         }
     };
 

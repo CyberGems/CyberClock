@@ -57,7 +57,7 @@
         "label": "tray_menu",
         "title": "CyberClock Tray Menu",
         "width": 290,
-        "height": 380,
+        "height": 510,
         "resizable": false,
         "fullscreen": false,
         "decorations": false,
@@ -96,6 +96,9 @@
     ],
     "createUpdaterArtifacts": true,
     "publisher": "CyberGems",
+    "resources": [
+      "bin/open-taskbar-settings.exe"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -335,6 +335,99 @@ fn toggle_always_on_top(window: WebviewWindow) -> bool {
     !is_on_top
 }
 
+// ─────────────────────────────────────────────────────────────
+// Help menu support (tray "Help" section)
+// ─────────────────────────────────────────────────────────────
+
+// Where the compiled open-taskbar-settings.exe can be found:
+// - Dev: OUT_DIR from build.rs (CC_OPEN_TASKBAR_HELPER env, baked at
+//   compile time by cargo:rustc-env).
+// - Packaged: the NSIS installer ships it via tauri.conf.json `resources`
+//   (resources/open-taskbar-settings.exe under the resource dir).
+fn resolve_taskbar_helper(app: &AppHandle) -> Option<std::path::PathBuf> {
+    let env_path = option_env!("CC_OPEN_TASKBAR_HELPER");
+    if let Some(p) = env_path {
+        let path = std::path::PathBuf::from(p);
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    // Packaged: bundled resource next to the install dir.
+    if let Ok(res_dir) = app.path().resource_dir() {
+        let res = res_dir.join("open-taskbar-settings.exe");
+        if res.exists() {
+            return Some(res);
+        }
+    }
+    // Dev/fallback: next to the current executable.
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let beside = dir.join("open-taskbar-settings.exe");
+            if beside.exists() {
+                return Some(beside);
+            }
+        }
+    }
+    None
+}
+
+/// Open Windows taskbar settings on the tray-icon page. Uses the
+/// OpenTaskbarSettings.exe helper (build.rs compiles CyberLauncher's C#
+/// source) which additionally navigates to the nested "Select which icons
+/// appear on the taskbar" page on Win10 via UI Automation. Falls back to
+/// ms-settings:taskbar when the helper is unavailable.
+#[tauri::command]
+fn open_taskbar_settings(app: AppHandle) {
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(helper) = resolve_taskbar_helper(&app) {
+            use std::os::windows::process::CommandExt;
+            use std::process::Command;
+            let _ = Command::new(helper)
+                .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+                .spawn();
+            return;
+        }
+        warn!("open_taskbar_settings: helper exe missing; falling back to ms-settings:taskbar");
+    }
+
+    let _ = open_external_url("ms-settings:taskbar".to_string());
+}
+
+/// Open an external URL with the OS default handler (ShellExecute).
+/// Only https URLs (plus the ms-settings scheme used above) are accepted —
+/// the value is validated before launch so the frontend can never ask the
+/// backend to run arbitrary protocols or executables.
+#[tauri::command]
+fn open_external_url(url: String) -> bool {
+    let parsed = url.trim();
+    let allowed = parsed.starts_with("https://") || parsed.starts_with("ms-settings:");
+    if !allowed {
+        warn!("open_external_url: rejected non-https url {:?}", parsed);
+        return false;
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+        // `cmd /c start "" <url>` — the empty title argument is required
+        // so cmd doesn't treat the URL as the window title.
+        let ok = Command::new("cmd")
+            .args(["/C", "start", "", parsed])
+            .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+            .spawn()
+            .is_ok();
+        return ok;
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = parsed;
+        false
+    }
+}
+
 #[tauri::command]
 fn open_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
@@ -1403,6 +1496,7 @@ pub struct TrayMenuState {
     pub update_available: bool,
     pub theme: String,
     pub mini_zoom: f64,
+    pub auto_update: bool,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -1411,7 +1505,10 @@ static TRAY_MENU_PENDING_SHOW: std::sync::atomic::AtomicBool =
 
 const TRAY_MENU_WIDTH: f64 = 250.0;
 const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
-const TRAY_MENU_EST_HEIGHT: f64 = 390.0;
+// Collapsed help section baseline; the tray window re-reports its real
+// size via tray_menu_ready once rendered (help expands the menu, the
+// About modal resizes it further).
+const TRAY_MENU_EST_HEIGHT: f64 = 470.0;
 
 fn tray_menu_geometry(
     win: &tauri::WebviewWindow,
@@ -1472,6 +1569,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         update_available: pending_update_version().is_some(),
         theme: settings.theme.clone(),
         mini_zoom: settings.mini_zoom,
+        auto_update: settings.auto_update,
     }
 }
 
@@ -1868,7 +1966,9 @@ pub fn run() {
             get_app_version,
             check_for_updates,
             download_update,
-            install_update
+            install_update,
+            open_taskbar_settings,
+            open_external_url
         ]);
 
     // Build the app without starting the event loop, so the settings

@@ -74,6 +74,49 @@
 
                 <div class="tray-divider"></div>
 
+                <!-- Help (expandable section, CyberLauncher-style) -->
+                <div class="tray-group">
+                    <button type="button" class="tray-item tray-help-toggle" id="btn-help-toggle" aria-expanded="false">
+                        <span class="ico" data-ico="help"></span>
+                        <span class="label" id="lbl-help">Help</span>
+                        <span class="chev" data-ico="back"></span>
+                    </button>
+                    <div class="tray-help-sub" id="tray-help-sub" hidden>
+                        <button type="button" class="tray-item tray-sub-item" data-action="pin-tray-icon">
+                            <span class="ico" data-ico="pin"></span>
+                            <span class="label" id="lbl-pin-tray">Pin icon to taskbar...</span>
+                        </button>
+                        <div class="tray-sub-sep"></div>
+                        <button type="button" class="tray-item tray-sub-item" data-action="faq">
+                            <span class="ico" data-ico="faq"></span>
+                            <span class="label" id="lbl-faq">FAQ</span>
+                        </button>
+                        <button type="button" class="tray-item tray-sub-item" data-action="changelog">
+                            <span class="ico" data-ico="changelog"></span>
+                            <span class="label" id="lbl-changelog">Changelog</span>
+                        </button>
+                        <button type="button" class="tray-item tray-sub-item" data-action="website">
+                            <span class="ico" data-ico="globe"></span>
+                            <span class="label" id="lbl-website">Website</span>
+                        </button>
+                        <button type="button" class="tray-item tray-sub-item" data-action="donate">
+                            <span class="ico ico-heart" data-ico="heart"></span>
+                            <span class="label" id="lbl-donate">Donate</span>
+                        </button>
+                        <div class="tray-sub-sep"></div>
+                        <button type="button" class="tray-item tray-sub-item" data-action="about-modal">
+                            <span class="ico" data-ico="info"></span>
+                            <span class="label" id="lbl-about">About...</span>
+                        </button>
+                        <button type="button" class="tray-item tray-sub-item" data-action="check-updates">
+                            <span class="ico" data-ico="refresh"></span>
+                            <span class="label" id="lbl-check-updates">Check for Update...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tray-divider"></div>
+
                 <!-- Exit Group -->
                 <div class="tray-group tray-group-exit">
                     <button type="button" class="tray-item tray-item-exit" data-action="quit">
@@ -82,7 +125,57 @@
                     </button>
                 </div>
             </div>
+            <!-- About modal (adapted from CyberLauncher's AboutModal) -->
+            <div class="tray-about-overlay" id="about-overlay" hidden>
+                <div class="tray-about-modal" role="dialog" aria-modal="true" aria-label="About CyberClock">
+                    <div class="ta-head">
+                        <span class="ta-title">CyberClock</span>
+                        <button type="button" class="ta-close" id="about-close" title="Close">
+                            <span data-ico="x"></span>
+                        </button>
+                    </div>
+                    <div class="ta-body">
+                        <div class="ta-ver" id="about-version">v…</div>
+                        <p class="ta-sub" id="about-sub">CyberGems © 2026 · Premium Cyber-Neon Clock for Windows</p>
+                        <div class="ta-divider"><span id="about-maint-lbl">Maintenance</span></div>
+                        <div class="ta-update-status" id="ta-update-status"></div>
+                        <button type="button" class="ta-btn" id="ta-update-btn">
+                            <span data-ico="refresh"></span>
+                            <span id="ta-update-btn-lbl">Check Updates</span>
+                        </button>
+                        <button type="button" class="ta-btn ta-btn-quiet" id="ta-diag-btn">
+                            <span data-ico="copy"></span>
+                            <span id="ta-diag-lbl">Copy diagnostics</span>
+                        </button>
+                        <div class="ta-autoup">
+                            <span class="ta-autoup-lbl">
+                                <b id="ta-auto-lbl">Auto-updates</b>
+                                <small id="ta-auto-desc">Check automatically at startup</small>
+                            </span>
+                            <label class="ta-tog">
+                                <input type="checkbox" id="ta-autoup" />
+                                <div class="ta-tog-tr"><div class="ta-tog-th"></div></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="ta-foot">
+                        <span class="ta-foot-txt">cybergems.org</span>
+                        <div class="ta-foot-links">
+                            <button type="button" class="ta-ico-btn" id="ta-link-website" data-ico="globe" title="Website"></button>
+                            <button type="button" class="ta-ico-btn" id="ta-link-github" title="GitHub">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48l-.01-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85l-.01 2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="ta-ico-btn" id="ta-link-issues" data-ico="flag" title="Report a bug"></button>
+                            <button type="button" class="ta-ico-btn" id="ta-link-releases" data-ico="changelog" title="Releases / Changelog"></button>
+                            <button type="button" class="ta-ico-btn ta-heart" id="ta-link-donate" data-ico="heart" title="Donate"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        <!-- tray-card -->
 
         <script src="tray.js"></script>
     </body>
