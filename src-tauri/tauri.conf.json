@@ -1,118 +1,120 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "CyberClock",
-  "version": "1.1.0",
-  "identifier": "com.cybergems.cyberclock",
-  "build": {
-    "frontendDist": "../src",
-    "devUrl": null,
-    "beforeDevCommand": "",
-    "beforeBuildCommand": ""
-  },
-  "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "CyberClock",
-        "width": 1024,
-        "height": 768,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "visible": false,
-        "url": "main/index.html"
-      },
-      {
-        "label": "mini",
-        "title": "CyberClock Mini",
-        "width": 260,
-        "height": 48,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "visible": false,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
-        "url": "mini/index.html"
-      },
-      {
-        "label": "menu",
-        "title": "CyberClock Menu",
-        "width": 270,
-        "height": 560,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "visible": false,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
-        "url": "mini/menu.html"
-      },
-      {
-        "label": "tray_menu",
-        "title": "CyberClock Tray Menu",
-        "width": 290,
-        "height": 510,
-        "resizable": false,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "visible": false,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
-        "url": "tray/menu.html"
-      }
-    ],
-    "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' asset: http://asset.localhost blob: data:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost asset: http://asset.localhost",
-      "assetProtocol": {
-        "enable": true,
-        "scope": ["$APPDATA/alarm-sounds/**"]
-      }
-    },
-    "withGlobalTauri": true
-  },
-  "plugins": {
-    "updater": {
-      "endpoints": [
-        "https://github.com/CyberGems/CyberClock/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ3ODVFOUU4MUE0MDMxMApSV1FRQTZTQm5sNTRCQlMxZ0RwblplTVVRZmQrUng4OEFkU2d4QStab2RpSlZ4a0Nwb1prREJMdwo=",
-      "windows": {
-        "installMode": "passive"
-      }
-    }
-  },
-  "bundle": {
-    "active": true,
-    "targets": [
-      "nsis"
-    ],
-    "createUpdaterArtifacts": true,
-    "publisher": "CyberGems",
-    "resources": [
-      "bin/open-taskbar-settings.exe"
-    ],
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
-    "windows": {
-      "nsis": {
-        "installMode": "both"
-      }
-    },
-    "android": {
-      "debugApplicationIdSuffix": ".debug"
-    }
-  }
+    "$schema":  "../node_modules/@tauri-apps/cli/config.schema.json",
+    "productName":  "CyberClock",
+    "version":  "1.2.0",
+    "identifier":  "com.cybergems.cyberclock",
+    "build":  {
+                  "frontendDist":  "../src",
+                  "devUrl":  null,
+                  "beforeDevCommand":  "",
+                  "beforeBuildCommand":  ""
+              },
+    "app":  {
+                "windows":  [
+                                {
+                                    "label":  "main",
+                                    "title":  "CyberClock",
+                                    "width":  1024,
+                                    "height":  768,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  false,
+                                    "visible":  false,
+                                    "url":  "main/index.html"
+                                },
+                                {
+                                    "label":  "mini",
+                                    "title":  "CyberClock Mini",
+                                    "width":  260,
+                                    "height":  48,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  true,
+                                    "shadow":  false,
+                                    "visible":  false,
+                                    "alwaysOnTop":  true,
+                                    "skipTaskbar":  true,
+                                    "url":  "mini/index.html"
+                                },
+                                {
+                                    "label":  "menu",
+                                    "title":  "CyberClock Menu",
+                                    "width":  270,
+                                    "height":  560,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  true,
+                                    "shadow":  false,
+                                    "visible":  false,
+                                    "alwaysOnTop":  true,
+                                    "skipTaskbar":  true,
+                                    "url":  "mini/menu.html"
+                                },
+                                {
+                                    "label":  "tray_menu",
+                                    "title":  "CyberClock Tray Menu",
+                                    "width":  290,
+                                    "height":  510,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  true,
+                                    "shadow":  false,
+                                    "visible":  false,
+                                    "alwaysOnTop":  true,
+                                    "skipTaskbar":  true,
+                                    "url":  "tray/menu.html"
+                                }
+                            ],
+                "security":  {
+                                 "csp":  "default-src \u0027self\u0027; script-src \u0027self\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027; img-src \u0027self\u0027 data: blob:; media-src \u0027self\u0027 asset: http://asset.localhost blob: data:; font-src \u0027self\u0027 data:; connect-src \u0027self\u0027 ipc: http://ipc.localhost asset: http://asset.localhost",
+                                 "assetProtocol":  {
+                                                       "enable":  true,
+                                                       "scope":  [
+                                                                     "$APPDATA/alarm-sounds/**"
+                                                                 ]
+                                                   }
+                             },
+                "withGlobalTauri":  true
+            },
+    "plugins":  {
+                    "updater":  {
+                                    "endpoints":  [
+                                                      "https://github.com/CyberGems/CyberClock/releases/latest/download/latest.json"
+                                                  ],
+                                    "pubkey":  "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ3ODVFOUU4MUE0MDMxMApSV1FRQTZTQm5sNTRCQlMxZ0RwblplTVVRZmQrUng4OEFkU2d4QStab2RpSlZ4a0Nwb1prREJMdwo=",
+                                    "windows":  {
+                                                    "installMode":  "passive"
+                                                }
+                                }
+                },
+    "bundle":  {
+                   "active":  true,
+                   "targets":  [
+                                   "nsis"
+                               ],
+                   "createUpdaterArtifacts":  true,
+                   "publisher":  "CyberGems",
+                   "resources":  [
+                                     "bin/open-taskbar-settings.exe"
+                                 ],
+                   "icon":  [
+                                "icons/32x32.png",
+                                "icons/128x128.png",
+                                "icons/128x128@2x.png",
+                                "icons/icon.icns",
+                                "icons/icon.ico"
+                            ],
+                   "windows":  {
+                                   "nsis":  {
+                                                "installMode":  "both"
+                                            }
+                               },
+                   "android":  {
+                                   "debugApplicationIdSuffix":  ".debug"
+                               }
+               }
 }
