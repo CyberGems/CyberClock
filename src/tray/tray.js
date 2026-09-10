@@ -48,12 +48,6 @@
             verEl.textContent = "v" + state.version;
         }
 
-        // Update badge
-        const badgeEl = document.getElementById("update-badge");
-        if (badgeEl) {
-            badgeEl.style.display = state.update_available ? "inline-block" : "none";
-        }
-
         // Visibility Item
         const lblVis = document.getElementById("lbl-visibility");
         const icoVis = document.getElementById("ico-visibility");
@@ -443,6 +437,12 @@
             e.stopPropagation();
             const action = btn.dataset.action;
             if (!action) return;
+            if (action === "about-modal") {
+                // Suite branding: the header opens the About modal in place
+                // (same as CyberViewer's header opening its About view).
+                openAboutModal();
+                return;
+            }
             if (action === "toggle_mode") {
                 const targetMode = currentMenuState && currentMenuState.window_mode === "full" ? "mini" : "full";
                 runAction(targetMode);

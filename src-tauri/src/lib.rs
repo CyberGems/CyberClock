@@ -1592,18 +1592,26 @@ fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
         return;
     };
 
+    // Re-apply the window geometry on EVERY ready report — the menu grows
+    // when the Help section expands (or the About modal opens), and the
+    // size only becomes known once rendered. Anchoring to the tray click
+    // point and clamping to the monitor is handled by tray_menu_geometry;
+    // if no anchor is recorded yet (first show), use a safe fallback.
+    let (anchor_x, anchor_y) = TRAY_MENU_ANCHOR
+        .lock()
+        .ok()
+        .and_then(|g| *g)
+        .unwrap_or((100, 100));
+    let (x, y, w, h) = tray_menu_geometry(&win, anchor_x, anchor_y, width, height);
+    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+        width: w,
+        height: h,
+    }));
+    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+
+    // The show/focus sequence runs only for the first report after a
+    // pending show; later reports (Help expand/collapse) just resize.
     if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
-        let (anchor_x, anchor_y) = TRAY_MENU_ANCHOR
-            .lock()
-            .ok()
-            .and_then(|g| *g)
-            .unwrap_or((100, 100));
-        let (x, y, w, h) = tray_menu_geometry(&win, anchor_x, anchor_y, width, height);
-        let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-            width: w,
-            height: h,
-        }));
-        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
         let _ = win.show();
         let _ = win.set_focus();
     }

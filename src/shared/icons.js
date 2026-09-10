@@ -259,9 +259,7 @@
   </symbol>
   <symbol id="cc-i-heart" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 20c-4 0-7-2.5-9-6 3.5.2 6-1.2 9-4 3 2.8 5.5 4.2 9 4-2 3.5-5 6-9 6Z"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 10c-1.8-2.2-2.6-4.4-2.4-6.6 1.2.8 2 .8 2.4.8s1.2 0 2.4-.8c.2 2.2-.6 4.4-2.4 6.6Z"/>
+      d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
   </symbol>
   <symbol id="cc-i-download" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
