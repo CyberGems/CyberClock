@@ -109,8 +109,11 @@
     const DESIGN_HEIGHTS = { 1: 48, 2: 56, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
     const DESIGN_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
 
+    // Collapsed widths: single-row skins must fit the worst-case 12h+seconds
+    // string ("12:34:56 PM") at their native font size — measured per skin
+    // (see git history for the deficit audit that set these).
     const COLLAPSED_HEIGHTS = { 1: 34, 2: 38, 3: 34, 4: 36, 5: 34, 6: 34, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
-    const COLLAPSED_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 165, 8: 165, 9: 175, 10: 155, 11: 175, 12: 170 };
+    const COLLAPSED_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 188, 8: 188, 9: 200, 10: 180, 11: 175, 12: 170 };
 
     let isHovered = false;
     let isTipVisible = false;
