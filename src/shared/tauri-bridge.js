@@ -71,7 +71,15 @@
             await invoke("move_window", { x: Math.round(pos.x), y: Math.round(pos.y) });
         },
         setWindowSize: async (size) => {
-            await invoke("set_window_size", { width: Math.round(size.width), height: Math.round(size.height) });
+            const args = {
+                width: Math.round(size.width),
+                height: Math.round(size.height)
+            };
+            // recenter: zoom-style resizes grow the window around its
+            // visual center instead of the top-left anchor (see
+            // set_window_size in lib.rs).
+            if (size.recenter) args.recenter = true;
+            await invoke("set_window_size", args);
         },
         openMiniContextMenu: async (point) => {
             // Use client coordinates which are more reliable across DPI scaling

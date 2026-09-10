@@ -1,6 +1,22 @@
     let currentMenuState = null;
     const rootEl = document.getElementById("tray-root");
 
+    // Discrete zoom stops for the mini clock (slider index → factor).
+    const ZOOM_STEPS = [0.5, 1, 2, 4];
+
+    // Debounced settings save for slider drags: each save broadcasts the
+    // full settings object to every window, so coalesce the burst of
+    // `input` events into one trailing save.
+    let zoomSaveTimer = null;
+    function saveZoomDebounced(factor) {
+        clearTimeout(zoomSaveTimer);
+        zoomSaveTimer = setTimeout(() => {
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniZoom: factor });
+            }
+        }, 120);
+    }
+
     function reportSize() {
         if (!rootEl) return;
         const r = rootEl.getBoundingClientRect();
@@ -72,6 +88,19 @@
         const lblQuit = document.getElementById("lbl-quit");
         if (lblQuit) lblQuit.textContent = window.ccI18n ? window.ccI18n.t("tray.quit") : "Exit";
 
+        // Mini zoom (discrete steps, 100% default)
+        const lblZoom = document.getElementById("lbl-zoom");
+        if (lblZoom) lblZoom.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.zoom") : "Zoom";
+        const zoomSlider = document.getElementById("tray-zoom");
+        const zoomVal = document.getElementById("tray-zoom-val");
+        if (zoomSlider) {
+            const idx = ZOOM_STEPS.indexOf(state.mini_zoom ?? 1);
+            zoomSlider.value = String(idx >= 0 ? idx : 1);
+        }
+        if (zoomVal) {
+            zoomVal.textContent = Math.round((state.mini_zoom ?? 1) * 100) + "%";
+        }
+
         // Re-render icons if data-ico changed
         if (window.ccIcons) {
             window.ccIcons.replaceIcons();
@@ -82,6 +111,18 @@
         if (window.cc && window.cc.trayMenuAction) {
             window.cc.trayMenuAction(action);
         }
+    }
+
+    // Zoom slider input (live label, debounced save)
+    const trayZoom = document.getElementById("tray-zoom");
+    if (trayZoom) {
+        trayZoom.addEventListener("input", (e) => {
+            const idx = parseInt(e.target.value);
+            const factor = ZOOM_STEPS[idx] ?? 1;
+            const zoomVal = document.getElementById("tray-zoom-val");
+            if (zoomVal) zoomVal.textContent = Math.round(factor * 100) + "%";
+            saveZoomDebounced(factor);
+        });
     }
 
     // Click handlers for tray items & header

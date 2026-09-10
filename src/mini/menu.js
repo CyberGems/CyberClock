@@ -1,6 +1,14 @@
     let currentDesign = 1;
     let alwaysOnTop = false;
 
+    // Discrete zoom stops (slider index → factor). 100% is the default.
+    const ZOOM_STEPS = [0.5, 1, 2, 4];
+
+    function zoomIndexFor(z) {
+        const i = ZOOM_STEPS.indexOf(z);
+        return i >= 0 ? i : 1;
+    }
+
     // The Real Sun Cycle toggle only applies to the Sunset Pulse skin
     // (design 7); show the row only when that design is active.
     function syncSolarVisibility(design) {
@@ -77,7 +85,12 @@
                 const activeBgOpacity = Math.round((cfg.miniBgOpacity ?? 1.0) * 100);
                 document.getElementById("bg-opacity-slider").value = activeBgOpacity;
                 document.getElementById("bg-opacity-val").textContent = `${activeBgOpacity}%`;
-                
+
+                // Active Zoom
+                const activeZoomIdx = zoomIndexFor(cfg.miniZoom ?? 1);
+                document.getElementById("zoom-slider").value = activeZoomIdx;
+                document.getElementById("zoom-val").textContent = `${Math.round(ZOOM_STEPS[activeZoomIdx] * 100)}%`;
+
                 // Position Lock
                 document.getElementById("toggle-lock").classList.toggle("on", cfg.miniPositionLocked || false);
 
@@ -135,6 +148,17 @@
         bgSliderVal.textContent = `${val}%`;
 
         debouncedSave("miniBgOpacity", { miniBgOpacity: val / 100 });
+    });
+
+    // Zoom slider handler (discrete stops: 50/100/200/400%)
+    const zoomSlider = document.getElementById("zoom-slider");
+    const zoomVal = document.getElementById("zoom-val");
+    zoomSlider.addEventListener("input", (e) => {
+        const idx = parseInt(e.target.value);
+        const factor = ZOOM_STEPS[idx] ?? 1;
+        zoomVal.textContent = `${Math.round(factor * 100)}%`;
+
+        debouncedSave("miniZoom", { miniZoom: factor });
     });
 
     // Lock toggle handler

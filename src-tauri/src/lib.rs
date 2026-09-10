@@ -268,11 +268,54 @@ fn move_window(window: WebviewWindow, x: i32, y: i32) {
 }
 
 #[tauri::command]
-fn set_window_size(window: WebviewWindow, width: i32, height: i32) {
+fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Option<bool>) {
     // Reject invalid values.
     if width <= 0 || height <= 0 || width > 2000 || height > 2000 {
         return;
     }
+
+    // Zoom-style resizes grow the window around its visual center so the
+    // clock stays where the user placed it; the final position is clamped
+    // to the monitor's work area so it never ends up partially off-screen
+    // (e.g. near the bottom edge). Skipped for plain skin swaps, which keep
+    // the top-left anchor.
+    if recenter.unwrap_or(false) {
+        if let (Ok(pos), Ok(old_size)) = (window.outer_position(), window.outer_size()) {
+            let new_phys_width = (width as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+            let new_phys_height = (height as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+
+            // Keep the old center fixed under the new size.
+            let mut new_x = pos.x + (old_size.width as i32 - new_phys_width) / 2;
+            let mut new_y = pos.y + (old_size.height as i32 - new_phys_height) / 2;
+
+            // Clamp fully inside the work area of the monitor that hosts
+            // the window's (old) center.
+            if let Ok(Some(monitor)) = window.current_monitor() {
+                let wa = monitor.work_area();
+                let wa_x = wa.position.x;
+                let wa_y = wa.position.y;
+                let wa_w = wa.size.width as i32;
+                let wa_h = wa.size.height as i32;
+                if new_x < wa_x {
+                    new_x = wa_x;
+                }
+                if new_y < wa_y {
+                    new_y = wa_y;
+                }
+                if new_x + new_phys_width > wa_x + wa_w {
+                    new_x = wa_x + wa_w - new_phys_width;
+                }
+                if new_y + new_phys_height > wa_y + wa_h {
+                    new_y = wa_y + wa_h - new_phys_height;
+                }
+            }
+
+            let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                new_x, new_y,
+            )));
+        }
+    }
+
     // Store the target size so the Resized handler can re-apply it
     // when DPI scaling tries to corrupt the window size.
     MINI_TARGET_WIDTH.store(width as u32, Ordering::Release);
@@ -690,7 +733,7 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
 
                 // Menu dimensions (logical px in tauri.conf.json) → physical
                 let menu_width = (270.0 * scale) as i32;
-                let menu_height = (500.0 * scale) as i32;
+                let menu_height = (560.0 * scale) as i32;
                 let gap = (8.0 * scale) as i32;
 
                 // Monitor edges
@@ -1359,6 +1402,7 @@ pub struct TrayMenuState {
     pub language: String,
     pub update_available: bool,
     pub theme: String,
+    pub mini_zoom: f64,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -1427,6 +1471,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         language: settings.language.clone(),
         update_available: pending_update_version().is_some(),
         theme: settings.theme.clone(),
+        mini_zoom: settings.mini_zoom,
     }
 }
 

@@ -341,6 +341,7 @@
 
             // Settings modal - Mini Mode
             "settings.mini.designMode": "Design Mode",
+            "settings.mini.zoom": "Zoom",
             "settings.mini.transparency": "Transparency",
             "settings.mini.bg": "Background",
             "settings.mini.content": "Content",
@@ -704,6 +705,7 @@
 
             // Settings modal - Mini Mode
             "settings.mini.designMode": "Modo de Diseño",
+            "settings.mini.zoom": "Zoom",
             "settings.mini.transparency": "Transparencia",
             "settings.mini.bg": "Fondo",
             "settings.mini.content": "Contenido",

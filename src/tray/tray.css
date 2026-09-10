@@ -180,6 +180,33 @@
         white-space: nowrap;
     }
 
+    /* Slider row (mini zoom) */
+    .tray-slider-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 10px;
+        min-height: 30px;
+    }
+    .tray-slider-lbl {
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--text-hi);
+        flex-shrink: 0;
+    }
+    .tray-slider-row input[type="range"] {
+        flex: 1;
+        min-width: 0;
+    }
+    .tray-slider-val {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 10.5px;
+        color: var(--text-md);
+        width: 34px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+
     /* Exit Button - normal text color, reddish icon */
     .tray-item-exit {
         color: var(--text-hi);

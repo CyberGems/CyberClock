@@ -375,6 +375,15 @@
         document.querySelectorAll('[data-mini-design]').forEach((b) => {
             b.classList.toggle('on', parseInt(b.dataset.miniDesign) === miniDesign);
         });
+        // Mini zoom — discrete stops, slider index → factor (100% default)
+        const ZOOM_STEPS = [0.5, 1, 2, 4];
+        const miniZoom = document.getElementById('s-mini-zoom');
+        if (miniZoom) {
+            const idx = ZOOM_STEPS.indexOf(s.miniZoom ?? 1);
+            miniZoom.value = String(idx >= 0 ? idx : 1);
+            document.getElementById('s-mini-zoom-val').textContent =
+                Math.round((ZOOM_STEPS[idx >= 0 ? idx : 1]) * 100) + '%';
+        }
         const miniBgOp = document.getElementById('s-minibg-op');
         if (miniBgOp) {
             const v = Math.round((s.miniBgOpacity ?? 1.0) * 100);
@@ -2599,6 +2608,17 @@
             const v = parseInt(e.target.value);
             document.getElementById('s-mini-op-val').textContent = v + '%';
             window.cc.saveSettings({ miniOpacity: v / 100 });
+        });
+    }
+    // Mini zoom — discrete stops: 50 / 100 (default) / 200 / 400 %
+    const MINI_ZOOM_STEPS = [0.5, 1, 2, 4];
+    const sMiniZoom = document.getElementById('s-mini-zoom');
+    if (sMiniZoom) {
+        sMiniZoom.addEventListener('input', (e) => {
+            const idx = parseInt(e.target.value);
+            const factor = MINI_ZOOM_STEPS[idx] ?? 1;
+            document.getElementById('s-mini-zoom-val').textContent = Math.round(factor * 100) + '%';
+            window.cc.saveSettings({ miniZoom: factor });
         });
     }
     const sMiniLock = document.getElementById('s-mini-lock');

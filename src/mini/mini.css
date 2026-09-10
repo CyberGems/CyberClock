@@ -1536,6 +1536,21 @@
         color: var(--accent-a);
     }
 
+    /* ── Zoom (50/100/200/400%) ─────────────────────────────
+       The shell renders at its natural skin size and the zoom
+       multiplies it via transform. The window itself is resized
+       to (base × zoom) by mini.js, and the shell counter-shrinks
+       its own box (100%/zoom) so it exactly fills that window
+       once scaled. Borders, glows and fonts scale together like
+       native zoom; #mini-tip is outside the shell and stays at
+       scale 1 so notes remain readable at every zoom. */
+    .mini-shell {
+        width: calc(100% / var(--mini-zoom, 1));
+        height: calc(100% / var(--mini-zoom, 1));
+        transform: scale(var(--mini-zoom, 1));
+        transform-origin: top left;
+    }
+
     /* ═══════════════════════════════════════════════════════
        SHARED LED BREATHING SYSTEM
        Every skin's status dot = core (element itself, static

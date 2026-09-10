@@ -103,7 +103,10 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // WINDOW SIZING — Each skin has its own dimensions.
+    // WINDOW SIZING — Each skin has its own dimensions, then the
+    // zoom factor (miniZoom) multiplies them. The shell renders at
+    // the natural skin size and is scaled via CSS transform (see
+    // mini.css), so these are the window dimensions, in logical px.
     // ═══════════════════════════════════════════════════════
 
     const DESIGN_HEIGHTS = { 1: 48, 2: 56, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
@@ -115,6 +118,14 @@
     const COLLAPSED_HEIGHTS = { 1: 34, 2: 38, 3: 34, 4: 36, 5: 34, 6: 34, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
     const COLLAPSED_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 188, 8: 188, 9: 200, 10: 180, 11: 175, 12: 170 };
 
+    // Discrete zoom stops for the mini clock (slider index → factor).
+    const ZOOM_STEPS = [0.5, 1, 2, 4];
+
+    function zoomFactor() {
+        const z = cfg.miniZoom ?? 1;
+        return Number.isFinite(z) && z > 0 ? z : 1;
+    }
+
     let isHovered = false;
     let isTipVisible = false;
     let lastAppliedWidth = 0;
@@ -123,6 +134,7 @@
     function getCurrentTargetSize() {
         const design = cfg.miniDesign || 1;
         const isCollapsible = cfg.miniCollapseDate === true;
+        const zoom = zoomFactor();
 
         let baseWidth = DESIGN_WIDTHS[design] || 260;
         let baseHeight = DESIGN_HEIGHTS[design] || 48;
@@ -134,28 +146,32 @@
 
         if (isTipVisible) {
             const tipHeight = tipEl.offsetHeight || 80;
-            baseHeight += tipHeight + 16;
+            baseHeight += (tipHeight + 16) / zoom;
         }
 
-        return { width: baseWidth, height: baseHeight };
+        return { width: Math.round(baseWidth * zoom), height: Math.round(baseHeight * zoom) };
     }
 
-    function syncWindowSize(force = false) {
+    function syncWindowSize(force = false, recenter = false) {
         const target = getCurrentTargetSize();
-        if (force || target.width !== lastAppliedWidth || target.height !== lastAppliedHeight) {
+        if (force || recenter || target.width !== lastAppliedWidth || target.height !== lastAppliedHeight) {
             lastAppliedWidth = target.width;
             lastAppliedHeight = target.height;
+            target.recenter = recenter;
             window.cc.setWindowSize(target);
         }
     }
 
     let lastDesign = null;
     let lastCollapse = null;
+    let lastZoom = null;
     function applySettings(s) {
         const designChanged = s.miniDesign !== lastDesign;
         const collapseChanged = s.miniCollapseDate !== lastCollapse;
+        const zoomChanged = s.miniZoom !== lastZoom && s.miniZoom !== undefined;
         lastDesign = s.miniDesign;
         lastCollapse = s.miniCollapseDate;
+        lastZoom = s.miniZoom;
 
         cfg = s;
         calNotes = s.calendarNotes || {};
@@ -173,6 +189,7 @@
             shell.classList.toggle("collapse-date", s.miniCollapseDate === true);
             shell.style.setProperty("--bg-op", s.miniBgOpacity ?? 1.0);
             shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
+            shell.style.setProperty("--mini-zoom", String(zoomFactor()));
         }
 
         if (s.miniScanlines === false)
@@ -195,8 +212,10 @@
         }
 
         // Resize window to match the skin height/width when design or collapse setting changes
-        if (designChanged || collapseChanged || lastAppliedWidth === 0) {
-            syncWindowSize(true);
+        if (designChanged || collapseChanged || zoomChanged || lastAppliedWidth === 0) {
+            // Zoom changes re-anchor the window to its visual center (see
+            // set_window_size); design/collapse swaps keep the top-left anchor.
+            syncWindowSize(true, zoomChanged);
         }
     }
 
