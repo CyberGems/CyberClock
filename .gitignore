@@ -19,6 +19,7 @@ CLAUDE.md
 .github/copilot-instructions.md
 .claude/
 .qodo/
+.zcode/
 
 # OS files
 .DS_Store
