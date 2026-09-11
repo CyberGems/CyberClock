@@ -332,6 +332,10 @@
 
         if (window.cc.onTrayMenuShow) {
             window.cc.onTrayMenuShow(() => {
+                // The tray window is persistent (hidden, not destroyed), so
+                // an expanded Help section would survive a close/reopen —
+                // every show starts with the submenu collapsed.
+                if (typeof setHelpOpen === "function") setHelpOpen(false);
                 if (window.cc.getTrayMenuState) {
                     window.cc.getTrayMenuState().then(renderState).catch(console.error);
                 }

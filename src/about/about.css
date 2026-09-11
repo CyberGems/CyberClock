@@ -55,10 +55,13 @@ body {
     gap: 8px;
     -webkit-app-region: drag;
 }
-.ab-title-logo {
-    width: 17px;
-    height: 17px;
-    border-radius: 4px;
+.ab-title-ico {
+    color: var(--ab-text-secondary);
+    display: inline-flex;
+}
+.ab-title-ico .cc-ico {
+    width: 16px;
+    height: 16px;
 }
 .ab-title-text {
     font-size: 12px;
@@ -96,19 +99,6 @@ body {
 .ab-close:hover {
     background: #e81123;
     color: #fff;
-}
-.ab-donate {
-    color: #f43f5e;
-}
-.ab-donate:hover {
-    background: rgba(244, 63, 94, 0.12);
-    color: #fb7185;
-}
-.ab-title-sep {
-    width: 1px;
-    height: 20px;
-    background: var(--ab-separator);
-    margin: 0 2px;
 }
 
 /* ── Scrollable content ────────────────────────────────────── */

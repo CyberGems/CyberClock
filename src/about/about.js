@@ -197,8 +197,6 @@
     if (closeBtn) closeBtn.addEventListener("click", closeAbout);
     const minBtn = document.getElementById("ab-minimize");
     if (minBtn) minBtn.addEventListener("click", minimizeAbout);
-    const donateBtn = document.getElementById("ab-donate");
-    if (donateBtn) donateBtn.addEventListener("click", () => openUrl(LINKS.donate));
 
     // ── Footer links (same set/order as CyberSnap) ───────────
     const linkMap = {
