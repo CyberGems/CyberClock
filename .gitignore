@@ -25,5 +25,8 @@ CLAUDE.md
 .DS_Store
 Thumbs.db
 
+# Local scratch output (screenshots, pasted images)
+artifacts/
+
 ## GitHub Wiki (local copy ÔÇö wiki lives on GitHub Wiki)
 docs/wiki/
