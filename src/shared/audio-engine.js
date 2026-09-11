@@ -16,6 +16,9 @@ class AudioEngine {
     this._voices     = [];     // all live voices (current + those fading out)
     this._current    = null;   // the active voice
     this._building   = null;   // voice currently being constructed
+    this._layers     = [];     // ambient mix layers (id -> gain + voice)
+    this._layerDest  = null;   // routing hint while a layer voice is built
+    this._layerTrack = null;
     this.isPlaying   = false;
     this.currentTrack = null;
     this.volume      = 0.8;
@@ -43,6 +46,13 @@ class AudioEngine {
     if (this._ctx.state === 'suspended') this._ctx.resume();
   }
 
+  // Real pause: suspends the whole AudioContext so every voice freezes in
+  // place (HTMLAudioElement media too, via createMediaElementSource).
+  suspend() {
+    this._ensureCtx();
+    if (this._ctx.state === 'running') this._ctx.suspend();
+  }
+
   setVolume(v) {
     this.volume = Math.max(0, Math.min(1, v));
     if (this._master && !this.muted) {
@@ -64,6 +74,19 @@ class AudioEngine {
     this.crossfadeTime = Math.max(0, secs);
   }
 
+  // Sleep-friendly auto stop: glide the master gain to silence over
+  // `secs`. Any later setVolume/resume/stop cancels the glide cleanly.
+  beginSlowFade(secs) {
+    if (!this._master || !this._ctx) return;
+    const now = this._ctx.currentTime;
+    const from = Math.max(0.0001, this._master.gain.value);
+    try {
+      this._master.gain.cancelScheduledValues(now);
+      this._master.gain.setValueAtTime(from, now);
+      this._master.gain.linearRampToValueAtTime(0.0001, now + Math.max(1, secs));
+    } catch (_) { /* a mid-ramp re-schedule is harmless to miss */ }
+  }
+
   getAnalyserData() {
     if (!this._analyser) return new Uint8Array(128);
     const d = new Uint8Array(this._analyser.frequencyBinCount);
@@ -75,8 +98,11 @@ class AudioEngine {
   _startVoice(track) {
     const bus = this._ctx.createGain();
     bus.gain.value = 0;            // fades in on commit
-    bus.connect(this._master);
-    const voice = { track, bus, nodes: [], birdTimer: null, audioEl: null, alive: true };
+    // Layer mixing: when a layer is being (re)built, route the voice
+    // through the layer's gain node instead of the master.
+    const dest = this._layerDest || this._master;
+    bus.connect(dest);
+    const voice = { track, bus, dest, nodes: [], birdTimer: null, audioEl: null, alive: true, layer: this._layerTrack || null };
     this._building = voice;
     return voice;
   }
@@ -95,8 +121,13 @@ class AudioEngine {
 
   _commitVoice(voice, fade = this.crossfadeTime) {
     const now  = this._ctx.currentTime;
-    // Fade out everything currently playing.
-    this._voices.forEach(v => this._retireVoice(v, fade));
+    // Fade out everything currently playing — except voices belonging
+    // to other mix layers (those keep sounding across the commit).
+    this._voices.forEach(v => {
+      if (v === voice) return;
+      if (voice.layer && v.layer && v.layer !== voice.layer) return;
+      this._retireVoice(v, fade);
+    });
     // Fade the new voice in.
     voice.bus.gain.cancelScheduledValues(now);
     if (fade > 0) {
@@ -105,10 +136,13 @@ class AudioEngine {
       voice.bus.gain.setValueAtTime(1, now);
     }
     this._voices.push(voice);
-    this._current      = voice;
+    if (!voice.layer) {
+      // Solo (non-layer) commits own the global "current" state.
+      this._current = voice;
+      this.currentTrack = voice.track;
+    }
     this._building     = null;
     this.isPlaying     = true;
-    this.currentTrack  = voice.track;
   }
 
   _retireVoice(voice, fade) {
@@ -145,6 +179,7 @@ class AudioEngine {
   // ── Stop all (fade out, click-free) ───────────────────────
   stop(fadeTime = this.stopFadeTime) {
     this._voices.slice().forEach(v => this._retireVoice(v, fadeTime));
+    this._layers.forEach(l => { l.active = false; l.voice = null; });
     this._current     = null;
     this.isPlaying    = false;
     this.currentTrack = null;
@@ -343,14 +378,120 @@ class AudioEngine {
   playTrack(id) {
     this.isPlaying = true;
     this.currentTrack = id;
+    // Capture any pending layer routing now: the HEAD fetch below is
+    // async, and by the time it resolves the fields are already reset.
+    const dest = this._layerDest || null;
+    const layerId = this._layerTrack || null;
+    const startVoice = () => {
+      this._layerDest = dest;
+      this._layerTrack = layerId;
+      try { this._playSynth(id); } finally { this._layerDest = null; this._layerTrack = null; }
+    };
     // Try real audio file first, fall back to procedural synthesis
     const realFile = `../assets/sounds/${id}.mp3`;
     fetch(realFile, { method: 'HEAD' })
       .then(r => {
-        if (r.ok) this.playFile(realFile, { id, fade: this.crossfadeTime });
-        else this._playSynth(id);
+        if (r.ok) {
+          this._layerDest = dest;
+          this._layerTrack = layerId;
+          try { this.playFile(realFile, { id, fade: this.crossfadeTime }); }
+          finally { this._layerDest = null; this._layerTrack = null; }
+        } else {
+          startVoice();
+        }
       })
-      .catch(() => this._playSynth(id));
+      .catch(() => startVoice());
+  }
+
+  // ── Layer mixing (ambient blend mode) ─────────────────────
+  // Each layer keeps its own gain node off _master, so toggling one
+  // layer fades it independently while the others keep playing.
+  getLayer(id) {
+    return this._layers.find(l => l.id === id) || null;
+  }
+
+  isLayerActive(id) {
+    const l = this.getLayer(id);
+    return !!(l && l.active);
+  }
+
+  activeLayerIds() {
+    return this._layers.filter(l => l.active).map(l => l.id);
+  }
+
+  _ensureLayer(id) {
+    let layer = this.getLayer(id);
+    if (!layer) {
+      const gain = this._ctx.createGain();
+      gain.gain.value = 0;                 // silent until activated
+      gain.connect(this._master);
+      layer = { id, gain, active: false, voice: null };
+      this._layers.push(layer);
+    }
+    return layer;
+  }
+
+  // Turn a layer on: (re)builds its voice routed through the layer gain.
+  _startLayerVoice(layer) {
+    // _startVoice consumes these fields while the (possibly async)
+    // voice construction runs; the finally block restores them so a
+    // normal playTrack call right after is never mis-routed.
+    this._layerDest = layer.gain;
+    this._layerTrack = layer.id;
+    try {
+      this.playTrack(layer.id);
+    } finally {
+      this._layerDest = null;
+      this._layerTrack = null;
+    }
+    layer.active = true;
+    layer.voice = this._current;
+    this.isPlaying = true;
+  }
+
+  addLayer(id) {
+    this._ensureCtx();
+    this.resume();
+    const layer = this._ensureLayer(id);
+    if (layer.active) return;
+    // If a solo track is currently playing, promote it to a layer first
+    // so blending keeps it sounding instead of crossfading it away.
+    if (this._current && this._current.alive && this.isPlaying) {
+      const soloId = this._current.track;
+      const soloLayer = this.getLayer(soloId);
+      if (!soloLayer || !soloLayer.active) {
+        const promoted = this._ensureLayer(soloId);
+        promoted.active = true;
+        promoted.voice = this._current;
+        promoted.gain.gain.setTargetAtTime(1, this._ctx.currentTime, 0.05);
+        // Re-wire the live voice's bus through the layer gain.
+        try { this._current.bus.disconnect(); } catch (_) {}
+        try { this._current.bus.connect(promoted.gain); } catch (_) {}
+        this._current.layer = soloId;
+        this._current.dest = promoted.gain;
+      }
+    }
+    this._startLayerVoice(layer);
+    layer.gain.gain.setTargetAtTime(1, this._ctx.currentTime, 0.4);
+  }
+
+  removeLayer(id, fade = 1.2) {
+    const layer = this.getLayer(id);
+    if (!layer || !layer.active) return;
+    layer.active = false;
+    const now = this._ctx.currentTime;
+    layer.gain.gain.setTargetAtTime(0.0001, now, fade / 3);
+    // Retire the voice underneath so its nodes/timers wind down too.
+    if (layer.voice) this._retireVoice(layer.voice, fade);
+    layer.voice = null;
+    if (this.activeLayerIds().length === 0) {
+      this.isPlaying = false;
+      this.currentTrack = null;
+    }
+  }
+
+  clearLayers(fade = 1.2) {
+    this._layers.slice().forEach(l => this.removeLayer(l.id, fade));
   }
 
   _playSynth(id) {
@@ -389,7 +530,19 @@ class AudioEngine {
       const timeLeft = audio.duration - audio.currentTime;
       if (audio.duration > this.crossfadeTime && timeLeft <= this.crossfadeTime) {
         loopTriggered = true;
-        this.playFile(filePath, { id, fade: this.crossfadeTime, loop });
+        // Keep layer routing across the crossfaded re-loop.
+        this._layerDest = voice.dest || null;
+        this._layerTrack = voice.layer || null;
+        try {
+          this.playFile(filePath, { id, fade: this.crossfadeTime, loop });
+        } finally {
+          this._layerDest = null;
+          this._layerTrack = null;
+        }
+        if (voice.layer) {
+          const layer = this.getLayer(voice.layer);
+          if (layer && layer.active) layer.voice = this._voices[this._voices.length - 1] || layer.voice;
+        }
       }
     });
 
@@ -397,7 +550,18 @@ class AudioEngine {
       if (!voice.alive || loopTriggered) return;
       loopTriggered = true;
       if (loop) {
-        this.playFile(filePath, { id, fade: 0, loop });
+        this._layerDest = voice.dest || null;
+        this._layerTrack = voice.layer || null;
+        try {
+          this.playFile(filePath, { id, fade: 0, loop });
+        } finally {
+          this._layerDest = null;
+          this._layerTrack = null;
+        }
+        if (voice.layer) {
+          const layer = this.getLayer(voice.layer);
+          if (layer && layer.active) layer.voice = this._voices[this._voices.length - 1] || layer.voice;
+        }
       } else {
         this._destroyVoice(voice);
         if (this._current === voice) {
