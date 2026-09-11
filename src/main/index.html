@@ -91,6 +91,10 @@
                 <div class="vc" id="vc">
                     <!-- HOME -->
                     <div class="view active" id="view-home">
+                        <!-- Discrete side handle: collapse/expand the analog clock -->
+                        <button class="clock-grip" id="clock-grip" type="button" title="Hide clock">
+                            <span data-ico="back"></span>
+                        </button>
                         <div class="clock-panel">
                             <canvas id="clock-canvas"></canvas>
                         </div>
@@ -725,6 +729,15 @@
                                     autocomplete="off"
                                     data-i18n-attr="placeholder:settings.appearance.clockNamePlaceholder"
                                 />
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.hideClock">Hide Analog Clock</span>
+                                    <small data-i18n="settings.appearance.hideClockDesc">Calendar takes the full width</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-hide-clock" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
                         </div>
                     </div>

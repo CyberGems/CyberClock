@@ -264,6 +264,20 @@
         if (secEl) secEl.checked = s.showSeconds !== false;
         const clockNameEl = document.getElementById("s-clock-name");
         if (clockNameEl) clockNameEl.value = s.clockBrand || "CYBERGEMS";
+        // Hide analog clock (full-mode Home): collapse the panel and let
+        // the calendar dashboard absorb the freed width.
+        const hideClock = s.fullHideClock === true;
+        const homeView = document.getElementById("view-home");
+        if (homeView) homeView.classList.toggle("no-clock", hideClock);
+        const hideClockEl = document.getElementById("s-hide-clock");
+        if (hideClockEl) hideClockEl.checked = hideClock;
+        const gripEl = document.getElementById("clock-grip");
+        if (gripEl) {
+            gripEl.title = window.ccI18n.t(
+                hideClock ? "tooltip.showClock" : "tooltip.hideClock",
+            );
+        }
+        syncHomeClock();
         const aotEl = document.getElementById("s-aot");
         if (aotEl) aotEl.checked = !!s.alwaysOnTop;
         const suEl = document.getElementById("s-startup");
@@ -595,7 +609,10 @@
     }
 
     function syncHomeClock() {
-        if (isMainActive() && curView === "home") {
+        const hidden = document
+            .getElementById("view-home")
+            ?.classList.contains("no-clock");
+        if (!hidden && isMainActive() && curView === "home") {
             startClockAnim();
         } else {
             stopClockAnim();
@@ -2643,6 +2660,21 @@
             const text = sClockName.value.trim().slice(0, 16);
             sClockName.value = text;
             window.cc.saveSettings({ clockBrand: text });
+        });
+    }
+
+    // Hide analog clock — the side grip on the Home view and the Settings
+    // toggle drive the same setting through the same broadcast round-trip.
+    const clockGrip = document.getElementById("clock-grip");
+    if (clockGrip) {
+        clockGrip.addEventListener("click", () => {
+            window.cc.saveSettings({ fullHideClock: !(cfg.fullHideClock === true) });
+        });
+    }
+    const sHideClock = document.getElementById("s-hide-clock");
+    if (sHideClock) {
+        sHideClock.addEventListener("change", (e) => {
+            window.cc.saveSettings({ fullHideClock: e.target.checked });
         });
     }
     // Mini mode settings

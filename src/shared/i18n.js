@@ -239,6 +239,8 @@
             "menu.home": "Home",
             "tooltip.switchToMini": "Switch to Mini Mode",
             "tooltip.settings": "Settings",
+            "tooltip.hideClock": "Hide clock",
+            "tooltip.showClock": "Show clock",
 
             "alarms.custom.title": "◈ Custom Alarms",
             "alarms.custom.slot1": "Alarm 1",
@@ -280,6 +282,8 @@
             "settings.appearance.clockDisplay": "Clock Display",
             "settings.appearance.timeFormat": "Time Format",
             "settings.appearance.showSeconds": "Show Seconds",
+            "settings.appearance.hideClock": "Hide Analog Clock",
+            "settings.appearance.hideClockDesc": "Calendar takes the full width",
             "settings.appearance.clockName": "Clock Name",
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
 
@@ -633,6 +637,8 @@
             "menu.home": "Inicio",
             "tooltip.switchToMini": "Cambiar a Modo Mini",
             "tooltip.settings": "Configuración",
+            "tooltip.hideClock": "Ocultar reloj",
+            "tooltip.showClock": "Mostrar reloj",
 
             "alarms.custom.title": "◈ Alarmas personalizadas",
             "alarms.custom.slot1": "Alarma 1",
@@ -674,6 +680,8 @@
             "settings.appearance.clockDisplay": "Pantalla de Reloj",
             "settings.appearance.timeFormat": "Formato de Hora",
             "settings.appearance.showSeconds": "Mostrar Segundos",
+            "settings.appearance.hideClock": "Ocultar Reloj Analógico",
+            "settings.appearance.hideClockDesc": "El calendario ocupa todo el ancho",
             "settings.appearance.clockName": "Nombre del Reloj",
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
 

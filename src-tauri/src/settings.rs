@@ -116,6 +116,10 @@ pub struct AppSettings {
     // Zero all mini-mode motion: animations AND transitions.
     pub mini_no_animations: bool,
 
+    // Hide the analog clock in full mode — the calendar dashboard takes
+    // the full width (full-mode Home view only).
+    pub full_hide_clock: bool,
+
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
 
@@ -167,6 +171,7 @@ impl Default for AppSettings {
             mini_zoom: 1.0,
             mini_click_through: false,
             mini_no_animations: false,
+            full_hide_clock: false,
             custom_alarms: vec![
                 CustomAlarm::default(),
                 CustomAlarm::default(),
