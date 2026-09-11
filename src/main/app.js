@@ -1879,6 +1879,43 @@
     // ══════════════════════════════════════════════════════════════
     // RELAX + AUDIO ENGINE
     // ══════════════════════════════════════════════════════════════
+    const RELAX_TRACKS = [
+        { id: "night",     icon: "stars" },
+        { id: "forest",    icon: "trees" },
+        { id: "space",     icon: "planet" },
+        { id: "ocean",     icon: "waves" },
+        { id: "rain",      icon: "cloud-rain" },
+        { id: "fireplace", icon: "flame" },
+    ];
+
+    // Build the track cards once, from the same single source of truth
+    // used by Zen Flow and the scheduler — no duplicated markup to drift.
+    function buildTrackCards() {
+        const grid = document.getElementById("track-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        RELAX_TRACKS.forEach(({ id, icon }) => {
+            const card = document.createElement("div");
+            card.className = "tcard";
+            card.dataset.track = id;
+            card.setAttribute("role", "button");
+            card.tabIndex = 0;
+            card.setAttribute("data-tooltip-dir", "bottom");
+            card.setAttribute("data-tooltip", window.ccI18n ? window.ccI18n.t("relax.tooltip.tcardMix") : "Click to play · Ctrl+Click to blend");
+            card.setAttribute("data-i18n-attr", "data-tooltip:relax.tooltip.tcardMix");
+            card.innerHTML = `
+                <div class="tcard-dot"></div>
+                <div class="tcard-ico"><span data-ico="${icon}" data-ico-size="26"></span></div>
+                <div class="tcard-name" data-i18n="relax.track.${id}"></div>
+                <div class="tcard-desc" data-i18n="relax.track.${id}.desc"></div>
+            `;
+            grid.appendChild(card);
+        });
+        // i18n fills the name/desc placeholders; icons need the replacer.
+        if (window.ccI18n) window.ccI18n.apply(grid);
+        if (window.ccIcons) window.ccIcons.replaceIcons(grid);
+    }
+
     const ZEN_FLOW_TRACK_DURATION = 15 * 60 * 1000; // 15 minutes per track
 
     let rSelected = null,
@@ -1966,43 +2003,56 @@
     function updatePlayButtonUI(isPlaying) {
         const playBtn = document.getElementById("r-play");
         if (!playBtn) return;
-        const iconName = isPlaying ? "pause" : "play";
-        
+        const iconName = isPlaying && !rPaused ? "pause" : "play";
+
+        // Tray sync: report what's playing (last track while paused) so
+        // the tray menu can show and toggle it from anywhere.
+        if (window.cc && window.cc.reportRelaxPlaying) {
+            const reported = isPlaying
+                ? (window.audioEngine.currentTrack || rSelected)
+                : null;
+            window.cc.reportRelaxPlaying(reported);
+        }
+
         let text = "";
         let labelKey = "";
         let tooltipKey = "";
-        if (isPlaying) {
-            if (zenFlowActive) {
-                labelKey = "relax.pauseZenFlow";
-                text = window.ccI18n.t("relax.pauseZenFlow");
-                tooltipKey = "relax.tooltip.pauseZenFlow";
-            } else {
-                labelKey = "relax.pauseTrack";
-                const trackName = window.ccI18n.t("relax.track." + rSelected);
-                text = window.ccI18n.t("relax.pauseTrack", { track: trackName });
-                tooltipKey = "relax.tooltip.pauseTrack";
-            }
+        if (isPlaying && rPaused) {
+            labelKey = "relax.resume";
+            text = window.ccI18n.t("relax.resume");
+            tooltipKey = "relax.tooltip.resume";
+        } else if (isPlaying) {
+            labelKey = "relax.pause";
+            text = window.ccI18n.t("relax.pause");
+            tooltipKey = "relax.tooltip.pause";
         } else {
             labelKey = "relax.play";
             text = window.ccI18n.t("relax.play");
             tooltipKey = "relax.tooltip.play";
         }
-        
+
         playBtn.innerHTML = `<span data-ico="${iconName}"></span> <span id="r-play-text" data-i18n="${labelKey}">${text}</span>`;
         if (window.ccIcons) {
             window.ccIcons.replaceIcons(playBtn);
         }
-        
+
         // Update dynamic tooltip wrapper
         const playWrap = document.getElementById("r-play-wrap");
         if (playWrap) {
             playWrap.setAttribute("data-i18n-attr", `data-tooltip:${tooltipKey}`);
-            if (tooltipKey === "relax.tooltip.pauseTrack") {
-                const trackName = window.ccI18n.t("relax.track." + rSelected);
-                playWrap.setAttribute("data-tooltip", window.ccI18n.t("relax.tooltip.pauseTrack", { track: trackName }));
-            } else {
-                playWrap.setAttribute("data-tooltip", window.ccI18n.t(tooltipKey));
-            }
+            playWrap.setAttribute("data-tooltip", window.ccI18n.t(tooltipKey));
+        }
+
+        // Breathe circle active tint follows playback state
+        const circle = document.getElementById("breathe-circle");
+        if (circle) {
+            circle.setAttribute("data-active", isPlaying && !rPaused ? "1" : "0");
+        }
+
+        // Shuffle button shows its active state while Zen Flow runs
+        const shuffleBtn = document.getElementById("r-shuffle");
+        if (shuffleBtn) {
+            shuffleBtn.classList.toggle("on", zenFlowActive);
         }
     }
 
@@ -2116,8 +2166,6 @@
         document.querySelectorAll(".tcard").forEach((c) => {
             const shouldPlay = playing && c.dataset.track === rSelected;
             c.classList.toggle("playing", shouldPlay);
-            if (c.dataset.track === rSelected) {
-            }
         });
     }
 
@@ -2140,21 +2188,74 @@
     function rStop(isManual = false) {
         stopZenFlow();
         const fade = isManual ? 1.0 : 2.0;
+        window.audioEngine.clearLayers();
         window.audioEngine.stop(fade);
+        // Undo any auto-stop slow fade so the next session starts at
+        // the configured volume, not whatever the glide left behind.
+        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+        rPaused = false;
         updatePlayButtonUI(false);
         rStopSession();
         stopBreathePacer();
         rStopTips();
         rClearAutoStop();
         updatePlayingTrackCardClass(false);
+        updateMixStateUI();
     }
 
     function rTogglePlay() {
         if (window.audioEngine.isPlaying) {
-            rStop(true);
+            rPauseOrResume();
+        } else if (rSelected) {
+            rPlayTrack();
         } else {
+            // Nothing selected yet: Zen Flow is the sensible default
             startZenFlow();
         }
+    }
+
+    // Real pause: suspends the whole AudioContext (positions freeze in
+    // place) and freezes the session/tips/pacer clocks. Resume restores
+    // everything without losing elapsed time.
+    let rPaused = false;
+    let rPauseResumedAt = 0;
+    let rPauseAccum = 0;
+
+    function rPause() {
+        if (!window.audioEngine.isPlaying || rPaused) return;
+        rPaused = true;
+        rPauseResumedAt = Date.now();
+        window.audioEngine.suspend();
+        // Freeze the tips cycle; session/pacer clocks are time-offset on resume.
+        if (rTipInterval) {
+            clearInterval(rTipInterval);
+            rTipInterval = null;
+        }
+        // Freeze the auto-stop countdown by stopping its interval; the
+        // remaining seconds stay in rAstRemain until resume re-arms it.
+        if (rAstTimer) {
+            clearInterval(rAstTimer);
+            rAstTimer = null;
+        }
+        updatePlayButtonUI(true); // re-render with the Resume label
+    }
+
+    function rResume() {
+        if (!rPaused) return;
+        rPaused = false;
+        const pauseMs = Date.now() - rPauseResumedAt;
+        rPauseAccum += pauseMs;
+        window.audioEngine.resume();
+        if (rSesStart) rSesStart += pauseMs;
+        if (rPacerStart) rPacerStart += pauseMs;
+        if (rSesStart) rStartTips(); // tips cycle resumes with the session
+        if (rAstMins > 0 && rAstRemain > 0) rStartAutoStop(rAstRemain);
+        updatePlayButtonUI(true);
+    }
+
+    function rPauseOrResume() {
+        if (rPaused) rResume();
+        else rPause();
     }
 
     function rStartSession() {
@@ -2262,6 +2363,9 @@
         rTipInterval = null;
     }
 
+    // Auto-stop: instead of a hard cut at 0, the master gain glides to
+    // silence over the last minute so sleep sessions fade out gently.
+    const AUTO_STOP_FADE_SECS = 60;
     function rStartAutoStop(secs) {
         rClearAutoStop();
         rAstRemain = secs;
@@ -2270,6 +2374,9 @@
             if (!window.audioEngine.isPlaying) return;
             rAstRemain = Math.max(0, rAstRemain - 1);
             rAstUpdateDisplay();
+            if (rAstRemain === AUTO_STOP_FADE_SECS) {
+                window.audioEngine.beginSlowFade(AUTO_STOP_FADE_SECS);
+            }
             if (rAstRemain <= 0) {
                 rClearAutoStop();
                 rStop();
@@ -2358,11 +2465,11 @@
                     ctx.beginPath();
                     const opacity = 0.05 + (wIdx * 0.04);
                     ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
-                    
+
                     const freq = 0.008 + (wIdx * 0.004);
                     const amp = 15 + (wIdx * 8);
                     const speed = 1.2 + (wIdx * 0.5);
-                    
+
                     for (let x = 0; x < w; x++) {
                         const angle = (x * freq) + (time * speed);
                         const y = (h / 2) + Math.sin(angle) * amp * Math.cos(x * 0.002);
@@ -2371,12 +2478,7 @@
                     }
                     ctx.stroke();
                 }
-                
-                ctx.fillStyle = `rgba(${rgb}, 0.5)`;
-                ctx.font = "9px 'Share Tech Mono', monospace";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(window.ccI18n.t("relax.standby"), w / 2, h - 15);
+                // No standby text: idle waves alone read as "waiting".
             }
             vizRaf = requestAnimationFrame(draw);
         }
@@ -2395,14 +2497,37 @@
     }
 
     // Track cards
+    buildTrackCards();
     document.querySelectorAll(".tcard").forEach((card) => {
-        card.addEventListener("click", () => {
+        card.addEventListener("click", (e) => {
             const t = card.dataset.track;
-            stopZenFlow();
-            if (rSelected === t && window.audioEngine.isPlaying) {
-                rStop(true);
+
+            // Ctrl+Click blends tracks as layers (Rain + Fireplace, etc.)
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                if (window.audioEngine.isLayerActive(t)) {
+                    window.audioEngine.removeLayer(t);
+                } else {
+                    window.audioEngine.addLayer(t);
+                }
+                updateMixStateUI();
                 return;
             }
+
+            if (rPaused && rSelected === t) {
+                // Same track while paused: just resume
+                stopZenFlow();
+                rResume();
+                return;
+            }
+            stopZenFlow();
+            if (rSelected === t && window.audioEngine.isPlaying) {
+                rPause(); // second click on the playing card pauses it
+                return;
+            }
+            rPaused = false;
+            // Switching to a solo track also clears any blend layers
+            window.audioEngine.clearLayers();
             preSelectRelaxTrack(t);
             rSelected = t;
             if (window.audioEngine.isPlaying) {
@@ -2412,12 +2537,44 @@
             } else {
                 rPlayTrack();
             }
+            updateMixStateUI();
+        });
+        // Keyboard parity for the role="button" cards
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                card.click();
+            }
         });
     });
+
+    // Reflect active blend layers on the cards: layered cards get the
+    // active tint too (dot + border). The solo selection keeps its own
+    // highlight; the two sources can coexist (solo + layers).
+    function updateMixStateUI() {
+        const layered = window.audioEngine.activeLayerIds();
+        document.querySelectorAll(".tcard").forEach((c) => {
+            c.classList.toggle(
+                "on",
+                layered.includes(c.dataset.track) || c.dataset.track === rSelected,
+            );
+        });
+        updatePlayButtonUI(window.audioEngine.isPlaying || layered.length > 0);
+    }
 
     document
         .getElementById("r-play")
         .addEventListener("click", rTogglePlay);
+    document.getElementById("r-shuffle").addEventListener("click", () => {
+        // Zen Flow (continuous shuffle) is a deliberate mode choice,
+        // separate from the primary Play/Pause CTA.
+        if (zenFlowActive) {
+            rStop(true);
+        } else {
+            if (rSelected) preSelectRelaxTrack(null);
+            startZenFlow();
+        }
+    });
     document.getElementById("r-stop").addEventListener("click", () => {
         rStop(true);
         document
@@ -2426,12 +2583,14 @@
         rSelected = null;
     });
 
-    // Breathing circle click toggles playback
+    // Breathing circle click toggles pause/play (not full stop, so a
+    // mid-session glance at the circle can't wipe the session timer).
     document.getElementById("breathe-circle").addEventListener("click", () => {
-        if (window.audioEngine.isPlaying) {
-            rStop(true);
+        if (!window.audioEngine.isPlaying) {
+            if (rSelected) rPlayTrack();
+            else startZenFlow();
         } else {
-            startZenFlow();
+            rPauseOrResume();
         }
     });
 
@@ -2609,6 +2768,16 @@
             e.preventDefault();
             closeSettings();
         }
+    });
+
+    // Space toggles play/pause while the Relax view is active. Skips
+    // editable controls so typing (e.g. clock name) never triggers it.
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== " " || curView !== "relax") return;
+        const tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || tag === "BUTTON") return;
+        e.preventDefault();
+        rTogglePlay();
     });
 
     // Settings tabs
@@ -3246,20 +3415,63 @@
         const nextEl = document.getElementById('sched-next');
         const t = (key, vars) => window.ccI18n.t(key, vars);
         if (!sched || !sched.enabled) {
-            statusEl.textContent = t("relax.schedOff");
-            statusEl.classList.remove('on');
-            nextEl.textContent = t("relax.schedNextRun");
+            if (statusEl) { statusEl.textContent = t("relax.schedOff"); statusEl.classList.remove('on'); }
+            if (nextEl) nextEl.textContent = t("relax.schedOffNext");
+            updateRelaxSchedLine(sched);
             return;
         }
-        statusEl.textContent = t("relax.schedOn");
-        statusEl.classList.add('on');
+        if (statusEl) { statusEl.textContent = t("relax.schedOn"); statusEl.classList.add('on'); }
 
-        // Estimate next run (handled precisely by backend)
+        // Next run: the backend's loop re-fires every `repeat` minutes
+        // from the first firing at `time`, so mirror that math here.
         const [h, m] = (sched.time || '22:00').split(':').map(Number);
+        const repeat = sched.repeat !== undefined ? sched.repeat : 60;
         const now = new Date();
         let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-        if (next <= now) next.setDate(next.getDate() + 1);
-        nextEl.textContent = t("relax.schedNextRun").replace('—', fmtSchedDisplay(next.getHours(), next.getMinutes()));
+        if (repeat > 0) {
+            // Recurring: roll forward from the start time by full repeat
+            // intervals until we're strictly past "now".
+            while (next <= now) {
+                next = new Date(next.getTime() + repeat * 60000);
+            }
+        } else if (next <= now) {
+            next.setDate(next.getDate() + 1);
+        }
+        if (nextEl) {
+            nextEl.textContent = t("relax.schedNextRun", {
+                time: fmtSchedDisplay(next.getHours(), next.getMinutes()),
+            });
+        }
+        updateRelaxSchedLine(sched, next);
+    }
+
+    // Compact status line on the Relax view: "Next: 22:00 · Rain · 15m".
+    // The scheduler's controls live in Settings; the Relax view only
+    // needs to answer "when is the next automatic session?".
+    function updateRelaxSchedLine(sched, next) {
+        const lineEl = document.getElementById('r-sched-line');
+        if (!lineEl) return;
+        if (!sched || !sched.enabled) {
+            lineEl.textContent = "";
+            lineEl.style.display = "none";
+            return;
+        }
+        const t = (key, vars) => window.ccI18n.t(key, vars);
+        const durKey = `relax.duration.${sched.duration}m`;
+        let duration;
+        if (sched.duration === 0) duration = t("relax.duration.stopped");
+        else if (sched.duration === 60) duration = t("relax.duration.1h");
+        else duration = t(durKey);
+        const trackLabel = sched.track === 'random-one' ? t("relax.track.randomOne")
+            : sched.track === 'shuffle-all' ? t("relax.track.shuffleAll")
+            : t(`relax.track.${sched.track}`);
+        const when = next
+            ? fmtSchedDisplay(next.getHours(), next.getMinutes())
+            : (sched.time || '22:00');
+        lineEl.style.display = "";
+        lineEl.textContent = t("relax.schedStatus", {
+            time: when, track: trackLabel, duration,
+        });
     }
 
     // Scheduler event listeners
@@ -3393,8 +3605,25 @@
             );
     });
 
+    // Tray quick toggle: play/pause the relax audio without navigating.
+    if (window.cc && window.cc.onTrayRelaxToggle) {
+        window.cc.onTrayRelaxToggle(() => {
+            if (window.audioEngine.isPlaying) {
+                rPauseOrResume();
+            } else if (rSelected) {
+                rPlayTrack();
+            } else {
+                startZenFlow();
+            }
+        });
+    }
+
     window.cc.onRelaxTrigger((p) => {
         const track = getSchedTrack(p.track);
+        // Scheduled sessions always start from silence (not blended with
+        // whatever might still be fading out) and at the configured volume.
+        window.audioEngine.clearLayers();
+        rPaused = false;
         preSelectRelaxTrack(track);
         rSelected = track;
         rPlayTrack();
