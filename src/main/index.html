@@ -340,137 +340,55 @@
                     <!-- RELAX -->
                     <div class="view" id="view-relax">
                         <div class="relax-L">
-                            <div class="track-grid">
-                                <div class="tcard" data-track="night" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="stars" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.night">Night</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.night.desc">Calm night ambience</div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                                <div class="tcard" data-track="forest" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="trees" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.forest">Forest</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.forest.desc">
-                                        Birds &amp; wind
-                                    </div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                                <div class="tcard" data-track="space" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="planet" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.space">Outer Space</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.space.desc">Cosmic drones</div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                                <div class="tcard" data-track="ocean" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="waves" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.ocean">Ocean</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.ocean.desc">Rolling waves</div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                                <div class="tcard" data-track="rain" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="cloud-rain" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.rain">Rain</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.rain.desc">
-                                        Steady rainfall
-                                    </div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                                <div class="tcard" data-track="fireplace" data-tooltip="Play this track in loop" data-i18n-attr="data-tooltip:relax.tooltip.tcard">
-                                    <div class="tcard-ico"><span data-ico="flame" data-ico-size="28"></span></div>
-                                    <div class="tcard-name" data-i18n="relax.track.fireplace">Fireplace</div>
-                                    <div class="tcard-desc" data-i18n="relax.track.fireplace.desc">Warm crackling hearth</div>
-                                    <div class="tcard-wave">
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                        <div class="wbar"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="track-grid" id="track-grid"></div>
                             <div class="r-play-row">
-                                <div id="r-play-wrap" style="flex: 1;" data-tooltip="Activate continuous playlist mode (Zen Flow)" data-i18n-attr="data-tooltip:relax.tooltip.play">
-                                    <button class="abtn" id="r-play" style="width: 100%;">
-                                        <span data-ico="play"></span> <span id="r-play-text" data-i18n="relax.play">Zen Flow</span>
+                                <div id="r-play-wrap" class="r-cta-wrap" data-tooltip="Play or pause the selected track" data-i18n-attr="data-tooltip:relax.tooltip.play">
+                                    <button class="abtn" id="r-play">
+                                        <span data-ico="play"></span> <span id="r-play-text" data-i18n="relax.play">Play</span>
                                     </button>
                                 </div>
-                                <div id="r-stop-wrap" data-tooltip-dir="left" data-tooltip="Stop playback and reset to Zen Flow" data-i18n-attr="data-tooltip:relax.tooltip.stop">
-                                    <button
-                                        class="abtn red"
-                                        id="r-stop"
-                                        style="min-width: 80px; padding: 13px 18px; width: 100%;"
-                                    >
+                                <div id="r-shuffle-wrap" data-tooltip-dir="left" data-tooltip="Play all tracks shuffled (Zen Flow)" data-i18n-attr="data-tooltip:relax.tooltip.shuffle">
+                                    <button class="abtn ghost" id="r-shuffle" aria-label="Shuffle all tracks">
+                                        <span data-ico="shuffle"></span>
+                                    </button>
+                                </div>
+                                <div id="r-stop-wrap" data-tooltip-dir="left" data-tooltip="Stop playback and reset" data-i18n-attr="data-tooltip:relax.tooltip.stop">
+                                    <button class="abtn red" id="r-stop" aria-label="Stop playback">
                                         <span data-ico="stop" data-ico-size="16"></span>
                                     </button>
                                 </div>
                             </div>
                             <div class="r-vol-row">
-                                <span class="r-vol-lbl">Volume</span>
-                                <span style="font-size: 11px; color: var(--text-lo)"
-                                    ><span data-ico="volume-low"></span></span
-                                >
+                                <span class="r-vol-lbl" data-i18n="relax.volume">Volume</span>
+                                <span class="r-vol-ico"><span data-ico="volume-low"></span></span>
                                 <input
                                     type="range"
                                     id="r-vol"
                                     min="0"
                                     max="100"
                                     value="80"
-                                    data-tooltip="Adjust relaxation volume"
-                                    data-i18n-attr="data-tooltip:relax.tooltip.vol"
                                 />
-                                <span style="font-size: 11px; color: var(--text-lo)"
-                                    ><span data-ico="volume-high"></span></span
-                                >
+                                <span class="r-vol-ico"><span data-ico="volume-high"></span></span>
                                 <span class="r-vol-val" id="r-vol-val"
                                     >80%</span
                                 >
                             </div>
                             <div class="r-ast-row">
                                 <span class="r-ast-lbl" data-i18n="relax.autoStop">Auto Stop</span>
-                                <div class="ast-group">
-                                    <button class="ast-btn on" data-min="0" data-tooltip="Disable auto-stop timer" data-i18n-attr="data-tooltip:relax.tooltip.ast.off">
+                                <div class="ast-group" role="radiogroup" aria-label="Auto stop timer">
+                                    <button class="ast-btn on" data-min="0" role="radio" aria-checked="true" data-tooltip="Disable auto-stop timer" data-i18n-attr="data-tooltip:relax.tooltip.ast.off">
                                         OFF
                                     </button>
-                                    <button class="ast-btn" data-min="15" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                    <button class="ast-btn" data-min="15" role="radio" aria-checked="false" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                         15m
                                     </button>
-                                    <button class="ast-btn" data-min="30" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
+                                    <button class="ast-btn" data-min="30" role="radio" aria-checked="false" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                         30m
                                     </button>
-                                    <button class="ast-btn" data-min="60" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val" data-tooltip-dir="left">
+                                    <button class="ast-btn" data-min="60" role="radio" aria-checked="false" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                         1h
                                     </button>
-                                    <button class="ast-btn" data-min="120" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val" data-tooltip-dir="left">
+                                    <button class="ast-btn" data-min="120" role="radio" aria-checked="false" data-tooltip="Set auto-stop timer duration" data-i18n-attr="data-tooltip:relax.tooltip.ast.val">
                                         2h
                                     </button>
                                 </div>
@@ -480,85 +398,18 @@
                                     style="display: none"
                                 ></span>
                             </div>
-
-                            <!-- Auto Scheduler -->
-                            <div class="sched-panel" id="sched-panel">
-                                <div class="sched-title">
-                                    <span data-i18n="relax.schedulerTitle">◈ Auto Scheduler</span>
-                                    <span class="sched-status" id="sched-status">OFF</span>
-                                </div>
-                                <div class="sched-row" style="justify-content: space-between;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="sched-lbl" style="width: auto;" data-i18n="relax.schedEnable">Enable</span>
-                                        <label class="tog-sm" data-tooltip="Schedule automatic playback times" data-i18n-attr="data-tooltip:relax.tooltip.scheduler">
-                                            <input type="checkbox" id="sched-enable" />
-                                            <div class="tog-sm-tr"><div class="tog-sm-th"></div></div>
-                                        </label>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="sched-lbl" style="width: auto;" data-i18n="relax.schedStartAt">Start At</span>
-                                        <div class="sched-time" id="sched-time">
-                                            <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
-                                            <span class="sched-time-sep">:</span>
-                                            <select class="sched-time-sel" id="sched-time-m" aria-label="Minute"></select>
-                                            <select class="sched-time-sel sched-time-ap" id="sched-time-ap" aria-label="AM/PM" style="display:none">
-                                                <option value="AM">AM</option>
-                                                <option value="PM">PM</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="sched-row">
-                                    <span class="sched-lbl" data-i18n="relax.schedRepeat">Repeat</span>
-                                    <select class="sched-select" id="sched-repeat">
-                                        <option value="0" data-i18n="relax.repeat.once">Once</option>
-                                        <option value="15" data-i18n="relax.repeat.15min">Every 15 min</option>
-                                        <option value="30" data-i18n="relax.repeat.30min">Every 30 min</option>
-                                        <option value="60" selected data-i18n="relax.repeat.1h">Every 1 hour</option>
-                                        <option value="120" data-i18n="relax.repeat.2h">Every 2 hours</option>
-                                        <option value="240" data-i18n="relax.repeat.4h">Every 4 hours</option>
-                                        <option value="1440" data-i18n="relax.repeat.daily">Daily</option>
-                                    </select>
-                                </div>
-                                <div class="sched-row">
-                                    <span class="sched-lbl" data-i18n="relax.schedTrack">Track</span>
-                                    <select class="sched-select" id="sched-track">
-                                        <option value="night">Night</option>
-                                        <option value="forest">Forest</option>
-                                        <option value="space">Outer Space</option>
-                                        <option value="ocean">Ocean</option>
-                                        <option value="rain">Rain</option>
-                                        <option value="fireplace">Fireplace</option>
-                                        <option value="random-one" selected data-i18n="relax.track.randomOne">Random One</option>
-                                        <option value="shuffle-all" data-i18n="relax.track.shuffleAll">Shuffle All</option>
-                                    </select>
-                                </div>
-                                <div class="sched-row">
-                                    <span class="sched-lbl" data-i18n="relax.schedDuration">Duration</span>
-                                    <select class="sched-select" id="sched-duration">
-                                        <option value="5" data-i18n="relax.duration.5m">5 minutes</option>
-                                        <option value="10" data-i18n="relax.duration.10m">10 minutes</option>
-                                        <option value="15" selected data-i18n="relax.duration.15m">15 minutes</option>
-                                        <option value="30" data-i18n="relax.duration.30m">30 minutes</option>
-                                        <option value="60" data-i18n="relax.duration.1h">1 hour</option>
-                                        <option value="0" data-i18n="relax.duration.stopped">Until stopped</option>
-                                    </select>
-                                </div>
-                                <div class="sched-status" id="sched-next" style="margin-top:2px;text-align:center;padding-top:4px;" data-i18n="relax.schedNextRun">
-                                    Next run: —
-                                </div>
-                            </div>
+                            <div class="r-sched-line" id="r-sched-line" style="display:none"></div>
                         </div>
                         <div class="relax-R">
                             <div class="viz-wrap">
-                                <div class="viz-title" data-i18n="relax.audioSpectrum">◈ Audio Spectrum</div>
+                                <div class="viz-title" data-i18n="relax.audioSpectrum">Audio Spectrum</div>
                                 <canvas id="viz-canvas" height="200"></canvas>
                             </div>
                             <div class="breathe-wrap">
-                                <div class="breathe-left" data-tooltip="Click to toggle playback and breathing guide" data-i18n-attr="data-tooltip:relax.tooltip.breatheCircle">
-                                    <div class="breathe-circle" id="breathe-circle">
+                                <div class="breathe-left">
+                                    <button type="button" class="breathe-circle" id="breathe-circle" data-tooltip="Click to toggle playback and breathing guide" data-i18n-attr="data-tooltip:relax.tooltip.breatheCircle">
                                         <span id="breathe-phase" data-i18n="relax.breathe.start">Ready</span>
-                                    </div>
+                                    </button>
                                 </div>
                                 <div class="breathe-right">
                                     <div class="breathe-right-title" data-i18n="relax.breathePattern">Breathing Pattern</div>
@@ -566,18 +417,17 @@
                                         <button class="breathe-pat-btn" id="breathe-btn-box" data-pat="box" data-i18n="relax.box">Box 4-4-4-4</button>
                                         <button class="breathe-pat-btn" id="breathe-btn-478" data-pat="478" data-i18n="relax.relax478">4-7-8</button>
                                     </div>
-                                    <div class="breathe-desc" id="breathe-guide-text" data-i18n="relax.breathe.guide.ready">Click circle or Zen Flow to start</div>
+                                    <div class="breathe-desc" id="breathe-guide-text" data-i18n="relax.breathe.guide.ready">Click circle or Play to start</div>
                                 </div>
                             </div>
                             <div class="ses-panel">
-                                <div class="ses-title" data-i18n="relax.sessionTitle">◈ Session</div>
                                 <div class="ses-timer" id="r-ses">
                                     00:00:00
                                 </div>
                                 <div class="ses-timer-lbl" data-i18n="relax.sessionTime">Session Time</div>
                                 <div class="ndiv"></div>
                                 <div class="tip-box">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <div class="tip-hdr">
                                         <div class="tip-lbl" data-i18n="relax.tipLabel">Mindfulness Tip</div>
                                         <button id="r-next-tip" class="lap-act" data-i18n="relax.nextTip" data-tooltip="Show next mindfulness tip" data-i18n-attr="data-tooltip:relax.tooltip.nextTip">Next</button>
                                     </div>
@@ -590,7 +440,7 @@
 
 
                         <div class="r-notify" id="r-notify" data-i18n="relax.complete">
-                            ✓ Session Complete
+                            Session complete
                         </div>
                     </div>
                 </div>
@@ -1192,6 +1042,76 @@
                                 ><span class="s-vol-val" id="s-rvol-val"
                                     >80%</span
                                 >
+                            </div>
+                        </div>
+
+                        <!-- Relax Auto Scheduler (moved from the Relax view:
+                             set-and-forget config belongs in Settings; the
+                             Relax view only shows the next-run status line) -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="relax.schedulerTitle">Auto Scheduler</div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="relax.schedEnable">Enable</span>
+                                    <small data-i18n="relax.tooltip.scheduler">Schedule automatic playback times</small>
+                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="sched-enable" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl" data-i18n="relax.schedStartAt">Start At</div>
+                                <div class="sched-time" id="sched-time">
+                                    <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
+                                    <span class="sched-time-sep">:</span>
+                                    <select class="sched-time-sel" id="sched-time-m" aria-label="Minute"></select>
+                                    <select class="sched-time-sel sched-time-ap" id="sched-time-ap" aria-label="AM/PM" style="display:none">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl" data-i18n="relax.schedRepeat">Repeat</div>
+                                <select class="sched-select" id="sched-repeat">
+                                    <option value="0" data-i18n="relax.repeat.once">Once</option>
+                                    <option value="15" data-i18n="relax.repeat.15min">Every 15 min</option>
+                                    <option value="30" data-i18n="relax.repeat.30min">Every 30 min</option>
+                                    <option value="60" selected data-i18n="relax.repeat.1h">Every 1 hour</option>
+                                    <option value="120" data-i18n="relax.repeat.2h">Every 2 hours</option>
+                                    <option value="240" data-i18n="relax.repeat.4h">Every 4 hours</option>
+                                    <option value="1440" data-i18n="relax.repeat.daily">Daily</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl" data-i18n="relax.schedTrack">Track</div>
+                                <select class="sched-select" id="sched-track">
+                                    <option value="night" data-i18n="relax.track.night">Night</option>
+                                    <option value="forest" data-i18n="relax.track.forest">Forest</option>
+                                    <option value="space" data-i18n="relax.track.space">Outer Space</option>
+                                    <option value="ocean" data-i18n="relax.track.ocean">Ocean</option>
+                                    <option value="rain" data-i18n="relax.track.rain">Rain</option>
+                                    <option value="fireplace" data-i18n="relax.track.fireplace">Fireplace</option>
+                                    <option value="random-one" selected data-i18n="relax.track.randomOne">Random One</option>
+                                    <option value="shuffle-all" data-i18n="relax.track.shuffleAll">Shuffle All</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl" data-i18n="relax.schedDuration">Duration</div>
+                                <select class="sched-select" id="sched-duration">
+                                    <option value="5" data-i18n="relax.duration.5m">5 minutes</option>
+                                    <option value="10" data-i18n="relax.duration.10m">10 minutes</option>
+                                    <option value="15" selected data-i18n="relax.duration.15m">15 minutes</option>
+                                    <option value="30" data-i18n="relax.duration.30m">30 minutes</option>
+                                    <option value="60" data-i18n="relax.duration.1h">1 hour</option>
+                                    <option value="0" data-i18n="relax.duration.stopped">Until stopped</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-lbl" data-i18n="relax.schedStatusLbl">Status</span>
+                                <span class="sched-status" id="sched-status">OFF</span>
+                                <span class="sched-status" id="sched-next">Next run: —</span>
                             </div>
                         </div>
                         <div class="s-sec">

@@ -395,7 +395,6 @@
     .wmbtn:hover .cc-ico,
     .btn-mini-pill:hover .cc-ico,
     .abtn:hover .cc-ico,
-    .tcard:hover .cc-ico,
     .s-close:hover .cc-ico,
     .s-abtn:hover .cc-ico,
     .s-fclr:hover .cc-ico,
@@ -406,6 +405,11 @@
         transform: scale(1.15);
         filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.8))
                 drop-shadow(0 0 12px rgba(var(--rgb-accent), 0.35));
+    }
+    /* Relax cards keep icons quiet on hover (sober module) */
+    .tcard:hover .cc-ico {
+        transform: none;
+        filter: none;
     }
     /* Active nav glow */
     .nav-item.active .cc-ico {
@@ -1535,6 +1539,22 @@
     .abtn.red:hover {
         box-shadow: 0 0 14px rgba(255, 68, 68, 0.4);
     }
+    /* Quiet secondary action (shuffle): same shape, no fill weight */
+    .abtn.ghost {
+        border-color: var(--border);
+        color: var(--text-md);
+        min-width: 48px;
+    }
+    .abtn.ghost:hover {
+        border-color: var(--border-bright);
+        color: var(--text-hi);
+        box-shadow: none;
+    }
+    .abtn.ghost.on {
+        background: var(--accent-dim);
+        border-color: var(--border-active);
+        color: var(--accent-a);
+    }
 
     /* ── START readiness states (Timer) ──────────────────────
        A timer with no duration can't run, so the button shows it:
@@ -1896,7 +1916,8 @@
     }
 
     /* ════════════════════════════════════════════════════
-   RELAX VIEW
+   RELAX VIEW — calm surface treatment: flat backgrounds,
+   1px borders, no glows, no scale transforms, soft radii.
 ════════════════════════════════════════════════════ */
     #view-relax {
         flex-direction: row;
@@ -1919,6 +1940,16 @@
         gap: 14px;
     }
 
+    /* Relax label font: modern geometric sans for UI copy;
+       numerals stay mono for the clock-y feel. */
+    .relax-lbl {
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: var(--text-lo);
+    }
+
     .track-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -1928,149 +1959,84 @@
         background: var(--bg-02);
         border: 1px solid var(--border);
         border-radius: 10px;
-        padding: 13px 10px;
+        padding: 16px 12px 14px;
         cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 7px;
         position: relative;
-        overflow: hidden;
-        transition: all 0.22s;
+        transition: border-color 0.2s, background 0.2s;
         -webkit-app-region: no-drag;
     }
     .tcard:hover {
         border-color: var(--border-bright);
-        transform: scale(1.02);
     }
     .tcard.on {
         background: var(--accent-dim);
         border-color: var(--border-active);
-        box-shadow: var(--glow-sm);
-        transform: scale(1.03);
-        animation: card-breathe 2.5s ease-in-out infinite;
     }
-    @keyframes card-breathe {
-        0%,
-        100% {
-            box-shadow: var(--glow-sm);
-        }
-        50% {
-            box-shadow: var(--glow-md);
-        }
-    }
-    .tcard::before {
-        content: "";
+    /* Active dot — quiet replacement for the old glow/wave bars */
+    .tcard-dot {
         position: absolute;
-        top: 0;
-        left: 20%;
-        right: 20%;
-        height: 1px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            var(--accent-a),
-            transparent
-        );
+        top: 10px;
+        right: 10px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent-a);
         opacity: 0;
-        transition: 0.3s;
+        transition: opacity 0.3s;
     }
-    .tcard.on::before {
-        opacity: 0.6;
+    .tcard.on .tcard-dot {
+        opacity: 0.85;
     }
     .tcard-ico {
-        font-size: 30px;
         line-height: 1;
+        color: var(--text-md);
+        transition: color 0.2s;
+    }
+    .tcard-ico .cc-ico {
+        filter: none;
+    }
+    .tcard.on .tcard-ico {
+        color: var(--accent-a);
     }
     .tcard-name {
-        font-family: "Orbitron", monospace;
-        font-size: 8.5px;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: var(--text-md);
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: var(--text-hi);
         text-align: center;
     }
     .tcard-desc {
-        font-family: "Share Tech Mono", monospace;
-        font-size: 9.5px;
-        letter-spacing: 0.4px;
-        color: var(--text-md);
-        text-shadow: 0 0 5px rgba(var(--rgb-accent), 0.08);
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        letter-spacing: 0.2px;
+        color: var(--text-lo);
         text-align: center;
     }
     .tcard.on .tcard-name {
         color: var(--accent-a);
-        text-shadow: var(--glow-xs);
     }
-
-    .tcard-wave {
-        display: flex;
-        align-items: flex-end;
-        gap: 2px;
-        height: 14px;
-        margin-top: 2px;
-    }
-    .wbar {
-        width: 3px;
-        background: var(--accent-a);
-        border-radius: 2px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-    .tcard.on .wbar {
-        opacity: 0.38;
-        height: 3px;
-    }
-    .tcard.playing .wbar {
-        opacity: 0.7;
-    }
-    .tcard.playing .wbar:nth-child(1) {
-        animation: w1 0.8s ease-in-out infinite;
-    }
-    .tcard.playing .wbar:nth-child(2) {
-        animation: w2 0.9s ease-in-out infinite 0.1s;
-    }
-    .tcard.playing .wbar:nth-child(3) {
-        animation: w3 0.7s ease-in-out infinite 0.2s;
-    }
-    .tcard.playing .wbar:nth-child(4) {
-        animation: w2 0.85s ease-in-out infinite 0.05s;
-    }
-    .tcard.playing .wbar:nth-child(5) {
-        animation: w1 0.75s ease-in-out infinite 0.15s;
-    }
-    @keyframes w1 {
-        0%,
-        100% {
-            height: 4px;
-        }
-        50% {
-            height: 14px;
-        }
-    }
-    @keyframes w2 {
-        0%,
-        100% {
-            height: 8px;
-        }
-        50% {
-            height: 12px;
-        }
-    }
-    @keyframes w3 {
-        0%,
-        100% {
-            height: 12px;
-        }
-        50% {
-            height: 4px;
-        }
-    }
-
 
     .r-play-row {
         display: flex;
         gap: 10px;
+    }
+    .r-cta-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+    .r-cta-wrap .abtn {
+        width: 100%;
+    }
+    #r-shuffle-wrap .abtn,
+    #r-stop-wrap .abtn {
+        min-width: 48px;
+        padding: 13px 0;
     }
     .r-vol-row {
         display: flex;
@@ -2078,18 +2044,23 @@
         gap: 10px;
     }
     .r-vol-lbl {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
         width: 70px;
         flex-shrink: 0;
     }
+    .r-vol-ico {
+        display: inline-flex;
+        align-items: center;
+        color: var(--text-lo);
+    }
     .r-vol-val {
-        font-family: "Share Tech Mono", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 11px;
-        color: var(--accent-a);
+        color: var(--text-md);
         width: 36px;
         text-align: right;
     }
@@ -2105,16 +2076,15 @@
     }
     input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         background: var(--accent-a);
-        box-shadow: var(--glow-sm);
         cursor: pointer;
-        transition: box-shadow 0.15s;
+        transition: transform 0.15s;
     }
     input[type="range"]::-webkit-slider-thumb:hover {
-        box-shadow: var(--glow-md);
+        transform: scale(1.15);
     }
     .r-ast-row {
         display: flex;
@@ -2122,12 +2092,12 @@
         gap: 10px;
     }
     .r-ast-lbl {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
-        width: 60px;
+        width: 70px;
         flex-shrink: 0;
     }
     .ast-group {
@@ -2136,56 +2106,62 @@
         gap: 4px;
         background: var(--bg-02);
         border: 1px solid var(--border);
-        border-radius: 11px;
+        border-radius: 10px;
         padding: 3px;
     }
     .ast-btn {
         flex: 1;
-        font-family: "Orbitron", monospace;
-        font-size: 9px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         text-align: center;
         background: transparent;
-        border: 1px solid transparent;
+        border: none;
         color: var(--text-md);
-        padding: 7px 0;
-        border-radius: 8px;
+        padding: 6px 0;
+        border-radius: 7px;
         cursor: pointer;
-        transition: all 0.15s;
+        transition: color 0.15s, background 0.15s;
         -webkit-app-region: no-drag;
     }
     .ast-btn:hover {
-        color: var(--accent-a);
+        color: var(--text-hi);
         background: rgba(var(--rgb-accent), 0.06);
     }
     .ast-btn.on {
         background: var(--accent-dim);
         color: var(--accent-a);
-        border-color: var(--border-active);
-        box-shadow: var(--glow-xs);
-        font-weight: 700;
     }
     .ast-cd {
-        font-family: "Share Tech Mono", monospace;
-        font-size: 9px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-xs);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-md);
+    }
+    /* Scheduler status line: mirrors Settings config in one quiet line */
+    .r-sched-line {
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 11.5px;
+        font-weight: 400;
+        letter-spacing: 0.2px;
+        color: var(--text-lo);
+        text-align: center;
+        padding: 2px 0 0;
     }
 
     .viz-wrap {
         background: var(--bg-01);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
     }
     .viz-title {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
-        padding: 8px 12px;
+        padding: 9px 14px;
         border-bottom: 1px solid var(--border);
     }
     #viz-canvas {
@@ -2195,21 +2171,21 @@
     .ses-panel {
         background: var(--bg-01);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 16px;
+        border-radius: 10px;
+        padding: 18px 16px;
         flex: 1;
     }
     /* Breathing Pacer */
     .breathe-wrap {
         background: var(--bg-01);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 12px 16px;
+        border-radius: 10px;
+        padding: 14px 18px;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        gap: 20px;
+        gap: 22px;
         min-height: 120px;
     }
     .breathe-left {
@@ -2224,80 +2200,78 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 9px;
         align-items: flex-start;
     }
     .breathe-right-title {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
     }
     .breathe-desc {
-        font-family: "Share Tech Mono", monospace;
-        font-size: 11px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 400;
         color: var(--text-md);
-        line-height: 1.4;
+        line-height: 1.45;
         margin-top: 2px;
     }
     .breathe-circle {
         width: 72px;
         height: 72px;
         border-radius: 50%;
-        border: 3px solid var(--accent-a);
-        background: rgba(var(--rgb-accent), 0.03);
-        box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.25),
-                    inset 0 0 12px rgba(var(--rgb-accent), 0.15);
+        border: 2px solid var(--border-active);
+        background: rgba(var(--rgb-accent), 0.04);
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.1s linear, border-color 0.4s, box-shadow 0.4s;
+        transition: transform 0.1s linear, border-color 0.4s, background 0.4s;
         position: relative;
         cursor: pointer;
+        padding: 0;
+        font: inherit;
     }
     .breathe-circle:hover {
-        border-color: var(--accent-b);
-        box-shadow: 0 0 16px rgba(var(--rgb-accent), 0.4),
-                    inset 0 0 16px rgba(var(--rgb-accent), 0.25);
+        border-color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.08);
     }
-    .breathe-circle::before {
-        content: "";
-        position: absolute;
-        inset: -6px;
-        border-radius: 50%;
-        border: 1px dashed rgba(var(--rgb-accent), 0.25);
-        opacity: 0.5;
+    .breathe-circle:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 4px;
     }
     #breathe-phase {
-        font-family: "Orbitron", monospace;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 1px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.8px;
         text-transform: uppercase;
-        color: var(--accent-a);
-        text-shadow: var(--glow-xs);
+        color: var(--text-md);
         text-align: center;
+    }
+    .breathe-circle[data-active="1"] #breathe-phase {
+        color: var(--accent-a);
     }
     .breathe-pat-toggle {
         display: flex;
         background: var(--bg-02);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 8px;
         padding: 2px;
     }
     .breathe-pat-btn {
-        font-family: "Orbitron", monospace;
-        font-size: 7.5px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         background: transparent;
         border: none;
         color: var(--text-lo);
-        padding: 4px 10px;
-        border-radius: 12px;
+        padding: 5px 12px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: color 0.2s, background 0.2s;
         -webkit-app-region: no-drag;
     }
     .breathe-pat-btn:hover {
@@ -2306,67 +2280,54 @@
     .breathe-pat-btn.on {
         background: var(--accent-dim);
         color: var(--accent-a);
-        box-shadow: var(--glow-xs);
-        font-weight: 700;
-    }
-    .ses-title {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 2.5px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-xs);
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid var(--border);
     }
     .ses-timer {
-        font-family: "Share Tech Mono", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 32px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-md);
+        font-weight: 500;
+        color: var(--text-hi);
         letter-spacing: 2px;
         line-height: 1;
     }
     .ses-timer-lbl {
-        font-family: "Orbitron", monospace;
-        font-size: 7px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
-        margin-top: 3px;
-        margin-bottom: 12px;
+        margin-top: 5px;
+        margin-bottom: 14px;
     }
     .ndiv {
         height: 1px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            var(--border-bright),
-            transparent
-        );
+        background: var(--border);
         margin: 10px 0;
-        opacity: 0.5;
     }
     .tip-box {
-        padding: 10px;
-        background: rgba(var(--rgb-accent), 0.04);
-        border: 1px solid rgba(var(--rgb-accent), 0.1);
-        border-radius: 6px;
+        padding: 12px;
+        background: var(--bg-02);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .tip-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
     }
     .tip-lbl {
-        font-family: "Orbitron", monospace;
-        font-size: 7px;
-        letter-spacing: 2px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
         color: var(--text-lo);
-        text-transform: uppercase;
-        margin-bottom: 6px;
     }
     .tip-text {
-        font-family: "Share Tech Mono", monospace;
-        font-size: 12.5px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 13px;
+        font-weight: 400;
         color: var(--text-md);
-        line-height: 1.6;
+        line-height: 1.55;
         transition: opacity 0.4s;
     }
     .tip-text.fade {
@@ -2380,14 +2341,14 @@
         white-space: nowrap;
         background: var(--bg-02);
         border: 1px solid var(--border-bright);
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 11px 24px;
-        font-family: "Orbitron", monospace;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-sm);
-        box-shadow: var(--glow-md);
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: var(--text-md);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
         opacity: 0;
         transition: opacity 0.4s;
         pointer-events: none;
@@ -2398,55 +2359,24 @@
     }
 
     /* Auto Scheduler */
-    .sched-panel {
-        background: var(--bg-01);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 13px 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-        flex: 1;
-        min-height: 0;
-    }
-    .sched-title {
-        font-family: "Orbitron", monospace;
-        font-size: 8.5px;
-        letter-spacing: 2.5px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-xs);
-        text-transform: uppercase;
-        margin-bottom: 4px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+    /* Scheduler controls (Settings → General, also reused by the alarms
+       tab time pickers). Calm surface treatment to match the Relax view. */
     .sched-row {
         display: flex;
         align-items: center;
         gap: 8px;
         flex-wrap: wrap;
     }
-    .sched-lbl {
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 1.5px;
-        color: var(--text-md);
-        text-transform: uppercase;
-        width: 72px;
-        flex-shrink: 0;
-    }
     .sched-select {
         background: var(--bg-02);
-        border: 1px solid var(--border-bright);
+        border: 1px solid var(--border);
         color: var(--text-hi);
-        font-family: "Orbitron", monospace;
-        font-size: 8px;
-        letter-spacing: 1px;
-        padding: 5px 8px;
-        border-radius: 4px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        padding: 6px 10px;
+        border-radius: 6px;
         cursor: pointer;
         outline: none;
         flex: 1;
@@ -2460,8 +2390,8 @@
         align-items: center;
         gap: 2px;
         background: var(--bg-02);
-        border: 1px solid var(--border-bright);
-        border-radius: 4px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
         padding: 3px 6px;
     }
     .sched-time-sel {
@@ -2470,7 +2400,7 @@
         background: transparent;
         border: none;
         color: var(--text-hi);
-        font-family: "Orbitron", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 11px;
         letter-spacing: 0.5px;
         padding: 1px 1px;
@@ -2485,12 +2415,12 @@
     .sched-time-sel option {
         background: var(--bg-02);
         color: var(--text-hi);
-        font-family: "Orbitron", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 11px;
     }
     .sched-time-sep {
-        color: var(--accent-a);
-        font-family: "Orbitron", monospace;
+        color: var(--text-md);
+        font-family: "JetBrains Mono", monospace;
         font-size: 11px;
         line-height: 1;
     }
@@ -2499,54 +2429,13 @@
         margin-left: 3px;
     }
     .sched-status {
-        font-family: "Share Tech Mono", monospace;
-        font-size: 9px;
-        color: var(--text-lo);
-        letter-spacing: 0.5px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-md);
+        letter-spacing: 0.3px;
     }
     .sched-status.on {
         color: var(--accent-a);
-        text-shadow: var(--glow-xs);
-    }
-    .tog-sm {
-        position: relative;
-        width: 34px;
-        height: 18px;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-    .tog-sm input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-    .tog-sm-tr {
-        position: absolute;
-        inset: 0;
-        background: var(--bg-03);
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        transition: all 0.25s;
-    }
-    .tog-sm input:checked ~ .tog-sm-tr {
-        background: var(--accent-dim);
-        border-color: var(--border-bright);
-        box-shadow: var(--glow-xs);
-    }
-    .tog-sm-th {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 12px;
-        height: 12px;
-        background: var(--text-lo);
-        border-radius: 50%;
-        transition: all 0.25s;
-    }
-    .tog-sm input:checked ~ .tog-sm-tr .tog-sm-th {
-        transform: translateX(16px);
-        background: var(--accent-a);
-        box-shadow: var(--glow-xs);
     }
 
     /* ════════════════════════════════════════════════════
@@ -3433,9 +3322,6 @@
        reduced motion (mirrors the mini window's support). */
     @media (prefers-reduced-motion: reduce) {
         .agenda-empty-ico,
-        .tcard.on,
-        .tcard,
-        .wbar,
         .t-presets.attract {
             animation: none !important;
         }

@@ -108,6 +108,18 @@
     <rect x="6" y="4" width="4" height="16" fill="currentColor" rx="1.5"/>
     <rect x="14" y="4" width="4" height="16" fill="currentColor" rx="1.5"/>
   </symbol>
+  <symbol id="cc-i-shuffle" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M16 3h5v5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M4 20 21 3"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M16 21h5v-5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M15 15l6 6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M4 4l5 5"/>
+  </symbol>
   <symbol id="cc-i-flag" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M6 21V4"/>
