@@ -117,6 +117,20 @@
             ? T("tray.soundOff", "Sound off")
             : T("tray.soundOn", "Sound on");
 
+        // Click-through toggle (mini window ignores the mouse while on)
+        const ctpBtn = document.getElementById("btn-clickthrough");
+        const ctpIco = document.getElementById("ico-clickthrough");
+        const ctpLbl = document.getElementById("lbl-clickthrough");
+        const ctpOn = state.mini_click_through === true;
+        if (ctpBtn) {
+            ctpBtn.classList.toggle("on", ctpOn);
+            ctpBtn.setAttribute("aria-pressed", String(ctpOn));
+        }
+        if (ctpIco) ctpIco.setAttribute("data-ico", ctpOn ? "eye-off" : "eye");
+        if (ctpLbl) ctpLbl.textContent = ctpOn
+            ? T("tray.clickThroughOff", "Click-through off")
+            : T("tray.clickThrough", "Click-through");
+
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
         setLbl("lbl-faq", T("tray.faq", "FAQ"));
@@ -176,6 +190,23 @@
             renderState(currentMenuState);
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ audioMuted: next });
+            }
+        });
+    }
+
+    // Click-through toggle: backend applies set_ignore_cursor_events in
+    // the same patch; the tray is one of the two places that can turn it
+    // OFF (the mini window itself ignores the mouse while ON).
+    const ctpBtn = document.getElementById("btn-clickthrough");
+    if (ctpBtn) {
+        ctpBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const next = !ctpBtn.classList.contains("on");
+            if (currentMenuState) currentMenuState.mini_click_through = next;
+            renderState(currentMenuState);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniClickThrough: next });
             }
         });
     }

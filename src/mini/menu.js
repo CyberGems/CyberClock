@@ -52,6 +52,8 @@
                     if (aotLbl) aotLbl.textContent = window.ccI18n.t("menu.alwaysOnTop");
                     const solarLbl = document.querySelector("#ctx-solar .switch-lbl");
                     if (solarLbl) solarLbl.textContent = window.ccI18n.t("settings.mini.solarReal");
+                    const animLbl = document.querySelector("#ctx-anim .switch-lbl");
+                    if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.noAnimations");
                     const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
                     if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
                     const timerLbl = document.querySelector('.ctx-item[data-action="timer"] .label');
@@ -96,7 +98,10 @@
 
                 // Collapse Date
                 document.getElementById("toggle-collapse").classList.toggle("on", cfg.miniCollapseDate || false);
-                
+
+                // Disable Animations
+                document.getElementById("toggle-anim").classList.toggle("on", cfg.miniNoAnimations || false);
+
                 // AOT
                 updateAotState(cfg.alwaysOnTop || false);
             }
@@ -181,6 +186,19 @@
         const on = tgl.classList.toggle("on");
         if (window.cc && window.cc.saveSettings) {
             window.cc.saveSettings({ miniCollapseDate: on });
+        }
+        if (window.cc && window.cc.closeMenuPopup) {
+            setTimeout(() => window.cc.closeMenuPopup(), 200);
+        }
+    });
+
+    // Disable Animations toggle handler
+    const animRow = document.getElementById("ctx-anim");
+    animRow.addEventListener("click", () => {
+        const tgl = document.getElementById("toggle-anim");
+        const on = tgl.classList.toggle("on");
+        if (window.cc && window.cc.saveSettings) {
+            window.cc.saveSettings({ miniNoAnimations: on });
         }
         if (window.cc && window.cc.closeMenuPopup) {
             setTimeout(() => window.cc.closeMenuPopup(), 200);

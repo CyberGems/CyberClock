@@ -231,6 +231,21 @@
         filter: none;
     }
 
+    /* ── Click-through toggle (same dot language as audio) ───── */
+    #btn-clickthrough .audio-dot {
+        flex: 0 0 auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #64748b;
+        box-shadow: none;
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    #btn-clickthrough.on .audio-dot {
+        background: #20bfdf;
+        box-shadow: 0 0 6px rgba(32, 191, 223, 0.7);
+    }
+
     /* ── Help section (expandable, CyberLauncher-style) ──────── */
     .tray-help-toggle .chev {
         margin-left: auto;

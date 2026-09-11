@@ -109,6 +109,12 @@ pub struct AppSettings {
     pub mini_collapse_date: bool,
     pub mini_solar_real: bool,
     pub mini_zoom: f64,
+    // Mouse events pass through the mini clock (toggle lives outside the
+    // mini window — tray menu and Settings — because the window stops
+    // responding to clicks while this is on).
+    pub mini_click_through: bool,
+    // Zero all mini-mode motion: animations AND transitions.
+    pub mini_no_animations: bool,
 
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
@@ -159,6 +165,8 @@ impl Default for AppSettings {
             mini_collapse_date: false,
             mini_solar_real: false,
             mini_zoom: 1.0,
+            mini_click_through: false,
+            mini_no_animations: false,
             custom_alarms: vec![
                 CustomAlarm::default(),
                 CustomAlarm::default(),

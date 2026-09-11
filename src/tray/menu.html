@@ -63,13 +63,18 @@
 
                 <div class="tray-divider"></div>
 
-                <!-- Mini Zoom -->
+                <!-- Mini Zoom + Click-through -->
                 <div class="tray-group">
                     <div class="tray-slider-row">
                         <span class="tray-slider-lbl" id="lbl-zoom">Zoom</span>
                         <input type="range" id="tray-zoom" min="0" max="3" step="1" value="1" aria-label="Mini clock zoom" />
                         <span class="tray-slider-val" id="tray-zoom-val">100%</span>
                     </div>
+                    <button type="button" class="tray-item" id="btn-clickthrough" aria-pressed="false">
+                        <span class="ico" data-ico="eye-off" id="ico-clickthrough"></span>
+                        <span class="label" id="lbl-clickthrough">Click-through</span>
+                        <span class="audio-dot" id="clickthrough-dot" aria-hidden="true"></span>
+                    </button>
                 </div>
 
                 <div class="tray-divider"></div>

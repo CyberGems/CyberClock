@@ -196,6 +196,15 @@
             document.body.classList.add("no-scanlines");
         else document.body.classList.remove("no-scanlines");
 
+        // User motion toggle: zero ALL mini movement (animations AND
+        // transitions) via CSS. Body class mirrors the no-scanlines pattern.
+        document.body.classList.toggle("no-animations", s.miniNoAnimations === true);
+
+        // Click-through: the backend sets the OS-level ignore-cursor flag;
+        // the body class gives a subtle visual cue (slight dim) that the
+        // clock no longer responds to the mouse.
+        document.body.classList.toggle("click-through", s.miniClickThrough === true);
+
         const aotOn = s.alwaysOnTop || false;
         document.getElementById("btn-aot").classList.toggle("active", aotOn);
 
@@ -329,6 +338,9 @@
 
     timeBlock.addEventListener("mouseenter", () => {
         if (isDragging) return;
+        // Click-through mode: the OS never delivers mouse events, so skip
+        // the tooltip pipeline (no timers, no resize churn) entirely.
+        if (document.body.classList.contains("click-through")) return;
         expandDate();
         refreshTipContent();
         positionTip();

@@ -1633,3 +1633,23 @@
     body.mini-paused .mini-shell * {
         animation-play-state: paused !important;
     }
+
+    /* User toggle "Disable animations": zero ALL motion — infinite
+       animations (LED breathe, colon blink, spins, sweeps) AND
+       interaction transitions (tooltip, date collapse, hover). Placed
+       after the paused rule so it wins with equal importance. */
+    body.no-animations .mini-shell,
+    body.no-animations .mini-shell::before,
+    body.no-animations .mini-shell::after,
+    body.no-animations .mini-shell *,
+    body.no-animations .mini-shell *::before,
+    body.no-animations .mini-shell *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* Click-through cue: the OS flag makes the window ignore the mouse;
+       a slight dim tells the user why it no longer responds. */
+    body.click-through .mini-shell {
+        opacity: 0.88;
+    }

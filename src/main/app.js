@@ -409,6 +409,10 @@
         if (solarRow) solarRow.style.display = (s.miniDesign || 1) === 7 ? 'flex' : 'none';
         const miniSolar = document.getElementById('s-mini-solar');
         if (miniSolar) miniSolar.checked = s.miniSolarReal === true;
+        const miniClickThrough = document.getElementById('s-mini-clickthrough');
+        if (miniClickThrough) miniClickThrough.checked = s.miniClickThrough === true;
+        const miniAnim = document.getElementById('s-mini-anim');
+        if (miniAnim) miniAnim.checked = s.miniNoAnimations === true;
     }
 
     function showCustomFile(which, p) {
@@ -2702,6 +2706,18 @@
     if (sMiniSolar) {
         sMiniSolar.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniSolarReal: e.target.checked });
+        });
+    }
+    const sMiniClickThrough = document.getElementById('s-mini-clickthrough');
+    if (sMiniClickThrough) {
+        sMiniClickThrough.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniClickThrough: e.target.checked });
+        });
+    }
+    const sMiniAnim = document.getElementById('s-mini-anim');
+    if (sMiniAnim) {
+        sMiniAnim.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniNoAnimations: e.target.checked });
         });
     }
     document

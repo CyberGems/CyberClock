@@ -128,6 +128,15 @@ fn apply_always_on_top(app: &AppHandle, aot: bool) {
     }
 }
 
+/// Pass mouse events through the mini clock. Applied from the settings
+/// commands (like AOT) and re-applied every time the mini window is
+/// shown, since Windows can drop the flag across hide/show cycles.
+fn apply_mini_click_through(app: &AppHandle, on: bool) {
+    if let Some(mini) = app.get_webview_window("mini") {
+        let _ = mini.set_ignore_cursor_events(on);
+    }
+}
+
 /// main or mini currently visible and not minimized.
 fn is_any_clock_window_visible(app: &AppHandle) -> bool {
     ["main", "mini"].iter().any(|label| {
@@ -160,6 +169,10 @@ fn show_clock_window(app: &AppHandle) {
         let _ = win.unminimize();
         let _ = win.show();
         let _ = win.set_focus();
+        if target_win == "mini" {
+            // Re-apply click-through: hide/show cycles can drop the flag.
+            let _ = win.set_ignore_cursor_events(settings.mini_click_through);
+        }
         broadcast_active_window(app, target_win);
     }
 }
@@ -183,6 +196,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, settings.always_on_top);
+    apply_mini_click_through(&app, settings.mini_click_through);
     Ok(settings)
 }
 
@@ -199,6 +213,7 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, merged.always_on_top);
+    apply_mini_click_through(&app, merged.mini_click_through);
     Ok(merged)
 }
 
@@ -213,6 +228,7 @@ fn reset_settings(app: AppHandle) -> AppSettings {
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, default_settings.always_on_top);
+    apply_mini_click_through(&app, default_settings.mini_click_through);
 
     // Broadcast updated settings to all windows
     let _ = app.emit("settings:updated", &default_settings);
@@ -836,6 +852,9 @@ fn switch_to_mini_mode(app: AppHandle) {
 
         let _ = mini.show();
         let _ = mini.set_focus();
+        // Hide/show can drop the ignore-cursor flag on Windows — re-apply
+        // the persisted click-through preference every time mini is shown.
+        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
     }
 
     let _ = persist(&app, &settings);
@@ -1552,6 +1571,7 @@ pub struct TrayMenuState {
     pub mini_zoom: f64,
     pub auto_update: bool,
     pub audio_muted: bool,
+    pub mini_click_through: bool,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -1626,6 +1646,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         mini_zoom: settings.mini_zoom,
         auto_update: settings.auto_update,
         audio_muted: settings.audio_muted,
+        mini_click_through: settings.mini_click_through,
     }
 }
 
@@ -1874,6 +1895,8 @@ fn show_initial_window(app: &AppHandle) {
             }
         }
         let _ = mini.show();
+        // Re-apply click-through on startup (hide/show can drop the flag).
+        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
     }
 
     broadcast_active_window(app, if is_mini { "mini" } else { "main" });
