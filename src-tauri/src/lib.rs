@@ -473,11 +473,15 @@ fn show_about_window(app: &AppHandle) {
 
     if let Some(m) = reference {
         let scale = win.scale_factor().unwrap_or(1.0);
-        let w_px = (520.0 * scale).round() as i32;
-        let h_px = (600.0 * scale).round() as i32;
+        // Center by the window's REAL current size (it is user-resizable,
+        // 740×590 by default) — not the config default.
+        let size = win.inner_size().unwrap_or(tauri::PhysicalSize {
+            width: (740.0 * scale).round() as u32,
+            height: (590.0 * scale).round() as u32,
+        });
         let work = m.work_area();
-        let x = work.position.x + (work.size.width as i32 - w_px) / 2;
-        let y = work.position.y + (work.size.height as i32 - h_px) / 2;
+        let x = work.position.x + (work.size.width as i32 - size.width as i32) / 2;
+        let y = work.position.y + (work.size.height as i32 - size.height as i32) / 2;
         let _ = win.set_position(tauri::Position::Physical(
             tauri::PhysicalPosition::new(x, y),
         ));

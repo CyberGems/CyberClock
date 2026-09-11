@@ -71,16 +71,17 @@
                                 {
                                     "label":  "about",
                                     "title":  "About CyberClock",
-                                    "width":  520,
-                                    "height":  600,
-                                    "resizable":  false,
+                                    "width":  740,
+                                    "height":  590,
+                                    "minWidth":  600,
+                                    "minHeight":  480,
+                                    "resizable":  true,
                                     "fullscreen":  false,
                                     "decorations":  false,
                                     "transparent":  true,
                                     "shadow":  false,
                                     "visible":  false,
                                     "center":  true,
-                                    "alwaysOnTop":  true,
                                     "skipTaskbar":  true,
                                     "url":  "about/index.html"
                                 }

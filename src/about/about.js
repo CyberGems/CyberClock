@@ -1,8 +1,8 @@
 /**
- * CyberClock — Dedicated About Window
- * The tray menu's About was cramped inside a 250px popup window; this
- * window gives the same design a real dialog canvas with proper
- * accessibility (focus trap, Esc, visible focus, aria-modal).
+ * CyberClock — About Window (CyberSnap standard behavior)
+ * Title-bar driven window: minimize + close (donate heart shortcut),
+ * "Updates & Maintenance" card with the auto-check toggle and a
+ * stateful check/download/install button, muted footer links.
  * CyberGems © 2026
  */
 (() => {
@@ -11,9 +11,10 @@
     const REPO_URL = "https://github.com/CyberGems/CyberClock";
     const LINKS = {
         website: "https://cybergems.org",
+        docs: `${REPO_URL}/wiki/Home`,
         github: REPO_URL,
         issues: `${REPO_URL}/issues`,
-        changelog: `${REPO_URL}/releases`,
+        releases: `${REPO_URL}/releases`,
         donate: "https://ko-fi.com/cybergems",
     };
 
@@ -38,11 +39,16 @@
         }
     }
 
+    function minimizeAbout() {
+        if (window.cc && window.cc.minimizeWindow) {
+            window.cc.minimizeWindow();
+        }
+    }
+
     let appVersion = "";
     let updateStatus = { state: "idle" };
-    let diagTimer = null;
 
-    // ── Theme / language ─────────────────────────────────────
+    // ── Theme / language / auto-update toggle ───────────────
     function applySettings(s) {
         document.body.dataset.theme = s.theme || "arctic-ice";
         if (window.ccI18n) {
@@ -51,7 +57,7 @@
         }
         const autoEl = document.getElementById("ab-autoup");
         if (autoEl) autoEl.checked = s.autoUpdate !== false;
-        renderUpdateStatus();
+        renderUpdateState();
     }
 
     if (window.cc) {
@@ -59,61 +65,83 @@
         window.cc.onSettingsUpdated((s) => applySettings(s));
     }
 
-    // ── Version ───────────────────────────────────────────────
+    // ── Version label ────────────────────────────────────────
     if (window.cc && window.cc.getAppVersion) {
         window.cc.getAppVersion().then((v) => {
             appVersion = v || "dev";
             const el = document.getElementById("ab-version");
-            if (el) el.textContent = "v" + appVersion;
+            if (el) el.textContent = "Version v" + appVersion;
         }).catch(() => {});
     }
 
-    // ── Update flow (mirrors the tray About logic) ────────────
-    function renderUpdateStatus() {
-        const stEl = document.getElementById("ab-update-status");
+    // ── Update flow (CyberSnap state matrix) ─────────────────
+    // idle/up-to-date: "Check Now" — available: "Update Now" —
+    // downloading: progress % + disabled — downloaded: "Install & Restart".
+    function renderUpdateState() {
         const btn = document.getElementById("ab-update-btn");
-        const btnLbl = document.getElementById("ab-update-btn-lbl");
-        if (!stEl || !btn) return;
-
-        stEl.className = "ab-update-status";
-        btn.disabled = false;
-        btn.classList.remove("spin");
+        const desc = document.getElementById("ab-update-desc");
+        const progress = document.getElementById("ab-progress");
+        const progressText = document.getElementById("ab-progress-text");
+        const progressFill = document.getElementById("ab-progress-fill");
+        if (!btn || !desc) return;
 
         const s = updateStatus;
-        if (s.state === "idle") {
-            stEl.textContent = "";
-            btnLbl.textContent = T("about.checkUpdates", "Check Updates");
+        const idleDesc = T(
+            "about.updateDesc",
+            "Check for the latest version and download updates directly.",
+        );
+
+        btn.disabled = false;
+        progress.hidden = s.state !== "downloading";
+
+        if (s.state === "idle" || s.state === "not-available") {
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            btn.title = T("about.checkLatest", "Check for the latest version");
+            desc.textContent = idleDesc;
         } else if (s.state === "checking") {
-            stEl.className += " warn";
-            stEl.textContent = T("about.statuses.checking", "Checking for updates…");
+            btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
-            btn.classList.add("spin");
-        } else if (s.state === "not-available") {
-            stEl.className += " ok";
-            stEl.textContent = T("about.statuses.latest", "You are on the latest version.");
+            desc.textContent = T("about.statuses.checking", "Checking for updates…");
         } else if (s.state === "available") {
-            stEl.className += " info";
-            stEl.textContent = T("about.statuses.available", "Update available — click Download.");
-            btnLbl.textContent = T("about.downloadBtn", "Download");
-        } else if (s.state === "downloading") {
-            stEl.className += " warn";
-            stEl.textContent = T("about.statuses.downloading", "Downloading… {percent}%").replace(
-                "{percent}",
-                String(s.percent ?? 0),
+            btn.textContent = T("about.updateNow", "Update Now");
+            btn.title = T(
+                "about.viewDetails",
+                "View update details and changelog",
             );
+            desc.textContent =
+                T("about.updateAvailable", "Update {0} available").replace(
+                    "{0}",
+                    s.version || "",
+                );
+        } else if (s.state === "downloading") {
+            btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
+            const pct = Math.round(s.percent ?? 0);
+            desc.textContent = T(
+                "about.statuses.downloading",
+                "Downloading update ({pct}%)…",
+            ).replace("{pct}", String(pct));
+            progressText.textContent = desc.textContent;
+            progressFill.style.width = pct + "%";
         } else if (s.state === "downloaded") {
-            stEl.className += " ok";
-            stEl.textContent = T("about.statuses.downloaded", "Update ready — click Install & Restart.");
-            btnLbl.textContent = T("about.installBtn", "Install & Restart");
+            btn.textContent = T("about.installBtn", "Install & Restart");
+            btn.title = T("about.installTooltip", "Install the update and restart");
+            desc.textContent = T(
+                "about.statuses.downloaded",
+                "Update ready — click Install & Restart.",
+            );
         } else if (s.state === "error") {
-            stEl.className += " err";
-            stEl.textContent = T("about.statuses.error", "Update check failed");
-            btnLbl.textContent = T("about.checkUpdates", "Check Updates");
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            btn.title = T("about.checkLatest", "Check for the latest version");
+            desc.textContent =
+                s.message ||
+                T("about.statuses.error", "Could not check for updates. Check your internet connection.");
         }
     }
 
     async function handleUpdateAction() {
+        // Known update → download it (Tauri updater downloads in background
+        // and reports progress via update:status, same as CyberSnap's flow).
         if (updateStatus.state === "available") {
             await window.cc.downloadUpdate();
             return;
@@ -127,18 +155,21 @@
         }
 
         updateStatus = { state: "checking" };
-        renderUpdateStatus();
+        renderUpdateState();
         try {
             const res = await window.cc.checkForUpdates();
             if (!res?.ok) {
-                updateStatus = { state: "error", message: res?.error || "Update check failed" };
+                updateStatus = {
+                    state: "error",
+                    message: res?.error || "Update check failed",
+                };
             } else {
-                updateStatus = { state: "not-available", version: res.version || appVersion };
+                updateStatus = { state: "not-available", version: res.version };
             }
         } catch (e) {
             updateStatus = { state: "error", message: String(e?.message || e) };
         }
-        renderUpdateStatus();
+        renderUpdateState();
     }
 
     const updateBtn = document.getElementById("ab-update-btn");
@@ -147,33 +178,11 @@
     if (window.cc && window.cc.onUpdateStatus) {
         window.cc.onUpdateStatus((payload) => {
             updateStatus = payload || { state: "idle" };
-            renderUpdateStatus();
+            renderUpdateState();
         });
     }
 
-    // ── Copy diagnostics ──────────────────────────────────────
-    const diagBtn = document.getElementById("ab-diag-btn");
-    if (diagBtn) {
-        diagBtn.addEventListener("click", async () => {
-            const lang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
-            const lines = [
-                `CyberClock ${appVersion}`,
-                `Platform: Windows (${navigator.userAgentData?.platform || "Win32"})`,
-                `Locale: ${lang}`,
-            ];
-            try {
-                await navigator.clipboard.writeText(lines.join("\n"));
-                const lbl = document.getElementById("ab-diag-lbl");
-                if (lbl) lbl.textContent = T("about.diagCopied", "Copied ✓");
-                clearTimeout(diagTimer);
-                diagTimer = setTimeout(() => {
-                    lbl.textContent = T("about.copyDiag", "Copy diagnostics");
-                }, 1800);
-            } catch { /* clipboard unavailable */ }
-        });
-    }
-
-    // ── Auto-update toggle ───────────────────────────────────
+    // ── Auto-update toggle ──────────────────────────────────
     const autoUp = document.getElementById("ab-autoup");
     if (autoUp) {
         autoUp.addEventListener("change", (e) => {
@@ -183,66 +192,26 @@
         });
     }
 
-    // ── Links ────────────────────────────────────────────────
+    // ── Title bar ─────────────────────────────────────────────
+    const closeBtn = document.getElementById("ab-close");
+    if (closeBtn) closeBtn.addEventListener("click", closeAbout);
+    const minBtn = document.getElementById("ab-minimize");
+    if (minBtn) minBtn.addEventListener("click", minimizeAbout);
+    const donateBtn = document.getElementById("ab-donate");
+    if (donateBtn) donateBtn.addEventListener("click", () => openUrl(LINKS.donate));
+
+    // ── Footer links (same set/order as CyberSnap) ───────────
     const linkMap = {
+        "ab-footer-copy": LINKS.website,
         "ab-link-website": LINKS.website,
+        "ab-link-docs": LINKS.docs,
         "ab-link-github": LINKS.github,
         "ab-link-issues": LINKS.issues,
-        "ab-link-releases": LINKS.changelog,
+        "ab-link-releases": LINKS.releases,
         "ab-link-donate": LINKS.donate,
-        "ab-foot-link": LINKS.website,
     };
     for (const [id, url] of Object.entries(linkMap)) {
         const el = document.getElementById(id);
         if (el) el.addEventListener("click", () => openUrl(url));
     }
-
-    // ── Close ─────────────────────────────────────────────────
-    const closeBtn = document.getElementById("ab-close");
-    if (closeBtn) closeBtn.addEventListener("click", closeAbout);
-
-    // ── Accessibility: focus trap + Esc ──────────────────────
-    // The dialog is the whole window; Tab cycles inside it so focus
-    // never leaks to a window that is not visible behind it.
-    function focusables() {
-        return [...document.querySelectorAll(
-            "button, input, [tabindex]:not([tabindex='-1'])",
-        )].filter((el) => !el.disabled && el.offsetParent !== null);
-    }
-
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            e.preventDefault();
-            closeAbout();
-            return;
-        }
-        if (e.key === "Tab") {
-            const list = focusables();
-            if (list.length === 0) return;
-            const first = list[0];
-            const last = list[list.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
-        }
-    });
-
-    // Hide instead of closing when the window loses focus (matches the
-    // tray popup behavior — clicking outside dismisses the dialog).
-    if (window.cc && window.cc.isTauri && window.cc.isTauri()) {
-        window.addEventListener("blur", () => {
-            setTimeout(closeAbout, 120);
-        });
-    }
-
-    // Initial focus goes to the close button: an immediate, reversible
-    // action is the safest entry point for keyboard and screen readers.
-    requestAnimationFrame(() => {
-        const closeEl = document.getElementById("ab-close");
-        if (closeEl) closeEl.focus();
-    });
 })();
