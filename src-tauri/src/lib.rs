@@ -34,6 +34,9 @@ pub struct AlarmState {
     pub last_half_hour: Mutex<Option<(u32, u32)>>,    // (hour, minute)
     pub last_full_hour: Mutex<Option<u32>>,           // hour
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
+    // Live relax playback state, reported by the main window so the tray
+    // can show what's playing without touching the audio engine itself.
+    pub relax_playing: Mutex<Option<String>>,         // track id, or None
 }
 
 /// Lock a mutex without panicking on poison: if another thread
@@ -619,7 +622,17 @@ fn relax_scheduler_loop(app: AppHandle) {
                 now + chrono::Duration::days(365)
             };
 
-            emit_to_active(&app, "relax:trigger", trigger_data);
+            // The relax engine lives in the main window (mini/menu have no
+            // audio). Emit to main specifically — its webview stays alive
+            // even when hidden, so the trigger lands regardless of which
+            // window happens to be visible.
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.emit("relax:trigger", &trigger_data);
+            } else {
+                let _ = app.emit("relax:trigger", trigger_data);
+            }
+            // Keep the visible window's settings UI in sync (one-shot
+            // disable above already broadcast app-wide in that branch).
             *next_run_opt = Some(next_dt);
         }
     }
@@ -1576,6 +1589,7 @@ pub struct TrayMenuState {
     pub auto_update: bool,
     pub audio_muted: bool,
     pub mini_click_through: bool,
+    pub relax_playing: Option<String>,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -1639,6 +1653,12 @@ fn tray_menu_geometry(
 pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     let settings = load_settings(app);
     let is_visible = is_any_clock_window_visible(app);
+    let relax_playing = app
+        .state::<AlarmState>()
+        .relax_playing
+        .lock()
+        .ok()
+        .and_then(|g| g.clone());
 
     TrayMenuState {
         version: app.package_info().version.to_string(),
@@ -1651,12 +1671,21 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         auto_update: settings.auto_update,
         audio_muted: settings.audio_muted,
         mini_click_through: settings.mini_click_through,
+        relax_playing,
     }
 }
 
 #[tauri::command]
 fn get_tray_menu_state(app: AppHandle) -> TrayMenuState {
     collect_tray_menu_state(&app)
+}
+
+// Main window reports its live relax playback state (track id or None)
+// so the tray menu can show/toggle it without owning an audio engine.
+#[tauri::command]
+fn report_relax_playing(app: AppHandle, track: Option<String>) {
+    let state = app.state::<AlarmState>();
+    *lock_or_recover(&state.relax_playing) = track;
 }
 
 #[tauri::command]
@@ -1728,6 +1757,13 @@ fn tray_menu_action(app: AppHandle, action: String) {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);
+            }
+        }
+        // Quick relax toggle from the tray: main plays/stops without
+        // leaving whatever view the user was on.
+        "relax_toggle" => {
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.emit("tray:relax-toggle", ());
             }
         }
         "about" => {
@@ -2050,6 +2086,7 @@ pub fn run() {
             close_mini_context_menu,
             menu_action,
             get_tray_menu_state,
+            report_relax_playing,
             hide_tray_menu,
             tray_menu_ready,
             tray_menu_action,
