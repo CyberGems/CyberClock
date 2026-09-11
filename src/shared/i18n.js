@@ -384,7 +384,14 @@
             "tray.checkUpdates": "Check for Update...",
             "about.autoUpdatesDesc": "Check automatically at startup",
             "about.copyDiag": "Copy diagnostics",
-            "about.diagCopied": "Copied ✓"
+            "about.diagCopied": "Copied ✓",
+            "about.openWindow": "Open About Window",
+            "about.openWindowDesc": "Updates, diagnostics and links live in the dedicated About window.",
+            "about.links": "Links",
+            "about.links.website": "Website",
+            "about.links.issues": "Report a bug",
+            "about.links.changelog": "Changelog",
+            "about.links.donate": "Donate"
         },
         es: {
             "relax.sessionTitle": "◈ Sesión",
@@ -765,7 +772,14 @@
             "tray.checkUpdates": "Buscar actualizaciones...",
             "about.autoUpdatesDesc": "Comprobar automáticamente al iniciar",
             "about.copyDiag": "Copiar diagnóstico",
-            "about.diagCopied": "Copiado ✓"
+            "about.diagCopied": "Copiado ✓",
+            "about.openWindow": "Abrir ventana Acerca de",
+            "about.openWindowDesc": "Las actualizaciones, el diagnóstico y los enlaces están en la ventana Acerca de dedicada.",
+            "about.links": "Enlaces",
+            "about.links.website": "Sitio web",
+            "about.links.issues": "Reportar un error",
+            "about.links.changelog": "Changelog",
+            "about.links.donate": "Donar"
         }
     };
 

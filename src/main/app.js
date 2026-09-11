@@ -277,12 +277,9 @@
 
         const langEl = document.getElementById("s-lang");
         if (langEl) langEl.value = s.language || "auto";
-        const autoUpEl = document.getElementById("s-autoupdate");
-        if (autoUpEl) autoUpEl.checked = s.autoUpdate !== false;
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
         if (typeof renderAboutVersion === "function") renderAboutVersion();
-        if (typeof renderUpdateStatus === "function") renderUpdateStatus();
         updateDigital();
         if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
             renderCalendar();
@@ -2743,7 +2740,9 @@
         );
 
     // ── About / Updates ─────────────────────────────────────
-    let updateStatus = { state: "idle" };
+    // The update flow, diagnostics and links live in the dedicated About
+    // window (src/about/) since v1.3 — this window only keeps the version
+    // label and a launcher button.
     let appVersion = "";
 
     function renderAboutVersion() {
@@ -2756,132 +2755,18 @@
         el.innerHTML = `CyberClock · <span class="app-ver-digits">${label}</span>`;
     }
 
-    function renderUpdateStatus() {
-        const el = document.getElementById("s-update-status");
-        const btn = document.getElementById("s-update-btn");
-        if (!el || !btn) return;
-
-        el.className = "s-about-status";
-        btn.disabled = false;
-        btn.classList.remove("spin");
-
-        const t = (k) => window.ccI18n.t(k);
-        const s = updateStatus;
-
-        if (s.state === "idle") {
-            el.textContent = "";
-            btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
-            return;
-        }
-        if (s.state === "checking") {
-            el.className += " warn";
-            el.textContent = t("about.statuses.checking");
-            btn.disabled = true;
-            return;
-        }
-        if (s.state === "not-available") {
-            el.className += " ok";
-            el.textContent = t("about.statuses.latest");
-            btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
-            return;
-        }
-        if (s.state === "available") {
-            el.className += " info";
-            el.textContent = t("about.statuses.available");
-            btn.innerHTML = `<span data-i18n="about.downloadBtn">${t("about.downloadBtn")}</span>`;
-            return;
-        }
-        if (s.state === "downloading") {
-            el.className += " warn";
-            el.textContent = t("about.statuses.downloading").replace(
-                "{percent}",
-                String(s.percent ?? 0),
-            );
-            btn.disabled = true;
-            return;
-        }
-        if (s.state === "downloaded") {
-            el.className += " ok";
-            el.textContent = t("about.statuses.downloaded");
-            btn.innerHTML = `<span data-i18n="about.installBtn">${t("about.installBtn")}</span>`;
-            return;
-        }
-        if (s.state === "error") {
-            el.className += " err";
-            el.textContent = t("about.statuses.error");
-            if (s.message) {
-                const detail = document.createElement("div");
-                detail.style.marginTop = "4px";
-                detail.style.fontSize = "8px";
-                detail.style.opacity = "0.75";
-                detail.style.wordBreak = "break-word";
-                detail.textContent = s.message;
-                el.appendChild(detail);
-            }
-            btn.innerHTML = `<span data-i18n="about.checkUpdates">${t("about.checkUpdates")}</span>`;
-            return;
-        }
-    }
-
-    async function handleUpdateAction() {
-        if (updateStatus.state === "available") {
-            await window.cc.downloadUpdate();
-            return;
-        }
-        if (updateStatus.state === "downloaded") {
-            await window.cc.installUpdate();
-            return;
-        }
-
-        updateStatus = { state: "checking" };
-        renderUpdateStatus();
-        try {
-            const res = await window.cc.checkForUpdates();
-            if (!res?.ok) {
-                updateStatus = {
-                    state: "error",
-                    message: res?.error || "Update check failed",
-                };
-            } else if (updateStatus.state === "checking") {
-                updateStatus = {
-                    state: "not-available",
-                    version: res.version || appVersion,
-                };
-            }
-        } catch (e) {
-            updateStatus = {
-                state: "error",
-                message: String(e?.message || e),
-            };
-        }
-        renderUpdateStatus();
-    }
-
     window.cc.getAppVersion().then((v) => {
         appVersion = v;
         renderAboutVersion();
     });
-    window.cc.onUpdateStatus((payload) => {
-        updateStatus = payload || { state: "idle" };
-        renderUpdateStatus();
-    });
 
-    const updateBtn = document.getElementById("s-update-btn");
-    if (updateBtn) {
-        updateBtn.addEventListener("click", () => handleUpdateAction());
-    }
-    const githubBtn = document.getElementById("s-github-btn");
-    if (githubBtn) {
-        githubBtn.addEventListener("click", () => {
-            window.open("https://github.com/CyberGems/CyberClock", "_blank");
+    const aboutOpenBtn = document.getElementById("s-about-open-btn");
+    if (aboutOpenBtn) {
+        aboutOpenBtn.addEventListener("click", () => {
+            window.cc.openWindow("about");
         });
     }
-    const autoUpEl = document.getElementById("s-autoupdate");
-    if (autoUpEl) {
-        autoUpEl.addEventListener("change", (e) => {
-            window.cc.saveSettings({ autoUpdate: e.target.checked });
-        });
-    }
+
     const sBtnReset = document.getElementById("s-btn-reset");
     if (sBtnReset) {
         sBtnReset.addEventListener("click", () => {

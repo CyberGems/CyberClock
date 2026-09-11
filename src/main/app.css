@@ -3058,18 +3058,13 @@
         gap: 12px;
         margin-top: 12px;
     }
-    .s-about-autoup {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-    }
-    .s-about-autoup span {
+    .s-about-note {
         font-family: "Inter", sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--text-md);
-        white-space: nowrap;
+        font-size: 11.5px;
+        font-weight: 400;
+        color: var(--text-lo);
+        margin-top: 10px;
+        line-height: 1.5;
     }
     .s-abtn:disabled {
         opacity: 0.45;

@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Core permissions for every CyberClock window",
-  "windows": ["main", "mini", "menu", "tray_menu"],
+  "windows": ["main", "mini", "menu", "tray_menu", "about"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",

@@ -67,6 +67,22 @@
                                     "alwaysOnTop":  true,
                                     "skipTaskbar":  true,
                                     "url":  "tray/menu.html"
+                                },
+                                {
+                                    "label":  "about",
+                                    "title":  "About CyberClock",
+                                    "width":  520,
+                                    "height":  600,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  true,
+                                    "shadow":  false,
+                                    "visible":  false,
+                                    "center":  true,
+                                    "alwaysOnTop":  true,
+                                    "skipTaskbar":  true,
+                                    "url":  "about/index.html"
                                 }
                             ],
                 "security":  {

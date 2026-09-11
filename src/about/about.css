@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════════════════════
+   CyberClock — Dedicated About Window
+   Scales the tray About design to a real dialog canvas (~520×600).
+   CyberGems © 2026
+═══════════════════════════════════════════════════════════ */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    background: transparent !important;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    /* Scrim + blur behind the dialog */
+    background: rgba(2, 4, 8, 0.45);
+    backdrop-filter: blur(10px) saturate(1.3);
+    -webkit-backdrop-filter: blur(10px) saturate(1.3);
+}
+
+.ab-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #0d1520 0%, #0a0f18 100%);
+    border: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-radius: 16px;
+    box-shadow:
+        0 0 32px rgba(var(--rgb-accent), 0.14),
+        0 16px 48px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    animation: ab-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ab-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ── Head ─────────────────────────────────────────────────── */
+.ab-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px 14px;
+}
+
+.ab-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    filter: drop-shadow(0 0 10px rgba(var(--rgb-accent), 0.4));
+}
+
+.ab-id {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ab-title {
+    font-family: "Orbitron", monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(var(--rgb-accent), 0.35);
+}
+
+.ab-ver {
+    font-family: "Share Tech Mono", monospace;
+    font-size: 12px;
+    color: var(--accent-a);
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+}
+
+.ab-close {
+    border: none;
+    background: transparent;
+    color: var(--text-lo);
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+}
+
+.ab-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ab-close .cc-ico {
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Body ──────────────────────────────────────────────────── */
+.ab-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2px 26px 12px;
+    text-align: center;
+}
+
+.ab-sub {
+    font-size: 11.5px;
+    color: var(--text-md);
+    line-height: 1.6;
+    margin: 2px 0 14px;
+}
+
+.ab-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Orbitron", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-a);
+    margin: 16px 0 10px;
+}
+
+.ab-divider::before,
+.ab-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: rgba(var(--rgb-accent), 0.2);
+}
+
+.ab-update-status {
+    min-height: 20px;
+    font-size: 12px;
+    color: var(--text-md);
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+
+.ab-update-status.ok { color: #34d399; }
+.ab-update-status.warn { color: #fbbf24; }
+.ab-update-status.info { color: var(--accent-a); }
+.ab-update-status.err { color: #f87171; }
+
+.ab-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #e2e8f0;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.ab-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ab-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.ab-btn .cc-ico {
+    width: 15px;
+    height: 15px;
+    color: var(--accent-a);
+}
+
+.ab-btn.spin .cc-ico {
+    animation: ab-spin 0.9s linear infinite;
+}
+
+@keyframes ab-spin {
+    to { transform: rotate(360deg); }
+}
+
+.ab-btn-quiet .cc-ico {
+    color: var(--text-md);
+}
+
+/* Auto-update toggle row */
+.ab-autoup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 2px 2px;
+    text-align: left;
+}
+
+.ab-autoup-lbl {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ab-autoup-lbl b {
+    font-size: 12px;
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.ab-autoup-lbl small {
+    font-size: 10.5px;
+    color: var(--text-lo);
+}
+
+.ab-tog {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.ab-tog input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ab-tog-tr {
+    width: 36px;
+    height: 19px;
+    border-radius: 12px;
+    background: rgba(120, 130, 150, 0.35);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.ab-tog-th {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 0.18s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.ab-tog input:checked + .ab-tog-tr {
+    background: var(--accent-a);
+    box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
+}
+
+.ab-tog input:checked + .ab-tog-tr .ab-tog-th {
+    transform: translateX(17px);
+}
+
+/* ── Links grid ───────────────────────────────────────────── */
+.ab-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.ab-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-md);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.ab-link-btn:hover {
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.08);
+    border-color: rgba(var(--rgb-accent), 0.3);
+}
+
+.ab-link-btn .cc-ico {
+    width: 14px;
+    height: 14px;
+    color: var(--accent-a);
+}
+
+.ab-link-btn.ab-heart {
+    color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.25);
+}
+
+.ab-link-btn.ab-heart:hover {
+    color: #fb7185;
+    background: rgba(244, 63, 94, 0.12);
+}
+
+/* ── Foot ─────────────────────────────────────────────────── */
+.ab-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.ab-foot-txt {
+    border: none;
+    background: transparent;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-md);
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color 0.15s;
+}
+
+.ab-foot-txt:hover {
+    color: #ffffff;
+}
+
+/* ── Accessibility: visible focus ring on keyboard focus ──── */
+.ab-close:focus-visible,
+.ab-btn:focus-visible,
+.ab-link-btn:focus-visible,
+.ab-foot-txt:focus-visible {
+    outline: 2px solid var(--accent-a);
+    outline-offset: 2px;
+}

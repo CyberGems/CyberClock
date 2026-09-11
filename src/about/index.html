@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+        <title>About CyberClock</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/fonts.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/i18n.js"></script>
+        <script src="../shared/icons.js"></script>
+        <link rel="stylesheet" href="about.css" />
+    </head>
+    <body>
+        <div class="about-shell" id="about-root" role="dialog" aria-modal="true" aria-labelledby="ab-title">
+            <div class="ab-card">
+                <!-- Head: app icon, name, version, close -->
+                <div class="ab-head">
+                    <img class="ab-logo" src="../assets/images/icon.png" alt="" />
+                    <div class="ab-id">
+                        <span class="ab-title" id="ab-title">CyberClock</span>
+                        <span class="ab-ver" id="ab-version">v…</span>
+                    </div>
+                    <button type="button" class="ab-close" id="ab-close" data-ico="x" title="Close"></button>
+                </div>
+
+                <div class="ab-body">
+                    <!-- Brand line -->
+                    <p class="ab-sub" data-i18n="settings.general.aboutSub">
+                        CyberGems © 2026 · Premium Cyber-Neon Clock for Windows
+                    </p>
+
+                    <!-- Maintenance -->
+                    <div class="ab-divider"><span data-i18n="about.maintenance">Maintenance</span></div>
+                    <div class="ab-update-status" id="ab-update-status" role="status"></div>
+                    <div class="ab-actions">
+                        <button type="button" class="ab-btn" id="ab-update-btn">
+                            <span data-ico="refresh"></span>
+                            <span id="ab-update-btn-lbl" data-i18n="about.checkUpdates">Check Updates</span>
+                        </button>
+                        <button type="button" class="ab-btn ab-btn-quiet" id="ab-diag-btn">
+                            <span data-ico="copy"></span>
+                            <span id="ab-diag-lbl" data-i18n="about.copyDiag">Copy diagnostics</span>
+                        </button>
+                    </div>
+                    <div class="ab-autoup">
+                        <span class="ab-autoup-lbl">
+                            <b data-i18n="about.autoUpdates">Auto-updates</b>
+                            <small data-i18n="about.autoUpdatesDesc">Check automatically at startup</small>
+                        </span>
+                        <label class="ab-tog">
+                            <input type="checkbox" id="ab-autoup" />
+                            <div class="ab-tog-tr"><div class="ab-tog-th"></div></div>
+                        </label>
+                    </div>
+
+                    <!-- Links -->
+                    <div class="ab-divider"><span data-i18n="about.links">Links</span></div>
+                    <div class="ab-links">
+                        <button type="button" class="ab-link-btn" id="ab-link-website" title="Website">
+                            <span data-ico="globe"></span><span data-i18n="about.links.website">Website</span>
+                        </button>
+                        <button type="button" class="ab-link-btn" id="ab-link-github" title="GitHub">
+                            <span data-ico="info"></span><span>GitHub</span>
+                        </button>
+                        <button type="button" class="ab-link-btn" id="ab-link-issues" title="Report a bug">
+                            <span data-ico="flag"></span><span data-i18n="about.links.issues">Report a bug</span>
+                        </button>
+                        <button type="button" class="ab-link-btn" id="ab-link-releases" title="Releases / Changelog">
+                            <span data-ico="changelog"></span><span data-i18n="about.links.changelog">Changelog</span>
+                        </button>
+                        <button type="button" class="ab-link-btn ab-heart" id="ab-link-donate" title="Donate">
+                            <span data-ico="heart"></span><span data-i18n="about.links.donate">Donate</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ab-foot">
+                    <button type="button" class="ab-foot-txt" id="ab-foot-link">cybergems.org</button>
+                </div>
+            </div>
+        </div>
+        <script src="about.js"></script>
+    </body>
+</html>

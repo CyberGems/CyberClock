@@ -439,6 +439,37 @@ fn open_window(app: AppHandle, name: String) -> bool {
     false
 }
 
+/// Show the dedicated About window centered on the monitor that currently
+/// holds the clock (main or mini), so the dialog feels attached to the app
+/// instead of popping up on an arbitrary display.
+fn show_about_window(app: &AppHandle) {
+    let Some(win) = app.get_webview_window("about") else {
+        return;
+    };
+    // Center on the monitor of the first *visible* clock window; fall back
+    // to the primary monitor when both are hidden.
+    let reference = ["main", "mini"]
+        .iter()
+        .filter_map(|label| app.get_webview_window(label))
+        .find(|w| w.is_visible().unwrap_or(false))
+        .and_then(|w| w.current_monitor().ok().flatten())
+        .or_else(|| win.primary_monitor().ok().flatten());
+
+    if let Some(m) = reference {
+        let scale = win.scale_factor().unwrap_or(1.0);
+        let w_px = (520.0 * scale).round() as i32;
+        let h_px = (600.0 * scale).round() as i32;
+        let work = m.work_area();
+        let x = work.position.x + (work.size.width as i32 - w_px) / 2;
+        let y = work.position.y + (work.size.height as i32 - h_px) / 2;
+        let _ = win.set_position(tauri::Position::Physical(
+            tauri::PhysicalPosition::new(x, y),
+        ));
+    }
+    let _ = win.show();
+    let _ = win.set_focus();
+}
+
 #[tauri::command]
 fn hide_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
@@ -964,6 +995,10 @@ fn menu_action(app: AppHandle, action: String) -> bool {
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);
             }
+            true
+        }
+        "about" => {
+            show_about_window(&app);
             true
         }
         _ => {
@@ -1664,11 +1699,16 @@ fn tray_menu_action(app: AppHandle, action: String) {
         "mini" => {
             switch_to_mini_mode(app);
         }
-        "timer" | "stopwatch" | "relax" | "settings" | "about" => {
+        "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);
             }
+        }
+        "about" => {
+            // Dedicated About window (option B): show in place instead of
+            // switching the clock to full mode.
+            show_about_window(&app);
         }
         "quit" => {
             exit_app(&app);
