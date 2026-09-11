@@ -78,6 +78,23 @@
         if (lblSw) lblSw.textContent = window.ccI18n ? window.ccI18n.t("tray.stopwatch") : "Stopwatch";
         const lblRelax = document.getElementById("lbl-relax");
         if (lblRelax) lblRelax.textContent = window.ccI18n ? window.ccI18n.t("tray.relax") : "Relax";
+
+        // Relax quick toggle: reflects live playback (track id comes from
+        // the main window's reports). Hidden when nothing is loaded.
+        const relaxTgBtn = document.getElementById("btn-relax-toggle");
+        const relaxTgIco = document.getElementById("ico-relax-toggle");
+        const relaxTgLbl = document.getElementById("lbl-relax-toggle");
+        const playingTrack = state.relax_playing || null;
+        if (relaxTgBtn) relaxTgBtn.hidden = !playingTrack;
+        if (relaxTgIco) {
+            relaxTgIco.setAttribute("data-ico", playingTrack ? "pause" : "play");
+        }
+        if (relaxTgLbl) {
+            relaxTgLbl.textContent = playingTrack
+                ? (window.ccI18n ? window.ccI18n.t("tray.pauseRelax", { track: window.ccI18n.t("relax.track." + playingTrack) }) : "Pause relax")
+                : (window.ccI18n ? window.ccI18n.t("tray.playRelax") : "Play relax");
+        }
+
         const lblSettings = document.getElementById("lbl-settings");
         if (lblSettings) lblSettings.textContent = window.ccI18n ? window.ccI18n.t("tray.settings") : "Settings...";
         const lblQuit = document.getElementById("lbl-quit");
@@ -208,6 +225,17 @@
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniClickThrough: next });
             }
+        });
+    }
+
+    // Relax quick toggle: fires the backend action that asks the main
+    // window to play/pause; the menu closes just like other actions.
+    const relaxTgBtn = document.getElementById("btn-relax-toggle");
+    if (relaxTgBtn) {
+        relaxTgBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            runAction("relax_toggle");
         });
     }
 

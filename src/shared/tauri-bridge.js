@@ -199,6 +199,10 @@
         trayMenuAction: async (action) => {
             await invoke("tray_menu_action", { action });
         },
+        reportRelaxPlaying: async (track) => {
+            if (!HAS_TAURI) return;
+            await invoke("report_relax_playing", { track });
+        },
 
         // ── Events (renderer ← main) ──────────────────────────────
         onInit: (cb) => {
@@ -236,6 +240,9 @@
         },
         onMiniMenuAction: (cb) => {
             return subscribe("mini:menu-action", cb);
+        },
+        onTrayRelaxToggle: (cb) => {
+            return subscribe("tray:relax-toggle", cb);
         },
         onActiveWindow: (cb) => {
             return subscribe("cc:active-window", cb);
