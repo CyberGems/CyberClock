@@ -263,7 +263,13 @@
         const secEl = document.getElementById("s-sec");
         if (secEl) secEl.checked = s.showSeconds !== false;
         const clockNameEl = document.getElementById("s-clock-name");
-        if (clockNameEl) clockNameEl.value = s.clockBrand || "CYBERGEMS";
+        if (clockNameEl) {
+            clockNameEl.value = s.clockBrand || "CYBERGEMS";
+            // Keep the Reset button in sync with the loaded value.
+            if (typeof refreshClockNameRestoreBtn === "function") {
+                refreshClockNameRestoreBtn();
+            }
+        }
         // Hide analog clock (full-mode Home): collapse the panel and let
         // the calendar dashboard absorb the freed width.
         const hideClock = s.fullHideClock === true;
@@ -1462,6 +1468,17 @@
         tInterval = null,
         tActivePreset = null;
 
+    // Dim the untouched display: before the timer has ever been started
+    // (or after a reset with nothing armed) the all-zero digits read as
+    // placeholder, not as information. Any armed time or running state
+    // brings back full presence.
+    function tRefreshIdle() {
+        const idle = !tRunning && tAcc === 0 && !tActivePreset;
+        document
+            .getElementById("t-disp")
+            .classList.toggle("idle", idle);
+    }
+
     function tSetDisplay(secs) {
         secs = Math.max(0, secs);
         const totalMs = Math.floor(secs * 1000);
@@ -1560,6 +1577,7 @@
             tRunning = false;
             tAcc = Math.max(0, tAcc - (Date.now() - tLastTick) / 1000);
             clearInterval(tInterval);
+            tRefreshIdle();
         document.getElementById("t-start").innerHTML =
             '<span data-ico="play"></span> RESUME';
         window.ccIcons &&
@@ -1580,6 +1598,7 @@
             }
             tRunning = true;
             tLastTick = Date.now();
+            tRefreshIdle();
             document
                 .getElementById("t-start")
                 .classList.remove("dormant", "ready");
@@ -1631,6 +1650,7 @@
             .forEach((b) => b.classList.remove("on"));
         tActivePreset = null;
         tRefreshReady(); // back to the dim, "set a time" resting state
+        tRefreshIdle();  // untouched zeros dim back down
     }
 
     function tOnComplete() {
@@ -1663,6 +1683,7 @@
         }, 200);
         document.getElementById("t-done").classList.add("vis");
         tRefreshReady(); // inputs still hold the value → re-run is armed
+        tRefreshIdle();  // countdown finished at zero → dims unless re-armed
     }
 
     document
@@ -1704,6 +1725,7 @@
             tActivePreset = s;
             tStopAttract(); // user engaged → end the invitation
             tRefreshReady(); // a preset just armed the timer → light up START
+            tRefreshIdle();  // armed digits wake up from the dim rest
         });
     });
     ["t-ih", "t-im", "t-is"].forEach((id) => {
@@ -1735,6 +1757,16 @@
     let laps = [],
         lastLapTotal = 0;
 
+    // Untouched zeros read as placeholder, not information — dim them
+    // until the first start; any elapsed time (running or paused)
+    // brings the digits back to full presence.
+    function swRefreshIdle() {
+        const idle = !swRunning && swElapsed === 0;
+        document
+            .getElementById("sw-disp")
+            .classList.toggle("idle", idle);
+    }
+
     function swFmt(ms) {
         const t = Math.floor(ms);
         return {
@@ -1765,6 +1797,7 @@
             swRunning = false;
             swPaused = swElapsed;
             cancelAnimationFrame(swRaf);
+            swRefreshIdle();
             document.getElementById("sw-start").innerHTML =
                 '<span data-ico="play"></span> RESUME';
             window.ccIcons &&
@@ -1777,6 +1810,7 @@
         } else {
             swRunning = true;
             swStart = performance.now();
+            swRefreshIdle();
             document.getElementById("sw-start").innerHTML =
                 '<span data-ico="pause"></span> PAUSE';
             window.ccIcons &&
@@ -1809,6 +1843,7 @@
         document.getElementById("sw-lap").disabled = true;
         document.getElementById("sw-clear").disabled = true;
         document.getElementById("run-dot").classList.remove("on");
+        swRefreshIdle(); // fresh zeros go back to the dim resting state
     }
 
     function swLap() {
@@ -1879,6 +1914,10 @@
             swRenderLaps();
             document.getElementById("sw-clear").disabled = true;
         });
+
+    // Both displays open untouched: rest dim until the first interaction.
+    tRefreshIdle();
+    swRefreshIdle();
 
     // ══════════════════════════════════════════════════════════════
     // RELAX + AUDIO ENGINE
@@ -2860,14 +2899,35 @@
         );
     // Analog clock brand wordmark — free text, max 16 chars; blank restores
     // the default. Saved on change (blur/Enter) to avoid a write per keystroke.
+    // The Reset button appears only while the name differs from the default,
+    // so the resting UI stays clean.
+    const CLOCK_NAME_DEFAULT = "CYBERGEMS";
     const sClockName = document.getElementById("s-clock-name");
+    const sClockNameRestore = document.getElementById("s-clock-name-restore");
+    function refreshClockNameRestoreBtn() {
+        if (!sClockName || !sClockNameRestore) return;
+        const changed = (sClockName.value || "").trim() !== CLOCK_NAME_DEFAULT;
+        sClockNameRestore.style.display = changed ? "" : "none";
+    }
     if (sClockName) {
+        sClockName.addEventListener("input", refreshClockNameRestoreBtn);
         sClockName.addEventListener("change", () => {
             const text = sClockName.value.trim().slice(0, 16);
             sClockName.value = text;
             window.cc.saveSettings({ clockBrand: text });
+            refreshClockNameRestoreBtn();
         });
     }
+    if (sClockNameRestore) {
+        sClockNameRestore.addEventListener("click", () => {
+            if (sClockName) sClockName.value = CLOCK_NAME_DEFAULT;
+            window.cc.saveSettings({ clockBrand: CLOCK_NAME_DEFAULT });
+            refreshClockNameRestoreBtn();
+        });
+    }
+    // Initial visibility for the loaded settings (applySettings fills the
+    // input before this runs via onInit → applySettings ordering).
+    refreshClockNameRestoreBtn();
 
     // Hide analog clock — the side grip on the Home view and the Settings
     // toggle drive the same setting through the same broadcast round-trip.

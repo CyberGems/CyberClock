@@ -288,6 +288,8 @@
             "settings.appearance.hideClockDesc": "Calendar takes the full width",
             "settings.appearance.clockName": "Clock Name",
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
+            "settings.appearance.clockNameRestore": "Reset",
+            "settings.appearance.clockNameRestoreTip": "Restore the default clock name",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
@@ -693,6 +695,8 @@
             "settings.appearance.hideClockDesc": "El calendario ocupa todo el ancho",
             "settings.appearance.clockName": "Nombre del Reloj",
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
+            "settings.appearance.clockNameRestore": "Restaurar",
+            "settings.appearance.clockNameRestoreTip": "Restaura el nombre predeterminado del reloj",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
