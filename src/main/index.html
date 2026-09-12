@@ -399,6 +399,14 @@
                                 ></span>
                             </div>
                             <div class="r-sched-line" id="r-sched-line" style="display:none"></div>
+                            <!-- Global mute warning: without it, a muted
+                                 session looks "stuck" (empty spectrum,
+                                 no sound) with no hint why. -->
+                            <div class="r-mute-banner" id="r-mute-banner" style="display:none">
+                                <span data-ico="volume-x"></span>
+                                <span class="r-mute-txt" data-i18n="relax.mutedWarning">Audio is muted</span>
+                                <button class="r-mute-enable" id="r-mute-enable" data-i18n="relax.mutedEnable">Enable</button>
+                            </div>
                         </div>
                         <div class="relax-R">
                             <div class="viz-wrap">

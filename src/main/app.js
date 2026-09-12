@@ -380,6 +380,10 @@
 
         window.audioEngine.setVolume(s.relaxVolume || 0.8);
         window.audioEngine.setMuted(s.audioMuted === true);
+        // Quiet but unmissable hint while a global mute silences the
+        // Relax engine (otherwise the module looks simply "broken").
+        const muteBanner = document.getElementById("r-mute-banner");
+        if (muteBanner) muteBanner.style.display = s.audioMuted === true ? "" : "none";
         if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
         if (typeof updatePlayingTrackCardClass === "function") {
             updatePlayingTrackCardClass(window.audioEngine.isPlaying);
@@ -2253,6 +2257,10 @@
         const pauseMs = Date.now() - rPauseResumedAt;
         rPauseAccum += pauseMs;
         window.audioEngine.resume();
+        // Guard: if an auto-stop slow fade started before the pause, the
+        // master gain may still be gliding toward 0 — pin it back to the
+        // configured volume so resuming is actually audible.
+        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
         // Session clock: shift the epoch so elapsed time skips the pause.
         if (rSesStart) rSesStart += pauseMs;
         // Pacer: the rAF froze during the pause, so shifting the epoch
@@ -2620,6 +2628,15 @@
             400,
         );
     });
+
+    // Mute banner: one click clears the global mute that silences every
+    // sound in the app (same setting as the tray "Sound" toggle).
+    const rMuteEnable = document.getElementById("r-mute-enable");
+    if (rMuteEnable) {
+        rMuteEnable.addEventListener("click", () => {
+            window.cc.saveSettings({ audioMuted: false });
+        });
+    }
 
     document.querySelectorAll(".ast-btn").forEach((b) => {
         b.addEventListener("click", () => {
