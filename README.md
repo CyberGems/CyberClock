@@ -2,10 +2,10 @@
   <img src="src/assets/images/icon.png" width="120" alt="CyberClock logo" />
 </p>
 
-<h1 align="center">CyberClock — Desktop Clock</h1>
+<h1 align="center">CyberClock: Desktop Clock</h1>
 
 <p align="center">
-  <strong>A premium cyber-neon styled clock for Windows</strong> — analog & digital display, calendar, timer, stopwatch, and a relaxation module with ambient sound synthesis.
+  <strong>A premium cyber-neon styled clock for Windows</strong>: analog & digital display, calendar, timer, stopwatch, and a relaxation module with ambient sound synthesis.
 </p>
 
 <p align="center">
@@ -20,15 +20,15 @@
   <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" height="24" /></a>
 </p>
 
-A feature-rich desktop clock application with a futuristic neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities — clock, calendar, timer, stopwatch — with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
+A feature-rich desktop clock application with a futuristic neon aesthetic. Built with **Tauri v2** and **Rust**, CyberClock combines practical utilities (clock, calendar, timer, stopwatch) with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness.
 
-*Free and open source — no ads, no tracking, and no data collection. Just enjoy it.*
+*Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
 ---
 
 ## 🕐 Why CyberClock?
 
-Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub** — beautiful timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
+Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub**: beautiful timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
 
 | Need | Solution |
 |---|---|
@@ -162,7 +162,7 @@ The installer will be in `src-tauri/target/release/`.
 
 ### 🛡️ Windows SmartScreen
 
-Windows may show a SmartScreen warning the first time you run the CyberClock installer — this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
+Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
 
 To continue:
 
@@ -249,12 +249,12 @@ Made by [**CyberGems**](https://cybergems.org)
 
 </div>
 <p align="center">
-  <a href="https://twitter.com/intent/tweet?text=CyberClock%20%E2%80%94%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_X-1DA1F2?style=for-the-badge&logo=x&logoColor=white" alt="Share on X" /></a>
+  <a href="https://twitter.com/intent/tweet?text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_X-1DA1F2?style=for-the-badge&logo=x&logoColor=white" alt="Share on X" /></a>
   &nbsp;<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Share on Facebook" /></a>
-  &nbsp;<a href="https://www.reddit.com/submit?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&title=CyberClock%20%E2%80%94%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Reddit-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Share on Reddit" /></a>
-  &nbsp;<a href="https://t.me/share/url?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&text=CyberClock%20%E2%80%94%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Share on Telegram" /></a>
+  &nbsp;<a href="https://www.reddit.com/submit?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&title=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Reddit-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Share on Reddit" /></a>
+  &nbsp;<a href="https://t.me/share/url?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Share on Telegram" /></a>
   &nbsp;<a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="Share on LinkedIn" /></a>
-  &nbsp;<a href="mailto:?subject=CyberClock%20%E2%80%94%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&body=CyberClock%20%E2%80%94%20free%20%26%20open-source%20desktop%20tool%20for%20Windows%20https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_by_Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Share by Email" /></a>
+  &nbsp;<a href="mailto:?subject=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&body=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows%20https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_by_Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Share by Email" /></a>
 </p>
 
 ---
@@ -267,7 +267,7 @@ More free, open-source, privacy-first apps from [**CyberGems**](https://github.c
 |:---:|---|
 | 📢&nbsp;[**CyberFeeds**](https://github.com/CyberGems/CyberFeeds#readme) | High-performance, local-first RSS and Atom reader built for speed, privacy and clean reading. |
 | 🚀&nbsp;[**CyberLauncher**](https://github.com/CyberGems/CyberLauncher#readme) | Windows application launcher with hot corners, scheduler, system monitor and integrated terminal. |
-| 💻&nbsp;[**CyberManager**](https://github.com/CyberGems/CyberManager#readme) | Lightweight, high-performance task manager, virtualized and NT-native — a powerful Task Manager alternative. |
+| 💻&nbsp;[**CyberManager**](https://github.com/CyberGems/CyberManager#readme) | Lightweight, high-performance task manager, virtualized and NT-native, a powerful Task Manager alternative. |
 | 📝&nbsp;[**CyberNotes**](https://github.com/CyberGems/CyberNotes#readme) | Privacy-focused note-taking app with rich text, folders, tabs and bcrypt-protected local storage. |
 | ⚡&nbsp;[**CyberPaste**](https://github.com/CyberGems/CyberPaste#readme) | Privacy-first clipboard manager for text, code, images, HTML and files. |
 | 📸&nbsp;[**CyberSnap**](https://github.com/CyberGems/CyberSnap#readme) | Screen capture and annotation suite with vector tools, high-speed OCR, screen recording and color picker. |
