@@ -1680,14 +1680,35 @@ fn tray_menu_geometry(
 
     let gap = (4.0 * scale).round() as i32;
     let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
-    let mut x = anchor_x - width_px / 2;
-    let mut y = anchor_y - height_px - gap + shadow_pad_px;
+
+    // Vertical taskbar on the left edge: the icon sits inside the strip
+    // left of the work area, so "open upward centered on the anchor"
+    // places the menu far away. Open to the RIGHT of the icon instead,
+    // vertically centered on it (native tray menus on side taskbars do
+    // the same). Any other edge keeps the classic above/below behavior.
+    let anchor_in_left_strip = min_x - anchor_x > 0 && anchor_x < min_x;
+    let (mut x, mut y);
+    if anchor_in_left_strip {
+        // Card's left edge lands `gap` right of the icon center.
+        x = anchor_x + gap - shadow_pad_px;
+        // Card vertically centered on the icon.
+        y = anchor_y - height_px / 2;
+    } else {
+        // Classic placement: the visible card's bottom sits `gap` above
+        // the anchor (menus open upward); the window's transparent bleed
+        // border is what the +/- shadow_pad below compensates for.
+        x = anchor_x - width_px / 2;
+        y = anchor_y - height_px - gap + shadow_pad_px;
+
+        if y + shadow_pad_px < min_y + 4 {
+            // Not enough room above the icon for the full card — flip the
+            // menu to open below it instead (card top lands `gap` under
+            // the anchor).
+            y = anchor_y + gap - shadow_pad_px;
+        }
+    }
 
     x = x.clamp(min_x + 4, (max_x - width_px - 4).max(min_x + 4));
-    if y + height_px - shadow_pad_px < min_y + 4 {
-        // Not enough room above — open below the icon
-        y = anchor_y + gap - shadow_pad_px;
-    }
     y = y.clamp(min_y + 4, (max_y - height_px - 4).max(min_y + 4));
 
     (x, y, width_px.max(1) as u32, height_px.max(1) as u32)
@@ -1885,12 +1906,18 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                     ..
                 } => {
                     let app = tray.app_handle().clone();
+                    // Anchor at the icon's CENTER: vertical taskbars put the
+                    // icon mid-bar, and menus (native ones too) open beside/
+                    // above that center — anchoring at the rect's top edge
+                    // made the menu float visibly higher than other tray
+                    // menus and far away on a left-edge taskbar.
                     let (x, y) = {
                         use tauri::{Position, Size};
                         match (rect.position, rect.size) {
-                            (Position::Physical(p), Size::Physical(s)) => {
-                                (p.x + (s.width as i32) / 2, p.y)
-                            }
+                            (Position::Physical(p), Size::Physical(s)) => (
+                                p.x + (s.width as i32) / 2,
+                                p.y + (s.height as i32) / 2,
+                            ),
                             _ => (position.x.round() as i32, position.y.round() as i32),
                         }
                     };
