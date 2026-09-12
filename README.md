@@ -186,11 +186,11 @@ To continue:
 ## 🎨 Themes & Customization
 
 ### 5 Theme Skins
-- **Arctic Ice** — Cool cyan and white
-- **Cyber Blue** — Deep blue with electric accents
-- **Neon Green** — Vibrant emerald glow
-- **Plasma Purple** — Rich violet and magenta
-- **Solar Orange** — Warm amber and gold
+- **Arctic Ice** — Ice blue over deep navy
+- **Cyber Blue** — Classic electric blue
+- **Forest Mist** — Sage green over dark green-brown
+- **Twilight Haze** — Soft lilac over dark violet
+- **Warm Ember** — Warm amber over dark umber
 
 ### Display Options
 - Time format: 12H / 24H
