@@ -2752,9 +2752,13 @@
         position: relative;
         display: inline-flex;
     }
-    .s-name-restore {
+    /* Two classes on purpose: this must outrank the later
+       [data-tooltip] { position: relative } rule, which otherwise
+       drops the button into row flow and pushes a horizontal
+       scrollbar into the modal. */
+    .s-name-wrap .s-name-restore {
         position: absolute;
-        right: 5px;
+        right: 6px;
         top: 50%;
         transform: translateY(-50%);
         display: inline-flex;
@@ -2771,11 +2775,11 @@
         -webkit-app-region: no-drag;
         transition: color 0.15s, background 0.15s;
     }
-    .s-name-restore:hover {
+    .s-name-wrap .s-name-restore:hover {
         color: var(--accent-a);
         background: rgba(var(--rgb-accent), 0.1);
     }
-    .s-name-restore .cc-ico {
+    .s-name-wrap .s-name-restore .cc-ico {
         width: 13px;
         height: 13px;
         filter: none;
