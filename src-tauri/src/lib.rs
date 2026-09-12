@@ -1603,6 +1603,40 @@ const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
 // About modal resizes it further).
 const TRAY_MENU_EST_HEIGHT: f64 = 470.0;
 
+/// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
+/// region that EXCLUDES the taskbar. Clamping the tray menu to the full
+/// monitor bounds lets it open behind/over a taskbar docked to any edge
+/// (e.g. a vertical taskbar on the left). GetMonitorInfoW gives the
+/// per-monitor work area, so this is correct on every screen.
+#[cfg(windows)]
+fn work_area_containing(anchor_x: i32, anchor_y: i32) -> Option<(i32, i32, i32, i32)> {
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::Graphics::Gdi::{
+        GetMonitorInfoW, MonitorFromPoint, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+    };
+
+    let monitor = unsafe {
+        MonitorFromPoint(POINT { x: anchor_x, y: anchor_y }, MONITOR_DEFAULTTONEAREST)
+    };
+    if monitor.is_null() {
+        return None;
+    }
+    let mut info = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    let ok = unsafe { GetMonitorInfoW(monitor, &mut info) };
+    if ok == 0 {
+        return None;
+    }
+    Some((
+        info.rcWork.left,
+        info.rcWork.top,
+        info.rcWork.right,
+        info.rcWork.bottom,
+    ))
+}
+
 fn tray_menu_geometry(
     win: &tauri::WebviewWindow,
     anchor_x: i32,
@@ -1622,7 +1656,16 @@ fn tray_menu_geometry(
         .or_else(|| win.primary_monitor().ok().flatten())
         .or_else(|| win.current_monitor().ok().flatten());
 
-    let (min_x, min_y, max_x, max_y) = if let Some(m) = monitor {
+    // Prefer the taskbar-free work area when the anchor sits on the
+    // primary monitor; otherwise clamp to the monitor's full bounds.
+    #[cfg(windows)]
+    let work_area = work_area_containing(anchor_x, anchor_y);
+    #[cfg(not(windows))]
+    let work_area: Option<(i32, i32, i32, i32)> = None;
+
+    let (min_x, min_y, max_x, max_y) = if let Some((wa_x0, wa_y0, wa_x1, wa_y1)) = work_area {
+        (wa_x0, wa_y0, wa_x1, wa_y1)
+    } else if let Some(m) = monitor {
         let pos = m.position();
         let size = m.size();
         (
