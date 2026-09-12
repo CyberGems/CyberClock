@@ -109,3 +109,21 @@ jobs:
         with:
           files: src-tauri/target/release/bundle/checksums.sha256
           make_draft: true
+
+      # Final guard: some action in the chain above has been observed to
+      # flip the draft to published. Re-assert the draft state through the
+      # API so the release always lands as a draft, no matter what.
+      - name: Force draft state (final guard)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          RELEASE_ID=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          if [ -z "$RELEASE_ID" ]; then
+            echo "::error::Release for $TAG not found"
+            exit 1
+          fi
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -f draft=true
+          echo "Release $TAG (id $RELEASE_ID) forced back to draft."
