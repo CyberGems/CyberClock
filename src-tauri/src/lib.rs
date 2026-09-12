@@ -1942,7 +1942,37 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
 // ─────────────────────────────────────────────────────────────
 
 fn show_initial_window(app: &AppHandle) {
-    let settings = load_settings(app);
+    let mut settings = load_settings(app);
+
+    // Reconcile the saved Start-with-Windows preference with the actual
+    // HKCU Run entry: the registry is what really decides whether the app
+    // boots with Windows, and the NSIS installer's checkbox (or msconfig,
+    // antivirus cleanups…) can change it behind the settings file's back.
+    // The Settings UI must reflect reality.
+    #[cfg(target_os = "windows")]
+    {
+        let registered = {
+            use std::process::Command;
+            Command::new("reg")
+                .args([
+                    "query",
+                    "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    "/v",
+                    "CyberClock",
+                ])
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+        };
+        if registered != settings.start_with_windows {
+            let actual = registered;
+            let _ = update_settings(app, |s| {
+                s.start_with_windows = actual;
+                Ok(())
+            });
+            settings.start_with_windows = actual;
+        }
+    }
 
     // Hide all windows first
     for window in app.webview_windows().values() {
