@@ -2089,6 +2089,13 @@
                 rPacerTimer = requestAnimationFrame(tick);
                 return;
             }
+            // Audio paused: freeze the circle exactly where it is instead
+            // of advancing the pattern clock, so resume continues the
+            // phase mid-breath instead of jumping back.
+            if (rPaused) {
+                rPacerTimer = requestAnimationFrame(tick);
+                return;
+            }
             const elapsed = (performance.now() - rPacerStart) % totalDuration;
             
             let accumulated = 0;
@@ -2246,7 +2253,11 @@
         const pauseMs = Date.now() - rPauseResumedAt;
         rPauseAccum += pauseMs;
         window.audioEngine.resume();
+        // Session clock: shift the epoch so elapsed time skips the pause.
         if (rSesStart) rSesStart += pauseMs;
+        // Pacer: the rAF froze during the pause, so shifting the epoch
+        // forward by the pause length makes `now - rPacerStart` unchanged
+        // — the phase resumes exactly where it froze (mid-breath).
         if (rPacerStart) rPacerStart += pauseMs;
         if (rSesStart) rStartTips(); // tips cycle resumes with the session
         if (rAstMins > 0 && rAstRemain > 0) rStartAutoStop(rAstRemain);
@@ -2262,6 +2273,10 @@
         if (rSesInterval) clearInterval(rSesInterval);
         if (!rSesStart) rSesStart = Date.now();
         rSesInterval = setInterval(() => {
+            // While paused, the clock is frozen on screen (rSesStart is
+            // shifted on resume); skipping the update keeps the display
+            // from ticking forward during the pause.
+            if (rPaused) return;
             const ms = Date.now() - rSesStart;
             const h = Math.floor(ms / 3600000),
                 m = Math.floor((ms % 3600000) / 60000),
@@ -2634,7 +2649,12 @@
                     x.classList.toggle("on", x.dataset.pat === pat),
                 );
             cfg.breathePattern = pat;
-            if (rPacerActive) startBreathePacer();
+            // Restart the pacer only while actually breathing; during an
+            // audio pause the tick is frozen, and re-arming here would
+            // leave the circle stuck at "Ready" until the next session.
+            // rResume's epoch shift keeps the old cycle, so the new
+            // pattern simply takes effect on the next full start.
+            if (rPacerActive && !rPaused) startBreathePacer();
         });
     });
 
