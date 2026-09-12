@@ -101,18 +101,21 @@ jobs:
           find . -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.sig" -o -name "latest.json" \) -exec sha256sum {} \; > checksums.sha256
           cat checksums.sha256
 
-      # Keep the release a DRAFT: without make_draft this step publishes
-      # the release automatically once assets upload. Publishing remains a
-      # deliberate manual step for the maintainer.
+      # Upload the checksums file. draft: true keeps the release
+      # unpublished; this is the action's real input (a previous
+      # 'make_draft' input was silently ignored, publishing the release).
       - name: Upload checksums to release (keep draft)
         uses: softprops/action-gh-release@v2
         with:
           files: src-tauri/target/release/bundle/checksums.sha256
-          make_draft: true
+          draft: true
 
       # Final guard: some action in the chain above has been observed to
       # flip the draft to published. Re-assert the draft state through the
       # API so the release always lands as a draft, no matter what.
+      # NOTE: -F (not -f) sends a real JSON boolean; the previous -f
+      # string "true" was silently ignored by the API and the release
+      # stayed published.
       - name: Force draft state (final guard)
         shell: bash
         env:
@@ -125,5 +128,9 @@ jobs:
             echo "::error::Release for $TAG not found"
             exit 1
           fi
-          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -f draft=true
-          echo "Release $TAG (id $RELEASE_ID) forced back to draft."
+          DRAFT_STATE=$(gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F draft=true --jq ".draft")
+          if [ "$DRAFT_STATE" != "true" ]; then
+            echo "::error::Failed to force $TAG back to draft (API returned draft=$DRAFT_STATE)"
+            exit 1
+          fi
+          echo "Release $TAG (id $RELEASE_ID) confirmed as draft."
