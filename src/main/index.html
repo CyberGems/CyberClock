@@ -578,25 +578,29 @@
                             </div>
                             <div class="s-row">
                                 <div class="s-lbl" data-i18n="settings.appearance.clockName">Clock Name</div>
-                                <input
-                                    type="text"
-                                    id="s-clock-name"
-                                    class="s-inp"
-                                    maxlength="16"
-                                    spellcheck="false"
-                                    autocomplete="off"
-                                    data-i18n-attr="placeholder:settings.appearance.clockNamePlaceholder"
-                                />
-                                <button
-                                    class="s-abtn s-name-restore"
-                                    id="s-clock-name-restore"
-                                    style="display: none"
-                                    title="Restore default name"
-                                    data-i18n-attr="title:settings.appearance.clockNameRestoreTip"
-                                >
-                                    <span data-ico="rotate-ccw"></span>
-                                    <span data-i18n="settings.appearance.clockNameRestore">Reset</span>
-                                </button>
+                                <!-- Overlay host keeps the button out of flow:
+                                     the input never moves when it appears. -->
+                                <div class="s-name-wrap">
+                                    <input
+                                        type="text"
+                                        id="s-clock-name"
+                                        class="s-inp"
+                                        maxlength="16"
+                                        spellcheck="false"
+                                        autocomplete="off"
+                                        data-i18n-attr="placeholder:settings.appearance.clockNamePlaceholder"
+                                    />
+                                    <button
+                                        class="s-name-restore"
+                                        id="s-clock-name-restore"
+                                        style="display: none"
+                                        data-tooltip="Restore default name"
+                                        data-i18n-attr="data-tooltip:settings.appearance.clockNameRestoreTip"
+                                        aria-label="Restore default name"
+                                    >
+                                        <span data-ico="rotate-ccw"></span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="s-row">
                                 <div class="s-lbl">

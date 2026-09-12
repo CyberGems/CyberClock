@@ -2745,12 +2745,44 @@
         -webkit-app-region: no-drag;
         transition: all 0.18s ease;
     }
-    /* Compact restore button beside the Clock Name input: appears only
-       while the name differs from the default. */
+    /* Clock Name row: the restore control overlays the input's right
+       edge instead of joining the flex row, so the text field never
+       shifts when it appears/disappears. */
+    .s-name-wrap {
+        position: relative;
+        display: inline-flex;
+    }
     .s-name-restore {
-        flex-shrink: 0;
-        padding: 6px 12px;
-        min-width: 0;
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 5px;
+        color: var(--text-lo);
+        cursor: pointer;
+        -webkit-app-region: no-drag;
+        transition: color 0.15s, background 0.15s;
+    }
+    .s-name-restore:hover {
+        color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.1);
+    }
+    .s-name-restore .cc-ico {
+        width: 13px;
+        height: 13px;
+        filter: none;
+    }
+    /* Breathing room for the overlay icon inside the input */
+    #s-clock-name {
+        padding-right: 30px;
     }
     .s-inp:focus {
         border-color: var(--border-active);
