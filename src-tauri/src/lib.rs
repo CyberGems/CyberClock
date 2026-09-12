@@ -36,7 +36,7 @@ pub struct AlarmState {
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
     // Live relax playback state, reported by the main window so the tray
     // can show what's playing without touching the audio engine itself.
-    pub relax_playing: Mutex<Option<String>>,         // track id, or None
+    pub relax_playing: Mutex<Option<String>>, // track id, or None
 }
 
 /// Lock a mutex without panicking on poison: if another thread
@@ -485,9 +485,9 @@ fn show_about_window(app: &AppHandle) {
         let work = m.work_area();
         let x = work.position.x + (work.size.width as i32 - size.width as i32) / 2;
         let y = work.position.y + (work.size.height as i32 - size.height as i32) / 2;
-        let _ = win.set_position(tauri::Position::Physical(
-            tauri::PhysicalPosition::new(x, y),
-        ));
+        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            x, y,
+        )));
     }
     let _ = win.show();
     let _ = win.set_focus();
@@ -1616,7 +1616,13 @@ fn work_area_containing(anchor_x: i32, anchor_y: i32) -> Option<(i32, i32, i32, 
     };
 
     let monitor = unsafe {
-        MonitorFromPoint(POINT { x: anchor_x, y: anchor_y }, MONITOR_DEFAULTTONEAREST)
+        MonitorFromPoint(
+            POINT {
+                x: anchor_x,
+                y: anchor_y,
+            },
+            MONITOR_DEFAULTTONEAREST,
+        )
     };
     if monitor.is_null() {
         return None;
@@ -1915,10 +1921,9 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                     let (x, y) = {
                         use tauri::{Position, Size};
                         match (rect.position, rect.size) {
-                            (Position::Physical(p), Size::Physical(s)) => (
-                                p.x + (s.width as i32) / 2,
-                                p.y + (s.height as i32) / 2,
-                            ),
+                            (Position::Physical(p), Size::Physical(s)) => {
+                                (p.x + (s.width as i32) / 2, p.y + (s.height as i32) / 2)
+                            }
                             _ => (position.x.round() as i32, position.y.round() as i32),
                         }
                     };
