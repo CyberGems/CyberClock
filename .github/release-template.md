@@ -6,30 +6,21 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 
 ### ✨ Key Features & Highlights
 
-- 🧘 **Relax Module — Sober Redesign**:
-  - The Relax view was rebuilt around calm, flat surfaces: readable typography, 1px borders, no neon glows or decorative wave bars — the module now feels as quiet as its purpose.
-  - **True pause**: pausing freezes the audio, the session timer, the breathing pacer and the tips cycle in place; resuming continues exactly where you left off (Space toggles play/pause too).
-  - **Ambient blending**: Ctrl+Click any track card to layer it over the playing one (Rain + Fireplace, Ocean + Space…) — layers fade in and out independently.
-  - One-click **Shuffle (Zen Flow)** joins the transport as a secondary action, and the auto-stop timer now fades the audio out gently over the final minute.
+- 🪟 **Start with Windows — in the installer**:
+  - The setup wizard now asks whether CyberClock should launch automatically at Windows startup, with the option pre-checked — no need to dig into Settings after installing.
+  - Silent and passive installs register the startup entry automatically (the app default), and the uninstaller always removes it, leaving nothing behind.
 
-- 🧘 **Breathing & Wellness**:
-  - Natural Spanish phrasing for the breathing phases ("Inhala / Mantén / Exhala") and bilingual polish across the whole module.
-  - The mindfulness tip rotation is phase-aware: opening, deepening and closing tips follow your session's arc.
+- ⚙️ **Startup setting that reflects reality**:
+  - The Start-with-Windows toggle in Settings now reconciles with the real registry entry at every boot: if the installer, msconfig or any system tool changed the actual startup state, the toggle updates to match it — what you see is what runs.
+  - Installer and app manage the **same** single HKCU Run entry, so no duplicate startup commands ever pile up.
 
-- 🔕 **Mute Awareness**:
-  - If global audio is muted, the Relax view shows a quiet banner with a one-click **Enable** button — no more silent "why is there no sound?" mysteries.
-  - Resuming playback always restores the configured volume.
+- 📦 **CyberClock.exe**:
+  - The built executable is now named `CyberClock.exe` instead of `app.exe` — process lists, shortcuts and startup entries now read clean and identifiable.
 
-- ⏱️ **Timer & Stopwatch**:
-  - Untouched all-zero digits rest dimmed (no glow) until a time is armed or the count starts — they read as placeholder, not information, and wake up on first use.
-  - The Clock Name field gains an inline **reset icon** that restores the default wordmark without moving the text box.
-
-- 📌 **Tray Menu Placement**:
-  - The tray menu now anchors at the tray icon's center, opens beside the icon on vertical (left-edge) taskbars, and stays fully inside the taskbar-free work area on every screen — flush with the activation point, like native menus.
-
-- 🆘 **Tray Help Menu** (carried from the suite standard):
-  - Expandable Help section: Pin icon to taskbar, FAQ, Changelog, Website, Donate, About and Check for Update.
-  - Master audio mute toggle with live feedback, and suite-standard branding in the header.
+- 🔧 **Suite & Maintenance**:
+  - Release workflow hardened: releases always land as drafts, never auto-published by any action in the chain.
+  - Missing "Status" translation label for the Relax scheduler added in both English and Spanish.
+  - README wording polish.
 
 ---
 
