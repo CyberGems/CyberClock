@@ -44,7 +44,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ## ✨ Key Features
 
 ### 🕐 Clock & Calendar
-- **Analog Clock** — Canvas-rendered with smooth animations and neon accents
+- **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
 - **Digital Display** — Orbitron font with fixed-width digit cells (12H / 24H)
 - **Full Calendar** — Month view with agenda, day notes, and statistics
 - **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
@@ -53,23 +53,30 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ### ⏱️ Timer & Stopwatch
 - **Countdown Timer** — Large digital display with milliseconds, preset buttons, visual progress bar, and warning state
 - **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
+- **Resting Digits** — Untouched all-zero timer/stopwatch digits rest dimmed until a time is armed or the count starts
 
 ### 🧘 Relaxation Module
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
 - **Procedural Audio Synthesis** — Web Audio API generated sounds with real audio file fallback
-- **Equal-Power Crossfade** — Smooth transitions between tracks
+- **True Pause** — Pause freezes the audio, session timer, breathing pacer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
+- **Ambient Blending** — Ctrl+Click any track card to layer it over the playing one (Rain + Fireplace, Ocean + Space…); layers fade in and out independently
+- **Zen Flow Shuffle** — One-click shuffled playback through all tracks
+- **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
 - **Breathing Patterns** — Box breathing (4-4-4-4) and 4-7-8 technique
 - **Session Timer** — With mindfulness tips and auto-stop (15m, 30m, 1h, 2h)
 - **Auto Scheduler** — Schedule automatic playback times
+- **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
 
 ### 📌 Mini Mode
-- **12 Unique Skins** — Distinct designs for the compact clock bar
+- **12 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
 - **Position Lock** — Prevent accidental dragging
 - **Collapse Date** — Show date only on hover
 - **CRT Scanlines** — Retro overlay effect
+- **Click-Through** — Let mouse events pass through the mini clock (toggled from the tray menu or Settings)
+- **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes
 - **Quarter-Hour Chimes** — :00, :15, :30, :45
@@ -81,11 +88,12 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **3 Custom Alarms** — With day-of-week repetition
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu with quick access to all features
+- **System Tray** — Custom HTML popup menu, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu
 - **Multi-Monitor Support** — Choose which display CyberClock appears on
-- **Auto-Start with Windows** — Registry-based startup
+- **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
 - **Auto-Updates** — Built-in Tauri updater with GitHub Releases
 - **Bilingual UI** — Full English and Spanish interface
+- **Accessible About Window** — Suite-standard About with links, donate options and check-for-update
 
 ---
 
@@ -100,38 +108,42 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ```
 CyberClock/
 ├── src/                    Frontend (HTML/CSS/JS)
-│   ├── main/              Main window (clock, calendar, timer, stopwatch)
-│   ├── mini/              Mini mode clock bar
+│   ├── main/              Main window (clock, calendar, timer, stopwatch, relax)
+│   ├── mini/              Mini mode clock bar + its context menu
 │   ├── tray/              System tray menu
-│   ├── relax/             Relaxation module
-│   ├── stopwatch/         Stopwatch
-│   └── shared/
-│       ├── themes.css     Theme system (5 skins)
-│       ├── base.css       Base styles
-│       ├── i18n.js        Internationalization
-│       ├── icons.js       SVG icon system
-│       ├── audio-engine.js Web Audio synthesis
-│       └── tauri-bridge.js Tauri API bridge
-├── src-tauri/             Rust backend
-│   ├── src/
-│   │   ├── main.rs        Entry point
-│   │   ├── lib.rs         Core logic
-│   │   └── updater.rs     Update system
-│   ├── capabilities/      Tauri permissions
-│   └── icons/             App icons
-└── assets/sounds/         Ambient audio files
+│   ├── about/             About window
+│   ├── shared/
+│   │   ├── themes.css     Theme system (5 skins)
+│   │   ├── base.css       Base styles
+│   │   ├── i18n.js        Internationalization
+│   │   ├── icons.js       SVG icon system
+│   │   ├── audio-engine.js Web Audio synthesis, layering & true pause
+│   │   └── tauri-bridge.js Tauri API bridge
+│   └── assets/
+│       ├── images/        Icons & artwork
+│       └── sounds/        Ambient audio files
+└── src-tauri/             Rust backend
+    ├── src/
+    │   ├── main.rs        Entry point
+    │   ├── lib.rs         Core logic (windows, tray, startup, scheduler)
+    │   ├── settings.rs    Atomic settings store
+    │   └── updater.rs     Update system
+    ├── bin/               Bundled helper executables
+    ├── capabilities/      Tauri permissions
+    └── icons/             App icons
 ```
 
 ### Multi-Window Architecture
 
-The app uses **4 independent Tauri windows**:
+The app uses **5 independent Tauri windows**:
 
 | Window | Purpose | Size |
 |---|---|---|
-| `main` | Full application (clock, calendar, timer, stopwatch) | 1024×768 |
-| `mini` | Compact clock bar | 260×48 |
-| `menu` | Context menu for mini mode | 270×500 |
-| `tray_menu` | System tray popup | 290×380 |
+| `main` | Full application (clock, calendar, timer, stopwatch, relax) | 1024×768 |
+| `mini` | Compact clock bar | 260×48 (per skin) |
+| `menu` | Context menu for mini mode | 270×560 |
+| `tray_menu` | System tray popup | 290×510 |
+| `about` | About window | 740×590 |
 
 Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
 
@@ -158,7 +170,7 @@ npm run dev
 npm run build
 ```
 
-The installer will be in `src-tauri/target/release/`.
+The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
 
 ### 🛡️ Windows SmartScreen
 
