@@ -6,21 +6,30 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 
 ### ✨ Key Features & Highlights
 
-- 🔍 **Mini Clock Zoom**:
-  - A discrete zoom control (50 / 100 / 200 / 400%) for the mini clock — in the mini context menu, main settings, and the tray menu.
-  - The window grows around its visual center and stays fully on screen, whatever edge it sits near.
-  - The day-note tooltip stays at native size for readability at every zoom.
+- 🧘 **Relax Module — Sober Redesign**:
+  - The Relax view was rebuilt around calm, flat surfaces: readable typography, 1px borders, no neon glows or decorative wave bars — the module now feels as quiet as its purpose.
+  - **True pause**: pausing freezes the audio, the session timer, the breathing pacer and the tips cycle in place; resuming continues exactly where you left off (Space toggles play/pause too).
+  - **Ambient blending**: Ctrl+Click any track card to layer it over the playing one (Rain + Fireplace, Ocean + Space…) — layers fade in and out independently.
+  - One-click **Shuffle (Zen Flow)** joins the transport as a secondary action, and the auto-stop timer now fades the audio out gently over the final minute.
 
-- 🆘 **Tray Help Menu**:
-  - A new expandable **Help** section in the tray menu: Pin icon to taskbar, FAQ, Changelog, Website, Donate, About and Check for Update.
-  - **Pin icon to taskbar** opens Windows' taskbar settings straight on the tray-icons page (via a bundled UI Automation helper that also navigates to the nested page on Windows 10).
-  - **About modal** right in the tray menu: version, update flow (check / download / install), auto-update toggle, copy diagnostics, and quick links to the website, GitHub, issues, releases and donations.
+- 🧘 **Breathing & Wellness**:
+  - Natural Spanish phrasing for the breathing phases ("Inhala / Mantén / Exhala") and bilingual polish across the whole module.
+  - The mindfulness tip rotation is phase-aware: opening, deepening and closing tips follow your session's arc.
 
-- 🔇 **Master Audio Mute**:
-  - One toggle silences every sound source: alarms, chimes and relax audio — available from the tray menu and main settings, with live icon and status feedback.
-  - Alarms never fire while muted; the ambient audio fades out smoothly and returns to its exact previous volume on unmute.
+- 🔕 **Mute Awareness**:
+  - If global audio is muted, the Relax view shows a quiet banner with a one-click **Enable** button — no more silent "why is there no sound?" mysteries.
+  - Resuming playback always restores the configured volume.
 
-- 🏷 **Suite-standard branding**: the tray header now shows the app icon (colorizing on hover) with the centered name and version — consistent with the rest of the CyberGems suite.
+- ⏱️ **Timer & Stopwatch**:
+  - Untouched all-zero digits rest dimmed (no glow) until a time is armed or the count starts — they read as placeholder, not information, and wake up on first use.
+  - The Clock Name field gains an inline **reset icon** that restores the default wordmark without moving the text box.
+
+- 📌 **Tray Menu Placement**:
+  - The tray menu now anchors at the tray icon's center, opens beside the icon on vertical (left-edge) taskbars, and stays fully inside the taskbar-free work area on every screen — flush with the activation point, like native menus.
+
+- 🆘 **Tray Help Menu** (carried from the suite standard):
+  - Expandable Help section: Pin icon to taskbar, FAQ, Changelog, Website, Donate, About and Check for Update.
+  - Master audio mute toggle with live feedback, and suite-standard branding in the header.
 
 ---
 
