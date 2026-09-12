@@ -1681,35 +1681,38 @@ fn tray_menu_geometry(
     let gap = (4.0 * scale).round() as i32;
     let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
 
-    // Vertical taskbar on the left edge: the icon sits inside the strip
-    // left of the work area, so "open upward centered on the anchor"
-    // places the menu far away. Open to the RIGHT of the icon instead,
-    // vertically centered on it (native tray menus on side taskbars do
-    // the same). Any other edge keeps the classic above/below behavior.
-    let anchor_in_left_strip = min_x - anchor_x > 0 && anchor_x < min_x;
-    let (mut x, mut y);
-    if anchor_in_left_strip {
-        // Card's left edge lands `gap` right of the icon center.
-        x = anchor_x + gap - shadow_pad_px;
-        // Card vertically centered on the icon.
-        y = anchor_y - height_px / 2;
-    } else {
-        // Classic placement: the visible card's bottom sits `gap` above
-        // the anchor (menus open upward); the window's transparent bleed
-        // border is what the +/- shadow_pad below compensates for.
-        x = anchor_x - width_px / 2;
-        y = anchor_y - height_px - gap + shadow_pad_px;
+    // All placement math below works in CARD coordinates (what the user
+    // actually sees); the window differs from the card by the transparent
+    // shadow-bleed border on every side. The bleed may overhang the work
+    // area's edge — only the visible card must stay inside it.
+    let card_w = (width_px - 2 * shadow_pad_px).max(1);
+    let card_h = (height_px - 2 * shadow_pad_px).max(1);
 
-        if y + shadow_pad_px < min_y + 4 {
-            // Not enough room above the icon for the full card — flip the
-            // menu to open below it instead (card top lands `gap` under
-            // the anchor).
-            y = anchor_y + gap - shadow_pad_px;
+    // Vertical taskbar on the left edge: the icon sits inside the strip
+    // left of the work area. Open to the RIGHT of the icon, vertically
+    // centered on it. Any other edge keeps the classic above/below.
+    let anchor_in_left_strip = anchor_x < min_x;
+    let (mut card_x, mut card_y);
+    if anchor_in_left_strip {
+        card_x = anchor_x + gap;
+        card_y = anchor_y - card_h / 2;
+    } else {
+        // Classic placement: card centered on the icon, bottom `gap`
+        // above the anchor; flip below when there is no room above.
+        card_x = anchor_x - card_w / 2;
+        card_y = anchor_y - card_h - gap;
+        if card_y < min_y {
+            card_y = anchor_y + gap;
         }
     }
 
-    x = x.clamp(min_x + 4, (max_x - width_px - 4).max(min_x + 4));
-    y = y.clamp(min_y + 4, (max_y - height_px - 4).max(min_y + 4));
+    // Clamp the CARD inside the work area (bleed overhangs are fine).
+    card_x = card_x.clamp(min_x, (max_x - card_w).max(min_x));
+    card_y = card_y.clamp(min_y, (max_y - card_h).max(min_y));
+
+    // Convert card back to window coordinates: shift by the bleed.
+    let x = card_x - shadow_pad_px;
+    let y = card_y - shadow_pad_px;
 
     (x, y, width_px.max(1) as u32, height_px.max(1) as u32)
 }
@@ -1744,8 +1747,6 @@ fn get_tray_menu_state(app: AppHandle) -> TrayMenuState {
     collect_tray_menu_state(&app)
 }
 
-// Main window reports its live relax playback state (track id or None)
-// so the tray menu can show/toggle it without owning an audio engine.
 #[tauri::command]
 fn report_relax_playing(app: AppHandle, track: Option<String>) {
     let state = app.state::<AlarmState>();
