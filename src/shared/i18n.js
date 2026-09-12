@@ -419,7 +419,7 @@
             "relax.box": "Caja 4-4-4-4",
             "relax.relax478": "4-7-8",
             "relax.breathe.inhale": "Inhala",
-            "relax.breathe.hold": "Sostén",
+            "relax.breathe.hold": "Mantén",
             "relax.breathe.exhale": "Exhala",
             "relax.breathe.start": "Listo",
             "relax.play": "Reproducir",
