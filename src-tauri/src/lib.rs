@@ -171,6 +171,9 @@ fn show_clock_window(app: &AppHandle) {
     if let Some(win) = app.get_webview_window(target_win) {
         let _ = win.unminimize();
         let _ = win.show();
+        // The taskbar may have never registered our DeleteTab (boot
+        // race) or may have restarted and dropped it — re-assert.
+        refresh_taskbar_tab(&win);
         let _ = win.set_focus();
         if target_win == "mini" {
             // Re-apply click-through: hide/show cycles can drop the flag.
@@ -471,6 +474,7 @@ fn open_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.show();
         let _ = window.set_focus();
+        refresh_taskbar_tab(&window);
         return true;
     }
     false
@@ -509,6 +513,7 @@ fn show_about_window(app: &AppHandle) {
     }
     let _ = win.show();
     let _ = win.set_focus();
+    refresh_taskbar_tab(&win);
 }
 
 #[tauri::command]
@@ -521,6 +526,51 @@ fn hide_window(app: AppHandle, name: String) -> bool {
         return true;
     }
     false
+}
+
+// ─────────────────────────────────────────────────────────────
+// Taskbar tab registration (Windows)
+// ─────────────────────────────────────────────────────────────
+// On Windows, tao stamps every top-level window with WS_EX_APPWINDOW
+// and implements skipTaskbar as a single ITaskbarList::DeleteTab call
+// at window creation, discarding the result. That one-shot message
+// cannot land when the taskbar does not exist yet: with Start with
+// Windows, CyberClock frequently comes up before Explorer finishes
+// creating the taskbar, so the registration is lost and the visible
+// mini clock keeps a regular taskbar button forever (Explorer also
+// drops all registrations when it restarts).
+//
+// Re-assert the registration after every show of these windows, and
+// poll briefly on other platforms no-ops.
+
+/// Re-assert the taskbar tab state of a window: skip-taskbar labels
+/// get DeleteTab again, the main window gets its tab back (AddTab).
+fn refresh_taskbar_tab(win: &WebviewWindow) {
+    #[cfg(target_os = "windows")]
+    {
+        let _ = win.set_skip_taskbar(win.label() != "main");
+    }
+    #[cfg(not(target_os = "windows"))]
+    let _ = win;
+}
+
+/// Self-healing poll: re-assert the tab state of every VISIBLE window
+/// a few times a minute. Covers the boot race (taskbar created after
+/// us) and Explorer restarts, where all DeleteTab/AddTab registrations
+/// are lost. Hidden windows have no tab to fix; their next show()
+/// re-asserts through `refresh_taskbar_tab`.
+#[cfg(target_os = "windows")]
+fn spawn_taskbar_tab_poll(app: AppHandle) {
+    std::thread::spawn(move || loop {
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        for label in ["main", "mini", "menu", "tray_menu", "about"] {
+            if let Some(win) = app.get_webview_window(label) {
+                if win.is_visible().unwrap_or(false) {
+                    refresh_taskbar_tab(&win);
+                }
+            }
+        }
+    });
 }
 
 fn is_position_in_monitor(x: i32, y: i32, monitor: &tauri::Monitor) -> bool {
@@ -830,6 +880,7 @@ fn switch_to_full_mode(app: AppHandle) {
         }
         let _ = main.show();
         let _ = main.set_focus();
+        refresh_taskbar_tab(&main);
     }
 
     let _ = persist(&app, &settings);
@@ -890,6 +941,7 @@ fn switch_to_mini_mode(app: AppHandle) {
         // Hide/show can drop the ignore-cursor flag on Windows — re-apply
         // the persisted click-through preference every time mini is shown.
         let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
+        refresh_taskbar_tab(&mini);
     }
 
     let _ = persist(&app, &settings);
@@ -961,6 +1013,7 @@ fn set_mini_preview(app: AppHandle, on: bool) {
         }
         *MINI_PREVIEW.lock().unwrap() = Some(MiniPreviewState { moved, orig_pos });
         let _ = mini.show();
+        refresh_taskbar_tab(&mini);
         // The preview must never intercept the user's clicks or drags.
         // Windows can drop the flag on show — set it after, not before.
         let _ = mini.set_ignore_cursor_events(true);
@@ -1094,6 +1147,7 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
 
         let _ = menu.show();
         let _ = menu.set_focus();
+        refresh_taskbar_tab(&menu);
     }
 }
 
@@ -1905,6 +1959,7 @@ fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
     if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
         let _ = win.show();
         let _ = win.set_focus();
+        refresh_taskbar_tab(&win);
     }
 }
 
@@ -1985,6 +2040,7 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
     TRAY_MENU_PENDING_SHOW.store(true, std::sync::atomic::Ordering::SeqCst);
     let _ = win.show();
     let _ = win.set_focus();
+    refresh_taskbar_tab(&win);
 }
 
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
@@ -2120,6 +2176,9 @@ fn show_initial_window(app: &AppHandle) {
                 }
             }
             let _ = main.show();
+            // Re-assert the taskbar tab: a boot-time start can beat the
+            // taskbar creation, losing the AddTab registration.
+            refresh_taskbar_tab(&main);
         }
     } else if let Some(mini) = app.get_webview_window("mini") {
         // Set position if saved and valid
@@ -2151,6 +2210,11 @@ fn show_initial_window(app: &AppHandle) {
             }
         }
         let _ = mini.show();
+        // Re-assert the taskbar DeleteTab: at a Run-key boot start the
+        // taskbar may not exist yet, and the one-shot registration tao
+        // performs at creation is silently lost (the mini then keeps a
+        // permanent taskbar button).
+        refresh_taskbar_tab(&mini);
         // Re-apply click-through on startup (hide/show can drop the flag).
         let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
     }
@@ -2172,11 +2236,13 @@ pub fn run() {
                 if let Some(main) = app.get_webview_window("main") {
                     let _ = main.unminimize();
                     let _ = main.show();
+                    refresh_taskbar_tab(&main);
                     let _ = main.set_focus();
                 }
             } else if let Some(mini) = app.get_webview_window("mini") {
                 let _ = mini.unminimize();
                 let _ = mini.show();
+                refresh_taskbar_tab(&mini);
                 let _ = mini.set_focus();
             }
             broadcast_active_window(
@@ -2265,6 +2331,13 @@ pub fn run() {
             let settings = load_settings(app.handle());
             init_updater(app.handle(), settings.auto_update);
             show_initial_window(app.handle());
+
+            // Keep taskbar tabs honest: re-assert DeleteTab/AddTab on the
+            // visible windows so a boot start that beat the taskbar (or an
+            // Explorer restart, which drops every registration) cannot
+            // leave a phantom taskbar button on the mini clock.
+            #[cfg(target_os = "windows")]
+            spawn_taskbar_tab_poll(app.handle().clone());
 
             // Fixed-interval chime checker (:00 / :15 / :30 / :45).
             // 15s cadence so a chime never fires more than 15s late.
