@@ -2975,6 +2975,21 @@
         opacity: 0.4;
         pointer-events: none;
     }
+    .s-hotkey-input {
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 12.5px;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+    }
+    .s-hotkey-input.is-empty {
+        color: var(--text-lo);
+        border-style: dashed;
+    }
+    .s-hotkey-input.is-recording {
+        color: var(--accent-a);
+        border-color: var(--accent-a);
+        box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.35);
+    }
     .s-lbl {
         font-family: "Inter", system-ui, sans-serif;
         font-size: 13px;

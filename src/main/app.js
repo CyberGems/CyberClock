@@ -312,8 +312,7 @@
         const displayAutoEl = document.getElementById("s-display-auto");
         if (displayAutoEl) displayAutoEl.checked = s.displayAuto !== false;
         if (typeof syncDisplayAutoUI === "function") syncDisplayAutoUI(s.displayAuto !== false);
-        const hotkeyEl = document.getElementById("s-hotkey");
-        if (hotkeyEl) hotkeyEl.value = s.hotkeyToggle || "";
+        if (typeof renderHotkey === "function") renderHotkey();
         if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
 
         const langEl = document.getElementById("s-lang");
@@ -2800,10 +2799,10 @@
                 card.style.cssText = `
                   display:flex;align-items:center;gap:12px;
                   padding:12px 14px;
-                  background:${s.current ? "var(--accent-dim)" : "var(--bg-01)"};
-                  border:1px solid ${s.current ? "var(--border-active)" : "var(--border)"};
+                  background:${s.current ? "var(--accent-dim)" : "transparent"};
+                  border:1px solid ${s.current ? "var(--border-bright)" : "rgba(255,255,255,0.07)"};
                   border-radius:6px;margin-bottom:8px;
-                  box-shadow:${s.current ? "var(--glow-xs)" : "none"};
+                  box-shadow:${s.current ? "var(--glow-sm)" : "none"};
                   transition:all .2s;
                 `;
                 const primaryText = window.ccI18n.t('settings.display.primary');
@@ -3197,47 +3196,93 @@
         });
     }
 
-    // Global hotkey: editable field, empty disables it. The backend
-    // validates and registers; when the combination is rejected (bad
-    // format or taken by another app) the stored value is restored.
+    // Global hotkey recorder: click the field, press the combination.
+    // Backspace/Delete or the X button clear it (disabled); Escape
+    // cancels. Bare keys are ignored so typing is never hijacked.
     const sHotkey = document.getElementById("s-hotkey");
     const sHotkeyDesc = document.getElementById("s-hotkey-desc");
     const DEFAULT_HOTKEY = "Alt+Shift+C";
-    function revertHotkeyInput() {
-        if (sHotkey) sHotkey.value = cfg.hotkeyToggle || "";
+    const HOTKEY_MODIFIER_KEYS = ["Control", "Shift", "Alt", "Meta"];
+
+    function friendlyHotkey(canonical) {
+        if (!canonical) return "";
+        return canonical
+            .split("+")
+            .map((part) => part.replace(/^Key/, "").replace(/^Digit/, ""))
+            .join("+");
+    }
+    function renderHotkey() {
+        if (!sHotkey) return;
+        const val = cfg.hotkeyToggle || "";
+        sHotkey.value = friendlyHotkey(val);
+        sHotkey.classList.toggle("is-empty", !val);
+        sHotkey.classList.remove("is-recording");
         if (sHotkeyDesc) {
-            sHotkeyDesc.textContent = window.ccI18n.t("settings.general.hotkeyDesc");
+            sHotkeyDesc.textContent = window.ccI18n.t(
+                val ? "settings.general.hotkeyDesc" : "settings.general.hotkeyOff",
+            );
         }
     }
-    async function commitHotkey(value) {
-        if (!sHotkey) return;
+    async function commitHotkey(raw) {
         try {
-            const normalized = await window.cc.setHotkey(value);
+            const normalized = await window.cc.setHotkey(raw);
             cfg.hotkeyToggle = normalized || "";
-            sHotkey.value = cfg.hotkeyToggle;
-            if (sHotkeyDesc) {
-                sHotkeyDesc.textContent = window.ccI18n.t("settings.general.hotkeyDesc");
-            }
         } catch (err) {
             console.warn("setHotkey rejected:", err);
-            revertHotkeyInput();
+            if (sHotkeyDesc) {
+                sHotkeyDesc.textContent = window.ccI18n.t("settings.general.hotkeyInvalid");
+            }
         }
+        renderHotkey();
     }
     if (sHotkey) {
         sHotkey.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.key === "Escape") {
+                renderHotkey();
                 sHotkey.blur();
+                return;
             }
+            if (e.key === "Backspace" || e.key === "Delete") {
+                commitHotkey("");
+                return;
+            }
+            if (HOTKEY_MODIFIER_KEYS.includes(e.key)) {
+                // Modifiers alone: show the partial combo and wait for
+                // the final key.
+                const mods = [];
+                if (e.ctrlKey) mods.push("Ctrl");
+                if (e.altKey) mods.push("Alt");
+                if (e.shiftKey) mods.push("Shift");
+                if (e.metaKey) mods.push("Win");
+                sHotkey.value = mods.join("+") + "+…";
+                sHotkey.classList.add("is-recording");
+                return;
+            }
+            if (!(e.ctrlKey || e.altKey || e.metaKey)) {
+                // Bare keys would hijack normal typing: ignore.
+                renderHotkey();
+                return;
+            }
+            const parts = [];
+            if (e.ctrlKey) parts.push("Ctrl");
+            if (e.altKey) parts.push("Alt");
+            if (e.shiftKey) parts.push("Shift");
+            if (e.metaKey) parts.push("Win");
+            let keyLabel = e.key === " " ? "Space" : e.key;
+            parts.push(keyLabel.length === 1 ? keyLabel.toUpperCase() : keyLabel);
+            commitHotkey(parts.join("+"));
         });
-        sHotkey.addEventListener("change", () => commitHotkey(sHotkey.value));
+        sHotkey.addEventListener("blur", renderHotkey);
+    }
+    const sHotkeyClear = document.getElementById("s-hotkey-clear");
+    if (sHotkeyClear) {
+        sHotkeyClear.addEventListener("click", () => commitHotkey(""));
     }
     const sHotkeyRestore = document.getElementById("s-hotkey-restore");
     if (sHotkeyRestore) {
-        sHotkeyRestore.addEventListener("click", () => {
-            if (sHotkey) sHotkey.value = DEFAULT_HOTKEY;
-            commitHotkey(DEFAULT_HOTKEY);
-        });
+        sHotkeyRestore.addEventListener("click", () => commitHotkey(DEFAULT_HOTKEY));
     }
 
     const sBtnClockCheck = document.getElementById("s-btn-clock-check");

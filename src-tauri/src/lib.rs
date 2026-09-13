@@ -170,6 +170,11 @@ fn show_clock_window(app: &AppHandle) {
         "mini"
     };
     if let Some(win) = app.get_webview_window(target_win) {
+        // Automatic display: showing the full clock from the tray or
+        // the hotkey also picks the monitor where the mouse is.
+        if target_win == "main" {
+            place_full_clock(&win, &settings);
+        }
         let _ = win.unminimize();
         let _ = win.show();
         // The taskbar may have never registered our DeleteTab (boot
@@ -628,6 +633,42 @@ fn monitor_under_cursor(window: &WebviewWindow) -> Option<tauri::Monitor> {
                 && py >= mp.y
                 && py < mp.y + ms.height as i32
         })
+}
+
+/// Size and position the full clock on its monitor. Automatic mode
+/// (CyberLauncher style) picks the monitor that holds the mouse
+/// pointer; otherwise the preferred display from the Display tab is
+/// used. Full mode fills the monitor's WORK AREA, so taskbars docked
+/// on any edge are respected.
+fn place_full_clock(main: &WebviewWindow, settings: &AppSettings) {
+    let mut monitor = if settings.display_auto {
+        monitor_under_cursor(main)
+    } else {
+        None
+    };
+    if monitor.is_none() {
+        let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
+        monitor = main.available_monitors().ok().and_then(|monitors| {
+            monitors
+                .get(display_id)
+                .or_else(|| monitors.first())
+                .cloned()
+        });
+    }
+    if let Some(m) = monitor {
+        let work_area = m.work_area();
+        info!(
+            "place_full_clock: monitor {:?} work area {:?}",
+            m.name(),
+            (work_area.position, work_area.size)
+        );
+        let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            work_area.position.x, work_area.position.y,
+        )));
+        let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+            work_area.size.width, work_area.size.height,
+        )));
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1124,6 +1165,7 @@ fn toggle_clock_visibility(app: &AppHandle) {
 fn register_app_hotkey(app: &AppHandle) {
     use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
     let settings = load_settings(app);
+    info!("hotkey: setup value {:?}", settings.hotkey_toggle);
     let Some(shortcut) = normalize_hotkey(&settings.hotkey_toggle) else {
         warn!("hotkey: unparseable value {:?}", settings.hotkey_toggle);
         return;
@@ -1202,12 +1244,11 @@ fn switch_to_full_mode(app: AppHandle) {
     let mut settings = load_settings(&app);
     settings.window_mode = "full".to_string();
 
-    let mut detected_monitor = None;
+    // Keep the preferred display in sync with where the mini was, so
+    // the manual selection in the Display tab follows the user.
     if let Some(mini) = app.get_webview_window("mini") {
-        // Detect monitor of mini
-        if let Some((idx, monitor)) = find_monitor_for_window(&mini) {
+        if let Some((idx, _monitor)) = find_monitor_for_window(&mini) {
             settings.preferred_display_id = Some(idx as u32);
-            detected_monitor = Some(monitor);
         }
 
         // Also save its current position
@@ -1219,40 +1260,7 @@ fn switch_to_full_mode(app: AppHandle) {
     }
 
     if let Some(main) = app.get_webview_window("main") {
-        // Automatic selection: open on the monitor that holds the mouse
-        // pointer. Otherwise fall back to the mini's monitor, then to
-        // the preferred display.
-        let mut monitor = if settings.display_auto {
-            monitor_under_cursor(&main)
-        } else {
-            None
-        };
-        if monitor.is_none() {
-            monitor = detected_monitor.or_else(|| {
-                let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-                main.available_monitors().ok().and_then(|monitors| {
-                    monitors
-                        .get(display_id)
-                        .or_else(|| monitors.first())
-                        .cloned()
-                })
-            });
-        }
-
-        if let Some(m) = monitor {
-            // Full mode fills the monitor's WORK AREA: taskbars are
-            // respected on every edge (left, right, top or bottom).
-            let work_area = m.work_area();
-            let position = work_area.position;
-            let size = work_area.size;
-            let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                position.x, position.y,
-            )));
-            let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
-                size.width,
-                size.height,
-            )));
-        }
+        place_full_clock(&main, &settings);
         let _ = main.show();
         let _ = main.set_focus();
         refresh_taskbar_tab(&main);
@@ -2533,35 +2541,9 @@ fn show_initial_window(app: &AppHandle) {
     if !is_mini {
         if let Some(main) = app.get_webview_window("main") {
             // Automatic selection: the monitor that holds the mouse
-            // pointer, else the preferred display (or the first one).
-            let mut monitor = if settings.display_auto {
-                monitor_under_cursor(&main)
-            } else {
-                None
-            };
-            if monitor.is_none() {
-                let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-                if let Ok(monitors) = main.available_monitors() {
-                    monitor = monitors
-                        .get(display_id)
-                        .or_else(|| monitors.first())
-                        .cloned();
-                }
-            }
-            if let Some(m) = monitor {
-                // Full mode fills the monitor's WORK AREA: taskbars are
-                // respected on every edge.
-                let work_area = m.work_area();
-                let position = work_area.position;
-                let size = work_area.size;
-                let _ = main.set_position(tauri::Position::Physical(
-                    tauri::PhysicalPosition::new(position.x, position.y),
-                ));
-                let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
-                    size.width,
-                    size.height,
-                )));
-            }
+            // pointer, else the preferred display. Full mode fills the
+            // monitor's work area (taskbars respected on every edge).
+            place_full_clock(&main, &settings);
             let _ = main.show();
             // Re-assert the taskbar tab: a boot-time start can beat the
             // taskbar creation, losing the AddTab registration.
@@ -2621,6 +2603,7 @@ pub fn run() {
             let settings = load_settings(app);
             if settings.window_mode == "full" {
                 if let Some(main) = app.get_webview_window("main") {
+                    place_full_clock(&main, &settings);
                     let _ = main.unminimize();
                     let _ = main.show();
                     refresh_taskbar_tab(&main);
