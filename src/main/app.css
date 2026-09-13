@@ -2971,6 +2971,10 @@
     .s-vol-row .s-row-ico {
         margin-right: 4px;
     }
+    #s-screens.is-disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
     .s-lbl {
         font-family: "Inter", system-ui, sans-serif;
         font-size: 13px;
@@ -3183,7 +3187,9 @@
     }
     .s-tog input:checked ~ .s-tog-tr .s-tog-th {
         transform: translateX(20px);
-        background: #ffffff;
+        /* Dark knob on the accent track: pale tints (ice) with a white
+           knob read as "off/illuminated" and hid the checked state. */
+        background: #0b121c;
     }
 
     .s-alarm-blk {

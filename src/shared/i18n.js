@@ -326,6 +326,10 @@
             "settings.general.datetime": "Date and Time",
             "settings.general.datetimeDesc": "Opens the Windows date and time properties dialog",
             "settings.general.datetimeBtn": "Open...",
+            "settings.general.hotkey": "Show / Hide Clock",
+            "settings.general.hotkeyDesc": "Global shortcut to toggle the clock (empty = off)",
+            "settings.general.hotkeyRestore": "Restore default shortcut",
+            "settings.general.hotkeyInvalid": "Invalid or already-taken shortcut",
             "settings.general.clockAccuracy": "Clock accuracy",
             "settings.general.clockAccuracyDesc": "Checks the system clock against a time server and warns when it is off by more than a minute",
             "settings.general.clockCheck": "Check now",
@@ -366,7 +370,7 @@
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Multi-Monitor Support",
-            "settings.display.desc1": "Full mode covers the selected display completely, edge to edge.",
+            "settings.display.desc1": "Full mode fills the selected display's work area, respecting the taskbar on any edge.",
             "settings.display.desc2": "In Mini Mode, drag the clock to any monitor: the position is remembered.",
             "settings.display.desc3": "Display changes are detected automatically and the window repositions itself.",
             "settings.display.auto": "Automatic monitor",
@@ -749,6 +753,10 @@
             "settings.general.datetime": "Fecha y hora",
             "settings.general.datetimeDesc": "Abre el diálogo de propiedades de fecha y hora de Windows",
             "settings.general.datetimeBtn": "Abrir...",
+            "settings.general.hotkey": "Mostrar u ocultar el reloj",
+            "settings.general.hotkeyDesc": "Atajo global para alternar el reloj (vacío = desactivado)",
+            "settings.general.hotkeyRestore": "Restaurar el atajo predeterminado",
+            "settings.general.hotkeyInvalid": "Atajo no válido u ocupado",
             "settings.general.clockAccuracy": "Precisión del reloj",
             "settings.general.clockAccuracyDesc": "Compara la hora del sistema con un servidor de tiempo y avisa si se desvía más de un minuto",
             "settings.general.clockCheck": "Comprobar ahora",
@@ -789,7 +797,7 @@
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Soporte Multi-Monitor",
-            "settings.display.desc1": "El modo completo cubre por completo la pantalla seleccionada, de borde a borde.",
+            "settings.display.desc1": "El modo completo llena el área de trabajo de la pantalla seleccionada, respetando la barra de tareas en cualquier posición.",
             "settings.display.desc2": "En Modo Mini, arrastra el reloj a cualquier pantalla: se recuerda la posición.",
             "settings.display.desc3": "Los cambios de pantalla se detectan automáticamente y la ventana se reposiciona sola.",
             "settings.display.auto": "Monitor automático",

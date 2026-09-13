@@ -159,6 +159,12 @@
             // when no server was reachable.
             return await invokeOrFallback("check_clock_accuracy", undefined, null);
         },
+        setHotkey: async (hotkey) => {
+            // Registers the global show/hide shortcut. Empty string
+            // disables it. Rejects with an error when the combination
+            // is invalid or taken by another app.
+            return await invoke("set_hotkey", { hotkey });
+        },
         onClockAccuracy: (cb) => {
             // Pushed after every automatic or manual check.
             return subscribe("clock:accuracy", cb);

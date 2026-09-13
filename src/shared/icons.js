@@ -73,6 +73,11 @@
     <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
       d="M9.5 20.5h5M12 16.5v4"/>
   </symbol>
+  <symbol id="cc-i-keyboard" viewBox="0 0 24 24">
+    <rect x="2.75" y="6" width="18.5" height="12" rx="1.75" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      d="M6 9.5h.01M9.5 9.5h.01M13 9.5h.01M16.5 9.5h.01M6 12.75h.01M9.5 12.75h.01M13 12.75h.01M16.5 12.75h.01M8 15.75h8"/>
+  </symbol>
   <symbol id="cc-i-timer" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M9 2h6"/>

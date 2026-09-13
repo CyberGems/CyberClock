@@ -994,12 +994,9 @@ fn handle_display_change(app: AppHandle) {
             if main.is_visible().unwrap_or(false) {
                 let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
                 if let Some(monitor) = monitors.get(display_id).or_else(|| monitors.first()) {
-                    let position = monitor.position();
-                    let size = monitor.size();
-                    let was_fullscreen = main.is_fullscreen().unwrap_or(false);
-                    if was_fullscreen {
-                        let _ = main.set_fullscreen(false);
-                    }
+                    let work_area = monitor.work_area();
+                    let size = work_area.size;
+                    let position = work_area.position;
                     let _ = main.set_position(tauri::Position::Physical(
                         tauri::PhysicalPosition::new(position.x, position.y),
                     ));
@@ -1007,9 +1004,6 @@ fn handle_display_change(app: AppHandle) {
                         size.width,
                         size.height,
                     )));
-                    if was_fullscreen {
-                        let _ = main.set_fullscreen(true);
-                    }
                 }
             }
         }
@@ -1044,6 +1038,159 @@ fn handle_display_change(app: AppHandle) {
 
     // Broadcast the update so frontends refresh their screen lists
     let _ = app.emit("settings:updated", &settings);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Global hotkey (show / hide the clock)
+// ─────────────────────────────────────────────────────────────
+// Optional system-wide shortcut (default Alt+Shift+C) that toggles the
+// visibility of the clock in its current mode. An empty setting means
+// no hotkey is registered.
+
+/// Normalize casual user input ("alt+shift+c") into the plugin's
+/// canonical form ("Alt+Shift+KeyC"). Empty input is valid: the user
+/// disabled the hotkey. Returns None for unparseable combinations.
+fn normalize_hotkey(input: &str) -> Option<String> {
+    let input = input.trim();
+    if input.is_empty() {
+        return Some(String::new());
+    }
+
+    let (mut ctrl, mut alt, mut shift, mut win) = (false, false, false, false);
+    let mut key: Option<String> = None;
+    for part in input.split('+').map(str::trim).filter(|p| !p.is_empty()) {
+        match part.to_ascii_lowercase().as_str() {
+            "ctrl" | "control" => ctrl = true,
+            "alt" => alt = true,
+            "shift" => shift = true,
+            "super" | "win" | "windows" | "meta" | "cmd" => win = true,
+            _ => {
+                if key.is_some() {
+                    return None; // more than one non-modifier key
+                }
+                let lower = part.to_ascii_lowercase();
+                let token = if lower.len() == 1 {
+                    let c = lower.chars().next()?;
+                    if c.is_ascii_digit() {
+                        format!("Digit{}", c.to_ascii_uppercase())
+                    } else if c.is_ascii_alphabetic() {
+                        format!("Key{}", c.to_ascii_uppercase())
+                    } else {
+                        return None;
+                    }
+                } else {
+                    // Named keys pass through uppercased: F1..F24,
+                    // Space, Up, Down, Home, Media*, etc.
+                    part.to_ascii_uppercase()
+                };
+                key = Some(token);
+            }
+        }
+    }
+
+    // A bare Shift (or no modifier at all) would hijack normal typing.
+    if key.is_none() || !(ctrl || alt || win) {
+        return None;
+    }
+
+    let mut out = String::new();
+    if ctrl {
+        out.push_str("Control+");
+    }
+    if alt {
+        out.push_str("Alt+");
+    }
+    if shift {
+        out.push_str("Shift+");
+    }
+    if win {
+        out.push_str("Super+");
+    }
+    out.push_str(&key?);
+    Some(out)
+}
+
+/// Tray-left-click behavior: hide the clock if it is on screen,
+/// otherwise bring it back in its current mode.
+fn toggle_clock_visibility(app: &AppHandle) {
+    if is_any_clock_window_visible(app) {
+        hide_all_clock_windows(app);
+        broadcast_active_window(app, "none");
+    } else {
+        show_clock_window(app);
+    }
+}
+
+fn register_app_hotkey(app: &AppHandle) {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+    let settings = load_settings(app);
+    let Some(shortcut) = normalize_hotkey(&settings.hotkey_toggle) else {
+        warn!("hotkey: unparseable value {:?}", settings.hotkey_toggle);
+        return;
+    };
+    if shortcut.is_empty() {
+        info!("hotkey: disabled");
+        return;
+    }
+    let result = app.global_shortcut().on_shortcut(shortcut.as_str(), |app, _shortcut, event| {
+        if event.state == ShortcutState::Pressed {
+            toggle_clock_visibility(app);
+        }
+    });
+    if let Err(e) = result {
+        warn!("hotkey: could not register {:?}: {}", shortcut, e);
+    } else {
+        info!("hotkey: registered {}", shortcut);
+    }
+}
+
+/// Replace the global hotkey. Empty input unregisters it. On failure
+/// (invalid combination or taken by another app) the previous hotkey
+/// stays registered and an error is returned.
+#[tauri::command]
+fn set_hotkey(app: AppHandle, hotkey: String) -> Result<String, String> {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+    let Some(normalized) = normalize_hotkey(&hotkey) else {
+        return Err("invalid-hotkey".to_string());
+    };
+
+    let old = load_settings(&app).hotkey_toggle;
+    if let Some(old_sc) = normalize_hotkey(&old) {
+        if !old_sc.is_empty() {
+            let _ = app.global_shortcut().unregister(old_sc.as_str());
+        }
+    }
+
+    if !normalized.is_empty() {
+        let result = app.global_shortcut().on_shortcut(normalized.as_str(), |app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                toggle_clock_visibility(app);
+            }
+        });
+        if let Err(e) = result {
+            // Keep behavior consistent with the persisted settings:
+            // bring the old hotkey back before reporting the failure.
+            if let Some(old_sc) = normalize_hotkey(&old) {
+                if !old_sc.is_empty() {
+                    let _ = app.global_shortcut().on_shortcut(old_sc.as_str(), |app, _shortcut, event| {
+                        if event.state == ShortcutState::Pressed {
+                            toggle_clock_visibility(app);
+                        }
+                    });
+                }
+            }
+            warn!("hotkey: could not register {:?}: {}", normalized, e);
+            return Err("register-failed".to_string());
+        }
+    }
+
+    let _ = update_settings(&app, |s| {
+        s.hotkey_toggle = normalized.clone();
+        Ok(())
+    });
+    let _ = app.emit("settings:updated", &load_settings(&app));
+    info!("hotkey: set to {:?}", normalized);
+    Ok(normalized)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1093,10 +1240,11 @@ fn switch_to_full_mode(app: AppHandle) {
         }
 
         if let Some(m) = monitor {
-            // Edge-to-edge: the full clock covers the WHOLE monitor,
-            // taskbar included, and goes borderless fullscreen.
-            let position = m.position();
-            let size = m.size();
+            // Full mode fills the monitor's WORK AREA: taskbars are
+            // respected on every edge (left, right, top or bottom).
+            let work_area = m.work_area();
+            let position = work_area.position;
+            let size = work_area.size;
             let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
                 position.x, position.y,
             )));
@@ -1107,7 +1255,6 @@ fn switch_to_full_mode(app: AppHandle) {
         }
         let _ = main.show();
         let _ = main.set_focus();
-        let _ = main.set_fullscreen(true);
         refresh_taskbar_tab(&main);
     }
 
@@ -1521,14 +1668,11 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
     if let Some(main) = app.get_webview_window("main") {
         if let Ok(monitors) = window.available_monitors() {
             if let Some(monitor) = monitors.get(id as usize) {
-                // Edge-to-edge: the whole monitor bounds, then restore
-                // borderless fullscreen so the system refits it there.
-                let position = monitor.position();
-                let size = monitor.size();
-                let was_fullscreen = main.is_fullscreen().unwrap_or(false);
-                if was_fullscreen {
-                    let _ = main.set_fullscreen(false);
-                }
+                // Full mode fills the WORK AREA of the chosen display:
+                // taskbars are respected on every edge.
+                let work_area = monitor.work_area();
+                let size = work_area.size;
+                let position = work_area.position;
                 let _ = main.set_position(tauri::Position::Physical(
                     tauri::PhysicalPosition::new(position.x, position.y),
                 ));
@@ -1536,9 +1680,6 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
                     size.width,
                     size.height,
                 )));
-                if was_fullscreen {
-                    let _ = main.set_fullscreen(true);
-                }
             }
         }
     }
@@ -2408,10 +2549,11 @@ fn show_initial_window(app: &AppHandle) {
                 }
             }
             if let Some(m) = monitor {
-                // Edge-to-edge full mode: the whole monitor, taskbar
-                // included, in borderless fullscreen.
-                let position = m.position();
-                let size = m.size();
+                // Full mode fills the monitor's WORK AREA: taskbars are
+                // respected on every edge.
+                let work_area = m.work_area();
+                let position = work_area.position;
+                let size = work_area.size;
                 let _ = main.set_position(tauri::Position::Physical(
                     tauri::PhysicalPosition::new(position.x, position.y),
                 ));
@@ -2421,7 +2563,6 @@ fn show_initial_window(app: &AppHandle) {
                 )));
             }
             let _ = main.show();
-            let _ = main.set_fullscreen(true);
             // Re-assert the taskbar tab: a boot-time start can beat the
             // taskbar creation, losing the AddTab registration.
             refresh_taskbar_tab(&main);
@@ -2513,6 +2654,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .manage(AlarmState::default())
@@ -2536,14 +2678,10 @@ pub fn run() {
                         if main_for_resize.is_minimized().unwrap_or(true) {
                             return;
                         }
-                        // Borderless fullscreen is sized by the system to
-                        // the exact monitor bounds; do not fight it.
-                        if main_for_resize.is_fullscreen().unwrap_or(false) {
-                            return;
-                        }
                         if let Ok(Some(monitor)) = main_for_resize.current_monitor() {
-                            let pos = monitor.position();
-                            let size = monitor.size();
+                            let work_area = monitor.work_area();
+                            let pos = work_area.position;
+                            let size = work_area.size;
                             let in_place = main_for_resize
                                 .outer_position()
                                 .map(|p| p.x == pos.x && p.y == pos.y)
@@ -2664,6 +2802,9 @@ pub fn run() {
                 clock_accuracy_loop(app_for_clock);
             });
 
+            // Global hotkey (show/hide the clock)
+            register_app_hotkey(app.handle());
+
             info!(
                 "CyberClock v{} started (mode: {})",
                 app.package_info().version,
@@ -2709,6 +2850,7 @@ pub fn run() {
             open_taskbar_settings,
             open_datetime_properties,
             check_clock_accuracy,
+            set_hotkey,
             open_external_url
         ]);
 

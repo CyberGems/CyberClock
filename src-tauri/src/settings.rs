@@ -98,6 +98,10 @@ pub struct AppSettings {
     // the mouse pointer (the "active" monitor) instead of the
     // preferred display picked in the Display tab.
     pub display_auto: bool,
+
+    // Global shortcut that toggles clock visibility, e.g. "Alt+Shift+C".
+    // Empty string = no hotkey registered.
+    pub hotkey_toggle: String,
     pub alarm_half_hour: AlarmSettings,
     pub alarm_full_hour: AlarmSettings,
     pub alarm_quarter_hour: AlarmSettings,
@@ -164,6 +168,7 @@ impl Default for AppSettings {
             mini_position_locked: false,
             preferred_display_id: None,
             display_auto: true,
+            hotkey_toggle: "Alt+Shift+C".to_string(),
             alarm_half_hour: AlarmSettings::default(),
             alarm_full_hour: AlarmSettings {
                 enabled: true,

@@ -311,6 +311,9 @@
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
         const displayAutoEl = document.getElementById("s-display-auto");
         if (displayAutoEl) displayAutoEl.checked = s.displayAuto !== false;
+        if (typeof syncDisplayAutoUI === "function") syncDisplayAutoUI(s.displayAuto !== false);
+        const hotkeyEl = document.getElementById("s-hotkey");
+        if (hotkeyEl) hotkeyEl.value = s.hotkeyToggle || "";
         if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
 
         const langEl = document.getElementById("s-lang");
@@ -3180,10 +3183,60 @@
     }
 
     // Automatic monitor: full mode opens where the mouse is.
+    // Automatic monitor: full mode opens where the mouse is. While it
+    // is on, the manual picker below has no effect, so it is disabled.
+    function syncDisplayAutoUI(auto) {
+        const screens = document.getElementById("s-screens");
+        if (screens) screens.classList.toggle("is-disabled", auto === true);
+    }
     const sDisplayAuto = document.getElementById("s-display-auto");
     if (sDisplayAuto) {
         sDisplayAuto.addEventListener("change", (e) => {
             window.cc.saveSettings({ displayAuto: e.target.checked });
+            syncDisplayAutoUI(e.target.checked);
+        });
+    }
+
+    // Global hotkey: editable field, empty disables it. The backend
+    // validates and registers; when the combination is rejected (bad
+    // format or taken by another app) the stored value is restored.
+    const sHotkey = document.getElementById("s-hotkey");
+    const sHotkeyDesc = document.getElementById("s-hotkey-desc");
+    const DEFAULT_HOTKEY = "Alt+Shift+C";
+    function revertHotkeyInput() {
+        if (sHotkey) sHotkey.value = cfg.hotkeyToggle || "";
+        if (sHotkeyDesc) {
+            sHotkeyDesc.textContent = window.ccI18n.t("settings.general.hotkeyDesc");
+        }
+    }
+    async function commitHotkey(value) {
+        if (!sHotkey) return;
+        try {
+            const normalized = await window.cc.setHotkey(value);
+            cfg.hotkeyToggle = normalized || "";
+            sHotkey.value = cfg.hotkeyToggle;
+            if (sHotkeyDesc) {
+                sHotkeyDesc.textContent = window.ccI18n.t("settings.general.hotkeyDesc");
+            }
+        } catch (err) {
+            console.warn("setHotkey rejected:", err);
+            revertHotkeyInput();
+        }
+    }
+    if (sHotkey) {
+        sHotkey.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sHotkey.blur();
+            }
+        });
+        sHotkey.addEventListener("change", () => commitHotkey(sHotkey.value));
+    }
+    const sHotkeyRestore = document.getElementById("s-hotkey-restore");
+    if (sHotkeyRestore) {
+        sHotkeyRestore.addEventListener("click", () => {
+            if (sHotkey) sHotkey.value = DEFAULT_HOTKEY;
+            commitHotkey(DEFAULT_HOTKEY);
         });
     }
 

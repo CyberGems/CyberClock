@@ -1019,6 +1019,19 @@
                                 ></label>
                             </div>
                             <div class="s-row">
+                                <span class="s-row-ico" data-ico="keyboard"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.hotkey">Show / Hide Clock</span>
+                                    <small id="s-hotkey-desc" data-i18n="settings.general.hotkeyDesc">Global shortcut to toggle the clock (empty = off)</small>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="s-hotkey" class="s-inp" style="width: 150px; text-align: center;" spellcheck="false" autocomplete="off" placeholder="Alt+Shift+C" />
+                                    <button class="s-abtn" id="s-hotkey-restore" type="button" data-tooltip="Restore default shortcut" data-i18n-attr="data-tooltip:settings.general.hotkeyRestore" aria-label="Restore default shortcut" style="padding: 9px 11px;">
+                                        <span data-ico="rotate-ccw"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-x"></span>
                                 <div class="s-lbl">
                                     <span data-i18n="settings.behavior.muteAudio">Mute all sounds</span>
