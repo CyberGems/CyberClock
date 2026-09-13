@@ -880,6 +880,98 @@ fn switch_to_mini_mode(app: AppHandle) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Mini preview (live peek from the settings modal)
+// ─────────────────────────────────────────────────────────────
+
+/// Peek state captured when the preview starts, so the mini window
+/// can be put back exactly where it was when it ends.
+struct MiniPreviewState {
+    moved: bool,
+    orig_pos: Option<(i32, i32)>,
+}
+
+static MINI_PREVIEW: std::sync::Mutex<Option<MiniPreviewState>> = std::sync::Mutex::new(None);
+
+/// Bottom-right corner of the settings window's monitor — where the
+/// mini docks when its own position would not be visible from there
+/// (off-screen or another display).
+fn mini_dock_pos(app: &AppHandle, mini: &WebviewWindow) -> Option<(i32, i32)> {
+    let main = app.get_webview_window("main")?;
+    let (_, monitor) = find_monitor_for_window(&main)?;
+    let wa = monitor.work_area();
+    let size = mini.outer_size().ok()?;
+    let margin = 24;
+    Some((
+        wa.position.x + wa.size.width as i32 - size.width as i32 - margin,
+        wa.position.y + wa.size.height as i32 - size.height as i32 - margin,
+    ))
+}
+
+/// Show/hide the real mini window as a live preview while the "Modo
+/// Mini" tab is open in the settings modal (full mode only). The mini
+/// re-applies every settings change on its own — this only makes it
+/// visible, pass-through so it can never steal clicks, and restores
+/// its position, visibility and click-through when the peek ends.
+#[tauri::command]
+fn set_mini_preview(app: AppHandle, on: bool) {
+    let settings = load_settings(&app);
+    let Some(mini) = app.get_webview_window("mini") else {
+        return;
+    };
+
+    if on {
+        // In mini mode the clock is already on screen.
+        if settings.window_mode != "full" || mini.is_visible().unwrap_or(true) {
+            return;
+        }
+        let orig_pos = mini.outer_position().ok().map(|p| (p.x, p.y));
+        let mut moved = false;
+        if let Some((x, y)) = orig_pos {
+            let on_settings_monitor = app
+                .get_webview_window("main")
+                .and_then(|main| find_monitor_for_window(&main))
+                .map(|(_, m)| is_position_in_monitor(x, y, &m))
+                .unwrap_or(true);
+            if !on_settings_monitor {
+                if let Some((dx, dy)) = mini_dock_pos(&app, &mini) {
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(dx, dy),
+                    ));
+                    moved = true;
+                }
+            }
+        }
+        *MINI_PREVIEW.lock().unwrap() = Some(MiniPreviewState { moved, orig_pos });
+        let _ = mini.show();
+        // The preview must never intercept the user's clicks or drags.
+        // Windows can drop the flag on show — set it after, not before.
+        let _ = mini.set_ignore_cursor_events(true);
+        // show() can briefly activate the mini on Windows; hand focus
+        // straight back to the settings window.
+        if let Some(main) = app.get_webview_window("main") {
+            let _ = main.set_focus();
+        }
+    } else {
+        let state = MINI_PREVIEW.lock().unwrap().take();
+        // Switching to mini mode mid-peek makes the clock legitimately
+        // visible — only hide when the app is still in full mode.
+        if settings.window_mode == "full" {
+            let _ = mini.hide();
+        }
+        if let Some(st) = state {
+            if st.moved {
+                if let Some((x, y)) = st.orig_pos {
+                    let _ = mini.set_position(tauri::Position::Physical(
+                        tauri::PhysicalPosition::new(x, y),
+                    ));
+                }
+            }
+        }
+        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
 // Mini context menu
 // ─────────────────────────────────────────────────────────────
 
@@ -2106,6 +2198,7 @@ pub fn run() {
             // so that skin changes (which call set_window_size) work correctly.
             if let Some(mini) = app.get_webview_window("mini") {
                 let mini_for_resize = mini.clone();
+                let app_for_resize = app.handle().clone();
                 mini.on_window_event(move |event| match event {
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         let w = MINI_TARGET_WIDTH.load(Ordering::Acquire);
@@ -2113,6 +2206,22 @@ pub fn run() {
                         let _ = mini_for_resize.set_size(tauri::Size::Logical(
                             tauri::LogicalSize::new(f64::from(w), f64::from(h)),
                         ));
+                        // While the settings peek is docked, follow
+                        // resizes (zoom changes) so the mini never
+                        // spills past the work area edge.
+                        let peek_moved = MINI_PREVIEW
+                            .lock()
+                            .ok()
+                            .and_then(|guard| guard.as_ref().map(|st| st.moved))
+                            .unwrap_or(false);
+                        if peek_moved {
+                            if let Some((x, y)) = mini_dock_pos(&app_for_resize, &mini_for_resize)
+                            {
+                                let _ = mini_for_resize.set_position(
+                                    tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)),
+                                );
+                            }
+                        }
                     }
                     _ => {}
                 });
@@ -2188,6 +2297,7 @@ pub fn run() {
             hide_window,
             switch_to_full_mode,
             switch_to_mini_mode,
+            set_mini_preview,
             open_mini_context_menu,
             close_mini_context_menu,
             menu_action,

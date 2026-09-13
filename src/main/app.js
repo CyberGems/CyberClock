@@ -2731,6 +2731,22 @@
     // ══════════════════════════════════════════════════════════════
     let sDebounce = {};
 
+    // ── Mini preview (peek) ──────────────────────────────────
+    // While the "Modo Mini" tab is open in the settings modal, the
+    // real mini window is shown as a live preview (set_mini_preview).
+    // The mini re-applies every settings change on its own, so the
+    // sliders update it as they move — no more blind adjustments.
+    function syncMiniPreview() {
+        const open = document
+            .getElementById("s-overlay")
+            .classList.contains("open");
+        const active = document.querySelector(".s-nav-btn.on");
+        const on = open && !!active && active.dataset.stab === "mini";
+        window.cc
+            .setMiniPreview(on)
+            .catch((e) => console.error("mini preview failed:", e));
+    }
+
     function switchSettingsTab(tabName) {
         document
             .querySelectorAll(".s-nav-btn")
@@ -2738,6 +2754,7 @@
         document
             .querySelectorAll(".s-panel")
             .forEach((p) => p.classList.toggle("on", p.id === "stab-" + tabName));
+        syncMiniPreview();
     }
 
     function openSettings(targetTab, focusSelector) {
@@ -2746,6 +2763,10 @@
         // click bindings must never clear the active tab.
         if (typeof targetTab === "string" && targetTab) {
             switchSettingsTab(targetTab);
+        } else {
+            // Reopening without an explicit tab keeps the previous one
+            // active — re-sync the peek with whatever tab is showing.
+            syncMiniPreview();
         }
         loadScreensList();
         // Focus (and select) a specific control once the modal is painted,
@@ -2838,6 +2859,8 @@
         // setting is moved inside the modal.
         const savedPill = document.getElementById("s-autosave-pill");
         if (savedPill) savedPill.classList.add("is-hidden");
+        // End the mini peek if it was running.
+        syncMiniPreview();
     }
 
     // ── Saved badge (sidebar footer pill) ───────────────────
