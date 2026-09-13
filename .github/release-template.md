@@ -6,23 +6,28 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 
 ### ✨ Key Features & Highlights
 
-- 🪟 **Start with Windows — in the installer**:
-  - The setup wizard now asks whether CyberClock should launch automatically at Windows startup, with the option pre-checked — no need to dig into Settings after installing.
-  - Silent and passive installs register the startup entry automatically (the app default), and the uninstaller always removes it, leaving nothing behind.
+- 🕐 **Windows date and time, one click away**:
+  - New entries in the tray menu (Help) and in Settings open the classic Windows "Date and Time" dialog, right where you need them.
 
-- ⚙️ **Startup setting that reflects reality**:
-  - The Start-with-Windows toggle in Settings now reconciles with the real registry entry at every boot: if the installer, msconfig or any system tool changed the actual startup state, the toggle updates to match it — what you see is what runs.
-  - Installer and app manage the **same** single HKCU Run entry, so no duplicate startup commands ever pile up.
+- 🎯 **Clock accuracy monitor with wrong-time alerts**:
+  - CyberClock now measures its drift against network time servers at startup and every 6 hours, and shows the result under Settings › Windows Integration with a "Check now" button.
+  - If the system clock is off by more than a minute (dead CMOS battery, timezone mishap), a Windows notification warns you immediately — before your alarms and chimes fire at the wrong time.
+  - Read-only and privilege-free: SNTP first, automatic HTTP fallback on networks that block NTP.
 
-- 📦 **CyberClock.exe**:
-  - The built executable is now named `CyberClock.exe` instead of `app.exe` — process lists, shortcuts and startup entries now read clean and identifiable.
+- ⌨️ **Global hotkey to show / hide the clock (optional)**:
+  - Alt+Shift+C by default. Click the field in Settings › General and press your own combination; the X button disables it and the restore button brings the default back.
+  - Invalid or already-taken combinations are rejected and the previous one stays.
 
-- 🔧 **Suite & Maintenance**:
-  - Release workflow hardened: releases always land as drafts, never auto-published by any action in the chain.
-  - Missing "Status" translation label for the Relax scheduler added in both English and Spanish.
-  - README wording polish.
+- 🖥️ **Automatic monitor + full mode locked to the work area**:
+  - Full mode now opens on the monitor where the mouse is (CyberLauncher style), with a toggle in the Display tab to use a fixed preferred display instead.
+  - Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, dragging and double-click maximize/restore are disabled, and the phantom taskbar button after a Windows boot start is gone.
 
----
+- 🎨 **Settings polish**:
+  - The General tab leads the list, so the language selector comes first.
+  - Every control got an accent-tinted icon tile, helper texts are larger and brighter, and toggles now read clearly in the ON state with every accent tint.
+  - The Display tab matches the rest of the settings: whole display cards are clickable (no more tiny "Move here" button), and the active monitor is unmistakable.
+
+--- 
 
 ### 📦 Downloads & Packages
 
