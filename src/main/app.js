@@ -299,7 +299,7 @@
         if (langEl) langEl.value = s.language || "auto";
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
-        if (typeof renderAboutVersion === "function") renderAboutVersion();
+        if (typeof renderBrandVersion === "function") renderBrandVersion();
         updateDigital();
         if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
             renderCalendar();
@@ -2721,7 +2721,7 @@
 
     function switchSettingsTab(tabName) {
         document
-            .querySelectorAll(".s-tab")
+            .querySelectorAll(".s-nav-btn")
             .forEach((t) => t.classList.toggle("on", t.dataset.stab === tabName));
         document
             .querySelectorAll(".s-panel")
@@ -2730,7 +2730,9 @@
 
     function openSettings(targetTab, focusSelector) {
         document.getElementById("s-overlay").classList.add("open");
-        if (targetTab) {
+        // Only explicit string tabs switch; raw event objects from direct
+        // click bindings must never clear the active tab.
+        if (typeof targetTab === "string" && targetTab) {
             switchSettingsTab(targetTab);
         }
         loadScreensList();
@@ -2823,12 +2825,16 @@
     }
 
     const btnSettings = document.getElementById("btn-settings");
-    if (btnSettings) btnSettings.addEventListener("click", openSettings);
+    if (btnSettings)
+        btnSettings.addEventListener("click", () => openSettings());
     document
         .getElementById("nav-btn-settings")
-        .addEventListener("click", openSettings);
+        .addEventListener("click", () => openSettings());
     document
         .getElementById("s-close")
+        .addEventListener("click", closeSettings);
+    document
+        .getElementById("s-nav-close")
         .addEventListener("click", closeSettings);
     document
         .getElementById("s-overlay")
@@ -2856,20 +2862,9 @@
         rTogglePlay();
     });
 
-    // Settings tabs
-    document.querySelectorAll(".s-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-            document
-                .querySelectorAll(".s-tab")
-                .forEach((t) => t.classList.remove("on"));
-            document
-                .querySelectorAll(".s-panel")
-                .forEach((p) => p.classList.remove("on"));
-            tab.classList.add("on");
-            document
-                .getElementById("stab-" + tab.dataset.stab)
-                .classList.add("on");
-        });
+    // Settings tabs (sidebar nav buttons in the settings modal)
+    document.querySelectorAll(".s-nav-btn").forEach((btn) => {
+        btn.addEventListener("click", () => switchSettingsTab(btn.dataset.stab));
     });
 
     // Theme tiles
@@ -3053,30 +3048,27 @@
             window.cc.saveSettings({ language: e.target.value }),
         );
 
-    // ── About / Updates ─────────────────────────────────────
+    // ── Brand footer / About ────────────────────────────────
     // The update flow, diagnostics and links live in the dedicated About
-    // window (src/about/) since v1.3 — this window only keeps the version
-    // label and a launcher button.
+    // window (src/about/) since v1.3 — the settings modal only shows the
+    // brand footer (version + copyright) that launches it, mirroring
+    // CyberViewer's config modal.
     let appVersion = "";
 
-    function renderAboutVersion() {
-        const el = document.getElementById("s-about-version");
+    function renderBrandVersion() {
+        const el = document.getElementById("s-brand-version");
         if (!el) return;
-        const label = window.ccI18n.t("about.version").replace(
-            "{version}",
-            appVersion || "…",
-        );
-        el.innerHTML = `CyberClock · <span class="app-ver-digits">${label}</span>`;
+        el.textContent = `v${appVersion || "…"}`;
     }
 
     window.cc.getAppVersion().then((v) => {
         appVersion = v;
-        renderAboutVersion();
+        renderBrandVersion();
     });
 
-    const aboutOpenBtn = document.getElementById("s-about-open-btn");
-    if (aboutOpenBtn) {
-        aboutOpenBtn.addEventListener("click", () => {
+    const brandAboutBtn = document.getElementById("s-brand-about");
+    if (brandAboutBtn) {
+        brandAboutBtn.addEventListener("click", () => {
             window.cc.openWindow("about");
         });
     }
@@ -3675,8 +3667,6 @@
     window.cc.onMiniMenuAction((action) => {
         if (action === "settings") {
             openSettings();
-        } else if (action === "about") {
-            openSettings("about");
         } else if (action.startsWith("open-note:")) {
             const dateStr = action.split(":")[1];
             const [y, m, d] = dateStr.split("-").map(Number);

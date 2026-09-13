@@ -271,9 +271,10 @@
             "settings.tab.appearance": "Appearance",
             "settings.tab.alarms": "Alarms",
             "settings.tab.general": "General",
-            "settings.tab.about": "About",
             "settings.tab.display": "Display",
             "settings.tab.mini": "Mini Mode",
+            "settings.autosave": "Auto-saved",
+            "settings.close": "Close",
 
             // Settings modal - Appearance
             "settings.appearance.themeTitle": "Theme / Skin",
@@ -323,10 +324,7 @@
             "settings.general.resetBtn": "Reset to Defaults",
             "settings.general.resetConfirmTitle": "Reset Settings?",
             "settings.general.resetConfirmMsg": "Are you sure you want to restore all settings to factory defaults? Your preferences will be reset.",
-            "settings.general.about": "About",
-            "settings.general.aboutSub": "CyberGems © 2026 · Premium Cyber-Neon Clock for Windows",
 
-            "about.version": "Version {version}",
             "about.title": "About CyberClock",
             "about.description": "CyberClock is a premium cyber-neon clock for Windows — analog dial, calendar dashboard, alarms and relaxation sessions.",
             "about.maintenance": "Updates & Maintenance",
@@ -409,9 +407,7 @@
             "tray.homepage": "Website",
             "tray.donate": "Donate",
             "tray.about": "About...",
-            "tray.checkUpdates": "Check for Update...",
-            "about.openWindow": "Open About Window",
-            "about.openWindowDesc": "Updates, version info and links live in the dedicated About window."
+            "tray.checkUpdates": "Check for Update..."
         },
         es: {
             "relax.audioSpectrum": "Espectro de Audio",
@@ -679,9 +675,10 @@
             "settings.tab.appearance": "Apariencia",
             "settings.tab.alarms": "Alarmas",
             "settings.tab.general": "General",
-            "settings.tab.about": "Acerca de",
             "settings.tab.display": "Pantalla",
             "settings.tab.mini": "Modo Mini",
+            "settings.autosave": "Autoguardado",
+            "settings.close": "Cerrar",
 
             // Settings modal - Appearance
             "settings.appearance.themeTitle": "Tema / Diseño",
@@ -731,10 +728,7 @@
             "settings.general.resetBtn": "Restablecer Ajustes",
             "settings.general.resetConfirmTitle": "¿Restablecer Ajustes?",
             "settings.general.resetConfirmMsg": "¿Estás seguro de que deseas restablecer todos los ajustes de fábrica? Se reiniciarán todas tus preferencias.",
-            "settings.general.about": "Acerca de",
-            "settings.general.aboutSub": "CyberGems © 2026 · Reloj Cyber-Neón Premium para Windows",
 
-            "about.version": "Versión {version}",
             "about.title": "Acerca de CyberClock",
             "about.description": "CyberClock es un reloj cyber-neón premium para Windows: esfera analógica, panel de calendario, alarmas y sesiones de relajación.",
             "about.maintenance": "Actualizaciones y mantenimiento",
@@ -817,9 +811,7 @@
             "tray.homepage": "Sitio web",
             "tray.donate": "Donar",
             "tray.about": "Acerca de...",
-            "tray.checkUpdates": "Buscar actualizaciones...",
-            "about.openWindow": "Abrir ventana Acerca de",
-            "about.openWindowDesc": "Las actualizaciones, la versión y los enlaces están en la ventana Acerca de dedicada."
+            "tray.checkUpdates": "Buscar actualizaciones..."
         }
     };
 

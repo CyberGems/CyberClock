@@ -462,25 +462,51 @@
         <div class="s-overlay" id="s-overlay">
             <div class="s-modal">
                 <div class="s-tbar">
-                    <span class="s-brand"
-                        ><span data-ico="gear"></span> <span data-i18n="menu.settings">Settings</span> · CyberClock</span
-                    >
-                    <div class="s-spacer"></div>
-                    <button class="s-close" id="s-close">
+                    <div class="s-title">
+                        <span data-ico="gear"></span>
+                        <span data-i18n="menu.settings">Settings</span>
+                    </div>
+                    <button class="s-close" id="s-close" type="button">
                         <span data-ico="x"></span>
                     </button>
                 </div>
-                <div class="s-tabs">
-                    <div class="s-tab on" data-stab="appearance" data-i18n="settings.tab.appearance">
-                        Appearance
-                    </div>
-                    <div class="s-tab" data-stab="alarms" data-i18n="settings.tab.alarms">Alarms</div>
-                    <div class="s-tab" data-stab="general" data-i18n="settings.tab.general">General</div>
-                    <div class="s-tab" data-stab="about" data-i18n="settings.tab.about">About</div>
-                    <div class="s-tab" data-stab="display" data-i18n="settings.tab.display">Display</div>
-                    <div class="s-tab" data-stab="mini" data-i18n="settings.tab.mini">mini mode</div>
-                </div>
-                <div class="s-content">
+                <div class="s-body">
+                    <div class="s-layout">
+                        <aside class="s-nav">
+                            <div class="s-nav-items" role="tablist">
+                                <button type="button" class="s-nav-btn on" data-stab="appearance">
+                                    <span class="s-nav-ico" data-ico="eye"></span>
+                                    <span data-i18n="settings.tab.appearance">Appearance</span>
+                                </button>
+                                <button type="button" class="s-nav-btn" data-stab="alarms">
+                                    <span class="s-nav-ico" data-ico="bell"></span>
+                                    <span data-i18n="settings.tab.alarms">Alarms</span>
+                                </button>
+                                <button type="button" class="s-nav-btn" data-stab="general">
+                                    <span class="s-nav-ico" data-ico="gear"></span>
+                                    <span data-i18n="settings.tab.general">General</span>
+                                </button>
+                                <button type="button" class="s-nav-btn" data-stab="display">
+                                    <span class="s-nav-ico" data-ico="expand"></span>
+                                    <span data-i18n="settings.tab.display">Display</span>
+                                </button>
+                                <button type="button" class="s-nav-btn" data-stab="mini">
+                                    <span class="s-nav-ico" data-ico="compact"></span>
+                                    <span data-i18n="settings.tab.mini">Mini Mode</span>
+                                </button>
+                            </div>
+                            <div class="s-nav-footer">
+                                <div class="s-autosave-pill">
+                                    <span class="s-autosave-dot"></span>
+                                    <span data-i18n="settings.autosave">Auto-saved</span>
+                                </div>
+                                <button type="button" class="s-nav-close" id="s-nav-close">
+                                    <span data-i18n="settings.close">Close</span>
+                                    <span class="s-nav-close-ico" data-ico="x"></span>
+                                </button>
+                            </div>
+                        </aside>
+                        <div class="s-content">
                     <!-- Appearance -->
                     <div class="s-panel on" id="stab-appearance">
                         <div class="s-sec">
@@ -1151,28 +1177,6 @@
                         </div>
                     </div>
 
-                    <!-- About -->
-                    <div class="s-panel" id="stab-about">
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.general.about">About</div>
-                            <div class="s-about">
-                                <div class="s-about-v" id="s-about-version">CyberClock · <span class="app-ver-digits">v…</span></div>
-                                <div class="s-about-s" data-i18n="settings.general.aboutSub">
-                                    CyberGems © 2026 · Premium Cyber-Neon Clock for Windows
-                                </div>
-                                <div class="s-about-actions">
-                                    <button class="s-abtn" id="s-about-open-btn" type="button">
-                                        <span data-ico="info"></span>
-                                        <span data-i18n="about.openWindow">Open About Window</span>
-                                    </button>
-                                </div>
-                                <div class="s-about-note" data-i18n="about.openWindowDesc">
-                                    Updates, diagnostics and links live in the dedicated About window.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Display -->
                     <div class="s-panel" id="stab-display">
                         <div class="s-sec">
@@ -1318,8 +1322,31 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- s-content -->
+                    </div>
+                    <!-- /s-content -->
+                    </div>
+                    <!-- /s-layout -->
+                    </div>
+                    <!-- /s-body -->
+                <button
+                    type="button"
+                    class="s-brand-footer"
+                    id="s-brand-about"
+                    data-i18n-attr="title:about.title"
+                    title="About CyberClock"
+                    aria-label="About CyberClock"
+                >
+                    <div class="s-brand-line">
+                        <img
+                            class="s-brand-icon"
+                            src="../assets/images/icon.png"
+                            alt=""
+                            draggable="false"
+                        />
+                        <span>CyberClock <span class="s-brand-version" id="s-brand-version">v…</span></span>
+                    </div>
+                    <span class="s-brand-copyright">© 2026 CyberGems</span>
+                </button>
             </div>
             <!-- s-modal -->
         </div>
