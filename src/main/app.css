@@ -32,7 +32,10 @@
         flex-shrink: 0;
         position: relative;
         z-index: 20;
-        -webkit-app-region: drag;
+        /* No app-region: drag: full mode must stay locked to the work
+           area of its monitor. A CSS drag region starts a native
+           caption drag, and its double-click maximize/restore toggle
+           let the window end up bigger than the screen. */
     }
     .tbar::before {
         content: "";
@@ -2938,11 +2941,35 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 14px;
         padding: 10px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
     .s-row:last-child {
         border-bottom: none;
+    }
+    /* CyberLauncher-style leading icon tile for setting rows */
+    .s-row-ico {
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--rgb-accent), 0.10);
+        border: 1px solid rgba(var(--rgb-accent), 0.28);
+        color: var(--accent-a);
+    }
+    .s-row-ico .cc-ico {
+        width: 17px;
+        height: 17px;
+    }
+    .s-row .s-lbl {
+        flex: 1;
+    }
+    .s-vol-row .s-row-ico {
+        margin-right: 4px;
     }
     .s-lbl {
         font-family: "Inter", system-ui, sans-serif;
