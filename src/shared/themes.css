@@ -19,7 +19,18 @@
 
   --text-hi: #f0f4f6;
   --text-md: #90b0c0;
-  --text-lo: #2a5060;
+  --text-lo: #5e8296;
+
+  /* ── Type system ──────────────────────────────────────
+     One role per face, used across every window:
+     ui      Outfit          labels, buttons, body copy
+     display Space Grotesk   section titles, big clock digits
+     mono    JetBrains Mono  dates, values, tabular data
+     brand   Orbitron        wordmark + analog clock face only */
+  --font-ui: "Outfit", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+  --font-brand: "Orbitron", "Consolas", monospace;
 
   /* ── Accent seeds ──────────────────────────────────────
      Defaults = the Ice tint. tint.js replaces these triplets

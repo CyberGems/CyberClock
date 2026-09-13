@@ -167,8 +167,8 @@
         gap: 6px;
     }
     .ctx-section-title {
-        font-family: "Orbitron", monospace;
-        font-size: 8.5px;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 9px;
         font-weight: 700;
         letter-spacing: 1px;
         color: var(--accent-a);
@@ -189,9 +189,9 @@
         color: rgba(255, 255, 255, 0.6);
         border-radius: 4px;
         height: 24px;
-        font-family: "Orbitron", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 10px;
-        font-weight: 700;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.15s;
         display: flex;
@@ -221,7 +221,7 @@
         cursor: pointer;
     }
     .slider-val {
-        font-family: "Share Tech Mono", monospace;
+        font-family: "JetBrains Mono", monospace;
         font-size: 10px;
         color: var(--text-md);
         width: 26px;

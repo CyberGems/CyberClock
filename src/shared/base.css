@@ -17,7 +17,7 @@ html, body {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  font-family: 'Orbitron', 'Consolas', 'Courier New', monospace;
+  font-family: var(--font-ui);
   background: transparent;
   color: var(--text-hi);
   font-size: 13px;
@@ -97,7 +97,7 @@ body.no-scanlines .scanlines { opacity: 0; }
 }
 
 .titlebar .brand {
-  font-family: 'Orbitron', monospace;
+  font-family: var(--font-brand);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
@@ -140,10 +140,10 @@ body.no-scanlines .scanlines { opacity: 0; }
   background: transparent;
   border: 1px solid var(--border-bright);
   color: var(--accent-a);
-  font-family: 'Orbitron', monospace;
-  font-size: 10px;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   padding: 8px 18px;
   border-radius: 4px;
