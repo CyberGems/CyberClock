@@ -88,8 +88,12 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **3 Custom Alarms** — With day-of-week repetition
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu
-- **Multi-Monitor Support** — Choose which display CyberClock appears on
+- **System Tray** — Custom HTML popup menu, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
+- **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
+- **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
+- **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
+- **Clock Accuracy Guard** — Periodic NTP drift check shown in Settings, with a Windows notification when the system time is off by more than a minute
+- **Multi-Monitor Support** — Choose which display CyberClock appears on; display changes are detected and the window repositions itself
 - **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
 - **Auto-Updates** — Built-in Tauri updater with GitHub Releases
 - **Bilingual UI** — Full English and Spanish interface
