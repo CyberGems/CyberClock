@@ -37,7 +37,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Time your work | Countdown timer with presets + precision stopwatch with lap tracking |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
 | Save screen space | Mini mode — compact always-on-top clock bar with 12 skins |
-| Make it yours | 5 theme skins, CRT scanlines, transparency controls, multi-monitor |
+| Make it yours | 8 accent tints, CRT scanlines, transparency controls, multi-monitor |
 
 ---
 
@@ -113,7 +113,8 @@ CyberClock/
 │   ├── tray/              System tray menu
 │   ├── about/             About window
 │   ├── shared/
-│   │   ├── themes.css     Theme system (5 skins)
+│   │   ├── themes.css     Design tokens (single sober base + derived accent layer)
+│   │   ├── tint.js        Accent tint engine (8 presets, normalized seeds)
 │   │   ├── base.css       Base styles
 │   │   ├── i18n.js        Internationalization
 │   │   ├── icons.js       SVG icon system
@@ -185,12 +186,24 @@ To continue:
 
 ## 🎨 Themes & Customization
 
-### 5 Theme Skins
-- **Arctic Ice** — Ice blue over deep navy
-- **Cyber Blue** — Classic electric blue
-- **Forest Mist** — Sage green over dark green-brown
-- **Twilight Haze** — Soft lilac over dark violet
-- **Warm Ember** — Warm amber over dark umber
+### 8 Accent Tints
+One sober structural palette — deep navy surfaces, neutral text — with color
+entering only through the accent: glows, borders, highlights and a subtle
+ambient kiss on the panels. The interface never floods with color.
+
+- **Ice** *(default)* — pale ice over deep navy
+- **Cyan** — quiet tropical cyan
+- **Azure** — muted cornflower blue
+- **Mint** — soft spearmint green
+- **Sage** — gentle sage green
+- **Amber** — warm sandy amber
+- **Rose** — dusty pink
+- **Violet** — powdery lavender
+
+Tints are derived from a single seed color (normalized to a shared
+luminance/saturation band) by `src/shared/tint.js`, so every preset stays
+readable and no accent can wash out the interface. Settings saved with the
+old 5-skin themes migrate automatically to their heir tint.
 
 ### Display Options
 - Time format: 12H / 24H
