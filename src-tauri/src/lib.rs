@@ -619,20 +619,13 @@ fn find_monitor_for_window(window: &WebviewWindow) -> Option<(usize, tauri::Moni
 /// is enabled so full mode opens wherever the user is working.
 fn monitor_under_cursor(window: &WebviewWindow) -> Option<tauri::Monitor> {
     let pos = window.cursor_position().ok()?;
-    window
-        .available_monitors()
-        .ok()?
-        .into_iter()
-        .find(|m| {
-            let mp = m.position();
-            let ms = m.size();
-            let px = pos.x as i32;
-            let py = pos.y as i32;
-            px >= mp.x
-                && px < mp.x + ms.width as i32
-                && py >= mp.y
-                && py < mp.y + ms.height as i32
-        })
+    window.available_monitors().ok()?.into_iter().find(|m| {
+        let mp = m.position();
+        let ms = m.size();
+        let px = pos.x as i32;
+        let py = pos.y as i32;
+        px >= mp.x && px < mp.x + ms.width as i32 && py >= mp.y && py < mp.y + ms.height as i32
+    })
 }
 
 /// Size and position the full clock on its monitor. Automatic mode
@@ -663,10 +656,12 @@ fn place_full_clock(main: &WebviewWindow, settings: &AppSettings) {
             (work_area.position, work_area.size)
         );
         let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-            work_area.position.x, work_area.position.y,
+            work_area.position.x,
+            work_area.position.y,
         )));
         let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
-            work_area.size.width, work_area.size.height,
+            work_area.size.width,
+            work_area.size.height,
         )));
     }
 }
@@ -791,13 +786,7 @@ fn send_clock_notification(app: &AppHandle, drift_ms: i64) {
             ),
         )
     };
-    if let Err(e) = app
-        .notification()
-        .builder()
-        .title(title)
-        .body(&body)
-        .show()
-    {
+    if let Err(e) = app.notification().builder().title(title).body(&body).show() {
         warn!("clock accuracy: notification failed: {}", e);
     }
 }
@@ -856,8 +845,11 @@ async fn check_clock_accuracy(app: AppHandle) -> ClockAccuracy {
     std::thread::spawn(move || {
         let _ = tx.send(run_clock_check(&app_for_thread, true));
     });
-    rx.recv()
-        .unwrap_or_else(|_| ClockAccuracy { drift_ms: None, checked_at: None, source: Some("unreachable".to_string()) })
+    rx.recv().unwrap_or_else(|_| ClockAccuracy {
+        drift_ms: None,
+        checked_at: None,
+        source: Some("unreachable".to_string()),
+    })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1174,11 +1166,13 @@ fn register_app_hotkey(app: &AppHandle) {
         info!("hotkey: disabled");
         return;
     }
-    let result = app.global_shortcut().on_shortcut(shortcut.as_str(), |app, _shortcut, event| {
-        if event.state == ShortcutState::Pressed {
-            toggle_clock_visibility(app);
-        }
-    });
+    let result = app
+        .global_shortcut()
+        .on_shortcut(shortcut.as_str(), |app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                toggle_clock_visibility(app);
+            }
+        });
     if let Err(e) = result {
         warn!("hotkey: could not register {:?}: {}", shortcut, e);
     } else {
@@ -1204,21 +1198,26 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<String, String> {
     }
 
     if !normalized.is_empty() {
-        let result = app.global_shortcut().on_shortcut(normalized.as_str(), |app, _shortcut, event| {
-            if event.state == ShortcutState::Pressed {
-                toggle_clock_visibility(app);
-            }
-        });
+        let result =
+            app.global_shortcut()
+                .on_shortcut(normalized.as_str(), |app, _shortcut, event| {
+                    if event.state == ShortcutState::Pressed {
+                        toggle_clock_visibility(app);
+                    }
+                });
         if let Err(e) = result {
             // Keep behavior consistent with the persisted settings:
             // bring the old hotkey back before reporting the failure.
             if let Some(old_sc) = normalize_hotkey(&old) {
                 if !old_sc.is_empty() {
-                    let _ = app.global_shortcut().on_shortcut(old_sc.as_str(), |app, _shortcut, event| {
-                        if event.state == ShortcutState::Pressed {
-                            toggle_clock_visibility(app);
-                        }
-                    });
+                    let _ = app.global_shortcut().on_shortcut(
+                        old_sc.as_str(),
+                        |app, _shortcut, event| {
+                            if event.state == ShortcutState::Pressed {
+                                toggle_clock_visibility(app);
+                            }
+                        },
+                    );
                 }
             }
             warn!("hotkey: could not register {:?}: {}", normalized, e);
@@ -1681,9 +1680,9 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
                 let work_area = monitor.work_area();
                 let size = work_area.size;
                 let position = work_area.position;
-                let _ = main.set_position(tauri::Position::Physical(
-                    tauri::PhysicalPosition::new(position.x, position.y),
-                ));
+                let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    position.x, position.y,
+                )));
                 let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
                     size.width,
                     size.height,
@@ -2669,15 +2668,13 @@ pub fn run() {
                                 .outer_position()
                                 .map(|p| p.x == pos.x && p.y == pos.y)
                                 .unwrap_or(false)
-                                && main_for_resize.outer_size().ok().map_or(false, |s| {
+                                && main_for_resize.outer_size().ok().is_some_and(|s| {
                                     s.width == size.width && s.height == size.height
                                 });
                             if !in_place {
-                                let _ = main_for_resize.set_position(
-                                    tauri::Position::Physical(tauri::PhysicalPosition::new(
-                                        pos.x, pos.y,
-                                    )),
-                                );
+                                let _ = main_for_resize.set_position(tauri::Position::Physical(
+                                    tauri::PhysicalPosition::new(pos.x, pos.y),
+                                ));
                                 let _ = main_for_resize.set_size(tauri::Size::Physical(
                                     tauri::PhysicalSize::new(size.width, size.height),
                                 ));
@@ -2713,11 +2710,10 @@ pub fn run() {
                             .and_then(|guard| guard.as_ref().map(|st| st.moved))
                             .unwrap_or(false);
                         if peek_moved {
-                            if let Some((x, y)) = mini_dock_pos(&app_for_resize, &mini_for_resize)
-                            {
-                                let _ = mini_for_resize.set_position(
-                                    tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)),
-                                );
+                            if let Some((x, y)) = mini_dock_pos(&app_for_resize, &mini_for_resize) {
+                                let _ = mini_for_resize.set_position(tauri::Position::Physical(
+                                    tauri::PhysicalPosition::new(x, y),
+                                ));
                             }
                         }
                     }

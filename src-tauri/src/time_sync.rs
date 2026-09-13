@@ -27,7 +27,12 @@ pub fn measure() -> Result<Measurement, String> {
     let mut last_err = String::from("no time source reachable");
     for server in NTP_SERVERS {
         match sntp_offset_ms(server) {
-            Ok(drift_ms) => return Ok(Measurement { drift_ms, source: "ntp" }),
+            Ok(drift_ms) => {
+                return Ok(Measurement {
+                    drift_ms,
+                    source: "ntp",
+                })
+            }
             Err(e) => {
                 warn!("time_sync: sntp {} failed: {}", server, e);
                 last_err = format!("{}: {}", server, e);
@@ -36,7 +41,12 @@ pub fn measure() -> Result<Measurement, String> {
     }
     for host in HTTP_HOSTS {
         match http_date_offset_ms(host) {
-            Ok(drift_ms) => return Ok(Measurement { drift_ms, source: "http-date" }),
+            Ok(drift_ms) => {
+                return Ok(Measurement {
+                    drift_ms,
+                    source: "http-date",
+                })
+            }
             Err(e) => {
                 warn!("time_sync: http-date {} failed: {}", host, e);
                 last_err = format!("{}: {}", host, e);
@@ -65,11 +75,21 @@ fn sntp_offset_ms(server: &str) -> Result<i64, String> {
 
     // Windows creates IPv6 sockets with V6ONLY by default, so the bind
     // family must match the resolved address or IPv4 targets fail.
-    let bind_addr = if addr.is_ipv4() { "0.0.0.0:0" } else { "[::]:0" };
+    let bind_addr = if addr.is_ipv4() {
+        "0.0.0.0:0"
+    } else {
+        "[::]:0"
+    };
     let socket = UdpSocket::bind(bind_addr).map_err(|e| format!("bind: {}", e))?;
-    socket.set_read_timeout(Some(TIMEOUT)).map_err(|e| e.to_string())?;
-    socket.set_write_timeout(Some(TIMEOUT)).map_err(|e| e.to_string())?;
-    socket.connect(addr).map_err(|e| format!("connect: {}", e))?;
+    socket
+        .set_read_timeout(Some(TIMEOUT))
+        .map_err(|e| e.to_string())?;
+    socket
+        .set_write_timeout(Some(TIMEOUT))
+        .map_err(|e| e.to_string())?;
+    socket
+        .connect(addr)
+        .map_err(|e| format!("connect: {}", e))?;
 
     let mut request = [0u8; 48];
     request[0] = 0x23; // LI = 0, VN = 4, Mode = 3 (client)
@@ -109,7 +129,7 @@ fn ntp_timestamp_ms(bytes: &[u8]) -> i128 {
     let secs = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as i128;
     // Fraction scaled to milliseconds: frac / 2^32 * 1000.
     let frac = u32::from_be_bytes([bytes[4], bytes[5], bytes[6], bytes[7]]) as i128;
-    (secs - 2_208_988_800) * 1000 + (frac * 1000 >> 32)
+    (secs - 2_208_988_800) * 1000 + ((frac * 1000) >> 32)
 }
 
 /// Fallback for networks that block UDP/123: read the HTTP `Date`
@@ -122,17 +142,22 @@ fn http_date_offset_ms(host: &str) -> Result<i64, String> {
 }
 
 fn fetch_http_date_ms(host: &str) -> Result<i128, String> {
-    let mut stream = TcpStream::connect((host, 80))
-        .map_err(|e| format!("connect: {}", e))?;
-    stream.set_read_timeout(Some(TIMEOUT)).map_err(|e| e.to_string())?;
-    stream.set_write_timeout(Some(TIMEOUT)).map_err(|e| e.to_string())?;
+    let mut stream = TcpStream::connect((host, 80)).map_err(|e| format!("connect: {}", e))?;
+    stream
+        .set_read_timeout(Some(TIMEOUT))
+        .map_err(|e| e.to_string())?;
+    stream
+        .set_write_timeout(Some(TIMEOUT))
+        .map_err(|e| e.to_string())?;
 
     let request = format!(
         "HEAD / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nUser-Agent: CyberClock\r\n\r\n",
         host
     );
     use std::io::{Read, Write};
-    stream.write_all(request.as_bytes()).map_err(|e| format!("send: {}", e))?;
+    stream
+        .write_all(request.as_bytes())
+        .map_err(|e| format!("send: {}", e))?;
 
     let mut response = Vec::new();
     // Cap the read: headers are tiny, a hostile server must not balloon it.
