@@ -449,8 +449,7 @@
         width: 20px;
         height: 20px;
     }
-    .s-nav-btn .cc-ico,
-    .s-nav-close .cc-ico {
+    .s-nav-btn .cc-ico {
         width: 15px;
         height: 15px;
     }
@@ -2753,6 +2752,9 @@
         text-align: center;
         text-transform: uppercase;
     }
+    .s-autosave-pill.is-hidden {
+        display: none;
+    }
     .s-autosave-dot {
         width: 7px;
         height: 7px;
@@ -2789,12 +2791,15 @@
         background: rgba(var(--rgb-accent), 0.08);
         border-color: var(--accent-a);
     }
-    .s-nav-close-ico {
-        display: inline-flex;
+    .s-nav-close-enter {
         width: 13px;
         height: 13px;
         flex: 0 0 13px;
         opacity: 0.72;
+    }
+    .s-nav-close:hover .s-nav-close-enter {
+        opacity: 1;
+        color: var(--accent-a);
     }
 
     .s-content {

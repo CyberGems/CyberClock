@@ -273,7 +273,7 @@
             "settings.tab.general": "General",
             "settings.tab.display": "Display",
             "settings.tab.mini": "Mini Mode",
-            "settings.autosave": "Auto-saved",
+            "settings.saved": "Saved",
             "settings.close": "Close",
 
             // Settings modal - Appearance
@@ -677,7 +677,7 @@
             "settings.tab.general": "General",
             "settings.tab.display": "Pantalla",
             "settings.tab.mini": "Modo Mini",
-            "settings.autosave": "Autoguardado",
+            "settings.saved": "Guardado",
             "settings.close": "Cerrar",
 
             // Settings modal - Appearance

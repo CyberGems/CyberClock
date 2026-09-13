@@ -2822,7 +2822,24 @@
         const active = document.activeElement;
         if (active && overlay.contains(active)) active.blur();
         overlay.classList.remove("open");
+        // The Saved badge is per-open: it comes back the next time a
+        // setting is moved inside the modal.
+        const savedPill = document.getElementById("s-autosave-pill");
+        if (savedPill) savedPill.classList.add("is-hidden");
     }
+
+    // ── Saved badge (sidebar footer pill) ───────────────────
+    // Shown whenever a settings change is persisted while the modal is
+    // open — every modal control persists through saveSettings — and it
+    // stays visible until the modal closes. Wrapping the bridge call
+    // keeps the badge honest: interactions that change nothing (tab
+    // switches, test-sound buttons) never light it up.
+    const origSaveSettings = window.cc.saveSettings.bind(window.cc);
+    window.cc.saveSettings = (patch) => {
+        const savedPill = document.getElementById("s-autosave-pill");
+        if (savedPill) savedPill.classList.remove("is-hidden");
+        return origSaveSettings(patch);
+    };
 
     const btnSettings = document.getElementById("btn-settings");
     if (btnSettings)
