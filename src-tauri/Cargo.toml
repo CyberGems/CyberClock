@@ -8,6 +8,13 @@ repository = "https://github.com/CyberGems/CyberClock"
 edition = "2021"
 rust-version = "1.77.2"
 
+# Explicit bin target so dev builds and process lists show
+# cyberclock.exe instead of the package-default app.exe. The bundler
+# already renames to CyberClock.exe (mainBinaryName in tauri.conf.json).
+[[bin]]
+name = "cyberclock"
+path = "src/main.rs"
+
 [lib]
 name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
