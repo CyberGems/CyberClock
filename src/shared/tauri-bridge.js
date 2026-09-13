@@ -147,6 +147,12 @@
             if (!HAS_TAURI) return;
             await invoke("open_taskbar_settings");
         },
+        openDatetimeProperties: async () => {
+            // Opens the classic Windows "Date and Time" dialog
+            // (timedate.cpl), like the taskbar clock's context menu.
+            if (!HAS_TAURI) return;
+            await invoke("open_datetime_properties");
+        },
         openExternalUrl: async (url) => {
             // Opens an https/ms-settings URL with the OS default handler.
             if (!HAS_TAURI) {

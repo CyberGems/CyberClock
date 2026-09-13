@@ -3117,6 +3117,15 @@
         });
     }
 
+    // Windows Integration: open the classic date and time properties
+    // dialog (timedate.cpl), same as the taskbar clock's context menu.
+    const sBtnDatetime = document.getElementById("s-btn-datetime");
+    if (sBtnDatetime) {
+        sBtnDatetime.addEventListener("click", () => {
+            window.cc.openDatetimeProperties();
+        });
+    }
+
     const sBtnReset = document.getElementById("s-btn-reset");
     if (sBtnReset) {
         sBtnReset.addEventListener("click", () => {

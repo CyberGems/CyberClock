@@ -150,6 +150,7 @@
 
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
+        setLbl("lbl-datetime", T("tray.datetimeProperties", "Date and time properties..."));
         setLbl("lbl-faq", T("tray.faq", "FAQ"));
         setLbl("lbl-changelog", T("tray.changelog", "Changelog"));
         setLbl("lbl-website", T("tray.homepage", "Website"));
@@ -275,6 +276,11 @@
             if (action === "pin-tray-icon") {
                 if (window.cc && window.cc.openTaskbarSettings) {
                     window.cc.openTaskbarSettings();
+                }
+                setTimeout(() => hideMenu(), 250);
+            } else if (action === "datetime-properties") {
+                if (window.cc && window.cc.openDatetimeProperties) {
+                    window.cc.openDatetimeProperties();
                 }
                 setTimeout(() => hideMenu(), 250);
             } else if (action === "about-modal" || action === "check-updates") {

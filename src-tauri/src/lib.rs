@@ -415,6 +415,24 @@ fn open_taskbar_settings(app: AppHandle) {
     let _ = open_external_url("ms-settings:taskbar".to_string());
 }
 
+/// Open the classic Windows "Date and Time" control panel applet
+/// (timedate.cpl), the same dialog Windows shows from the taskbar
+/// clock's context menu ("Adjust date/time" on Win10 / "Date/time
+/// properties" on Win11). The applet name is a fixed string, so the
+/// command exposes no injection surface.
+#[tauri::command]
+fn open_datetime_properties() {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+        let _ = Command::new("control.exe")
+            .arg("timedate.cpl")
+            .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+            .spawn();
+    }
+}
+
 /// Open an external URL with the OS default handler (ShellExecute).
 /// Only https URLs (plus the ms-settings scheme used above) are accepted —
 /// the value is validated before launch so the frontend can never ask the
@@ -2317,6 +2335,7 @@ pub fn run() {
             download_update,
             install_update,
             open_taskbar_settings,
+            open_datetime_properties,
             open_external_url
         ]);
 
