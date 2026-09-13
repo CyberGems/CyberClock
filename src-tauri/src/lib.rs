@@ -2465,6 +2465,48 @@ pub fn run() {
             // Setup tray icon
             setup_tray(app.handle())?;
 
+            // Full mode is work-area sized by definition (CyberLauncher
+            // style): the clock fills its monitor's work area, only
+            // minimize is allowed. Any other resize (a stray caption
+            // double-click maximize/restore, mixed-DPI glitches) snaps
+            // back to the work area of the monitor the window is on.
+            if let Some(main) = app.get_webview_window("main") {
+                // No maximize box: without it a caption double-click can
+                // not toggle maximize/restore in the first place.
+                let _ = main.set_maximizable(false);
+                let main_for_resize = main.clone();
+                main.on_window_event(move |event| match event {
+                    WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
+                        if main_for_resize.is_minimized().unwrap_or(true) {
+                            return;
+                        }
+                        if let Ok(Some(monitor)) = main_for_resize.current_monitor() {
+                            let work_area = monitor.work_area();
+                            let pos = work_area.position;
+                            let size = work_area.size;
+                            let in_place = main_for_resize
+                                .outer_position()
+                                .map(|p| p.x == pos.x && p.y == pos.y)
+                                .unwrap_or(false)
+                                && main_for_resize.outer_size().ok().map_or(false, |s| {
+                                    s.width == size.width && s.height == size.height
+                                });
+                            if !in_place {
+                                let _ = main_for_resize.set_position(
+                                    tauri::Position::Physical(tauri::PhysicalPosition::new(
+                                        pos.x, pos.y,
+                                    )),
+                                );
+                                let _ = main_for_resize.set_size(tauri::Size::Physical(
+                                    tauri::PhysicalSize::new(size.width, size.height),
+                                ));
+                            }
+                        }
+                    }
+                    _ => {}
+                });
+            }
+
             // The mini window is non-resizable (tauri.conf.json). However,
             // moving between monitors with different DPI can still cause
             // Webview2 to apply incorrect scaling (progressive ~20% shrink).

@@ -2954,10 +2954,11 @@
     .s-lbl small {
         display: block;
         font-family: "Inter", system-ui, sans-serif;
-        font-size: 11.5px;
+        font-size: 12.5px;
         font-weight: 400;
-        color: var(--text-lo);
-        margin-top: 3px;
+        line-height: 1.45;
+        color: var(--text-md);
+        margin-top: 4px;
         font-style: normal;
     }
 

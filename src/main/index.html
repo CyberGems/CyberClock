@@ -475,17 +475,17 @@
                     <div class="s-layout">
                         <aside class="s-nav">
                             <div class="s-nav-items" role="tablist">
-                                <button type="button" class="s-nav-btn on" data-stab="appearance">
+                                <button type="button" class="s-nav-btn on" data-stab="general">
+                                    <span class="s-nav-ico" data-ico="gear"></span>
+                                    <span data-i18n="settings.tab.general">General</span>
+                                </button>
+                                <button type="button" class="s-nav-btn" data-stab="appearance">
                                     <span class="s-nav-ico" data-ico="eye"></span>
                                     <span data-i18n="settings.tab.appearance">Appearance</span>
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="alarms">
                                     <span class="s-nav-ico" data-ico="bell"></span>
                                     <span data-i18n="settings.tab.alarms">Alarms</span>
-                                </button>
-                                <button type="button" class="s-nav-btn" data-stab="general">
-                                    <span class="s-nav-ico" data-ico="gear"></span>
-                                    <span data-i18n="settings.tab.general">General</span>
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="display">
                                     <span class="s-nav-ico" data-ico="expand"></span>
@@ -522,7 +522,7 @@
                         </aside>
                         <div class="s-content">
                     <!-- Appearance -->
-                    <div class="s-panel on" id="stab-appearance">
+                    <div class="s-panel" id="stab-appearance">
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.appearance.themeTitle">Accent Tint</div>
                             <div class="s-sec-d" data-i18n="settings.appearance.themeDesc">Defines the accent color used across the interface.</div>
@@ -974,7 +974,7 @@
                     </div>
 
                     <!-- General -->
-                    <div class="s-panel" id="stab-general">
+                    <div class="s-panel on" id="stab-general">
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.langTitle">Language</div>
                             <div class="s-row">

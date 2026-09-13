@@ -3435,13 +3435,11 @@
     // ══════════════════════════════════════════════════════════════
     // TITLE BAR BUTTONS
     // ══════════════════════════════════════════════════════════════
-    document.querySelector(".tbar").addEventListener("mousedown", (e) => {
-        if (e.target.closest(".tbar-right, .tbar-brand")) return;
-        if (e.button === 0 && window.cc && window.cc.startDragging) {
-            window.cc.startDragging();
-        }
-    });
-
+    // No dragging here on purpose: full mode always covers the work
+    // area of its monitor (only minimize is allowed), and starting a
+    // system caption drag would re-enable the native double-click
+    // maximize/restore toggle, which let the window end up bigger
+    // than the monitor on multi-DPI setups.
     const btnAot = document.getElementById("btn-aot");
     if (btnAot) {
         btnAot.addEventListener("click", async () => {
