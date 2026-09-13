@@ -153,6 +153,16 @@
             if (!HAS_TAURI) return;
             await invoke("open_datetime_properties");
         },
+        checkClockAccuracy: async () => {
+            // Measures the local clock against a network time server
+            // (read-only). Returns the persisted measurement or null
+            // when no server was reachable.
+            return await invokeOrFallback("check_clock_accuracy", undefined, null);
+        },
+        onClockAccuracy: (cb) => {
+            // Pushed after every automatic or manual check.
+            return subscribe("clock:accuracy", cb);
+        },
         openExternalUrl: async (url) => {
             // Opens an https/ms-settings URL with the OS default handler.
             if (!HAS_TAURI) {

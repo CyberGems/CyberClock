@@ -307,6 +307,10 @@
         const audioMuteEl = document.getElementById("s-audio-mute");
         if (audioMuteEl) audioMuteEl.checked = s.audioMuted === true;
 
+        const clockAccEl = document.getElementById("s-clock-acc");
+        if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
+        if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
+
         const langEl = document.getElementById("s-lang");
         if (langEl) langEl.value = s.language || "auto";
         window.ccI18n.setLang(s.language || "auto");
@@ -3123,6 +3127,74 @@
     if (sBtnDatetime) {
         sBtnDatetime.addEventListener("click", () => {
             window.cc.openDatetimeProperties();
+        });
+    }
+
+    // Clock accuracy: drift readout under the Windows Integration
+    // section. The backend checks on its own (boot retries + every 6h)
+    // and notifies when the drift exceeds a minute; this UI only shows
+    // the measurement and offers a manual check.
+    function renderClockAccuracy(s) {
+        const el = document.getElementById("s-clock-status");
+        if (!el) return;
+        const drift = s ? s.clockDriftMs : null;
+        const at = s ? s.clockCheckedAt : null;
+        if (drift == null || at == null) {
+            el.textContent = window.ccI18n.t("settings.general.clockNever");
+            return;
+        }
+        const abs = Math.abs(drift);
+        const driftTxt = abs < 60000 ? (abs / 1000).toFixed(1) + " s"
+            : abs < 3600000 ? Math.round(abs / 60000) + " min"
+            : abs < 86400000 ? Math.round(abs / 3600000) + " h"
+            : Math.round(abs / 86400000) + " d";
+        const sign = drift >= 0 ? "+" : "-";
+        const when = new Date(at * 1000).toLocaleString();
+        el.textContent = window.ccI18n.t("settings.general.clockDrift") + ": " + sign + driftTxt
+            + " · " + window.ccI18n.t("settings.general.clockLastCheck") + ": " + when;
+    }
+
+    if (window.cc.onClockAccuracy) {
+        window.cc.onClockAccuracy((payload) => {
+            if (!payload) return;
+            if (payload.source === "unreachable") {
+                const el = document.getElementById("s-clock-status");
+                if (el) el.textContent = window.ccI18n.t("settings.general.clockUnreachable");
+                return;
+            }
+            cfg.clockDriftMs = payload.driftMs;
+            cfg.clockCheckedAt = payload.checkedAt;
+            renderClockAccuracy(cfg);
+        });
+    }
+
+    const sClockAcc = document.getElementById("s-clock-acc");
+    if (sClockAcc) {
+        sClockAcc.addEventListener("change", (e) => {
+            window.cc.saveSettings({ clockAccuracyEnabled: e.target.checked });
+        });
+    }
+
+    const sBtnClockCheck = document.getElementById("s-btn-clock-check");
+    if (sBtnClockCheck) {
+        sBtnClockCheck.addEventListener("click", async () => {
+            sBtnClockCheck.disabled = true;
+            const lbl = sBtnClockCheck.querySelector('[data-i18n="settings.general.clockCheck"]');
+            const prev = lbl ? lbl.textContent : null;
+            if (lbl) lbl.textContent = window.ccI18n.t("settings.general.clockChecking");
+            try {
+                const res = await window.cc.checkClockAccuracy();
+                // Success and unreachable both arrive via the
+                // clock:accuracy event; a null result (bridge fallback)
+                // still gets the unreachable text.
+                if (!res) {
+                    const el = document.getElementById("s-clock-status");
+                    if (el) el.textContent = window.ccI18n.t("settings.general.clockUnreachable");
+                }
+            } finally {
+                sBtnClockCheck.disabled = false;
+                if (lbl && prev != null) lbl.textContent = prev;
+            }
         });
     }
 

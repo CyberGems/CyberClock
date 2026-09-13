@@ -11,6 +11,7 @@ use tauri_plugin_dialog::DialogExt;
 use log::{info, warn};
 
 mod settings;
+mod time_sync;
 mod updater;
 
 use settings::{
@@ -606,6 +607,195 @@ fn find_monitor_for_window(window: &WebviewWindow) -> Option<(usize, tauri::Moni
     }
 
     None
+}
+
+// ─────────────────────────────────────────────────────────────
+// Clock accuracy (NTP drift check + warning notification)
+// ─────────────────────────────────────────────────────────────
+// A dead CMOS battery (or any timezone mishap) leaves the system clock
+// wrong after boot, which silently corrupts every alarm and chime.
+// This loop measures the drift against network time servers
+// (read-only, no privileges) and sends a system notification when the
+// deviation exceeds a minute, so a wrong clock is caught at startup
+// instead of through mysterious errors later on.
+
+/// Notify from this much drift on (60 s). Smaller deviations only show
+/// in the settings readout.
+const CLOCK_DRIFT_NOTIFY_MS: i64 = 60_000;
+
+/// Send the drift notification at most once per process: a machine
+/// with a dead battery would otherwise get a toast every 6 hours.
+static CLOCK_DRIFT_NOTIFIED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
+/// Persisted status of the last clock accuracy check (serializable
+/// over IPC: `Measurement` itself is an internal type).
+#[derive(Clone, serde::Serialize)]
+pub struct ClockAccuracy {
+    pub drift_ms: Option<i64>,
+    pub checked_at: Option<i64>,
+    pub source: Option<String>,
+}
+
+/// Run one measurement, persist the result, broadcast it to the
+/// windows and (optionally) notify. Returns the status that the
+/// caller (command or loop) can pass on.
+fn run_clock_check(app: &AppHandle, notify_allowed: bool) -> ClockAccuracy {
+    let status = |drift_ms: Option<i64>, source: Option<&str>| ClockAccuracy {
+        drift_ms,
+        checked_at: if drift_ms.is_some() {
+            Some(Local::now().timestamp())
+        } else {
+            None
+        },
+        source: source.map(|s| s.to_string()),
+    };
+
+    match time_sync::measure() {
+        Ok(m) => {
+            let now = Local::now().timestamp();
+            let _ = update_settings(app, |s| {
+                s.clock_drift_ms = Some(m.drift_ms);
+                s.clock_checked_at = Some(now);
+                Ok(())
+            });
+            let _ = app.emit(
+                "clock:accuracy",
+                serde_json::json!({
+                    "driftMs": m.drift_ms,
+                    "checkedAt": now,
+                    "source": m.source,
+                }),
+            );
+            info!("clock accuracy: drift {} ms ({})", m.drift_ms, m.source);
+
+            if notify_allowed
+                && !CLOCK_DRIFT_NOTIFIED.swap(true, Ordering::SeqCst)
+                && m.drift_ms.abs() > CLOCK_DRIFT_NOTIFY_MS
+            {
+                send_clock_notification(app, m.drift_ms);
+            }
+            status(Some(m.drift_ms), Some(m.source))
+        }
+        Err(e) => {
+            // Transient failures keep the last good persisted values;
+            // this result only tells the requesting UI that the check
+            // itself could not run.
+            warn!("clock accuracy: no time source reachable: {}", e);
+            let _ = app.emit(
+                "clock:accuracy",
+                serde_json::json!({ "driftMs": null, "checkedAt": null, "source": "unreachable" }),
+            );
+            status(None, Some("unreachable"))
+        }
+    }
+}
+
+/// Background loop: at boot the network often is not up yet when the
+/// Run key fires, so retry for ~10 minutes; afterwards re-check every
+/// 6 hours while auto-check is enabled.
+fn clock_accuracy_loop(app: AppHandle) {
+    for _ in 0..10 {
+        std::thread::sleep(std::time::Duration::from_secs(30));
+        if run_clock_check(&app, true).drift_ms.is_some() {
+            break;
+        }
+    }
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(6 * 3600));
+        if load_settings(&app).clock_accuracy_enabled {
+            run_clock_check(&app, true);
+        }
+    }
+}
+
+fn send_clock_notification(app: &AppHandle, drift_ms: i64) {
+    use tauri_plugin_notification::NotificationExt;
+    let drift = format_drift(drift_ms);
+    let (title, body) = if display_language(app) == "es" {
+        (
+            "CyberClock",
+            format!(
+                "La hora del sistema parece incorrecta: desfase de {}. Sincroniza el reloj de Windows.",
+                drift
+            ),
+        )
+    } else {
+        (
+            "CyberClock",
+            format!(
+                "The system time seems wrong: off by {}. Sync your Windows clock.",
+                drift
+            ),
+        )
+    };
+    if let Err(e) = app
+        .notification()
+        .builder()
+        .title(title)
+        .body(&body)
+        .show()
+    {
+        warn!("clock accuracy: notification failed: {}", e);
+    }
+}
+
+/// Humanize a drift for the notification: "1.4 s", "5 min", "3 h",
+/// "2 d" (units are language-neutral).
+fn format_drift(ms: i64) -> String {
+    let abs = ms.abs();
+    if abs < 60_000 {
+        format!("{:.1} s", abs as f64 / 1000.0)
+    } else if abs < 3_600_000 {
+        format!("{} min", abs / 60_000)
+    } else if abs < 86_400_000 {
+        format!("{} h", abs / 3_600_000)
+    } else {
+        format!("{} d", abs / 86_400_000)
+    }
+}
+
+/// UI language for backend-generated text: the explicit setting wins,
+/// "auto" falls back to the system UI language (English as last resort).
+fn display_language(app: &AppHandle) -> String {
+    match load_settings(app).language.as_str() {
+        "es" => "es".to_string(),
+        "en" => "en".to_string(),
+        _ => system_ui_language(),
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn system_ui_language() -> String {
+    use windows_sys::Win32::Globalization::GetUserDefaultLocaleName;
+    const BUF_LEN: usize = 85; // LOCALE_NAME_MAX_LENGTH
+    let mut buf = [0u16; BUF_LEN];
+    let len = unsafe { GetUserDefaultLocaleName(buf.as_mut_ptr(), BUF_LEN as i32) };
+    if len > 1 {
+        let locale = String::from_utf16_lossy(&buf[..(len - 1) as usize]);
+        if locale.to_ascii_lowercase().starts_with("es") {
+            return "es".to_string();
+        }
+    }
+    "en".to_string()
+}
+
+#[cfg(not(target_os = "windows"))]
+fn system_ui_language() -> String {
+    "en".to_string()
+}
+
+/// Manual "Check now": measures off-thread (a server timeout can take
+/// seconds) and returns the persisted status.
+#[tauri::command]
+async fn check_clock_accuracy(app: AppHandle) -> ClockAccuracy {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let app_for_thread = app.clone();
+    std::thread::spawn(move || {
+        let _ = tx.send(run_clock_check(&app_for_thread, true));
+    });
+    rx.recv()
+        .unwrap_or_else(|_| ClockAccuracy { drift_ms: None, checked_at: None, source: Some("unreachable".to_string()) })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2266,6 +2456,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .manage(AlarmState::default())
@@ -2365,6 +2556,12 @@ pub fn run() {
                 relax_scheduler_loop(app_for_relax);
             });
 
+            // Clock accuracy loop (NTP drift check + wrong-time warning)
+            let app_for_clock = app.handle().clone();
+            std::thread::spawn(move || {
+                clock_accuracy_loop(app_for_clock);
+            });
+
             info!(
                 "CyberClock v{} started (mode: {})",
                 app.package_info().version,
@@ -2409,6 +2606,7 @@ pub fn run() {
             install_update,
             open_taskbar_settings,
             open_datetime_properties,
+            check_clock_accuracy,
             open_external_url
         ]);
 

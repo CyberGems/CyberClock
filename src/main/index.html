@@ -1034,6 +1034,31 @@
                                     <span data-i18n="settings.general.datetimeBtn">Open...</span>
                                 </button>
                             </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockAccuracy">Clock accuracy</span>
+                                    <small data-i18n="settings.general.clockAccuracyDesc">Checks the system clock against a time server and warns when it is off by more than a minute</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-clock-acc" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row">
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockDrift">Difference</span>
+                                    <!-- Dynamic status: app.js owns this text
+                                         (drift, last check or unreachable);
+                                         data-i18n would clobber it on language
+                                         changes. -->
+                                    <small id="s-clock-status">Never checked</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-clock-check" type="button">
+                                    <span data-ico="clock"></span>
+                                    <span data-i18n="settings.general.clockCheck">Check now</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.general.relaxVolume">Relaxation Volume</div>
