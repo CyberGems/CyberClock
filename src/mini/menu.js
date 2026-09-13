@@ -37,8 +37,8 @@
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
             if (cfg) {
-                // Theme
-                if (cfg.theme) document.body.dataset.theme = cfg.theme;
+                // Accent tint
+                if (cfg.theme) window.CCTint.apply(cfg.theme);
 
                 if (window.ccI18n) {
                     window.ccI18n.setLang(cfg.language || "auto");

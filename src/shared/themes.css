@@ -1,173 +1,54 @@
 /* ═══════════════════════════════════════════════════════════
-   CyberClock — Theme System  ·  CyberGems © 2026
-   5 Skins: arctic-ice | cyber-blue | neon-green |
-            plasma-purple | solar-orange
+   CyberClock — Design Tokens · CyberGems © 2026
+   One sober structural palette + one derived accent layer.
+
+   The interface keeps a single fixed base (deep navy surfaces,
+   cool neutral text). Color enters only through the accent
+   tint applied by shared/tint.js, which overrides the seed
+   triplets below on <body>. Glows, borders and the accent
+   family are derived here — never redefined per color.
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Arctic Ice (default) ──────────────────────────────── */
-:root,
-[data-theme="arctic-ice"] {
+:root {
+  /* ── Structural base (never tinted) ─────────────────── */
   --bg-00: #010c14;
   --bg-01: #031624;
   --bg-02: #051e30;
   --bg-03: #07283e;
   --bg-04: #09324c;
 
-  --accent-a:   #c8dce8;
-  --accent-b:   #78b8cc;
-  --accent-c:   #a4d0e0;
-  --accent-dim: rgba(200, 220, 232, 0.08);
+  --text-hi: #f0f4f6;
+  --text-md: #90b0c0;
+  --text-lo: #2a5060;
 
-  --text-hi:  #f0f4f6;
-  --text-md:  #90b0c0;
-  --text-lo:  #2a5060;
-
-  --glow-xs: 0 0 4px rgba(200,220,232,0.40);
-  --glow-sm: 0 0 8px rgba(200,220,232,0.50), 0 0 16px rgba(200,220,232,0.18);
-  --glow-md: 0 0 14px rgba(200,220,232,0.60), 0 0 30px rgba(200,220,232,0.25), 0 0 60px rgba(200,220,232,0.08);
-  --glow-lg: 0 0 20px rgba(200,220,232,0.70), 0 0 50px rgba(200,220,232,0.30), 0 0 100px rgba(200,220,232,0.10);
-
-  --border:        rgba(200, 220, 232, 0.18);
-  --border-bright: rgba(200, 220, 232, 0.45);
-  --border-active: rgba(200, 220, 232, 0.80);
-
+  /* ── Accent seeds ──────────────────────────────────────
+     Defaults = the Ice tint. tint.js replaces these triplets
+     inline on <body>; everything below derives from them. */
   --rgb-accent: 200, 220, 232;
-  --rgb-b:      120, 184, 204;
+  --rgb-b:      149, 185, 206;
+  --rgb-c:      230, 238, 243;
 
+  /* ── Secondary hand — fixed brand identity, stays
+     independent of the tint ───────────────────────────── */
   --hand-sec: #ff6699;
   --rgb-sec:  255, 102, 153;
 }
 
-/* ── Cyber Blue ────────────────────────────────────────── */
-[data-theme="cyber-blue"] {
-  --bg-00: #020810;
-  --bg-01: #050e1e;
-  --bg-02: #07152a;
-  --bg-03: #0a1e3c;
-  --bg-04: #0c2550;
+/* ── Derived chromatic layer ──────────────────────────────
+   Declared on body (not :root) so inline overrides of the
+   seed triplets recomputed this whole chain on one element. */
+body {
+  --accent-a:   rgb(var(--rgb-accent));
+  --accent-b:   rgb(var(--rgb-b));
+  --accent-c:   rgb(var(--rgb-c));
+  --accent-dim: rgba(var(--rgb-accent), 0.08);
 
-  --accent-a:   #20bfdf;
-  --accent-b:   #206cdf;
-  --accent-c:   #20dfb9;
-  --accent-dim: rgba(32, 191, 223, 0.12);
+  --glow-xs: 0 0 4px rgba(var(--rgb-accent), 0.40);
+  --glow-sm: 0 0 8px rgba(var(--rgb-accent), 0.50), 0 0 16px rgba(var(--rgb-accent), 0.18);
+  --glow-md: 0 0 14px rgba(var(--rgb-accent), 0.60), 0 0 30px rgba(var(--rgb-accent), 0.25), 0 0 60px rgba(var(--rgb-accent), 0.08);
+  --glow-lg: 0 0 20px rgba(var(--rgb-accent), 0.70), 0 0 50px rgba(var(--rgb-accent), 0.30), 0 0 100px rgba(var(--rgb-accent), 0.10);
 
-  --text-hi:  #e4f4f8;
-  --text-md:  #6eb8c8;
-  --text-lo:  #254a55;
-
-  --glow-xs: 0 0 4px rgba(32,191,223,0.45);
-  --glow-sm: 0 0 8px rgba(32,191,223,0.60), 0 0 16px rgba(32,191,223,0.22);
-  --glow-md: 0 0 14px rgba(32,191,223,0.70), 0 0 30px rgba(32,191,223,0.30), 0 0 60px rgba(32,191,223,0.10);
-  --glow-lg: 0 0 20px rgba(32,191,223,0.80), 0 0 50px rgba(32,191,223,0.40), 0 0 100px rgba(32,191,223,0.12);
-
-  --border:        rgba(32, 191, 223, 0.20);
-  --border-bright: rgba(32, 191, 223, 0.50);
-  --border-active: rgba(32, 191, 223, 0.85);
-
-  --rgb-accent: 32, 191, 223;
-  --rgb-b:      32, 108, 223;
-
-  --hand-sec: #ff4444;
-  --rgb-sec:  255, 68, 68;
+  --border:        rgba(var(--rgb-accent), 0.18);
+  --border-bright: rgba(var(--rgb-accent), 0.45);
+  --border-active: rgba(var(--rgb-accent), 0.80);
 }
-
-/* ── Neon Green → Forest Mist ─────────────────────────── */
-[data-theme="neon-green"] {
-  --bg-00: #040e0a;
-  --bg-01: #06140e;
-  --bg-02: #081a12;
-  --bg-03: #0a2016;
-  --bg-04: #0c261a;
-
-  --accent-a:   #add9ce;
-  --accent-b:   #74a695;
-  --accent-c:   #c3e6e0;
-  --accent-dim: rgba(173, 217, 206, 0.10);
-
-  --text-hi:  #dff2ed;
-  --text-md:  #93b8ab;
-  --text-lo:  #47665c;
-
-  --glow-xs: 0 0 4px rgba(173,217,206,0.40);
-  --glow-sm: 0 0 8px rgba(173,217,206,0.50), 0 0 16px rgba(173,217,206,0.18);
-  --glow-md: 0 0 14px rgba(173,217,206,0.60), 0 0 30px rgba(173,217,206,0.25), 0 0 60px rgba(173,217,206,0.08);
-  --glow-lg: 0 0 20px rgba(173,217,206,0.70), 0 0 50px rgba(173,217,206,0.30), 0 0 100px rgba(173,217,206,0.10);
-
-  --border:        rgba(173, 217, 206, 0.20);
-  --border-bright: rgba(173, 217, 206, 0.50);
-  --border-active: rgba(173, 217, 206, 0.85);
-
-  --rgb-accent: 173, 217, 206;
-  --rgb-b:      116, 166, 149;
-
-  --hand-sec: #cc8f7a;
-  --rgb-sec:  204, 143, 122;
-}
-
-/* ── Plasma Purple → Twilight Haze ─────────────────────── */
-[data-theme="plasma-purple"] {
-  --bg-00: #0c080e;
-  --bg-01: #120c14;
-  --bg-02: #18101a;
-  --bg-03: #1e1420;
-  --bg-04: #241826;
-
-  --accent-a:   #ccb2d9;
-  --accent-b:   #9277a6;
-  --accent-c:   #e4ceeb;
-  --accent-dim: rgba(204, 178, 217, 0.10);
-
-  --text-hi:  #ede4f2;
-  --text-md:  #ad97b8;
-  --text-lo:  #5c4966;
-
-  --glow-xs: 0 0 4px rgba(204,178,217,0.40);
-  --glow-sm: 0 0 8px rgba(204,178,217,0.50), 0 0 16px rgba(204,178,217,0.18);
-  --glow-md: 0 0 14px rgba(204,178,217,0.60), 0 0 30px rgba(204,178,217,0.25), 0 0 60px rgba(204,178,217,0.08);
-  --glow-lg: 0 0 20px rgba(204,178,217,0.70), 0 0 50px rgba(204,178,217,0.30), 0 0 100px rgba(204,178,217,0.10);
-
-  --border:        rgba(204, 178, 217, 0.20);
-  --border-bright: rgba(204, 178, 217, 0.50);
-  --border-active: rgba(204, 178, 217, 0.85);
-
-  --rgb-accent: 204, 178, 217;
-  --rgb-b:      146, 119, 166;
-
-  --hand-sec: #86bfac;
-  --rgb-sec:  134, 191, 172;
-}
-
-/* ── Solar Orange → Warm Ember ────────────────────────────── */
-[data-theme="solar-orange"] {
-  --bg-00: #0e0a06;
-  --bg-01: #140e08;
-  --bg-02: #1a120a;
-  --bg-03: #20180e;
-  --bg-04: #261c12;
-
-  --accent-a:   #d9c2a9;
-  --accent-b:   #a68971;
-  --accent-c:   #ebdcc7;
-  --accent-dim: rgba(217, 194, 169, 0.10);
-
-  --text-hi:  #f2ebe4;
-  --text-md:  #b8a797;
-  --text-lo:  #665849;
-
-  --glow-xs: 0 0 4px rgba(217,194,169,0.40);
-  --glow-sm: 0 0 8px rgba(217,194,169,0.50), 0 0 16px rgba(217,194,169,0.18);
-  --glow-md: 0 0 14px rgba(217,194,169,0.60), 0 0 30px rgba(217,194,169,0.25), 0 0 60px rgba(217,194,169,0.08);
-  --glow-lg: 0 0 20px rgba(217,194,169,0.70), 0 0 50px rgba(217,194,169,0.30), 0 0 100px rgba(217,194,169,0.10);
-
-  --border:        rgba(217, 194, 169, 0.20);
-  --border-bright: rgba(217, 194, 169, 0.50);
-  --border-active: rgba(217, 194, 169, 0.85);
-
-  --rgb-accent: 217, 194, 169;
-  --rgb-b:      166, 137, 113;
-
-  --hand-sec: #7da1b3;
-  --rgb-sec:  125, 161, 179;
-}
-
-

@@ -161,27 +161,40 @@
             ),
         );
 
-    // Skin dots (sidebar + settings)
-    function applySkin(t) {
-        document.body.dataset.theme = t;
+    // Accent tint — shared engine in shared/tint.js. The structural
+    // palette never changes; only the accent family and the kissed
+    // panels do.
+    function applyTint(t) {
+        const id = window.CCTint.apply(t);
         document
-            .querySelectorAll(".skin-dot")
+            .querySelectorAll(".tint-swatch")
             .forEach((d) =>
-                d.classList.toggle("active", d.dataset.theme === t),
-            );
-        document
-            .querySelectorAll(".s-ttile")
-            .forEach((d) =>
-                d.classList.toggle("on", d.dataset.theme === t),
+                d.classList.toggle("on", d.dataset.tint === id),
             );
     }
 
-    document.querySelectorAll(".skin-dot").forEach((d) =>
-        d.addEventListener("click", () => {
-            window.cc.saveSettings({ theme: d.dataset.theme });
-            applySkin(d.dataset.theme);
-        }),
-    );
+    // Build the tint swatch grid once at boot; applySettings keeps
+    // the selection in sync and ccI18n translates the tooltips.
+    (function buildTintSwatches() {
+        const grid = document.getElementById("tint-grid");
+        if (!grid) return;
+        window.CCTint.PRESETS.forEach((p) => {
+            const sw = document.createElement("button");
+            sw.type = "button";
+            sw.className = "tint-swatch";
+            sw.dataset.tint = p.id;
+            sw.style.background = window.CCTint.normalizeSeed(p.seed);
+            sw.setAttribute(
+                "data-i18n-attr",
+                `title:settings.appearance.tint.${p.id},aria-label:settings.appearance.tint.${p.id}`,
+            );
+            sw.addEventListener("click", () => {
+                window.cc.saveSettings({ theme: p.id });
+                applyTint(p.id);
+            });
+            grid.appendChild(sw);
+        });
+    })();
 
     // ══════════════════════════════════════════════════════════════
     // ALARM SCHEDULER TIME HELPERS
@@ -246,9 +259,8 @@
     // ══════════════════════════════════════════════════════════════
     function applySettings(s) {
         cfg = s;
-        document.body.dataset.theme = s.theme || "arctic-ice";
         // Scanlines are mini-mode only — full mode never has them
-        applySkin(s.theme || "arctic-ice");
+        applyTint(s.theme || "ice");
         updateDigital();
 
         // Settings modal controls
@@ -2882,14 +2894,6 @@
     // Settings tabs (sidebar nav buttons in the settings modal)
     document.querySelectorAll(".s-nav-btn").forEach((btn) => {
         btn.addEventListener("click", () => switchSettingsTab(btn.dataset.stab));
-    });
-
-    // Theme tiles
-    document.querySelectorAll(".s-ttile").forEach((t) => {
-        t.addEventListener("click", () => {
-            window.cc.saveSettings({ theme: t.dataset.theme });
-            applySkin(t.dataset.theme);
-        });
     });
 
     // Format

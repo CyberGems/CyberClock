@@ -28,7 +28,7 @@
     }
 
     function applyTheme(theme) {
-        document.body.dataset.theme = theme || "arctic-ice";
+        window.CCTint.apply(theme || "ice");
     }
 
     function renderState(state) {

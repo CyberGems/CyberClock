@@ -175,7 +175,7 @@
 
         cfg = s;
         calNotes = s.calendarNotes || {};
-        document.body.dataset.theme = s.theme || "arctic-ice";
+        window.CCTint.apply(s.theme || "ice");
 
         window.ccI18n.setLang(s.language || "auto");
         const btnAot = document.getElementById("btn-aot");

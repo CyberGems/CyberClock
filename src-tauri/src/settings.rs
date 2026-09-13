@@ -136,7 +136,9 @@ pub struct AppSettings {
 impl Default for AppSettings {
     fn default() -> AppSettings {
         AppSettings {
-            theme: "cyber-blue".to_string(),
+            // Accent tint preset id (see src/shared/tint.js); old
+            // skin ids are migrated client-side on load.
+            theme: "ice".to_string(),
             clock_format: "12h".to_string(),
             clock_brand: "CYBERGEMS".to_string(),
             show_seconds: true,

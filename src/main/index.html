@@ -7,11 +7,12 @@
                 <link rel="stylesheet" href="../shared/themes.css" />
         <link rel="stylesheet" href="../shared/base.css" />
         <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/tint.js"></script>
         <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <link rel="stylesheet" href="app.css" />
     </head>
-    <body data-theme="arctic-ice" class="cc-inactive">
+    <body data-tint="ice" class="cc-inactive">
         <!-- Theme-aware gradients for the premium icon system -->
         <svg width="0" height="0" style="position:absolute" aria-hidden="true">
             <defs>
@@ -523,74 +524,9 @@
                     <!-- Appearance -->
                     <div class="s-panel on" id="stab-appearance">
                         <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.appearance.themeTitle">Theme / Skin</div>
-                            <div class="s-themes">
-                                <div class="s-ttile" data-theme="arctic-ice">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #d0f0ff;
-                                            box-shadow: 0 0 8px #d0f0ff;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.arcticIce">Arctic Ice</div>
-                                </div>
-                                <div class="s-ttile" data-theme="cyber-blue">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #00d4ff;
-                                            box-shadow: 0 0 8px #00d4ff;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.cyberBlue">Cyber Blue</div>
-                                </div>
-                                <div class="s-ttile" data-theme="neon-green">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #add9ce;
-                                            box-shadow: 0 0 8px #add9ce;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.forestMist">Forest Mist</div>
-                                </div>
-                                <div class="s-ttile" data-theme="plasma-purple">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #ccb2d9;
-                                            box-shadow: 0 0 8px #ccb2d9;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.twilightHaze">Twilight Haze</div>
-                                </div>
-                                <div class="s-ttile" data-theme="solar-orange">
-                                    <div
-                                        class="s-tdot"
-                                        style="
-                                            background: #d9c2a9;
-                                            box-shadow: 0 0 8px #d9c2a9;
-                                            border-radius: 50%;
-                                            width: 20px;
-                                            height: 20px;
-                                        "
-                                    ></div>
-                                    <div class="s-tname" data-i18n="settings.appearance.theme.warmEmber">Warm Ember</div>
-                                </div>
-                            </div>
+                            <div class="s-sec-t" data-i18n="settings.appearance.themeTitle">Accent Tint</div>
+                            <div class="s-sec-d" data-i18n="settings.appearance.themeDesc">Defines the accent color used across the interface.</div>
+                            <div class="tint-grid" id="tint-grid"><!-- swatches built by app.js from shared/tint.js --></div>
                         </div>
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.appearance.clockDisplay">Clock Display</div>

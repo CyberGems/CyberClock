@@ -50,7 +50,7 @@
 
     // ── Theme / language / auto-update toggle ───────────────
     function applySettings(s) {
-        document.body.dataset.theme = s.theme || "arctic-ice";
+        window.CCTint.apply(s.theme || "ice");
         if (window.ccI18n) {
             window.ccI18n.setLang(s.language || "auto");
             window.ccI18n.apply(document);
