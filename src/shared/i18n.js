@@ -366,9 +366,11 @@
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Multi-Monitor Support",
-            "settings.display.desc1": "CyberClock fills your primary display's work area, respecting the taskbar at all times.",
-            "settings.display.desc2": "Mini Mode — drag the bar to any monitor; position is remembered.",
+            "settings.display.desc1": "Full mode covers the selected display completely, edge to edge.",
+            "settings.display.desc2": "In Mini Mode, drag the clock to any monitor: the position is remembered.",
             "settings.display.desc3": "Display changes are detected automatically and the window repositions itself.",
+            "settings.display.auto": "Automatic monitor",
+            "settings.display.autoDesc": "Full mode opens on the monitor where the mouse is",
             "settings.display.primary": "PRIMARY",
             "settings.display.active": "ACTIVE",
             "settings.display.inUse": "✓ IN USE",
@@ -787,9 +789,11 @@
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Soporte Multi-Monitor",
-            "settings.display.desc1": "CyberClock llena el área de trabajo de tu pantalla principal, respetando la barra de tareas en todo momento.",
-            "settings.display.desc2": "Modo Mini — arrastra la barra a cualquier pantalla; se recordará la posición.",
+            "settings.display.desc1": "El modo completo cubre por completo la pantalla seleccionada, de borde a borde.",
+            "settings.display.desc2": "En Modo Mini, arrastra el reloj a cualquier pantalla: se recuerda la posición.",
             "settings.display.desc3": "Los cambios de pantalla se detectan automáticamente y la ventana se reposiciona sola.",
+            "settings.display.auto": "Monitor automático",
+            "settings.display.autoDesc": "El modo completo se abre en el monitor donde está el ratón",
             "settings.display.primary": "PRIMARIA",
             "settings.display.active": "ACTIVA",
             "settings.display.inUse": "✓ EN USO",

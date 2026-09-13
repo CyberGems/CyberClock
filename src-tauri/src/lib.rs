@@ -609,6 +609,27 @@ fn find_monitor_for_window(window: &WebviewWindow) -> Option<(usize, tauri::Moni
     None
 }
 
+/// The monitor that currently holds the mouse pointer: the "active"
+/// monitor, CyberLauncher style. Used when automatic display selection
+/// is enabled so full mode opens wherever the user is working.
+fn monitor_under_cursor(window: &WebviewWindow) -> Option<tauri::Monitor> {
+    let pos = window.cursor_position().ok()?;
+    window
+        .available_monitors()
+        .ok()?
+        .into_iter()
+        .find(|m| {
+            let mp = m.position();
+            let ms = m.size();
+            let px = pos.x as i32;
+            let py = pos.y as i32;
+            px >= mp.x
+                && px < mp.x + ms.width as i32
+                && py >= mp.y
+                && py < mp.y + ms.height as i32
+        })
+}
+
 // ─────────────────────────────────────────────────────────────
 // Clock accuracy (NTP drift check + warning notification)
 // ─────────────────────────────────────────────────────────────
@@ -973,9 +994,12 @@ fn handle_display_change(app: AppHandle) {
             if main.is_visible().unwrap_or(false) {
                 let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
                 if let Some(monitor) = monitors.get(display_id).or_else(|| monitors.first()) {
-                    let work_area = monitor.work_area();
-                    let size = work_area.size;
-                    let position = work_area.position;
+                    let position = monitor.position();
+                    let size = monitor.size();
+                    let was_fullscreen = main.is_fullscreen().unwrap_or(false);
+                    if was_fullscreen {
+                        let _ = main.set_fullscreen(false);
+                    }
                     let _ = main.set_position(tauri::Position::Physical(
                         tauri::PhysicalPosition::new(position.x, position.y),
                     ));
@@ -983,6 +1007,9 @@ fn handle_display_change(app: AppHandle) {
                         size.width,
                         size.height,
                     )));
+                    if was_fullscreen {
+                        let _ = main.set_fullscreen(true);
+                    }
                 }
             }
         }
@@ -1045,21 +1072,31 @@ fn switch_to_full_mode(app: AppHandle) {
     }
 
     if let Some(main) = app.get_webview_window("main") {
-        // Position on detected or preferred display
-        let monitor = detected_monitor.or_else(|| {
-            let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-            main.available_monitors().ok().and_then(|monitors| {
-                monitors
-                    .get(display_id)
-                    .or_else(|| monitors.first())
-                    .cloned()
-            })
-        });
+        // Automatic selection: open on the monitor that holds the mouse
+        // pointer. Otherwise fall back to the mini's monitor, then to
+        // the preferred display.
+        let mut monitor = if settings.display_auto {
+            monitor_under_cursor(&main)
+        } else {
+            None
+        };
+        if monitor.is_none() {
+            monitor = detected_monitor.or_else(|| {
+                let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
+                main.available_monitors().ok().and_then(|monitors| {
+                    monitors
+                        .get(display_id)
+                        .or_else(|| monitors.first())
+                        .cloned()
+                })
+            });
+        }
 
         if let Some(m) = monitor {
-            let work_area = m.work_area();
-            let size = work_area.size;
-            let position = work_area.position;
+            // Edge-to-edge: the full clock covers the WHOLE monitor,
+            // taskbar included, and goes borderless fullscreen.
+            let position = m.position();
+            let size = m.size();
             let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
                 position.x, position.y,
             )));
@@ -1070,6 +1107,7 @@ fn switch_to_full_mode(app: AppHandle) {
         }
         let _ = main.show();
         let _ = main.set_focus();
+        let _ = main.set_fullscreen(true);
         refresh_taskbar_tab(&main);
     }
 
@@ -1483,16 +1521,24 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
     if let Some(main) = app.get_webview_window("main") {
         if let Ok(monitors) = window.available_monitors() {
             if let Some(monitor) = monitors.get(id as usize) {
-                let work_area = monitor.work_area();
-                let size = work_area.size;
-                let position = work_area.position;
-                let _ = main.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                    position.x, position.y,
-                )));
+                // Edge-to-edge: the whole monitor bounds, then restore
+                // borderless fullscreen so the system refits it there.
+                let position = monitor.position();
+                let size = monitor.size();
+                let was_fullscreen = main.is_fullscreen().unwrap_or(false);
+                if was_fullscreen {
+                    let _ = main.set_fullscreen(false);
+                }
+                let _ = main.set_position(tauri::Position::Physical(
+                    tauri::PhysicalPosition::new(position.x, position.y),
+                ));
                 let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
                     size.width,
                     size.height,
                 )));
+                if was_fullscreen {
+                    let _ = main.set_fullscreen(true);
+                }
             }
         }
     }
@@ -2345,27 +2391,37 @@ fn show_initial_window(app: &AppHandle) {
     // Show appropriate window based on mode
     if !is_mini {
         if let Some(main) = app.get_webview_window("main") {
-            // Find preferred display or fallback to first
-            let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-            if let Ok(monitors) = main.available_monitors() {
-                let monitor = monitors
-                    .get(display_id)
-                    .or_else(|| monitors.first())
-                    .cloned();
-                if let Some(m) = monitor {
-                    let work_area = m.work_area();
-                    let size = work_area.size;
-                    let position = work_area.position;
-                    let _ = main.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(position.x, position.y),
-                    ));
-                    let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
-                        size.width,
-                        size.height,
-                    )));
+            // Automatic selection: the monitor that holds the mouse
+            // pointer, else the preferred display (or the first one).
+            let mut monitor = if settings.display_auto {
+                monitor_under_cursor(&main)
+            } else {
+                None
+            };
+            if monitor.is_none() {
+                let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
+                if let Ok(monitors) = main.available_monitors() {
+                    monitor = monitors
+                        .get(display_id)
+                        .or_else(|| monitors.first())
+                        .cloned();
                 }
             }
+            if let Some(m) = monitor {
+                // Edge-to-edge full mode: the whole monitor, taskbar
+                // included, in borderless fullscreen.
+                let position = m.position();
+                let size = m.size();
+                let _ = main.set_position(tauri::Position::Physical(
+                    tauri::PhysicalPosition::new(position.x, position.y),
+                ));
+                let _ = main.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+                    size.width,
+                    size.height,
+                )));
+            }
             let _ = main.show();
+            let _ = main.set_fullscreen(true);
             // Re-assert the taskbar tab: a boot-time start can beat the
             // taskbar creation, losing the AddTab registration.
             refresh_taskbar_tab(&main);
@@ -2480,10 +2536,14 @@ pub fn run() {
                         if main_for_resize.is_minimized().unwrap_or(true) {
                             return;
                         }
+                        // Borderless fullscreen is sized by the system to
+                        // the exact monitor bounds; do not fight it.
+                        if main_for_resize.is_fullscreen().unwrap_or(false) {
+                            return;
+                        }
                         if let Ok(Some(monitor)) = main_for_resize.current_monitor() {
-                            let work_area = monitor.work_area();
-                            let pos = work_area.position;
-                            let size = work_area.size;
+                            let pos = monitor.position();
+                            let size = monitor.size();
                             let in_place = main_for_resize
                                 .outer_position()
                                 .map(|p| p.x == pos.x && p.y == pos.y)

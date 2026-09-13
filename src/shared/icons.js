@@ -68,6 +68,11 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M12 7v6l4 2"/>
   </symbol>
+  <symbol id="cc-i-monitor" viewBox="0 0 24 24">
+    <rect x="2.75" y="4" width="18.5" height="12.5" rx="1.75" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      d="M9.5 20.5h5M12 16.5v4"/>
+  </symbol>
   <symbol id="cc-i-timer" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M9 2h6"/>

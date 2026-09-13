@@ -309,6 +309,8 @@
 
         const clockAccEl = document.getElementById("s-clock-acc");
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
+        const displayAutoEl = document.getElementById("s-display-auto");
+        if (displayAutoEl) displayAutoEl.checked = s.displayAuto !== false;
         if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
 
         const langEl = document.getElementById("s-lang");
@@ -2807,17 +2809,15 @@
                 const moveHereText = window.ccI18n.t('settings.display.moveHere');
 
                 card.innerHTML = `
-                  <div style="font-size:22px;flex-shrink:0;">${s.primary ? "🖥️" : "📺"}</div>
+                  <span class="s-row-ico" data-ico="monitor"></span>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1.5px;
-                      color:${s.current ? "var(--accent-a)" : "var(--text-md)"};
-                      text-shadow:${s.current ? "var(--glow-xs)" : "none"};
-                      text-transform:uppercase;margin-bottom:3px;">
+                    <div style="font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;
+                      letter-spacing:.1px;color:var(--text-hi);margin-bottom:3px;">
                       ${s.label}
-                      ${s.primary ? `<span style="font-size:7px;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:6px;">${primaryText}</span>` : ""}
-                      ${s.current ? `<span style="font-size:7px;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:3px;padding:1px 5px;margin-left:4px;">${activeText}</span>` : ""}
+                      ${s.primary ? `<span style="font-size:9px;font-weight:600;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:4px;padding:1px 6px;margin-left:6px;">${primaryText}</span>` : ""}
+                      ${s.current ? `<span style="font-size:9px;font-weight:600;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:4px;padding:1px 6px;margin-left:4px;">${activeText}</span>` : ""}
                     </div>
-                    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-lo);">
+                    <div style="font-family:'Inter',system-ui,sans-serif;font-size:12px;color:var(--text-md);">
                       ${s.width} × ${s.height} px  &nbsp;·&nbsp;
                       pos (${s.x}, ${s.y})
                     </div>
@@ -2834,6 +2834,10 @@
                 `;
                 el.appendChild(card);
             });
+
+            // The monitor tiles were inserted after the initial icon
+            // pass ran at load; render them now.
+            if (window.ccIcons) window.ccIcons.replaceIcons(el);
 
             // Wire Move Here buttons
             el.querySelectorAll(".s-move-btn").forEach((btn) => {
@@ -3172,6 +3176,14 @@
     if (sClockAcc) {
         sClockAcc.addEventListener("change", (e) => {
             window.cc.saveSettings({ clockAccuracyEnabled: e.target.checked });
+        });
+    }
+
+    // Automatic monitor: full mode opens where the mouse is.
+    const sDisplayAuto = document.getElementById("s-display-auto");
+    if (sDisplayAuto) {
+        sDisplayAuto.addEventListener("change", (e) => {
+            window.cc.saveSettings({ displayAuto: e.target.checked });
         });
     }
 

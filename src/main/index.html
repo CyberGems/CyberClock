@@ -488,7 +488,7 @@
                                     <span data-i18n="settings.tab.alarms">Alarms</span>
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="display">
-                                    <span class="s-nav-ico" data-ico="expand"></span>
+                                    <span class="s-nav-ico" data-ico="monitor"></span>
                                     <span data-i18n="settings.tab.display">Display</span>
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="mini">
@@ -1187,24 +1187,20 @@
                     <div class="s-panel" id="stab-display">
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.display.multiMonitor">Multi-Monitor Support</div>
-                            <div
-                                style="
-                                    font-family:
-                                        &quot;Share Tech Mono&quot;, monospace;
-                                    font-size: 10px;
-                                    color: var(--text-md);
-                                    line-height: 1.7;
-                                    padding: 12px;
-                                    background: var(--bg-01);
-                                    border: 1px solid var(--border);
-                                    border-radius: 6px;
-                                "
-                            >
-                                <span data-i18n="settings.display.desc1">CyberClock fills your primary display's work area, respecting the taskbar at all times.</span><br />
-                                ·
-                                <span style="color: var(--accent-a)" data-i18n="settings.tab.mini">Mini Mode</span>
-                                <span data-i18n="settings.display.desc2">— drag the bar to any monitor; position is remembered.</span><br />
-                                · <span data-i18n="settings.display.desc3">Display changes are detected automatically and the window repositions itself.</span>
+                            <div class="s-sec-d" data-i18n="settings.display.desc1">Full mode covers the selected display completely, edge to edge.</div>
+                            <div class="s-sec-d" data-i18n="settings.display.desc2">In Mini Mode, drag the clock to any monitor: the position is remembered.</div>
+                            <div class="s-sec-d" data-i18n="settings.display.desc3">Display changes are detected automatically and the window repositions itself.</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="expand"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.display.auto">Automatic monitor</span>
+                                    <small data-i18n="settings.display.autoDesc">Full mode opens on the monitor where the mouse is</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-display-auto" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
                             </div>
                             <div id="s-screens" style="margin-top: 12px"></div>
                         </div>

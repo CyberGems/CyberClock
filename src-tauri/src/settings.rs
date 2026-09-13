@@ -94,6 +94,10 @@ pub struct AppSettings {
     pub mini_design: u32,
     pub mini_position_locked: bool,
     pub preferred_display_id: Option<u32>,
+    // When true, full mode opens on the monitor that currently holds
+    // the mouse pointer (the "active" monitor) instead of the
+    // preferred display picked in the Display tab.
+    pub display_auto: bool,
     pub alarm_half_hour: AlarmSettings,
     pub alarm_full_hour: AlarmSettings,
     pub alarm_quarter_hour: AlarmSettings,
@@ -159,6 +163,7 @@ impl Default for AppSettings {
             mini_design: 1,
             mini_position_locked: false,
             preferred_display_id: None,
+            display_auto: true,
             alarm_half_hour: AlarmSettings::default(),
             alarm_full_hour: AlarmSettings {
                 enabled: true,
