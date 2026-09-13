@@ -2975,6 +2975,28 @@
         opacity: 0.4;
         pointer-events: none;
     }
+    .s-screen-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        transition: all .2s;
+    }
+    .s-screen-card:not(.s-screen-current) {
+        cursor: pointer;
+    }
+    .s-screen-card:not(.s-screen-current):hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .s-screen-card.s-screen-current {
+        background: var(--accent-dim);
+        border-color: var(--border-bright);
+        box-shadow: var(--glow-sm);
+    }
     .s-hotkey-input {
         font-family: "Inter", system-ui, sans-serif;
         font-size: 12.5px;

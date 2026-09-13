@@ -2796,19 +2796,10 @@
             el.innerHTML = "";
             screens.forEach((s) => {
                 const card = document.createElement("div");
-                card.style.cssText = `
-                  display:flex;align-items:center;gap:12px;
-                  padding:12px 14px;
-                  background:${s.current ? "var(--accent-dim)" : "transparent"};
-                  border:1px solid ${s.current ? "var(--border-bright)" : "rgba(255,255,255,0.07)"};
-                  border-radius:6px;margin-bottom:8px;
-                  box-shadow:${s.current ? "var(--glow-sm)" : "none"};
-                  transition:all .2s;
-                `;
+                card.className = "s-screen-card" + (s.current ? " s-screen-current" : "");
                 const primaryText = window.ccI18n.t('settings.display.primary');
                 const activeText = window.ccI18n.t('settings.display.active');
                 const inUseText = window.ccI18n.t('settings.display.inUse');
-                const moveHereText = window.ccI18n.t('settings.display.moveHere');
 
                 card.innerHTML = `
                   <span class="s-row-ico" data-ico="monitor"></span>
@@ -2824,38 +2815,24 @@
                       pos (${s.x}, ${s.y})
                     </div>
                   </div>
-                      ${
-                      s.current
-                          ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">${inUseText}</span>`
-                          : `<button data-did="${s.id}" class="s-move-btn"
-                        style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
-                          background:transparent;border:1px solid var(--border-bright);color:var(--accent-a);
-                          padding:7px 14px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:all .18s;"
-                      >${moveHereText}</button>`
-                  }
+                  ${s.current ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">${inUseText}</span>` : ""}
                 `;
+                if (!s.current) {
+                    // The whole card selects this display.
+                    card.addEventListener("click", async () => {
+                        const res = await window.cc.selectDisplay(s.id);
+                        if (res) {
+                            // Refresh list to show new ACTIVE state
+                            setTimeout(loadScreensList, 150);
+                        }
+                    });
+                }
                 el.appendChild(card);
             });
 
             // The monitor tiles were inserted after the initial icon
             // pass ran at load; render them now.
             if (window.ccIcons) window.ccIcons.replaceIcons(el);
-
-            // Wire Move Here buttons
-            el.querySelectorAll(".s-move-btn").forEach((btn) => {
-                btn.addEventListener("click", async () => {
-                    const id = parseInt(btn.dataset.did);
-                    btn.textContent = "…";
-                    btn.disabled = true;
-                    const res = await window.cc.selectDisplay(id);
-                    if (res) {
-                        // Refresh list to show new ACTIVE state
-                        setTimeout(loadScreensList, 150);
-                    } else {
-                        btn.textContent = window.ccI18n.t('settings.display.error');
-                    }
-                });
-            });
         });
     }
     function closeSettings() {

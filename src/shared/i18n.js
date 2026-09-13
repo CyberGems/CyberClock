@@ -379,7 +379,6 @@
             "settings.display.primary": "PRIMARY",
             "settings.display.active": "ACTIVE",
             "settings.display.inUse": "✓ IN USE",
-            "settings.display.moveHere": "⊞ Move Here",
             "settings.display.error": "✕ Error",
 
             // Settings modal - Mini Mode
@@ -807,7 +806,6 @@
             "settings.display.primary": "PRIMARIA",
             "settings.display.active": "ACTIVA",
             "settings.display.inUse": "✓ EN USO",
-            "settings.display.moveHere": "⊞ Mover Aquí",
             "settings.display.error": "✕ Error",
 
             // Settings modal - Mini Mode
