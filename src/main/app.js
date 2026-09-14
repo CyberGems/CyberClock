@@ -3269,9 +3269,6 @@
     if (tbarSettings)
         tbarSettings.addEventListener("click", () => openSettings());
     document
-        .getElementById("nav-btn-settings")
-        .addEventListener("click", () => openSettings());
-    document
         .getElementById("s-close")
         .addEventListener("click", closeSettings);
     document
