@@ -289,6 +289,16 @@
             .forEach((b) =>
                 b.classList.toggle("on", b.dataset.uiScale === uiScaleVal),
             );
+        // Dial design buttons: mark the active design (1..5; anything
+        // unknown falls back to Classic, same as currentClockDesign()).
+        const dialVal = String(
+            Math.min(5, Math.max(1, parseInt(s.clockDesign, 10) || 1)),
+        );
+        document
+            .querySelectorAll("[data-clock-design]")
+            .forEach((b) =>
+                b.classList.toggle("on", b.dataset.clockDesign === dialVal),
+            );
         const clockNameEl = document.getElementById("s-clock-name");
         if (clockNameEl) {
             clockNameEl.value = s.clockBrand || "CYBERGEMS";
@@ -738,6 +748,24 @@
     let clockFaceKey = null;
 
     function buildClockFace(W, H, cx, cy, R, c) {
+        const design = currentClockDesign();
+        if (design === 2) return buildFaceMinimal(W, H, cx, cy, R, c);
+        if (design === 3) return buildFaceSegments(W, H, cx, cy, R, c);
+        if (design === 4) return buildFaceHud(W, H, cx, cy, R, c);
+        if (design === 5) return buildFaceAurora(W, H, cx, cy, R, c);
+        return buildFaceClassic(W, H, cx, cy, R, c);
+    }
+
+    // Settings id of the analog dial design (1..5). Unknown values and
+    // missing keys fall back to the Classic face, matching the backend
+    // default (clockDesign: 1).
+    function currentClockDesign() {
+        const d = parseInt(cfg.clockDesign, 10);
+        return d >= 1 && d <= 5 ? d : 1;
+    }
+
+    // ── Design 1: Classic (bezel + domed glass + 12/3/6/9 numerals) ──
+    function buildFaceClassic(W, H, cx, cy, R, c) {
         const off = document.createElement("canvas");
         off.width = W;
         off.height = H;
@@ -876,6 +904,259 @@
         return off;
     }
 
+    // ── Design 2: Minimal (dot markers, no bezel, thin ring) ──
+    function buildFaceMinimal(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Soft face glow, kept faint: the design reads by absence.
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.05);
+        bg.addColorStop(0, `rgba(${c.rgb},.05)`);
+        bg.addColorStop(0.65, `rgba(${c.rgb},.02)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // Hairline ring instead of a bezel
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.94, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.30)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+
+        // Dot markers: quarters are larger and glow a little; the rest
+        // stay tiny and quiet. No numerals at all.
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const big = i % 3 === 0;
+            const r = big ? R * 0.013 : R * 0.006;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(
+                cx + Math.cos(a) * R * 0.86,
+                cy + Math.sin(a) * R * 0.86,
+                r,
+                0,
+                Math.PI * 2,
+            );
+            ctx.fillStyle = big ? c.accent : `rgba(${c.rgb},.45)`;
+            if (big) {
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 8;
+            }
+            ctx.fill();
+            ctx.restore();
+        }
+
+        return off;
+    }
+
+    // ── Design 3: Neon Segments (baton markers, flat bezel; the
+    //    60-segment progress ring is the DYNAMIC layer, see drawClock) ──
+    function buildFaceSegments(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Face glow, a touch stronger: neon earns its light.
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.08);
+        bg.addColorStop(0, `rgba(${c.rgb},.09)`);
+        bg.addColorStop(0.65, `rgba(${c.rgb},.03)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // Flat bezel: two clean concentric rings, no dome shading.
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.45)`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.80, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.16)`;
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+        ctx.restore();
+
+        // Baton markers: fat quarters, slim hours, no minute ticks
+        // (the segment ring already paces the perimeter).
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const big = i % 3 === 0;
+            const len = big ? R * 0.10 : R * 0.045;
+            const wid = big ? R * 0.018 : R * 0.009;
+            ctx.save();
+            ctx.translate(cx + Math.cos(a) * R * 0.71, cy + Math.sin(a) * R * 0.71);
+            ctx.rotate(a + Math.PI / 2);
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = wid;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = big ? 12 : 4;
+            ctx.beginPath();
+            ctx.moveTo(0, -len / 2);
+            ctx.lineTo(0, len / 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        return off;
+    }
+
+    // ── Design 4: Cyber HUD (radial grid, degree ticks, quarter
+    //    targeting brackets) ──
+    function buildFaceHud(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Face glow, cool and technical
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.08);
+        bg.addColorStop(0, `rgba(${c.rgb},.08)`);
+        bg.addColorStop(0.65, `rgba(${c.rgb},.025)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // Fine radial grid: 24 hairlines crossing the inner face
+        ctx.save();
+        ctx.strokeStyle = `rgba(${c.rgb},.10)`;
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * R * 0.12, cy + Math.sin(a) * R * 0.12);
+            ctx.lineTo(cx + Math.cos(a) * R * 0.84, cy + Math.sin(a) * R * 0.84);
+            ctx.stroke();
+        }
+        // Two faint concentric grid circles
+        [0.34, 0.58].forEach((f) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * f, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+        ctx.restore();
+
+        // Degree ticks on the outer ring: 60 minor + 12 major
+        ctx.save();
+        for (let i = 0; i < 60; i++) {
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+            const big = i % 5 === 0;
+            ctx.strokeStyle = big ? `rgba(${c.rgb},.55)` : `rgba(${c.rgb},.25)`;
+            ctx.lineWidth = big ? 2 : 1;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * R * 0.885, cy + Math.sin(a) * R * 0.885);
+            ctx.lineTo(cx + Math.cos(a) * R * 0.95, cy + Math.sin(a) * R * 0.95);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // Targeting brackets at the quarters: open corner marks that
+        // frame the dial like a visor readout.
+        ctx.save();
+        ctx.strokeStyle = c.accent;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 8;
+        for (let i = 0; i < 4; i++) {
+            const a = (i / 4) * Math.PI * 2 - Math.PI / 2;
+            const bx = cx + Math.cos(a) * R * 0.98;
+            const by = cy + Math.sin(a) * R * 0.98;
+            // Bracket tangent direction and its normal
+            const t = a + Math.PI / 2;
+            const arm = R * 0.07;
+            const inw = R * 0.035;
+            ctx.beginPath();
+            ctx.moveTo(bx + Math.cos(t) * arm, by + Math.sin(t) * arm);
+            ctx.lineTo(bx + Math.cos(t) * R * 0.02, by + Math.sin(t) * R * 0.02);
+            ctx.lineTo(bx - Math.cos(a) * inw + Math.cos(t) * R * 0.02, by - Math.sin(a) * inw + Math.sin(t) * R * 0.02);
+            ctx.lineTo(bx - Math.cos(a) * inw, by - Math.sin(a) * inw);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        return off;
+    }
+
+    // ── Design 5: Aurora (diffuse gradient washes, orb markers,
+    //    breathing ring handled by the dynamic layer) ──
+    function buildFaceAurora(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Wide diffuse glow: two offset radial washes, like curtains
+        // of light leaning over the dial.
+        const wash = (ox, oy, rad, a0, a1) => {
+            const g = ctx.createRadialGradient(cx + ox, cy + oy, 0, cx + ox, cy + oy, rad);
+            g.addColorStop(0, `rgba(${c.rgb},${a0})`);
+            g.addColorStop(0.6, `rgba(${c.rgb},${a1})`);
+            g.addColorStop(1, "transparent");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(cx + ox, cy + oy, rad, 0, Math.PI * 2);
+            ctx.fill();
+        };
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
+        ctx.clip();
+        wash(-R * 0.3, -R * 0.25, R * 0.9, 0.14, 0.05);
+        wash(R * 0.35, R * 0.3, R * 0.85, 0.12, 0.04);
+        ctx.restore();
+
+        // Soft outer boundary
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+
+        // Orb markers: glowing circles with a bright core, quarters
+        // larger. Dreamy but still readable at a glance.
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const big = i % 3 === 0;
+            const r = big ? R * 0.022 : R * 0.012;
+            const ox = cx + Math.cos(a) * R * 0.84;
+            const oy = cy + Math.sin(a) * R * 0.84;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(ox, oy, r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${c.rgb},${big ? 0.35 : 0.22})`;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = big ? 14 : 7;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ox, oy, r * 0.45, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.shadowBlur = big ? 8 : 4;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        return off;
+    }
+
     function drawClock(ts) {
         const canvas = document.getElementById("clock-canvas");
         if (!canvas || curView !== "home" || !mainActive) {
@@ -912,9 +1193,10 @@
 
         // Static face: rendered once to an offscreen canvas and reused
         // every frame (see buildClockFace). Rebuilt only when the canvas
-        // size or accent color changes — the ticks/markers/numerals and
-        // their shadowBlur strokes no longer redraw at 60fps.
-        const faceKey = `${W}x${H}|${c.accent}|${c.rgb}`;
+        // size, accent color or dial design changes — the ticks/markers/
+        // numerals and their shadowBlur strokes no longer redraw at 60fps.
+        const design = currentClockDesign();
+        const faceKey = `${W}x${H}|${c.accent}|${c.rgb}|d${design}`;
         if (faceKey !== clockFaceKey) {
             clockFaceCanvas = buildClockFace(W, H, cx, cy, R, c);
             clockFaceKey = faceKey;
@@ -922,19 +1204,51 @@
         ctx.drawImage(clockFaceCanvas, 0, 0);
 
         // ── Breathing outer rim highlight (signature glow) ──
-        const br =
-            0.68 +
-            0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.985, 0, Math.PI * 2);
-        ctx.strokeStyle = c.accent;
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = br;
-        ctx.shadowColor = c.accent;
-        ctx.shadowBlur = 10;
-        ctx.stroke();
-        ctx.restore();
+        // Segments keeps the rim flat: its 60-segment ring IS the
+        // second indicator, a second glow would fight it. Aurora
+        // breathes wider and slower to match its dreamy washes.
+        if (design !== 3) {
+            const rimR = design === 5 ? R * 0.99 : R * 0.985;
+            const br =
+                0.68 +
+                0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, rimR, 0, Math.PI * 2);
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = design === 5 ? 3 : 2;
+            ctx.globalAlpha = br;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = design === 5 ? 16 : 10;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // ── Segments: 60-segment progress ring (design 3) ──
+        // Lit segments = whole elapsed seconds; the leading segment
+        // fills smoothly with the in-flight second, so the ring sweeps
+        // once per minute exactly like the second hand it replaces.
+        if (design === 3) {
+            const segR = R * 0.885;
+            const gap = (Math.PI * 2) / 240; // angular gap between segments
+            const total = 60;
+            for (let i = 0; i < total; i++) {
+                const lit = sec >= i + 1;
+                const partial = Math.min(1, Math.max(0, sec - i));
+                const a0 = (i / total) * Math.PI * 2 - Math.PI / 2 + gap;
+                const a1 = ((i + 1) / total) * Math.PI * 2 - Math.PI / 2 - gap;
+                const alpha = lit ? 0.85 : 0.18 + partial * 0.67;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, segR, a0, Math.max(a0 + 0.001, a1));
+                ctx.strokeStyle = `rgba(${c.rgb},${alpha})`;
+                ctx.lineWidth = R * 0.045;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = lit || partial > 0 ? 8 : 0;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
 
         // Brand wordmark — pendulum sweep: a soft glow walks across the
         // word one letter per exact second, swinging left↔right like a
@@ -996,30 +1310,95 @@
         }
         ctx.restore();
 
-        // Hands
-        hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
-        hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
-        hand(ctx, cx, cy, secA, R * 0.83, 1.5, c.handSec, 12);
-        hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 8);
+        // Hands — per-design character:
+        // Classic/Segments keep the original cast-shadowed hands; Minimal
+        // uses slim glow-only hands; HUD draws angular hands (a short
+        // bar, gap, tip) that read like vector indicators; Aurora keeps
+        // the standard hands with a softer glow.
+        if (design === 2) {
+            hand(ctx, cx, cy, hrA, R * 0.50, 2.5, c.accent, 8);
+            hand(ctx, cx, cy, minA, R * 0.74, 2, c.accent, 6);
+            hand(ctx, cx, cy, secA, R * 0.85, 1, c.handSec, 10);
+        } else if (design === 4) {
+            hudHand(ctx, cx, cy, hrA, R * 0.52, R * 0.10, 3.5, c.accent);
+            hudHand(ctx, cx, cy, minA, R * 0.74, R * 0.12, 3, c.accent);
+            hudHand(ctx, cx, cy, secA, R * 0.86, R * 0.14, 1.5, c.handSec);
+        } else if (design === 5) {
+            hand(ctx, cx, cy, hrA, R * 0.52, 4.5, c.accent, 14);
+            hand(ctx, cx, cy, minA, R * 0.74, 3, c.accent, 12);
+            hand(ctx, cx, cy, secA, R * 0.84, 1.5, c.handSec, 16);
+            hand(ctx, cx, cy, secA + Math.PI, R * 0.12, 3, c.handSec, 10);
+        } else {
+            hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
+            hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
+            hand(ctx, cx, cy, secA, R * 0.83, 1.5, c.handSec, 12);
+            hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 8);
+        }
 
-        // Center jewel
+        // Center jewel — per-design finish: Classic/HUD/Segments keep
+        // the jeweled cap; Minimal reduces it to a plain accent dot;
+        // Aurora gets a bigger glowing orb with a white core.
         ctx.save();
         ctx.shadowColor = c.accent;
-        ctx.shadowBlur = 12;
+        if (design === 2) {
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.018, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+        } else if (design === 5) {
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.034, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.02, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.globalAlpha = 0.65;
+            ctx.fill();
+        } else {
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.028, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.048, 0, Math.PI * 2);
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.016, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.globalAlpha = 0.55;
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    // Angular HUD hand: a short base bar, a gap, then the pointed tip
+    // segment — reads as a vector indicator, not a physical needle.
+    function hudHand(ctx, cx, cy, angle, len, tipLen, width, color) {
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 9;
+        ctx.lineCap = "butt";
+        // Base bar
+        ctx.lineWidth = width;
         ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.028, 0, Math.PI * 2);
-        ctx.fillStyle = c.accent;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.048, 0, Math.PI * 2);
-        ctx.strokeStyle = c.accent;
-        ctx.lineWidth = 1.5;
+        ctx.moveTo(cx - ux * R * 0.06, cy - uy * R * 0.06);
+        ctx.lineTo(cx + ux * (len - tipLen), cy + uy * (len - tipLen));
         ctx.stroke();
+        // Tip segment, slightly thinner and brighter
+        ctx.lineWidth = Math.max(1, width * 0.6);
         ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.016, 0, Math.PI * 2);
-        ctx.fillStyle = "white";
-        ctx.globalAlpha = 0.55;
-        ctx.fill();
+        ctx.moveTo(cx + ux * len, cy + uy * len);
+        ctx.lineTo(cx + ux * (len - tipLen), cy + uy * (len - tipLen));
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -2944,6 +3323,19 @@
             );
             document
                 .querySelectorAll("#s-ui-scale .s-fmt")
+                .forEach((x) => x.classList.toggle("on", x === b));
+        });
+    });
+
+    // Dial design (Appearance): the canvas loop picks the new design on
+    // the very next frame (the face cache key includes the design id),
+    // so persisting is all the live-apply it needs.
+    document.querySelectorAll("[data-clock-design]").forEach((b) => {
+        b.addEventListener("click", () => {
+            const design = parseInt(b.dataset.clockDesign, 10) || 1;
+            window.cc.saveSettings({ clockDesign: design });
+            document
+                .querySelectorAll("[data-clock-design]")
                 .forEach((x) => x.classList.toggle("on", x === b));
         });
     });

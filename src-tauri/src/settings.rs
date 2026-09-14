@@ -133,6 +133,10 @@ pub struct AppSettings {
     // the full width (full-mode Home view only).
     pub full_hide_clock: bool,
 
+    // Analog dial design for the full-mode clock (1 = Classic,
+    // 2 = Minimal, 3 = Neon Segments, 4 = Cyber HUD, 5 = Aurora).
+    pub clock_design: u32,
+
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
 
@@ -197,6 +201,7 @@ impl Default for AppSettings {
             mini_no_animations: false,
             ui_scale: 1.0,
             full_hide_clock: false,
+            clock_design: 1,
             custom_alarms: vec![
                 CustomAlarm::default(),
                 CustomAlarm::default(),
