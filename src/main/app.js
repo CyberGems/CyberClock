@@ -2804,18 +2804,18 @@
                 card.innerHTML = `
                   <span class="s-row-ico" data-ico="monitor"></span>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;
+                    <div style="font-family:var(--font-ui);font-size:13px;font-weight:500;
                       letter-spacing:.1px;color:var(--text-hi);margin-bottom:3px;">
                       ${s.label}
                       ${s.primary ? `<span style="font-size:9px;font-weight:600;background:var(--accent-dim);border:1px solid var(--border-bright);color:var(--accent-a);border-radius:4px;padding:1px 6px;margin-left:6px;">${primaryText}</span>` : ""}
-                      ${s.current ? `<span style="font-size:9px;font-weight:600;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:4px;padding:1px 6px;margin-left:4px;">${activeText}</span>` : ""}
+                      ${s.current ? `<span style="font-size:9px;font-weight:600;background:rgba(var(--rgb-accent),.2);border:1px solid var(--border-active);color:var(--accent-a);border-radius:4px;padding:1px 4px;margin-left:4px;">${activeText}</span>` : ""}
                     </div>
-                    <div style="font-family:'Inter',system-ui,sans-serif;font-size:12px;color:var(--text-md);">
+                    <div style="font-family:var(--font-ui);font-size:12px;color:var(--text-md);">
                       ${s.width} × ${s.height} px  &nbsp;·&nbsp;
                       pos (${s.x}, ${s.y})
                     </div>
                   </div>
-                  ${s.current ? `<span style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;color:var(--accent-a);text-shadow:var(--glow-xs);">${inUseText}</span>` : ""}
+                  ${s.current ? `<span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;color:var(--accent-a);">${inUseText}</span>` : ""}
                 `;
                 if (!s.current) {
                     // The whole card selects this display.
@@ -2916,6 +2916,7 @@
             b.classList.add("on");
         });
     });
+
 
     // Toggles
     document

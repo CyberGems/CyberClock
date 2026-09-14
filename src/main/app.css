@@ -3018,7 +3018,7 @@
         box-shadow: var(--glow-sm);
     }
     .s-hotkey-input {
-        font-family: "Inter", system-ui, sans-serif;
+        font-family: var(--font-ui);
         font-size: 12.5px;
         letter-spacing: 0.3px;
         cursor: pointer;
@@ -3033,7 +3033,7 @@
         box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.35);
     }
     .s-lbl {
-        font-family: "Inter", system-ui, sans-serif;
+        font-family: var(--font-ui);
         font-size: 13px;
         font-weight: 500;
         letter-spacing: 0.1px;
@@ -3041,7 +3041,7 @@
     }
     .s-lbl small {
         display: block;
-        font-family: "Inter", system-ui, sans-serif;
+        font-family: var(--font-ui);
         font-size: 12.5px;
         font-weight: 400;
         line-height: 1.45;
@@ -3279,7 +3279,7 @@
         margin-bottom: 0;
     }
     .s-alarm-lbl {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-ui);
         font-size: 12.5px;
         font-weight: 500;
         color: var(--text-md);
@@ -3290,7 +3290,7 @@
         background: var(--bg-02);
         border: 1px solid var(--border);
         color: var(--text-hi);
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-ui);
         font-size: 12px;
         font-weight: 500;
         padding: 6px 12px;
@@ -3405,7 +3405,7 @@
         margin-bottom: 8px;
     }
     .s-ti {
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-ui);
         font-size: 11.5px;
         color: var(--text-lo);
         padding: 4px 0;
