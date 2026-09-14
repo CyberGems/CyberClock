@@ -27,8 +27,18 @@
         align-items: center;
         padding: 0 16px;
         gap: 12px;
-        background: var(--bg-01);
-        border-bottom: 1px solid var(--border);
+        /* Mica-black glass: near-black base with a whisper of accent
+           depth, layered over the body via backdrop-filter. The tbar
+           sits above .vc content only by z-index, so the blur has real
+           pixels to chew on where panels scroll under it. */
+        background: linear-gradient(
+            to bottom,
+            rgba(8, 10, 13, 0.92) 0%,
+            rgba(5, 6, 8, 0.96) 100%
+        );
+        backdrop-filter: blur(18px) saturate(1.15);
+        -webkit-backdrop-filter: blur(18px) saturate(1.15);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
         flex-shrink: 0;
         position: relative;
         z-index: 20;
@@ -186,6 +196,11 @@
         justify-content: center;
         transition: all 0.18s;
         font-variant-emoji: text;
+    }
+    /* On the mica-black bar a quiet wmbtn reads darker than the brand
+       text; lift the rest state a notch so controls stay legible. */
+    .wmbtn:not(.close) {
+        color: #a8bfd0;
     }
     .wmbtn:hover {
         color: var(--accent-a);
