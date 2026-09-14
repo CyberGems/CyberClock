@@ -42,7 +42,7 @@ body {
     --ab-card: #171a28;
     --ab-input-bg: #12141f;
     --ab-separator: rgba(255, 255, 255, 0.16);
-    --ab-name-accent: #6acbdc; /* CyberSnap wordmark accent */
+    --ab-name-accent: #2ea9bd; /* logo teal, unified with --brand-name-accent */
 }
 
 /* ── Title bar ─────────────────────────────────────────────── */

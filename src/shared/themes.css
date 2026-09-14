@@ -50,6 +50,12 @@
      independent of the tint ───────────────────────────── */
   --hand-sec: #ff6699;
   --rgb-sec:  255, 102, 153;
+
+  /* ── Brand wordmark accent — the teal of the official logo,
+     sampled from icon.png. Fixed, like the logo itself: the
+     "Clock" half of the two-tone wordmark never follows the
+     accent tint. */
+  --brand-name-accent: #2ea9bd;
 }
 
 /* ── Derived chromatic layer ──────────────────────────────

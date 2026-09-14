@@ -76,6 +76,10 @@
     .tray-header:hover {
         color: rgba(255, 255, 255, 0.85);
     }
+    /* Two-tone wordmark: "Cyber" neutral, "Clock" in the logo teal */
+    .tray-header .app-title-accent {
+        color: var(--brand-name-accent);
+    }
     .tray-header:hover .app-ver {
         color: rgba(255, 255, 255, 0.8);
     }

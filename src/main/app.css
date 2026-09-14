@@ -77,6 +77,11 @@
         line-height: 1;
         white-space: nowrap;
     }
+    /* Two-tone wordmark, suite standard: "Cyber" keeps the neutral
+       text color, "Clock" carries the logo's teal. */
+    .tbar-name-b {
+        color: var(--brand-name-accent);
+    }
     /* Pulse LED now lives next to the clock time; keeps the accent
        glowing on the titlebar without competing with the brand. */
     .tbar-time-row {
@@ -2982,6 +2987,10 @@
         letter-spacing: 0.5px;
         color: var(--accent-a);
         margin-left: 2px;
+    }
+    /* Two-tone wordmark, same as the titlebar and tray header */
+    .s-brand-accent {
+        color: var(--brand-name-accent);
     }
     .s-brand-copyright {
         color: var(--text-lo);
