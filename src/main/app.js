@@ -1382,6 +1382,9 @@
     function hudHand(ctx, cx, cy, angle, len, tipLen, width, color) {
         const ux = Math.cos(angle);
         const uy = Math.sin(angle);
+        // Base-bar counterweight length, relative to the hand length so
+        // all three hands share the same proportion at any dial size.
+        const baseLen = len * 0.12;
         ctx.save();
         ctx.strokeStyle = color;
         ctx.shadowColor = color;
@@ -1390,7 +1393,7 @@
         // Base bar
         ctx.lineWidth = width;
         ctx.beginPath();
-        ctx.moveTo(cx - ux * R * 0.06, cy - uy * R * 0.06);
+        ctx.moveTo(cx - ux * baseLen, cy - uy * baseLen);
         ctx.lineTo(cx + ux * (len - tipLen), cy + uy * (len - tipLen));
         ctx.stroke();
         // Tip segment, slightly thinner and brighter
