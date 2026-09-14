@@ -59,6 +59,9 @@
                         <span class="mini-ico"><span data-ico="compact"></span></span>
                         <span class="mini-lbl">Mini</span>
                     </button>
+                    <button class="wmbtn" id="tbar-btn-settings" title="Settings" data-i18n-attr="title:tooltip.settings">
+                        <span data-ico="gear"></span>
+                    </button>
                     <button class="wmbtn close" id="btn-close">
                         <span data-ico="x"></span>
                     </button>
@@ -101,6 +104,16 @@
                         </button>
                         <div class="clock-panel">
                             <canvas id="clock-canvas"></canvas>
+                            <!-- Floating dial-design switcher: semi-transparent
+                                 pills that fade in on hover so the clock stays
+                                 clean at rest. Mirrors the Settings picker. -->
+                            <div class="dial-switch" id="dial-switch">
+                                <button class="dial-sw-btn on" data-clock-design="1" title="Classic" data-i18n-attr="title:settings.appearance.dialClassic" aria-label="Classic">●</button>
+                                <button class="dial-sw-btn" data-clock-design="2" title="Minimal" data-i18n-attr="title:settings.appearance.dialMinimal" aria-label="Minimal">○</button>
+                                <button class="dial-sw-btn" data-clock-design="3" title="Neon Segments" data-i18n-attr="title:settings.appearance.dialSegments" aria-label="Neon Segments">◫</button>
+                                <button class="dial-sw-btn" data-clock-design="4" title="Cyber HUD" data-i18n-attr="title:settings.appearance.dialHud" aria-label="Cyber HUD">✛</button>
+                                <button class="dial-sw-btn" data-clock-design="5" title="Aurora" data-i18n-attr="title:settings.appearance.dialAurora" aria-label="Aurora">◍</button>
+                            </div>
                         </div>
                         <div class="cal-panel">
                             <div class="cal-hdr">

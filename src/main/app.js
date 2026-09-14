@@ -291,6 +291,8 @@
             );
         // Dial design buttons: mark the active design (1..5; anything
         // unknown falls back to Classic, same as currentClockDesign()).
+        // Covers BOTH the Settings picker and the floating dial
+        // switcher — they share the data-clock-design contract.
         const dialVal = String(
             Math.min(5, Math.max(1, parseInt(s.clockDesign, 10) || 1)),
         );
@@ -3263,6 +3265,9 @@
     const btnSettings = document.getElementById("btn-settings");
     if (btnSettings)
         btnSettings.addEventListener("click", () => openSettings());
+    const tbarSettings = document.getElementById("tbar-btn-settings");
+    if (tbarSettings)
+        tbarSettings.addEventListener("click", () => openSettings());
     document
         .getElementById("nav-btn-settings")
         .addEventListener("click", () => openSettings());
@@ -3330,16 +3335,19 @@
         });
     });
 
-    // Dial design (Appearance): the canvas loop picks the new design on
-    // the very next frame (the face cache key includes the design id),
-    // so persisting is all the live-apply it needs.
+    // Dial design (Appearance + floating switcher): the canvas loop picks
+    // the new design on the very next frame (the face cache key includes
+    // the design id), so persisting is all the live-apply it needs.
+    // Both surfaces share the data-clock-design contract; match by value,
+    // not by element, so a switcher click also lights the picker up.
     document.querySelectorAll("[data-clock-design]").forEach((b) => {
         b.addEventListener("click", () => {
             const design = parseInt(b.dataset.clockDesign, 10) || 1;
             window.cc.saveSettings({ clockDesign: design });
+            const val = String(design);
             document
                 .querySelectorAll("[data-clock-design]")
-                .forEach((x) => x.classList.toggle("on", x === b));
+                .forEach((x) => x.classList.toggle("on", x.dataset.clockDesign === val));
         });
     });
 

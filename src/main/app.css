@@ -603,6 +603,63 @@
         display: block;
     }
 
+    /* ── Floating dial-design switcher ──────────────────────── */
+    /* Semi-transparent pill row floating under the dial. Hidden at
+       rest (the clock reads clean), fades in on panel hover with a
+       slight rise. Shares state with the Settings picker through
+       the same data-clock-design / .on contract. */
+    .dial-switch {
+        position: absolute;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%) translateY(6px);
+        display: flex;
+        gap: 4px;
+        padding: 4px 6px;
+        background: rgba(3, 22, 36, 0.62);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        z-index: 10;
+    }
+    .clock-panel:hover .dial-switch,
+    .dial-switch:focus-within {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+    }
+    .dial-sw-btn {
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid transparent;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--text-lo);
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease,
+            background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .dial-sw-btn:hover {
+        color: var(--accent-a);
+        border-color: var(--border-bright);
+        background: rgba(var(--rgb-accent), 0.10);
+    }
+    .dial-sw-btn.on {
+        color: var(--accent-a);
+        border-color: var(--border-bright);
+        background: rgba(var(--rgb-accent), 0.14);
+        box-shadow: var(--glow-xs);
+    }
+
     /* ── Hide-analog-clock mode ─────────────────────────────── */
     /* The panel collapses fully; the calendar (flex:1) takes the width. */
     #view-home.no-clock .clock-panel {
