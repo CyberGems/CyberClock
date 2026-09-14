@@ -53,15 +53,44 @@
     }
     .tbar-brand {
         font-size: calc(11px * var(--ui-scale));
-        font-weight: 900;
-        letter-spacing: 4px;
-        color: var(--accent-a);
-        text-shadow: var(--glow-sm);
-        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: var(--text-hi);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-shrink: 0;
+    }
+    /* Official logo + name, the same branding language as the tray
+       menu header (Outfit) instead of the old neon display caps. */
+    .tbar-logo {
+        width: 20px;
+        height: 20px;
+        display: block;
+        flex-shrink: 0;
+        border-radius: 4px;
+        filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.35));
+    }
+    .tbar-name {
+        font-family: "Outfit", "Space Grotesk", "Segoe UI Variable", system-ui, sans-serif;
+        font-size: 12.5px;
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    /* Pulse LED now lives next to the clock time; keeps the accent
+       glowing on the titlebar without competing with the brand. */
+    .tbar-time-row {
         display: flex;
         align-items: center;
         gap: 8px;
-        animation: flicker 24s infinite;
+    }
+    /* Mirror spacer on the right of the time (spacer 6px + gap 8px =
+       LED 6px + gap 8px on the left) so the TIME stays on the same
+       center axis as the date below, level with the date, instead of
+       the LED+time group. */
+    .tbar-time-row::after {
+        content: "";
+        width: 6px;
         flex-shrink: 0;
     }
     .tbar-dot {
