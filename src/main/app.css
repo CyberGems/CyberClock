@@ -105,7 +105,7 @@
     #dig-time {
         font-family: var(--font-display);
         font-size: 20px;
-        font-weight: 700;
+        font-weight: 600;
         color: var(--accent-a);
         text-shadow: var(--glow-md);
         letter-spacing: 1px;
