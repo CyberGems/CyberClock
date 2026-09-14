@@ -261,6 +261,13 @@
         cfg = s;
         // Scanlines are mini-mode only — full mode never has them
         applyTint(s.theme || "ice");
+        // Text size tier: labels, body copy and values. Display digits
+        // and layout metrics stay fixed, so nothing reflows badly.
+        const scale = Number(s.uiScale) >= 0 ? Number(s.uiScale) : 1;
+        document.documentElement.style.setProperty(
+            "--ui-scale",
+            String(scale || 1),
+        );
         updateDigital();
 
         // Settings modal controls
@@ -274,6 +281,14 @@
             );
         const secEl = document.getElementById("s-sec");
         if (secEl) secEl.checked = s.showSeconds !== false;
+        // Text size buttons: mark the active tier (data-ui-scale strings
+        // compare exactly with the persisted value).
+        const uiScaleVal = String(scale || 1);
+        document
+            .querySelectorAll("#s-ui-scale .s-fmt")
+            .forEach((b) =>
+                b.classList.toggle("on", b.dataset.uiScale === uiScaleVal),
+            );
         const clockNameEl = document.getElementById("s-clock-name");
         if (clockNameEl) {
             clockNameEl.value = s.clockBrand || "CYBERGEMS";
@@ -2914,6 +2929,22 @@
                 .querySelectorAll(".s-fmt")
                 .forEach((x) => x.classList.remove("on"));
             b.classList.add("on");
+        });
+    });
+
+    // Text size tiers (Appearance): apply live via the CSS var so the
+    // change is visible instantly, and persist for next launch.
+    document.querySelectorAll("#s-ui-scale .s-fmt").forEach((b) => {
+        b.addEventListener("click", () => {
+            const scale = parseFloat(b.dataset.uiScale) || 1;
+            window.cc.saveSettings({ uiScale: scale });
+            document.documentElement.style.setProperty(
+                "--ui-scale",
+                String(scale),
+            );
+            document
+                .querySelectorAll("#s-ui-scale .s-fmt")
+                .forEach((x) => x.classList.toggle("on", x === b));
         });
     });
 

@@ -32,6 +32,13 @@
   --font-mono: "JetBrains Mono", "Consolas", monospace;
   --font-brand: "Orbitron", "Consolas", monospace;
 
+  /* ── Text size scale ──────────────────────────────────
+     ui-scale multiplies the interface's text tier (labels,
+     body copy, values). Set from Settings (Appearance); the
+     display tier (clock digits, module titles) and layout
+     metrics stay fixed so big elements never reflow. */
+  --ui-scale: 1;
+
   /* ── Accent seeds ──────────────────────────────────────
      Defaults = the Ice tint. tint.js replaces these triplets
      inline on <body>; everything below derives from them. */

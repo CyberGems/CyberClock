@@ -52,7 +52,7 @@
         );
     }
     .tbar-brand {
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 900;
         letter-spacing: 4px;
         color: var(--accent-a);
@@ -122,7 +122,7 @@
     }
     #dig-date {
         font-family: var(--font-mono);
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         color: var(--text-hi);
         opacity: 0.82;
         letter-spacing: 2px;
@@ -145,7 +145,7 @@
         width: 28px;
         height: 28px;
         border-radius: 4px;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -182,7 +182,7 @@
         color: var(--accent-a);
         cursor: pointer;
         font-family: var(--font-ui);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1.5px;
         text-transform: uppercase;
@@ -350,7 +350,7 @@
     }
     .nav-lbl {
         font-family: var(--font-ui);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.8px;
         color: var(--text-lo);
@@ -647,7 +647,7 @@
     }
     .cal-title-lbl {
         font-family: var(--font-display);
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 2.5px;
         color: var(--accent-a);
@@ -680,7 +680,7 @@
         border: 1px solid var(--border);
         color: var(--text-md);
         font-family: var(--font-ui);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -710,7 +710,7 @@
     }
     .cal-mhdr {
         font-family: var(--font-display);
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1.5px;
         color: var(--accent-a);
@@ -732,7 +732,7 @@
     }
     .cal-dlbl {
         font-family: var(--font-ui);
-        font-size: 8.5px;
+        font-size: calc(8.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.5px;
         color: var(--text-lo);
@@ -758,7 +758,7 @@
     .cal-day {
         position: relative;
         font-family: var(--font-mono);
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         color: var(--text-md);
         text-align: center;
@@ -857,7 +857,7 @@
     }
     .cal-dash-t {
         font-family: var(--font-display);
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 2px;
         color: var(--accent-a);
@@ -908,7 +908,7 @@
     }
     .agenda-chip {
         font-family: var(--font-mono);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 0.5px;
         text-transform: uppercase;
@@ -919,7 +919,7 @@
         width: 52px;
     }
     .agenda-chip .agenda-chip-d {
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         display: block;
         line-height: 1.1;
     }
@@ -927,7 +927,7 @@
         flex: 1;
         min-width: 0;
         font-family: var(--font-ui);
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         color: var(--text-md);
         white-space: nowrap;
         overflow: hidden;
@@ -972,13 +972,13 @@
     }
     .agenda-empty-title {
         font-family: var(--font-ui);
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         color: var(--text-md);
         line-height: 1.5;
     }
     .agenda-empty-tip {
         font-family: var(--font-ui);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         color: var(--text-lo);
         line-height: 1.6;
         max-width: 300px;
@@ -1004,7 +1004,7 @@
     }
     .stat-lbl {
         font-family: var(--font-ui);
-        font-size: 9.5px;
+        font-size: calc(9.5px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -1012,7 +1012,7 @@
     }
     .stat-val {
         font-family: var(--font-mono);
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.3px;
         color: var(--accent-a);
@@ -1101,7 +1101,7 @@
     }
     .note-date {
         font-family: var(--font-display);
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1.5px;
         text-transform: uppercase;
@@ -1122,7 +1122,7 @@
         border-radius: 7px;
         color: var(--text-hi, var(--accent-a));
         font-family: var(--font-ui);
-        font-size: 13.5px;
+        font-size: calc(13.5px * var(--ui-scale));
         line-height: 1.55;
         outline: none;
         transition: border-color 0.18s, box-shadow 0.18s;
@@ -1146,7 +1146,7 @@
     .note-btn {
         -webkit-app-region: no-drag;
         font-family: var(--font-ui);
-        font-size: 9.5px;
+        font-size: calc(9.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -1273,7 +1273,7 @@
     }
     .t-seg-lbl {
         font-family: var(--font-ui);
-        font-size: 9.5px;
+        font-size: calc(9.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 2px;
         color: var(--text-lo);
@@ -1401,7 +1401,7 @@
     }
     .preset-btn {
         font-family: var(--font-ui);
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -1520,7 +1520,7 @@
     }
     .t-inp-lbl {
         font-family: var(--font-ui);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 600;
         color: var(--text-lo);
         letter-spacing: 1.5px;
@@ -1541,7 +1541,7 @@
     }
     .abtn {
         font-family: var(--font-ui);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1.5px;
         text-transform: uppercase;
@@ -1666,7 +1666,7 @@
         left: 50%;
         transform: translateX(-50%) translateY(8px);
         font-family: var(--font-ui);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--accent-a);
@@ -1867,7 +1867,7 @@
     }
     .lap-hdr-t {
         font-family: var(--font-display);
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 2px;
         color: var(--accent-a);
@@ -1880,7 +1880,7 @@
     }
     .lap-act {
         font-family: var(--font-ui);
-        font-size: 9px;
+        font-size: calc(9px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.8px;
         text-transform: uppercase;
@@ -1900,7 +1900,7 @@
         color: var(--accent-a);
         background: var(--accent-dim);
         border-color: var(--border-active);
-        font-size: 8.5px;
+        font-size: calc(8.5px * var(--ui-scale));
         letter-spacing: 1px;
         padding: 3px 10px;
         height: 20px;
@@ -1919,7 +1919,7 @@
     }
     .col-lbl {
         font-family: var(--font-ui);
-        font-size: 8.5px;
+        font-size: calc(8.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 1px;
         color: var(--text-lo);
@@ -1950,25 +1950,25 @@
     }
     .lap-num {
         font-family: var(--font-mono);
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--ui-scale));
         color: var(--text-lo);
     }
     .lap-time {
         font-family: var(--font-mono);
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--ui-scale));
         font-weight: 500;
         color: var(--text-hi);
         text-align: right;
     }
     .lap-delta {
         font-family: var(--font-mono);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         color: var(--text-md);
         text-align: right;
     }
     .lap-total {
         font-family: var(--font-mono);
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--ui-scale));
         color: var(--text-lo);
         text-align: right;
     }
@@ -1985,7 +1985,7 @@
         text-align: center;
         padding: 28px;
         font-family: var(--font-ui);
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         color: var(--text-lo);
         letter-spacing: 0.5px;
     }
@@ -2019,7 +2019,7 @@
        numerals stay mono for the clock-y feel. */
     .relax-lbl {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
@@ -2079,7 +2079,7 @@
     }
     .tcard-name {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.2px;
         color: var(--text-hi);
@@ -2087,7 +2087,7 @@
     }
     .tcard-desc {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 400;
         letter-spacing: 0.2px;
         color: var(--text-lo);
@@ -2120,7 +2120,7 @@
     }
     .r-vol-lbl {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
@@ -2134,7 +2134,7 @@
     }
     .r-vol-val {
         font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         color: var(--text-md);
         width: 36px;
         text-align: right;
@@ -2168,7 +2168,7 @@
     }
     .r-ast-lbl {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
@@ -2187,7 +2187,7 @@
     .ast-btn {
         flex: 1;
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         text-align: center;
@@ -2210,13 +2210,13 @@
     }
     .ast-cd {
         font-family: "JetBrains Mono", monospace;
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         color: var(--text-md);
     }
     /* Scheduler status line: mirrors Settings config in one quiet line */
     .r-sched-line {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 400;
         letter-spacing: 0.2px;
         color: var(--text-lo);
@@ -2244,13 +2244,13 @@
     .r-mute-txt {
         flex: 1;
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.2px;
     }
     .r-mute-enable {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.3px;
         background: transparent;
@@ -2274,7 +2274,7 @@
     }
     .viz-title {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
@@ -2322,14 +2322,14 @@
     }
     .breathe-right-title {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
     }
     .breathe-desc {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 400;
         color: var(--text-md);
         line-height: 1.45;
@@ -2360,7 +2360,7 @@
     }
     #breathe-phase {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.8px;
         text-transform: uppercase;
@@ -2379,7 +2379,7 @@
     }
     .breathe-pat-btn {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         background: transparent;
@@ -2408,7 +2408,7 @@
     }
     .ses-timer-lbl {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
@@ -2434,14 +2434,14 @@
     }
     .tip-lbl {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
     }
     .tip-text {
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         font-weight: 400;
         color: var(--text-md);
         line-height: 1.55;
@@ -2461,7 +2461,7 @@
         border-radius: 8px;
         padding: 11px 24px;
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-md);
@@ -2489,7 +2489,7 @@
         border: 1px solid var(--border);
         color: var(--text-hi);
         font-family: "Outfit", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         padding: 6px 10px;
@@ -2518,7 +2518,7 @@
         border: none;
         color: var(--text-hi);
         font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         letter-spacing: 0.5px;
         padding: 1px 1px;
         outline: none;
@@ -2533,12 +2533,12 @@
         background: var(--bg-02);
         color: var(--text-hi);
         font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
     }
     .sched-time-sep {
         color: var(--text-md);
         font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         line-height: 1;
     }
     .sched-time-ap {
@@ -2547,7 +2547,7 @@
     }
     .sched-status {
         font-family: "JetBrains Mono", monospace;
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         color: var(--text-md);
         letter-spacing: 0.3px;
     }
@@ -2704,7 +2704,7 @@
         background: transparent;
         color: var(--text-md);
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 0.055em;
         text-transform: uppercase;
@@ -2769,7 +2769,7 @@
         background: rgba(var(--rgb-accent), 0.06);
         color: var(--text-md);
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 0.08em;
         text-align: center;
@@ -2795,7 +2795,7 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-weight: 700;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-family: "Space Grotesk", system-ui, sans-serif;
         padding: 9px 12px;
         border-radius: 4px;
@@ -2876,7 +2876,7 @@
     }
     .s-sec-t {
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 0.13em;
         text-transform: uppercase;
@@ -2913,7 +2913,7 @@
         background: rgba(0, 0, 0, 0.16);
         color: var(--text-md);
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         line-height: 1.15;
         width: 100%;
         cursor: pointer;
@@ -2948,7 +2948,7 @@
     }
     .s-brand-version {
         font-family: var(--font-mono);
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.5px;
         color: var(--accent-a);
@@ -3019,7 +3019,7 @@
     }
     .s-hotkey-input {
         font-family: var(--font-ui);
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--ui-scale));
         letter-spacing: 0.3px;
         cursor: pointer;
     }
@@ -3034,7 +3034,7 @@
     }
     .s-lbl {
         font-family: var(--font-ui);
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.1px;
         color: var(--text-hi);
@@ -3042,7 +3042,7 @@
     .s-lbl small {
         display: block;
         font-family: var(--font-ui);
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--ui-scale));
         font-weight: 400;
         line-height: 1.45;
         color: var(--text-md);
@@ -3052,7 +3052,7 @@
 
     .s-inp {
         font-family: var(--font-ui);
-        font-size: 13px;
+        font-size: calc(13px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         width: 190px;
@@ -3134,7 +3134,7 @@
 
     .s-sec-d {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         letter-spacing: 0.2px;
         color: var(--text-md);
         margin-top: 3px;
@@ -3177,7 +3177,7 @@
     }
     .s-fmt {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.8px;
         text-transform: uppercase;
@@ -3258,7 +3258,7 @@
     }
     .s-alarm-t {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1px;
         color: var(--accent-a);
@@ -3280,7 +3280,7 @@
     }
     .s-alarm-lbl {
         font-family: var(--font-ui);
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--ui-scale));
         font-weight: 500;
         color: var(--text-md);
         width: 62px;
@@ -3291,7 +3291,7 @@
         border: 1px solid var(--border);
         color: var(--text-hi);
         font-family: var(--font-ui);
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         padding: 6px 12px;
         border-radius: 8px;
@@ -3310,7 +3310,7 @@
     }
     .s-abtn {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.6px;
         text-transform: uppercase;
@@ -3347,7 +3347,7 @@
     }
     .s-flbl {
         font-family: var(--font-mono);
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         color: var(--text-lo);
         margin-top: 4px;
         display: flex;
@@ -3357,7 +3357,7 @@
     .s-fclr {
         cursor: pointer;
         color: #f87171;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
     }
     .s-fclr:hover {
         text-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
@@ -3372,7 +3372,7 @@
     }
     .s-vol-val {
         font-family: var(--font-mono);
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 500;
         color: var(--accent-a);
         min-width: 38px;
@@ -3397,7 +3397,7 @@
     }
     .s-teaser-t {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 10px;
+        font-size: calc(10px * var(--ui-scale));
         font-weight: 700;
         letter-spacing: 1.5px;
         color: var(--text-lo);
@@ -3406,7 +3406,7 @@
     }
     .s-ti {
         font-family: var(--font-ui);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--ui-scale));
         color: var(--text-lo);
         padding: 4px 0;
         border-bottom: 1px dashed rgba(var(--rgb-accent), 0.06);
@@ -3443,7 +3443,7 @@
         padding: 6px 12px;
         border-radius: 5px;
         font-family: var(--font-ui);
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--ui-scale));
         font-weight: 400;
         letter-spacing: 0.2px;
         white-space: nowrap;
@@ -3541,7 +3541,7 @@
     .ctx-item {
         padding: 6px 10px;
         font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 12px;
+        font-size: calc(12px * var(--ui-scale));
         font-weight: 400;
         color: rgba(255, 255, 255, 0.85);
         cursor: pointer;
@@ -3590,7 +3590,7 @@
         flex: 1;
     }
     .ctx-item .shortcut {
-        font-size: 11px;
+        font-size: calc(11px * var(--ui-scale));
         color: rgba(255, 255, 255, 0.3);
         margin-left: auto;
         padding-left: 20px;
@@ -3701,7 +3701,7 @@
     }
     .s-day-btn {
         font-family: var(--font-ui);
-        font-size: 9.5px;
+        font-size: calc(9.5px * var(--ui-scale));
         font-weight: 600;
         letter-spacing: 0.5px;
         text-transform: uppercase;

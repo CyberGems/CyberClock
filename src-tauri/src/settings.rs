@@ -124,6 +124,11 @@ pub struct AppSettings {
     // Zero all mini-mode motion: animations AND transitions.
     pub mini_no_animations: bool,
 
+    // Interface text scale for the full window (multiplier on the
+    // text tier; display digits and layout metrics stay fixed).
+    // 0.9 = small, 1.0 = normal, 1.1 = large.
+    pub ui_scale: f64,
+
     // Hide the analog clock in full mode — the calendar dashboard takes
     // the full width (full-mode Home view only).
     pub full_hide_clock: bool,
@@ -190,6 +195,7 @@ impl Default for AppSettings {
             mini_zoom: 1.0,
             mini_click_through: false,
             mini_no_animations: false,
+            ui_scale: 1.0,
             full_hide_clock: false,
             custom_alarms: vec![
                 CustomAlarm::default(),

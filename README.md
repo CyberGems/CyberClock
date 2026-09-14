@@ -37,7 +37,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Time your work | Countdown timer with presets + precision stopwatch with lap tracking |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
 | Save screen space | Mini mode — compact always-on-top clock bar with 12 skins |
-| Make it yours | 8 accent tints, CRT scanlines, transparency controls, multi-monitor |
+| Make it yours | 8 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
 
 ---
 
