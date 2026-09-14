@@ -52,12 +52,20 @@
         // Visibility Item
         const lblVis = document.getElementById("lbl-visibility");
         const icoVis = document.getElementById("ico-visibility");
+        const hintVis = document.getElementById("hint-visibility");
         const isVis = state.is_visible;
         if (lblVis) {
             lblVis.textContent = window.ccI18n ? window.ccI18n.t(isVis ? "tray.hide" : "tray.show") : (isVis ? "Hide Clock" : "Show Clock");
         }
         if (icoVis) {
             icoVis.setAttribute("data-ico", isVis ? "eye-off" : "eye");
+        }
+        // Shortcut hint of the global show/hide hotkey; hidden when the
+        // user disabled the shortcut in Settings.
+        if (hintVis) {
+            const hotkey = state.hotkey || "";
+            hintVis.textContent = hotkey;
+            hintVis.hidden = !hotkey;
         }
 
         // Mode Item

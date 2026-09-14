@@ -2138,6 +2138,9 @@ pub struct TrayMenuState {
     pub audio_muted: bool,
     pub mini_click_through: bool,
     pub relax_playing: Option<String>,
+    /// Friendly form of the configured show/hide hotkey
+    /// ("Alt+Shift+C"); empty when the shortcut is disabled.
+    pub hotkey: String,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -2271,6 +2274,21 @@ fn tray_menu_geometry(
     (x, y, width_px.max(1) as u32, height_px.max(1) as u32)
 }
 
+/// Strip the keyboard-event prefixes ("KeyC" -> "C", "Digit5" -> "5")
+/// from the canonical hotkey so the tray hint reads like the user typed
+/// it in Settings ("Alt+Shift+C", not "Alt+Shift+KeyC").
+fn friendly_hotkey(canonical: &str) -> String {
+    canonical
+        .split('+')
+        .map(|part| {
+            part.strip_prefix("Key")
+                .or_else(|| part.strip_prefix("Digit"))
+                .unwrap_or(part)
+        })
+        .collect::<Vec<_>>()
+        .join("+")
+}
+
 pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     let settings = load_settings(app);
     let is_visible = is_any_clock_window_visible(app);
@@ -2293,6 +2311,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         audio_muted: settings.audio_muted,
         mini_click_through: settings.mini_click_through,
         relax_playing,
+        hotkey: friendly_hotkey(&settings.hotkey_toggle),
     }
 }
 
