@@ -49,9 +49,8 @@
   </symbol>
   <symbol id="cc-i-gear" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-      d="M19.4 15a1.9 1.9 0 0 0 .4 2.1l.1.1-1.5 2.6-.1-.1a2 2 0 0 0-2.3.8l-.1.2h-3l-.1-.2a2 2 0 0 0-1.7-1 2 2 0 0 0-1 .2l-.1.1-2.6-1.5.1-.1a1.9 1.9 0 0 0 .4-2.1l-.1-.2-2.2-1.3.1-.2a2 2 0 0 0 0-2.1l-.1-.2 2.2-1.3.1-.2a1.9 1.9 0 0 0-.4-2.1l-.1-.1 2.6-1.5.1.1a2 2 0 0 0 2.3-.8l.1-.2h3l.1.2a2 2 0 0 0 2.7.8l.1-.1 1.5 2.6-.1.1a1.9 1.9 0 0 0-.4 2.1l.1.2 2.2 1.3-.1.2a2 2 0 0 0 0 2.1l.1.2-2.2 1.3Z"/>
+      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
   </symbol>
   <symbol id="cc-i-minimize" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
@@ -64,9 +63,9 @@
       d="M6 6l12 12"/>
   </symbol>
   <symbol id="cc-i-clock" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 7v6l4 2"/>
+    <circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 12V7.5M12 12l3 2.25"/>
   </symbol>
   <symbol id="cc-i-monitor" viewBox="0 0 24 24">
     <rect x="2.75" y="4" width="18.5" height="12.5" rx="1.75" fill="none" stroke="currentColor" stroke-width="1.6"/>
@@ -79,30 +78,28 @@
       d="M6 9.5h.01M9.5 9.5h.01M13 9.5h.01M16.5 9.5h.01M6 12.75h.01M9.5 12.75h.01M13 12.75h.01M16.5 12.75h.01M8 15.75h8"/>
   </symbol>
   <symbol id="cc-i-timer" viewBox="0 0 24 24">
+    <circle cx="12" cy="13.5" r="7.75" fill="none" stroke="currentColor" stroke-width="1.75"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M9 2h6"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 8a9 9 0 1 0 9 9"/>
+      d="M10 2.5h4"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M17 5l-2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 12l-3 3"/>
+      d="M12 13.5 15 10.5"/>
   </symbol>
   <symbol id="cc-i-stopwatch" viewBox="0 0 24 24">
+    <circle cx="12" cy="13.5" r="7.75" fill="none" stroke="currentColor" stroke-width="1.75"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M9 2h6"/>
+      d="M10 2.5h4"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 7a9 9 0 1 0 9 9"/>
+      d="M12 13.5V9.4"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M19 4l-2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 12l0-4"/>
+      d="M14.6 10.4l-1.5 1.5"/>
   </symbol>
   <symbol id="cc-i-lotus" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 20c-4 0-7-2.5-9-6 3.5.2 6-1.2 9-4 3 2.8 5.5 4.2 9 4-2 3.5-5 6-9 6Z"/>
+      d="M12 19.5c-3.7 0-6.6-2.2-8.6-5.5 3.3.1 5.7-1.2 8.6-4 2.9 2.8 5.3 4.1 8.6 4-2 3.3-4.9 5.5-8.6 5.5Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
-      d="M12 10c-1.8-2.2-2.6-4.4-2.4-6.6 1.2.8 2 .8 2.4.8s1.2 0 2.4-.8c.2 2.2-.6 4.4-2.4 6.6Z"/>
+      d="M12 10c-1.9-2-2.8-4.2-2.6-6.4 1.2.8 2 .8 2.6.8s1.4 0 2.6-.8c.2 2.2-.7 4.4-2.6 6.4Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      d="M4.6 12.5c-1.9-1.6-2.7-3.7-2.4-6.2 1.6 1.3 2.9 1.6 4.3 1.6M19.4 12.5c1.9-1.6 2.7-3.7 2.4-6.2-1.6 1.3-2.9 1.6-4.3 1.6"/>
   </symbol>
   <symbol id="cc-i-back" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
