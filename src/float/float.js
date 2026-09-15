@@ -302,6 +302,10 @@
         if (window.cc && window.cc.startDragging) window.cc.startDragging().catch(() => {});
     });
 
+    // Suppress the WebView2 default context menu. A dedicated float
+    // context menu (mini-style) is planned; until then no menu shows.
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
     window.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !e.repeat && e.target === document.body) {
             e.preventDefault();
