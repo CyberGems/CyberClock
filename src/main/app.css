@@ -38,7 +38,11 @@
         );
         backdrop-filter: blur(18px) saturate(1.15);
         -webkit-backdrop-filter: blur(18px) saturate(1.15);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        /* Single hairline seam: a faint white lip on top of the darker
+           mica body. No accent gradient here: over near-black it read
+           as a doubled line next to the border-bottom. */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
         flex-shrink: 0;
         position: relative;
         z-index: 20;
@@ -46,20 +50,6 @@
            area of its monitor. A CSS drag region starts a native
            caption drag, and its double-click maximize/restore toggle
            let the window end up bigger than the screen. */
-    }
-    .tbar::before {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 5%;
-        right: 5%;
-        height: 1px;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(var(--rgb-accent), 0.35),
-            transparent
-        );
     }
     .tbar-brand {
         font-size: calc(11px * var(--ui-scale));
@@ -315,26 +305,35 @@
         left: 50%;
         transform: translateX(-50%);
         height: 56px;
-        background: rgba(var(--rgb-accent), 0.04);
-        border: 1px solid rgba(var(--rgb-accent), 0.15);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        /* Mica-black pill to match the titlebar: near-black glass,
+           one white hairline lip, elevation shadow. The old accent
+           border + neon halo fought the new dark chrome. */
+        background: linear-gradient(
+            to bottom,
+            rgba(8, 10, 13, 0.88) 0%,
+            rgba(5, 6, 8, 0.94) 100%
+        );
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(18px) saturate(1.15);
+        -webkit-backdrop-filter: blur(18px) saturate(1.15);
         border-radius: 28px;
         display: flex;
         align-items: center;
         padding: 0 10px;
         gap: 6px;
         z-index: 50;
-        box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-                    0 0 20px rgba(var(--rgb-accent), 0.05);
+        box-shadow:
+            0 16px 40px -10px rgba(0, 0, 0, 0.7),
+            0 0 0 1px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .floating-nav:hover {
-        border-color: rgba(var(--rgb-accent), 0.3);
-        box-shadow: 0 20px 50px -8px rgba(0, 0, 0, 0.8), 
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 0 30px rgba(var(--rgb-accent), 0.12);
+        border-color: rgba(255, 255, 255, 0.14);
+        box-shadow:
+            0 20px 50px -8px rgba(0, 0, 0, 0.8),
+            0 0 0 1px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .nav-item {
         height: 40px;
@@ -352,15 +351,14 @@
         position: relative;
     }
     .nav-item:hover {
-        background: rgba(var(--rgb-accent), 0.08);
-        border-color: rgba(var(--rgb-accent), 0.15);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.08);
         transform: translateY(-2px);
     }
     .nav-item.active {
-        background: rgba(var(--rgb-accent), 0.14);
-        border-color: rgba(var(--rgb-accent), 0.35);
-        box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.15),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        background: rgba(var(--rgb-accent), 0.12);
+        border-color: rgba(var(--rgb-accent), 0.3);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
     /* Active glowing bottom bar */
     .nav-item::before {
@@ -759,6 +757,22 @@
         color: var(--accent-a);
         text-shadow: var(--glow-xs);
         text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+    /* Leading icon for section titles (replaces the old ◈ text glyph).
+       Inherits the title's accent colour + glow through currentColor. */
+    .cal-t-ico {
+        display: inline-flex;
+        align-items: center;
+        color: inherit;
+        flex-shrink: 0;
+    }
+    .cal-t-ico .cc-ico {
+        width: 13px;
+        height: 13px;
+        filter: drop-shadow(0 0 4px rgba(var(--rgb-accent), 0.4));
     }
     .cal-nav {
         -webkit-app-region: no-drag;
@@ -973,6 +987,9 @@
         padding-bottom: 7px;
         border-bottom: 1px solid var(--border);
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 7px;
     }
     .cal-agenda-list {
         flex: 1;
@@ -2103,13 +2120,15 @@
     #view-relax {
         flex-direction: row;
     }
+    /* Both columns split the tab 50/50 and stretch to the full height.
+       Same padding + gap keeps the vertical rhythm mirrored. */
     .relax-L {
         width: 50%;
         flex-shrink: 0;
         padding: var(--view-pad-y) var(--view-pad-x);
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
         border-right: 1px solid var(--border);
         overflow: hidden;
     }
@@ -2131,24 +2150,32 @@
         color: var(--text-lo);
     }
 
+    /* Track grid fills the column: rows share the free height so the
+       six cards grow with the window instead of stacking at the top
+       with dead space below. */
     .track-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 1fr;
         gap: 10px;
+        flex: 1;
+        min-height: 0;
     }
     .tcard {
         background: var(--bg-02);
         border: 1px solid var(--border);
         border-radius: 10px;
-        padding: 16px 12px 14px;
+        padding: 12px;
         cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 7px;
         position: relative;
         transition: border-color 0.2s, background 0.2s;
         -webkit-app-region: no-drag;
+        min-height: 0;
     }
     .tcard:hover {
         border-color: var(--border-bright);
@@ -2377,6 +2404,12 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         overflow: hidden;
+        /* Shares the column's free height with the session panel so the
+           right column always fills the tab, mirroring the left. */
+        flex: 1;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
     }
     .viz-title {
         font-family: "Outfit", system-ui, sans-serif;
@@ -2386,9 +2419,12 @@
         color: var(--text-lo);
         padding: 9px 14px;
         border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
     }
     #viz-canvas {
         width: 100%;
+        flex: 1;
+        min-height: 0;
         display: block;
     }
     .ses-panel {
@@ -2397,6 +2433,9 @@
         border-radius: 10px;
         padding: 18px 16px;
         flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
     }
     /* Breathing Pacer */
     .breathe-wrap {
@@ -2531,6 +2570,12 @@
         background: var(--bg-02);
         border: 1px solid var(--border);
         border-radius: 8px;
+        /* Panel is a stretched flex column; the tip fills what's left
+           so the session block always reaches the bottom of the tab. */
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
     }
     .tip-hdr {
         display: flex;
@@ -2552,6 +2597,9 @@
         color: var(--text-md);
         line-height: 1.55;
         transition: opacity 0.4s;
+        flex: 1;
+        display: flex;
+        align-items: center;
     }
     .tip-text.fade {
         opacity: 0;
