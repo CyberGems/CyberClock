@@ -334,10 +334,38 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     // path-only WebviewUrl::App is used because the PathBuf variant
     // resolves through Url::join, which can mangle a "?kind=" query
     // into the file path and produce an unloadable webview.
+    // Open the window on the monitor where the user invoked it (tray
+    // click), near the cursor and clamped inside that monitor's bounds.
+    let (mut pos_x, mut pos_y) = (200.0 + cascade, 200.0 + cascade);
+    if let Ok(cursor) = app.cursor_position() {
+        let mon = app
+            .monitor_from_point(cursor.x, cursor.y)
+            .ok()
+            .flatten()
+            .or_else(|| app.primary_monitor().ok().flatten());
+        if let Some(mon) = mon {
+            let sf = mon.scale_factor();
+            let mpos = mon.position();
+            let msize = mon.size();
+            let win_w = wide * zoom * sf;
+            let win_h = tall * zoom * sf;
+            let margin = 12.0;
+            let min_x = mpos.x as f64 + margin;
+            let min_y = mpos.y as f64 + margin;
+            let max_x = (mpos.x as f64 + msize.width as f64 - win_w - margin).max(min_x);
+            let max_y = (mpos.y as f64 + msize.height as f64 - win_h - margin).max(min_y);
+            // Center on the cursor, with the cascade offset so repeated
+            // spawns do not stack exactly on top of each other.
+            let x = cursor.x - win_w / 2.0 + cascade;
+            let y = cursor.y - win_h / 2.0 + cascade;
+            pos_x = x.clamp(min_x, max_x) / sf;
+            pos_y = y.clamp(min_y, max_y) / sf;
+        }
+    }
     let builder = WebviewWindowBuilder::new(app, &label, url)
         .title(title)
         .inner_size(wide * zoom, tall * zoom)
-        .position(200.0 + cascade, 200.0 + cascade)
+        .position(pos_x, pos_y)
         .decorations(false)
         .transparent(true)
         .shadow(false)

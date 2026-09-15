@@ -7,7 +7,9 @@
 
 /* Preset chooser: instead of resizing the window, an idle timer swaps
    its clock face for the presets panel (same compact size as the
-   stopwatch, all skins unchanged). Opened with the "+" control. */
+   stopwatch, all skins unchanged). Opened with the timer control.
+   The panel is solid: a translucent overlay on a transparent window
+   lets the desktop show through and the presets get visually mixed. */
 .float-presets {
     position: absolute;
     inset: 0;
@@ -18,7 +20,8 @@
     justify-content: center;
     padding: 0 8px;
     border-radius: inherit;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(8, 10, 14, 0.96);
+    box-shadow: inset 0 0 0 1px var(--border-bright);
     opacity: var(--fg-op, 1);
 }
 .float-presets[hidden] { display: none; }
@@ -86,7 +89,8 @@
     justify-content: center;
     gap: 10px;
     border-radius: inherit;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(8, 10, 14, 0.96);
+    box-shadow: inset 0 0 0 1px var(--border-bright);
     font-family: "Orbitron", sans-serif;
     font-size: 13px;
     font-weight: 700;

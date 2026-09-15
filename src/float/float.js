@@ -69,7 +69,7 @@
     }
     const ICO_PLAY = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l13-7.5Z"/></svg>';
     const ICO_PAUSE = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14M16 5v14"/></svg>';
-    const ICO_PLUS = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+    const ICO_TIMER = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
     const ICO_BACK = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
 
     /* Preset chooser state: an idle timer can swap its clock face for
@@ -81,7 +81,7 @@
         if (!b) return;
         b.hidden = !(KIND === "timer" && timerIdle());
         if (!b.hidden) {
-            b.innerHTML = choosing ? ICO_BACK : ICO_PLUS;
+            b.innerHTML = choosing ? ICO_BACK : ICO_TIMER;
             b.title = window.ccI18n.t(choosing ? "float.back" : "float.pickMinutes");
         }
     }
