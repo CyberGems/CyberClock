@@ -154,10 +154,10 @@
             ],
 
             // Calendar
-            "calendar.label": "◈ Calendar",
+            "calendar.label": "Calendar",
             "calendar.today": "Today",
-            "calendar.upcoming": "◈ Upcoming",
-            "calendar.todayPanel": "◈ Today",
+            "calendar.upcoming": "Upcoming",
+            "calendar.todayPanel": "Today",
             "calendar.noNotes": "No notes yet — click any day to add one.",
             "calendar.noNotesTip": "Click any day in the calendar to attach a note. The first line will appear as a preview in your agenda.",
             "calendar.notePlaceholder": "Write a note for this day…",
@@ -192,7 +192,7 @@
             "timer.reset": "RESET",
             "timer.dismiss": "DISMISS",
             "timer.timesUp": "TIME'S UP!",
-            "timer.hint": "◈ Pick a preset or set a custom time to start",
+            "timer.hint": "Pick a preset or set a custom time to start",
 
             "stopwatch.title": "Stopwatch",
             "stopwatch.lapTimes": "Lap Times",
@@ -245,7 +245,7 @@
             "tooltip.hideClock": "Hide clock",
             "tooltip.showClock": "Show clock",
 
-            "alarms.custom.title": "◈ Custom Alarms",
+            "alarms.custom.title": "Custom Alarms",
             "alarms.custom.slot1": "Alarm 1",
             "alarms.custom.slot2": "Alarm 2",
             "alarms.custom.slot3": "Alarm 3",
@@ -593,10 +593,10 @@
             ],
 
             // Calendar
-            "calendar.label": "◈ Calendario",
+            "calendar.label": "Calendario",
             "calendar.today": "Hoy",
-            "calendar.upcoming": "◈ Próximos",
-            "calendar.todayPanel": "◈ Hoy",
+            "calendar.upcoming": "Próximos",
+            "calendar.todayPanel": "Hoy",
             "calendar.noNotes": "Sin notas aún — haz clic en un día para añadir una.",
             "calendar.noNotesTip": "Haz clic en cualquier día del calendario para adjuntar una nota. La primera línea aparecerá como vista previa en tu agenda.",
             "calendar.notePlaceholder": "Escribe una nota para este día…",
@@ -631,7 +631,7 @@
             "timer.reset": "REINICIAR",
             "timer.dismiss": "DESCARTAR",
             "timer.timesUp": "¡SE ACABÓ!",
-            "timer.hint": "◈ Elige un preset o define un tiempo personalizado para empezar",
+            "timer.hint": "Elige un preset o define un tiempo personalizado para empezar",
 
             "stopwatch.title": "Cronómetro",
             "stopwatch.lapTimes": "Vueltas",
@@ -684,7 +684,7 @@
             "tooltip.hideClock": "Ocultar reloj",
             "tooltip.showClock": "Mostrar reloj",
 
-            "alarms.custom.title": "◈ Alarmas personalizadas",
+            "alarms.custom.title": "Alarmas personalizadas",
             "alarms.custom.slot1": "Alarma 1",
             "alarms.custom.slot2": "Alarma 2",
             "alarms.custom.slot3": "Alarma 3",

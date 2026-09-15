@@ -67,6 +67,28 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M12 12V7.5M12 12l3 2.25"/>
   </symbol>
+  <symbol id="cc-i-calendar" viewBox="0 0 24 24">
+    <rect x="3.25" y="5" width="17.5" height="15.75" rx="2.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M3.25 9.5h17.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M8 3v3.25M16 3v3.25"/>
+  </symbol>
+  <symbol id="cc-i-sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M12 2.5v2.25M12 19.25v2.25M4.42 4.42l1.6 1.6M18.98 18.98l-1.6-1.6M2.5 12h2.25M19.25 12h2.25M4.42 19.58l1.6-1.6M18.98 5.02l-1.6 1.6"/>
+  </symbol>
+  <symbol id="cc-i-list" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M9.5 6h11M9.5 12h11M9.5 18h11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m3 6 1.5 1.5L7 5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m3 12 1.5 1.5L7 11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m3 18 1.5 1.5L7 17"/>
+  </symbol>
   <symbol id="cc-i-monitor" viewBox="0 0 24 24">
     <rect x="2.75" y="4" width="18.5" height="12.5" rx="1.75" fill="none" stroke="currentColor" stroke-width="1.6"/>
     <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"

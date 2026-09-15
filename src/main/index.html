@@ -113,7 +113,7 @@
                         </div>
                         <div class="cal-panel">
                             <div class="cal-hdr">
-                                <span class="cal-title-lbl" data-i18n="calendar.label">◈ Calendar</span>
+                                <span class="cal-title-lbl"><span class="cal-t-ico" data-ico="calendar"></span> <span data-i18n="calendar.label">Calendar</span></span>
                                 <div style="flex: 1"></div>
                                 <button class="cal-today-btn" id="cal-today" data-i18n="calendar.today">
                                     Today
@@ -124,11 +124,11 @@
                             <div class="cal-months" id="cal-months"></div>
                             <div class="cal-bottom">
                                 <div class="cal-dash cal-agenda">
-                                    <div class="cal-dash-t" data-i18n="calendar.upcoming">◈ Upcoming</div>
+                                    <div class="cal-dash-t"><span class="cal-t-ico" data-ico="list"></span> <span data-i18n="calendar.upcoming">Upcoming</span></div>
                                     <div class="cal-agenda-list" id="cal-agenda-list"></div>
                                 </div>
                                 <div class="cal-dash cal-stats">
-                                    <div class="cal-dash-t" data-i18n="calendar.todayPanel">◈ Today</div>
+                                    <div class="cal-dash-t"><span class="cal-t-ico" data-ico="sun"></span> <span data-i18n="calendar.todayPanel">Today</span></div>
                                     <div class="stat-row">
                                         <span class="stat-lbl" data-i18n="calendar.stat.dayOfYear">Day of year</span>
                                         <span class="stat-val" id="stat-doy">—</span>
@@ -268,7 +268,7 @@
                             </button>
                         </div>
                         <div class="t-hint" id="t-hint">
-                            ◈ <span data-i18n="timer.hint">Pick a preset or set a custom time to start</span>
+                            <span class="cal-t-ico" data-ico="timer"></span> <span data-i18n="timer.hint">Pick a preset or set a custom time to start</span>
                         </div>
                         <div class="done-ov" id="t-done">
                             <div class="done-txt" data-i18n="timer.timesUp">TIME'S UP!</div>
@@ -424,7 +424,7 @@
                         <div class="relax-R">
                             <div class="viz-wrap">
                                 <div class="viz-title" data-i18n="relax.audioSpectrum">Audio Spectrum</div>
-                                <canvas id="viz-canvas" height="200"></canvas>
+                                <canvas id="viz-canvas"></canvas>
                             </div>
                             <div class="breathe-wrap">
                                 <div class="breathe-left">
@@ -825,7 +825,7 @@
                         </div>
 
                         <!-- Custom alarms (3 slots, day-of-week repetition) -->
-                        <div class="s-sec-t" style="margin: 22px 0 8px;" data-i18n="alarms.custom.title">◈ Custom Alarms</div>
+                        <div class="s-sec-t" style="margin: 22px 0 8px;"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="alarms.custom.title">Custom Alarms</span></div>
                         <div class="s-alarm-blk" id="s-cust-blk-0">
                             <div class="s-alarm-t">
                                 <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot1">Alarm 1</span>
