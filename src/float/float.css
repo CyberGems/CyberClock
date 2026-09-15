@@ -1,0 +1,121 @@
+/* CyberClock Float - extra layer on top of mini.css skins.
+   The shell markup reuses .mini-shell / .mini-bg / .scanlines /
+   .status-dot / .time-block / .sep / .controls so all 12
+   [data-design] skins apply unchanged. This file only adds the
+   float-specific bits: extra control buttons fit, presets strip,
+   progress hairline and done overlay. */
+
+.float-presets {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 6px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    opacity: var(--fg-op, 1);
+}
+.float-presets[hidden] { display: none; }
+
+.float-preset {
+    font-family: "Outfit", sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--accent-a);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+}
+.float-preset:hover {
+    background: rgba(var(--rgb-accent), 0.14);
+    transform: scale(1.06);
+}
+.float-preset.armed {
+    background: rgba(var(--rgb-accent), 0.22);
+}
+
+.float-prog {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 0 0 inherit inherit;
+    overflow: hidden;
+}
+.float-prog[hidden] { display: none; }
+.float-prog-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-a);
+    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.8);
+    transition: width 0.1s linear;
+}
+
+.mini-shell.float-warn #mini-time {
+    color: #ffb020 !important;
+}
+.mini-shell.float-done #mini-time {
+    color: #ff5470 !important;
+}
+
+.float-done {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.55);
+    font-family: "Orbitron", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+}
+.float-done[hidden] { display: none; }
+
+/* Running dot: reuse the skin's LED, force it on while running */
+.mini-shell.float-running .status-dot {
+    opacity: 1 !important;
+}
+
+/* Four control buttons must fit the narrow single-row skins (7-12):
+   shrink the buttons a bit inside a float window. */
+.mini-shell .controls {
+    flex-direction: row;
+    gap: 2px;
+}
+.mini-shell .ctl-btn {
+    width: 18px;
+    height: 18px;
+}
+.mini-shell .ctl-ico {
+    width: 14px;
+    height: 14px;
+}
+
+/* Tall skins (1-6) stack time over date; keep the row compact */
+.mini-shell[data-design="1"] .controls,
+.mini-shell[data-design="2"] .controls,
+.mini-shell[data-design="3"] .controls,
+.mini-shell[data-design="4"] .controls,
+.mini-shell[data-design="5"] .controls,
+.mini-shell[data-design="6"] .controls {
+    flex-direction: row;
+}
+
+/* Idle timer (presets visible) needs extra height: the window itself
+   is resized from JS, this just pins the strip inside the shell. */
+.mini-shell.float-idle-timer {
+    align-items: center;
+}

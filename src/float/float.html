@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+        <title>CyberClock Float</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/tint.js"></script>
+        <script src="../shared/i18n.js"></script>
+        <script src="../shared/icons.js"></script>
+        <link rel="stylesheet" href="../mini/mini.css" />
+        <link rel="stylesheet" href="float.css" />
+    </head>
+    <body data-tint="ice">
+        <div class="mini-shell" id="shell" data-design="1">
+            <div class="mini-bg"></div>
+            <div class="scanlines"></div>
+            <div class="status-dot" id="float-dot"></div>
+            <div class="time-block">
+                <div id="mini-time">00:00.0</div>
+                <div id="mini-date">STOPWATCH</div>
+            </div>
+            <div class="sep"></div>
+            <div class="controls">
+                <button class="ctl-btn" id="btn-start" title="Start">
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 4.5v15l13-7.5Z"/>
+                    </svg>
+                </button>
+                <button class="ctl-btn" id="btn-reset" title="Reset">
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="ctl-btn" id="btn-min" title="Minimize">
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M5 12h14"/>
+                    </svg>
+                </button>
+                <button class="ctl-btn" id="btn-close" title="Close">
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="float-presets" id="float-presets" hidden>
+                <button class="float-preset" data-s="60">1m</button>
+                <button class="float-preset" data-s="300">5m</button>
+                <button class="float-preset" data-s="600">10m</button>
+                <button class="float-preset" data-s="900">15m</button>
+            </div>
+            <div class="float-prog" id="float-prog" hidden><div class="float-prog-fill" id="float-prog-fill"></div></div>
+            <div class="float-done" id="float-done" hidden>
+                <span id="float-done-txt">TIME'S UP!</span>
+                <button class="ctl-btn" id="btn-dismiss" title="Dismiss">
+                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <script src="../shared/audio-engine.js"></script>
+        <script src="float.js"></script>
+    </body>
+</html>

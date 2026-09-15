@@ -42,6 +42,10 @@
         // ── Environment ───────────────────────────────────────────
         isTauri: () => HAS_TAURI,
 
+        // ── Floating stopwatch / timer windows ────────────────────
+        spawnFloat: async (kind) => {
+            return await invoke("spawn_float", { kind });
+        },
         // ── Window management ─────────────────────────────────────
         openWindow: async (name) => {
             await invoke("open_window", { name });

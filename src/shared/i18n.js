@@ -358,6 +358,21 @@
             "settings.general.resetConfirmTitle": "Reset Settings?",
             "settings.general.resetConfirmMsg": "Are you sure you want to restore all settings to factory defaults? Your preferences will be reset.",
 
+            // Floating stopwatch / timer windows
+            "float.newStopwatch": "New Stopwatch",
+            "float.newTimer": "New Timer",
+            "float.start": "Start",
+            "float.pause": "Pause",
+            "float.reset": "Reset",
+            "float.close": "Close",
+            "float.minimize": "Minimize",
+            "float.dismiss": "Dismiss",
+            "float.stopwatchTitle": "Stopwatch · CyberClock",
+            "float.timerTitle": "Timer · CyberClock",
+            "float.stopwatchSub": "STOPWATCH",
+            "float.timerSub": "TIMER",
+            "float.timesUp": "TIME'S UP!",
+
             "about.title": "About CyberClock",
             "about.description": "CyberClock is a premium cyber-neon clock for Windows — analog dial, calendar dashboard, alarms and relaxation sessions.",
             "about.maintenance": "Updates & Maintenance",
@@ -796,6 +811,21 @@
             "settings.general.resetBtn": "Restablecer Ajustes",
             "settings.general.resetConfirmTitle": "¿Restablecer Ajustes?",
             "settings.general.resetConfirmMsg": "¿Estás seguro de que deseas restablecer todos los ajustes de fábrica? Se reiniciarán todas tus preferencias.",
+
+            // Ventanas flotantes de cronometro / timer
+            "float.newStopwatch": "Nuevo cronómetro",
+            "float.newTimer": "Nuevo timer",
+            "float.start": "Iniciar",
+            "float.pause": "Pausar",
+            "float.reset": "Reiniciar",
+            "float.close": "Cerrar",
+            "float.minimize": "Minimizar",
+            "float.dismiss": "Descartar",
+            "float.stopwatchTitle": "Cronómetro · CyberClock",
+            "float.timerTitle": "Timer · CyberClock",
+            "float.stopwatchSub": "CRONÓMETRO",
+            "float.timerSub": "TIMER",
+            "float.timesUp": "¡TIEMPO!",
 
             "about.title": "Acerca de CyberClock",
             "about.description": "CyberClock es un reloj cyber-neón premium para Windows: esfera analógica, panel de calendario, alarmas y sesiones de relajación.",

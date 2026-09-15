@@ -5,7 +5,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Mutex;
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, Emitter, Manager, WebviewWindow, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
 use tauri_plugin_dialog::DialogExt;
 
 use log::{info, warn};
@@ -100,6 +100,8 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
 
 static MINI_TARGET_WIDTH: AtomicU32 = AtomicU32::new(260);
 static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
+static FLOAT_SEQ: AtomicU32 = AtomicU32::new(0);
+const MAX_FLOAT_WINDOWS: usize = 10;
 
 /// Half the mini window's default width/height in logical px —
 /// used by every "center the mini clock" call site.
@@ -278,6 +280,83 @@ fn exit_app(app: &AppHandle) {
 #[tauri::command]
 fn minimize_window(window: WebviewWindow) {
     let _ = window.minimize();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Floating stopwatch / timer windows
+// ─────────────────────────────────────────────────────────────
+// Each call spawns one fully independent window (own WebView, own
+// JS clock). Labels are unique ("float-sw-3") so windows never
+// share state; closing a window destroys its clock. Skins, tint,
+// language and zoom are read from the global settings on load.
+// Timers chime locally in their own window; the backend broadcast
+// (alarm:chime) is intentionally not involved.
+fn float_window_count(app: &AppHandle) -> usize {
+    app.webview_windows()
+        .keys()
+        .filter(|label| label.starts_with("float-"))
+        .count()
+}
+
+fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
+    let kind = match kind {
+        "timer" => "timer",
+        _ => "sw",
+    };
+    if float_window_count(app) >= MAX_FLOAT_WINDOWS {
+        warn!("spawn_float: refusing, {} float windows alive", MAX_FLOAT_WINDOWS);
+        return None;
+    }
+    let seq = FLOAT_SEQ.fetch_add(1, Ordering::SeqCst) + 1;
+    let label = format!("float-{}-{}", kind, seq);
+    if app.get_webview_window(&label).is_some() {
+        warn!("spawn_float: label collision {}", label);
+        return None;
+    }
+    let settings = load_settings(app);
+    let zoom = if settings.mini_zoom.is_finite() && settings.mini_zoom > 0.0 {
+        settings.mini_zoom
+    } else {
+        1.0
+    };
+    let (title, wide, tall) = if kind == "timer" {
+        ("Timer · CyberClock", 280.0, 82.0)
+    } else {
+        ("Stopwatch · CyberClock", 280.0, 52.0)
+    };
+    let cascade = ((seq - 1) % 8) as f64 * 30.0;
+    let url = WebviewUrl::App(format!("float/float.html?kind={}", kind).into());
+    let builder = WebviewWindowBuilder::new(app, &label, url)
+        .title(title)
+        .inner_size(wide * zoom, tall * zoom)
+        .position(200.0 + cascade, 200.0 + cascade)
+        .decorations(false)
+        .transparent(true)
+        .shadow(false)
+        .resizable(false)
+        .minimizable(true)
+        .maximizable(false)
+        .closable(true)
+        .skip_taskbar(false)
+        .always_on_top(settings.always_on_top)
+        .visible(true)
+        .focused(true);
+    match builder.build() {
+        Ok(win) => {
+            info!("spawn_float: {} opened ({})", label, kind);
+            let _ = win.set_focus();
+            Some(label)
+        }
+        Err(e) => {
+            warn!("spawn_float: failed to build {}: {}", label, e);
+            None
+        }
+    }
+}
+
+#[tauri::command]
+fn spawn_float(app: AppHandle, kind: String) -> Option<String> {
+    spawn_float_window(&app, kind.as_str())
 }
 
 #[tauri::command]
@@ -1554,6 +1633,12 @@ fn menu_action(app: AppHandle, action: String) -> bool {
             switch_to_full_mode(app);
             true
         }
+        "new_timer" => {
+            spawn_float_window(&app, "timer").is_some()
+        }
+        "new_stopwatch" => {
+            spawn_float_window(&app, "sw").is_some()
+        }
         "close" => {
             exit_app(&app);
             true
@@ -2392,6 +2477,18 @@ fn tray_menu_action(app: AppHandle, action: String) {
         "mini" => {
             switch_to_mini_mode(app);
         }
+        "new_timer_tray" => {
+            spawn_float_window(&app, "timer");
+        }
+        "new_stopwatch_tray" => {
+            spawn_float_window(&app, "sw");
+        }
+        "new_timer" => {
+            spawn_float_window(&app, "timer");
+        }
+        "new_stopwatch" => {
+            spawn_float_window(&app, "sw");
+        }
         "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
@@ -2824,6 +2921,7 @@ pub fn run() {
             toggle_always_on_top,
             open_window,
             hide_window,
+            spawn_float,
             switch_to_full_mode,
             switch_to_mini_mode,
             set_mini_preview,

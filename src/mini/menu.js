@@ -56,10 +56,10 @@
                     if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.noAnimations");
                     const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
                     if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
-                    const timerLbl = document.querySelector('.ctx-item[data-action="timer"] .label');
-                    if (timerLbl) timerLbl.textContent = window.ccI18n.t("menu.timer");
-                    const stopwatchLbl = document.querySelector('.ctx-item[data-action="stopwatch"] .label');
-                    if (stopwatchLbl) stopwatchLbl.textContent = window.ccI18n.t("menu.stopwatch");
+                    const timerLbl = document.querySelector('.ctx-item[data-action="new_timer"] .label');
+                    if (timerLbl) timerLbl.textContent = window.ccI18n.t("float.newTimer");
+                    const stopwatchLbl = document.querySelector('.ctx-item[data-action="new_stopwatch"] .label');
+                    if (stopwatchLbl) stopwatchLbl.textContent = window.ccI18n.t("float.newStopwatch");
                     const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
                     if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
                     const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');

@@ -81,9 +81,9 @@
 
         // Features
         const lblTimer = document.getElementById("lbl-timer");
-        if (lblTimer) lblTimer.textContent = window.ccI18n ? window.ccI18n.t("tray.timer") : "Timer";
+        if (lblTimer) lblTimer.textContent = window.ccI18n ? window.ccI18n.t("float.newTimer") : "New Timer";
         const lblSw = document.getElementById("lbl-stopwatch");
-        if (lblSw) lblSw.textContent = window.ccI18n ? window.ccI18n.t("tray.stopwatch") : "Stopwatch";
+        if (lblSw) lblSw.textContent = window.ccI18n ? window.ccI18n.t("float.newStopwatch") : "New Stopwatch";
         const lblRelax = document.getElementById("lbl-relax");
         if (lblRelax) lblRelax.textContent = window.ccI18n ? window.ccI18n.t("tray.relax") : "Relax";
 
