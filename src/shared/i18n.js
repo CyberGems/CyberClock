@@ -372,6 +372,8 @@
             "float.stopwatchSub": "STOPWATCH",
             "float.timerSub": "TIMER",
             "float.timesUp": "TIME'S UP!",
+            "float.pickMinutes": "Pick minutes",
+            "float.back": "Back",
 
             "about.title": "About CyberClock",
             "about.description": "CyberClock is a premium cyber-neon clock for Windows — analog dial, calendar dashboard, alarms and relaxation sessions.",
@@ -826,6 +828,8 @@
             "float.stopwatchSub": "CRONÓMETRO",
             "float.timerSub": "TIMER",
             "float.timesUp": "¡TIEMPO!",
+            "float.pickMinutes": "Elegir minutos",
+            "float.back": "Volver",
 
             "about.title": "Acerca de CyberClock",
             "about.description": "CyberClock es un reloj cyber-neón premium para Windows: esfera analógica, panel de calendario, alarmas y sesiones de relajación.",

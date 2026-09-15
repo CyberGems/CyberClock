@@ -319,8 +319,11 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     } else {
         1.0
     };
+    // Both kinds start at the same compact size; an idle timer opens
+    // its preset chooser as an overlay over the clock face instead of
+    // growing the window (frontend syncSize() keeps them in sync).
     let (title, wide, tall) = if kind == "timer" {
-        ("Timer · CyberClock", 280.0, 82.0)
+        ("Timer · CyberClock", 280.0, 52.0)
     } else {
         ("Stopwatch · CyberClock", 280.0, 52.0)
     };

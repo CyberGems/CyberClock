@@ -5,18 +5,29 @@
    float-specific bits: extra control buttons fit, presets strip,
    progress hairline and done overlay. */
 
+/* Preset chooser: instead of resizing the window, an idle timer swaps
+   its clock face for the presets panel (same compact size as the
+   stopwatch, all skins unchanged). Opened with the "+" control. */
 .float-presets {
     position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 6px;
+    inset: 0;
     z-index: 2;
     display: flex;
     gap: 6px;
+    align-items: center;
     justify-content: center;
+    padding: 0 8px;
+    border-radius: inherit;
+    background: rgba(0, 0, 0, 0.55);
     opacity: var(--fg-op, 1);
 }
 .float-presets[hidden] { display: none; }
+
+/* While choosing, hide the face so the panel replaces it in place. */
+.mini-shell.float-choosing .time-block,
+.mini-shell.float-choosing .sep {
+    visibility: hidden;
+}
 
 .float-preset {
     font-family: "Outfit", sans-serif;
@@ -114,8 +125,5 @@
     flex-direction: row;
 }
 
-/* Idle timer (presets visible) needs extra height: the window itself
-   is resized from JS, this just pins the strip inside the shell. */
-.mini-shell.float-idle-timer {
-    align-items: center;
-}
+/* Idle timer needs no extra height anymore: the preset chooser swaps
+   in over the face at the same compact size (see float-presets). */
