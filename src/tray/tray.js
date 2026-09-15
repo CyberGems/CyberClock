@@ -181,7 +181,9 @@
 
     function runAction(action) {
         if (window.cc && window.cc.trayMenuAction) {
-            window.cc.trayMenuAction(action);
+            window.cc.trayMenuAction(action).catch((e) => {
+                console.error("trayMenuAction failed:", e);
+            });
         }
     }
 

@@ -325,7 +325,12 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         ("Stopwatch · CyberClock", 280.0, 52.0)
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
-    let url = WebviewUrl::App(format!("float/float.html?kind={}", kind).into());
+    let url = WebviewUrl::App("float/float.html".into());
+    // The window label encodes the kind ("float-timer-3" / "float-sw-3");
+    // the frontend reads it via getCurrentWindow().label. A plain
+    // path-only WebviewUrl::App is used because the PathBuf variant
+    // resolves through Url::join, which can mangle a "?kind=" query
+    // into the file path and produce an unloadable webview.
     let builder = WebviewWindowBuilder::new(app, &label, url)
         .title(title)
         .inner_size(wide * zoom, tall * zoom)
@@ -354,8 +359,15 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     }
 }
 
+// NOTE: These float/menu commands MUST be `async`. Sync commands run
+// inline on the main thread inside WebView2's WebMessageReceived
+// handler; creating a new webview from there re-enters WebView2 and
+// leaves the tray/mini menus unresponsive (observed: menu closes and
+// nothing spawns, afterwards no menu item reacts). Async commands run
+// on the async runtime and the window creation is dispatched safely
+// through the event loop instead.
 #[tauri::command]
-fn spawn_float(app: AppHandle, kind: String) -> Option<String> {
+async fn spawn_float(app: AppHandle, kind: String) -> Option<String> {
     spawn_float_window(&app, kind.as_str())
 }
 
@@ -1619,8 +1631,10 @@ fn close_mini_context_menu(app: AppHandle) {
     }
 }
 
+// Must be async: see the note above spawn_float. This command spawns
+// float windows for both the tray menu and the mini context menu.
 #[tauri::command]
-fn menu_action(app: AppHandle, action: String) -> bool {
+async fn menu_action(app: AppHandle, action: String) -> bool {
     // Hide menu first (except for "aot" which needs a visual delay in the UI)
     if action != "aot" {
         if let Some(menu) = app.get_webview_window("menu") {
@@ -2451,8 +2465,10 @@ fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
     }
 }
 
+// Must be async: see the note above spawn_float. This is the entry
+// point for the tray menu ("New Timer" / "New Stopwatch" etc.).
 #[tauri::command]
-fn tray_menu_action(app: AppHandle, action: String) {
+async fn tray_menu_action(app: AppHandle, action: String) {
     hide_tray_menu(app.clone());
 
     match action.as_str() {

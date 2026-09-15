@@ -6,18 +6,24 @@
     "use strict";
 
     const params = new URLSearchParams(location.search);
+    // The kind is encoded in the window label ("float-timer-3" /
+    // "float-sw-3"); the query string is only a best-effort hint.
     let KIND = params.get("kind") === "timer" ? "timer" : "sw";
-    if (!params.get("kind")) {
-        // Fallback: derive the kind from the window label
-        // ("float-timer-3" / "float-sw-3") in case the query string
-        // does not survive the WebviewUrl resolution.
+    function kindFromLabel() {
+        if (params.get("kind") === "timer" || params.get("kind") === "sw") {
+            return params.get("kind");
+        }
         try {
-            const lbl = window.__TAURI__ && window.__TAURI__.window
-                ? window.__TAURI__.window.getCurrentWindow().label
-                : "";
-            if (lbl.indexOf("float-timer-") === 0) KIND = "timer";
+            if (window.__TAURI__ && window.__TAURI__.window && window.__TAURI__.window.getCurrentWindow) {
+                const w = window.__TAURI__.window.getCurrentWindow();
+                const lbl = typeof w.label === "string" ? w.label : "";
+                if (lbl.indexOf("float-timer-") === 0) return "timer";
+                if (lbl.indexOf("float-sw-") === 0) return "sw";
+            }
         } catch (e) { /* keep default */ }
+        return KIND;
     }
+    KIND = kindFromLabel();
 
     let cfg = {};
 
