@@ -2888,7 +2888,10 @@
     function startViz() {
         if (vizRaf || curView !== "relax") return;
         const canvas = document.getElementById("viz-canvas");
+        // The wrap is now flex-sized (fills the right column), so sync
+        // the bitmap to BOTH axes, not just the width.
         canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
         const ctx = canvas.getContext("2d");
         const h = canvas.height,
             w = canvas.width;
