@@ -85,25 +85,37 @@
    it instead of inheriting the mini skin's intentionally soft contrast. */
 .float-shell[data-design="4"] > .controls,
 .float-shell[data-design="4"] > .float-presets {
-    opacity: 1;
+    opacity: 0.88;
 }
 .float-shell[data-design="4"] .controls .ctl-btn {
-    color: #42678f;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.55);
+    color: rgba(60, 90, 130, 0.68);
+    text-shadow: none;
 }
 .float-shell[data-design="4"] .controls .ctl-btn:hover {
     color: #28496f;
     background: rgba(76, 116, 158, 0.14);
 }
 .float-shell[data-design="4"] .controls .ctl-ico {
+    filter: none;
+}
+.float-shell[data-design="4"] .controls > #btn-presets .ctl-ico,
+.float-shell[data-design="4"] .controls > #btn-start .ctl-ico,
+.float-shell[data-design="4"] .controls > #btn-reset .ctl-ico {
     width: 18px;
     height: 18px;
-    filter: drop-shadow(0 1px 2px rgba(42, 78, 116, 0.2));
+}
+.float-shell[data-design="4"][data-kind="timer"] .float-window-controls .ctl-ico {
+    width: 16px;
+    height: 16px;
+}
+.float-shell[data-design="4"][data-kind="sw"] .float-window-controls .ctl-ico {
+    width: 17px;
+    height: 17px;
 }
 .float-shell[data-design="4"] .float-preset {
-    color: #466b93;
-    border-color: rgba(70, 106, 145, 0.48);
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.55);
+    color: rgba(70, 107, 147, 0.72);
+    border-color: rgba(70, 106, 145, 0.38);
+    text-shadow: none;
 }
 .float-shell[data-design="4"] .float-preset:hover {
     color: #28496f;
