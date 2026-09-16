@@ -86,7 +86,7 @@
     function syncPresetBtn() {
         const b = document.getElementById("btn-presets");
         if (!b) return;
-        b.hidden = !(KIND === "timer" && timerIdle());
+        b.hidden = !(KIND === "timer" && !tRunning);
         if (!b.hidden) {
             b.innerHTML = choosing ? ICO_BACK : ICO_TIMER;
             b.title = window.ccI18n.t(choosing ? "float.back" : "float.pickMinutes");
@@ -94,7 +94,7 @@
     }
 
     function openPresets() {
-        if (!timerIdle()) return;
+        if (KIND !== "timer" || tRunning) return;
         choosing = true;
         shellEl().classList.add("float-choosing");
         document.getElementById("float-presets").hidden = false;
@@ -205,12 +205,15 @@
         shellEl().classList.remove("float-done");
     }
 
-    function tArm(secs) {
-        const btns = document.querySelectorAll(".float-preset");
-        for (const b of btns) b.classList.toggle("armed", Number(b.dataset.s) === secs);
-        tTotal = secs; tAcc = secs;
+    function tAdd(secs) {
+        if (KIND !== "timer" || tRunning || !Number.isFinite(secs) || secs <= 0) return;
+        tTotal = Math.max(0, tTotal) + secs;
+        tAcc = Math.max(0, tAcc) + secs;
         tHideDone();
-        tGo();
+        document.getElementById("float-prog").hidden = false;
+        setStartIcon(false);
+        syncPresetBtn();
+        tPaint();
     }
 
     function tGo() {
@@ -349,7 +352,7 @@
         if (choosing) closePresets(); else openPresets();
     });
     const presets = document.querySelectorAll(".float-preset");
-    for (const b of presets) b.addEventListener("click", () => tArm(Number(b.dataset.s)));
+    for (const b of presets) b.addEventListener("click", () => tAdd(Number(b.dataset.s)));
     document.getElementById("float-presets").addEventListener("click", (e) => {
         if (e.target === e.currentTarget) closePresets();
     });
