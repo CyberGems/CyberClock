@@ -145,6 +145,9 @@
         getAppVersion: async () => {
             return await invokeOrFallback("get_app_version", undefined, "dev");
         },
+        isPortable: async () => {
+            return await invokeOrFallback("is_portable", undefined, false);
+        },
         openTaskbarSettings: async () => {
             // Opens Windows taskbar settings on the tray-icon page
             // (Win10: also navigates to the nested icon-list page).

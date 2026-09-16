@@ -84,6 +84,196 @@
     }
 
     // ══════════════════════════════════════════════════════════════
+    // UPDATE NOTIFICATION
+    // ══════════════════════════════════════════════════════════════
+    const UPDATE_SKIP_KEY = "cyberclock_skipped_update_version";
+    let updateStatus = { state: "idle" };
+    let updateDetails = { version: "", bullets: [], url: "" };
+    let updateDetailsToken = 0;
+    let updateNoticeDismissed = false;
+    let updatePortable = false;
+
+    function updateText(key, fallback, vars = {}) {
+        let value = window.ccI18n ? window.ccI18n.t(key) : fallback;
+        if (!value || value === key) value = fallback;
+        Object.entries(vars).forEach(([name, replacement]) => {
+            value = value.replace(`{${name}}`, String(replacement ?? ""));
+        });
+        return value;
+    }
+
+    function updateReleaseUrl() {
+        return updateStatus.releaseUrl ||
+            updateDetails.url ||
+            (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version));
+    }
+
+    function hideUpdateNotice() {
+        const notice = document.getElementById("update-notice");
+        if (!notice) return;
+        notice.classList.remove("open");
+        window.setTimeout(() => {
+            if (!notice.classList.contains("open")) notice.hidden = true;
+        }, 260);
+    }
+
+    function renderUpdateNotice() {
+        const notice = document.getElementById("update-notice");
+        if (!notice) return;
+
+        const state = updateStatus.state;
+        if (
+            updateNoticeDismissed ||
+            state === "idle" ||
+            state === "checking" ||
+            state === "not-available" ||
+            state === "error"
+        ) {
+            hideUpdateNotice();
+            return;
+        }
+
+        const versionEl = document.getElementById("update-notice-version");
+        const summaryEl = document.getElementById("update-notice-summary");
+        const listEl = document.getElementById("update-notice-changelog-list");
+        const emptyEl = document.getElementById("update-notice-empty");
+        const progressEl = document.getElementById("update-notice-progress");
+        const progressLabel = document.getElementById("update-notice-progress-label");
+        const progressFill = document.getElementById("update-notice-progress-fill");
+        const actionBtn = document.getElementById("update-notice-action");
+        const skipBtn = document.getElementById("update-notice-skip");
+        const releaseBtn = document.getElementById("update-notice-release");
+        if (!versionEl || !summaryEl || !listEl || !emptyEl || !progressEl || !actionBtn) return;
+
+        const version = updateStatus.version || updateDetails.version || "";
+        const isDownloaded = state === "downloaded";
+        const isDownloading = state === "downloading";
+        const titleEl = document.getElementById("update-notice-title");
+        versionEl.textContent = version ? `v${version}` : "";
+        if (titleEl) {
+            titleEl.textContent = isDownloaded
+                ? updateText("updates.readyTitle", "Update ready to install")
+                : isDownloading
+                    ? updateText("updates.downloadingTitle", "Downloading CyberClock")
+                    : updateText("updates.availableTitle", "A new version is ready");
+        }
+        listEl.replaceChildren();
+        for (const bullet of updateDetails.bullets || []) {
+            const item = document.createElement("li");
+            item.textContent = bullet;
+            listEl.appendChild(item);
+        }
+        emptyEl.hidden = listEl.children.length > 0;
+
+        const isAvailable = state === "available";
+        summaryEl.textContent = isDownloaded
+            ? updateText("updates.downloaded", "Update downloaded and ready to install.")
+            : isDownloading
+                ? updateText("updates.downloading", "Downloading update ({pct}%)…", {
+                    pct: Math.round(updateStatus.percent ?? 0),
+                })
+                : updatePortable
+                    ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
+                    : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", { version });
+
+        progressEl.hidden = !isDownloading;
+        if (isDownloading) {
+            const pct = Math.max(0, Math.min(100, Math.round(updateStatus.percent ?? 0)));
+            progressLabel.textContent = updateText("updates.downloading", "Downloading update ({pct}%)…", { pct });
+            progressFill.style.width = `${pct}%`;
+        }
+
+        actionBtn.textContent = isDownloaded
+            ? updateText("updates.install", "Install & restart")
+            : updatePortable
+                ? updateText("updates.downloadPortable", "Open download page")
+                : updateText("updates.download", "Download update");
+        actionBtn.disabled = isDownloading;
+        skipBtn.hidden = !isAvailable;
+        releaseBtn.hidden = !version;
+
+        notice.hidden = false;
+        requestAnimationFrame(() => notice.classList.add("open"));
+    }
+
+    async function loadUpdateDetails(payload) {
+        const version = payload.version || "";
+        const token = ++updateDetailsToken;
+        updateDetails = {
+            version,
+            bullets: window.ccUpdates
+                ? window.ccUpdates.parseChangelogPeek(payload.releaseNotes)
+                : [],
+            url: payload.releaseUrl || "",
+        };
+        renderUpdateNotice();
+        if (!window.ccUpdates || !version) return;
+        const details = await window.ccUpdates.fetchReleaseDetails(version, payload.releaseNotes || "");
+        if (token !== updateDetailsToken || updateStatus.version !== version) return;
+        updateDetails = { version, ...details };
+        renderUpdateNotice();
+    }
+
+    function handleUpdateStatus(payload) {
+        const next = payload || { state: "idle" };
+        if (next.state === "available") {
+            if (next.version && next.version !== updateStatus.version) {
+                updateNoticeDismissed = false;
+            }
+            updateStatus = next;
+            const skipped = !next.version || localStorage.getItem(UPDATE_SKIP_KEY) === next.version;
+            if (skipped) {
+                updateNoticeDismissed = true;
+                hideUpdateNotice();
+                return;
+            }
+            loadUpdateDetails(next);
+            return;
+        }
+
+        updateStatus = next;
+        if (next.state === "downloading" || next.state === "downloaded") {
+            updateNoticeDismissed = false;
+            renderUpdateNotice();
+        } else if (next.state !== "checking") {
+            renderUpdateNotice();
+        }
+    }
+
+    async function handleUpdateNoticeAction() {
+        const actionBtn = document.getElementById("update-notice-action");
+        if (actionBtn) actionBtn.disabled = true;
+        try {
+            if (updateStatus.state === "downloaded") {
+                await window.cc.installUpdate();
+                return;
+            }
+            if (updatePortable) {
+                await window.cc.openExternalUrl(updateReleaseUrl());
+                return;
+            }
+            await window.cc.downloadUpdate();
+        } catch (error) {
+            console.error("Update action failed:", error);
+            updateStatus = { state: "error", message: String(error?.message || error) };
+            hideUpdateNotice();
+        } finally {
+            if (actionBtn && updateStatus.state !== "downloading") actionBtn.disabled = false;
+        }
+    }
+
+    function skipCurrentUpdate() {
+        if (updateStatus.version) localStorage.setItem(UPDATE_SKIP_KEY, updateStatus.version);
+        updateNoticeDismissed = true;
+        hideUpdateNotice();
+    }
+
+    function openCurrentRelease() {
+        const url = updateReleaseUrl();
+        if (url && window.cc && window.cc.openExternalUrl) window.cc.openExternalUrl(url);
+    }
+
+    // ══════════════════════════════════════════════════════════════
     // NAVIGATION with cinematic transitions
     // ══════════════════════════════════════════════════════════════
     function navigate(to) {
@@ -4306,11 +4496,37 @@
         } else {
             showNextTip();
         }
+        renderUpdateNotice();
     });
 
     // ══════════════════════════════════════════════════════════════
     // IPC
     // ══════════════════════════════════════════════════════════════
+    const updateActionBtn = document.getElementById("update-notice-action");
+    if (updateActionBtn) updateActionBtn.addEventListener("click", handleUpdateNoticeAction);
+    const updateSkipBtn = document.getElementById("update-notice-skip");
+    if (updateSkipBtn) updateSkipBtn.addEventListener("click", skipCurrentUpdate);
+    const updateReleaseBtn = document.getElementById("update-notice-release");
+    if (updateReleaseBtn) updateReleaseBtn.addEventListener("click", openCurrentRelease);
+    const updateCloseBtn = document.getElementById("update-notice-close");
+    if (updateCloseBtn) {
+        updateCloseBtn.addEventListener("click", () => {
+            updateNoticeDismissed = true;
+            hideUpdateNotice();
+        });
+    }
+    if (window.cc && window.cc.isPortable) {
+        window.cc.isPortable().then((value) => {
+            updatePortable = !!value;
+            if (updateStatus.state === "available" || updateStatus.state === "downloaded") {
+                renderUpdateNotice();
+            }
+        }).catch(() => {});
+    }
+    if (window.cc && window.cc.onUpdateStatus) {
+        window.cc.onUpdateStatus(handleUpdateStatus);
+    }
+
     window.cc.onInit((s) => {
         applySettings(s);
         const startPromptEl = document.getElementById("r-tip");

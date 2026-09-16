@@ -68,6 +68,45 @@ jobs:
           releaseDraft: true
           prerelease: false
 
+      # Tauri does not provide a native Windows portable target. Package the
+      # same verified release executable separately, with a marker that makes
+      # the app keep its settings and imported sounds beside the ZIP copy.
+      - name: Package portable build
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $exe = Join-Path (Get-Location) "src-tauri/target/release/CyberClock.exe"
+          $helper = Join-Path (Get-Location) "src-tauri/target/release/bin/open-taskbar-settings.exe"
+          $portableDir = Join-Path (Get-Location) "src-tauri/target/release/bundle/portable"
+          $zip = Join-Path $portableDir "CyberClock_${version}_x64-portable.zip"
+
+          if (-not (Test-Path -LiteralPath $exe)) {
+            throw "Release executable not found: $exe"
+          }
+          if (-not (Test-Path -LiteralPath $helper)) {
+            throw "Taskbar helper not found: $helper"
+          }
+
+          if (Test-Path -LiteralPath $portableDir) {
+            Remove-Item -LiteralPath $portableDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Path $portableDir | Out-Null
+          Copy-Item -LiteralPath $exe -Destination (Join-Path $portableDir "CyberClock.exe")
+          Copy-Item -LiteralPath $helper -Destination (Join-Path $portableDir "open-taskbar-settings.exe")
+          [IO.File]::WriteAllText((Join-Path $portableDir "portable.flag"), "CyberClock portable data root`r`n")
+          Compress-Archive -Path (Join-Path $portableDir "CyberClock.exe"), (Join-Path $portableDir "open-taskbar-settings.exe"), (Join-Path $portableDir "portable.flag") -DestinationPath $zip -CompressionLevel Optimal
+          Write-Host "Portable package: $zip"
+
+      - name: Upload portable package to draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: src-tauri/target/release/bundle/portable/*-portable.zip
+          draft: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Render release notes from template
         shell: bash
         env:
@@ -82,13 +121,22 @@ jobs:
             exit 1
           fi
           INSTALLER_HASH=$(sha256sum "$INSTALLER" | cut -d' ' -f1)
+          PORTABLE=$(ls src-tauri/target/release/bundle/portable/*-portable.zip | head -1)
+          if [ -z "$PORTABLE" ]; then
+            echo "::error::Portable package not found under src-tauri/target/release/bundle/portable"
+            exit 1
+          fi
+          PORTABLE_HASH=$(sha256sum "$PORTABLE" | cut -d' ' -f1)
           echo "installer: $INSTALLER"
           echo "sha256:   $INSTALLER_HASH"
+          echo "portable: $PORTABLE"
+          echo "sha256:   $PORTABLE_HASH"
 
           # Render .github/release-template.md with the release facts
           sed -e "s/{{VERSION}}/$TAG/g" \
               -e "s/{{VERSION_NUM}}/$VER_NUM/g" \
               -e "s/{{INSTALLER_HASH}}/$INSTALLER_HASH/g" \
+              -e "s/{{PORTABLE_HASH}}/$PORTABLE_HASH/g" \
               .github/release-template.md > FINAL_RELEASE_NOTES.md
 
           # Update the draft release body in place (keeps draft state)

@@ -1490,6 +1490,64 @@
             </div>
         </div>
 
+        <!-- ═══ UPDATE NOTIFICATION ════════════════════════════════ -->
+        <section
+            class="update-notice"
+            id="update-notice"
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby="update-notice-title"
+            aria-describedby="update-notice-summary"
+            hidden
+        >
+            <div class="update-notice-head">
+                <div class="update-notice-kicker">
+                    <span class="update-notice-icon" data-ico="download"></span>
+                    <span data-i18n="updates.kicker">CyberClock update</span>
+                </div>
+                <button
+                    class="update-notice-close"
+                    id="update-notice-close"
+                    type="button"
+                    aria-label="Dismiss"
+                    data-i18n-attr="aria-label:updates.dismiss"
+                >
+                    <span data-ico="x"></span>
+                </button>
+            </div>
+            <div class="update-notice-title" id="update-notice-title">
+                <span data-i18n="updates.availableTitle">A new version is ready</span>
+            </div>
+            <div class="update-notice-version" id="update-notice-version"></div>
+            <p class="update-notice-summary" id="update-notice-summary" data-i18n="updates.availableSummary">
+                A new version of CyberClock is available.
+            </p>
+            <div class="update-notice-changelog">
+                <div class="update-notice-changelog-title" data-i18n="updates.whatsNew">What's new</div>
+                <ul class="update-notice-changelog-list" id="update-notice-changelog-list"></ul>
+                <div class="update-notice-empty" id="update-notice-empty" data-i18n="updates.notesUnavailable" hidden>
+                    Release notes are not available right now.
+                </div>
+            </div>
+            <div class="update-notice-progress" id="update-notice-progress" hidden>
+                <div class="update-notice-progress-label" id="update-notice-progress-label"></div>
+                <div class="update-notice-progress-bar">
+                    <div class="update-notice-progress-fill" id="update-notice-progress-fill"></div>
+                </div>
+            </div>
+            <div class="update-notice-actions">
+                <button class="update-notice-btn quiet" id="update-notice-skip" type="button" data-i18n="updates.skip">
+                    Skip this update
+                </button>
+                <button class="update-notice-btn quiet" id="update-notice-release" type="button" data-i18n="updates.viewRelease">
+                    View release
+                </button>
+                <button class="update-notice-btn primary" id="update-notice-action" type="button" data-i18n="updates.download">
+                    Download update
+                </button>
+            </div>
+        </section>
+
         <!-- ═══ CUSTOM CONTEXT MENU ═══════════════════════════════════ -->
         <div class="ctx-menu" id="full-ctx-menu">
             <div class="ctx-item" id="ctx-btn-mini">
@@ -1527,6 +1585,7 @@
         </div>
 
         <script src="../shared/audio-engine.js"></script>
+        <script src="../shared/update-utils.js"></script>
         <script src="app.js"></script>
     </body>
 </html>

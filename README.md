@@ -182,6 +182,11 @@ npm run build
 
 The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
 
+Tagged releases also include `CyberClock_<version>_x64-portable.zip`. Extract it
+to any folder and run `CyberClock.exe`; the portable build keeps its settings
+and imported alarm sounds in a `data/` folder beside the executable. Portable
+copies are updated by downloading the next ZIP from the release page.
+
 ### 🛡️ Windows SmartScreen
 
 Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.

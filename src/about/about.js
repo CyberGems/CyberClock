@@ -47,6 +47,7 @@
 
     let appVersion = "";
     let updateStatus = { state: "idle" };
+    let updatePortable = false;
 
     // ── Theme / language / auto-update toggle ───────────────
     function applySettings(s) {
@@ -71,6 +72,12 @@
             appVersion = v || "dev";
             const el = document.getElementById("ab-version");
             if (el) el.textContent = "Version v" + appVersion;
+        }).catch(() => {});
+    }
+    if (window.cc && window.cc.isPortable) {
+        window.cc.isPortable().then((value) => {
+            updatePortable = !!value;
+            renderUpdateState();
         }).catch(() => {});
     }
 
@@ -103,7 +110,9 @@
             btn.disabled = true;
             desc.textContent = T("about.statuses.checking", "Checking for updates…");
         } else if (s.state === "available") {
-            btn.textContent = T("about.updateNow", "Update Now");
+            btn.textContent = updatePortable
+                ? T("updates.downloadPortable", "Open download page")
+                : T("about.updateNow", "Update Now");
             btn.title = T(
                 "about.viewDetails",
                 "View update details and changelog",
@@ -140,14 +149,31 @@
     }
 
     async function handleUpdateAction() {
-        // Known update → download it (Tauri updater downloads in background
-        // and reports progress via update:status, same as CyberSnap's flow).
+        // Known update → download it. Progress arrives through the shared
+        // update:status event, matching the popup in the main window.
         if (updateStatus.state === "available") {
-            await window.cc.downloadUpdate();
+            try {
+                if (updatePortable) {
+                    openUrl(
+                        updateStatus.releaseUrl ||
+                        (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version)),
+                    );
+                } else {
+                    await window.cc.downloadUpdate();
+                }
+            } catch (e) {
+                updateStatus = { state: "error", message: String(e?.message || e) };
+                renderUpdateState();
+            }
             return;
         }
         if (updateStatus.state === "downloaded") {
-            await window.cc.installUpdate();
+            try {
+                await window.cc.installUpdate();
+            } catch (e) {
+                updateStatus = { state: "error", message: String(e?.message || e) };
+                renderUpdateState();
+            }
             return;
         }
         if (updateStatus.state === "checking" || updateStatus.state === "downloading") {
@@ -158,10 +184,36 @@
         renderUpdateState();
         try {
             const res = await window.cc.checkForUpdates();
+            if (typeof res?.isPortable === "boolean") updatePortable = res.isPortable;
             if (!res?.ok) {
                 updateStatus = {
                     state: "error",
-                    message: res?.error || "Update check failed",
+                    message: res?.error || T(
+                        "about.statuses.error",
+                        "Could not check for updates. Check your internet connection.",
+                    ),
+                };
+            } else if (updateStatus.state === "available" || updateStatus.state === "downloading" || updateStatus.state === "downloaded") {
+                // The backend broadcasts the authoritative state while the
+                // command is still resolving. Never replace that event with
+                // a stale default response from this window.
+                updateStatus = {
+                    ...updateStatus,
+                    version: updateStatus.version || res.version,
+                    releaseNotes: updateStatus.releaseNotes || res.releaseNotes,
+                    releaseUrl: updateStatus.releaseUrl || res.releaseUrl,
+                };
+            } else if (updateStatus.state === "not-available") {
+                // The event is authoritative when the current version is
+                // already installed. This also avoids a false positive while
+                // the About window is still loading its version label.
+                updateStatus = { state: "not-available", version: res.version };
+            } else if (res.version && appVersion && res.version !== appVersion) {
+                updateStatus = {
+                    state: "available",
+                    version: res.version,
+                    releaseNotes: res.releaseNotes,
+                    releaseUrl: res.releaseUrl,
                 };
             } else {
                 updateStatus = { state: "not-available", version: res.version };

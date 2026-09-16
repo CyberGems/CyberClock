@@ -2659,6 +2659,230 @@
         opacity: 1;
     }
 
+    /* ════════════════════════════════════════════════════
+   UPDATE NOTIFICATION — non-blocking release preview
+════════════════════════════════════════════════════ */
+    .update-notice {
+        position: fixed;
+        top: 68px;
+        right: 20px;
+        width: min(430px, calc(100vw - 40px));
+        box-sizing: border-box;
+        padding: 16px;
+        color: var(--text-hi);
+        background:
+            linear-gradient(145deg, rgba(var(--rgb-accent), 0.12), transparent 46%),
+            linear-gradient(180deg, rgba(17, 21, 28, 0.98), rgba(7, 10, 15, 0.98));
+        border: 1px solid var(--border-bright);
+        border-radius: 12px;
+        box-shadow:
+            0 24px 70px rgba(0, 0, 0, 0.62),
+            0 0 24px rgba(var(--rgb-accent), 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+        transition: opacity 0.24s ease, transform 0.24s ease;
+        pointer-events: none;
+        z-index: 120;
+    }
+    .update-notice.open {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+    .update-notice-head,
+    .update-notice-actions,
+    .update-notice-kicker {
+        display: flex;
+        align-items: center;
+    }
+    .update-notice-head {
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .update-notice-kicker {
+        gap: 8px;
+        color: var(--accent-a);
+        font-family: var(--font-ui);
+        font-size: calc(10px * var(--ui-scale));
+        font-weight: 700;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+    }
+    .update-notice-icon {
+        display: inline-flex;
+        width: 17px;
+        height: 17px;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.55));
+    }
+    .update-notice-icon .cc-ico {
+        width: 17px;
+        height: 17px;
+    }
+    .update-notice-close {
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-md);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .update-notice-close:hover {
+        color: var(--text-hi);
+        border-color: var(--border-bright);
+        background: rgba(var(--rgb-accent), 0.08);
+    }
+    .update-notice-close .cc-ico {
+        width: 14px;
+        height: 14px;
+    }
+    .update-notice-title {
+        margin-top: 12px;
+        color: var(--text-hi);
+        font-family: var(--font-display);
+        font-size: calc(18px * var(--ui-scale));
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+    .update-notice-version {
+        display: inline-flex;
+        margin-top: 7px;
+        padding: 3px 8px;
+        color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.1);
+        border: 1px solid rgba(var(--rgb-accent), 0.28);
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: calc(10px * var(--ui-scale));
+        font-weight: 600;
+        letter-spacing: 0.4px;
+    }
+    .update-notice-summary {
+        margin: 10px 0 13px;
+        color: var(--text-md);
+        font-family: var(--font-ui);
+        font-size: calc(12px * var(--ui-scale));
+        line-height: 1.45;
+    }
+    .update-notice-changelog {
+        padding: 11px 12px 10px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(var(--rgb-accent), 0.14);
+        border-radius: 8px;
+    }
+    .update-notice-changelog-title {
+        margin-bottom: 7px;
+        color: var(--text-hi);
+        font-family: var(--font-ui);
+        font-size: calc(10px * var(--ui-scale));
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .update-notice-changelog-list {
+        display: grid;
+        gap: 6px;
+        max-height: 126px;
+        margin: 0;
+        padding: 0 4px 0 17px;
+        overflow-y: auto;
+        color: var(--text-md);
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        line-height: 1.38;
+    }
+    .update-notice-changelog-list li::marker {
+        color: var(--accent-a);
+    }
+    .update-notice-empty {
+        color: var(--text-lo);
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        line-height: 1.4;
+    }
+    .update-notice-progress {
+        margin-top: 12px;
+    }
+    .update-notice-progress-label {
+        margin-bottom: 6px;
+        color: var(--text-md);
+        font-family: var(--font-mono);
+        font-size: calc(10px * var(--ui-scale));
+    }
+    .update-notice-progress-bar {
+        height: 5px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+    }
+    .update-notice-progress-fill {
+        width: 0%;
+        height: 100%;
+        background: var(--accent-a);
+        box-shadow: 0 0 9px rgba(var(--rgb-accent), 0.7);
+        transition: width 0.2s ease;
+    }
+    .update-notice-actions {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 14px;
+    }
+    .update-notice-btn {
+        min-height: 29px;
+        padding: 5px 10px;
+        color: var(--text-md);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: calc(10px * var(--ui-scale));
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .update-notice-btn:hover:not(:disabled) {
+        color: var(--text-hi);
+        border-color: var(--border-bright);
+        background: rgba(var(--rgb-accent), 0.08);
+    }
+    .update-notice-btn.primary {
+        color: var(--bg-00);
+        background: var(--accent-a);
+        border-color: var(--accent-a);
+        box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.24);
+    }
+    .update-notice-btn.primary:hover:not(:disabled) {
+        color: var(--bg-00);
+        background: var(--accent-c);
+        border-color: var(--accent-c);
+    }
+    .update-notice-btn:disabled {
+        opacity: 0.48;
+        cursor: default;
+    }
+
+    @media (max-width: 560px) {
+        .update-notice {
+            top: 60px;
+            right: 12px;
+            width: calc(100vw - 24px);
+        }
+        .update-notice-actions {
+            justify-content: stretch;
+        }
+        .update-notice-btn {
+            flex: 1 1 auto;
+        }
+    }
+
     /* Auto Scheduler */
     /* Scheduler controls (Settings → General, also reused by the alarms
        tab time pickers). Calm surface treatment to match the Relax view. */

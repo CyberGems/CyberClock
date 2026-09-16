@@ -237,11 +237,35 @@ pub struct SettingsStore {
     state: RwLock<AppSettings>,
 }
 
+/// Portable packages place a marker beside CyberClock.exe. Keeping the
+/// detection marker-based avoids treating a normal installed copy as
+/// portable merely because it happens to live outside Program Files.
+fn portable_data_dir() -> Option<PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    let exe_dir = exe.parent()?;
+    if !exe_dir.join("portable.flag").is_file() {
+        return None;
+    }
+    Some(exe_dir.join("data"))
+}
+
+pub fn is_portable() -> bool {
+    portable_data_dir().is_some()
+}
+
+/// Shared local storage root. Installer builds keep the existing per-user
+/// AppConfig location; portable builds keep settings and imported sounds in
+/// a data folder beside the executable.
+pub fn storage_dir(app: &AppHandle) -> PathBuf {
+    portable_data_dir().unwrap_or_else(|| {
+        app.path()
+            .app_config_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+    })
+}
+
 pub fn init_settings_store(app: &AppHandle) -> SettingsStore {
-    let dir = app
-        .path()
-        .app_config_dir()
-        .unwrap_or_else(|_| PathBuf::from("."));
+    let dir = storage_dir(app);
     if let Err(e) = fs::create_dir_all(&dir) {
         error!("Settings: cannot create config dir {:?}: {}", dir, e);
     }

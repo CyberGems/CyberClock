@@ -18,13 +18,14 @@ mod time_sync;
 mod updater;
 
 use settings::{
-    get_settings as load_settings, init_settings_store, persist, update as update_settings,
+    get_settings as load_settings, init_settings_store, persist, storage_dir,
+    update as update_settings,
 };
 pub use settings::{
     AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SettingsStore,
 };
 use updater::{
-    check_for_updates, download_update, get_app_version, init_updater, install_update,
+    check_for_updates, download_update, get_app_version, init_updater, install_update, is_portable,
     pending_update_version, set_auto_update, UpdaterState,
 };
 
@@ -1965,7 +1966,7 @@ fn save_mini_position(app: AppHandle) -> bool {
 const AUDIO_EXTENSIONS: &[&str] = &["mp3", "wav", "ogg", "m4a", "flac", "aac"];
 
 fn alarm_sounds_dir(app: &AppHandle) -> Option<std::path::PathBuf> {
-    let dir = app.path().app_data_dir().ok()?.join("alarm-sounds");
+    let dir = storage_dir(app).join("alarm-sounds");
     fs::create_dir_all(&dir).ok()?;
     Some(dir)
 }
@@ -3069,6 +3070,7 @@ pub fn run() {
             open_file_dialog,
             set_startup,
             get_app_version,
+            is_portable,
             check_for_updates,
             download_update,
             install_update,

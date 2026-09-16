@@ -89,11 +89,12 @@
                                 }
                             ],
                 "security":  {
-                                 "csp":  "default-src \u0027self\u0027; script-src \u0027self\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027; img-src \u0027self\u0027 data: blob:; media-src \u0027self\u0027 asset: http://asset.localhost blob: data:; font-src \u0027self\u0027 data:; connect-src \u0027self\u0027 ipc: http://ipc.localhost asset: http://asset.localhost",
+                                 "csp":  "default-src \u0027self\u0027; script-src \u0027self\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027; img-src \u0027self\u0027 data: blob:; media-src \u0027self\u0027 asset: http://asset.localhost blob: data:; font-src \u0027self\u0027 data:; connect-src \u0027self\u0027 ipc: http://ipc.localhost asset: http://asset.localhost https://api.github.com https://github.com",
                                  "assetProtocol":  {
                                                        "enable":  true,
                                                        "scope":  [
-                                                                     "$APPDATA/alarm-sounds/**"
+                                                                     "$APPDATA/alarm-sounds/**",
+                                                                     "$EXE/data/alarm-sounds/**"
                                                                  ]
                                                    }
                              },

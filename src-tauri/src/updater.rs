@@ -70,7 +70,9 @@ pub fn init_updater(app: &AppHandle, auto_update: bool) {
         let app = app.clone();
         tauri::async_runtime::spawn(async move {
             sleep(Duration::from_secs(8)).await;
-            let _ = perform_check(&app, false).await;
+            if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
+                let _ = perform_check(&app).await;
+            }
         });
     }
 }
@@ -81,9 +83,14 @@ pub fn get_app_version(app: AppHandle) -> String {
 }
 
 #[tauri::command]
+pub fn is_portable() -> bool {
+    crate::settings::is_portable()
+}
+
+#[tauri::command]
 pub async fn check_for_updates(app: AppHandle) -> Result<serde_json::Value, String> {
     let app_clone = app.clone();
-    match timeout(Duration::from_secs(20), perform_check(&app_clone, true)).await {
+    match timeout(Duration::from_secs(20), perform_check(&app_clone)).await {
         Ok(result) => result,
         Err(_) => {
             emit_status(
@@ -102,6 +109,11 @@ pub async fn check_for_updates(app: AppHandle) -> Result<serde_json::Value, Stri
 
 #[tauri::command]
 pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String> {
+    if crate::settings::is_portable() {
+        // A portable executable cannot be replaced safely while it is
+        // running. The UI sends the user to the release page instead.
+        return Ok(serde_json::json!({ "ok": true, "isPortable": true }));
+    }
     perform_download(&app)
         .await
         .map(|_| serde_json::json!({ "ok": true }))
@@ -109,10 +121,13 @@ pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String
 
 #[tauri::command]
 pub async fn install_update(app: AppHandle) -> Result<serde_json::Value, String> {
+    if crate::settings::is_portable() {
+        return Ok(serde_json::json!({ "ok": true, "isPortable": true }));
+    }
     perform_install(&app).map(|_| serde_json::json!({ "ok": true }))
 }
 
-async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::Value, String> {
+async fn perform_check(app: &AppHandle) -> Result<serde_json::Value, String> {
     emit_status(
         app,
         UpdateStatusPayload {
@@ -163,12 +178,12 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
                 },
             );
 
-            if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
-                let _ = perform_download(app).await;
-            }
-
             info!("Updater: update available -> v{}", version);
-            Ok(serde_json::json!({ "ok": true, "version": version }))
+            Ok(serde_json::json!({
+                "ok": true,
+                "version": version,
+                "isPortable": crate::settings::is_portable()
+            }))
         }
         Ok(None) => {
             let version = app.package_info().version.to_string();
@@ -182,7 +197,11 @@ async fn perform_check(app: &AppHandle, _is_manual: bool) -> Result<serde_json::
                     message: None,
                 },
             );
-            Ok(serde_json::json!({ "ok": true, "version": version }))
+            Ok(serde_json::json!({
+                "ok": true,
+                "version": version,
+                "isPortable": crate::settings::is_portable()
+            }))
         }
         Err(e) => {
             let msg = e.to_string();
