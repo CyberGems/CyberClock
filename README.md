@@ -5,7 +5,7 @@
 <h1 align="center">CyberClock: Desktop Clock</h1>
 
 <p align="center">
-  <strong>A premium cyber-neon styled clock for Windows</strong>: analog & digital display, calendar, timer, stopwatch, and a relaxation module with ambient sound synthesis.
+  <strong>A premium cyber-neon styled clock for Windows</strong>: analog & digital display, calendar, timer, stopwatch, relaxation module, and independent floating time tools.
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 |---|---|
 | Beautiful timekeeping | Canvas-rendered analog clock + digital display with Space Grotesk font |
 | Stay organized | Full calendar with agenda, day notes, statistics, and moon phase |
-| Time your work | Countdown timer with presets + precision stopwatch with lap tracking |
+| Time your work | Countdown timer and precision stopwatch, including independent floating windows |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
 | Save screen space | Mini mode — compact always-on-top clock bar with 12 skins |
 | Make it yours | 8 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
@@ -53,6 +53,8 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ### ⏱️ Timer & Stopwatch
 - **Countdown Timer** — Large digital display with milliseconds, preset buttons, visual progress bar, and warning state
 - **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
+- **Floating Timer and Stopwatch** — Open independent compact windows from the tray or Mini Mode menu; each window keeps its own state and inherits the active skin, tint, language, and zoom
+- **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown
 - **Resting Digits** — Untouched all-zero timer/stopwatch digits rest dimmed until a time is armed or the count starts
 
 ### 🧘 Relaxation Module
@@ -70,6 +72,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 📌 Mini Mode
 - **12 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
+- **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse the selected Mini Mode design with layouts sized for their controls
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
 - **Position Lock** — Prevent accidental dragging
@@ -98,6 +101,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Auto-Updates** — Built-in Tauri updater with GitHub Releases
 - **Bilingual UI** — Full English and Spanish interface
 - **Accessible About Window** — Suite-standard About with links, donate options and check-for-update
+- **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
 
 ---
 
@@ -107,7 +111,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Framework:** Tauri v2 (Rust backend + HTML/CSS/JS frontend)
 - **Audio:** Web Audio API with procedural synthesis
 - **Styling:** CSS custom properties for dynamic theming
-- **Architecture:** Multi-window (main, mini, menu, tray_menu) with Tauri commands/events
+- **Architecture:** Multi-window (main, mini, menu, tray_menu, about) plus dynamic floating timer/stopwatch windows, with Tauri commands/events
 
 ```
 CyberClock/
@@ -140,15 +144,16 @@ CyberClock/
 
 ### Multi-Window Architecture
 
-The app uses **5 independent Tauri windows**:
+The app uses **5 fixed Tauri windows**, plus independently spawned floating timer and stopwatch windows:
 
 | Window | Purpose | Size |
 |---|---|---|
 | `main` | Full application (clock, calendar, timer, stopwatch, relax) | 1024×768 |
-| `mini` | Compact clock bar | 260×48 (per skin) |
+| `mini` | Compact clock bar | Skin-specific dimensions |
 | `menu` | Context menu for mini mode | 270×560 |
 | `tray_menu` | System tray popup | 290×510 |
 | `about` | About window | 740×590 |
+| `float-*` | Independent timer or stopwatch | Responsive per skin |
 
 Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
 
@@ -214,6 +219,7 @@ old 5-skin themes migrate automatically to their heir tint.
 - Show/hide seconds
 - CRT scanlines overlay
 - Mini mode: background opacity, content opacity
+- Welcome greeting: optional display name shown beside the brand in Full Mode
 
 ---
 
