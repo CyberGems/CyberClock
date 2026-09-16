@@ -65,7 +65,7 @@
         // timer adds a second row for presets inside the same shell.
         const width = Math.max(bw + (KIND === "timer" ? 88 : 72), KIND === "timer" ? 370 : 350);
         const height = bh + (KIND === "sw" ? 14 : 10) +
-            (KIND === "timer" && choosing ? 44 : 0);
+            (KIND === "timer" && choosing ? 54 : 0);
         const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
