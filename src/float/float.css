@@ -1,43 +1,123 @@
 /* CyberClock Float - extra layer on top of mini.css skins.
    The shell markup reuses .mini-shell / .mini-bg / .scanlines /
    .status-dot / .time-block / .sep / .controls so all 12
-   [data-design] skins apply unchanged. This file only adds the
-   float-specific bits: extra control buttons fit, presets strip,
-   progress hairline and done overlay. */
+   [data-design] skins keep their visual identity. This file gives
+   timer and stopwatch their own geometry, presets row, progress
+   hairline and done overlay. */
 
-/* Preset chooser: instead of resizing the window, an idle timer swaps
-   its clock face for the presets panel (same compact size as the
-   stopwatch, all skins unchanged). Opened with the timer control.
-   The panel is solid: a translucent overlay on a transparent window
-   lets the desktop show through and the presets get visually mixed. */
+/* All float shells fill the logical window size calculated by float.js.
+   The design-specific height in mini.css is for the mini clock, not
+   for these mode-specific float variants. */
+.float-shell {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+.mini-shell.float-shell[data-design] {
+    height: 100%;
+}
+
+/* The stopwatch has room for its precision display and four controls. */
+.float-shell[data-kind="sw"] {
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 14px;
+}
+.float-shell[data-kind="sw"] .time-block {
+    overflow: visible;
+}
+.float-shell[data-kind="sw"] .controls {
+    gap: 6px;
+    padding: 4px 0;
+}
+.float-shell[data-kind="sw"] .ctl-btn {
+    width: 24px;
+    height: 24px;
+}
+.float-shell[data-kind="sw"] .ctl-ico {
+    width: 17px;
+    height: 17px;
+}
+
+/* Timer controls are slightly roomier because the idle state includes
+   the preset toggle. */
+.float-shell[data-kind="timer"] .controls {
+    gap: 5px;
+    padding: 4px 0;
+}
+.float-shell[data-kind="timer"] .ctl-btn {
+    width: 22px;
+    height: 22px;
+}
+.float-shell[data-kind="timer"] .ctl-ico {
+    width: 16px;
+    height: 16px;
+}
+
+/* .ctl-btn declares display:flex, so the browser's default [hidden]
+   rule is not enough. This also guarantees the timer-only button is
+   absent from stopwatch floats. */
+.float-shell .ctl-btn[hidden] {
+    display: none;
+}
+
+/* Idle timer: keep the clock face in the first row and place presets
+   below it, still inside one continuous outer shell. */
+.float-shell.float-choosing {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: center;
+}
+.float-shell.float-choosing > .status-dot {
+    grid-column: 1;
+    grid-row: 1;
+}
+.float-shell.float-choosing > .time-block {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+}
+.float-shell.float-choosing > .sep {
+    display: none;
+}
+.float-shell.float-choosing > .controls {
+    grid-column: 3;
+    grid-row: 1;
+}
+
 .float-presets {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: auto;
+    min-width: 0;
     z-index: 2;
     display: flex;
-    gap: 6px;
+    gap: 10px;
     align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-    border-radius: inherit;
-    background: rgba(8, 10, 14, 0.96);
-    box-shadow: inset 0 0 0 1px var(--border-bright);
+    justify-content: stretch;
+    padding: 8px 0 0;
+    border: 0;
+    border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     opacity: var(--fg-op, 1);
 }
 .float-presets[hidden] { display: none; }
 
-/* While choosing, hide the face so the panel replaces it in place. */
-.mini-shell.float-choosing .time-block,
-.mini-shell.float-choosing .sep {
-    visibility: hidden;
-}
-
 .float-preset {
+    flex: 1 1 0;
+    min-width: 0;
     font-family: "Outfit", sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    padding: 3px 9px;
+    padding: 5px 10px;
     border-radius: 20px;
     border: 1px solid var(--border-bright);
     background: transparent;
@@ -132,5 +212,5 @@
     flex-direction: row;
 }
 
-/* Idle timer needs no extra height anymore: the preset chooser swaps
-   in over the face at the same compact size (see float-presets). */
+/* The timer's idle preset row is included in the same shell and its
+   extra height is provided by float.js. */

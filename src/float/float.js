@@ -24,6 +24,7 @@
         return KIND;
     }
     KIND = kindFromLabel();
+    document.getElementById("shell").dataset.kind = KIND;
 
     let cfg = {};
 
@@ -54,17 +55,23 @@
     const subEl = () => document.getElementById("mini-date");
 
     let lastW = 0, lastH = 0;
-    function syncSize(force) {
+    function syncSize(force, recenter = false) {
         const design = cfg.miniDesign || 1;
         const zoom = zoomFactor();
-        // Same compact size for sw and timer: the preset chooser swaps in
-        // over the clock face instead of resizing the window (Opcion A).
         const bw = DESIGN_WIDTHS[design] || 280;
         const bh = DESIGN_HEIGHTS[design] || 48;
-        const w = Math.round(bw * zoom), h = Math.round(bh * zoom);
+        // The float owns more controls than the mini clock, so it gets a
+        // wider base geometry. Stopwatch controls are larger and the idle
+        // timer adds a second row for presets inside the same shell.
+        const width = Math.max(bw + (KIND === "timer" ? 88 : 72), KIND === "timer" ? 370 : 350);
+        const height = bh + (KIND === "sw" ? 14 : 10) +
+            (KIND === "timer" && choosing ? 44 : 0);
+        const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
-            if (window.cc && window.cc.setWindowSize) window.cc.setWindowSize({ width: w, height: h });
+            if (window.cc && window.cc.setWindowSize) {
+                window.cc.setWindowSize({ width: w, height: h, recenter });
+            }
         }
     }
     const ICO_PLAY = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l13-7.5Z"/></svg>';
@@ -72,8 +79,8 @@
     const ICO_TIMER = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
     const ICO_BACK = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
 
-    /* Preset chooser state: an idle timer can swap its clock face for
-       the quick-pick panel ("+" button). The window never resizes. */
+    /* Preset chooser state: an idle timer adds a second row for the
+       quick-pick panel ("+" button) inside the same window shell. */
     let choosing = false;
 
     function syncPresetBtn() {
@@ -92,6 +99,7 @@
         shellEl().classList.add("float-choosing");
         document.getElementById("float-presets").hidden = false;
         syncPresetBtn();
+        syncSize(true, true);
     }
 
     function closePresets() {
@@ -99,6 +107,7 @@
         shellEl().classList.remove("float-choosing");
         document.getElementById("float-presets").hidden = true;
         syncPresetBtn();
+        syncSize(true, true);
     }
 
     function setStartIcon(running) {
