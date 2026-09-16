@@ -60,6 +60,13 @@
         gap: 7px;
         flex-shrink: 0;
     }
+    .tbar-brand-copy {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+    }
     /* Official logo + name, the same branding language as the tray
        menu header (Outfit) instead of the old neon display caps. */
     .tbar-logo {
@@ -76,6 +83,26 @@
         font-weight: 500;
         line-height: 1;
         white-space: nowrap;
+    }
+    .tbar-welcome {
+        max-width: 190px;
+        overflow: hidden;
+        color: var(--text-md);
+        font-family: "Outfit", "Segoe UI Variable", system-ui, sans-serif;
+        font-size: calc(9.5px * var(--ui-scale));
+        font-weight: 400;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+        opacity: 0;
+        pointer-events: none;
+        text-overflow: ellipsis;
+        transform: translateY(3px);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        white-space: nowrap;
+    }
+    .tbar-welcome.is-visible {
+        opacity: 0.78;
+        transform: translateY(0);
     }
     /* Two-tone wordmark, suite standard: "Cyber" keeps the neutral
        text color, "Clock" carries the logo's teal. */

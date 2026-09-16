@@ -328,6 +328,10 @@
             "settings.alarms.sound.music": "Music Box",
 
             // Settings modal - General
+            "settings.general.welcomeTitle": "Welcome",
+            "settings.general.displayName": "Your name",
+            "settings.general.displayNameDesc": "Personalize the greeting shown in the titlebar",
+            "settings.general.displayNamePlaceholder": "Optional",
             "settings.general.behavior": "Behavior",
             "settings.general.startWithWindows": "Start with Windows",
             "settings.general.launchAtLogin": "Launch at login",
@@ -357,6 +361,12 @@
             "settings.general.resetBtn": "Reset to Defaults",
             "settings.general.resetConfirmTitle": "Reset Settings?",
             "settings.general.resetConfirmMsg": "Are you sure you want to restore all settings to factory defaults? Your preferences will be reset.",
+
+            // Full-mode welcome greeting
+            "welcome.goodMorning": "Good morning{name}",
+            "welcome.goodAfternoon": "Good afternoon{name}",
+            "welcome.goodEvening": "Good evening{name}",
+            "welcome.back": "Welcome back{name}",
 
             // Floating stopwatch / timer windows
             "float.newStopwatch": "New Stopwatch",
@@ -784,6 +794,10 @@
             "settings.alarms.sound.music": "Caja de Música",
 
             // Settings modal - General
+            "settings.general.welcomeTitle": "Toque personal",
+            "settings.general.displayName": "Tu nombre",
+            "settings.general.displayNameDesc": "Personaliza el saludo de la barra superior",
+            "settings.general.displayNamePlaceholder": "Opcional",
             "settings.general.behavior": "Comportamiento",
             "settings.general.startWithWindows": "Iniciar con Windows",
             "settings.general.launchAtLogin": "Iniciar al iniciar sesión",
@@ -813,6 +827,12 @@
             "settings.general.resetBtn": "Restablecer Ajustes",
             "settings.general.resetConfirmTitle": "¿Restablecer Ajustes?",
             "settings.general.resetConfirmMsg": "¿Estás seguro de que deseas restablecer todos los ajustes de fábrica? Se reiniciarán todas tus preferencias.",
+
+            // Saludo de bienvenida en modo completo
+            "welcome.goodMorning": "Buenos días{name}",
+            "welcome.goodAfternoon": "Buenas tardes{name}",
+            "welcome.goodEvening": "Buenas noches{name}",
+            "welcome.back": "Qué bueno verte de nuevo{name}",
 
             // Ventanas flotantes de cronometro / timer
             "float.newStopwatch": "Nuevo cronómetro",

@@ -143,6 +143,8 @@ pub struct AppSettings {
     pub relax_scheduler: RelaxSchedulerSettings,
 
     pub language: String,
+    // Optional name used by the full-mode welcome greeting.
+    pub display_name: String,
     pub breathe_pattern: String,
     pub auto_update: bool,
 
@@ -209,6 +211,7 @@ impl Default for AppSettings {
             ],
             relax_scheduler: RelaxSchedulerSettings::default(),
             language: "auto".to_string(),
+            display_name: String::new(),
             breathe_pattern: "box".to_string(),
             auto_update: true,
             calendar_notes: HashMap::new(),

@@ -45,7 +45,10 @@
             <div class="tbar">
                 <div class="tbar-brand">
                     <img class="tbar-logo" src="../assets/images/icon.png" alt="" />
-                    <span class="tbar-name"><span class="tbar-name-a">Cyber</span><span class="tbar-name-b">Clock</span></span>
+                    <div class="tbar-brand-copy">
+                        <span class="tbar-name"><span class="tbar-name-a">Cyber</span><span class="tbar-name-b">Clock</span></span>
+                        <span class="tbar-welcome" id="tbar-welcome" aria-live="polite"></span>
+                    </div>
                 </div>
                 <div class="tbar-mid">
                     <div class="tbar-time-row">
@@ -1025,6 +1028,25 @@
                                     <option value="en" data-i18n="settings.langEn">English</option>
                                     <option value="es" data-i18n="settings.langEs">Español</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.general.welcomeTitle">Welcome</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="stars"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.displayName">Your name</span>
+                                    <small data-i18n="settings.general.displayNameDesc">Personalize the greeting shown in the titlebar</small>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="s-display-name"
+                                    class="s-inp"
+                                    maxlength="32"
+                                    spellcheck="false"
+                                    autocomplete="off"
+                                    data-i18n-attr="placeholder:settings.general.displayNamePlaceholder"
+                                />
                             </div>
                         </div>
                         <div class="s-sec">

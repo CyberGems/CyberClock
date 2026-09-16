@@ -344,8 +344,11 @@
 
         const langEl = document.getElementById("s-lang");
         if (langEl) langEl.value = s.language || "auto";
+        const displayNameEl = document.getElementById("s-display-name");
+        if (displayNameEl) displayNameEl.value = s.displayName || "";
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
+        syncWelcomeGreetingText();
         if (typeof renderBrandVersion === "function") renderBrandVersion();
         updateDigital();
         if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
@@ -654,13 +657,58 @@
     // while the main window is the active one and resumes instantly
     // (with the correct time) when it is shown again.
     let mainActive = false;
+    let welcomeHideTimer = null;
+    let welcomeHasOpened = false;
+
+    function welcomeGreetingKey() {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return "welcome.goodMorning";
+        if (hour >= 12 && hour < 18) return "welcome.goodAfternoon";
+        return "welcome.goodEvening";
+    }
+
+    function welcomeGreetingText(returning) {
+        const name = String(cfg.displayName || "").trim().replace(/\s+/g, " ").slice(0, 32);
+        const suffix = name ? ", " + name : "";
+        return window.ccI18n.t(returning ? "welcome.back" : welcomeGreetingKey(), { name: suffix });
+    }
+
+    function syncWelcomeGreetingText() {
+        const el = document.getElementById("tbar-welcome");
+        if (!el || !el.classList.contains("is-visible")) return;
+        el.textContent = welcomeGreetingText(el.dataset.returning === "true");
+    }
+
+    function showWelcomeGreeting() {
+        const el = document.getElementById("tbar-welcome");
+        if (!el) return;
+        if (welcomeHideTimer) clearTimeout(welcomeHideTimer);
+        const returning = welcomeHasOpened;
+        welcomeHasOpened = true;
+        el.dataset.returning = String(returning);
+        el.textContent = welcomeGreetingText(returning);
+        el.classList.remove("is-visible");
+        requestAnimationFrame(() => el.classList.add("is-visible"));
+        welcomeHideTimer = setTimeout(() => el.classList.remove("is-visible"), 6500);
+    }
+
+    function hideWelcomeGreeting() {
+        if (welcomeHideTimer) clearTimeout(welcomeHideTimer);
+        welcomeHideTimer = null;
+        const el = document.getElementById("tbar-welcome");
+        if (el) el.classList.remove("is-visible");
+    }
+
     function isMainActive() {
         return mainActive;
     }
     function setMainActive(v) {
         const nv = !!v;
+        const wasActive = mainActive;
         mainActive = nv;
         document.body.classList.toggle("cc-inactive", !nv);
+        if (nv && !wasActive) showWelcomeGreeting();
+        else if (!nv) hideWelcomeGreeting();
         syncHomeClock();
         syncDigitalClock();
     }
@@ -3389,6 +3437,18 @@
     // Initial visibility for the loaded settings (applySettings fills the
     // input before this runs via onInit → applySettings ordering).
     refreshClockNameRestoreBtn();
+
+    // Optional display name for the full-mode welcome greeting. Saved on
+    // change so typing stays local and does not trigger a write per key.
+    const sDisplayName = document.getElementById("s-display-name");
+    if (sDisplayName) {
+        sDisplayName.addEventListener("change", () => {
+            const text = sDisplayName.value.trim().replace(/\s+/g, " ").slice(0, 32);
+            sDisplayName.value = text;
+            window.cc.saveSettings({ displayName: text });
+            syncWelcomeGreetingText();
+        });
+    }
 
     // Hide analog clock — the side grip on the Home view and the Settings
     // toggle drive the same setting through the same broadcast round-trip.
