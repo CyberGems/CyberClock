@@ -419,25 +419,43 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background:
-            radial-gradient(circle at 32% 28%, #ffffff 0%, #ffffff 18%,
-                color-mix(in srgb, var(--accent-a) 60%, #cfe4f7) 55%,
-                color-mix(in srgb, var(--accent-b) 75%, #4b7ba6) 100%);
-        box-shadow: 0 0 16px var(--accent-a), inset 0 -2px 3px rgba(35, 49, 74, 0.25);
-        --led-halo: var(--accent-b);
-        --led-period: 4s;
+        background: transparent;
+        border: 1px solid color-mix(in srgb, var(--accent-b) 58%, #b8cfe5);
+        box-shadow:
+            0 0 0 1px color-mix(in srgb, var(--accent-a) 26%, transparent),
+            0 0 14px color-mix(in srgb, var(--accent-a) 38%, transparent),
+            inset 0 0 4px color-mix(in srgb, var(--accent-a) 26%, transparent);
         animation: none;
         position: relative;
         z-index: 1;
     }
     .mini-shell[data-design="4"] .status-dot::before {
-        width: 440%;
-        height: 440%;
-        background: radial-gradient(circle,
-            color-mix(in srgb, var(--accent-a) 42%, transparent) 0%,
-            transparent 70%);
-        opacity: 0.72;
-        animation: none;
+        top: 50%;
+        left: 50%;
+        width: 220%;
+        height: 220%;
+        transform: translate(-50%, -50%);
+        background: conic-gradient(
+            from 0deg,
+            transparent 0deg 215deg,
+            color-mix(in srgb, var(--accent-a) 28%, transparent) 250deg,
+            color-mix(in srgb, #ffffff 88%, var(--accent-a)) 292deg,
+            transparent 330deg 360deg
+        );
+        opacity: 0.95;
+        animation: glass-lens-orbit 2.4s linear infinite;
+    }
+    .mini-shell[data-design="4"] .status-dot::after {
+        content: '';
+        position: absolute;
+        inset: 3px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%,
+            rgba(255, 255, 255, 0.8),
+            color-mix(in srgb, var(--accent-a) 45%, transparent) 48%,
+            transparent 76%);
+        opacity: 0.75;
+        animation: glass-lens-pulse 2.8s ease-in-out infinite;
     }
     .mini-shell[data-design="4"] .sep {
         width: 1px;
@@ -1625,6 +1643,14 @@
             background-position: -40% 0;
             opacity: 0.95;
         }
+    }
+    @keyframes glass-lens-orbit {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    @keyframes glass-lens-pulse {
+        0%, 100% { opacity: 0.45; transform: scale(0.88); }
+        50% { opacity: 1; transform: scale(1.08); }
     }
     @keyframes glass-rim {
         0%, 100% {
