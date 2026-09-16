@@ -18,7 +18,7 @@
     height: calc(100% / var(--mini-zoom, 1));
 }
 
-/* The stopwatch has room for its precision display and four controls. */
+/* The stopwatch has room for its precision display and functional controls. */
 .float-shell[data-kind="sw"] {
     padding-left: 16px;
     padding-right: 16px;
@@ -53,6 +53,32 @@
 .float-shell[data-kind="timer"] .ctl-ico {
     width: 16px;
     height: 16px;
+}
+
+/* Keep app actions together and isolate window actions in a compact vertical
+   stack, matching the clock's right-side control language. */
+.float-window-sep {
+    width: 1px;
+    height: 28px;
+    flex: 0 0 1px;
+    margin: 0 3px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        color-mix(in srgb, var(--accent-b) 38%, transparent),
+        transparent
+    );
+}
+.float-window-controls {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+.float-window-controls .ctl-btn {
+    margin: 0;
 }
 
 /* Skin 4 uses a light glass face. Keep float controls readable against
@@ -205,8 +231,8 @@
     opacity: 1 !important;
 }
 
-/* Four control buttons must fit the narrow single-row skins (7-12):
-   shrink the buttons a bit inside a float window. */
+/* Functional controls must fit the narrow single-row skins (7-12): shrink
+   the buttons a bit inside a float window. */
 .mini-shell .controls {
     flex-direction: row;
     gap: 2px;

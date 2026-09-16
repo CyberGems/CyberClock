@@ -61,11 +61,14 @@
         const bw = DESIGN_WIDTHS[design] || 280;
         const bh = DESIGN_HEIGHTS[design] || 48;
         // The float owns more controls than the mini clock, so it gets a
-        // wider base geometry. Stopwatch controls are larger and the idle
-        // timer adds a second row for presets inside the same shell.
+        // wider base geometry. The window controls are stacked vertically,
+        // so every skin gets enough height for that compact right-side group.
         const width = Math.max(bw + (KIND === "timer" ? 88 : 72), KIND === "timer" ? 370 : 350);
-        const height = bh + (KIND === "sw" ? 14 : 10) +
-            (KIND === "timer" && choosing ? 54 : 0);
+        const baseHeight = Math.max(
+            bh + (KIND === "sw" ? 14 : 10),
+            KIND === "sw" ? 58 : 52
+        );
+        const height = baseHeight + (KIND === "timer" && choosing ? 54 : 0);
         const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
