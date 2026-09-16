@@ -1,11 +1,14 @@
 use chrono::{Datelike, TimeZone};
 use chrono::{Local, Timelike};
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
+use tauri::{
+    AppHandle, Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent,
+};
 use tauri_plugin_dialog::DialogExt;
 
 use log::{info, warn};
@@ -93,15 +96,77 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Mini window target size — shared between resize handler and
-// set_window_size command so skin changes work correctly across
-// DPI differences between monitors.
+// Window target sizes shared between resize handlers and
+// set_window_size so skin changes work correctly across DPI
+// differences between monitors.
 // ─────────────────────────────────────────────────────────────
 
 static MINI_TARGET_WIDTH: AtomicU32 = AtomicU32::new(260);
 static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
 static FLOAT_SEQ: AtomicU32 = AtomicU32::new(0);
+static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
+static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
+
+fn float_target_sizes() -> &'static Mutex<HashMap<String, (u32, u32)>> {
+    FLOAT_TARGET_SIZES.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn remember_window_target(window: &WebviewWindow, width: u32, height: u32) {
+    match window.label() {
+        "mini" => {
+            MINI_TARGET_WIDTH.store(width, Ordering::Release);
+            MINI_TARGET_HEIGHT.store(height, Ordering::Release);
+        }
+        label if label.starts_with("float-") => {
+            lock_or_recover(float_target_sizes()).insert(label.to_string(), (width, height));
+        }
+        _ => {}
+    }
+}
+
+fn forget_float_target(label: &str) {
+    if label.starts_with("float-") {
+        lock_or_recover(float_target_sizes()).remove(label);
+    }
+}
+
+fn target_size_for(window: &WebviewWindow) -> Option<(u32, u32)> {
+    match window.label() {
+        "mini" => Some((
+            MINI_TARGET_WIDTH.load(Ordering::Acquire),
+            MINI_TARGET_HEIGHT.load(Ordering::Acquire),
+        )),
+        label if label.starts_with("float-") => {
+            lock_or_recover(float_target_sizes()).get(label).copied()
+        }
+        _ => None,
+    }
+}
+
+/// Re-assert a window's desired logical size after WebView2 reports a
+/// resize or DPI change. Comparing physical pixels first avoids a resize
+/// feedback loop while still correcting the known cross-monitor shrink.
+fn restore_target_size(window: &WebviewWindow) {
+    let Some((width, height)) = target_size_for(window) else {
+        return;
+    };
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let expected_width = (f64::from(width) * scale).round() as u32;
+    let expected_height = (f64::from(height) * scale).round() as u32;
+    let already_correct = window
+        .outer_size()
+        .map(|size| {
+            size.width.abs_diff(expected_width) <= 1 && size.height.abs_diff(expected_height) <= 1
+        })
+        .unwrap_or(false);
+    if !already_correct {
+        let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(
+            f64::from(width),
+            f64::from(height),
+        )));
+    }
+}
 
 /// Half the mini window's default width/height in logical px —
 /// used by every "center the mini clock" call site.
@@ -128,6 +193,9 @@ fn apply_always_on_top(app: &AppHandle, aot: bool) {
             }
             "main" => {
                 let _ = window.set_always_on_top(false);
+            }
+            label if label.starts_with("float-") => {
+                let _ = window.set_always_on_top(aot);
             }
             _ => {}
         }
@@ -299,12 +367,16 @@ fn float_window_count(app: &AppHandle) -> usize {
 }
 
 fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
+    let _spawn_guard = lock_or_recover(&FLOAT_SPAWN_LOCK);
     let kind = match kind {
         "timer" => "timer",
         _ => "sw",
     };
     if float_window_count(app) >= MAX_FLOAT_WINDOWS {
-        warn!("spawn_float: refusing, {} float windows alive", MAX_FLOAT_WINDOWS);
+        warn!(
+            "spawn_float: refusing, {} float windows alive",
+            MAX_FLOAT_WINDOWS
+        );
         return None;
     }
     let seq = FLOAT_SEQ.fetch_add(1, Ordering::SeqCst) + 1;
@@ -345,8 +417,9 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
             .or_else(|| app.primary_monitor().ok().flatten());
         if let Some(mon) = mon {
             let sf = mon.scale_factor();
-            let mpos = mon.position();
-            let msize = mon.size();
+            let work_area = mon.work_area();
+            let mpos = work_area.position;
+            let msize = work_area.size;
             let win_w = wide * zoom * sf;
             let win_h = tall * zoom * sf;
             let margin = 12.0;
@@ -379,6 +452,20 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         .focused(true);
     match builder.build() {
         Ok(win) => {
+            remember_window_target(
+                &win,
+                (wide * zoom).round() as u32,
+                (tall * zoom).round() as u32,
+            );
+            let float_for_resize = win.clone();
+            let float_label = win.label().to_string();
+            win.on_window_event(move |event| match event {
+                WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
+                    restore_target_size(&float_for_resize);
+                }
+                WindowEvent::Destroyed => forget_float_target(&float_label),
+                _ => {}
+            });
             info!("spawn_float: {} opened ({})", label, kind);
             let _ = win.set_focus();
             Some(label)
@@ -468,10 +555,9 @@ fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Opt
         }
     }
 
-    // Store the target size so the Resized handler can re-apply it
-    // when DPI scaling tries to corrupt the window size.
-    MINI_TARGET_WIDTH.store(width as u32, Ordering::Release);
-    MINI_TARGET_HEIGHT.store(height as u32, Ordering::Release);
+    // Store the target size so the matching window's resize handler can
+    // re-apply it when DPI scaling tries to corrupt the window size.
+    remember_window_target(&window, width as u32, height as u32);
     // Use Logical size so Tauri calculates the correct physical size
     // for the monitor the window is currently on.
     let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(
@@ -1547,11 +1633,18 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Mini context menu
+// Clock context menu
 // ─────────────────────────────────────────────────────────────
 
 #[tauri::command]
-fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, screen_y: i32) {
+fn open_mini_context_menu(
+    app: AppHandle,
+    window: WebviewWindow,
+    _x: i32,
+    _y: i32,
+    screen_x: i32,
+    screen_y: i32,
+) {
     if let Some(menu) = app.get_webview_window("menu") {
         // Get screen dimensions to prevent menu from going off-screen
         if let Ok(monitors) = menu.available_monitors() {
@@ -1561,8 +1654,9 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
                 .find(|m| is_position_in_monitor(screen_x, screen_y, m));
 
             if let Some(found_monitor) = found_monitor {
-                let monitor_pos = found_monitor.position();
-                let monitor_size = found_monitor.size();
+                let work_area = found_monitor.work_area();
+                let monitor_pos = work_area.position;
+                let monitor_size = work_area.size;
                 let scale = found_monitor.scale_factor();
 
                 // Menu dimensions (logical px in tauri.conf.json) → physical
@@ -1576,15 +1670,13 @@ fn open_mini_context_menu(app: AppHandle, _x: i32, _y: i32, screen_x: i32, scree
                 let mon_right = monitor_pos.x + monitor_size.width as i32;
                 let mon_bottom = monitor_pos.y + monitor_size.height as i32;
 
-                // Anchor the menu to the mini clock window (not the cursor) so it never
-                // covers the clock while the user adjusts sliders.
-                let (clock_x, clock_y, clock_w, clock_h) = app
-                    .get_webview_window("mini")
-                    .and_then(|mini| match (mini.outer_position(), mini.outer_size()) {
-                        (Ok(p), Ok(s)) => Some((p.x, p.y, s.width as i32, s.height as i32)),
-                        _ => None,
-                    })
-                    .unwrap_or((screen_x, screen_y, 0, 0));
+                // Anchor the menu to the invoking clock window (not the cursor)
+                // so it never covers the clock while the user adjusts sliders.
+                let (clock_x, clock_y, clock_w, clock_h) =
+                    match (window.outer_position(), window.outer_size()) {
+                        (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
+                        _ => (screen_x, screen_y, 0, 0),
+                    };
 
                 // Does the menu fit on each side of the clock (with a gap)?
                 let room_below = clock_y + clock_h + gap + menu_height <= mon_bottom;
@@ -1678,12 +1770,8 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             switch_to_full_mode(app);
             true
         }
-        "new_timer" => {
-            spawn_float_window(&app, "timer").is_some()
-        }
-        "new_stopwatch" => {
-            spawn_float_window(&app, "sw").is_some()
-        }
+        "new_timer" => spawn_float_window(&app, "timer").is_some(),
+        "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
         "close" => {
             exit_app(&app);
             true
@@ -2851,19 +2939,13 @@ pub fn run() {
             // The mini window is non-resizable (tauri.conf.json). However,
             // moving between monitors with different DPI can still cause
             // Webview2 to apply incorrect scaling (progressive ~20% shrink).
-            // We force the correct logical size on every resize event to
-            // counteract this. The height is read from MINI_TARGET_HEIGHT
-            // so that skin changes (which call set_window_size) work correctly.
+            // Re-apply the mini target only when the physical size is wrong.
             if let Some(mini) = app.get_webview_window("mini") {
                 let mini_for_resize = mini.clone();
                 let app_for_resize = app.handle().clone();
                 mini.on_window_event(move |event| match event {
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
-                        let w = MINI_TARGET_WIDTH.load(Ordering::Acquire);
-                        let h = MINI_TARGET_HEIGHT.load(Ordering::Acquire);
-                        let _ = mini_for_resize.set_size(tauri::Size::Logical(
-                            tauri::LogicalSize::new(f64::from(w), f64::from(h)),
-                        ));
+                        restore_target_size(&mini_for_resize);
                         // While the settings peek is docked, follow
                         // resizes (zoom changes) so the mini never
                         // spills past the work area edge.

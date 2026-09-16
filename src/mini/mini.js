@@ -311,6 +311,29 @@
     }
 
     const controlsEl = document.querySelector(".controls");
+    let tipHideTimer = null;
+    let isTimeBlockHovered = false;
+    let isTipHovered = false;
+
+    function hideTipNow() {
+        clearTimeout(tipTimer);
+        clearTimeout(tipHideTimer);
+        tipTimer = null;
+        tipHideTimer = null;
+        isTipVisible = false;
+        tipEl.classList.remove("show");
+    }
+
+    function scheduleTipHide(delay = 180) {
+        clearTimeout(tipHideTimer);
+        tipHideTimer = setTimeout(() => {
+            tipHideTimer = null;
+            if (isTimeBlockHovered || isTipHovered) return;
+            hideTipNow();
+            collapseDate();
+            syncWindowSize();
+        }, delay);
+    }
 
     function expandDate() {
         if (isHovered) return;
@@ -341,6 +364,9 @@
         // Click-through mode: the OS never delivers mouse events, so skip
         // the tooltip pipeline (no timers, no resize churn) entirely.
         if (document.body.classList.contains("click-through")) return;
+        isTimeBlockHovered = true;
+        clearTimeout(tipHideTimer);
+        tipHideTimer = null;
         expandDate();
         refreshTipContent();
         positionTip();
@@ -354,14 +380,25 @@
         }, 800);
     });
 
-    timeBlock.addEventListener("mouseleave", (e) => {
+    timeBlock.addEventListener("mouseleave", () => {
+        isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        isTipVisible = false;
-        tipEl.classList.remove("show");
-        if (e.relatedTarget && e.relatedTarget.closest(".controls")) {
-            collapseDate();
-        }
+        scheduleTipHide();
+    });
+
+    // The tooltip lives outside the shell, so keep it alive while the
+    // pointer crosses the small gap between the clock and the card.
+    tipEl.addEventListener("mouseenter", () => {
+        isTipHovered = true;
+        clearTimeout(tipHideTimer);
+        tipHideTimer = null;
+        positionTip();
+    });
+
+    tipEl.addEventListener("mouseleave", () => {
+        isTipHovered = false;
+        scheduleTipHide();
     });
 
     // Status dot also triggers date expand
@@ -375,19 +412,18 @@
     // Controls (buttons): DO NOT expand date. If already expanded, collapse it so buttons stay rock solid!
     if (controlsEl) {
         controlsEl.addEventListener("mouseenter", () => {
-            clearTimeout(tipTimer);
-            tipTimer = null;
-            isTipVisible = false;
-            tipEl.classList.remove("show");
+            isTimeBlockHovered = false;
+            isTipHovered = false;
+            hideTipNow();
             collapseDate();
+            syncWindowSize();
         });
     }
 
     document.body.addEventListener("mouseleave", () => {
-        clearTimeout(tipTimer);
-        tipTimer = null;
-        isTipVisible = false;
-        tipEl.classList.remove("show");
+        isTimeBlockHovered = false;
+        isTipHovered = false;
+        hideTipNow();
         miniHovered = false;
         collapseDate();
         syncMiniMotion();
@@ -402,7 +438,7 @@
     shellEl.addEventListener("mouseleave", () => {
         miniHovered = false;
         syncMiniMotion();
-        collapseDate();
+        if (!isTimeBlockHovered && !isTipHovered) scheduleTipHide();
     });
 
     tipEl.addEventListener("click", () => {
@@ -494,14 +530,10 @@
         if (e.target.closest(".controls")) return;
         if (e.button !== 0) return;
 
-        // Immediately cancel and dismiss hover popup if visible/pending
-        clearTimeout(tipTimer);
-        tipTimer = null;
-        if (isTipVisible) {
-            isTipVisible = false;
-            tipEl.classList.remove("show");
-            syncWindowSize();
-        }
+        // Immediately cancel and dismiss the hover popup if visible/pending.
+        hideTipNow();
+        collapseDate();
+        syncWindowSize();
 
         if (cfg.miniPositionLocked === true) return;
         e.preventDefault();

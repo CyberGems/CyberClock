@@ -132,8 +132,10 @@
 
     function swToggle() {
         if (swRunning) {
+            swElapsed = performance.now() - swStart + swPaused;
             swRunning = false; swPaused = swElapsed;
             cancelAnimationFrame(swRaf); swRaf = null;
+            swPaint();
         } else {
             swRunning = true; swStart = performance.now();
             swRaf = requestAnimationFrame(swLoop);
@@ -217,8 +219,17 @@
     }
 
     function tPause() {
+        if (!tRunning) return;
+        const now = Date.now();
+        tAcc = Math.max(0, tAcc - (now - tLastTick) / 1000);
+        tLastTick = now;
         tRunning = false;
         clearInterval(tInt);
+        if (tAcc <= 0) {
+            tAcc = 0;
+            tComplete();
+            return;
+        }
         shellEl().classList.remove("float-running");
         setStartIcon(false);
         tPaint();
@@ -227,8 +238,8 @@
     function tToggle() {
         if (tRunning) { tPause(); return; }
         if (tAcc <= 0) {
-            const first = document.querySelector(".float-preset");
-            if (first) { tArm(Number(first.dataset.s)); return; }
+            openPresets();
+            return;
         }
         tGo();
     }
@@ -330,6 +341,9 @@
     });
     const presets = document.querySelectorAll(".float-preset");
     for (const b of presets) b.addEventListener("click", () => tArm(Number(b.dataset.s)));
+    document.getElementById("float-presets").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closePresets();
+    });
 
     shellEl().addEventListener("mousedown", (e) => {
         if (e.target.closest(".controls, .float-preset, .float-done")) return;
@@ -339,9 +353,23 @@
         if (window.cc && window.cc.startDragging) window.cc.startDragging().catch(() => {});
     });
 
-    // Suppress the WebView2 default context menu. A dedicated float
-    // context menu (mini-style) is planned; until then no menu shows.
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    // Reuse the mini-style context menu. The backend anchors it to the
+    // invoking window, so each float opens its menu beside itself.
+    document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.cc.getWindowPosition().then(winPos => {
+            window.cc.openMiniContextMenu({
+                x: e.clientX, y: e.clientY,
+                screenX: winPos[0] + e.clientX, screenY: winPos[1] + e.clientY,
+            });
+        }).catch(() => {
+            window.cc.openMiniContextMenu({
+                x: e.clientX, y: e.clientY,
+                screenX: e.screenX, screenY: e.screenY,
+            });
+        });
+    });
 
     window.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !e.repeat && e.target === document.body) {

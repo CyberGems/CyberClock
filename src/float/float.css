@@ -61,7 +61,8 @@
     height: 3px;
     z-index: 2;
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 0 0 inherit inherit;
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
     overflow: hidden;
 }
 .float-prog[hidden] { display: none; }
@@ -109,6 +110,8 @@
 .mini-shell .controls {
     flex-direction: row;
     gap: 2px;
+    position: relative;
+    z-index: 4;
 }
 .mini-shell .ctl-btn {
     width: 18px;
