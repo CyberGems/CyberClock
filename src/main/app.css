@@ -60,13 +60,6 @@
         gap: 7px;
         flex-shrink: 0;
     }
-    .tbar-brand-copy {
-        display: flex;
-        min-width: 0;
-        flex-direction: column;
-        justify-content: center;
-        gap: 2px;
-    }
     /* Official logo + name, the same branding language as the tray
        menu header (Outfit) instead of the old neon display caps. */
     .tbar-logo {
@@ -85,24 +78,34 @@
         white-space: nowrap;
     }
     .tbar-welcome {
-        max-width: 190px;
+        max-width: 0;
         overflow: hidden;
+        border-left: 0 solid transparent;
         color: var(--text-md);
         font-family: "Outfit", "Segoe UI Variable", system-ui, sans-serif;
-        font-size: calc(9.5px * var(--ui-scale));
+        font-size: calc(11px * var(--ui-scale));
         font-weight: 400;
         letter-spacing: 0.04em;
         line-height: 1.1;
+        margin-left: -7px;
         opacity: 0;
+        padding-left: 0;
         pointer-events: none;
         text-overflow: ellipsis;
-        transform: translateY(3px);
-        transition: opacity 0.45s ease, transform 0.45s ease;
+        transform: translateX(-4px);
+        transition: max-width 0.45s ease, margin-left 0.45s ease,
+            padding-left 0.45s ease, border-color 0.45s ease,
+            opacity 0.45s ease, transform 0.45s ease;
         white-space: nowrap;
     }
     .tbar-welcome.is-visible {
+        max-width: 190px;
+        border-left-width: 1px;
+        border-left-color: rgba(255, 255, 255, 0.16);
+        margin-left: 3px;
         opacity: 0.78;
-        transform: translateY(0);
+        padding-left: 10px;
+        transform: translateX(0);
     }
     /* Two-tone wordmark, suite standard: "Cyber" keeps the neutral
        text color, "Clock" carries the logo's teal. */
