@@ -947,14 +947,25 @@
         syncDigitalClock();
     }
 
+    let stopClockTimer = null;
     function syncHomeClock() {
         const hidden = document
             .getElementById("view-home")
             ?.classList.contains("no-clock");
         if (!hidden && isMainActive() && curView === "home") {
+            if (stopClockTimer) {
+                clearTimeout(stopClockTimer);
+                stopClockTimer = null;
+            }
             startClockAnim();
         } else {
-            stopClockAnim();
+            // Keep drawing during the CSS collapse transition so the clock slides away fluidly
+            if (stopClockTimer) clearTimeout(stopClockTimer);
+            stopClockTimer = setTimeout(() => {
+                if (document.getElementById("view-home")?.classList.contains("no-clock") || curView !== "home") {
+                    stopClockAnim();
+                }
+            }, 460);
         }
     }
 
@@ -1004,12 +1015,20 @@
         if (!canvas) return;
         const panel = document.querySelector(".clock-panel") || canvas.closest(".clock-panel");
         if (!panel) return;
-        const isSolo = document.getElementById("view-home")?.classList.contains("no-calendar");
-        const padX = isSolo ? 72 : 36;
+        const homeView = document.getElementById("view-home");
+        if (homeView && homeView.classList.contains("no-clock")) {
+            return;
+        }
+        const w = panel.clientWidth;
+        const h = panel.clientHeight;
+        if (w < 50 || h < 50) return; // Skip intermediate transition frames to avoid flickering
+
+        const isSolo = homeView && homeView.classList.contains("no-calendar");
+        const padX = isSolo ? 48 : 36;
         const padY = isSolo ? 48 : 36;
-        const size = Math.max(0, Math.min(
-            panel.clientWidth - padX,
-            panel.clientHeight - padY,
+        const size = Math.max(120, Math.min(
+            w - padX,
+            h - padY,
         ));
         if (size > 0 && (canvas.width !== size || canvas.height !== size)) {
             canvas.width = size;
@@ -5491,10 +5510,11 @@
             setupClock();
             syncHomeClock();
         });
-        // Dynamically adjust clock canvas whenever the clock panel resizes
+        // Dynamically adjust clock canvas whenever the clock panel resizes (debounced to keep CSS animations silky smooth)
         const clockPanelEl = document.querySelector(".clock-panel");
         if (clockPanelEl && typeof ResizeObserver !== "undefined") {
             let prevW = 0, prevH = 0;
+            let resizeTimer = null;
             const ro = new ResizeObserver((entries) => {
                 for (const entry of entries) {
                     const w = Math.floor(entry.contentRect.width);
@@ -5502,10 +5522,13 @@
                     if (w !== prevW || h !== prevH) {
                         prevW = w;
                         prevH = h;
-                        setupClock();
-                        if (typeof drawClock === "function" && isMainActive() && curView === "home") {
-                            drawClock();
-                        }
+                        if (resizeTimer) clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            setupClock();
+                            if (typeof drawClock === "function" && isMainActive() && curView === "home") {
+                                drawClock();
+                            }
+                        }, 50);
                     }
                 }
             });
