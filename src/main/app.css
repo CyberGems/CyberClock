@@ -642,16 +642,23 @@
         );
         box-shadow: 2px 0 12px -2px rgba(0, 0, 0, 0.6);
     }
+    .clock-stage {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 0;
+    }
     #clock-canvas {
         display: block;
     }
 
     /* ── Floating dial-design switcher ──────────────────────── */
-    /* ── Discreet Floating Dial Cycler (Right edge of Clock Panel) ─ */
+    /* Discreet Vertical Quick-Cycle Dial Switcher (Right edge of Clock Canvas) */
     .dial-cycler {
         position: absolute;
-        right: 8px;
-        top: 43.5%;
+        right: -32px;
+        top: 50%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -668,6 +675,7 @@
         -webkit-app-region: no-drag;
     }
     .clock-panel:hover .dial-cycler,
+    .dial-cycler:hover,
     .dial-cycler:focus-within:has(:focus-visible) {
         opacity: 1;
         pointer-events: auto;
@@ -768,12 +776,29 @@
     #view-home.no-calendar .clock-panel {
         width: 100%;
         flex: 1;
+        padding-bottom: var(--view-pad-y) !important;
     }
     #view-home.no-calendar .clock-panel::after {
         opacity: 0;
     }
     #view-home.no-calendar .clock-grip {
         display: none;
+    }
+
+    /* In solo-clock mode (no calendar), auto-hide bottom navigation bar to avoid obstructing the clock */
+    body.home-no-calendar .floating-nav,
+    .body-area:has(#view-home.no-calendar.active) .floating-nav {
+        opacity: 0;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(16px);
+    }
+    body.home-no-calendar .floating-nav:hover,
+    body.home-no-calendar .floating-nav.nav-revealed,
+    .body-area:has(#view-home.no-calendar.active) .floating-nav:hover,
+    .body-area:has(#view-home.no-calendar.active) .floating-nav.nav-revealed {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
     }
 
     /* ── Side grip handles ───────────────────────────────────── */

@@ -104,18 +104,20 @@
                             <span data-ico="next"></span>
                         </button>
                         <div class="clock-panel">
-                            <canvas id="clock-canvas"></canvas>
-                            <!-- Discreet Vertical Quick-Cycle Dial Switcher on the Right -->
-                            <div class="dial-cycler" id="dial-cycler">
-                                <button class="dial-cyc-btn" id="dial-prev" type="button" aria-label="Previous clock style" data-tooltip="Previous clock style" data-i18n-attr="data-tooltip:clock.prevStyle, aria-label:clock.prevStyle" data-tooltip-dir="left">
-                                    <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6"/></svg>
-                                </button>
-                                <div class="dial-cyc-badge" id="dial-badge" data-tooltip="Classic" data-tooltip-dir="left">
-                                    <span class="dial-cyc-num" id="dial-badge-num">1/7</span>
+                            <div class="clock-stage">
+                                <canvas id="clock-canvas"></canvas>
+                                <!-- Discreet Vertical Quick-Cycle Dial Switcher on the Right -->
+                                <div class="dial-cycler" id="dial-cycler">
+                                    <button class="dial-cyc-btn" id="dial-prev" type="button" aria-label="Previous clock style" data-tooltip="Previous clock style" data-i18n-attr="data-tooltip:clock.prevStyle, aria-label:clock.prevStyle" data-tooltip-dir="left">
+                                        <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6"/></svg>
+                                    </button>
+                                    <div class="dial-cyc-badge" id="dial-badge" data-tooltip="Classic" data-tooltip-dir="left">
+                                        <span class="dial-cyc-num" id="dial-badge-num">1/7</span>
+                                    </div>
+                                    <button class="dial-cyc-btn" id="dial-next" type="button" aria-label="Next clock style" data-tooltip="Next clock style" data-i18n-attr="data-tooltip:clock.nextStyle, aria-label:clock.nextStyle" data-tooltip-dir="left">
+                                        <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                                     </button>
                                 </div>
-                                <button class="dial-cyc-btn" id="dial-next" type="button" aria-label="Next clock style" data-tooltip="Next clock style" data-i18n-attr="data-tooltip:clock.nextStyle, aria-label:clock.nextStyle" data-tooltip-dir="left">
-                                    <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-                                 </button>
                             </div>
                         </div>
                         <div class="cal-panel">

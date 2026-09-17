@@ -127,6 +127,10 @@
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
       d="M15 18l-6-6 6-6"/>
   </symbol>
+  <symbol id="cc-i-next" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"
+      d="M9 18l6-6-6-6"/>
+  </symbol>
   <symbol id="cc-i-play" viewBox="0 0 24 24">
     <path fill="currentColor" d="M7 4v16l13-8-13-8Z"/>
   </symbol>

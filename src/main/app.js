@@ -542,6 +542,7 @@
             homeView.classList.toggle("no-clock", hideClock);
             homeView.classList.toggle("no-calendar", hideCalendar);
         }
+        document.body.classList.toggle("home-no-calendar", hideCalendar);
         const hideClockEl = document.getElementById("s-hide-clock");
         if (hideClockEl) hideClockEl.checked = hideClock;
         const hideCalEl = document.getElementById("s-hide-cal");
@@ -892,7 +893,7 @@
     // (see broadcast_active_window). The heavy canvas loop runs only
     // while the main window is the active one and resumes instantly
     // (with the correct time) when it is shown again.
-    let mainActive = false;
+    let mainActive = true;
     function escapeHtml(s) {
         return String(s || "")
             .replace(/&/g, "&amp;")
@@ -1000,15 +1001,22 @@
 
     function setupClock() {
         const canvas = document.getElementById("clock-canvas");
-        const panel = canvas.parentElement;
-        const size = Math.min(
-            panel.clientWidth - 36,
-            panel.clientHeight - 36,
-        );
-        canvas.width = size;
-        canvas.height = size;
-        cybergemsCacheKey = null;
-        faceCache = null;
+        if (!canvas) return;
+        const panel = document.querySelector(".clock-panel") || canvas.closest(".clock-panel");
+        if (!panel) return;
+        const isSolo = document.getElementById("view-home")?.classList.contains("no-calendar");
+        const padX = isSolo ? 72 : 36;
+        const padY = isSolo ? 48 : 36;
+        const size = Math.max(0, Math.min(
+            panel.clientWidth - padX,
+            panel.clientHeight - padY,
+        ));
+        if (size > 0 && (canvas.width !== size || canvas.height !== size)) {
+            canvas.width = size;
+            canvas.height = size;
+            cybergemsCacheKey = null;
+            faceCache = null;
+        }
     }
 
     if (document.fonts) {
@@ -5455,9 +5463,7 @@
         applySettings(s);
         const startPromptEl = document.getElementById("r-tip");
         if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
-        // Initial active state from saved mode; live updates arrive via
-        // the backend "cc:active-window" broadcast.
-        setMainActive((s.windowMode || s.window_mode) === "full");
+        setMainActive(true);
         syncDigitalClock();
         calNotes = s.calendarNotes || {};
         const now = new Date();
@@ -5467,6 +5473,9 @@
         requestAnimationFrame(() => {
             setupClock();
             syncHomeClock();
+            if (typeof drawClock === "function" && isMainActive() && curView === "home") {
+                drawClock();
+            }
         });
         // Clicking the analog clock opens Settings on Appearance with the
         // clock-name field focused and selected, ready to type.
@@ -5502,6 +5511,15 @@
             });
             ro.observe(clockPanelEl);
         }
+
+        // Auto-reveal bottom navigation bar when cursor approaches the bottom in solo-clock mode
+        document.addEventListener("mousemove", (e) => {
+            if (document.body.classList.contains("home-no-calendar") && curView === "home") {
+                const nearBottom = e.clientY >= window.innerHeight - 80;
+                const nav = document.querySelector(".floating-nav");
+                if (nav) nav.classList.toggle("nav-revealed", nearBottom);
+            }
+        });
     });
 
     window.cc.onSettingsUpdated((s) => {
