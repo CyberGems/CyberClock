@@ -101,15 +101,18 @@
                         </button>
                         <div class="clock-panel">
                             <canvas id="clock-canvas"></canvas>
-                            <!-- Floating dial-design switcher: semi-transparent
-                                 pills that fade in on hover so the clock stays
-                                 clean at rest. Mirrors the Settings picker. -->
-                            <div class="dial-switch" id="dial-switch">
-                                <button class="dial-sw-btn on" data-clock-design="1" title="Classic" data-i18n-attr="title:settings.appearance.dialClassic" aria-label="Classic">●</button>
-                                <button class="dial-sw-btn" data-clock-design="2" title="Minimal" data-i18n-attr="title:settings.appearance.dialMinimal" aria-label="Minimal">○</button>
-                                <button class="dial-sw-btn" data-clock-design="3" title="Neon Segments" data-i18n-attr="title:settings.appearance.dialSegments" aria-label="Neon Segments">◫</button>
-                                <button class="dial-sw-btn" data-clock-design="4" title="Cyber HUD" data-i18n-attr="title:settings.appearance.dialHud" aria-label="Cyber HUD">✛</button>
-                                <button class="dial-sw-btn" data-clock-design="5" title="Aurora" data-i18n-attr="title:settings.appearance.dialAurora" aria-label="Aurora">◍</button>
+                            <!-- Discreet Quick-Cycle Dial Switcher on the Right -->
+                            <div class="dial-cycler" id="dial-cycler">
+                                <button class="dial-cyc-btn" id="dial-prev" type="button" aria-label="Previous clock style" data-tooltip="Previous clock style" data-i18n-attr="data-tooltip:clock.prevStyle;aria-label:clock.prevStyle">
+                                    <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
+                                </button>
+                                <div class="dial-cyc-badge" id="dial-badge">
+                                    <span class="dial-cyc-num" id="dial-badge-num">1/5</span>
+                                    <span class="dial-cyc-name" id="dial-badge-name">Classic</span>
+                                </div>
+                                <button class="dial-cyc-btn" id="dial-next" type="button" aria-label="Next clock style" data-tooltip="Next clock style" data-i18n-attr="data-tooltip:clock.nextStyle;aria-label:clock.nextStyle">
+                                    <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>
+                                </button>
                             </div>
                         </div>
                         <div class="cal-panel">
@@ -1577,6 +1580,12 @@
             <div class="ctx-item" id="ctx-btn-relax">
                 <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-4 0-7-2.5-9-6 3.5.2 6-1.2 9-4 3 2.8 5.5 4.2 9 4-2 3.5-5 6-9 6Z" /><path d="M12 10c-1.8-2.2-2.6-4.4-2.4-6.6 1.2.8 2 .8 2.4.8s1.2 0 2.4-.8c.2 2.2-.6 4.4-2.4 6.6Z" /></svg></span>
                 <span class="label" data-i18n="menu.relax">Relax</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" id="ctx-btn-dial-cycle">
+                <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                <span class="label" data-i18n="menu.dialStyle">Clock Style</span>
+                <span class="shortcut" id="ctx-dial-current-lbl">Classic</span>
             </div>
             <div class="ctx-sep"></div>
              <div class="ctx-item" id="ctx-btn-settings">

@@ -447,6 +447,45 @@
     // ══════════════════════════════════════════════════════════════
     // SETTINGS APPLICATION
     // ══════════════════════════════════════════════════════════════
+
+    function getDialDesignName(designNum) {
+        const keys = {
+            1: "settings.appearance.dialClassic",
+            2: "settings.appearance.dialMinimal",
+            3: "settings.appearance.dialSegments",
+            4: "settings.appearance.dialHud",
+            5: "settings.appearance.dialAurora",
+        };
+        const key = keys[designNum] || keys[1];
+        return window.ccI18n ? window.ccI18n.t(key) : "Classic";
+    }
+
+    function updateDialDesignUI(designNum) {
+        const design = Math.min(5, Math.max(1, parseInt(designNum, 10) || 1));
+        const val = String(design);
+        document
+            .querySelectorAll("[data-clock-design]")
+            .forEach((b) =>
+                b.classList.toggle("on", b.dataset.clockDesign === val),
+            );
+        const badgeNum = document.getElementById("dial-badge-num");
+        const badgeName = document.getElementById("dial-badge-name");
+        if (badgeNum) badgeNum.textContent = `${design}/5`;
+        if (badgeName) badgeName.textContent = getDialDesignName(design);
+        const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
+        if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
+    }
+
+    function cycleDialDesign(delta) {
+        const cur = Math.min(5, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+        let next = cur + delta;
+        if (next > 5) next = 1;
+        if (next < 1) next = 5;
+        cfg.clockDesign = next;
+        window.cc.saveSettings({ clockDesign: next });
+        updateDialDesignUI(next);
+    }
+
     function applySettings(s) {
         cfg = s;
         // Scanlines are mini-mode only — full mode never has them
@@ -483,14 +522,7 @@
         // unknown falls back to Classic, same as currentClockDesign()).
         // Covers BOTH the Settings picker and the floating dial
         // switcher — they share the data-clock-design contract.
-        const dialVal = String(
-            Math.min(5, Math.max(1, parseInt(s.clockDesign, 10) || 1)),
-        );
-        document
-            .querySelectorAll("[data-clock-design]")
-            .forEach((b) =>
-                b.classList.toggle("on", b.dataset.clockDesign === dialVal),
-            );
+        updateDialDesignUI(s.clockDesign);
         const clockNameEl = document.getElementById("s-clock-name");
         if (clockNameEl) {
             clockNameEl.value = s.clockBrand || "CYBERGEMS";
@@ -3598,12 +3630,18 @@
     document.querySelectorAll("[data-clock-design]").forEach((b) => {
         b.addEventListener("click", () => {
             const design = parseInt(b.dataset.clockDesign, 10) || 1;
+            cfg.clockDesign = design;
             window.cc.saveSettings({ clockDesign: design });
-            const val = String(design);
-            document
-                .querySelectorAll("[data-clock-design]")
-                .forEach((x) => x.classList.toggle("on", x.dataset.clockDesign === val));
+            updateDialDesignUI(design);
         });
+    });
+    document.getElementById("dial-prev")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        cycleDialDesign(-1);
+    });
+    document.getElementById("dial-next")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        cycleDialDesign(1);
     });
 
 
@@ -4345,6 +4383,10 @@
         hideAllContextMenus();
         navigate("relax");
     });
+    document.getElementById("ctx-btn-dial-cycle")?.addEventListener("click", () => {
+        hideAllContextMenus();
+        cycleDialDesign(1);
+    });
     document.getElementById("ctx-btn-settings").addEventListener("click", () => {
         hideAllContextMenus();
         openSettings();
@@ -4621,6 +4663,7 @@
         } else {
             showNextTip();
         }
+        updateDialDesignUI(cfg.clockDesign || 1);
         renderUpdateNotice();
     });
 
