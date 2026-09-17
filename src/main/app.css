@@ -3688,6 +3688,11 @@
         display: flex;
         gap: 6px;
     }
+    #s-dial-design {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        max-width: 440px;
+    }
     .s-fmt {
         font-family: "Space Grotesk", sans-serif;
         font-size: calc(11.5px * var(--ui-scale));

@@ -454,14 +454,16 @@
             2: "settings.appearance.dialMinimal",
             3: "settings.appearance.dialSegments",
             4: "settings.appearance.dialHud",
-            5: "settings.appearance.dialAurora",
+            5: "settings.appearance.dialQuantum",
+            6: "settings.appearance.dialChrono",
+            7: "settings.appearance.dialMatrix",
         };
         const key = keys[designNum] || keys[1];
         return window.ccI18n ? window.ccI18n.t(key) : "Classic";
     }
 
     function updateDialDesignUI(designNum) {
-        const design = Math.min(5, Math.max(1, parseInt(designNum, 10) || 1));
+        const design = Math.min(7, Math.max(1, parseInt(designNum, 10) || 1));
         const val = String(design);
         document
             .querySelectorAll("[data-clock-design]")
@@ -470,17 +472,17 @@
             );
         const badgeNum = document.getElementById("dial-badge-num");
         const badgeEl = document.getElementById("dial-badge");
-        if (badgeNum) badgeNum.textContent = `${design}/5`;
+        if (badgeNum) badgeNum.textContent = `${design}/7`;
         if (badgeEl) badgeEl.setAttribute("data-tooltip", getDialDesignName(design));
         const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
     }
 
     function cycleDialDesign(delta) {
-        const cur = Math.min(5, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+        const cur = Math.min(7, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
         let next = cur + delta;
-        if (next > 5) next = 1;
-        if (next < 1) next = 5;
+        if (next > 7) next = 1;
+        if (next < 1) next = 7;
         cfg.clockDesign = next;
         window.cc.saveSettings({ clockDesign: next });
         updateDialDesignUI(next);
@@ -1032,16 +1034,18 @@
         if (design === 2) return buildFaceMinimal(W, H, cx, cy, R, c);
         if (design === 3) return buildFaceSegments(W, H, cx, cy, R, c);
         if (design === 4) return buildFaceHud(W, H, cx, cy, R, c);
-        if (design === 5) return buildFaceAurora(W, H, cx, cy, R, c);
+        if (design === 5) return buildFaceQuantum(W, H, cx, cy, R, c);
+        if (design === 6) return buildFaceChrono(W, H, cx, cy, R, c);
+        if (design === 7) return buildFaceMatrix(W, H, cx, cy, R, c);
         return buildFaceClassic(W, H, cx, cy, R, c);
     }
 
-    // Settings id of the analog dial design (1..5). Unknown values and
+    // Settings id of the analog dial design (1..7). Unknown values and
     // missing keys fall back to the Classic face, matching the backend
     // default (clockDesign: 1).
     function currentClockDesign() {
         const d = parseInt(cfg.clockDesign, 10);
-        return d >= 1 && d <= 5 ? d : 1;
+        return d >= 1 && d <= 7 ? d : 1;
     }
 
     // ── Design 1: Classic (bezel + domed glass + 12/3/6/9 numerals) ──
@@ -1374,63 +1378,454 @@
         return off;
     }
 
-    // ── Design 5: Aurora (diffuse gradient washes, orb markers,
-    //    breathing ring handled by the dynamic layer) ──
-    function buildFaceAurora(W, H, cx, cy, R, c) {
+    // ── Design 5: Quantum Orbit (concentric particle rings, diamond
+    //    reticle cardinal nodes, planetary orbital markers) ──
+    function buildFaceQuantum(W, H, cx, cy, R, c) {
         const off = document.createElement("canvas");
         off.width = W;
         off.height = H;
         const ctx = off.getContext("2d");
 
-        // Wide diffuse glow: two offset radial washes, like curtains
-        // of light leaning over the dial.
-        const wash = (ox, oy, rad, a0, a1) => {
-            const g = ctx.createRadialGradient(cx + ox, cy + oy, 0, cx + ox, cy + oy, rad);
-            g.addColorStop(0, `rgba(${c.rgb},${a0})`);
-            g.addColorStop(0.6, `rgba(${c.rgb},${a1})`);
-            g.addColorStop(1, "transparent");
-            ctx.fillStyle = g;
-            ctx.beginPath();
-            ctx.arc(cx + ox, cy + oy, rad, 0, Math.PI * 2);
-            ctx.fill();
-        };
+        // Quantum core nebula glow
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.06);
+        bg.addColorStop(0, `rgba(${c.rgb},.12)`);
+        bg.addColorStop(0.45, `rgba(${c.rgb},.04)`);
+        bg.addColorStop(0.85, `rgba(${c.rgb},.01)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // Quantum containment boundary ring with technical hash marks
         ctx.save();
         ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
-        ctx.clip();
-        wash(-R * 0.3, -R * 0.25, R * 0.9, 0.14, 0.05);
-        wash(R * 0.35, R * 0.3, R * 0.85, 0.12, 0.04);
+        ctx.arc(cx, cy, R * 0.94, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.38)`;
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+
+        // 36 Quantum containment ticks
+        for (let i = 0; i < 36; i++) {
+            const a = (i / 36) * Math.PI * 2;
+            const isMajor = i % 9 === 0;
+            const r0 = isMajor ? R * 0.895 : R * 0.92;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
+            ctx.lineTo(cx + Math.cos(a) * R * 0.94, cy + Math.sin(a) * R * 0.94);
+            ctx.strokeStyle = isMajor ? c.accent : `rgba(${c.rgb},.28)`;
+            ctx.lineWidth = isMajor ? 2 : 1;
+            ctx.stroke();
+        }
         ctx.restore();
 
-        // Soft outer boundary
+        // Concentric broken orbital ring arcs
+        ctx.save();
+        // Outer orbit track (dashed)
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.82, 0, Math.PI * 2);
+        ctx.setLineDash([14, 8]);
+        ctx.strokeStyle = `rgba(${c.rgb},.20)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Middle orbit track (fine dotted)
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.60, 0, Math.PI * 2);
+        ctx.setLineDash([4, 6]);
+        ctx.strokeStyle = `rgba(${c.rgb},.16)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Inner particle accelerator ring with 24 fine radial hash lines
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.28, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.28)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * R * 0.26, cy + Math.sin(a) * R * 0.26);
+            ctx.lineTo(cx + Math.cos(a) * R * 0.28, cy + Math.sin(a) * R * 0.28);
+            ctx.strokeStyle = `rgba(${c.rgb},.24)`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // 12 Orbital Hour Nodes (4 Cardinal Diamond Reticles + 8 Planetary Nodes)
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const isCardinal = i % 3 === 0;
+            const nx = cx + Math.cos(a) * R * 0.82;
+            const ny = cy + Math.sin(a) * R * 0.82;
+
+            ctx.save();
+            if (isCardinal) {
+                // Diamond Reticle Node at 12, 3, 6, 9
+                const dSize = R * 0.045;
+                ctx.translate(nx, ny);
+                ctx.rotate(a + Math.PI / 2);
+
+                // Crosshair whiskers
+                ctx.beginPath();
+                ctx.moveTo(0, -dSize * 1.6);
+                ctx.lineTo(0, dSize * 1.6);
+                ctx.moveTo(-dSize * 1.2, 0);
+                ctx.lineTo(dSize * 1.2, 0);
+                ctx.strokeStyle = `rgba(${c.rgb},.40)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Diamond geometry
+                ctx.beginPath();
+                ctx.moveTo(0, -dSize);
+                ctx.lineTo(dSize * 0.7, 0);
+                ctx.lineTo(0, dSize);
+                ctx.lineTo(-dSize * 0.7, 0);
+                ctx.closePath();
+                ctx.strokeStyle = c.accent;
+                ctx.lineWidth = 2;
+                ctx.fillStyle = `rgba(${c.rgb},.22)`;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.stroke();
+
+                // Glowing core pin
+                ctx.beginPath();
+                ctx.arc(0, 0, R * 0.012, 0, Math.PI * 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.shadowBlur = 8;
+                ctx.fill();
+            } else {
+                // Planetary orbital nodes at 1, 2, 4, 5, 7, 8, 10, 11
+                ctx.beginPath();
+                ctx.arc(nx, ny, R * 0.018, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${c.rgb},.45)`;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(nx, ny, R * 0.008, 0, Math.PI * 2);
+                ctx.fillStyle = c.accent;
+                ctx.shadowColor = c.accent;
+                ctx.shadowBlur = 6;
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        return off;
+    }
+
+    // ── Design 6: Cyber Chrono (dual tactical subdials, tachymeter scale,
+    //    faceted batons, telemetry instrumentation) ──
+    function buildFaceChrono(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Precision matte face background
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.08);
+        bg.addColorStop(0, `rgba(${c.rgb},.08)`);
+        bg.addColorStop(0.7, `rgba(${c.rgb},.02)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // Outer Tachymeter / Telemetry Scale Bezel
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
+        ctx.strokeStyle = `rgba(${c.rgb},.32)`;
         ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.88, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.20)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 120 Telemetry ticks
+        for (let i = 0; i < 120; i++) {
+            const a = (i / 120) * Math.PI * 2 - Math.PI / 2;
+            const isMajor = i % 10 === 0;
+            const isSemi = i % 5 === 0;
+            const len = isMajor ? R * 0.065 : isSemi ? R * 0.045 : R * 0.025;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * (R * 0.945 - len), cy + Math.sin(a) * (R * 0.945 - len));
+            ctx.lineTo(cx + Math.cos(a) * R * 0.945, cy + Math.sin(a) * R * 0.945);
+            ctx.strokeStyle = isMajor ? c.accent : isSemi ? `rgba(${c.rgb},.50)` : `rgba(${c.rgb},.22)`;
+            ctx.lineWidth = isMajor ? 1.8 : 1;
+            ctx.stroke();
+        }
+
+        // Mini telemetry markings at key angles
+        const telemarks = [
+            { a: 0, t: "60" },
+            { a: 1, t: "400" },
+            { a: 2, t: "300" },
+            { a: 3, t: "240" },
+            { a: 4, t: "180" },
+            { a: 5, t: "140" },
+            { a: 6, t: "120" },
+            { a: 7, t: "100" },
+            { a: 8, t: "85" },
+            { a: 9, t: "75" },
+            { a: 10, t: "68" },
+            { a: 11, t: "64" },
+        ];
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `600 ${R * 0.034}px "JetBrains Mono",monospace`;
+        ctx.fillStyle = `rgba(${c.rgb},.55)`;
+        telemarks.forEach((m) => {
+            const a = (m.a / 12) * Math.PI * 2 - Math.PI / 2;
+            const tx = cx + Math.cos(a) * R * 0.915;
+            const ty = cy + Math.sin(a) * R * 0.915;
+            ctx.fillText(m.t, tx, ty);
+        });
+        ctx.restore();
+
+        // ── Subdial 1 (Left / 9 o'clock: 24-Hour Cycle) ──
+        const subR = R * 0.20;
+        const sub1X = cx - R * 0.38, sub1Y = cy;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sub1X, sub1Y, subR, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${c.rgb},.04)`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${c.rgb},.35)`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Subdial 1 ticks & labels (24, 6, 12, 18)
+        for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2 - Math.PI / 2;
+            const isMaj = i % 6 === 0;
+            ctx.beginPath();
+            ctx.moveTo(sub1X + Math.cos(a) * (subR - (isMaj ? subR * 0.22 : subR * 0.12)), sub1Y + Math.sin(a) * (subR - (isMaj ? subR * 0.22 : subR * 0.12)));
+            ctx.lineTo(sub1X + Math.cos(a) * subR, sub1Y + Math.sin(a) * subR);
+            ctx.strokeStyle = isMaj ? c.accent : `rgba(${c.rgb},.25)`;
+            ctx.lineWidth = isMaj ? 1.5 : 0.8;
+            ctx.stroke();
+        }
+        ctx.font = `700 ${R * 0.038}px "JetBrains Mono",monospace`;
+        ctx.fillStyle = c.accent;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("24", sub1X, sub1Y - subR * 0.55);
+        ctx.fillText("12", sub1X, sub1Y + subR * 0.55);
+        ctx.fillText("6", sub1X + subR * 0.55, sub1Y);
+        ctx.fillText("18", sub1X - subR * 0.55, sub1Y);
+        ctx.restore();
+
+        // ── Subdial 2 (Right / 3 o'clock: 60-Second Telemetry) ──
+        const sub2X = cx + R * 0.38, sub2Y = cy;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sub2X, sub2Y, subR, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${c.rgb},.04)`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${c.rgb},.35)`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Subdial 2 ticks & labels (60, 15, 30, 45)
+        for (let i = 0; i < 60; i++) {
+            if (i % 5 !== 0 && i % 2 !== 0) continue;
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+            const isMaj = i % 15 === 0;
+            ctx.beginPath();
+            ctx.moveTo(sub2X + Math.cos(a) * (subR - (isMaj ? subR * 0.22 : subR * 0.12)), sub2Y + Math.sin(a) * (subR - (isMaj ? subR * 0.22 : subR * 0.12)));
+            ctx.lineTo(sub2X + Math.cos(a) * subR, sub2Y + Math.sin(a) * subR);
+            ctx.strokeStyle = isMaj ? c.handSec : `rgba(${c.rgb},.25)`;
+            ctx.lineWidth = isMaj ? 1.5 : 0.8;
+            ctx.stroke();
+        }
+        ctx.font = `700 ${R * 0.038}px "JetBrains Mono",monospace`;
+        ctx.fillStyle = `rgba(${c.rgb},.80)`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("60", sub2X, sub2Y - subR * 0.55);
+        ctx.fillText("30", sub2X, sub2Y + subR * 0.55);
+        ctx.fillText("15", sub2X + subR * 0.55, sub2Y);
+        ctx.fillText("45", sub2X - subR * 0.55, sub2Y);
+        ctx.restore();
+
+        // ── Faceted Chronograph Hour Batons ──
+        for (let i = 0; i < 12; i++) {
+            // Skip 3 and 9 indices to leave room for subdials
+            if (i === 3 || i === 9) continue;
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const is12 = i === 0;
+            const is6 = i === 6;
+            const bLen = is12 ? R * 0.11 : is6 ? R * 0.09 : R * 0.075;
+            const bWid = is12 ? R * 0.024 : R * 0.016;
+
+            ctx.save();
+            ctx.translate(cx + Math.cos(a) * (R * 0.865 - bLen / 2), cy + Math.sin(a) * (R * 0.865 - bLen / 2));
+            ctx.rotate(a + Math.PI / 2);
+
+            // Faceted index body
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = bWid;
+            ctx.lineCap = "butt";
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = is12 ? 10 : 5;
+            ctx.beginPath();
+            ctx.moveTo(0, -bLen / 2);
+            ctx.lineTo(0, bLen / 2);
+            ctx.stroke();
+
+            // Luminous tip block
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(-bWid * 0.4, bLen / 2 - R * 0.018, bWid * 0.8, R * 0.018);
+            ctx.restore();
+        }
+
+        return off;
+    }
+
+    // ── Design 7: Hex Matrix (cybernetic honeycomb lattice, 12-sided bezel,
+    //    chevron vector hour glyphs, illuminated neural vertices) ──
+    function buildFaceMatrix(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // Background glow
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.05);
+        bg.addColorStop(0, `rgba(${c.rgb},.10)`);
+        bg.addColorStop(0.5, `rgba(${c.rgb},.03)`);
+        bg.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // 12-Sided Faceted Hex Bezel
+        ctx.save();
+        ctx.beginPath();
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const px = cx + Math.cos(a) * R * 0.94;
+            const py = cy + Math.sin(a) * R * 0.94;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = `rgba(${c.rgb},.42)`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+
+        // Inner polygon frame
+        ctx.beginPath();
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const px = cx + Math.cos(a) * R * 0.87;
+            const py = cy + Math.sin(a) * R * 0.87;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = `rgba(${c.rgb},.18)`;
+        ctx.lineWidth = 1;
         ctx.stroke();
         ctx.restore();
 
-        // Orb markers: glowing circles with a bright core, quarters
-        // larger. Dreamy but still readable at a glance.
+        // Hexagonal Honeycomb Matrix (clipped to R * 0.85 circle)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.85, 0, Math.PI * 2);
+        ctx.clip();
+
+        const hexR = R * 0.12;
+        const hexW = Math.sqrt(3) * hexR;
+        const hexH = 1.5 * hexR;
+        const cols = Math.ceil((R * 2) / hexW) + 2;
+        const rows = Math.ceil((R * 2) / hexH) + 2;
+
+        ctx.strokeStyle = `rgba(${c.rgb},.08)`;
+        ctx.lineWidth = 1;
+        for (let row = -rows; row <= rows; row++) {
+            for (let col = -cols; col <= cols; col++) {
+                const hx = cx + col * hexW + (row % 2 !== 0 ? hexW / 2 : 0);
+                const hy = cy + row * hexH;
+                const dist = Math.hypot(hx - cx, hy - cy);
+                if (dist > R * 0.86) continue;
+
+                ctx.beginPath();
+                for (let k = 0; k < 6; k++) {
+                    const ang = (k / 6) * Math.PI * 2 + Math.PI / 6;
+                    const vx = hx + Math.cos(ang) * hexR * 0.92;
+                    const vy = hy + Math.sin(ang) * hexR * 0.92;
+                    if (k === 0) ctx.moveTo(vx, vy);
+                    else ctx.lineTo(vx, vy);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
+
+        // 12 Chevron Vector Hour Glyphs
         for (let i = 0; i < 12; i++) {
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            const big = i % 3 === 0;
-            const r = big ? R * 0.022 : R * 0.012;
-            const ox = cx + Math.cos(a) * R * 0.84;
-            const oy = cy + Math.sin(a) * R * 0.84;
+            const isCardinal = i % 3 === 0;
+            const gx = cx + Math.cos(a) * R * 0.76;
+            const gy = cy + Math.sin(a) * R * 0.76;
+
             ctx.save();
-            ctx.beginPath();
-            ctx.arc(ox, oy, r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${c.rgb},${big ? 0.35 : 0.22})`;
+            ctx.translate(gx, gy);
+            ctx.rotate(a + Math.PI / 2);
+
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = isCardinal ? 2.5 : 1.6;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
             ctx.shadowColor = c.accent;
-            ctx.shadowBlur = big ? 14 : 7;
-            ctx.fill();
+            ctx.shadowBlur = isCardinal ? 12 : 5;
+
+            const cw = isCardinal ? R * 0.045 : R * 0.03;
+            const ch = isCardinal ? R * 0.025 : R * 0.016;
+
+            // Outer chevron
             ctx.beginPath();
-            ctx.arc(ox, oy, r * 0.45, 0, Math.PI * 2);
-            ctx.fillStyle = c.accent;
-            ctx.shadowBlur = big ? 8 : 4;
-            ctx.fill();
+            ctx.moveTo(-cw, -ch);
+            ctx.lineTo(0, ch);
+            ctx.lineTo(cw, -ch);
+            ctx.stroke();
+
+            // Double chevron for cardinals
+            if (isCardinal) {
+                ctx.beginPath();
+                ctx.moveTo(-cw * 0.75, -ch - R * 0.02);
+                ctx.lineTo(0, ch - R * 0.02);
+                ctx.lineTo(cw * 0.75, -ch - R * 0.02);
+                ctx.stroke();
+            }
+
+            // Circuit trace extending outward to the bezel
+            ctx.beginPath();
+            ctx.moveTo(0, ch + R * 0.01);
+            ctx.lineTo(0, ch + R * 0.08);
+            ctx.strokeStyle = `rgba(${c.rgb},.30)`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
             ctx.restore();
         }
 
@@ -1485,10 +1880,9 @@
 
         // ── Breathing outer rim highlight (signature glow) ──
         // Segments keeps the rim flat: its 60-segment ring IS the
-        // second indicator, a second glow would fight it. Aurora
-        // breathes wider and slower to match its dreamy washes.
+        // second indicator, a second glow would fight it.
         if (design !== 3) {
-            const rimR = design === 5 ? R * 0.99 : R * 0.985;
+            const rimR = design === 5 || design === 7 ? R * 0.94 : R * 0.985;
             const br =
                 0.68 +
                 0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
@@ -1496,7 +1890,7 @@
             ctx.beginPath();
             ctx.arc(cx, cy, rimR, 0, Math.PI * 2);
             ctx.strokeStyle = c.accent;
-            ctx.lineWidth = design === 5 ? 3 : 2;
+            ctx.lineWidth = design === 5 ? 2.5 : 2;
             ctx.globalAlpha = br;
             ctx.shadowColor = c.accent;
             ctx.shadowBlur = design === 5 ? 16 : 10;
@@ -1528,6 +1922,69 @@
                 ctx.stroke();
                 ctx.restore();
             }
+        }
+
+        // ── Quantum Orbit: Dynamic Rotating Quantum Arcs (design 5) ──
+        if (design === 5) {
+            const rot1 = ((Date.now() / 4800) % (Math.PI * 2));
+            const rot2 = -((Date.now() / 6200) % (Math.PI * 2));
+            ctx.save();
+            ctx.strokeStyle = `rgba(${c.rgb},.30)`;
+            ctx.lineWidth = 1.2;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 6;
+            // Arc 1
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.60, rot1, rot1 + Math.PI * 0.7);
+            ctx.stroke();
+            // Arc 2
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.72, rot2, rot2 + Math.PI * 0.5);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // ── Cyber Chrono: Dynamic Functional Subdial Needles (design 6) ──
+        if (design === 6) {
+            const sub1X = cx - R * 0.38, sub1Y = cy;
+            const sub2X = cx + R * 0.38, sub2Y = cy;
+            const subLen = R * 0.135;
+
+            // Subdial 1: 24-Hour needle
+            const a24 = (((now.getHours() % 24) + min / 60) / 24) * Math.PI * 2 - Math.PI / 2;
+            ctx.save();
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.6;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 5;
+            ctx.beginPath();
+            ctx.moveTo(sub1X - Math.cos(a24) * (subLen * 0.25), sub1Y - Math.sin(a24) * (subLen * 0.25));
+            ctx.lineTo(sub1X + Math.cos(a24) * subLen, sub1Y + Math.sin(a24) * subLen);
+            ctx.stroke();
+            // Pivot pin
+            ctx.beginPath();
+            ctx.arc(sub1X, sub1Y, R * 0.015, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.restore();
+
+            // Subdial 2: 60-Second telemetry needle
+            const a60 = (sec / 60) * Math.PI * 2 - Math.PI / 2;
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.4;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.moveTo(sub2X - Math.cos(a60) * (subLen * 0.25), sub2Y - Math.sin(a60) * (subLen * 0.25));
+            ctx.lineTo(sub2X + Math.cos(a60) * subLen, sub2Y + Math.sin(a60) * subLen);
+            ctx.stroke();
+            // Pivot pin
+            ctx.beginPath();
+            ctx.arc(sub2X, sub2Y, R * 0.015, 0, Math.PI * 2);
+            ctx.fillStyle = c.handSec;
+            ctx.fill();
+            ctx.restore();
         }
 
         // Brand wordmark — pendulum sweep: a soft glow walks across the
@@ -1592,10 +2049,12 @@
         ctx.restore();
 
         // Hands — per-design character:
-        // Classic/Segments keep the original cast-shadowed hands; Minimal
-        // uses slim glow-only hands; HUD draws angular hands (a short
-        // bar, gap, tip) that read like vector indicators; Aurora keeps
-        // the standard hands with a softer glow.
+        // 1 (Classic), 3 (Segments): standard cast-shadowed hands
+        // 2 (Minimal): slim glow-only hands
+        // 4 (HUD): angular HUD vector indicators
+        // 5 (Quantum): energy lance hands with diamond aperture + comet second tracer
+        // 6 (Chrono): faceted skeleton sword hands with lume windows + precision second needle
+        // 7 (Hex Matrix): stealth angular arrowhead vector hands
         if (design === 2) {
             hand(ctx, cx, cy, hrA, R * 0.50, 2.5, c.accent, 8);
             hand(ctx, cx, cy, minA, R * 0.74, 2, c.accent, 6);
@@ -1605,10 +2064,77 @@
             hudHand(ctx, cx, cy, minA, R * 0.74, R * 0.12, 3, c.accent);
             hudHand(ctx, cx, cy, secA, R * 0.86, R * 0.14, 1.5, c.handSec);
         } else if (design === 5) {
-            hand(ctx, cx, cy, hrA, R * 0.52, 4.5, c.accent, 14);
-            hand(ctx, cx, cy, minA, R * 0.74, 3, c.accent, 12);
-            hand(ctx, cx, cy, secA, R * 0.84, 1.5, c.handSec, 16);
-            hand(ctx, cx, cy, secA + Math.PI, R * 0.12, 3, c.handSec, 10);
+            quantumHand(ctx, cx, cy, hrA, R * 0.50, 4.0, c.accent);
+            quantumHand(ctx, cx, cy, minA, R * 0.74, 2.8, c.accent);
+            // Quantum Second hand: laser beam with comet tracer at tip & diamond tail
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.4;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.14), cy - Math.sin(secA) * (R * 0.14));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.84), cy + Math.sin(secA) * (R * 0.84));
+            ctx.stroke();
+
+            // Orbital Comet node at second tip
+            const stx = cx + Math.cos(secA) * (R * 0.84);
+            const sty = cy + Math.sin(secA) * (R * 0.84);
+            ctx.beginPath();
+            ctx.arc(stx, sty, R * 0.02, 0, Math.PI * 2);
+            ctx.fillStyle = c.handSec;
+            ctx.shadowBlur = 16;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(stx, sty, R * 0.009, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.restore();
+        } else if (design === 6) {
+            chronoHand(ctx, cx, cy, hrA, R * 0.50, 5.2, c.accent);
+            chronoHand(ctx, cx, cy, minA, R * 0.74, 3.8, c.accent);
+            // Chrono Second needle with circular balance ring
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.16), cy - Math.sin(secA) * (R * 0.16));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.85), cy + Math.sin(secA) * (R * 0.85));
+            ctx.stroke();
+            // Balance ring
+            const bx = cx - Math.cos(secA) * (R * 0.09);
+            const by = cy - Math.sin(secA) * (R * 0.09);
+            ctx.beginPath();
+            ctx.arc(bx, by, R * 0.024, 0, Math.PI * 2);
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.restore();
+        } else if (design === 7) {
+            matrixHand(ctx, cx, cy, hrA, R * 0.48, 5.0, c.accent);
+            matrixHand(ctx, cx, cy, minA, R * 0.72, 3.5, c.accent);
+            // Matrix Second needle with chevron arrow tip
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.14), cy - Math.sin(secA) * (R * 0.14));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.83), cy + Math.sin(secA) * (R * 0.83));
+            ctx.stroke();
+            // Chevron arrow tip
+            const sx = cx + Math.cos(secA) * (R * 0.83);
+            const sy = cy + Math.sin(secA) * (R * 0.83);
+            ctx.translate(sx, sy);
+            ctx.rotate(secA + Math.PI / 2);
+            ctx.beginPath();
+            ctx.moveTo(-R * 0.022, R * 0.025);
+            ctx.lineTo(0, -R * 0.02);
+            ctx.lineTo(R * 0.022, R * 0.025);
+            ctx.stroke();
+            ctx.restore();
         } else {
             hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
             hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
@@ -1616,29 +2142,68 @@
             hand(ctx, cx, cy, secA + Math.PI, R * 0.14, 3.5, c.handSec, 8);
         }
 
-        // Center jewel — per-design finish: Classic/HUD/Segments keep
-        // the jeweled cap; Minimal reduces it to a plain accent dot;
-        // Aurora gets a bigger glowing orb with a white core.
+        // Center jewel — per-design finish
         ctx.save();
         ctx.shadowColor = c.accent;
         if (design === 2) {
+            // Minimal: single clean dot
             ctx.shadowBlur = 8;
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.018, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
             ctx.fill();
         } else if (design === 5) {
+            // Quantum: pulsing multi-ring particle core
             ctx.shadowBlur = 18;
             ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.034, 0, Math.PI * 2);
+            ctx.arc(cx, cy, R * 0.038, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${c.rgb},.30)`;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.024, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.02, 0, Math.PI * 2);
-            ctx.fillStyle = "white";
-            ctx.globalAlpha = 0.65;
+            ctx.arc(cx, cy, R * 0.012, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        } else if (design === 6) {
+            // Chrono: knurled precision chronograph pivot
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.032, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${c.rgb},.40)`;
+            ctx.fill();
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.014, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        } else if (design === 7) {
+            // Hex Matrix: glowing 6-sided crystal polygon
+            ctx.shadowBlur = 14;
+            ctx.beginPath();
+            for (let k = 0; k < 6; k++) {
+                const ang = (k / 6) * Math.PI * 2 + Math.PI / 6;
+                const hx = cx + Math.cos(ang) * R * 0.034;
+                const hy = cy + Math.sin(ang) * R * 0.034;
+                if (k === 0) ctx.moveTo(hx, hy);
+                else ctx.lineTo(hx, hy);
+            }
+            ctx.closePath();
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.012, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
             ctx.fill();
         } else {
+            // Classic & HUD: layered jeweled cap
             ctx.shadowBlur = 12;
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.028, 0, Math.PI * 2);
@@ -1655,6 +2220,151 @@
             ctx.globalAlpha = 0.55;
             ctx.fill();
         }
+        ctx.restore();
+    }
+
+    // ── Quantum Energy Lance Hand (Design 5) ──
+    function quantumHand(ctx, cx, cy, angle, len, width, color) {
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        const baseLen = len * 0.14;
+        const apPos = len * 0.68;
+        const apSize = width * 1.5;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        // Base shaft
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(cx - ux * baseLen, cy - uy * baseLen);
+        ctx.lineTo(cx + ux * (apPos - apSize), cy + uy * (apPos - apSize));
+        ctx.stroke();
+
+        // Diamond aperture
+        const ax = cx + ux * apPos;
+        const ay = cy + uy * apPos;
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.beginPath();
+        ctx.moveTo(0, -apSize);
+        ctx.lineTo(apSize * 0.8, 0);
+        ctx.lineTo(0, apSize);
+        ctx.lineTo(-apSize * 0.8, 0);
+        ctx.closePath();
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, apSize * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Tip lance
+        ctx.lineWidth = Math.max(1, width * 0.6);
+        ctx.beginPath();
+        ctx.moveTo(cx + ux * (apPos + apSize), cy + uy * (apPos + apSize));
+        ctx.lineTo(cx + ux * len, cy + uy * len);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // ── Skeleton Sword Chrono Hand (Design 6) ──
+    function chronoHand(ctx, cx, cy, angle, len, width, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+
+        const w2 = width / 2;
+        const baseLen = len * 0.16;
+
+        // Counterweight tail
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, baseLen);
+        ctx.stroke();
+
+        // Skeleton sword blade with lume window
+        ctx.beginPath();
+        ctx.moveTo(-w2, 0);
+        ctx.lineTo(-w2, -len * 0.78);
+        ctx.lineTo(0, -len);
+        ctx.lineTo(w2, -len * 0.78);
+        ctx.lineTo(w2, 0);
+        ctx.closePath();
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        // Lume window cutout
+        ctx.beginPath();
+        ctx.moveTo(-w2 * 0.5, -len * 0.25);
+        ctx.lineTo(-w2 * 0.5, -len * 0.70);
+        ctx.lineTo(0, -len * 0.78);
+        ctx.lineTo(w2 * 0.5, -len * 0.70);
+        ctx.lineTo(w2 * 0.5, -len * 0.25);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Luminous pointer tip
+        ctx.beginPath();
+        ctx.moveTo(-w2 * 0.6, -len * 0.80);
+        ctx.lineTo(0, -len * 0.96);
+        ctx.lineTo(w2 * 0.6, -len * 0.80);
+        ctx.closePath();
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // ── Stealth Arrowhead Matrix Hand (Design 7) ──
+    function matrixHand(ctx, cx, cy, angle, len, width, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+
+        const w = width * 1.6;
+        const baseLen = len * 0.15;
+
+        // Tail
+        ctx.lineWidth = width * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, baseLen);
+        ctx.stroke();
+
+        // Chevron vector shaft
+        ctx.lineWidth = width * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -len * 0.62);
+        ctx.stroke();
+
+        // Stealth Arrowhead Tip
+        ctx.beginPath();
+        ctx.moveTo(-w, -len * 0.60);
+        ctx.lineTo(0, -len);
+        ctx.lineTo(w, -len * 0.60);
+        ctx.lineTo(0, -len * 0.72);
+        ctx.closePath();
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = `rgba(255, 255, 255, 0.45)`;
+        ctx.fill();
+
         ctx.restore();
     }
 
