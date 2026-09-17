@@ -659,7 +659,7 @@
         display: flex;
         gap: 4px;
         padding: 4px 6px;
-        background: rgba(3, 22, 36, 0.62);
+        background: rgba(14, 17, 23, 0.72);
         border: 1px solid var(--border);
         border-radius: 999px;
         backdrop-filter: blur(6px);

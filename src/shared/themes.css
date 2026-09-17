@@ -11,15 +11,15 @@
 
 :root {
   /* ── Structural base (never tinted) ─────────────────── */
-  --bg-00: #010c14;
-  --bg-01: #031624;
-  --bg-02: #051e30;
-  --bg-03: #07283e;
-  --bg-04: #09324c;
+  --bg-00: #07080b;
+  --bg-01: #0e1117;
+  --bg-02: #141820;
+  --bg-03: #1b202a;
+  --bg-04: #232936;
 
-  --text-hi: #f0f4f6;
-  --text-md: #90b0c0;
-  --text-lo: #5e8296;
+  --text-hi: #f2f5f8;
+  --text-md: #96a2b4;
+  --text-lo: #5c687a;
 
   /* ── Type system ──────────────────────────────────────
      One role per face, used across every window:

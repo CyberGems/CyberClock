@@ -49,10 +49,10 @@
     // base darkness never washes out).
     const BG_KISS = 0.04;
     const BG_BASE = {
-        "bg-01": "#031624",
-        "bg-02": "#051e30",
-        "bg-03": "#07283e",
-        "bg-04": "#09324c",
+        "bg-01": "#0e1117",
+        "bg-02": "#141820",
+        "bg-03": "#1b202a",
+        "bg-04": "#232936",
     };
 
     function clamp(v, lo, hi) {
