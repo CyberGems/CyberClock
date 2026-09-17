@@ -1439,6 +1439,7 @@
         <div class="note-overlay" id="note-overlay">
             <div class="note-modal">
                 <div class="note-head">
+                    <span class="note-head-ico" data-ico="calendar"></span>
                     <span class="note-date" id="note-date-lbl">—</span>
                     <div class="note-spacer"></div>
                     <button class="s-close" id="note-close">
@@ -1456,10 +1457,16 @@
                     ></textarea>
                 </div>
                 <div class="note-foot">
+                    <div class="note-meta">
+                        <span class="note-char-counter" id="note-char-counter">0 / 500</span>
+                    </div>
+                    <div class="note-spacer"></div>
                     <button class="note-btn danger" id="note-delete" data-i18n="calendar.delete">
                         Delete
                     </button>
-                    <div class="note-spacer"></div>
+                    <button class="note-btn secondary" id="note-cancel" data-i18n="calendar.cancel">
+                        Cancel
+                    </button>
                     <button class="note-btn primary" id="note-save" data-i18n="calendar.save">
                         Save
                     </button>
@@ -1581,6 +1588,34 @@
                 <span class="ico"><svg class="cc-ico-fx" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="M6 6l12 12" /></svg></span>
                 <span class="label" data-i18n="menu.close">Close</span>
                 <span class="shortcut">Alt+F4</span>
+            </div>
+        </div>
+        <!-- ═══ TEXT CONTEXT MENU (Inputs & Textareas) ═════════════════ -->
+        <div class="ctx-menu" id="text-ctx-menu">
+            <div class="ctx-item" id="ctx-text-cut">
+                <span class="ico"><span data-ico="scissors"></span></span>
+                <span class="label" data-i18n="ctx.cut">Cut</span>
+                <span class="shortcut">Ctrl+X</span>
+            </div>
+            <div class="ctx-item" id="ctx-text-copy">
+                <span class="ico"><span data-ico="copy"></span></span>
+                <span class="label" data-i18n="ctx.copy">Copy</span>
+                <span class="shortcut">Ctrl+C</span>
+            </div>
+            <div class="ctx-item" id="ctx-text-paste">
+                <span class="ico"><span data-ico="clipboard"></span></span>
+                <span class="label" data-i18n="ctx.paste">Paste</span>
+                <span class="shortcut">Ctrl+V</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item" id="ctx-text-selectall">
+                <span class="ico"><span data-ico="select-all"></span></span>
+                <span class="label" data-i18n="ctx.selectAll">Select All</span>
+                <span class="shortcut">Ctrl+A</span>
+            </div>
+            <div class="ctx-item danger" id="ctx-text-clear">
+                <span class="ico"><span data-ico="trash"></span></span>
+                <span class="label" data-i18n="ctx.clear">Clear</span>
             </div>
         </div>
 

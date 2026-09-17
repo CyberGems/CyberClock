@@ -336,6 +336,21 @@
       <circle cx="12" cy="8" r="1.1"/>
     </path>
   </symbol>
+  <symbol id="cc-i-scissors" viewBox="0 0 24 24">
+    <circle cx="6" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <line x1="20" y1="4" x2="8.12" y2="15.88" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="14.47" y1="14.48" x2="20" y2="20" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="8.12" y1="8.12" x2="12" y2="12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="cc-i-clipboard" viewBox="0 0 24 24">
+    <rect x="5" y="4" width="14" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" d="M9 2h6v3H9z"/>
+  </symbol>
+  <symbol id="cc-i-select-all" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-dasharray="2 2.5" d="M3 3h18v18H3z"/>
+    <rect x="7" y="7" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.75"/>
+  </symbol>
 </svg>
         `;
         document.body.appendChild(wrap);

@@ -1827,12 +1827,23 @@
         return dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
     }
 
+    function updateNoteCharCounter() {
+        const ta = document.getElementById("note-text");
+        const counter = document.getElementById("note-char-counter");
+        if (!ta || !counter) return;
+        const len = ta.value.length;
+        counter.textContent = `${len} / 500`;
+        counter.classList.toggle("warning", len >= 420 && len < 490);
+        counter.classList.toggle("limit", len >= 490);
+    }
+
     function openNoteModal(y, m, d) {
         noteEditKey = isoKey(y, m, d);
         document.getElementById("note-date-lbl").textContent =
             longDateLabel(y, m, d);
         const ta = document.getElementById("note-text");
         ta.value = calNotes[noteEditKey] || "";
+        updateNoteCharCounter();
         document.getElementById("note-delete").style.display = (
             calNotes[noteEditKey] || ""
         ).trim()
@@ -1878,8 +1889,14 @@
         .getElementById("note-delete")
         .addEventListener("click", deleteNote);
     document
+        .getElementById("note-cancel")
+        .addEventListener("click", closeNoteModal);
+    document
         .getElementById("note-close")
         .addEventListener("click", closeNoteModal);
+    document
+        .getElementById("note-text")
+        .addEventListener("input", updateNoteCharCounter);
     document
         .getElementById("note-overlay")
         .addEventListener("click", (e) => {
@@ -4227,83 +4244,191 @@
         .addEventListener("click", () => window.cc.hideWindow("main"));
 
     // ══════════════════════════════════════════════════════════════
-    // CUSTOM CONTEXT MENU (Full Mode)
+    // CUSTOM CONTEXT MENUS (Full Mode & Text Inputs)
     // ══════════════════════════════════════════════════════════════
     const fullCtxMenu = document.getElementById("full-ctx-menu");
+    const textCtxMenu = document.getElementById("text-ctx-menu");
+    let activeTextTarget = null;
 
-    function showFullContextMenu(x, y) {
-        // Ensure menu position stays on screen
-        fullCtxMenu.style.display = "block";
-        
-        const menuWidth = fullCtxMenu.offsetWidth;
-        const menuHeight = fullCtxMenu.offsetHeight;
-        
+    function positionCtxMenu(menuEl, x, y) {
+        menuEl.style.display = "block";
+        const menuWidth = menuEl.offsetWidth;
+        const menuHeight = menuEl.offsetHeight;
         const posX = (x + menuWidth > window.innerWidth) ? Math.max(8, window.innerWidth - menuWidth - 8) : Math.max(8, x);
         const posY = (y + menuHeight > window.innerHeight) ? Math.max(8, window.innerHeight - menuHeight - 8) : Math.max(8, y);
-        
-        fullCtxMenu.style.left = `${posX}px`;
-        fullCtxMenu.style.top = `${posY}px`;
+        menuEl.style.left = `${posX}px`;
+        menuEl.style.top = `${posY}px`;
     }
 
-    function hideFullContextMenu() {
-        fullCtxMenu.style.display = "none";
+    function showFullContextMenu(x, y) {
+        hideAllContextMenus();
+        if (fullCtxMenu) positionCtxMenu(fullCtxMenu, x, y);
+    }
+
+    function showTextContextMenu(x, y, targetInput) {
+        hideAllContextMenus();
+        activeTextTarget = targetInput;
+        if (!textCtxMenu) return;
+
+        const hasSelection = typeof targetInput.selectionStart === "number" &&
+            targetInput.selectionStart !== targetInput.selectionEnd;
+        const hasValue = (targetInput.value || "").length > 0;
+        const isReadOnly = Boolean(targetInput.readOnly || targetInput.disabled);
+
+        const btnCut = document.getElementById("ctx-text-cut");
+        const btnCopy = document.getElementById("ctx-text-copy");
+        const btnPaste = document.getElementById("ctx-text-paste");
+        const btnSelectAll = document.getElementById("ctx-text-selectall");
+        const btnClear = document.getElementById("ctx-text-clear");
+
+        if (btnCut) btnCut.classList.toggle("disabled", !hasSelection || isReadOnly);
+        if (btnCopy) btnCopy.classList.toggle("disabled", !hasSelection);
+        if (btnPaste) btnPaste.classList.toggle("disabled", isReadOnly);
+        if (btnSelectAll) btnSelectAll.classList.toggle("disabled", !hasValue);
+        if (btnClear) btnClear.classList.toggle("disabled", !hasValue || isReadOnly);
+
+        positionCtxMenu(textCtxMenu, x, y);
+    }
+
+    function hideAllContextMenus() {
+        if (fullCtxMenu) fullCtxMenu.style.display = "none";
+        if (textCtxMenu) textCtxMenu.style.display = "none";
     }
 
     document.addEventListener("contextmenu", (e) => {
-        // Ignore context menu on inputs/textareas so default behaves normally
-        if (e.target.closest("input, textarea")) return;
-        
+        const textTarget = e.target.closest("input[type='text'], input[type='number'], input[type='search'], input:not([type]), textarea");
         e.preventDefault();
-        showFullContextMenu(e.clientX, e.clientY);
+        if (textTarget) {
+            showTextContextMenu(e.clientX, e.clientY, textTarget);
+        } else {
+            showFullContextMenu(e.clientX, e.clientY);
+        }
     });
 
     // Close context menu on outside click
     document.addEventListener("click", (e) => {
         if (!e.target.closest(".ctx-menu")) {
-            hideFullContextMenu();
+            hideAllContextMenus();
         }
     });
 
     // Close context menu on escape key
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            hideFullContextMenu();
+            hideAllContextMenus();
         }
     });
 
     // Close context menu on blur (when clicking outside window)
     window.addEventListener("blur", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
     });
 
     // Wire context menu items
     document.getElementById("ctx-btn-mini").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         window.cc.goMini();
     });
     document.getElementById("ctx-btn-home").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         navigate("home");
     });
     document.getElementById("ctx-btn-timer").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         navigate("timer");
     });
     document.getElementById("ctx-btn-stopwatch").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         navigate("stopwatch");
     });
     document.getElementById("ctx-btn-relax").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         navigate("relax");
     });
     document.getElementById("ctx-btn-settings").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         openSettings();
     });
     document.getElementById("ctx-btn-close").addEventListener("click", () => {
-        hideFullContextMenu();
+        hideAllContextMenus();
         window.cc.hideWindow("main");
+    });
+
+    // Wire text context menu actions
+    document.getElementById("ctx-text-cut")?.addEventListener("click", async () => {
+        if (!activeTextTarget || activeTextTarget.readOnly || activeTextTarget.disabled) {
+            hideAllContextMenus();
+            return;
+        }
+        const start = activeTextTarget.selectionStart;
+        const end = activeTextTarget.selectionEnd;
+        if (typeof start === "number" && typeof end === "number" && start !== end) {
+            const selectedText = activeTextTarget.value.substring(start, end);
+            try {
+                await navigator.clipboard.writeText(selectedText);
+            } catch (_) {}
+            activeTextTarget.setRangeText("", start, end, "end");
+            activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        activeTextTarget.focus();
+        hideAllContextMenus();
+    });
+
+    document.getElementById("ctx-text-copy")?.addEventListener("click", async () => {
+        if (!activeTextTarget) {
+            hideAllContextMenus();
+            return;
+        }
+        const start = activeTextTarget.selectionStart;
+        const end = activeTextTarget.selectionEnd;
+        if (typeof start === "number" && typeof end === "number" && start !== end) {
+            const selectedText = activeTextTarget.value.substring(start, end);
+            try {
+                await navigator.clipboard.writeText(selectedText);
+            } catch (_) {}
+        }
+        activeTextTarget.focus();
+        hideAllContextMenus();
+    });
+
+    document.getElementById("ctx-text-paste")?.addEventListener("click", async () => {
+        if (!activeTextTarget || activeTextTarget.readOnly || activeTextTarget.disabled) {
+            hideAllContextMenus();
+            return;
+        }
+        activeTextTarget.focus();
+        try {
+            const clipText = await navigator.clipboard.readText();
+            if (clipText) {
+                const start = activeTextTarget.selectionStart ?? activeTextTarget.value.length;
+                const end = activeTextTarget.selectionEnd ?? activeTextTarget.value.length;
+                const maxLen = activeTextTarget.maxLength > 0 ? activeTextTarget.maxLength : Infinity;
+                const currentLen = activeTextTarget.value.length - (end - start);
+                const allowedText = clipText.slice(0, Math.max(0, maxLen - currentLen));
+                activeTextTarget.setRangeText(allowedText, start, end, "end");
+                activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+        } catch (_) {
+            document.execCommand("paste");
+        }
+        hideAllContextMenus();
+    });
+
+    document.getElementById("ctx-text-selectall")?.addEventListener("click", () => {
+        if (activeTextTarget) {
+            activeTextTarget.focus();
+            activeTextTarget.select();
+        }
+        hideAllContextMenus();
+    });
+
+    document.getElementById("ctx-text-clear")?.addEventListener("click", () => {
+        if (activeTextTarget && !activeTextTarget.readOnly && !activeTextTarget.disabled) {
+            activeTextTarget.value = "";
+            activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
+            activeTextTarget.focus();
+        }
+        hideAllContextMenus();
     });
 
 
