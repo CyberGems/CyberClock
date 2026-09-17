@@ -668,7 +668,7 @@
         -webkit-app-region: no-drag;
     }
     .clock-panel:hover .dial-cycler,
-    .dial-cycler:focus-within {
+    .dial-cycler:focus-within:has(:focus-visible) {
         opacity: 1;
         pointer-events: auto;
         transform: translateY(-50%) translateX(0);
@@ -1050,6 +1050,52 @@
         display: flex;
         align-items: center;
         gap: 7px;
+    }
+    .cal-greeting-card {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        margin-bottom: 9px;
+        background: linear-gradient(
+            135deg,
+            rgba(var(--rgb-accent), 0.12) 0%,
+            rgba(var(--rgb-accent), 0.03) 100%
+        );
+        border: 1px solid rgba(var(--rgb-accent), 0.22);
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+    .cal-greeting-lead {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 0;
+        flex: 1;
+    }
+    .cal-greeting-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent-a);
+        box-shadow: 0 0 8px var(--accent-a);
+        flex-shrink: 0;
+        animation: pulse-glow 2.4s ease-in-out infinite;
+    }
+    .cal-greeting-text {
+        font-family: var(--font-ui);
+        font-size: calc(12.5px * var(--ui-scale));
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: var(--text-hi);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .cal-greeting-name {
+        color: var(--accent-a);
+        text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
     }
     .cal-agenda-list {
         flex: 1;

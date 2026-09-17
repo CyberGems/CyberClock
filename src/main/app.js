@@ -572,7 +572,7 @@
         if (displayNameEl) displayNameEl.value = s.displayName || "";
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
-        syncWelcomeGreetingText();
+        updateGreeting();
         if (typeof renderBrandVersion === "function") renderBrandVersion();
         updateDigital();
         if (typeof renderCalendar === "function" && typeof calYear !== "undefined") {
@@ -881,8 +881,14 @@
     // while the main window is the active one and resumes instantly
     // (with the correct time) when it is shown again.
     let mainActive = false;
-    let welcomeHideTimer = null;
-    let welcomeHasOpened = false;
+    function escapeHtml(s) {
+        return String(s || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
     function welcomeGreetingKey() {
         const hour = new Date().getHours();
@@ -891,36 +897,28 @@
         return "welcome.goodEvening";
     }
 
-    function welcomeGreetingText(returning) {
+    function welcomeGreetingText() {
         const name = String(cfg.displayName || "").trim().replace(/\s+/g, " ").slice(0, 32);
         const suffix = name ? ", " + name : "";
-        return window.ccI18n.t(returning ? "welcome.back" : welcomeGreetingKey(), { name: suffix });
+        return window.ccI18n ? window.ccI18n.t(welcomeGreetingKey(), { name: suffix }) : (name ? `Hello, ${name}` : "Hello");
     }
 
-    function syncWelcomeGreetingText() {
-        const el = document.getElementById("tbar-welcome");
-        if (!el || !el.classList.contains("is-visible")) return;
-        el.textContent = welcomeGreetingText(el.dataset.returning === "true");
-    }
-
-    function showWelcomeGreeting() {
-        const el = document.getElementById("tbar-welcome");
-        if (!el) return;
-        if (welcomeHideTimer) clearTimeout(welcomeHideTimer);
-        const returning = welcomeHasOpened;
-        welcomeHasOpened = true;
-        el.dataset.returning = String(returning);
-        el.textContent = welcomeGreetingText(returning);
-        el.classList.remove("is-visible");
-        requestAnimationFrame(() => el.classList.add("is-visible"));
-        welcomeHideTimer = setTimeout(() => el.classList.remove("is-visible"), 6500);
-    }
-
-    function hideWelcomeGreeting() {
-        if (welcomeHideTimer) clearTimeout(welcomeHideTimer);
-        welcomeHideTimer = null;
-        const el = document.getElementById("tbar-welcome");
-        if (el) el.classList.remove("is-visible");
+    function updateGreeting() {
+        const key = welcomeGreetingKey();
+        const name = String(cfg.displayName || "").trim().replace(/\s+/g, " ").slice(0, 32);
+        const suffix = name ? ", " + name : "";
+        const text = window.ccI18n ? window.ccI18n.t(key, { name: suffix }) : (name ? `Hello, ${name}` : "Hello");
+        const calEl = document.getElementById("cal-greeting-text");
+        if (calEl) {
+            if (name) {
+                const baseGreeting = window.ccI18n ? window.ccI18n.t(key, { name: "" }) : "Hello";
+                calEl.innerHTML = `${escapeHtml(baseGreeting)}, <span class="cal-greeting-name">${escapeHtml(name)}</span>`;
+            } else {
+                calEl.textContent = text;
+            }
+        }
+        const tbarEl = document.getElementById("tbar-welcome");
+        if (tbarEl) tbarEl.textContent = text;
     }
 
     function isMainActive() {
@@ -931,8 +929,7 @@
         const wasActive = mainActive;
         mainActive = nv;
         document.body.classList.toggle("cc-inactive", !nv);
-        if (nv && !wasActive) showWelcomeGreeting();
-        else if (!nv) hideWelcomeGreeting();
+        if (nv && !wasActive) updateGreeting();
         syncHomeClock();
         syncDigitalClock();
     }
@@ -2881,6 +2878,7 @@
         set("stat-dly", daysInYear - dayOfYear);
         set("stat-dlm", lastOfMonth - now.getDate());
         set("stat-moon", MOON_SVGS[moonPhaseIdx(now)], true);
+        updateGreeting();
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -4357,10 +4355,12 @@
     document.getElementById("dial-prev")?.addEventListener("click", (e) => {
         e.stopPropagation();
         cycleDialDesign(-1);
+        e.currentTarget.blur();
     });
     document.getElementById("dial-next")?.addEventListener("click", (e) => {
         e.stopPropagation();
         cycleDialDesign(1);
+        e.currentTarget.blur();
     });
 
 
@@ -4406,11 +4406,17 @@
     // change so typing stays local and does not trigger a write per key.
     const sDisplayName = document.getElementById("s-display-name");
     if (sDisplayName) {
+        sDisplayName.addEventListener("input", () => {
+            const text = sDisplayName.value.trim().replace(/\s+/g, " ").slice(0, 32);
+            cfg.displayName = text;
+            updateGreeting();
+        });
         sDisplayName.addEventListener("change", () => {
             const text = sDisplayName.value.trim().replace(/\s+/g, " ").slice(0, 32);
             sDisplayName.value = text;
+            cfg.displayName = text;
             window.cc.saveSettings({ displayName: text });
-            syncWelcomeGreetingText();
+            updateGreeting();
         });
     }
 

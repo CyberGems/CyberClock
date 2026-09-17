@@ -341,7 +341,7 @@
             // Settings modal - General
             "settings.general.welcomeTitle": "Welcome",
             "settings.general.displayName": "Your name",
-            "settings.general.displayNameDesc": "Personalize the greeting shown in the titlebar",
+            "settings.general.displayNameDesc": "Personalize the greeting shown in the Today panel",
             "settings.general.displayNamePlaceholder": "Optional",
             "settings.general.behavior": "Behavior",
             "settings.general.startWithWindows": "Start with Windows",
@@ -836,7 +836,7 @@
             // Settings modal - General
             "settings.general.welcomeTitle": "Toque personal",
             "settings.general.displayName": "Tu nombre",
-            "settings.general.displayNameDesc": "Personaliza el saludo de la barra superior",
+            "settings.general.displayNameDesc": "Personaliza el saludo mostrado en el panel Hoy",
             "settings.general.displayNamePlaceholder": "Opcional",
             "settings.general.behavior": "Comportamiento",
             "settings.general.startWithWindows": "Iniciar con Windows",
