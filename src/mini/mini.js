@@ -191,6 +191,10 @@
             shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
             shell.style.setProperty("--mini-zoom", String(zoomFactor()));
         }
+        const tipEl = document.getElementById("mini-tip");
+        if (tipEl) {
+            tipEl.dataset.design = s.miniDesign || "1";
+        }
 
         if (s.miniScanlines === false)
             document.body.classList.add("no-scanlines");
@@ -377,7 +381,7 @@
             isTipVisible = true;
             tipEl.classList.add("show");
             syncWindowSize();
-        }, 800);
+        }, 1500);
     });
 
     timeBlock.addEventListener("mouseleave", () => {

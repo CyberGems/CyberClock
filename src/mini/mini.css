@@ -1484,11 +1484,11 @@
         pointer-events: auto;
         cursor: pointer;
         opacity: 0;
-        transition: opacity 0.2s ease, transform 0.18s ease, border-color 0.2s, box-shadow 0.2s;
-        transform: translate(-50%, 3px);
-        background: #18181c;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
+        transition: opacity 0.22s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
+        transform: translate(-50%, 4px);
+        background: var(--bg-02, #18181c);
+        border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
+        border-radius: 12px;
         padding: 12px 14px;
         width: 240px;
         text-align: center;
@@ -1496,14 +1496,15 @@
         z-index: 999;
         font-family: "Outfit", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.88);
         line-height: 1.5;
         word-break: break-word;
         overflow-wrap: anywhere;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 15px rgba(var(--rgb-accent), 0.1);
     }
     .mini-tip:hover {
         border-color: rgba(var(--rgb-accent), 0.5);
-        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 16px rgba(var(--rgb-accent), 0.25);
     }
     .mini-tip::after {
         content: "";
@@ -1513,9 +1514,9 @@
         transform: translateX(-50%);
         width: 10px;
         height: 10px;
-        background: #18181c;
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--bg-02, #18181c);
+        border-left: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
+        border-top: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
         rotate: 45deg;
     }
     .mini-tip.show {
@@ -1533,7 +1534,7 @@
     }
     .mini-tip-divider {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, transparent);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.12) 80%, transparent);
         margin-bottom: 8px;
     }
     .mini-tip-note {
@@ -1576,6 +1577,290 @@
     }
     .mini-tip-stat b {
         color: var(--accent-a);
+    }
+
+    /* ── Per-Skin Tooltip Theming ── */
+    /* Skin 1: Cyber Bar Pro */
+    .mini-tip[data-design="1"] {
+        border-left: 3px solid var(--accent-a);
+        font-family: "Share Tech Mono", monospace;
+    }
+
+    /* Skin 2: Holo Display */
+    .mini-tip[data-design="2"] {
+        background: linear-gradient(160deg, #071423 0%, #0a1030 60%, #12082b 100%);
+        border: 1px solid rgba(122, 162, 247, 0.35);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(90, 130, 255, 0.15);
+        font-family: "JetBrains Mono", monospace;
+    }
+    .mini-tip[data-design="2"]::after {
+        background: #071423;
+        border-color: rgba(122, 162, 247, 0.35);
+    }
+    .mini-tip[data-design="2"] .mini-tip-date {
+        color: #37e6ff;
+        text-shadow: -1px 0 8px rgba(255, 77, 141, 0.4), 1px 0 10px rgba(55, 230, 255, 0.5);
+    }
+    .mini-tip[data-design="2"] .mini-tip-action-btn {
+        background: rgba(55, 230, 255, 0.12);
+        border: 1px solid rgba(55, 230, 255, 0.6);
+        color: #37e6ff;
+        text-shadow: 0 0 8px rgba(55, 230, 255, 0.5);
+    }
+
+    /* Skin 3: Digital Matrix */
+    .mini-tip[data-design="3"] {
+        background: #0a0a0f;
+        border: 1px solid #1a1a2e;
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        font-family: "JetBrains Mono", monospace;
+    }
+    .mini-tip[data-design="3"]::after {
+        background: #0a0a0f;
+        border-color: #1a1a2e;
+    }
+    .mini-tip[data-design="3"] .mini-tip-date,
+    .mini-tip[data-design="3"] .mini-tip-stat b {
+        color: #00ff88;
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    }
+    .mini-tip[data-design="3"] .mini-tip-action-btn {
+        border-radius: 3px;
+        border-color: #00ff88;
+        color: #00ff88;
+        background: rgba(0, 255, 136, 0.1);
+        text-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
+    }
+
+    /* Skin 4: Glass Orb */
+    .mini-tip[data-design="4"] {
+        background: linear-gradient(135deg,
+            color-mix(in srgb, #ffffff 92%, var(--accent-a)) 0%,
+            color-mix(in srgb, #edf4fd 86%, var(--accent-a)) 50%,
+            color-mix(in srgb, #dfe9f8 80%, var(--accent-a)) 100%);
+        backdrop-filter: blur(24px) saturate(1.6);
+        border: 1px solid color-mix(in srgb, var(--accent-a) 48%, rgba(120, 140, 175, 0.5));
+        border-radius: 18px;
+        box-shadow:
+            0 10px 32px rgba(31, 42, 66, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        color: #1c2e44;
+    }
+    .mini-tip[data-design="4"]::after {
+        background: color-mix(in srgb, #ffffff 92%, var(--accent-a));
+        border-left: 1px solid color-mix(in srgb, var(--accent-a) 48%, rgba(120, 140, 175, 0.5));
+        border-top: 1px solid color-mix(in srgb, var(--accent-a) 48%, rgba(120, 140, 175, 0.5));
+    }
+    .mini-tip[data-design="4"] .mini-tip-date {
+        color: color-mix(in srgb, var(--accent-b) 75%, #1c2e44);
+        text-shadow: none;
+    }
+    .mini-tip[data-design="4"] .mini-tip-divider {
+        background: linear-gradient(90deg, transparent, rgba(60, 90, 130, 0.22) 20%, rgba(60, 90, 130, 0.22) 80%, transparent);
+    }
+    .mini-tip[data-design="4"] .mini-tip-note {
+        color: #1c2e44;
+    }
+    .mini-tip[data-design="4"] .mini-tip-note.empty {
+        color: color-mix(in srgb, #3c5078 80%, var(--accent-b));
+    }
+    .mini-tip[data-design="4"] .mini-tip-action-btn {
+        background: rgba(90, 130, 180, 0.12);
+        border: 1px solid color-mix(in srgb, var(--accent-b) 60%, #2c5282);
+        color: #1c2e44;
+        text-shadow: none;
+        box-shadow: none;
+        border-radius: 6px;
+    }
+    .mini-tip[data-design="4"]:hover .mini-tip-action-btn {
+        background: rgba(90, 130, 180, 0.22);
+        box-shadow: 0 0 10px rgba(90, 130, 180, 0.2);
+    }
+    .mini-tip[data-design="4"] .mini-tip-stat {
+        color: color-mix(in srgb, #3c5078 85%, var(--accent-b));
+    }
+    .mini-tip[data-design="4"] .mini-tip-stat b {
+        color: color-mix(in srgb, var(--accent-b) 75%, #1c2e44);
+    }
+
+    /* Skin 5: Neon Circuit */
+    .mini-tip[data-design="5"] {
+        background: #080c14;
+        border: 1px solid #00f0ff;
+        border-radius: 8px;
+        box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    }
+    .mini-tip[data-design="5"]::after {
+        background: #080c14;
+        border-color: #00f0ff;
+    }
+    .mini-tip[data-design="5"] .mini-tip-date,
+    .mini-tip[data-design="5"] .mini-tip-stat b {
+        color: #00f0ff;
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+    .mini-tip[data-design="5"] .mini-tip-action-btn {
+        border-color: #00f0ff;
+        color: #00f0ff;
+        background: rgba(0, 240, 255, 0.12);
+        text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+    }
+
+    /* Skin 6: Zen Minimal */
+    .mini-tip[data-design="6"] {
+        background: #0e0f14;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+    }
+    .mini-tip[data-design="6"]::after {
+        background: #0e0f14;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    .mini-tip[data-design="6"] .mini-tip-date {
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: none;
+    }
+    .mini-tip[data-design="6"] .mini-tip-action-btn {
+        border-radius: 8px;
+        border-color: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.06);
+        text-shadow: none;
+    }
+
+    /* Skin 7: Sunset Pulse */
+    .mini-tip[data-design="7"] {
+        background: linear-gradient(135deg, #1f1124 0%, #150d1a 100%);
+        border: 1px solid rgba(255, 120, 80, 0.35);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 100, 60, 0.12);
+    }
+    .mini-tip[data-design="7"]::after {
+        background: #1f1124;
+        border-color: rgba(255, 120, 80, 0.35);
+    }
+    .mini-tip[data-design="7"] .mini-tip-date,
+    .mini-tip[data-design="7"] .mini-tip-stat b {
+        color: #ff8c5a;
+        text-shadow: 0 0 8px rgba(255, 120, 80, 0.4);
+    }
+    .mini-tip[data-design="7"] .mini-tip-action-btn {
+        border-color: #ff7043;
+        color: #ffab91;
+        background: rgba(255, 112, 67, 0.12);
+    }
+
+    /* Skin 8: Frost Crystal */
+    .mini-tip[data-design="8"] {
+        background: linear-gradient(145deg, rgba(14, 28, 48, 0.96) 0%, rgba(8, 16, 32, 0.96) 100%);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(130, 200, 255, 0.35);
+        border-radius: 12px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(100, 180, 255, 0.12);
+    }
+    .mini-tip[data-design="8"]::after {
+        background: rgba(14, 28, 48, 0.96);
+        border-color: rgba(130, 200, 255, 0.35);
+    }
+    .mini-tip[data-design="8"] .mini-tip-date,
+    .mini-tip[data-design="8"] .mini-tip-stat b {
+        color: #8ed0ff;
+        text-shadow: 0 0 8px rgba(130, 200, 255, 0.4);
+    }
+    .mini-tip[data-design="8"] .mini-tip-action-btn {
+        border-color: #8ed0ff;
+        color: #b8e2ff;
+        background: rgba(100, 180, 255, 0.12);
+    }
+
+    /* Skin 9: Neo Tokyo */
+    .mini-tip[data-design="9"] {
+        background: #08060c;
+        border: 1px solid #ff2a70;
+        border-radius: 8px;
+        box-shadow: 0 0 16px rgba(255, 42, 112, 0.25);
+    }
+    .mini-tip[data-design="9"]::after {
+        background: #08060c;
+        border-color: #ff2a70;
+    }
+    .mini-tip[data-design="9"] .mini-tip-date,
+    .mini-tip[data-design="9"] .mini-tip-stat b {
+        color: #ff2a70;
+        text-shadow: 0 0 8px rgba(255, 42, 112, 0.6);
+    }
+    .mini-tip[data-design="9"] .mini-tip-action-btn {
+        border-color: #ff2a70;
+        color: #ff759f;
+        background: rgba(255, 42, 112, 0.12);
+    }
+
+    /* Skin 10: Obsidian */
+    .mini-tip[data-design="10"] {
+        background: #0c0d10;
+        border: 1px solid #282a32;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .mini-tip[data-design="10"]::after {
+        background: #0c0d10;
+        border-color: #282a32;
+    }
+    .mini-tip[data-design="10"] .mini-tip-date,
+    .mini-tip[data-design="10"] .mini-tip-stat b {
+        color: #d4af37;
+        text-shadow: none;
+    }
+    .mini-tip[data-design="10"] .mini-tip-action-btn {
+        border-color: #554422;
+        color: #d4af37;
+        background: rgba(212, 175, 55, 0.08);
+    }
+
+    /* Skin 11: Synthwave */
+    .mini-tip[data-design="11"] {
+        background: linear-gradient(160deg, #18092a 0%, #0d061c 100%);
+        border: 1px solid #ff388b;
+        border-radius: 10px;
+        box-shadow: 0 0 18px rgba(255, 56, 139, 0.25);
+    }
+    .mini-tip[data-design="11"]::after {
+        background: #18092a;
+        border-color: #ff388b;
+    }
+    .mini-tip[data-design="11"] .mini-tip-date,
+    .mini-tip[data-design="11"] .mini-tip-stat b {
+        color: #38ef7d;
+        text-shadow: 0 0 8px rgba(56, 239, 125, 0.5);
+    }
+    .mini-tip[data-design="11"] .mini-tip-action-btn {
+        border-color: #ff388b;
+        color: #ff77b2;
+        background: rgba(255, 56, 139, 0.12);
+    }
+
+    /* Skin 12: Quantum */
+    .mini-tip[data-design="12"] {
+        background: linear-gradient(145deg, #090918 0%, #04040d 100%);
+        border: 1px solid rgba(138, 92, 255, 0.4);
+        border-radius: 14px;
+        box-shadow: 0 0 20px rgba(138, 92, 255, 0.15);
+    }
+    .mini-tip[data-design="12"]::after {
+        background: #090918;
+        border-color: rgba(138, 92, 255, 0.4);
+    }
+    .mini-tip[data-design="12"] .mini-tip-date,
+    .mini-tip[data-design="12"] .mini-tip-stat b {
+        color: #9d7cfd;
+        text-shadow: 0 0 8px rgba(157, 124, 253, 0.4);
+    }
+    .mini-tip[data-design="12"] .mini-tip-action-btn {
+        border-color: #8a5cff;
+        color: #b79cff;
+        background: rgba(138, 92, 255, 0.12);
     }
 
     /* ── Zoom (50/100/200/400%) ─────────────────────────────
