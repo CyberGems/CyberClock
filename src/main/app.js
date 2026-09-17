@@ -543,6 +543,17 @@
             homeView.classList.toggle("no-calendar", hideCalendar);
         }
         document.body.classList.toggle("home-no-calendar", hideCalendar);
+        const stageEl = document.querySelector(".clock-stage");
+        const panelEl = document.querySelector(".clock-panel");
+        if (stageEl && panelEl) {
+            const h = panelEl.clientHeight || 450;
+            const parentW = panelEl.parentElement?.clientWidth || window.innerWidth;
+            const targetW = hideCalendar ? parentW : parentW * 0.44;
+            const targetPadX = hideCalendar ? 48 : 56;
+            const targetPadY = hideCalendar ? 48 : 36;
+            const targetSize = Math.max(120, Math.min(targetW - targetPadX, h - targetPadY));
+            stageEl.style.setProperty("--stage-size", `${targetSize}px`);
+        }
         const hideClockEl = document.getElementById("s-hide-clock");
         if (hideClockEl) hideClockEl.checked = hideClock;
         const hideCalEl = document.getElementById("s-hide-cal");
@@ -1013,6 +1024,7 @@
     function setupClock() {
         const canvas = document.getElementById("clock-canvas");
         if (!canvas) return;
+        const stage = document.querySelector(".clock-stage");
         const panel = document.querySelector(".clock-panel") || canvas.closest(".clock-panel");
         if (!panel) return;
         const homeView = document.getElementById("view-home");
@@ -1024,12 +1036,15 @@
         if (w < 50 || h < 50) return; // Skip intermediate transition frames to avoid flickering
 
         const isSolo = homeView && homeView.classList.contains("no-calendar");
-        const padX = isSolo ? 48 : 36;
+        const padX = isSolo ? 48 : 56;
         const padY = isSolo ? 48 : 36;
         const size = Math.max(120, Math.min(
             w - padX,
             h - padY,
         ));
+        if (stage) {
+            stage.style.setProperty("--stage-size", `${size}px`);
+        }
         if (size > 0 && (canvas.width !== size || canvas.height !== size)) {
             canvas.width = size;
             canvas.height = size;
