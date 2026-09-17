@@ -533,17 +533,29 @@
                 refreshClockNameRestoreBtn();
             }
         }
-        // Hide analog clock (full-mode Home): collapse the panel and let
-        // the calendar dashboard absorb the freed width.
+        // Hide analog clock / hide calendar (full-mode Home): collapse either
+        // panel and let the other absorb the full width.
         const hideClock = s.fullHideClock === true;
+        const hideCalendar = s.fullHideCalendar === true;
         const homeView = document.getElementById("view-home");
-        if (homeView) homeView.classList.toggle("no-clock", hideClock);
+        if (homeView) {
+            homeView.classList.toggle("no-clock", hideClock);
+            homeView.classList.toggle("no-calendar", hideCalendar);
+        }
         const hideClockEl = document.getElementById("s-hide-clock");
         if (hideClockEl) hideClockEl.checked = hideClock;
+        const hideCalEl = document.getElementById("s-hide-cal");
+        if (hideCalEl) hideCalEl.checked = hideCalendar;
         const gripEl = document.getElementById("clock-grip");
         if (gripEl) {
             gripEl.title = window.ccI18n.t(
                 hideClock ? "tooltip.showClock" : "tooltip.hideClock",
+            );
+        }
+        const calGripEl = document.getElementById("cal-grip");
+        if (calGripEl) {
+            calGripEl.title = window.ccI18n.t(
+                hideCalendar ? "tooltip.showCalendar" : "tooltip.hideCalendar",
             );
         }
         syncHomeClock();
@@ -4420,8 +4432,8 @@
         });
     }
 
-    // Hide analog clock — the side grip on the Home view and the Settings
-    // toggle drive the same setting through the same broadcast round-trip.
+    // Hide analog clock / hide calendar: side grips on Home view and Settings
+    // toggles drive the respective settings through broadcast round-trip.
     const clockGrip = document.getElementById("clock-grip");
     if (clockGrip) {
         clockGrip.addEventListener("click", () => {
@@ -4432,6 +4444,25 @@
     if (sHideClock) {
         sHideClock.addEventListener("change", (e) => {
             window.cc.saveSettings({ fullHideClock: e.target.checked });
+        });
+    }
+    const calGrip = document.getElementById("cal-grip");
+    if (calGrip) {
+        calGrip.addEventListener("click", () => {
+            window.cc.saveSettings({ fullHideCalendar: !(cfg.fullHideCalendar === true) });
+        });
+    }
+    const sHideCal = document.getElementById("s-hide-cal");
+    if (sHideCal) {
+        sHideCal.addEventListener("change", (e) => {
+            window.cc.saveSettings({ fullHideCalendar: e.target.checked });
+        });
+    }
+    // Greeting card click opens Settings on General tab with username field focused and selected
+    const calGreetingCard = document.getElementById("cal-greeting-card");
+    if (calGreetingCard) {
+        calGreetingCard.addEventListener("click", () => {
+            openSettings("general", "#s-display-name");
         });
     }
     // Mini mode settings
@@ -5451,6 +5482,26 @@
             setupClock();
             syncHomeClock();
         });
+        // Dynamically adjust clock canvas whenever the clock panel resizes
+        const clockPanelEl = document.querySelector(".clock-panel");
+        if (clockPanelEl && typeof ResizeObserver !== "undefined") {
+            let prevW = 0, prevH = 0;
+            const ro = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    const w = Math.floor(entry.contentRect.width);
+                    const h = Math.floor(entry.contentRect.height);
+                    if (w !== prevW || h !== prevH) {
+                        prevW = w;
+                        prevH = h;
+                        setupClock();
+                        if (typeof drawClock === "function" && isMainActive() && curView === "home") {
+                            drawClock();
+                        }
+                    }
+                }
+            });
+            ro.observe(clockPanelEl);
+        }
     });
 
     window.cc.onSettingsUpdated((s) => {

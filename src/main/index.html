@@ -99,6 +99,10 @@
                         <button class="clock-grip" id="clock-grip" type="button" title="Hide clock">
                             <span data-ico="back"></span>
                         </button>
+                        <!-- Discrete side handle: collapse/expand the calendar dashboard -->
+                        <button class="cal-grip" id="cal-grip" type="button" title="Hide calendar" data-i18n-attr="title:tooltip.hideCalendar">
+                            <span data-ico="next"></span>
+                        </button>
                         <div class="clock-panel">
                             <canvas id="clock-canvas"></canvas>
                             <!-- Discreet Vertical Quick-Cycle Dial Switcher on the Right -->
@@ -132,7 +136,7 @@
                                 </div>
                                 <div class="cal-dash cal-stats">
                                     <div class="cal-dash-t"><span class="cal-t-ico" data-ico="sun"></span> <span data-i18n="calendar.todayPanel">Today</span></div>
-                                    <div class="cal-greeting-card" id="cal-greeting-card">
+                                    <div class="cal-greeting-card" id="cal-greeting-card" data-tooltip="Click to personalize your greeting" data-i18n-attr="data-tooltip:tooltip.editName" data-tooltip-dir="up">
                                         <div class="cal-greeting-lead">
                                             <span class="cal-greeting-dot"></span>
                                             <span class="cal-greeting-text" id="cal-greeting-text"></span>
@@ -633,6 +637,16 @@
                                     <small data-i18n="settings.appearance.hideClockDesc">Calendar takes the full width</small>
                                 </div>
                                 <label class="s-tog"><input type="checkbox" id="s-hide-clock" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="eye-off"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.hideCalendar">Hide Calendar</span>
+                                    <small data-i18n="settings.appearance.hideCalendarDesc">Analog clock takes the full width</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-hide-cal" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
