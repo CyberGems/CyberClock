@@ -469,9 +469,9 @@
                 b.classList.toggle("on", b.dataset.clockDesign === val),
             );
         const badgeNum = document.getElementById("dial-badge-num");
-        const badgeName = document.getElementById("dial-badge-name");
+        const badgeEl = document.getElementById("dial-badge");
         if (badgeNum) badgeNum.textContent = `${design}/5`;
-        if (badgeName) badgeName.textContent = getDialDesignName(design);
+        if (badgeEl) badgeEl.setAttribute("data-tooltip", getDialDesignName(design));
         const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
     }
