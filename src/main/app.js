@@ -549,7 +549,7 @@
             const h = panelEl.clientHeight || 450;
             const parentW = panelEl.parentElement?.clientWidth || window.innerWidth;
             const targetW = hideCalendar ? parentW : parentW * 0.44;
-            const targetPadX = hideCalendar ? 48 : 56;
+            const targetPadX = hideCalendar ? 48 : 36;
             const targetPadY = hideCalendar ? 48 : 36;
             const targetSize = Math.max(120, Math.min(targetW - targetPadX, h - targetPadY));
             stageEl.style.setProperty("--stage-size", `${targetSize}px`);
@@ -1036,7 +1036,7 @@
         if (w < 50 || h < 50) return; // Skip intermediate transition frames to avoid flickering
 
         const isSolo = homeView && homeView.classList.contains("no-calendar");
-        const padX = isSolo ? 48 : 56;
+        const padX = isSolo ? 48 : 36;
         const padY = isSolo ? 48 : 36;
         const size = Math.max(120, Math.min(
             w - padX,
@@ -1050,6 +1050,9 @@
             canvas.height = size;
             cybergemsCacheKey = null;
             faceCache = null;
+            if (isMainActive() && curView === "home") {
+                drawClock(performance.now(), true);
+            }
         }
     }
 
@@ -1883,7 +1886,7 @@
         return off;
     }
 
-    function drawClock(ts) {
+    function drawClock(ts, force) {
         const canvas = document.getElementById("clock-canvas");
         if (!canvas || curView !== "home" || !mainActive) {
             clockRaf = null;
@@ -1891,9 +1894,11 @@
         }
         // Schedule the next frame first, then bail out early if we are
         // still inside the current frame budget (framerate cap).
-        clockRaf = requestAnimationFrame(drawClock);
+        if (!force) {
+            clockRaf = requestAnimationFrame(drawClock);
+        }
         if (ts === undefined) ts = performance.now();
-        if (ts - clockLastFrame < CLOCK_FRAME_MS - 0.5) {
+        if (!force && ts - clockLastFrame < CLOCK_FRAME_MS - 0.5) {
             return;
         }
         clockLastFrame = ts;
@@ -5540,10 +5545,7 @@
                         if (resizeTimer) clearTimeout(resizeTimer);
                         resizeTimer = setTimeout(() => {
                             setupClock();
-                            if (typeof drawClock === "function" && isMainActive() && curView === "home") {
-                                drawClock();
-                            }
-                        }, 50);
+                        }, 460);
                     }
                 }
             });
