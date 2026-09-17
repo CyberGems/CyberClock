@@ -1,0 +1,21 @@
+{
+    "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+    "bundle": {
+        "targets": ["nsis"],
+        "createUpdaterArtifacts": false,
+        "windows": {
+            "webviewInstallMode": {
+                "type": "embedBootstrapper"
+            },
+            "nsis": {
+                "installMode": "both",
+                "installerHooks": "installer.nsh"
+            }
+        }
+    },
+    "plugins": {
+        "updater": {
+            "endpoints": []
+        }
+    }
+}

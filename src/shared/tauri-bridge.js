@@ -148,6 +148,11 @@
         isPortable: async () => {
             return await invokeOrFallback("is_portable", undefined, false);
         },
+        isMsStore: async () => {
+            // Compile-time flag from the backend: true only in builds
+            // packaged for the Microsoft Store.
+            return await invokeOrFallback("is_msstore", undefined, false);
+        },
         openTaskbarSettings: async () => {
             // Opens Windows taskbar settings on the tray-icon page
             // (Win10: also navigates to the nested icon-list page).

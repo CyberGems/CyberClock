@@ -407,6 +407,7 @@
             "about.statuses.downloaded": "Update ready — click Install & Restart.",
             "about.statuses.downloading": "Downloading update ({pct}%)…",
             "about.statuses.error": "Could not check for updates. Check your internet connection.",
+            "about.statuses.msStore": "Updates are handled by the Microsoft Store.",
 
             "updates.kicker": "CyberClock update",
             "updates.availableTitle": "A new version is ready",
@@ -890,6 +891,7 @@
             "about.statuses.downloaded": "Actualización lista — pulsa Instalar y reiniciar.",
             "about.statuses.downloading": "Descargando actualización ({pct}%)…",
             "about.statuses.error": "No se pudieron buscar actualizaciones. Revisa tu conexión a internet.",
+            "about.statuses.msStore": "Las actualizaciones se gestionan desde Microsoft Store.",
 
             "updates.kicker": "Actualización de CyberClock",
             "updates.availableTitle": "Hay una nueva versión",

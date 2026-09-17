@@ -48,6 +48,7 @@
     let appVersion = "";
     let updateStatus = { state: "idle" };
     let updatePortable = false;
+    let updateMsStore = false;
 
     // ── Theme / language / auto-update toggle ───────────────
     function applySettings(s) {
@@ -80,6 +81,12 @@
             renderUpdateState();
         }).catch(() => {});
     }
+    if (window.cc && window.cc.isMsStore) {
+        window.cc.isMsStore().then((value) => {
+            updateMsStore = !!value;
+            renderUpdateState();
+        }).catch(() => {});
+    }
 
     // ── Update flow (CyberSnap state matrix) ─────────────────
     // idle/up-to-date: "Check Now" — available: "Update Now" —
@@ -93,13 +100,29 @@
         if (!btn || !desc) return;
 
         const s = updateStatus;
+
+        if (updateMsStore) {
+            // Microsoft Store build: updates are distributed by the Store,
+            // so the self-update button and the startup-check toggle make
+            // no sense here.
+            btn.style.display = "none";
+            progress.hidden = true;
+            desc.textContent = T(
+                "about.statuses.msStore",
+                "Updates are handled by the Microsoft Store.",
+            );
+            const autoRow = document.getElementById("ab-autoup")?.closest(".ab-setting-row");
+            if (autoRow) autoRow.style.display = "none";
+            return;
+        }
+
+        btn.style.display = "";
+        btn.disabled = false;
+        progress.hidden = s.state !== "downloading";
         const idleDesc = T(
             "about.updateDesc",
             "Check for the latest version and download updates directly.",
         );
-
-        btn.disabled = false;
-        progress.hidden = s.state !== "downloading";
 
         if (s.state === "idle" || s.state === "not-available") {
             btn.textContent = T("about.checkUpdates", "Check Now");

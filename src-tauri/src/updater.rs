@@ -4,8 +4,11 @@ use std::time::Duration;
 
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
+#[cfg(not(feature = "msstore"))]
 use tauri_plugin_updater::UpdaterExt;
-use tokio::time::{sleep, timeout};
+use tokio::time::timeout;
+#[cfg(not(feature = "msstore"))]
+use tokio::time::sleep;
 
 use log::{error, info};
 
@@ -65,15 +68,27 @@ pub fn pending_update_version() -> Option<String> {
 }
 
 pub fn init_updater(app: &AppHandle, auto_update: bool) {
-    set_auto_update(auto_update);
-    if auto_update {
-        let app = app.clone();
-        tauri::async_runtime::spawn(async move {
-            sleep(Duration::from_secs(8)).await;
-            if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
-                let _ = perform_check(&app).await;
-            }
-        });
+    #[cfg(feature = "msstore")]
+    {
+        // Microsoft Store build: updates are distributed by the Store,
+        // so no self-update checks are ever scheduled (Store policy).
+        let _ = (app, auto_update);
+        info!("Updater: disabled (Microsoft Store build)");
+        return;
+    }
+
+    #[cfg(not(feature = "msstore"))]
+    {
+        set_auto_update(auto_update);
+        if auto_update {
+            let app = app.clone();
+            tauri::async_runtime::spawn(async move {
+                sleep(Duration::from_secs(8)).await;
+                if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
+                    let _ = perform_check(&app).await;
+                }
+            });
+        }
     }
 }
 
@@ -85,6 +100,14 @@ pub fn get_app_version(app: AppHandle) -> String {
 #[tauri::command]
 pub fn is_portable() -> bool {
     crate::settings::is_portable()
+}
+
+#[tauri::command]
+pub fn is_msstore() -> bool {
+    // Compile-time flag: true only in Microsoft Store builds. The About
+    // window uses it to hide the self-update UI (the Store distributes
+    // updates in that channel).
+    cfg!(feature = "msstore")
 }
 
 #[tauri::command]
@@ -109,6 +132,10 @@ pub async fn check_for_updates(app: AppHandle) -> Result<serde_json::Value, Stri
 
 #[tauri::command]
 pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String> {
+    if cfg!(feature = "msstore") {
+        // Store build: updates come from the Store, never from GitHub.
+        return Err("Updates are handled by the Microsoft Store.".into());
+    }
     if crate::settings::is_portable() {
         // A portable executable cannot be replaced safely while it is
         // running. The UI sends the user to the release page instead.
@@ -121,12 +148,23 @@ pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String
 
 #[tauri::command]
 pub async fn install_update(app: AppHandle) -> Result<serde_json::Value, String> {
+    if cfg!(feature = "msstore") {
+        return Err("Updates are handled by the Microsoft Store.".into());
+    }
     if crate::settings::is_portable() {
         return Ok(serde_json::json!({ "ok": true, "isPortable": true }));
     }
     perform_install(&app).map(|_| serde_json::json!({ "ok": true }))
 }
 
+#[cfg(feature = "msstore")]
+async fn perform_check(_app: &AppHandle) -> Result<serde_json::Value, String> {
+    // Microsoft Store build: never contact the GitHub endpoint; updates
+    // are distributed through the Store itself (Store policy).
+    Err("Updates are handled by the Microsoft Store.".into())
+}
+
+#[cfg(not(feature = "msstore"))]
 async fn perform_check(app: &AppHandle) -> Result<serde_json::Value, String> {
     emit_status(
         app,
