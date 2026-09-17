@@ -107,24 +107,6 @@
                 drop-shadow(0 0 15px rgba(var(--rgb-accent), 0.4));
         }
     }
-    /* Close keeps its red identity */
-    .cc-ico-fx.danger {
-        stroke: url(#cc-grad-danger);
-        filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
-    }
-    .ctx-item.danger:hover .cc-ico-fx {
-        animation: ico-glow-danger 1.5s ease-in-out infinite;
-    }
-    @keyframes ico-glow-danger {
-        0%,
-        100% {
-            filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
-        }
-        50% {
-            filter: drop-shadow(0 0 8px rgba(255, 68, 102, 1))
-                drop-shadow(0 0 15px rgba(255, 68, 102, 0.4));
-        }
-    }
     /* Gradient stops follow the active theme */
     #cc-grad-menu .g0 {
         stop-color: var(--accent-a);
@@ -153,10 +135,19 @@
         visibility: visible;
     }
     .ctx-item.danger {
-        color: rgba(255, 100, 100, 0.9);
+        color: rgba(255, 255, 255, 0.85);
+    }
+    .ctx-item.danger .ico {
+        color: #ef4444;
+        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));
     }
     .ctx-item.danger:hover {
         background: rgba(255, 68, 68, 0.12);
+        color: #ffffff;
+    }
+    .ctx-item.danger:hover .ico {
+        color: #f87171;
+        filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
     }
 
     /* --- CUSTOM CONTROLS --- */

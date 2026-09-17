@@ -2553,6 +2553,28 @@ fn hide_tray_menu(app: AppHandle) {
     }
 }
 
+/// Bring the currently configured clock window to the foreground before the
+/// custom tray menu takes focus. This restores discoverability when the clock
+/// is visible but has fallen behind another window, without changing the
+/// user's Always on Top preference or showing a deliberately hidden clock.
+fn focus_clock_for_tray_menu(app: &AppHandle) {
+    let settings = load_settings(app);
+    let target_label = if settings.window_mode == "full" {
+        "main"
+    } else {
+        "mini"
+    };
+    let Some(clock) = app.get_webview_window(target_label) else {
+        return;
+    };
+    if !clock.is_visible().unwrap_or(false) || clock.is_minimized().unwrap_or(false) {
+        return;
+    }
+
+    let _ = clock.show();
+    let _ = clock.set_focus();
+}
+
 #[tauri::command]
 fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
     let Some(win) = app.get_webview_window("tray_menu") else {
@@ -2654,6 +2676,8 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
     if let Ok(mut slot) = TRAY_MENU_ANCHOR.lock() {
         *slot = Some((anchor_x, anchor_y));
     }
+
+    focus_clock_for_tray_menu(&app);
 
     let state = collect_tray_menu_state(&app);
     let _ = app.emit("tray-menu-state", &state);

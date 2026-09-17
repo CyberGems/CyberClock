@@ -65,7 +65,7 @@
                     const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');
                     if (settingsLbl) settingsLbl.textContent = window.ccI18n.t("menu.settings");
                     const closeLbl = document.querySelector('.ctx-item[data-action="close"] .label');
-                    if (closeLbl) closeLbl.textContent = window.ccI18n.t("menu.close");
+                    if (closeLbl) closeLbl.textContent = window.ccI18n.t("tray.quit");
                 }
                 
                 // Active Design
