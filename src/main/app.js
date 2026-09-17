@@ -997,6 +997,14 @@
         canvas.width = size;
         canvas.height = size;
         cybergemsCacheKey = null;
+        faceCache = null;
+    }
+
+    if (document.fonts) {
+        document.fonts.ready.then(() => {
+            cybergemsCacheKey = null;
+            faceCache = null;
+        });
     }
 
     function themeColors() {
@@ -1532,7 +1540,8 @@
         const rawBrand = (cfg.clockBrand || "").trim();
         const word = (rawBrand || "CYBERGEMS").toUpperCase().slice(0, 16);
         const tracking = R * 0.004;
-        const gemsKey = `${R}|${tracking}|${word}`;
+        const fontLoaded = document.fonts ? document.fonts.check("16px Orbitron") : true;
+        const gemsKey = `${R}|${tracking}|${word}|${fontLoaded}`;
         if (gemsKey !== cybergemsCacheKey) {
             cybergemsCacheKey = gemsKey;
             // Start at the nominal size, then shrink to fit the dial so long

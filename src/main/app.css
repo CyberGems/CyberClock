@@ -651,18 +651,18 @@
     .dial-cycler {
         position: absolute;
         right: 8px;
-        top: 50%;
+        top: 48%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 4px;
         background: transparent;
         border: none;
         box-shadow: none;
         padding: 0;
         opacity: 0;
         pointer-events: none;
-        transform: translateY(-50%) translateX(8px);
+        transform: translateY(-50%) translateX(6px);
         transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 25;
         -webkit-app-region: no-drag;
@@ -674,8 +674,8 @@
         transform: translateY(-50%) translateX(0);
     }
     .dial-cyc-btn {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -701,8 +701,8 @@
         transform: scale(0.94);
     }
     .dial-cyc-btn .cc-ico {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
     }
     .dial-cyc-badge {
         display: flex;
@@ -713,12 +713,12 @@
     }
     .dial-cyc-num {
         font-family: var(--font-mono);
-        font-size: calc(9.5px * var(--ui-scale));
+        font-size: calc(8.5px * var(--ui-scale));
         font-weight: 600;
         color: var(--accent-a);
         background: rgba(14, 17, 23, 0.8);
-        padding: 2px 5px;
-        border-radius: 5px;
+        padding: 1.5px 4.5px;
+        border-radius: 4px;
         border: 1px solid var(--border);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
