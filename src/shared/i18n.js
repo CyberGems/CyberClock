@@ -1056,7 +1056,8 @@
             // Translate attributes e.g. data-i18n-attr="placeholder:settings.searchPlaceholder"
             root.querySelectorAll('[data-i18n-attr]').forEach(el => {
                 const spec = el.getAttribute('data-i18n-attr');
-                spec.split(',').forEach(pair => {
+                if (!spec) return;
+                spec.split(/[,;]/).forEach(pair => {
                     const parts = pair.split(':');
                     const attr = parts[0]?.trim();
                     const key = parts.slice(1).join(':')?.trim();
