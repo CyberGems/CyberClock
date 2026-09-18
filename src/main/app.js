@@ -457,14 +457,13 @@
             5: "settings.appearance.dialQuantum",
             6: "settings.appearance.dialChrono",
             7: "settings.appearance.dialMatrix",
-            8: "settings.appearance.dialPrism",
         };
         const key = keys[designNum] || keys[1];
         return window.ccI18n ? window.ccI18n.t(key) : "Classic";
     }
 
     function updateDialDesignUI(designNum) {
-        const design = Math.min(8, Math.max(1, parseInt(designNum, 10) || 1));
+        const design = Math.min(7, Math.max(1, parseInt(designNum, 10) || 1));
         const val = String(design);
         document
             .querySelectorAll("[data-clock-design]")
@@ -473,17 +472,17 @@
             );
         const badgeNum = document.getElementById("dial-badge-num");
         const badgeEl = document.getElementById("dial-badge");
-        if (badgeNum) badgeNum.textContent = `${design}/8`;
+        if (badgeNum) badgeNum.textContent = `${design}/7`;
         if (badgeEl) badgeEl.setAttribute("data-tooltip", getDialDesignName(design));
         const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
     }
 
     function cycleDialDesign(delta) {
-        const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+        const cur = Math.min(7, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
         let next = cur + delta;
-        if (next > 8) next = 1;
-        if (next < 1) next = 8;
+        if (next > 7) next = 1;
+        if (next < 1) next = 7;
         cfg.clockDesign = next;
         window.cc.saveSettings({ clockDesign: next });
         updateDialDesignUI(next);
@@ -1115,16 +1114,15 @@
         if (design === 5) return buildFaceQuantum(W, H, cx, cy, R, c);
         if (design === 6) return buildFaceChrono(W, H, cx, cy, R, c);
         if (design === 7) return buildFaceMatrix(W, H, cx, cy, R, c);
-        if (design === 8) return buildFacePrism(W, H, cx, cy, R, c);
         return buildFaceClassic(W, H, cx, cy, R, c);
     }
 
-    // Settings id of the analog dial design (1..8). Unknown values and
+    // Settings id of the analog dial design (1..7). Unknown values and
     // missing keys fall back to the Classic face, matching the backend
     // default (clockDesign: 1).
     function currentClockDesign() {
         const d = parseInt(cfg.clockDesign, 10);
-        return d >= 1 && d <= 8 ? d : 1;
+        return d >= 1 && d <= 7 ? d : 1;
     }
 
     // ── Design 1: Classic (bezel + domed glass + 12/3/6/9 numerals) ──
@@ -1911,306 +1909,6 @@
         return off;
     }
 
-    // ── Design 8: Prism (Calibrated chromatic spectrum, 12 gem-cut faceted
-    //    baguette hour batons, optical refraction rosette, Dauphine hands) ──
-    function buildFacePrism(W, H, cx, cy, R, c) {
-        const off = document.createElement("canvas");
-        off.width = W;
-        off.height = H;
-        const ctx = off.getContext("2d");
-
-        // 12 Calibrated Horological Spectral Jewel Colors:
-        // Hand-picked elegant jewel tones across the 360-degree optical spectrum
-        const SPECTRAL_JEWELS = [
-            { hue: 348, hex: "#ff2d55", rgb: "255,45,85" },   // 12:00 Ruby
-            { hue: 12,  hex: "#ff623e", rgb: "255,98,62" },   // 01:00 Coral
-            { hue: 36,  hex: "#ffa116", rgb: "255,161,22" },  // 02:00 Amber
-            { hue: 48,  hex: "#ffcc00", rgb: "255,204,0" },   // 03:00 Topaz
-            { hue: 82,  hex: "#9fe024", rgb: "159,224,36" },  // 04:00 Peridot
-            { hue: 156, hex: "#00d589", rgb: "0,213,137" },  // 05:00 Emerald
-            { hue: 186, hex: "#00e5ff", rgb: "0,229,255" },  // 06:00 Aquamarine
-            { hue: 206, hex: "#0099ff", rgb: "0,153,255" },  // 07:00 Azure
-            { hue: 226, hex: "#3b72ff", rgb: "59,114,255" },  // 08:00 Sapphire
-            { hue: 254, hex: "#7042ff", rgb: "112,66,255" },  // 09:00 Tanzanite
-            { hue: 278, hex: "#b535ff", rgb: "181,53,255" },  // 10:00 Amethyst
-            { hue: 318, hex: "#f032b5", rgb: "240,50,181" },  // 11:00 Tourmaline
-        ];
-
-        // ── 1. Sunken Matte Dial Plate & Anti-Reflective Optical Coating ──
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
-        ctx.clip();
-
-        // Dark matte obsidian base
-        const baseGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.95);
-        baseGrad.addColorStop(0, "rgba(16, 20, 30, 0.96)");
-        baseGrad.addColorStop(0.55, "rgba(11, 14, 22, 0.98)");
-        baseGrad.addColorStop(1, "rgba(7, 9, 14, 1.0)");
-        ctx.fillStyle = baseGrad;
-        ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-        // Subtle Anti-Reflective (AR) optical coating sheen (diagonal dispersion)
-        const arSheen = ctx.createLinearGradient(cx - R * 0.8, cy - R * 0.8, cx + R * 0.8, cy + R * 0.8);
-        arSheen.addColorStop(0, "rgba(112, 66, 255, 0.05)");
-        arSheen.addColorStop(0.35, "rgba(255, 45, 85, 0.03)");
-        arSheen.addColorStop(0.7, "rgba(0, 229, 255, 0.04)");
-        arSheen.addColorStop(1, "rgba(0, 213, 137, 0.03)");
-        ctx.fillStyle = arSheen;
-        ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-        // Soft ambient center glow keyed to active theme tint
-        const ambGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.75);
-        ambGlow.addColorStop(0, `rgba(${c.rgb}, 0.08)`);
-        ambGlow.addColorStop(0.6, `rgba(${c.rgb}, 0.02)`);
-        ambGlow.addColorStop(1, "transparent");
-        ctx.fillStyle = ambGlow;
-        ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-        ctx.restore();
-
-        // ── 2. Beveled Bezel & Precision Titanium Border ──
-        ctx.save();
-        const bezelGrad = ctx.createLinearGradient(cx, cy - R, cx, cy + R);
-        bezelGrad.addColorStop(0, "rgba(255, 255, 255, 0.28)");
-        bezelGrad.addColorStop(0.35, `rgba(${c.rgb}, 0.25)`);
-        bezelGrad.addColorStop(0.7, "rgba(20, 25, 35, 0.8)");
-        bezelGrad.addColorStop(1, "rgba(5, 8, 12, 0.95)");
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.945, 0, Math.PI * 2);
-        ctx.lineWidth = R * 0.035;
-        ctx.strokeStyle = bezelGrad;
-        ctx.stroke();
-
-        // Inner bezel step hairline
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.93, 0, Math.PI * 2);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-        ctx.stroke();
-        ctx.restore();
-
-        // ── 3. Calibrated Chromatic Chapter Ring & 60 Spectral Ticks ──
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.925, 0, Math.PI * 2);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.865, 0, Math.PI * 2);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-        ctx.stroke();
-
-        // 60 Calibrated Spectral Minute Ticks
-        for (let i = 0; i < 60; i++) {
-            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
-            const isHour = i % 5 === 0;
-            const hourIdx = i / 5;
-            const jewel = SPECTRAL_JEWELS[hourIdx];
-
-            const tickHue = (i / 60) * 360;
-            const rOuter = R * 0.92;
-            const rInner = isHour ? R * 0.87 : R * 0.895;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(a) * rInner, cy + Math.sin(a) * rInner);
-            ctx.lineTo(cx + Math.cos(a) * rOuter, cy + Math.sin(a) * rOuter);
-
-            if (isHour) {
-                // Major spectral tick
-                ctx.strokeStyle = jewel.hex;
-                ctx.lineWidth = 2.2;
-                ctx.shadowColor = jewel.hex;
-                ctx.shadowBlur = 7;
-                ctx.stroke();
-
-                // Luminous micro-pip at the outer tip of each hour tick
-                ctx.beginPath();
-                ctx.arc(
-                    cx + Math.cos(a) * (rOuter + R * 0.012),
-                    cy + Math.sin(a) * (rOuter + R * 0.012),
-                    R * 0.007,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.fillStyle = jewel.hex;
-                ctx.shadowBlur = 6;
-                ctx.fill();
-            } else {
-                // Minor calibrated minute tick
-                ctx.strokeStyle = `hsla(${tickHue}, 75%, 65%, 0.35)`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-        ctx.restore();
-
-        // ── 4. Internal Optical Refraction Rosette & Geometric Dodecagon ──
-        ctx.save();
-        // 12-sided geometric prism polygon at R * 0.52
-        ctx.beginPath();
-        for (let i = 0; i < 12; i++) {
-            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            const px = cx + Math.cos(a) * R * 0.52;
-            const py = cy + Math.sin(a) * R * 0.52;
-            if (i === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-
-        // Converging optical facet lines from dodecagon vertices to inner ring (R * 0.22)
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
-        ctx.lineWidth = 0.8;
-        for (let i = 0; i < 12; i++) {
-            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(a) * R * 0.22, cy + Math.sin(a) * R * 0.22);
-            ctx.lineTo(cx + Math.cos(a) * R * 0.52, cy + Math.sin(a) * R * 0.52);
-            ctx.stroke();
-        }
-
-        // Concentric optical guide ring with dashed telemetry
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.36, 0, Math.PI * 2);
-        ctx.setLineDash([3, 5]);
-        ctx.strokeStyle = `rgba(${c.rgb}, 0.20)`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Cardinal reticle hairlines (crosshair through center, leaving central gap)
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
-        ctx.lineWidth = 1;
-        [0, 1, 2, 3].forEach((q) => {
-            const a = (q / 4) * Math.PI * 2 - Math.PI / 2;
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(a) * R * 0.12, cy + Math.sin(a) * R * 0.12);
-            ctx.lineTo(cx + Math.cos(a) * R * 0.32, cy + Math.sin(a) * R * 0.32);
-            ctx.stroke();
-        });
-
-        // Technical chromatic telemetry inscriptions
-        ctx.font = `600 ${R * 0.034}px "JetBrains Mono",monospace`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const degMarks = [
-            { a: 0, t: "000°", col: SPECTRAL_JEWELS[0].hex },
-            { a: 3, t: "090°", col: SPECTRAL_JEWELS[3].hex },
-            { a: 6, t: "180°", col: SPECTRAL_JEWELS[6].hex },
-            { a: 9, t: "270°", col: SPECTRAL_JEWELS[9].hex },
-        ];
-        degMarks.forEach((m) => {
-            const ang = (m.a / 12) * Math.PI * 2 - Math.PI / 2;
-            ctx.fillStyle = m.col;
-            ctx.fillText(m.t, cx + Math.cos(ang) * R * 0.42, cy + Math.sin(ang) * R * 0.42);
-        });
-
-        // Discreet upper brand/optic designation
-        ctx.font = `700 ${R * 0.032}px "Orbitron",monospace`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
-        ctx.fillText("PRISM OPTICS", cx, cy - R * 0.26);
-        ctx.font = `500 ${R * 0.026}px "JetBrains Mono",monospace`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.22)";
-        ctx.fillText("360° CHROMATIC CAL.", cx, cy - R * 0.20);
-        ctx.restore();
-
-        // ── 5. 12 Gem-Cut Faceted Hour Markers (Baguette Batons) ──
-        for (let i = 0; i < 12; i++) {
-            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            const jewel = SPECTRAL_JEWELS[i];
-            const is12 = i === 0;
-            const isCardinal = i % 3 === 0;
-
-            const bLen = is12 ? R * 0.125 : isCardinal ? R * 0.11 : R * 0.085;
-            const bWid = is12 ? R * 0.026 : isCardinal ? R * 0.022 : R * 0.016;
-            const bCenterR = R * 0.845 - bLen / 2;
-            const bx = cx + Math.cos(a) * bCenterR;
-            const by = cy + Math.sin(a) * bCenterR;
-
-            ctx.save();
-            ctx.translate(bx, by);
-            ctx.rotate(a + Math.PI / 2);
-
-            // Subtle drop shadow behind the faceted index
-            ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-            ctx.shadowBlur = 6;
-            ctx.shadowOffsetY = 2;
-
-            if (is12) {
-                // 12 o'clock: Twin-column faceted ruby baguette with central arrow ruby
-                const gap = bWid * 0.65;
-                [-gap, gap].forEach((xOff) => {
-                    // Left/Right column body
-                    const colGrad = ctx.createLinearGradient(xOff - bWid / 2, 0, xOff + bWid / 2, 0);
-                    colGrad.addColorStop(0, "rgba(255, 255, 255, 0.7)");
-                    colGrad.addColorStop(0.45, "rgba(180, 190, 205, 0.5)");
-                    colGrad.addColorStop(1, "rgba(30, 35, 45, 0.9)");
-                    ctx.fillStyle = colGrad;
-                    ctx.fillRect(xOff - bWid / 2, -bLen / 2, bWid, bLen);
-
-                    // Luminous Ruby core channel
-                    ctx.fillStyle = jewel.hex;
-                    ctx.shadowColor = jewel.hex;
-                    ctx.shadowBlur = 10;
-                    ctx.fillRect(xOff - bWid * 0.25, -bLen * 0.42, bWid * 0.5, bLen * 0.84);
-                });
-
-                // Ruby chevron arrow between the two pillars
-                ctx.beginPath();
-                ctx.moveTo(0, -bLen * 0.58);
-                ctx.lineTo(bWid * 0.9, -bLen * 0.15);
-                ctx.lineTo(-bWid * 0.9, -bLen * 0.15);
-                ctx.closePath();
-                ctx.fillStyle = jewel.hex;
-                ctx.shadowColor = jewel.hex;
-                ctx.shadowBlur = 12;
-                ctx.fill();
-            } else {
-                // Single faceted baguette baton
-                const bGrad = ctx.createLinearGradient(-bWid / 2, 0, bWid / 2, 0);
-                bGrad.addColorStop(0, "rgba(255, 255, 255, 0.75)");  // silver flank highlight
-                bGrad.addColorStop(0.35, "rgba(170, 180, 195, 0.45)");
-                bGrad.addColorStop(1, "rgba(20, 25, 35, 0.9)");      // shadowed flank
-                ctx.fillStyle = bGrad;
-
-                // Beveled faceted body
-                ctx.beginPath();
-                ctx.moveTo(-bWid / 2, -bLen / 2);
-                ctx.lineTo(bWid / 2, -bLen / 2);
-                ctx.lineTo(bWid * 0.4, bLen / 2);
-                ctx.lineTo(-bWid * 0.4, bLen / 2);
-                ctx.closePath();
-                ctx.fill();
-
-                // Luminous spectral jewel inset channel
-                ctx.fillStyle = jewel.hex;
-                ctx.shadowColor = jewel.hex;
-                ctx.shadowBlur = isCardinal ? 10 : 6;
-                ctx.beginPath();
-                ctx.rect(-bWid * 0.22, -bLen * 0.38, bWid * 0.44, bLen * 0.76);
-                ctx.fill();
-
-                // Specular diamond jewel tip (outer end)
-                ctx.beginPath();
-                ctx.arc(0, bLen * 0.40, bWid * 0.26, 0, Math.PI * 2);
-                ctx.fillStyle = "#ffffff";
-                ctx.shadowColor = jewel.hex;
-                ctx.shadowBlur = 8;
-                ctx.fill();
-            }
-            ctx.restore();
-        }
-
-        return off;
-    }
-
     function drawClock(ts, force) {
         const canvas = document.getElementById("clock-canvas");
         if (!canvas || curView !== "home" || !mainActive) {
@@ -2263,7 +1961,7 @@
         // Segments keeps the rim flat: its 60-segment ring IS the
         // second indicator, a second glow would fight it.
         if (design !== 3) {
-            const rimR = design === 5 || design === 7 || design === 8 ? R * 0.94 : R * 0.985;
+            const rimR = design === 5 || design === 7 ? R * 0.94 : R * 0.985;
             const br =
                 0.68 +
                 0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
@@ -2275,21 +1973,6 @@
             ctx.globalAlpha = br;
             ctx.shadowColor = c.accent;
             ctx.shadowBlur = design === 5 ? 16 : 10;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // ── Prism: Dynamic Optical Dispersion Shimmer Arc (design 8) ──
-        if (design === 8) {
-            const secHue = (sec / 60) * 360;
-            const arcSpan = Math.PI * 0.55;
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.94, secA - arcSpan, secA);
-            ctx.strokeStyle = `hsla(${secHue}, 90%, 65%, 0.40)`;
-            ctx.lineWidth = 2.5;
-            ctx.shadowColor = `hsl(${secHue}, 95%, 60%)`;
-            ctx.shadowBlur = 12;
             ctx.stroke();
             ctx.restore();
         }
@@ -2531,56 +2214,6 @@
             ctx.lineTo(R * 0.022, R * 0.025);
             ctx.stroke();
             ctx.restore();
-        } else if (design === 8) {
-            // Prism: 3D Faceted Dauphine lancet hands + dynamic chromatic second needle
-            prismHand(ctx, cx, cy, hrA, R * 0.49, R * 0.052, c.accent);
-            prismHand(ctx, cx, cy, minA, R * 0.73, R * 0.040, c.accent);
-
-            // Dynamic Chromatic Second Needle
-            const secHue = (sec / 60) * 360;
-            const secColor = `hsl(${secHue}, 92%, 62%)`;
-
-            ctx.save();
-            ctx.strokeStyle = secColor;
-            ctx.fillStyle = secColor;
-            ctx.shadowColor = secColor;
-            ctx.shadowBlur = 12;
-
-            // Needle shaft
-            ctx.lineWidth = 1.6;
-            ctx.beginPath();
-            ctx.moveTo(cx - Math.cos(secA) * (R * 0.16), cy - Math.sin(secA) * (R * 0.16));
-            ctx.lineTo(cx + Math.cos(secA) * (R * 0.86), cy + Math.sin(secA) * (R * 0.86));
-            ctx.stroke();
-
-            // Circular optical prism lens counterweight
-            const bx = cx - Math.cos(secA) * (R * 0.09);
-            const by = cy - Math.sin(secA) * (R * 0.09);
-            ctx.beginPath();
-            ctx.arc(bx, by, R * 0.026, 0, Math.PI * 2);
-            ctx.lineWidth = 1.4;
-            ctx.stroke();
-
-            // Diamond counterweight pip
-            const tx = cx - Math.cos(secA) * (R * 0.16);
-            const ty = cy - Math.sin(secA) * (R * 0.16);
-            ctx.beginPath();
-            ctx.arc(tx, ty, R * 0.008, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Chromatic lens jewel at second needle tip
-            const stx = cx + Math.cos(secA) * (R * 0.86);
-            const sty = cy + Math.sin(secA) * (R * 0.86);
-            ctx.beginPath();
-            ctx.arc(stx, sty, R * 0.018, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Specular white center in second tip
-            ctx.beginPath();
-            ctx.arc(stx, sty, R * 0.007, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffffff";
-            ctx.fill();
-            ctx.restore();
         } else {
             hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
             hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
@@ -2646,30 +2279,6 @@
             ctx.stroke();
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.012, 0, Math.PI * 2);
-            ctx.fillStyle = "#ffffff";
-            ctx.fill();
-        } else if (design === 8) {
-            // Prism: Multi-layered optical cabochon center cap
-            ctx.shadowBlur = 14;
-            // Outer knurled collar
-            ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.034, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(22, 27, 38, 0.95)";
-            ctx.fill();
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-
-            // Iridescent spectral dome matching second angle
-            const secHue = (sec / 60) * 360;
-            ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.022, 0, Math.PI * 2);
-            ctx.fillStyle = `hsl(${secHue}, 85%, 60%)`;
-            ctx.fill();
-
-            // Specular glass highlight dot
-            ctx.beginPath();
-            ctx.arc(cx - R * 0.006, cy - R * 0.006, R * 0.008, 0, Math.PI * 2);
             ctx.fillStyle = "#ffffff";
             ctx.fill();
         } else {
@@ -2834,70 +2443,6 @@
         ctx.stroke();
         ctx.fillStyle = `rgba(255, 255, 255, 0.45)`;
         ctx.fill();
-
-        ctx.restore();
-    }
-
-    // ── 3D Faceted Dauphine Lancet Hand (Design 8: Prism) ──
-    function prismHand(ctx, cx, cy, angle, len, width, color) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle + Math.PI / 2);
-
-        const w2 = width / 2;
-        const shoulder = -len * 0.28;
-        const tailLen = len * 0.16;
-
-        // Subtle drop shadow under hand
-        ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 2;
-
-        // 1. Counterweight diamond tail
-        ctx.beginPath();
-        ctx.moveTo(0, tailLen);
-        ctx.lineTo(w2 * 0.65, tailLen * 0.45);
-        ctx.lineTo(0, 0);
-        ctx.lineTo(-w2 * 0.65, tailLen * 0.45);
-        ctx.closePath();
-        ctx.fillStyle = "rgba(140, 150, 170, 0.85)";
-        ctx.fill();
-
-        // 2. Left Flank (Polished Rhodium Highlight - Lit Side)
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-w2, shoulder);
-        ctx.lineTo(0, -len);
-        ctx.lineTo(0, 0);
-        ctx.closePath();
-        const leftGrad = ctx.createLinearGradient(-w2, 0, 0, 0);
-        leftGrad.addColorStop(0, "rgba(220, 230, 245, 0.95)");
-        leftGrad.addColorStop(1, "rgba(255, 255, 255, 0.98)");
-        ctx.fillStyle = leftGrad;
-        ctx.fill();
-
-        // 3. Right Flank (Brushed Gunmetal - Shadowed Side)
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(w2, shoulder);
-        ctx.lineTo(0, -len);
-        ctx.lineTo(0, 0);
-        ctx.closePath();
-        const rightGrad = ctx.createLinearGradient(0, 0, w2, 0);
-        rightGrad.addColorStop(0, "rgba(60, 70, 88, 0.95)");
-        rightGrad.addColorStop(1, "rgba(25, 30, 42, 0.98)");
-        ctx.fillStyle = rightGrad;
-        ctx.fill();
-
-        // 4. Luminous Center Slit
-        ctx.beginPath();
-        ctx.moveTo(0, shoulder * 0.7);
-        ctx.lineTo(0, -len * 0.92);
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1.2;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
-        ctx.stroke();
 
         ctx.restore();
     }
