@@ -136,7 +136,8 @@ pub struct AppSettings {
     pub full_hide_calendar: bool,
 
     // Analog dial design for the full-mode clock (1 = Classic,
-    // 2 = Minimal, 3 = Neon Segments, 4 = Cyber HUD, 5 = Aurora).
+    // 2 = Minimal, 3 = Neon Segments, 4 = Cyber HUD, 5 = Quantum,
+    // 6 = Chrono, 7 = Hex Matrix, 8 = Prism).
     pub clock_design: u32,
 
     // Custom alarm times (HH:MM) with day-of-week repetition.
