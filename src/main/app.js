@@ -546,10 +546,10 @@
         const stageEl = document.querySelector(".clock-stage");
         const panelEl = document.querySelector(".clock-panel");
         if (stageEl && panelEl) {
-            const h = panelEl.clientHeight || 450;
-            const parentW = panelEl.parentElement?.clientWidth || window.innerWidth;
+            const h = panelEl.clientHeight || (window.innerHeight - 120) || 450;
+            const parentW = panelEl.parentElement?.clientWidth || window.innerWidth || 1024;
             const targetW = hideCalendar ? parentW : parentW * 0.44;
-            const targetPadX = hideCalendar ? 48 : 36;
+            const targetPadX = hideCalendar ? 64 : 72;
             const targetPadY = hideCalendar ? 48 : 36;
             const targetSize = Math.max(120, Math.min(targetW - targetPadX, h - targetPadY));
             stageEl.style.setProperty("--stage-size", `${targetSize}px`);
@@ -954,6 +954,7 @@
         mainActive = nv;
         document.body.classList.toggle("cc-inactive", !nv);
         if (nv && !wasActive) updateGreeting();
+        if (nv) setupClock();
         syncHomeClock();
         syncDigitalClock();
     }
@@ -981,11 +982,16 @@
     }
 
     document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) setupClock();
         syncHomeClock();
         syncDigitalClock();
     });
 
-    window.cc.onActiveWindow((label) => setMainActive(label === "main"));
+    window.cc.onActiveWindow((label) => {
+        const isMain = label === "main";
+        setMainActive(isMain);
+        if (isMain) setupClock();
+    });
 
     function updateDigital() {
         const now = new Date();
@@ -1031,13 +1037,21 @@
         if (homeView && homeView.classList.contains("no-clock")) {
             return;
         }
-        const w = panel.clientWidth;
-        const h = panel.clientHeight;
-        if (w < 50 || h < 50) return; // Skip intermediate transition frames to avoid flickering
-
+        let w = panel.clientWidth;
+        let h = panel.clientHeight;
         const isSolo = homeView && homeView.classList.contains("no-calendar");
-        const padX = isSolo ? 48 : 36;
+        const padX = isSolo ? 64 : 72;
         const padY = isSolo ? 48 : 36;
+
+        if (w < 50 || h < 50) {
+            // Initial boot fallback: use window dimensions so the clock renders immediately
+            const winW = window.innerWidth || 1024;
+            const winH = window.innerHeight || 768;
+            w = isSolo ? winW : Math.round(winW * 0.44);
+            h = winH - (isSolo ? 96 : 144);
+            requestAnimationFrame(setupClock);
+        }
+
         const size = Math.max(120, Math.min(
             w - padX,
             h - padY,
@@ -1045,14 +1059,18 @@
         if (stage) {
             stage.style.setProperty("--stage-size", `${size}px`);
         }
-        if (size > 0 && (canvas.width !== size || canvas.height !== size)) {
-            canvas.width = size;
-            canvas.height = size;
+
+        // Fixed high-DPI canvas buffer (900x900) so mode transitions scale the surface smoothly via GPU
+        // without clearing the framebuffer, eliminating any end-of-transition blink!
+        const targetRes = 900;
+        if (canvas.width !== targetRes || canvas.height !== targetRes) {
+            canvas.width = targetRes;
+            canvas.height = targetRes;
             cybergemsCacheKey = null;
             faceCache = null;
-            if (isMainActive() && curView === "home") {
-                drawClock(performance.now(), true);
-            }
+        }
+        if (isMainActive() && curView === "home") {
+            drawClock(performance.now(), true);
         }
     }
 
