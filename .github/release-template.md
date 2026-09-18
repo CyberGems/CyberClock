@@ -9,6 +9,12 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 - 💎 **Gem Crown analog dial**:
   - A new multicolor, faceted dial design with prismatic accents, gemstone hour markers, and an animated sparkle sweep.
 
+- ⏱️ **Floating timer and stopwatch tools**:
+  - Open independent windows from the tray or Mini Mode, with local state, skin inheritance, and quick-add timer presets from 30 seconds to 15 minutes.
+
+- 👋 **Personal welcome greeting**:
+  - Add an optional name in Settings to receive a time-aware greeting beside the CyberClock brand in Full Mode.
+
 - 🕐 **Windows date and time, one click away**:
   - New entries in the tray menu (Help) and in Settings open the classic Windows "Date and Time" dialog, right where you need them.
 
