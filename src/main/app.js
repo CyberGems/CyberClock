@@ -457,13 +457,14 @@
             5: "settings.appearance.dialQuantum",
             6: "settings.appearance.dialChrono",
             7: "settings.appearance.dialMatrix",
+            8: "settings.appearance.dialGemCrown",
         };
         const key = keys[designNum] || keys[1];
         return window.ccI18n ? window.ccI18n.t(key) : "Classic";
     }
 
     function updateDialDesignUI(designNum) {
-        const design = Math.min(7, Math.max(1, parseInt(designNum, 10) || 1));
+        const design = Math.min(8, Math.max(1, parseInt(designNum, 10) || 1));
         const val = String(design);
         document
             .querySelectorAll("[data-clock-design]")
@@ -472,17 +473,17 @@
             );
         const badgeNum = document.getElementById("dial-badge-num");
         const badgeEl = document.getElementById("dial-badge");
-        if (badgeNum) badgeNum.textContent = `${design}/7`;
+        if (badgeNum) badgeNum.textContent = `${design}/8`;
         if (badgeEl) badgeEl.setAttribute("data-tooltip", getDialDesignName(design));
         const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
     }
 
     function cycleDialDesign(delta) {
-        const cur = Math.min(7, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+        const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
         let next = cur + delta;
-        if (next > 7) next = 1;
-        if (next < 1) next = 7;
+        if (next > 8) next = 1;
+        if (next < 1) next = 8;
         cfg.clockDesign = next;
         window.cc.saveSettings({ clockDesign: next });
         updateDialDesignUI(next);
@@ -1114,15 +1115,16 @@
         if (design === 5) return buildFaceQuantum(W, H, cx, cy, R, c);
         if (design === 6) return buildFaceChrono(W, H, cx, cy, R, c);
         if (design === 7) return buildFaceMatrix(W, H, cx, cy, R, c);
+        if (design === 8) return buildFaceGemCrown(W, H, cx, cy, R, c);
         return buildFaceClassic(W, H, cx, cy, R, c);
     }
 
-    // Settings id of the analog dial design (1..7). Unknown values and
+    // Settings id of the analog dial design (1..8). Unknown values and
     // missing keys fall back to the Classic face, matching the backend
     // default (clockDesign: 1).
     function currentClockDesign() {
         const d = parseInt(cfg.clockDesign, 10);
-        return d >= 1 && d <= 7 ? d : 1;
+        return d >= 1 && d <= 8 ? d : 1;
     }
 
     // ── Design 1: Classic (bezel + domed glass + 12/3/6/9 numerals) ──
@@ -1909,7 +1911,319 @@
         return off;
     }
 
+    // ── Design 8: Gem Crown (multi-colored precious gem markers,
+    //    prismatic bezel, iridescent face, faceted gem hour nodes) ──
+    //
+    // Gem palette: 4 cardinal gems + 8 interpolated intermediate stones.
+    // Unlike every other design this face uses MULTIPLE hues rather than
+    // deriving everything from the single accent tint.
+    function buildFaceGemCrown(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // ── Gem color map (12 o'clock positions, clockwise) ──
+        // Cardinals: Diamond(12), Sapphire(3), Emerald(6), Ruby(9)
+        // Intermediates: smooth HSL interpolations between neighbors
+        const gemColors = [
+            { h: 210, s: 8,  l: 88 }, // 12 — diamond
+            { h: 240, s: 55, l: 72 }, //  1 — tanzanite
+            { h: 225, s: 62, l: 66 }, //  2 — iolite
+            { h: 215, s: 80, l: 62 }, //  3 — sapphire
+            { h: 185, s: 65, l: 58 }, //  4 — aquamarine
+            { h: 160, s: 60, l: 56 }, //  5 — tourmaline
+            { h: 152, s: 58, l: 52 }, //  6 — emerald
+            { h: 90,  s: 48, l: 56 }, //  7 — peridot
+            { h: 40,  s: 60, l: 60 }, //  8 — citrine
+            { h: 340, s: 65, l: 55 }, //  9 — ruby
+            { h: 310, s: 45, l: 60 }, // 10 — amethyst
+            { h: 280, s: 42, l: 66 }, // 11 — lavender
+        ];
+        function gemHSL(idx, alpha) {
+            const g = gemColors[idx % 12];
+            return alpha !== undefined
+                ? `hsla(${g.h},${g.s}%,${g.l}%,${alpha})`
+                : `hsl(${g.h},${g.s}%,${g.l}%)`;
+        }
+
+        // Smooth HSL interpolation across adjacent gems
+        function getBlendedGemColor(frac12, alpha) {
+            const mod = ((frac12 % 12) + 12) % 12;
+            const i0 = Math.floor(mod);
+            const i1 = (i0 + 1) % 12;
+            const t = mod - i0;
+            const g0 = gemColors[i0];
+            const g1 = gemColors[i1];
+            let dh = g1.h - g0.h;
+            if (dh > 180) dh -= 360;
+            if (dh < -180) dh += 360;
+            const h = (g0.h + dh * t + 360) % 360;
+            const s = g0.s + (g1.s - g0.s) * t;
+            const l = g0.l + (g1.l - g0.l) * t;
+            return alpha !== undefined
+                ? `hsla(${Math.round(h)},${Math.round(s)}%,${Math.round(l)}%,${alpha})`
+                : `hsl(${Math.round(h)},${Math.round(s)}%,${Math.round(l)}%)`;
+        }
+
+        // ── Iridescent face glow (multi-hue radial) ──
+        const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.06);
+        bg.addColorStop(0,    `rgba(${c.rgb},.08)`);
+        bg.addColorStop(0.35, `hsla(280,30%,60%,.04)`);
+        bg.addColorStop(0.55, `hsla(160,30%,55%,.03)`);
+        bg.addColorStop(0.75, `hsla(215,35%,58%,.02)`);
+        bg.addColorStop(1,    "transparent");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+        ctx.fillStyle = bg;
+        ctx.fill();
+
+        // ── Outer bezel: prismatic double ring ──
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.95, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.35)`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+
+        // Inner bezel ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.895, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.18)`;
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+        ctx.restore();
+
+        // ── Prismatic bezel fill: seamlessly blended rainbow crown ──
+        ctx.save();
+        if (typeof ctx.createConicGradient === "function") {
+            const conic = ctx.createConicGradient(-Math.PI / 2, cx, cy);
+            const numStops = 48;
+            for (let s = 0; s <= numStops; s++) {
+                const frac = s / numStops;
+                conic.addColorStop(frac, getBlendedGemColor(frac * 12, 0.28));
+            }
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.9225, 0, Math.PI * 2);
+            ctx.strokeStyle = conic;
+            ctx.lineWidth = R * 0.055;
+            ctx.stroke();
+        } else {
+            const steps = 180;
+            for (let i = 0; i < steps; i++) {
+                const a0 = (i / steps) * Math.PI * 2 - Math.PI / 2;
+                const a1 = ((i + 1.2) / steps) * Math.PI * 2 - Math.PI / 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * 0.9225, a0, a1);
+                ctx.strokeStyle = getBlendedGemColor((i / steps) * 12, 0.28);
+                ctx.lineWidth = R * 0.055;
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
+
+        // ── 60 Chromatic minute dots (smoothly interpolated hues) ──
+        for (let i = 0; i < 60; i++) {
+            if (i % 5 === 0) continue;
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+            const gemFrac = (i / 60) * 12;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(
+                cx + Math.cos(a) * R * 0.86,
+                cy + Math.sin(a) * R * 0.86,
+                R * 0.0055, 0, Math.PI * 2
+            );
+            ctx.fillStyle = getBlendedGemColor(gemFrac, 0.45);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ── Concentric setting rings ──
+        ctx.save();
+        ctx.setLineDash([10, 8]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.70, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.14)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.38, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.12)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // ── 12 Faceted Gem Hour Markers (Bespoke CyberGems Diamond Cut) ──
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const isCardinal = i % 3 === 0;
+            const is12 = i === 0;
+            const gx = cx + Math.cos(a) * R * 0.82;
+            const gy = cy + Math.sin(a) * R * 0.82;
+            const color = gemHSL(i);
+
+            ctx.save();
+            ctx.translate(gx, gy);
+            ctx.rotate(a + Math.PI / 2);
+
+            if (is12) {
+                // ── Position 12: Master CyberGems Official Logo Emblem ──
+                // Exact official vector silhouette of CyberGems (C & G glyphs)
+                // from the brand design system with gradient and crystalline glow.
+                const CG_LOGO_SVG =
+                    "M4.18,5.02L4.18,4.09C4.18,3.92 4.06,3.79 3.91,3.79L3.55,3.79C3.4,3.79 3.28,3.92 3.28,4.09L3.28,4.7C3.28,4.96 3.29,5.25 3.11,5.2C3.04,5.18 2.55,4.46 2.46,4.34C2.34,4.2 1.33,2.99 1.3,2.9C1.24,2.74 1.39,2.62 1.45,2.55L2.38,1.39C2.43,1.33 2.55,1.17 2.64,1.14C2.68,1.12 2.85,1.12 3.01,1.12C3.26,1.12 3.31,1.12 3.31,1.41C3.31,1.83 3.32,2.33 3.3,2.39L3.31,2.39C3.31,2.45 3.3,2.5 3.3,2.54C3.31,2.7 3.43,2.84 3.57,2.84L3.9,2.84C4.04,2.84 4.17,2.71 4.17,2.54L4.17,2.28C4.18,1.85 4.19,1.08 4.17,0.59L4.17,0.39C4.17,0.29 4.16,0.21 4.14,0.15C4.13,0.14 4.13,0.13 4.13,0.13C4.09,0.07 4.04,0.03 3.96,0.01C3.88,-0 3.33,0.01 3.03,0.01C2.78,-0 2.45,-0.01 2.29,0.02C2.09,0.06 1.89,0.36 1.76,0.52C1.69,0.62 1.61,0.72 1.53,0.81L0.13,2.55C-0.17,2.91 0.08,3.03 0.48,3.53C0.79,3.91 1.1,4.28 1.42,4.67C1.57,4.86 1.73,5.04 1.89,5.23C2.04,5.43 2.2,5.61 2.36,5.81C2.82,6.35 3.31,6.97 3.78,7.51C3.84,7.58 3.94,7.75 4.08,7.69C4.2,7.64 4.17,7.41 4.17,7.24C4.18,6.5 4.18,5.76 4.18,5.02ZM4.85,0.02C4.68,0.05 4.63,0.18 4.63,0.39L4.63,7.22C4.63,7.4 4.59,7.67 4.75,7.7C4.87,7.73 4.96,7.59 5.08,7.46C5.17,7.35 5.25,7.25 5.34,7.14C5.39,7.08 5.43,7.04 5.48,6.98L6.67,5.55C6.76,5.43 6.85,5.35 6.94,5.23L7.2,4.91C7.4,4.64 8.7,3.17 8.73,3.06C8.82,2.81 8.54,2.85 8.39,2.85L6.8,2.85L6.45,2.85C6.27,2.85 6.17,2.93 6.15,3.12C6.14,3.25 6.14,3.53 6.17,3.62C6.29,3.91 6.51,3.72 6.62,3.82C6.68,3.87 6.66,3.97 6.62,4.03C6.58,4.08 6.53,4.13 6.49,4.18L5.69,5.15C5.64,5.21 5.54,5.23 5.52,5.13C5.5,5.08 5.51,1.84 5.51,1.42C5.51,1.12 5.56,1.12 5.81,1.12C5.99,1.12 6.16,1.09 6.28,1.21C6.44,1.38 6.93,2.06 7.07,2.16C7.14,2.21 7.26,2.22 7.37,2.22C7.58,2.22 7.8,2.23 8,2.23C8.22,2.22 8.36,2.16 8.14,1.87C8.05,1.75 7.97,1.66 7.87,1.54C7.78,1.44 7.7,1.31 7.62,1.21L6.83,0.24C6.61,-0.07 6.42,0.01 5.94,0.01C5.77,0.01 4.94,-0 4.85,0.02Z";
+
+                if (typeof Path2D !== "undefined") {
+                    const cgPath = new Path2D(CG_LOGO_SVG);
+                    const targetH = R * 0.112;
+                    const s = targetH / 7.82;
+                    ctx.scale(s, s);
+                    ctx.translate(-4.325, -3.84);
+
+                    // Official CyberGems Gradient (Electric purple to radiant cyan)
+                    const grad = ctx.createLinearGradient(4.3, 7.8, 4.3, 0);
+                    grad.addColorStop(0, "#7a5cff");
+                    grad.addColorStop(0.45, "#38bdf8");
+                    grad.addColorStop(1, "#00f2ff");
+
+                    ctx.shadowColor = "#00f2ff";
+                    ctx.shadowBlur = 18;
+                    ctx.fillStyle = grad;
+                    ctx.fill(cgPath);
+
+                    // Specular edge definition
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+                    ctx.lineWidth = 0.28;
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = "#ffffff";
+                    ctx.stroke(cgPath);
+                }
+            } else {
+                // ── Positions 1..11: 3D Faceted Brilliant Cut Diamonds ──
+                const gSize = isCardinal ? R * 0.046 : R * 0.034;
+                const wT = gSize * 0.58;   // table half-width
+                const wG = gSize * 1.05;   // girdle half-width
+                const hT = gSize * 0.80;   // top level (-hT)
+                const hG = gSize * 0.20;   // girdle level (-hG)
+                const hP = gSize * 1.18;   // culet point (+hP)
+                const tH = -hG * 0.35;     // inner facet center
+
+                // 1. Outer diamond silhouette with glow
+                ctx.shadowColor = color;
+                ctx.shadowBlur = isCardinal ? 14 : 8;
+
+                // Left facet plane (light reflection side)
+                ctx.beginPath();
+                ctx.moveTo(-wT, -hT);
+                ctx.lineTo(0, -hT);
+                ctx.lineTo(0, tH);
+                ctx.lineTo(-wT * 0.6, tH);
+                ctx.lineTo(-wG, -hG);
+                ctx.closePath();
+                ctx.fillStyle = gemHSL(i, 0.45);
+                ctx.fill();
+
+                // Right facet plane (body shade)
+                ctx.beginPath();
+                ctx.moveTo(0, -hT);
+                ctx.lineTo(wT, -hT);
+                ctx.lineTo(wG, -hG);
+                ctx.lineTo(wT * 0.6, tH);
+                ctx.lineTo(0, tH);
+                ctx.closePath();
+                ctx.fillStyle = gemHSL(i, 0.28);
+                ctx.fill();
+
+                // Left lower pavilion facet
+                ctx.beginPath();
+                ctx.moveTo(-wG, -hG);
+                ctx.lineTo(0, tH);
+                ctx.lineTo(0, hP);
+                ctx.closePath();
+                ctx.fillStyle = gemHSL(i, 0.38);
+                ctx.fill();
+
+                // Right lower pavilion facet
+                ctx.beginPath();
+                ctx.moveTo(wG, -hG);
+                ctx.lineTo(0, tH);
+                ctx.lineTo(0, hP);
+                ctx.closePath();
+                ctx.fillStyle = gemHSL(i, 0.22);
+                ctx.fill();
+
+                // Table facet (crown brilliant kite)
+                ctx.beginPath();
+                ctx.moveTo(0, -hT * 0.96);
+                ctx.lineTo(wT * 0.55, tH);
+                ctx.lineTo(0, hG * 0.5);
+                ctx.lineTo(-wT * 0.55, tH);
+                ctx.closePath();
+                ctx.fillStyle = "rgba(255,255,255,0.40)";
+                ctx.fill();
+
+                // Outer silhouette stroke
+                ctx.beginPath();
+                ctx.moveTo(-wT, -hT);
+                ctx.lineTo(wT, -hT);
+                ctx.lineTo(wG, -hG);
+                ctx.lineTo(0, hP);
+                ctx.lineTo(-wG, -hG);
+                ctx.closePath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = isCardinal ? 1.6 : 1.2;
+                ctx.stroke();
+
+                // Fine internal facet lines
+                ctx.beginPath();
+                ctx.moveTo(-wT, -hT); ctx.lineTo(0, tH);
+                ctx.moveTo(wT, -hT);  ctx.lineTo(0, tH);
+                ctx.moveTo(-wG, -hG); ctx.lineTo(0, tH);
+                ctx.moveTo(wG, -hG);  ctx.lineTo(0, tH);
+                ctx.moveTo(0, hP);    ctx.lineTo(0, tH);
+                ctx.strokeStyle = "rgba(255,255,255,0.35)";
+                ctx.lineWidth = 0.8;
+                ctx.shadowBlur = 0;
+                ctx.stroke();
+
+                // 4-Prong micro-chaton claws at the 4 key corners
+                ctx.fillStyle = "rgba(255,255,255,0.90)";
+                const pR = gSize * 0.08;
+                const prongs = [
+                    [-wT, -hT],
+                    [wT, -hT],
+                    [-wG, -hG],
+                    [wG, -hG]
+                ];
+                for (let p = 0; p < 4; p++) {
+                    ctx.beginPath();
+                    ctx.arc(prongs[p][0], prongs[p][1], pR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Central brilliance white spark
+                ctx.beginPath();
+                ctx.arc(0, tH * 0.8, gSize * 0.16, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(255,255,255,0.85)";
+                ctx.shadowColor = color;
+                ctx.shadowBlur = isCardinal ? 10 : 5;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        return off;
+    }
+
     function drawClock(ts, force) {
+
         const canvas = document.getElementById("clock-canvas");
         if (!canvas || curView !== "home" || !mainActive) {
             clockRaf = null;
@@ -1961,7 +2275,7 @@
         // Segments keeps the rim flat: its 60-segment ring IS the
         // second indicator, a second glow would fight it.
         if (design !== 3) {
-            const rimR = design === 5 || design === 7 ? R * 0.94 : R * 0.985;
+            const rimR = design === 5 || design === 7 || design === 8 ? R * 0.94 : R * 0.985;
             const br =
                 0.68 +
                 0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
@@ -2062,6 +2376,26 @@
             ctx.beginPath();
             ctx.arc(sub2X, sub2Y, R * 0.015, 0, Math.PI * 2);
             ctx.fillStyle = c.handSec;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ── Gem Crown: Prismatic sparkle sweep (design 8) ──
+        // A highlight "spark" travels around the gem crown ring,
+        // illuminating each gem as it passes (one revolution per 12s)
+        if (design === 8) {
+            const sparkAngle = ((Date.now() / 12000) % 1) * Math.PI * 2 - Math.PI / 2;
+            const sparkR = R * 0.82;
+            const sparkX = cx + Math.cos(sparkAngle) * sparkR;
+            const sparkY = cy + Math.sin(sparkAngle) * sparkR;
+            const sparkGrad = ctx.createRadialGradient(sparkX, sparkY, 0, sparkX, sparkY, R * 0.15);
+            sparkGrad.addColorStop(0, "rgba(255,255,255,0.35)");
+            sparkGrad.addColorStop(0.4, "rgba(255,255,255,0.10)");
+            sparkGrad.addColorStop(1, "transparent");
+            ctx.save();
+            ctx.fillStyle = sparkGrad;
+            ctx.beginPath();
+            ctx.arc(sparkX, sparkY, R * 0.15, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
@@ -2214,6 +2548,43 @@
             ctx.lineTo(R * 0.022, R * 0.025);
             ctx.stroke();
             ctx.restore();
+        } else if (design === 8) {
+            gemHand(ctx, cx, cy, hrA, R * 0.50, 4.0, c.accent);
+            gemHand(ctx, cx, cy, minA, R * 0.74, 2.8, c.accent);
+            // Gem Crown second hand: slim needle with gem tip
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.4;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.14), cy - Math.sin(secA) * (R * 0.14));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.84), cy + Math.sin(secA) * (R * 0.84));
+            ctx.stroke();
+            // Small gem at second tip
+            const gtx = cx + Math.cos(secA) * (R * 0.84);
+            const gty = cy + Math.sin(secA) * (R * 0.84);
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(gtx, gty);
+            ctx.rotate(secA + Math.PI / 2);
+            for (let k = 0; k < 4; k++) {
+                const ang = (k / 4) * Math.PI * 2;
+                const px = Math.cos(ang) * R * 0.018;
+                const py = Math.sin(ang) * R * 0.018;
+                if (k === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fillStyle = c.handSec;
+            ctx.shadowBlur = 14;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(0, 0, R * 0.007, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.restore();
+            ctx.restore();
         } else {
             hand(ctx, cx, cy, hrA, R * 0.52, 5.5, c.accent, 10);
             hand(ctx, cx, cy, minA, R * 0.74, 3.5, c.accent, 8);
@@ -2281,6 +2652,116 @@
             ctx.arc(cx, cy, R * 0.012, 0, Math.PI * 2);
             ctx.fillStyle = "#ffffff";
             ctx.fill();
+        } else if (design === 8) {
+            // Gem Crown: enlarged luxury prismatic jewel center with
+            // a wider orbiting halo of faceted gem satellites and
+            // counter-rotating light facets around the hand base.
+            const jewR = R * 0.050;
+            const orbitR = R * 0.098;
+            const haloAngle = (Date.now() / 6500) * Math.PI * 2;
+            const rayAngle = -(Date.now() / 9000) * Math.PI * 2;
+            const hues = [210, 215, 152, 40, 340, 280]; // Diamond, Sapphire, Emerald, Citrine, Ruby, Amethyst
+
+            // 1. Delicate orbital track
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${c.rgb},.16)`;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+
+            // 2. Counter-rotating inner micro-rays (light refraction facets)
+            ctx.save();
+            ctx.strokeStyle = `rgba(${c.rgb},.22)`;
+            ctx.lineWidth = 1;
+            for (let k = 0; k < 6; k++) {
+                const a = rayAngle + (k / 6) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx + Math.cos(a) * jewR * 1.12, cy + Math.sin(a) * jewR * 1.12);
+                ctx.lineTo(cx + Math.cos(a) * (orbitR * 0.84), cy + Math.sin(a) * (orbitR * 0.84));
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 3. Orbiting faceted gem satellites (larger, brilliant stones)
+            const satR = R * 0.013;
+            for (let k = 0; k < 6; k++) {
+                const ang = haloAngle + (k / 6) * Math.PI * 2;
+                const hx = cx + Math.cos(ang) * orbitR;
+                const hy = cy + Math.sin(ang) * orbitR;
+                const hue = hues[k];
+
+                ctx.save();
+                ctx.translate(hx, hy);
+                ctx.rotate(ang + Math.PI / 4);
+
+                // Faceted diamond shape
+                ctx.beginPath();
+                ctx.moveTo(satR * 1.25, 0);
+                ctx.lineTo(0, satR * 1.25);
+                ctx.lineTo(-satR * 1.25, 0);
+                ctx.lineTo(0, -satR * 1.25);
+                ctx.closePath();
+                ctx.fillStyle = `hsla(${hue},70%,62%,0.75)`;
+                ctx.shadowColor = `hsl(${hue},75%,60%)`;
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.strokeStyle = `hsl(${hue},80%,75%)`;
+                ctx.lineWidth = 1.1;
+                ctx.stroke();
+
+                // Sparkle brilliance core
+                ctx.beginPath();
+                ctx.arc(0, 0, satR * 0.38, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(255,255,255,0.92)";
+                ctx.shadowColor = "#ffffff";
+                ctx.shadowBlur = 6;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // 4. Central faceted gem body
+            ctx.save();
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = c.accent;
+            ctx.beginPath();
+            for (let k = 0; k < 6; k++) {
+                const ang = (k / 6) * Math.PI * 2 + Math.PI / 6;
+                const gx = cx + Math.cos(ang) * jewR;
+                const gy = cy + Math.sin(ang) * jewR;
+                if (k === 0) ctx.moveTo(gx, gy);
+                else ctx.lineTo(gx, gy);
+            }
+            ctx.closePath();
+            ctx.fillStyle = `rgba(${c.rgb},.42)`;
+            ctx.fill();
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+
+            // Internal facet cuts (gem table cut)
+            ctx.beginPath();
+            for (let k = 0; k < 6; k++) {
+                const ang = (k / 6) * Math.PI * 2 + Math.PI / 6;
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(ang) * jewR, cy + Math.sin(ang) * jewR);
+            }
+            ctx.strokeStyle = "rgba(255,255,255,0.30)";
+            ctx.lineWidth = 0.9;
+            ctx.shadowBlur = 0;
+            ctx.stroke();
+
+            // Center brilliance table
+            ctx.beginPath();
+            ctx.arc(cx, cy, jewR * 0.38, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "#ffffff";
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.restore();
         } else {
             // Classic & HUD: layered jeweled cap
             ctx.shadowBlur = 12;
@@ -2443,6 +2924,86 @@
         ctx.stroke();
         ctx.fillStyle = `rgba(255, 255, 255, 0.45)`;
         ctx.fill();
+
+        ctx.restore();
+    }
+
+    // ── Gem Crown Hand (Design 8) ──
+    // Slim polished hand with a small hexagonal gem set near the tip,
+    // evoking haute horlogerie jewelled hands.
+    function gemHand(ctx, cx, cy, angle, len, width, color) {
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        const baseLen = len * 0.14;
+        const gemPos = len * 0.72;
+        const gemR = width * 1.2;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+
+        // Base shaft
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(cx - ux * baseLen, cy - uy * baseLen);
+        ctx.lineTo(cx + ux * (gemPos - gemR * 1.2), cy + uy * (gemPos - gemR * 1.2));
+        ctx.stroke();
+
+        // Diamond cut gem setting
+        const gx = cx + ux * gemPos;
+        const gy = cy + uy * gemPos;
+        ctx.save();
+        ctx.translate(gx, gy);
+        ctx.rotate(angle + Math.PI / 2);
+
+        const wT = gemR * 0.60;
+        const wG = gemR * 1.05;
+        const hT = gemR * 0.80;
+        const hG = gemR * 0.20;
+        const hP = gemR * 1.15;
+
+        ctx.beginPath();
+        ctx.moveTo(-wT, -hT);
+        ctx.lineTo(wT, -hT);
+        ctx.lineTo(wG, -hG);
+        ctx.lineTo(0, hP);
+        ctx.lineTo(-wG, -hG);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.40;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        // Facet lines
+        ctx.beginPath();
+        ctx.moveTo(-wT, -hT); ctx.lineTo(0, 0);
+        ctx.moveTo(wT, -hT);  ctx.lineTo(0, 0);
+        ctx.moveTo(-wG, -hG); ctx.lineTo(0, 0);
+        ctx.moveTo(wG, -hG);  ctx.lineTo(0, 0);
+        ctx.moveTo(0, hP);    ctx.lineTo(0, 0);
+        ctx.strokeStyle = "rgba(255,255,255,0.45)";
+        ctx.lineWidth = 0.8;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+
+        // Gem brilliance
+        ctx.beginPath();
+        ctx.arc(0, 0, gemR * 0.30, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.restore();
+
+        // Tip lance past the gem
+        ctx.lineWidth = Math.max(1, width * 0.6);
+        ctx.beginPath();
+        ctx.moveTo(cx + ux * (gemPos + gemR * 1.2), cy + uy * (gemPos + gemR * 1.2));
+        ctx.lineTo(cx + ux * len, cy + uy * len);
+        ctx.stroke();
 
         ctx.restore();
     }

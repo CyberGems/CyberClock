@@ -28,11 +28,11 @@ A feature-rich desktop clock application with a futuristic neon aesthetic. Built
 
 ## 🕐 Why CyberClock?
 
-Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub**: beautiful timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
+Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub**: Sleek timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
 
 | Need | Solution |
 |---|---|
-| Beautiful timekeeping | Canvas-rendered analog clock + digital display with Space Grotesk font |
+| Sleek timekeeping | Canvas-rendered analog clock + digital display |
 | Stay organized | Full calendar with agenda, day notes, statistics, and moon phase |
 | Time your work | Countdown timer and precision stopwatch, including independent floating windows |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |

@@ -20,6 +20,7 @@ CLAUDE.md
 .claude/
 .qodo/
 .zcode/
+.kilo/
 
 # OS files
 .DS_Store
