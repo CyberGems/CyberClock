@@ -6,6 +6,9 @@ Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a prem
 
 ### ✨ Key Features & Highlights
 
+- 💎 **Gem Crown analog dial**:
+  - A new multicolor, faceted dial design with prismatic accents, gemstone hour markers, and an animated sparkle sweep.
+
 - 🕐 **Windows date and time, one click away**:
   - New entries in the tray menu (Help) and in Settings open the classic Windows "Date and Time" dialog, right where you need them.
 

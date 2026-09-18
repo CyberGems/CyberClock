@@ -32,7 +32,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 | Need | Solution |
 |---|---|
-| Sleek timekeeping | Canvas-rendered analog clock + digital display |
+| Sleek timekeeping | Canvas-rendered analog clock + digital display with 8 selectable dial designs |
 | Stay organized | Full calendar with agenda, day notes, statistics, and moon phase |
 | Time your work | Countdown timer and precision stopwatch, including independent floating windows |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
@@ -45,6 +45,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 🕐 Clock & Calendar
 - **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
+- **Eight Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, and the multicolor Gem Crown dial
 - **Digital Display** — Space Grotesk font with fixed-width digit cells (12H / 24H)
 - **Full Calendar** — Month view with agenda, day notes, and statistics
 - **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
