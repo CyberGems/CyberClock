@@ -1037,11 +1037,14 @@
         if (homeView && homeView.classList.contains("no-clock")) {
             return;
         }
-        let w = panel.clientWidth;
-        let h = panel.clientHeight;
-        const isSolo = homeView && homeView.classList.contains("no-calendar");
+        const isSolo = (typeof cfg !== "undefined" && cfg.fullHideCalendar === true) || (homeView && homeView.classList.contains("no-calendar"));
         const padX = isSolo ? 64 : 72;
         const padY = isSolo ? 48 : 36;
+
+        const parentW = panel.parentElement?.clientWidth || window.innerWidth || 1024;
+        const parentH = panel.parentElement?.clientHeight || (window.innerHeight - 120) || 450;
+        let w = isSolo ? parentW : (panel.clientWidth || Math.round(parentW * 0.44));
+        let h = panel.clientHeight || parentH;
 
         if (w < 50 || h < 50) {
             // Initial boot fallback: use window dimensions so the clock renders immediately
@@ -1067,7 +1070,8 @@
             canvas.width = targetRes;
             canvas.height = targetRes;
             cybergemsCacheKey = null;
-            faceCache = null;
+            clockFaceCanvas = null;
+            clockFaceKey = null;
         }
         if (isMainActive() && curView === "home") {
             drawClock(performance.now(), true);
@@ -1077,7 +1081,8 @@
     if (document.fonts) {
         document.fonts.ready.then(() => {
             cybergemsCacheKey = null;
-            faceCache = null;
+            clockFaceCanvas = null;
+            clockFaceKey = null;
         });
     }
 
