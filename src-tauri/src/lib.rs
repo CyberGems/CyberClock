@@ -25,8 +25,8 @@ pub use settings::{
     AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SettingsStore,
 };
 use updater::{
-    check_for_updates, download_update, get_app_version, init_updater, install_update,
-    is_msstore, is_portable, pending_update_version, set_auto_update, UpdaterState,
+    check_for_updates, download_update, get_app_version, init_updater, install_update, is_msstore,
+    is_portable, pending_update_version, set_auto_update, UpdaterState,
 };
 
 // ─────────────────────────────────────────────────────────────

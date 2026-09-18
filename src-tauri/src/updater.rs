@@ -6,9 +6,9 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 #[cfg(not(feature = "msstore"))]
 use tauri_plugin_updater::UpdaterExt;
-use tokio::time::timeout;
 #[cfg(not(feature = "msstore"))]
 use tokio::time::sleep;
+use tokio::time::timeout;
 
 use log::{error, info};
 
