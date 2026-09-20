@@ -20,11 +20,36 @@
 
     function reportSize() {
         if (!rootEl) return;
-        const r = rootEl.getBoundingClientRect();
-        if (r.width < 10 || r.height < 10) return;
+        const card = rootEl.querySelector(".tray-card");
+        const h = card ? Math.ceil(card.scrollHeight + 40) : Math.ceil(rootEl.getBoundingClientRect().height);
+        const w = card ? Math.ceil(card.offsetWidth + 40) : 290;
+        if (w < 10 || h < 10) return;
         if (window.cc && window.cc.trayMenuReady) {
-            window.cc.trayMenuReady({ width: r.width, height: r.height });
+            window.cc.trayMenuReady({ width: w, height: h });
         }
+    }
+
+    function collapseAllSubmenus() {
+        const hSub = document.getElementById("tray-help-sub");
+        const hTog = document.getElementById("btn-help-toggle");
+        if (hSub && !hSub.hidden) {
+            hSub.hidden = true;
+            if (hTog) {
+                hTog.setAttribute("aria-expanded", "false");
+                hTog.classList.remove("open");
+            }
+        }
+        const sSub = document.getElementById("tray-suite-sub");
+        const sTog = document.getElementById("btn-suite-toggle");
+        if (sSub && !sSub.hidden) {
+            sSub.hidden = true;
+            if (sTog) {
+                sTog.setAttribute("aria-expanded", "false");
+                sTog.classList.remove("open");
+            }
+        }
+        const card = document.querySelector(".tray-card");
+        if (card) card.scrollTop = 0;
     }
 
     function applyTheme(theme) {
@@ -165,6 +190,7 @@
         setLbl("lbl-donate", T("tray.donate", "Donate"));
         setLbl("lbl-about", T("tray.about", "About..."));
         setLbl("lbl-check-updates", T("tray.checkUpdates", "Check for Update..."));
+        setLbl("lbl-suite", T("tray.suite", "More from CyberGems"));
         // Suite section visibility
         const showSuite = state.show_suite_recommendations !== false;
         const suiteGroup = document.getElementById("tray-group-suite");
@@ -186,6 +212,7 @@
     }
 
     function runAction(action) {
+        collapseAllSubmenus();
         if (window.cc && window.cc.trayMenuAction) {
             window.cc.trayMenuAction(action).catch((e) => {
                 console.error("trayMenuAction failed:", e);
@@ -383,6 +410,7 @@
     });
 
     function hideMenu() {
+        collapseAllSubmenus();
         if (window.cc && window.cc.hideTrayMenu) {
             window.cc.hideTrayMenu();
         }
@@ -439,6 +467,7 @@
 
     // Dismiss on blur
     window.addEventListener("blur", () => {
+        collapseAllSubmenus();
         setTimeout(() => {
             if (window.cc && window.cc.hideTrayMenu) {
                 window.cc.hideTrayMenu();
@@ -457,9 +486,8 @@
         if (window.cc.onTrayMenuShow) {
             window.cc.onTrayMenuShow(() => {
                 // The tray window is persistent (hidden, not destroyed), so
-                // an expanded Help section would survive a close/reopen —
-                // every show starts with the submenu collapsed.
-                if (typeof setHelpOpen === "function") setHelpOpen(false);
+                // any expanded submenu must collapse so it always opens clean.
+                collapseAllSubmenus();
                 if (window.cc.getTrayMenuState) {
                     window.cc.getTrayMenuState().then(renderState).catch(console.error);
                 }

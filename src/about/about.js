@@ -65,6 +65,9 @@
         const suiteCard = document.getElementById("ab-suite-card");
         if (suiteLabel) suiteLabel.style.display = showSuite ? "" : "none";
         if (suiteCard) suiteCard.style.display = showSuite ? "" : "none";
+        if (showSuite) {
+            initSuiteShowcase();
+        }
 
         renderUpdateState();
     }
@@ -131,13 +134,22 @@
             "Check for the latest version and download updates directly.",
         );
 
+        function setTip(text) {
+            btn.removeAttribute("title");
+            if (text) {
+                btn.setAttribute("data-tooltip", text);
+            } else {
+                btn.removeAttribute("data-tooltip");
+            }
+        }
+
         if (s.state === "idle") {
             btn.textContent = T("about.checkUpdates", "Check Now");
-            btn.title = T("about.checkLatest", "Check for the latest version");
+            setTip(T("about.checkLatest", "Check for the latest version"));
             desc.textContent = idleDesc;
         } else if (s.state === "not-available") {
             btn.textContent = T("about.checkUpdates", "Check Now");
-            btn.title = T("about.checkLatest", "Check for the latest version");
+            setTip(T("about.checkLatest", "Check for the latest version"));
             const ver = s.version || appVersion || "";
             desc.textContent = T("about.statuses.latest", "You're up to date on {version}").replace(
                 "{version}",
@@ -146,15 +158,13 @@
         } else if (s.state === "checking") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
+            setTip("");
             desc.textContent = T("about.statuses.checking", "Checking for updates…");
         } else if (s.state === "available") {
             btn.textContent = updatePortable
                 ? T("updates.downloadPortable", "Open download page")
                 : T("about.updateNow", "Update Now");
-            btn.title = T(
-                "about.viewDetails",
-                "View update details and changelog",
-            );
+            setTip(T("about.viewDetails", "View update details and changelog"));
             desc.textContent =
                 T("about.updateAvailable", "Update {0} available").replace(
                     "{0}",
@@ -163,6 +173,7 @@
         } else if (s.state === "downloading") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
+            setTip("");
             const pct = Math.round(s.percent ?? 0);
             desc.textContent = T(
                 "about.statuses.downloading",
@@ -172,14 +183,14 @@
             progressFill.style.width = pct + "%";
         } else if (s.state === "downloaded") {
             btn.textContent = T("about.installBtn", "Install & Restart");
-            btn.title = T("about.installTooltip", "Install the update and restart");
+            setTip(T("about.installTooltip", "Install the update and restart"));
             desc.textContent = T(
                 "about.statuses.downloaded",
                 "Update ready: click Install & Restart.",
             );
         } else if (s.state === "error") {
             btn.textContent = T("about.checkUpdates", "Check Now");
-            btn.title = T("about.checkLatest", "Check for the latest version");
+            setTip(T("about.checkLatest", "Check for the latest version"));
             const rawMsg = s.message || "";
             const isRawUrl = rawMsg.includes("error sending request") || rawMsg.includes("http");
             desc.textContent = isRawUrl
@@ -295,7 +306,8 @@
     function initSuiteShowcase() {
         const grid = document.getElementById("ab-suite-grid");
         const moreBtn = document.getElementById("ab-suite-more");
-        if (moreBtn) {
+        if (moreBtn && !moreBtn._hasListener) {
+            moreBtn._hasListener = true;
             moreBtn.addEventListener("click", () => openUrl("https://cybergems.org"));
         }
         if (!grid) return;
@@ -303,7 +315,6 @@
         try {
             let apps = window.CC_SUITE_DATA ? window.CC_SUITE_DATA.apps : null;
             if (!Array.isArray(apps) || !apps.length) {
-                // Fallback attempt
                 fetch("../assets/suite/suite.json")
                     .then((r) => r.json())
                     .then((data) => {
@@ -319,7 +330,7 @@
     }
 
     function renderSuiteButtons(grid, apps) {
-        const lang = window.ccI18n ? window.ccI18n.getLanguage() : "en";
+        const lang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
         const isEs = lang === "es";
 
         // Exclude CyberClock from its own showcase
@@ -331,12 +342,23 @@
             btn.type = "button";
             btn.className = "ab-suite-btn";
             const pitch = (isEs ? app.tagline?.es : app.tagline?.en) || app.name;
-            btn.title = `${app.name}: ${pitch}`;
-            btn.setAttribute("aria-label", btn.title);
+            const fullTip = `${app.name}: ${pitch}`;
+            btn.removeAttribute("title");
+            btn.setAttribute("data-tooltip", fullTip);
+            btn.setAttribute("aria-label", fullTip);
 
             const img = document.createElement("img");
             img.src = `../assets/suite/${app.slug}.png`;
             img.alt = app.name;
+            img.onerror = () => {
+                img.style.display = "none";
+                const fallbackSpan = document.createElement("span");
+                fallbackSpan.textContent = app.name.slice(5, 7) || "CG";
+                fallbackSpan.style.fontSize = "11px";
+                fallbackSpan.style.fontWeight = "bold";
+                fallbackSpan.style.color = "var(--accent-a)";
+                btn.appendChild(fallbackSpan);
+            };
             btn.appendChild(img);
 
             btn.addEventListener("click", () => {

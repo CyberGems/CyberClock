@@ -2547,7 +2547,7 @@ const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
 // Collapsed help section baseline; the tray window re-reports its real
 // size via tray_menu_ready once rendered (help expands the menu, the
 // About modal resizes it further).
-const TRAY_MENU_EST_HEIGHT: f64 = 470.0;
+const TRAY_MENU_EST_HEIGHT: f64 = 560.0;
 
 /// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
 /// region that EXCLUDES the taskbar. Clamping the tray menu to the full
@@ -2633,12 +2633,12 @@ fn tray_menu_geometry(
     let gap = (4.0 * scale).round() as i32;
     let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
 
-    // All placement math below works in CARD coordinates (what the user
-    // actually sees); the window differs from the card by the transparent
-    // shadow-bleed border on every side. The bleed may overhang the work
-    // area's edge — only the visible card must stay inside it.
+    // Maximum card height must not exceed the available monitor work area
+    let max_card_h = (max_y - min_y - 2 * gap).max(200);
     let card_w = (width_px - 2 * shadow_pad_px).max(1);
-    let card_h = (height_px - 2 * shadow_pad_px).max(1);
+    let card_h = (height_px - 2 * shadow_pad_px).min(max_card_h).max(1);
+    let final_w_px = card_w + 2 * shadow_pad_px;
+    let final_h_px = card_h + 2 * shadow_pad_px;
 
     // Vertical taskbar on the left edge: the icon sits inside the strip
     // left of the work area. Open to the RIGHT of the icon, vertically
@@ -2649,12 +2649,14 @@ fn tray_menu_geometry(
         card_x = anchor_x + gap;
         card_y = anchor_y - card_h / 2;
     } else {
-        // Classic placement: card centered on the icon, bottom `gap`
-        // above the anchor; flip below when there is no room above.
         card_x = anchor_x - card_w / 2;
-        card_y = anchor_y - card_h - gap;
-        if card_y < min_y {
+        let is_taskbar_at_top = anchor_y < (min_y + max_y) / 2;
+        if is_taskbar_at_top {
             card_y = anchor_y + gap;
+        } else {
+            // Taskbar is at bottom (standard Windows):
+            // Card opens upwards above the taskbar, clamped to work area top.
+            card_y = (anchor_y - card_h - gap).max(min_y);
         }
     }
 
@@ -2666,7 +2668,7 @@ fn tray_menu_geometry(
     let x = card_x - shadow_pad_px;
     let y = card_y - shadow_pad_px;
 
-    (x, y, width_px.max(1) as u32, height_px.max(1) as u32)
+    (x, y, final_w_px as u32, final_h_px as u32)
 }
 
 /// Strip the keyboard-event prefixes ("KeyC" -> "C", "Digit5" -> "5")

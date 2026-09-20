@@ -59,7 +59,7 @@
                                     "label":  "tray_menu",
                                     "title":  "CyberClock Tray Menu",
                                     "width":  290,
-                                    "height":  510,
+                                    "height":  600,
                                     "resizable":  false,
                                     "fullscreen":  false,
                                     "decorations":  false,

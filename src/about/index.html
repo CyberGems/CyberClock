@@ -21,8 +21,8 @@
                 <span class="ab-title-ico" data-ico="info"></span>
                 <span class="ab-title-text" id="ab-title-text" data-i18n="about.title">About CyberClock</span>
                 <div class="ab-title-spacer"></div>
-                <button type="button" class="ab-title-btn" id="ab-minimize" title="Minimize" data-ico="minimize"></button>
-                <button type="button" class="ab-title-btn ab-close" id="ab-close" title="Close" data-ico="x"></button>
+                <button type="button" class="ab-title-btn" id="ab-minimize" data-i18n-attr="data-tooltip:about.minimize" data-tooltip="Minimize" data-tooltip-dir="bottom" data-ico="minimize"></button>
+                <button type="button" class="ab-title-btn ab-close" id="ab-close" data-i18n-attr="data-tooltip:about.close" data-tooltip="Close" data-tooltip-dir="bottom" data-tooltip-align="right" data-ico="x"></button>
             </div>
 
             <!-- ── Scrollable content ── -->
@@ -91,24 +91,24 @@
 
             <!-- ── Footer (CyberSnap standard: copyright + 6 icon buttons) ── -->
             <div class="ab-footer">
-                <button type="button" class="ab-footer-copy" id="ab-footer-copy" title="Visit CyberGems website">© CyberGems • 2026</button>
+                <button type="button" class="ab-footer-copy" id="ab-footer-copy" data-i18n-attr="data-tooltip:about.copy" data-tooltip="Visit CyberGems website" data-tooltip-align="left">© CyberGems • 2026</button>
                 <div class="ab-footer-links">
-                    <button type="button" class="ab-footer-btn" id="ab-link-website" title="Visit CyberGems website">
+                    <button type="button" class="ab-footer-btn" id="ab-link-website" data-i18n-attr="data-tooltip:about.linkWebsite" data-tooltip="Visit CyberGems website">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     </button>
-                    <button type="button" class="ab-footer-btn" id="ab-link-docs" title="Open the online documentation">
+                    <button type="button" class="ab-footer-btn" id="ab-link-docs" data-i18n-attr="data-tooltip:about.linkDocs" data-tooltip="Open online documentation">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                     </button>
-                    <button type="button" class="ab-footer-btn" id="ab-link-github" title="View project on GitHub">
+                    <button type="button" class="ab-footer-btn" id="ab-link-github" data-i18n-attr="data-tooltip:about.linkGithub" data-tooltip="View project on GitHub">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.53-.49-.34-.35-.72-.89-.72-.89-.59-.53.04-.52.04-.52.65.05 1 .67 1 .67.58 1 1.52.71 1.89.54.06-.42.23-.71.41-.87-1.45-.17-2.98-.73-2.98-3.25 0-.72.26-1.31.67-1.77-.07-.16-.29-.84.06-1.75 0 0 .54-.17 1.76.67a6.1 6.1 0 0 1 3.2 0c1.22-.84 1.76-.67 1.76-.67.35.91.13 1.59.06 1.75.42.46.67 1.05.67 1.77 0 2.53-1.53 3.08-2.99 3.24.23.2.44.59.44 1.19 0 .86-.01 1.55-.01 1.77 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
                     </button>
-                    <button type="button" class="ab-footer-btn" id="ab-link-issues" title="Report a bug or open an issue">
+                    <button type="button" class="ab-footer-btn" id="ab-link-issues" data-i18n-attr="data-tooltip:about.linkIssues" data-tooltip="Report a bug or open an issue">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 2 1.88 1.88 M14.12 3.88 16 2 M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6z M12 20v-9 M8.5 8.5l7 7 M8.5 15.5l7-7" /></svg>
                     </button>
-                    <button type="button" class="ab-footer-btn" id="ab-link-releases" title="View releases and changelogs">
+                    <button type="button" class="ab-footer-btn" id="ab-link-releases" data-i18n-attr="data-tooltip:about.linkReleases" data-tooltip="View releases and changelogs">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.002 2.002 0 0 0 2.872 0l7.168-7.168a2.001 2.001 0 0 0 0-2.872z" /><circle cx="7.5" cy="7.5" r="1" class="ab-tag-dot"/></svg>
                     </button>
-                    <button type="button" class="ab-footer-btn ab-heart" id="ab-link-donate" title="Donate to project">
+                    <button type="button" class="ab-footer-btn ab-heart" id="ab-link-donate" data-i18n-attr="data-tooltip:about.linkDonate" data-tooltip="Donate to project" data-tooltip-align="right">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </button>
                 </div>

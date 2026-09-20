@@ -499,3 +499,87 @@ button:focus-visible {
     color: var(--text-hi);
 }
 
+/* ── Cyber-Neon Tooltips (Suite Standard) ── */
+[data-tooltip] {
+    position: relative;
+}
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translate(-50%, 6px);
+    background: rgba(10, 16, 26, 0.96);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+    color: var(--accent-a);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 10px rgba(var(--rgb-accent), 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 999;
+}
+[data-tooltip]:not([data-tooltip=""]):hover::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition-delay: 0.35s;
+}
+
+/* Direction: bottom */
+[data-tooltip-dir="bottom"]::after {
+    bottom: auto;
+    top: calc(100% + 8px);
+    transform: translate(-50%, -6px);
+}
+[data-tooltip-dir="bottom"]:not([data-tooltip=""]):hover::after {
+    transform: translate(-50%, 0);
+}
+
+/* Align: right */
+[data-tooltip-align="right"]::after {
+    left: auto;
+    right: 0;
+    transform: translate(0, 6px);
+}
+[data-tooltip-align="right"]:not([data-tooltip=""]):hover::after {
+    transform: translate(0, 0);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="right"]::after {
+    bottom: auto;
+    top: calc(100% + 8px);
+    left: auto;
+    right: 0;
+    transform: translate(0, -6px);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="right"]:not([data-tooltip=""]):hover::after {
+    transform: translate(0, 0);
+}
+
+/* Align: left */
+[data-tooltip-align="left"]::after {
+    left: 0;
+    right: auto;
+    transform: translate(0, 6px);
+}
+[data-tooltip-align="left"]:not([data-tooltip=""]):hover::after {
+    transform: translate(0, 0);
+}
+
+/* Suite button tooltips: wrap long tagline cleanly */
+.ab-suite-btn[data-tooltip]::after {
+    white-space: normal;
+    max-width: 260px;
+    min-width: 170px;
+    text-align: center;
+    line-height: 1.4;
+}
+
