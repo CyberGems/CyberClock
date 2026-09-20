@@ -143,34 +143,40 @@
             }
         }
 
+        desc.classList.remove("is-up-to-date", "is-available", "is-error", "is-checking");
+
         if (s.state === "idle") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             setTip(T("about.checkLatest", "Check for the latest version"));
             desc.textContent = idleDesc;
         } else if (s.state === "not-available") {
+            desc.classList.add("is-up-to-date");
             btn.textContent = T("about.checkUpdates", "Check Now");
             setTip(T("about.checkLatest", "Check for the latest version"));
             const ver = s.version || appVersion || "";
-            desc.textContent = T("about.statuses.latest", "You're up to date on {version}").replace(
+            desc.textContent = "✓ " + T("about.statuses.latest", "You're up to date on {version}").replace(
                 "{version}",
                 ver ? "v" + ver : "",
             );
         } else if (s.state === "checking") {
+            desc.classList.add("is-checking");
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
             setTip("");
-            desc.textContent = T("about.statuses.checking", "Checking for updates…");
+            desc.textContent = "⏳ " + T("about.statuses.checking", "Checking for updates…");
         } else if (s.state === "available") {
+            desc.classList.add("is-available");
             btn.textContent = updatePortable
                 ? T("updates.downloadPortable", "Open download page")
                 : T("about.updateNow", "Update Now");
             setTip(T("about.viewDetails", "View update details and changelog"));
             desc.textContent =
-                T("about.updateAvailable", "Update {0} available").replace(
+                "★ " + T("about.updateAvailable", "Update {0} available").replace(
                     "{0}",
                     s.version || "",
                 );
         } else if (s.state === "downloading") {
+            desc.classList.add("is-checking");
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
             setTip("");
@@ -182,20 +188,23 @@
             progressText.textContent = desc.textContent;
             progressFill.style.width = pct + "%";
         } else if (s.state === "downloaded") {
+            desc.classList.add("is-available");
             btn.textContent = T("about.installBtn", "Install & Restart");
             setTip(T("about.installTooltip", "Install the update and restart"));
-            desc.textContent = T(
+            desc.textContent = "✓ " + T(
                 "about.statuses.downloaded",
                 "Update ready: click Install & Restart.",
             );
         } else if (s.state === "error") {
+            desc.classList.add("is-error");
             btn.textContent = T("about.checkUpdates", "Check Now");
             setTip(T("about.checkLatest", "Check for the latest version"));
             const rawMsg = s.message || "";
             const isRawUrl = rawMsg.includes("error sending request") || rawMsg.includes("http");
-            desc.textContent = isRawUrl
+            const errText = isRawUrl
                 ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
                 : (rawMsg || T("about.statuses.error", "Could not check for updates. Check your internet connection."));
+            desc.textContent = "✕ " + errText;
         }
     }
 

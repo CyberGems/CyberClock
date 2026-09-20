@@ -717,7 +717,7 @@ fn show_about_window(app: &AppHandle) {
             Ok(s) if s.width > 100 && s.height > 100 => s,
             _ => tauri::PhysicalSize {
                 width: (740.0 * scale).round() as u32,
-                height: (600.0 * scale).round() as u32,
+                height: (535.0 * scale).round() as u32,
             },
         };
         let work = m.work_area();

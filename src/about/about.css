@@ -244,6 +244,27 @@ body {
     margin-top: 3px;
     line-height: 1.5;
     color: var(--ab-text-primary);
+    transition: color 0.2s ease;
+}
+.ab-setting-desc.is-up-to-date {
+    color: #34d399; /* emerald green */
+    opacity: 1;
+    font-weight: 500;
+}
+.ab-setting-desc.is-available {
+    color: #38bdf8; /* cyber cyan */
+    opacity: 1;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+.ab-setting-desc.is-error {
+    color: #fb7185; /* rose / red */
+    opacity: 1;
+    font-weight: 500;
+}
+.ab-setting-desc.is-checking {
+    color: var(--accent-a);
+    opacity: 0.95;
 }
 .ab-hairline {
     height: 1px;
