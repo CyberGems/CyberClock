@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Validate release summary
+        run: node .github/scripts/validate-release-summary.mjs
+
       - name: Verify tag matches version files
         shell: bash
         run: |

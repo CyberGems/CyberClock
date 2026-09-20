@@ -1,6 +1,13 @@
-## 📋 CyberClock {{VERSION}} — Release Notes
+## 📋 CyberClock {{VERSION}}: Release Notes
 
-Welcome to the official **CyberClock {{VERSION}}** release! CyberClock is a premium cyber-neon clock for Windows — analog canvas, digital display, calendar with day notes, alarms, timer, stopwatch, and a relax module with a desktop mini-bar in 12 unique skins.
+### 🚀 What's new in this release
+
+<!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
+<!-- changelog-summary:start -->
+A new gem-inspired analog dial leads a substantial update that adds floating timing tools, personal greetings, clock-accuracy alerts, customizable global shortcuts, smarter monitor placement, and a thoroughly refined settings experience.
+<!-- changelog-summary:end -->
+
+> **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
 
 ---
 
