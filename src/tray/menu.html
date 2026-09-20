@@ -148,6 +148,20 @@
 
                 <div class="tray-divider"></div>
 
+                <!-- Suite Group (CyberNotes style) -->
+                <div class="tray-group">
+                    <button type="button" class="tray-item tray-help-toggle" id="btn-suite-toggle" aria-expanded="false">
+                        <span class="ico" data-ico="gem"></span>
+                        <span class="label" id="lbl-suite">More from CyberGems</span>
+                        <span class="chev" data-ico="back"></span>
+                    </button>
+                    <div class="tray-help-sub tray-suite-sub" id="tray-suite-sub" hidden>
+                        <!-- Populated dynamically from suite.json -->
+                    </div>
+                </div>
+
+                <div class="tray-divider"></div>
+
                 <!-- Exit Group -->
                 <div class="tray-group tray-group-exit">
                     <button type="button" class="tray-item tray-item-exit" data-action="quit">

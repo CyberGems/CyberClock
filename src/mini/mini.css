@@ -1579,6 +1579,73 @@
         color: var(--accent-a);
     }
 
+    /* ── Mini tip clock drift block ── */
+    .mini-tip-drift-block {
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    .mini-tip-drift-head {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #fbbf24;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }
+    .mini-tip-drift-msg {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 6px;
+    }
+    .mini-tip-sync-btn {
+        display: inline-block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.45) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.6);
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .mini-tip-sync-btn:hover {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.6) 100%);
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    }
+    .mini-tip-sync-btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+
+    /* ── Subtle drift indicator on shell ── */
+    #shell.has-drift::before {
+        content: "";
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #f59e0b;
+        box-shadow: 0 0 8px #f59e0b;
+        z-index: 100;
+        pointer-events: none;
+        animation: drift-pulse 2s ease-in-out infinite;
+    }
+    @keyframes drift-pulse {
+        0%, 100% { opacity: 0.9; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
     /* ── Per-Skin Tooltip Theming ── */
     /* Skin 1: Cyber Bar Pro */
     .mini-tip[data-design="1"] {

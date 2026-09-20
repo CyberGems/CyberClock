@@ -157,6 +157,7 @@ pub struct AppSettings {
     // only reads time). The last measurement is persisted so the
     // settings row survives restarts.
     pub clock_accuracy_enabled: bool,
+    pub clock_auto_sync: bool,
     pub clock_drift_ms: Option<i64>,
     pub clock_checked_at: Option<i64>,
 }
@@ -219,6 +220,7 @@ impl Default for AppSettings {
             auto_update: true,
             calendar_notes: HashMap::new(),
             clock_accuracy_enabled: true,
+            clock_auto_sync: false,
             clock_drift_ms: None,
             clock_checked_at: None,
         }

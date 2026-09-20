@@ -62,6 +62,17 @@
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
       d="M6 6l12 12"/>
   </symbol>
+  <symbol id="cc-i-dots" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="1.75" fill="currentColor"/>
+    <circle cx="5" cy="12" r="1.75" fill="currentColor"/>
+    <circle cx="19" cy="12" r="1.75" fill="currentColor"/>
+  </symbol>
+  <symbol id="cc-i-gem" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M6 3h12l4 6-10 12L2 9z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M2 9h20M10 3l-2 6 4 12 4-12-2-6"/>
+  </symbol>
   <symbol id="cc-i-clock" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
@@ -354,6 +365,14 @@
   <symbol id="cc-i-select-all" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-dasharray="2 2.5" d="M3 3h18v18H3z"/>
     <rect x="7" y="7" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.75"/>
+  </symbol>
+  <symbol id="cc-i-shield" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <symbol id="cc-i-enter" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M20 4v7a3 3 0 0 1-3 3H4m0 0l5-5m-5 5l5 5"/>
   </symbol>
 </svg>
         `;

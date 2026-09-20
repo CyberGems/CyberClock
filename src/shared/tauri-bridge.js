@@ -97,6 +97,9 @@
         closeMiniContextMenu: async () => {
             await invoke("close_mini_context_menu");
         },
+        showAboutWindow: async () => {
+            await invoke("tray_menu_action", { action: "about" });
+        },
         startDragging: async () => {
             if (!HAS_TAURI) return;
             try {
@@ -170,6 +173,22 @@
             // (read-only). Returns the persisted measurement or null
             // when no server was reachable.
             return await invokeOrFallback("check_clock_accuracy", undefined, null);
+        },
+        getTimeSyncTaskStatus: async () => {
+            // Checks if the privileged Windows Scheduled Task is registered.
+            return await invokeOrFallback("get_time_sync_task_status", undefined, false);
+        },
+        setupTimeSyncTask: async () => {
+            // Prompts UAC once to register the background time sync scheduled task.
+            return await invoke("setup_time_sync_task");
+        },
+        removeTimeSyncTask: async () => {
+            // Prompts UAC once to delete the scheduled task.
+            return await invoke("remove_time_sync_task");
+        },
+        syncSystemClock: async () => {
+            // Triggers Windows Time sync and returns the refreshed ClockAccuracy.
+            return await invoke("sync_system_clock");
         },
         setHotkey: async (hotkey) => {
             // Registers the global show/hide shortcut. Empty string

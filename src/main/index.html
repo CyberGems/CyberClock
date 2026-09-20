@@ -43,7 +43,7 @@
         <div class="app">
             <!-- ═══ TITLE BAR ═══════════════════════════════════════════ -->
             <div class="tbar">
-                <div class="tbar-brand">
+                <div class="tbar-brand" id="tbar-brand" role="button" tabindex="0" data-tooltip="About CyberClock" data-i18n-attr="data-tooltip:about.title, aria-label:about.title" data-tooltip-dir="bottom">
                     <img class="tbar-logo" src="../assets/images/icon.png" alt="" />
                     <span class="tbar-name"><span class="tbar-name-a">Cyber</span><span class="tbar-name-b">Clock</span></span>
                     <span class="tbar-welcome" id="tbar-welcome" aria-live="polite"></span>
@@ -56,14 +56,75 @@
                     <div id="dig-date">SUN · 01 JAN 2026</div>
                 </div>
                 <div class="tbar-right">
-                    <button class="btn-mini-pill" id="btn-mini" title="Switch to Mini Mode" data-i18n-attr="title:tooltip.switchToMini">
+                    <button class="btn-mini-pill" id="btn-mini" type="button" data-tooltip="Switch to Mini Mode" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom">
                         <span class="mini-ico"><span data-ico="compact"></span></span>
                         <span class="mini-lbl">Mini</span>
                     </button>
-                    <button class="wmbtn" id="tbar-btn-settings" title="Settings" data-i18n-attr="title:tooltip.settings">
+                    <button class="wmbtn" id="tbar-btn-settings" type="button" data-tooltip="Settings" data-i18n-attr="data-tooltip:tooltip.settings, aria-label:tooltip.settings" data-tooltip-dir="bottom">
                         <span data-ico="gear"></span>
                     </button>
-                    <button class="wmbtn close" id="btn-close">
+                    <div class="tbar-more-wrap">
+                        <button class="wmbtn" id="tbar-btn-more" type="button" aria-haspopup="true" aria-expanded="false" data-tooltip="More options" data-i18n-attr="data-tooltip:tooltip.more, aria-label:tooltip.more" data-tooltip-dir="bottom">
+                            <span data-ico="dots"></span>
+                        </button>
+                        <div class="tbar-more-menu" id="tbar-more-menu" role="menu" hidden>
+                            <button type="button" class="tbar-more-item" data-action="toggle_pin">
+                                <span class="ico" data-ico="pin"></span>
+                                <span class="lbl" id="tbar-more-lbl-pin" data-i18n="tooltip.pin">Always on Top</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="mini_mode">
+                                <span class="ico" data-ico="compact"></span>
+                                <span class="lbl" data-i18n="tooltip.switchToMini">Switch to Mini Mode</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="time_sync">
+                                <span class="ico" data-ico="refresh"></span>
+                                <span class="lbl" data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
+                            </button>
+                            <div class="tbar-more-divider"></div>
+                            <button type="button" class="tbar-more-item" data-action="docs">
+                                <span class="ico" data-ico="book"></span>
+                                <span class="lbl" data-i18n="about.docs">Online Documentation</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="website">
+                                <span class="ico" data-ico="globe"></span>
+                                <span class="lbl" data-i18n="tray.homepage">Website</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="donate">
+                                <span class="ico ico-heart" data-ico="heart"></span>
+                                <span class="lbl" data-i18n="tray.donate">Donate</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="about">
+                                <span class="ico" data-ico="info"></span>
+                                <span class="lbl" data-i18n="about.title">About CyberClock</span>
+                            </button>
+                            <div class="tbar-more-divider"></div>
+                            <button type="button" class="tbar-more-item close-item" data-action="exit">
+                                <span class="ico" data-ico="power"></span>
+                                <span class="lbl" data-i18n="tray.exit">Exit CyberClock</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom">
+                        <span data-ico="x"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ═══ CLOCK DRIFT WARNING BANNER ═════════════════════════ -->
+            <div class="clock-drift-banner" id="clock-drift-banner" role="alert" aria-live="assertive" hidden>
+                <div class="clock-drift-banner-content">
+                    <span class="clock-drift-banner-icon" data-ico="info"></span>
+                    <div class="clock-drift-banner-text">
+                        <strong class="clock-drift-banner-title" data-i18n="banner.clockDriftTitle">Clock drift detected</strong>
+                        <span class="clock-drift-banner-desc" id="clock-drift-banner-desc">System time is off</span>
+                    </div>
+                </div>
+                <div class="clock-drift-banner-actions">
+                    <button type="button" class="clock-drift-btn-sync" id="btn-drift-sync">
+                        <span class="btn-sync-icon" data-ico="refresh"></span>
+                        <span data-i18n="banner.syncNow">Sync now</span>
+                    </button>
+                    <button type="button" class="clock-drift-btn-close" id="btn-drift-dismiss" title="Dismiss notice" data-i18n-attr="title:banner.dismiss">
                         <span data-ico="x"></span>
                     </button>
                 </div>
@@ -108,13 +169,13 @@
                                 <canvas id="clock-canvas"></canvas>
                                 <!-- Discreet Vertical Quick-Cycle Dial Switcher on the Right -->
                                 <div class="dial-cycler" id="dial-cycler">
-                                    <button class="dial-cyc-btn" id="dial-prev" type="button" aria-label="Previous clock style" data-tooltip="Previous clock style" data-i18n-attr="data-tooltip:clock.prevStyle, aria-label:clock.prevStyle" data-tooltip-dir="left">
+                                    <button class="dial-cyc-btn" id="dial-prev" type="button" aria-label="Next clock style" data-tooltip="Next clock style" data-i18n-attr="data-tooltip:clock.nextStyle, aria-label:clock.nextStyle" data-tooltip-dir="left">
                                         <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M18 15l-6-6-6 6"/></svg>
                                     </button>
                                     <div class="dial-cyc-badge" id="dial-badge" data-tooltip="Classic" data-tooltip-dir="left">
-                                        <span class="dial-cyc-num" id="dial-badge-num">1/7</span>
+                                        <span class="dial-cyc-num" id="dial-badge-num">1/8</span>
                                     </div>
-                                    <button class="dial-cyc-btn" id="dial-next" type="button" aria-label="Next clock style" data-tooltip="Next clock style" data-i18n-attr="data-tooltip:clock.nextStyle, aria-label:clock.nextStyle" data-tooltip-dir="left">
+                                    <button class="dial-cyc-btn" id="dial-next" type="button" aria-label="Previous clock style" data-tooltip="Previous clock style" data-i18n-attr="data-tooltip:clock.prevStyle, aria-label:clock.prevStyle" data-tooltip-dir="left">
                                         <svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
                                      </button>
                                 </div>
@@ -510,6 +571,10 @@
                                     <span class="s-nav-ico" data-ico="eye"></span>
                                     <span data-i18n="settings.tab.appearance">Appearance</span>
                                 </button>
+                                <button type="button" class="s-nav-btn" data-stab="time">
+                                    <span class="s-nav-ico" data-ico="clock"></span>
+                                    <span data-i18n="settings.tab.time">Time</span>
+                                </button>
                                 <button type="button" class="s-nav-btn" data-stab="alarms">
                                     <span class="s-nav-ico" data-ico="bell"></span>
                                     <span data-i18n="settings.tab.alarms">Alarms</span>
@@ -652,6 +717,89 @@
                                 <label class="s-tog"><input type="checkbox" id="s-hide-cal" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time -->
+                    <div class="s-panel" id="stab-time">
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.time.sectionWindows">Windows Date &amp; Time</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="clock"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.datetime">Date and Time</span>
+                                    <small data-i18n="settings.general.datetimeDesc">Opens the Windows date and time properties dialog</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-datetime" type="button">
+                                    <span data-ico="clock"></span>
+                                    <span data-i18n="settings.general.datetimeBtn">Open...</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.time.sectionSync">System Time Synchronization</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="check"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockAccuracy">Clock accuracy</span>
+                                    <small data-i18n="settings.general.clockAccuracyDesc">Checks the system clock against a time server and warns when it is off by more than a minute</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-clock-acc" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="stopwatch"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockDrift">Difference</span>
+                                    <!-- Dynamic status: app.js owns this text
+                                         (drift, last check or unreachable);
+                                         data-i18n would clobber it on language
+                                         changes. -->
+                                    <small id="s-clock-status">Never checked</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-clock-check" type="button">
+                                    <span data-ico="clock"></span>
+                                    <span data-i18n="settings.general.clockCheck">Check now</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
+                                    <small id="s-timesync-run-status" class="s-status-badge" style="display:none"></small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-sync-time" type="button">
+                                    <span data-ico="refresh"></span>
+                                    <span id="s-btn-sync-time-lbl" data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="shield"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncTitle">Unattended time synchronization</span>
+                                    <small data-i18n="settings.general.timeSyncDesc">Allows CyberClock to correct Windows time automatically. Clicking the "Authorize" button will prompt for Administrator permissions once</small>
+                                    <small id="s-timesync-task-status" class="s-status-badge">Pending authorization</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-timesync-task" type="button">
+                                    <span data-ico="shield"></span>
+                                    <span id="s-btn-timesync-task-lbl" data-i18n="settings.general.timeSyncBtnEnable">Authorize</span>
+                                </button>
+                            </div>
+                            <div class="s-row" id="s-row-clock-auto-sync">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncAuto">Sync automatically if drift is detected at startup</span>
+                                    <small data-i18n="settings.general.timeSyncAutoDesc">Automatically synchronizes Windows clock in the background when drift exceeds 1 minute (requires authorization)</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-clock-auto-sync" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
                             </div>
                         </div>
                     </div>
@@ -1130,47 +1278,6 @@
                             </div>
                         </div>
                         <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.general.systemTitle">Windows Integration</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.datetime">Date and Time</span>
-                                    <small data-i18n="settings.general.datetimeDesc">Opens the Windows date and time properties dialog</small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-datetime" type="button">
-                                    <span data-ico="clock"></span>
-                                    <span data-i18n="settings.general.datetimeBtn">Open...</span>
-                                </button>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="check"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.clockAccuracy">Clock accuracy</span>
-                                    <small data-i18n="settings.general.clockAccuracyDesc">Checks the system clock against a time server and warns when it is off by more than a minute</small>
-                                </div>
-                                <label class="s-tog"
-                                    ><input type="checkbox" id="s-clock-acc" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="stopwatch"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.clockDrift">Difference</span>
-                                    <!-- Dynamic status: app.js owns this text
-                                         (drift, last check or unreachable);
-                                         data-i18n would clobber it on language
-                                         changes. -->
-                                    <small id="s-clock-status">Never checked</small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-clock-check" type="button">
-                                    <span data-ico="clock"></span>
-                                    <span data-i18n="settings.general.clockCheck">Check now</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.general.relaxVolume">Relaxation Volume</div>
                             <div class="s-vol-row">
                                 <span class="s-row-ico" data-ico="lotus"></span>
@@ -1442,8 +1549,9 @@
                     type="button"
                     class="s-brand-footer"
                     id="s-brand-about"
-                    data-i18n-attr="title:about.title"
-                    title="About CyberClock"
+                    data-tooltip="About CyberClock"
+                    data-i18n-attr="data-tooltip:about.title"
+                    data-tooltip-dir="up"
                     aria-label="About CyberClock"
                 >
                     <div class="s-brand-line">
@@ -1488,14 +1596,16 @@
                         <span class="note-char-counter" id="note-char-counter">0 / 500</span>
                     </div>
                     <div class="note-spacer"></div>
-                    <button class="note-btn danger" id="note-delete" data-i18n="calendar.delete">
+                    <button class="note-btn danger" id="note-delete" type="button" data-i18n="calendar.delete">
                         Delete
                     </button>
-                    <button class="note-btn secondary" id="note-cancel" data-i18n="calendar.cancel">
-                        Cancel
+                    <button class="note-btn secondary" id="note-cancel" type="button">
+                        <span data-i18n="calendar.cancel">Cancel</span>
+                        <kbd class="btn-kbd">Esc</kbd>
                     </button>
-                    <button class="note-btn primary" id="note-save" data-i18n="calendar.save">
-                        Save
+                    <button class="note-btn primary" id="note-save" type="button" disabled>
+                        <span data-i18n="calendar.save">Save</span>
+                        <kbd class="btn-kbd"><svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M20 4v7a3 3 0 0 1-3 3H4m0 0l5-5m-5 5l5 5"/></svg></kbd>
                     </button>
                 </div>
             </div>

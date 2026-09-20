@@ -298,6 +298,14 @@
         width: 14px;
         height: 14px;
     }
+    .tray-sub-item-img {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        margin-right: 2px;
+        display: block;
+    }
     .tray-sub-sep {
         height: 1px;
         background: var(--border);

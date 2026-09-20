@@ -216,6 +216,7 @@
         if (window.audioEngine) window.audioEngine.setMuted(s.audioMuted === true);
 
         updateClock();
+        updateDriftIndicator();
 
         // Real-sun cycle for the Sunset Pulse skin (design 7). Applied as a
         // data-solar phase attribute on the shell; CSS owns the palettes.
@@ -244,6 +245,26 @@
     const shellEl = document.getElementById("shell");
     let tipTimer = null;
 
+    function updateDriftIndicator() {
+        const shell = document.getElementById("shell");
+        if (!shell) return;
+        const drift = cfg ? cfg.clockDriftMs : null;
+        const hasDrift = drift != null && Math.abs(drift) > 60000;
+        shell.classList.toggle("has-drift", hasDrift);
+    }
+
+    if (window.cc && window.cc.onClockAccuracy) {
+        window.cc.onClockAccuracy((payload) => {
+            if (!payload || !cfg) return;
+            if (payload.driftMs !== undefined) {
+                cfg.clockDriftMs = payload.driftMs;
+                cfg.clockCheckedAt = payload.checkedAt;
+                updateDriftIndicator();
+                if (typeof isTipVisible !== "undefined" && isTipVisible) refreshTipContent();
+            }
+        });
+    }
+
     function refreshTipContent() {
         const now = new Date();
         const lang = window.ccI18n.getEffectiveLang();
@@ -265,6 +286,55 @@
         dateDiv.textContent = dateStr;
         tipEl.appendChild(dateDiv);
         tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
+
+        const drift = cfg ? cfg.clockDriftMs : null;
+        if (drift != null && Math.abs(drift) > 60000) {
+            const abs = Math.abs(drift);
+            const driftTxt = abs < 60000 ? (abs / 1000).toFixed(1) + " s"
+                : abs < 3600000 ? Math.round(abs / 60000) + " min"
+                : abs < 86400000 ? Math.round(abs / 3600000) + " h"
+                : Math.round(abs / 86400000) + " d";
+            const sign = drift >= 0 ? "+" : "-";
+            const driftStr = sign + driftTxt;
+
+            const driftBlock = document.createElement("div");
+            driftBlock.className = "mini-tip-drift-block";
+
+            const driftHead = document.createElement("div");
+            driftHead.className = "mini-tip-drift-head";
+            driftHead.textContent = `⚠️ ${t("mini.tip.clockDriftTitle")}`;
+            driftBlock.appendChild(driftHead);
+
+            const driftMsg = document.createElement("div");
+            driftMsg.className = "mini-tip-drift-msg";
+            driftMsg.textContent = t("mini.tip.clockDriftMsg", { drift: driftStr });
+            driftBlock.appendChild(driftMsg);
+
+            const syncBtn = document.createElement("button");
+            syncBtn.type = "button";
+            syncBtn.className = "mini-tip-sync-btn";
+            syncBtn.textContent = t("mini.tip.syncNow");
+            syncBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                syncBtn.disabled = true;
+                syncBtn.textContent = t("settings.general.timeSyncing");
+                try {
+                    const res = await window.cc.syncSystemClock();
+                    if (res && res.drift_ms != null) {
+                        cfg.clockDriftMs = res.drift_ms;
+                        cfg.clockCheckedAt = res.checked_at;
+                        updateDriftIndicator();
+                        refreshTipContent();
+                    }
+                } catch (err) {
+                    console.error("Sync error:", err);
+                    syncBtn.textContent = t("settings.general.timeSyncError");
+                }
+            });
+            driftBlock.appendChild(syncBtn);
+            tipEl.appendChild(driftBlock);
+            tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
+        }
 
         if (note) {
             const noteDiv = document.createElement("div");

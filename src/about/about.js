@@ -124,10 +124,18 @@
             "Check for the latest version and download updates directly.",
         );
 
-        if (s.state === "idle" || s.state === "not-available") {
+        if (s.state === "idle") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.title = T("about.checkLatest", "Check for the latest version");
             desc.textContent = idleDesc;
+        } else if (s.state === "not-available") {
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            btn.title = T("about.checkLatest", "Check for the latest version");
+            const ver = s.version || appVersion || "";
+            desc.textContent = T("about.statuses.latest", "You're up to date on {version}").replace(
+                "{version}",
+                ver ? "v" + ver : "",
+            );
         } else if (s.state === "checking") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.disabled = true;
@@ -160,14 +168,16 @@
             btn.title = T("about.installTooltip", "Install the update and restart");
             desc.textContent = T(
                 "about.statuses.downloaded",
-                "Update ready — click Install & Restart.",
+                "Update ready: click Install & Restart.",
             );
         } else if (s.state === "error") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             btn.title = T("about.checkLatest", "Check for the latest version");
-            desc.textContent =
-                s.message ||
-                T("about.statuses.error", "Could not check for updates. Check your internet connection.");
+            const rawMsg = s.message || "";
+            const isRawUrl = rawMsg.includes("error sending request") || rawMsg.includes("http");
+            desc.textContent = isRawUrl
+                ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
+                : (rawMsg || T("about.statuses.error", "Could not check for updates. Check your internet connection."));
         }
     }
 
@@ -230,7 +240,7 @@
                 // The event is authoritative when the current version is
                 // already installed. This also avoids a false positive while
                 // the About window is still loading its version label.
-                updateStatus = { state: "not-available", version: res.version };
+                updateStatus = { state: "not-available", version: res.version || appVersion };
             } else if (res.version && appVersion && res.version !== appVersion) {
                 updateStatus = {
                     state: "available",
@@ -239,10 +249,17 @@
                     releaseUrl: res.releaseUrl,
                 };
             } else {
-                updateStatus = { state: "not-available", version: res.version };
+                updateStatus = { state: "not-available", version: res.version || appVersion };
             }
         } catch (e) {
-            updateStatus = { state: "error", message: String(e?.message || e) };
+            const raw = String(e?.message || e || "");
+            const isRawUrl = raw.includes("error sending request") || raw.includes("http");
+            updateStatus = {
+                state: "error",
+                message: isRawUrl
+                    ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
+                    : raw,
+            };
         }
         renderUpdateState();
     }
@@ -266,6 +283,53 @@
             }
         });
     }
+
+    // ── CyberGems Suite Showcase ──────────────────────────────
+    async function initSuiteShowcase() {
+        const grid = document.getElementById("ab-suite-grid");
+        const moreBtn = document.getElementById("ab-suite-more");
+        if (moreBtn) {
+            moreBtn.addEventListener("click", () => openUrl("https://cybergems.org"));
+        }
+        if (!grid) return;
+
+        try {
+            const res = await fetch("../assets/suite/suite.json");
+            if (!res.ok) return;
+            const data = await res.json();
+            const apps = Array.isArray(data?.apps) ? data.apps : [];
+            const lang = window.ccI18n ? window.ccI18n.getLanguage() : "en";
+            const isEs = lang === "es";
+
+            // Exclude CyberClock from its own showcase
+            const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
+            grid.innerHTML = "";
+
+            for (const app of sisters) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "ab-suite-btn";
+                const pitch = (isEs ? app.tagline?.es : app.tagline?.en) || app.name;
+                btn.title = `${app.name} — ${pitch}`;
+                btn.setAttribute("aria-label", btn.title);
+
+                const img = document.createElement("img");
+                img.src = `../assets/suite/${app.slug}.png`;
+                img.alt = app.name;
+                btn.appendChild(img);
+
+                btn.addEventListener("click", () => {
+                    const target = app.site || `https://cybergems.org/apps/${app.slug}/`;
+                    openUrl(target);
+                });
+
+                grid.appendChild(btn);
+            }
+        } catch (e) {
+            console.warn("Could not load suite showcase:", e);
+        }
+    }
+    initSuiteShowcase();
 
     // ── Title bar ─────────────────────────────────────────────
     const closeBtn = document.getElementById("ab-close");

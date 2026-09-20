@@ -59,6 +59,14 @@
         align-items: center;
         gap: 7px;
         flex-shrink: 0;
+        cursor: pointer;
+        user-select: none;
+        padding: 3px 6px;
+        border-radius: 6px;
+        transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .tbar-brand:hover {
+        background: rgba(var(--rgb-accent), 0.12);
     }
     /* Official logo + name, the same branding language as the tray
        menu header (Outfit) instead of the old neon display caps. */
@@ -236,6 +244,90 @@
         color: var(--accent-a);
         border-color: var(--border-bright);
         box-shadow: var(--glow-xs);
+    }
+
+    /* ── Title Bar More Menu ── */
+    .tbar-more-wrap {
+        position: relative;
+    }
+    .tbar-more-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        width: 220px;
+        background: rgba(12, 16, 24, 0.95);
+        border: 1px solid rgba(var(--rgb-accent), 0.3);
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), var(--glow-xs);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 10000;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        animation: tbar-menu-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tbar-more-menu[hidden] {
+        display: none !important;
+    }
+    @keyframes tbar-menu-in {
+        from {
+            opacity: 0;
+            transform: translateY(-6px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .tbar-more-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 5px;
+        background: transparent;
+        border: none;
+        color: var(--text-md);
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        transition: background 0.12s, color 0.12s;
+    }
+    .tbar-more-item:hover {
+        background: rgba(var(--rgb-accent), 0.14);
+        color: var(--text-hi);
+    }
+    .tbar-more-item.close-item:hover {
+        background: rgba(255, 68, 102, 0.18);
+        color: #ff4466;
+    }
+    .tbar-more-item .ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        font-size: 14px;
+        opacity: 0.85;
+    }
+    .tbar-more-item .ico.ico-heart {
+        color: #f43f5e;
+        opacity: 1;
+    }
+    .tbar-more-item .lbl {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .tbar-more-divider {
+        height: 1px;
+        background: rgba(var(--rgb-accent), 0.15);
+        margin: 4px 4px;
     }
 
     /* ── Mini Mode Pill Button ── */
@@ -725,6 +817,15 @@
     }
     .dial-cyc-btn:active {
         transform: scale(0.94);
+    }
+    .dial-cyc-btn:active::after,
+    .dial-cyc-btn.hide-tooltip::after,
+    .hide-tooltip::after {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: none !important;
     }
     .dial-cyc-btn .cc-ico {
         width: 10px;
@@ -1611,6 +1712,52 @@
         border-color: #ff4466;
         box-shadow: 0 0 14px rgba(255, 68, 68, 0.35);
         transform: translateY(-1px);
+    }
+    .note-modal .s-close {
+        background: transparent;
+        border-color: transparent;
+    }
+    .note-modal .s-close:hover {
+        color: #ffffff;
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+    .note-btn:disabled,
+    .note-btn[disabled] {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    .btn-kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono, monospace);
+        font-size: 9px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: inherit;
+        opacity: 0.85;
+        margin-left: 5px;
+        letter-spacing: 0;
+        text-transform: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+    .btn-kbd .cc-ico {
+        width: 10px;
+        height: 10px;
+    }
+    .note-btn.primary .btn-kbd {
+        background: rgba(var(--rgb-accent), 0.22);
+        border-color: rgba(var(--rgb-accent), 0.45);
+        color: var(--accent-a);
     }
 
     /* ════════════════════════════════════════════════════
@@ -3839,32 +3986,45 @@
     /* Accent tint swatches: compact color squares, 4 per row, with a
        light ring on the active one (CyberViewer-style picker). */
     .tint-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 32px);
-        gap: 10px;
-        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+        padding: 4px 2px;
     }
     .tint-swatch {
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: 8px;
+        position: relative;
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 9px;
         cursor: pointer;
         padding: 0;
-        transition: transform 0.16s ease, box-shadow 0.16s ease;
+        box-shadow:
+            inset 0 1px 1px rgba(255, 255, 255, 0.4),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.35),
+            0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s ease, border-color 0.16s ease;
     }
     .tint-swatch:hover {
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
+        transform: translateY(-2px) scale(1.08);
+        border-color: rgba(255, 255, 255, 0.42);
+        box-shadow:
+            inset 0 1px 1px rgba(255, 255, 255, 0.55),
+            0 4px 12px rgba(0, 0, 0, 0.4),
+            0 0 12px rgba(var(--rgb-accent), 0.3);
     }
     .tint-swatch:active {
         transform: scale(0.94);
     }
     .tint-swatch.on {
+        transform: scale(1.05);
+        border-color: #ffffff;
         box-shadow:
-            0 0 0 2px var(--bg-02),
-            0 0 0 3.5px var(--text-hi),
-            0 0 12px rgba(var(--rgb-accent), 0.45);
+            0 0 0 2px var(--bg-02, #141824),
+            0 0 0 4px #ffffff,
+            0 0 18px rgba(var(--rgb-accent), 0.6),
+            inset 0 1px 1px rgba(255, 255, 255, 0.6);
     }
 
     .s-fmts {
@@ -4447,3 +4607,157 @@
     .s-day-btn.s-day-all {
         border-style: dashed;
     }
+
+    /* ── Clock drift warning banner (Full mode) ── */
+    .clock-drift-banner {
+        position: relative;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 18px;
+        background: linear-gradient(90deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+        transition: all 0.3s ease;
+    }
+    .clock-drift-banner[hidden] {
+        display: none !important;
+    }
+    .clock-drift-banner-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1;
+    }
+    .clock-drift-banner-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        color: #f59e0b;
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+        flex-shrink: 0;
+    }
+    .clock-drift-banner-icon .cc-ico {
+        width: 20px;
+        height: 20px;
+    }
+    .clock-drift-banner-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .clock-drift-banner-title {
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: #fbbf24;
+    }
+    .clock-drift-banner-desc {
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        color: var(--text-hi);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .clock-drift-banner-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .clock-drift-btn-sync {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 13px;
+        border-radius: 6px;
+        font-family: var(--font-ui);
+        font-size: calc(10.5px * var(--ui-scale));
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.35) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.55);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .clock-drift-btn-sync:hover {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.4) 0%, rgba(217, 119, 6, 0.5) 100%);
+        border-color: #fbbf24;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.45);
+        transform: translateY(-1px);
+    }
+    .clock-drift-btn-sync:active {
+        transform: translateY(0);
+    }
+    .clock-drift-btn-sync:disabled {
+        opacity: 0.6;
+        cursor: wait;
+        transform: none;
+    }
+    .clock-drift-btn-sync .btn-sync-icon .cc-ico {
+        width: 14px;
+        height: 14px;
+    }
+    .clock-drift-btn-sync.is-syncing .btn-sync-icon .cc-ico {
+        animation: spin 1s linear infinite;
+    }
+    .clock-drift-btn-close {
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        color: var(--text-md);
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .clock-drift-btn-close:hover {
+        color: var(--text-hi);
+        border-color: rgba(245, 158, 11, 0.3);
+        background: rgba(245, 158, 11, 0.1);
+    }
+    .clock-drift-btn-close .cc-ico {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* ── Settings status badge ── */
+    .s-status-badge {
+        display: inline-block;
+        margin-top: 3px;
+        font-family: var(--font-ui);
+        font-size: calc(9.5px * var(--ui-scale));
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-md);
+        border: 1px solid var(--border-bright);
+    }
+    .s-status-badge.active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.4);
+    }
+    .s-status-badge.warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+

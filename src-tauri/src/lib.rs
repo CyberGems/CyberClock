@@ -712,13 +712,14 @@ fn show_about_window(app: &AppHandle) {
         .or_else(|| win.primary_monitor().ok().flatten());
 
     if let Some(m) = reference {
-        let scale = win.scale_factor().unwrap_or(1.0);
-        // Center by the window's REAL current size (it is user-resizable,
-        // 740×590 by default) — not the config default.
-        let size = win.inner_size().unwrap_or(tauri::PhysicalSize {
-            width: (740.0 * scale).round() as u32,
-            height: (590.0 * scale).round() as u32,
-        });
+        let scale = m.scale_factor();
+        let size = match win.outer_size() {
+            Ok(s) if s.width > 100 && s.height > 100 => s,
+            _ => tauri::PhysicalSize {
+                width: (740.0 * scale).round() as u32,
+                height: (590.0 * scale).round() as u32,
+            },
+        };
         let work = m.work_area();
         let x = work.position.x + (work.size.width as i32 - size.width as i32) / 2;
         let y = work.position.y + (work.size.height as i32 - size.height as i32) / 2;
@@ -935,9 +936,10 @@ fn run_clock_check(app: &AppHandle, notify_allowed: bool) -> ClockAccuracy {
             );
             info!("clock accuracy: drift {} ms ({})", m.drift_ms, m.source);
 
-            if notify_allowed
+            if m.drift_ms.abs() <= CLOCK_DRIFT_NOTIFY_MS {
+                CLOCK_DRIFT_NOTIFIED.store(false, Ordering::SeqCst);
+            } else if notify_allowed
                 && !CLOCK_DRIFT_NOTIFIED.swap(true, Ordering::SeqCst)
-                && m.drift_ms.abs() > CLOCK_DRIFT_NOTIFY_MS
             {
                 send_clock_notification(app, m.drift_ms);
             }
@@ -963,14 +965,27 @@ fn run_clock_check(app: &AppHandle, notify_allowed: bool) -> ClockAccuracy {
 fn clock_accuracy_loop(app: AppHandle) {
     for _ in 0..10 {
         std::thread::sleep(std::time::Duration::from_secs(30));
-        if run_clock_check(&app, true).drift_ms.is_some() {
+        let check = run_clock_check(&app, true);
+        if let Some(drift) = check.drift_ms {
+            let s = load_settings(&app);
+            if s.clock_auto_sync && drift.abs() > CLOCK_DRIFT_NOTIFY_MS && is_time_sync_task_registered() {
+                info!("clock accuracy: auto-syncing system clock due to drift of {} ms", drift);
+                let _ = sync_system_clock_internal(&app);
+            }
             break;
         }
     }
     loop {
         std::thread::sleep(std::time::Duration::from_secs(6 * 3600));
-        if load_settings(&app).clock_accuracy_enabled {
-            run_clock_check(&app, true);
+        let s = load_settings(&app);
+        if s.clock_accuracy_enabled {
+            let check = run_clock_check(&app, true);
+            if let Some(drift) = check.drift_ms {
+                if s.clock_auto_sync && drift.abs() > CLOCK_DRIFT_NOTIFY_MS && is_time_sync_task_registered() {
+                    info!("clock accuracy: auto-syncing system clock (periodic) due to drift of {} ms", drift);
+                    let _ = sync_system_clock_internal(&app);
+                }
+            }
         }
     }
 }
@@ -1059,6 +1074,166 @@ async fn check_clock_accuracy(app: AppHandle) -> ClockAccuracy {
         checked_at: None,
         source: Some("unreachable".to_string()),
     })
+}
+
+const TIME_SYNC_TASK_NAME: &str = "CyberClockTimeSync";
+
+#[cfg(target_os = "windows")]
+fn is_time_sync_task_registered() -> bool {
+    use std::os::windows::process::CommandExt;
+    use std::process::Command;
+    // 1. Check if schtasks /query succeeds (which requires read permission on the task)
+    let status = Command::new("schtasks.exe")
+        .args(["/query", "/tn", TIME_SYNC_TASK_NAME])
+        .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+        .status();
+    if let Ok(s) = status {
+        if s.success() {
+            return true;
+        }
+    }
+    // 2. Also check if the task file exists in System32\Tasks
+    std::path::Path::new(r"C:\Windows\System32\Tasks").join(TIME_SYNC_TASK_NAME).exists()
+}
+
+#[cfg(not(target_os = "windows"))]
+fn is_time_sync_task_registered() -> bool {
+    false
+}
+
+fn sync_system_clock_internal(app: &AppHandle) -> Result<ClockAccuracy, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+
+        let has_task = is_time_sync_task_registered();
+        let mut ran_ok = false;
+        if has_task {
+            info!("sync_system_clock: triggering scheduled task {}", TIME_SYNC_TASK_NAME);
+            let status = Command::new("schtasks.exe")
+                .args(["/run", "/tn", TIME_SYNC_TASK_NAME])
+                .creation_flags(0x0800_0000)
+                .status();
+            ran_ok = match status {
+                Ok(s) => s.success(),
+                Err(_) => false,
+            };
+        }
+
+        if !ran_ok {
+            info!("sync_system_clock: task run failed or not registered, invoking elevated cmd");
+            let script = "Start-Process cmd.exe -ArgumentList '/c net start w32time & w32tm /resync /force' -Verb RunAs -WindowStyle Hidden -Wait";
+            let status = Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script])
+                .creation_flags(0x0800_0000)
+                .status()
+                .map_err(|e| format!("failed to launch elevated time sync: {}", e))?;
+            if !status.success() {
+                return Err("Time sync elevation canceled or failed".to_string());
+            }
+        }
+
+        std::thread::sleep(std::time::Duration::from_millis(2000));
+        let accuracy = run_clock_check(app, false);
+        Ok(accuracy)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = app;
+        Err("Unsupported operating system".to_string())
+    }
+}
+
+#[tauri::command]
+fn get_time_sync_task_status() -> bool {
+    is_time_sync_task_registered()
+}
+
+#[tauri::command]
+async fn setup_time_sync_task() -> Result<bool, String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        #[cfg(target_os = "windows")]
+        {
+            use std::os::windows::process::CommandExt;
+            use std::process::Command;
+            let temp_dir = std::env::temp_dir();
+            let ps1_path = temp_dir.join("cc_setup_time_sync.ps1");
+            let ps_script = format!(
+                r#"$tn = '{0}'
+$cmd = 'cmd.exe /c net start w32time & w32tm /resync /force'
+schtasks.exe /create /tn $tn /tr $cmd /sc ONCE /st 00:00 /ru 'SYSTEM' /rl HIGHEST /f
+try {{
+    $svc = New-Object -ComObject 'Schedule.Service'
+    $svc.Connect()
+    $task = $svc.GetFolder('\').GetTask($tn)
+    $sec = $task.GetSecurityDescriptor(0xF)
+    if ($sec -and ($sec -notmatch ';;;AU\)')) {{
+        $sec = $sec + '(A;;GRGX;;;AU)'
+        $task.SetSecurityDescriptor($sec, 0)
+    }}
+}} catch {{}}
+"#,
+                TIME_SYNC_TASK_NAME
+            );
+            let _ = std::fs::write(&ps1_path, ps_script);
+            let launcher = format!(
+                "Start-Process powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{}\"' -Verb RunAs -WindowStyle Hidden -Wait",
+                ps1_path.to_string_lossy()
+            );
+            let _ = Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &launcher])
+                .creation_flags(0x0800_0000)
+                .status();
+            let _ = std::fs::remove_file(&ps1_path);
+
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            let _ = tx.send(Ok(is_time_sync_task_registered()));
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            let _ = tx.send(Err("Unsupported operating system".to_string()));
+        }
+    });
+    rx.recv().unwrap_or_else(|_| Err("task setup thread crashed".to_string()))
+}
+
+#[tauri::command]
+async fn remove_time_sync_task() -> Result<bool, String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        #[cfg(target_os = "windows")]
+        {
+            use std::os::windows::process::CommandExt;
+            use std::process::Command;
+            let script = format!(
+                "Start-Process schtasks.exe -ArgumentList '/delete /tn \"{}\" /f' -Verb RunAs -WindowStyle Hidden -Wait",
+                TIME_SYNC_TASK_NAME
+            );
+            let _ = Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &script])
+                .creation_flags(0x0800_0000)
+                .output();
+
+            let _ = tx.send(Ok(!is_time_sync_task_registered()));
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            let _ = tx.send(Err("Unsupported operating system".to_string()));
+        }
+    });
+    rx.recv().unwrap_or_else(|_| Err("task removal thread crashed".to_string()))
+}
+
+#[tauri::command]
+async fn sync_system_clock(app: AppHandle) -> Result<ClockAccuracy, String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let app_for_thread = app.clone();
+    std::thread::spawn(move || {
+        let _ = tx.send(sync_system_clock_internal(&app_for_thread));
+    });
+    rx.recv().unwrap_or_else(|_| Err("sync thread crashed".to_string()))
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -3102,6 +3277,10 @@ pub fn run() {
             open_taskbar_settings,
             open_datetime_properties,
             check_clock_accuracy,
+            get_time_sync_task_status,
+            setup_time_sync_task,
+            remove_time_sync_task,
+            sync_system_clock,
             set_hotkey,
             open_external_url
         ]);

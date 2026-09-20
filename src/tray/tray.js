@@ -165,6 +165,7 @@
         setLbl("lbl-donate", T("tray.donate", "Donate"));
         setLbl("lbl-about", T("tray.about", "About..."));
         setLbl("lbl-check-updates", T("tray.checkUpdates", "Check for Update..."));
+        setLbl("lbl-suite", T("tray.suiteTitle", "More from CyberGems"));
 
         // Header version label
         if (state.version) {
@@ -274,6 +275,63 @@
             setHelpOpen(helpSub.hidden);
         });
     }
+
+    // ── Suite section ───────────────────────────────────────────
+    const suiteToggle = document.getElementById("btn-suite-toggle");
+    const suiteSub = document.getElementById("tray-suite-sub");
+    function setSuiteOpen(open) {
+        if (!suiteSub || !suiteToggle) return;
+        suiteSub.hidden = !open;
+        suiteToggle.setAttribute("aria-expanded", String(open));
+        suiteToggle.classList.toggle("open", open);
+        reportSizeSoon();
+    }
+    if (suiteToggle) {
+        suiteToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSuiteOpen(suiteSub.hidden);
+        });
+    }
+
+    async function loadSuiteTrayItems() {
+        if (!suiteSub) return;
+        try {
+            const res = await fetch("../assets/suite/suite.json");
+            if (!res.ok) return;
+            const data = await res.json();
+            const apps = Array.isArray(data?.apps) ? data.apps : [];
+
+            // Exclude CyberClock
+            const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
+            suiteSub.innerHTML = "";
+
+            for (const app of sisters) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "tray-item tray-sub-item";
+                const img = document.createElement("img");
+                img.className = "tray-sub-item-img";
+                img.src = `../assets/suite/${app.slug}.png`;
+                img.alt = "";
+                const lbl = document.createElement("span");
+                lbl.className = "label";
+                lbl.textContent = app.name;
+                btn.appendChild(img);
+                btn.appendChild(lbl);
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openUrl(app.site || `https://cybergems.org/apps/${app.slug}/`);
+                    setTimeout(() => hideMenu(), 250);
+                });
+                suiteSub.appendChild(btn);
+            }
+        } catch (e) {
+            console.warn("loadSuiteTrayItems error:", e);
+        }
+    }
+    loadSuiteTrayItems();
 
     // Help sub-item handlers: URLs open in the browser, the pin opens
     // Windows settings, about/check-updates open the dedicated About

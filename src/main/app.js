@@ -376,8 +376,10 @@
             sw.style.background = window.CCTint.normalizeSeed(p.seed);
             sw.setAttribute(
                 "data-i18n-attr",
-                `title:settings.appearance.tint.${p.id},aria-label:settings.appearance.tint.${p.id}`,
+                `data-tooltip:settings.appearance.tint.${p.id},aria-label:settings.appearance.tint.${p.id}`,
             );
+            sw.setAttribute("data-tooltip-dir", "up");
+            sw.setAttribute("data-tooltip", p.id);
             sw.addEventListener("click", () => {
                 window.cc.saveSettings({ theme: p.id });
                 applyTint(p.id);
@@ -585,11 +587,15 @@
 
         const clockAccEl = document.getElementById("s-clock-acc");
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
+        const clockAutoSyncEl = document.getElementById("s-clock-auto-sync");
+        if (clockAutoSyncEl) clockAutoSyncEl.checked = s.clockAutoSync === true;
         const displayAutoEl = document.getElementById("s-display-auto");
         if (displayAutoEl) displayAutoEl.checked = s.displayAuto !== false;
         if (typeof syncDisplayAutoUI === "function") syncDisplayAutoUI(s.displayAuto !== false);
         if (typeof renderHotkey === "function") renderHotkey();
         if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
+        if (typeof updateClockDriftBanner === "function") updateClockDriftBanner(s);
+        if (typeof renderTimeSyncSettings === "function") renderTimeSyncSettings();
 
         const langEl = document.getElementById("s-lang");
         if (langEl) langEl.value = s.language || "auto";
@@ -3221,11 +3227,18 @@
     function updateNoteCharCounter() {
         const ta = document.getElementById("note-text");
         const counter = document.getElementById("note-char-counter");
-        if (!ta || !counter) return;
-        const len = ta.value.length;
-        counter.textContent = `${len} / 500`;
-        counter.classList.toggle("warning", len >= 420 && len < 490);
-        counter.classList.toggle("limit", len >= 490);
+        const saveBtn = document.getElementById("note-save");
+        if (!ta) return;
+        const text = ta.value;
+        const len = text.length;
+        if (counter) {
+            counter.textContent = `${len} / 500`;
+            counter.classList.toggle("warning", len >= 420 && len < 490);
+            counter.classList.toggle("limit", len >= 490);
+        }
+        if (saveBtn) {
+            saveBtn.disabled = text.trim().length === 0;
+        }
     }
 
     function openNoteModal(y, m, d) {
@@ -3258,8 +3271,8 @@
     function saveNote() {
         if (!noteEditKey) return;
         const text = document.getElementById("note-text").value.trim();
-        if (text) calNotes[noteEditKey] = text;
-        else delete calNotes[noteEditKey];
+        if (!text) return;
+        calNotes[noteEditKey] = text;
         persistNotes();
         closeNoteModal();
         renderCalendar();
@@ -3296,10 +3309,18 @@
     document
         .getElementById("note-text")
         .addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 saveNote();
             } else if (e.key === "Escape") {
+                e.preventDefault();
+                closeNoteModal();
+            }
+        });
+    document
+        .getElementById("note-overlay")
+        .addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
                 e.preventDefault();
                 closeNoteModal();
             }
@@ -4816,6 +4837,7 @@
 
     function openSettings(targetTab, focusSelector) {
         document.getElementById("s-overlay").classList.add("open");
+        if (typeof renderTimeSyncSettings === "function") renderTimeSyncSettings();
         // Only explicit string tabs switch; raw event objects from direct
         // click bindings must never clear the active tab.
         if (typeof targetTab === "string" && targetTab) {
@@ -4995,16 +5017,30 @@
             updateDialDesignUI(design);
         });
     });
-    document.getElementById("dial-prev")?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        cycleDialDesign(-1);
-        e.currentTarget.blur();
-    });
-    document.getElementById("dial-next")?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        cycleDialDesign(1);
-        e.currentTarget.blur();
-    });
+    const dialPrev = document.getElementById("dial-prev");
+    const dialNext = document.getElementById("dial-next");
+    if (dialPrev) {
+        dialPrev.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dialPrev.classList.add("hide-tooltip");
+            dialPrev.blur();
+            cycleDialDesign(1);
+        });
+        dialPrev.addEventListener("mouseleave", () => {
+            dialPrev.classList.remove("hide-tooltip");
+        });
+    }
+    if (dialNext) {
+        dialNext.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dialNext.classList.add("hide-tooltip");
+            dialNext.blur();
+            cycleDialDesign(-1);
+        });
+        dialNext.addEventListener("mouseleave", () => {
+            dialNext.classList.remove("hide-tooltip");
+        });
+    }
 
 
     // Toggles
@@ -5244,6 +5280,17 @@
     // section. The backend checks on its own (boot retries + every 6h)
     // and notifies when the drift exceeds a minute; this UI only shows
     // the measurement and offers a manual check.
+    function formatDriftString(drift) {
+        if (drift == null) return "";
+        const abs = Math.abs(drift);
+        const driftTxt = abs < 60000 ? (abs / 1000).toFixed(1) + " s"
+            : abs < 3600000 ? Math.round(abs / 60000) + " min"
+            : abs < 86400000 ? Math.round(abs / 3600000) + " h"
+            : Math.round(abs / 86400000) + " d";
+        const sign = drift >= 0 ? "+" : "-";
+        return sign + driftTxt;
+    }
+
     function renderClockAccuracy(s) {
         const el = document.getElementById("s-clock-status");
         if (!el) return;
@@ -5253,15 +5300,59 @@
             el.textContent = window.ccI18n.t("settings.general.clockNever");
             return;
         }
-        const abs = Math.abs(drift);
-        const driftTxt = abs < 60000 ? (abs / 1000).toFixed(1) + " s"
-            : abs < 3600000 ? Math.round(abs / 60000) + " min"
-            : abs < 86400000 ? Math.round(abs / 3600000) + " h"
-            : Math.round(abs / 86400000) + " d";
-        const sign = drift >= 0 ? "+" : "-";
         const when = new Date(at * 1000).toLocaleString();
-        el.textContent = window.ccI18n.t("settings.general.clockDrift") + ": " + sign + driftTxt
+        el.textContent = window.ccI18n.t("settings.general.clockDrift") + ": " + formatDriftString(drift)
             + " · " + window.ccI18n.t("settings.general.clockLastCheck") + ": " + when;
+    }
+
+    let clockDriftBannerDismissed = false;
+
+    function updateClockDriftBanner(s) {
+        const banner = document.getElementById("clock-drift-banner");
+        if (!banner) return;
+        const drift = s ? s.clockDriftMs : null;
+        if (drift != null && Math.abs(drift) > 60000 && !clockDriftBannerDismissed) {
+            const desc = document.getElementById("clock-drift-banner-desc");
+            if (desc) {
+                desc.textContent = window.ccI18n.t("banner.clockDriftMsg", {
+                    drift: formatDriftString(drift)
+                });
+            }
+            banner.hidden = false;
+        } else {
+            banner.hidden = true;
+        }
+    }
+
+    const btnDriftDismiss = document.getElementById("btn-drift-dismiss");
+    if (btnDriftDismiss) {
+        btnDriftDismiss.addEventListener("click", () => {
+            clockDriftBannerDismissed = true;
+            const banner = document.getElementById("clock-drift-banner");
+            if (banner) banner.hidden = true;
+        });
+    }
+
+    const btnDriftSync = document.getElementById("btn-drift-sync");
+    if (btnDriftSync) {
+        btnDriftSync.addEventListener("click", async () => {
+            btnDriftSync.disabled = true;
+            btnDriftSync.classList.add("is-syncing");
+            try {
+                const res = await window.cc.syncSystemClock();
+                if (res && res.drift_ms != null) {
+                    cfg.clockDriftMs = res.drift_ms;
+                    cfg.clockCheckedAt = res.checked_at;
+                    renderClockAccuracy(cfg);
+                    updateClockDriftBanner(cfg);
+                }
+            } catch (e) {
+                console.error("Time sync failed:", e);
+            } finally {
+                btnDriftSync.disabled = false;
+                btnDriftSync.classList.remove("is-syncing");
+            }
+        });
     }
 
     if (window.cc.onClockAccuracy) {
@@ -5275,6 +5366,7 @@
             cfg.clockDriftMs = payload.driftMs;
             cfg.clockCheckedAt = payload.checkedAt;
             renderClockAccuracy(cfg);
+            updateClockDriftBanner(cfg);
         });
     }
 
@@ -5408,6 +5500,103 @@
             } finally {
                 sBtnClockCheck.disabled = false;
                 if (lbl && prev != null) lbl.textContent = prev;
+            }
+        });
+    }
+
+    // Unattended time synchronization settings and actions
+    async function renderTimeSyncSettings() {
+        if (!window.cc || !window.cc.getTimeSyncTaskStatus) return;
+        try {
+            const isRegistered = await window.cc.getTimeSyncTaskStatus();
+            const badge = document.getElementById("s-timesync-task-status");
+            const btnLbl = document.getElementById("s-btn-timesync-task-lbl");
+            const autoRow = document.getElementById("s-row-clock-auto-sync");
+            if (badge) {
+                badge.textContent = window.ccI18n.t(
+                    isRegistered ? "settings.general.timeSyncStatusActive" : "settings.general.timeSyncStatusInactive"
+                );
+                badge.classList.toggle("active", isRegistered);
+            }
+            if (btnLbl) {
+                btnLbl.textContent = window.ccI18n.t(
+                    isRegistered ? "settings.general.timeSyncBtnAuthorized" : "settings.general.timeSyncBtnEnable"
+                );
+            }
+            if (sBtnTimeSyncTask) {
+                sBtnTimeSyncTask.disabled = isRegistered;
+            }
+            if (autoRow) {
+                autoRow.classList.toggle("is-disabled", !isRegistered);
+            }
+        } catch (e) {
+            console.warn("renderTimeSyncSettings error:", e);
+        }
+    }
+
+    const sClockAutoSync = document.getElementById("s-clock-auto-sync");
+    if (sClockAutoSync) {
+        sClockAutoSync.addEventListener("change", (e) => {
+            window.cc.saveSettings({ clockAutoSync: e.target.checked });
+        });
+    }
+
+    const sBtnTimeSyncTask = document.getElementById("s-btn-timesync-task");
+    if (sBtnTimeSyncTask) {
+        sBtnTimeSyncTask.addEventListener("click", async () => {
+            const btnLbl = document.getElementById("s-btn-timesync-task-lbl");
+            const badge = document.getElementById("s-timesync-task-status");
+            sBtnTimeSyncTask.disabled = true;
+            if (btnLbl) btnLbl.textContent = window.ccI18n.t("settings.general.timeSyncAuthorizing");
+            if (badge) badge.textContent = window.ccI18n.t("settings.general.timeSyncAuthorizing");
+            try {
+                const isRegistered = await window.cc.getTimeSyncTaskStatus();
+                if (isRegistered) {
+                    await window.cc.removeTimeSyncTask();
+                } else {
+                    await window.cc.setupTimeSyncTask();
+                }
+                await renderTimeSyncSettings();
+            } catch (e) {
+                console.error("Task setup/remove failed:", e);
+                await renderTimeSyncSettings();
+            } finally {
+                sBtnTimeSyncTask.disabled = false;
+            }
+        });
+    }
+
+    const sBtnSyncTime = document.getElementById("s-btn-sync-time");
+    if (sBtnSyncTime) {
+        sBtnSyncTime.addEventListener("click", async () => {
+            sBtnSyncTime.disabled = true;
+            const statusEl = document.getElementById("s-timesync-run-status");
+            if (statusEl) {
+                statusEl.style.display = "inline-block";
+                statusEl.className = "s-status-badge warning";
+                statusEl.textContent = window.ccI18n.t("settings.general.timeSyncing");
+            }
+            try {
+                const res = await window.cc.syncSystemClock();
+                if (res && res.drift_ms != null) {
+                    cfg.clockDriftMs = res.drift_ms;
+                    cfg.clockCheckedAt = res.checked_at;
+                    renderClockAccuracy(cfg);
+                    updateClockDriftBanner(cfg);
+                    if (statusEl) {
+                        statusEl.className = "s-status-badge active";
+                        statusEl.textContent = window.ccI18n.t("settings.general.timeSyncSuccess");
+                        setTimeout(() => { statusEl.style.display = "none"; }, 4000);
+                    }
+                }
+            } catch (e) {
+                if (statusEl) {
+                    statusEl.className = "s-status-badge warning";
+                    statusEl.textContent = window.ccI18n.t("settings.general.timeSyncError");
+                    setTimeout(() => { statusEl.style.display = "none"; }, 4000);
+                }
+            } finally {
+                sBtnSyncTime.disabled = false;
             }
         });
     }
@@ -5667,6 +5856,100 @@
     document
         .getElementById("btn-close")
         .addEventListener("click", () => window.cc.hideWindow("main"));
+
+    // ── Titlebar Brand (click -> About window) ────────────────
+    const tbarBrand = document.getElementById("tbar-brand");
+    if (tbarBrand) {
+        tbarBrand.addEventListener("click", () => {
+            if (window.cc && window.cc.showAboutWindow) {
+                window.cc.showAboutWindow();
+            }
+        });
+        tbarBrand.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (window.cc && window.cc.showAboutWindow) {
+                    window.cc.showAboutWindow();
+                }
+            }
+        });
+    }
+
+    // ── Titlebar More Menu ────────────────────────────────────
+    const tbarBtnMore = document.getElementById("tbar-btn-more");
+    const tbarMoreMenu = document.getElementById("tbar-more-menu");
+    function hideTbarMoreMenu() {
+        if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
+        tbarMoreMenu.hidden = true;
+        if (tbarBtnMore) {
+            tbarBtnMore.setAttribute("aria-expanded", "false");
+            tbarBtnMore.classList.remove("on");
+        }
+    }
+    function toggleTbarMoreMenu() {
+        if (!tbarMoreMenu) return;
+        const willShow = tbarMoreMenu.hidden;
+        hideAllContextMenus();
+        tbarMoreMenu.hidden = !willShow;
+        if (tbarBtnMore) {
+            tbarBtnMore.setAttribute("aria-expanded", String(willShow));
+            tbarBtnMore.classList.toggle("on", willShow);
+        }
+    }
+    if (tbarBtnMore && tbarMoreMenu) {
+        tbarBtnMore.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleTbarMoreMenu();
+        });
+        document.addEventListener("click", (e) => {
+            if (!tbarMoreMenu.hidden && !tbarMoreMenu.contains(e.target) && e.target !== tbarBtnMore) {
+                hideTbarMoreMenu();
+            }
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && !tbarMoreMenu.hidden) {
+                hideTbarMoreMenu();
+            }
+        });
+
+        tbarMoreMenu.querySelectorAll(".tbar-more-item").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                hideTbarMoreMenu();
+                const action = btn.dataset.action;
+                if (action === "toggle_pin") {
+                    const on = await window.cc.toggleAlwaysOnTop();
+                    btnAot?.classList.toggle("on", on);
+                } else if (action === "mini_mode") {
+                    window.cc.goMini();
+                } else if (action === "time_sync") {
+                    try {
+                        const res = await window.cc.syncSystemClock();
+                        if (res && res.drift_ms != null) {
+                            cfg.clockDriftMs = res.drift_ms;
+                            cfg.clockCheckedAt = res.checked_at;
+                            renderClockAccuracy(cfg);
+                            updateClockDriftBanner(cfg);
+                        }
+                    } catch (err) {
+                        console.error("Time sync from more menu failed:", err);
+                    }
+                } else if (action === "docs") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
+                } else if (action === "website") {
+                    window.cc.openExternalUrl("https://cybergems.org");
+                } else if (action === "donate") {
+                    window.cc.openExternalUrl("https://ko-fi.com/cybergems");
+                } else if (action === "about") {
+                    window.cc.showAboutWindow();
+                } else if (action === "exit") {
+                    if (window.cc && window.cc.trayMenuAction) {
+                        window.cc.trayMenuAction("quit");
+                    }
+                }
+            });
+        });
+    }
 
     // ══════════════════════════════════════════════════════════════
     // CUSTOM CONTEXT MENUS (Full Mode & Text Inputs)

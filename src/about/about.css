@@ -436,3 +436,66 @@ button:focus-visible {
     outline: 2px solid var(--accent-a);
     outline-offset: 1px;
 }
+
+/* ── Suite Showcase ────────────────────────────────────────── */
+.ab-suite-card {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ab-suite-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.ab-suite-btn {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--rgb-accent), 0.05);
+    border: 1px solid rgba(var(--rgb-accent), 0.18);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+.ab-suite-btn:hover {
+    transform: translateY(-2px) scale(1.06);
+    background: rgba(var(--rgb-accent), 0.14);
+    border-color: var(--accent-a);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), var(--glow-xs);
+}
+.ab-suite-btn img {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: block;
+    pointer-events: none;
+}
+.ab-suite-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+}
+.ab-suite-more-btn {
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--accent-a);
+    background: transparent;
+    border: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-radius: 6px;
+    padding: 4px 14px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.ab-suite-more-btn:hover {
+    background: rgba(var(--rgb-accent), 0.15);
+    border-color: var(--accent-a);
+    color: var(--text-hi);
+}
+
