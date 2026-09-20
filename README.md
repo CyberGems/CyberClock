@@ -1,24 +1,19 @@
 <p align="center">
-  <img src="src/assets/images/icon.png" width="120" alt="CyberClock logo" />
-</p>
-
-<h1 align="center">CyberClock: Desktop Clock</h1>
-
-<p align="center">
-  <strong>A premium cyber-neon styled clock for Windows</strong>: analog & digital display, calendar, timer, stopwatch, relaxation module, and independent floating time tools.
+  <a href="https://cybergems.org/apps/cyberclock/">
+    <img src="https://cybergems.org/banners/cyberclock.png" alt="CyberClock — clock, calendar, timer, stopwatch, relaxation and floating time tools for Windows" />
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Download%20CyberClock%20v&suffix=%20&style=for-the-badge&label=&labelColor=1D4ED8&color=1D4ED8" alt="Download Latest Release" /><img src="https://img.shields.io/badge/Windows_64--bit-0078D4?style=for-the-badge" alt="Windows 64-bit" /></a>
-  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/All_releases-2B3137?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" /><img src="https://img.shields.io/badge/Changelog-3B444B?style=for-the-badge" alt="Changelog" /></a>
+  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Download%20CyberClock%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Download Latest Release" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64-bit)" /></a>
+  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/All_releases-30363D?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" /><img src="https://img.shields.io/badge/Changelog-475569?style=for-the-badge" alt="Changelog" /></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-GPL--3.0-1F2428.svg?style=flat-square&color=1D4ED8" alt="License" />&nbsp;
-  <img src="https://img.shields.io/badge/Platform-Windows-1F2428.svg?style=flat-square&color=0078D4" alt="Platform" />&nbsp;
-  <img src="https://img.shields.io/badge/Tauri-2-1F2428.svg?style=flat-square&logo=tauri&logoColor=white&color=47848F" alt="Tauri" />&nbsp;
-  <img src="https://img.shields.io/badge/Rust-1.77+-1F2428.svg?style=flat-square&logo=rust&logoColor=white&color=47848F" alt="Rust" />&nbsp;
-  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=1D4ED8" alt="Wiki" /></a>
+  <img src="https://img.shields.io/badge/License-GPL--3.0-1F2428.svg?style=flat-square&color=334155" alt="License" />&nbsp;
+  <img src="https://img.shields.io/badge/Platform-Windows_10%2F11-1F2428.svg?style=flat-square&color=334155" alt="Platform" />&nbsp;
+  <img src="https://img.shields.io/badge/Tauri-2-1F2428.svg?style=flat-square&logo=tauri&logoColor=white&color=334155" alt="Tauri" />&nbsp;
+  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>
 </p>
 
 A feature-rich desktop clock application with a futuristic neon aesthetic. CyberClock combines practical utilities (clock, calendar, timer, stopwatch) with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness. Built with **Tauri v2** and **Rust**.
