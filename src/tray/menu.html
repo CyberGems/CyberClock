@@ -17,158 +17,191 @@
     <body>
         <div class="tray-root" id="tray-root">
             <div class="tray-card" role="menu">
-                <!-- Header (suite-standard branding: icon + name, click -> About) -->
-                <button type="button" class="tray-header" data-action="about-modal" title="CyberClock: About" id="btn-about">
-                    <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
-                    <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.5.0</span></span>
-                </button>
+                <div class="tray-deck" id="tray-deck" data-view="main">
+                    <!-- ── MAIN VIEW ── -->
+                    <div class="tray-view" id="view-main">
+                        <!-- Header (suite-standard branding: icon + name, click -> About) -->
+                        <button type="button" class="tray-header" data-action="about-modal" title="CyberClock: About" id="btn-about">
+                            <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
+                            <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.6.0</span></span>
+                        </button>
 
-                <div class="tray-divider"></div>
+                        <div class="tray-divider"></div>
 
-                <!-- Primary Controls -->
-                <div class="tray-group">
-                    <button type="button" class="tray-item" data-action="toggle_visibility" id="btn-visibility">
-                        <span class="ico" data-ico="eye" id="ico-visibility"></span>
-                        <span class="label" id="lbl-visibility">Show Clock</span>
-                        <!-- Hint of the configured global show/hide hotkey;
-                             hidden when the shortcut is disabled -->
-                        <span class="hotkey-hint" id="hint-visibility" hidden>Alt+Shift+C</span>
-                    </button>
+                        <!-- Primary Controls -->
+                        <div class="tray-group">
+                            <button type="button" class="tray-item" data-action="toggle_visibility" id="btn-visibility">
+                                <span class="ico" data-ico="eye" id="ico-visibility"></span>
+                                <span class="label" id="lbl-visibility">Show Clock</span>
+                                <span class="hotkey-hint" id="hint-visibility" hidden>Alt+Shift+C</span>
+                            </button>
 
-                    <button type="button" class="tray-item" data-action="toggle_mode" id="btn-mode">
-                        <span class="ico" data-ico="expand" id="ico-mode"></span>
-                        <span class="label" id="lbl-mode">Switch to Full Mode</span>
-                    </button>
-                </div>
+                            <button type="button" class="tray-item" data-action="toggle_mode" id="btn-mode">
+                                <span class="ico" data-ico="expand" id="ico-mode"></span>
+                                <span class="label" id="lbl-mode">Switch to Full Mode</span>
+                            </button>
+                        </div>
 
-                <div class="tray-divider"></div>
+                        <div class="tray-divider"></div>
 
-                <!-- Navigation Group -->
-                <div class="tray-group">
-                    <button type="button" class="tray-item" data-action="new_timer">
-                        <span class="ico" data-ico="timer"></span>
-                        <span class="label" id="lbl-timer">New Timer</span>
-                    </button>
+                        <!-- Navigation Group -->
+                        <div class="tray-group">
+                            <button type="button" class="tray-item" data-action="new_timer">
+                                <span class="ico" data-ico="timer"></span>
+                                <span class="label" id="lbl-timer">New Timer</span>
+                            </button>
 
-                    <button type="button" class="tray-item" data-action="new_stopwatch">
-                        <span class="ico" data-ico="stopwatch"></span>
-                        <span class="label" id="lbl-stopwatch">New Stopwatch</span>
-                    </button>
+                            <button type="button" class="tray-item" data-action="new_stopwatch">
+                                <span class="ico" data-ico="stopwatch"></span>
+                                <span class="label" id="lbl-stopwatch">New Stopwatch</span>
+                            </button>
 
-                    <button type="button" class="tray-item" data-action="relax">
-                        <span class="ico" data-ico="lotus"></span>
-                        <span class="label" id="lbl-relax">Relax</span>
-                    </button>
+                            <button type="button" class="tray-item" data-action="relax">
+                                <span class="ico" data-ico="lotus"></span>
+                                <span class="label" id="lbl-relax">Relax</span>
+                            </button>
 
-                    <!-- Relax quick toggle: shows the live track and
-                         play/pauses without leaving the current view -->
-                    <button type="button" class="tray-item tray-relax-toggle" id="btn-relax-toggle" hidden>
-                        <span class="ico" data-ico="pause" id="ico-relax-toggle"></span>
-                        <span class="label" id="lbl-relax-toggle">Pause relax</span>
-                    </button>
+                            <button type="button" class="tray-item tray-relax-toggle" id="btn-relax-toggle" hidden>
+                                <span class="ico" data-ico="pause" id="ico-relax-toggle"></span>
+                                <span class="label" id="lbl-relax-toggle">Pause relax</span>
+                            </button>
 
-                    <button type="button" class="tray-item" data-action="settings">
-                        <span class="ico" data-ico="gear"></span>
-                        <span class="label" id="lbl-settings">Settings...</span>
-                    </button>
-                </div>
+                            <button type="button" class="tray-item" data-action="settings">
+                                <span class="ico" data-ico="gear"></span>
+                                <span class="label" id="lbl-settings">Settings...</span>
+                            </button>
+                        </div>
 
-                <div class="tray-divider"></div>
+                        <div class="tray-divider"></div>
 
-                <!-- Mini Zoom + Click-through -->
-                <div class="tray-group">
-                    <div class="tray-slider-row">
-                        <span class="tray-slider-lbl" id="lbl-zoom">Zoom</span>
-                        <input type="range" id="tray-zoom" min="0" max="3" step="1" value="1" aria-label="Mini clock zoom" />
-                        <span class="tray-slider-val" id="tray-zoom-val">100%</span>
+                        <!-- Mini Zoom + Click-through -->
+                        <div class="tray-group">
+                            <div class="tray-slider-row">
+                                <span class="tray-slider-lbl" id="lbl-zoom">Zoom</span>
+                                <input type="range" id="tray-zoom" min="0" max="3" step="1" value="1" aria-label="Mini clock zoom" />
+                                <span class="tray-slider-val" id="tray-zoom-val">100%</span>
+                            </div>
+                            <button type="button" class="tray-item" id="btn-clickthrough" aria-pressed="false">
+                                <span class="ico" data-ico="eye-off" id="ico-clickthrough"></span>
+                                <span class="label" id="lbl-clickthrough">Click-through</span>
+                                <span class="audio-dot" id="clickthrough-dot" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <!-- Master audio mute -->
+                        <div class="tray-group">
+                            <button type="button" class="tray-item" id="btn-audio" aria-pressed="false">
+                                <span class="ico" data-ico="volume-high" id="ico-audio"></span>
+                                <span class="label" id="lbl-audio">Sound</span>
+                                <span class="audio-dot" id="audio-dot" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <!-- Submenu Drill-Down Links -->
+                        <div class="tray-group">
+                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-help">
+                                <span class="ico" data-ico="help"></span>
+                                <span class="label" id="lbl-help">Help</span>
+                                <span class="tray-nav-arrow" data-ico="back"></span>
+                            </button>
+
+                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-suite">
+                                <span class="ico" data-ico="gem"></span>
+                                <span class="label" id="lbl-suite">More from CyberGems</span>
+                                <span class="tray-nav-arrow" data-ico="back"></span>
+                            </button>
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <!-- Exit Group -->
+                        <div class="tray-group tray-group-exit">
+                            <button type="button" class="tray-item tray-item-exit" data-action="quit">
+                                <span class="ico" data-ico="power"></span>
+                                <span class="label" id="lbl-quit">Exit</span>
+                            </button>
+                        </div>
                     </div>
-                    <button type="button" class="tray-item" id="btn-clickthrough" aria-pressed="false">
-                        <span class="ico" data-ico="eye-off" id="ico-clickthrough"></span>
-                        <span class="label" id="lbl-clickthrough">Click-through</span>
-                        <span class="audio-dot" id="clickthrough-dot" aria-hidden="true"></span>
-                    </button>
-                </div>
 
-                <div class="tray-divider"></div>
+                    <!-- ── HELP SUB-VIEW ── -->
+                    <div class="tray-view tray-view-sub" id="view-help">
+                        <div class="tray-sub-header">
+                            <button type="button" class="tray-back-btn" id="btn-back-help">
+                                <span class="ico" data-ico="back"></span>
+                                <span class="label" id="lbl-back-help">Back</span>
+                            </button>
+                            <span class="tray-sub-title" id="lbl-help-title">Help</span>
+                        </div>
 
-                <!-- Master audio mute -->
-                <div class="tray-group">
-                    <button type="button" class="tray-item" id="btn-audio" aria-pressed="false">
-                        <span class="ico" data-ico="volume-high" id="ico-audio"></span>
-                        <span class="label" id="lbl-audio">Sound</span>
-                        <span class="audio-dot" id="audio-dot" aria-hidden="true"></span>
-                    </button>
-                </div>
+                        <div class="tray-divider"></div>
 
-                <div class="tray-divider"></div>
-
-                <!-- Help (expandable section, CyberLauncher-style) -->
-                <div class="tray-group">
-                    <button type="button" class="tray-item tray-help-toggle" id="btn-help-toggle" aria-expanded="false">
-                        <span class="ico" data-ico="help"></span>
-                        <span class="label" id="lbl-help">Help</span>
-                        <span class="chev" data-ico="back"></span>
-                    </button>
-                    <div class="tray-help-sub" id="tray-help-sub" hidden>
-                        <button type="button" class="tray-item tray-sub-item" data-action="pin-tray-icon">
-                            <span class="ico" data-ico="pin"></span>
-                            <span class="label" id="lbl-pin-tray">Pin icon to taskbar...</span>
-                        </button>
-                        <button type="button" class="tray-item tray-sub-item" data-action="datetime-properties">
-                            <span class="ico" data-ico="clock"></span>
-                            <span class="label" id="lbl-datetime">Date and time properties...</span>
-                        </button>
-                        <div class="tray-sub-sep"></div>
-                        <button type="button" class="tray-item tray-sub-item" data-action="faq">
-                            <span class="ico" data-ico="faq"></span>
-                            <span class="label" id="lbl-faq">FAQ</span>
-                        </button>
-                        <button type="button" class="tray-item tray-sub-item" data-action="changelog">
-                            <span class="ico" data-ico="changelog"></span>
-                            <span class="label" id="lbl-changelog">Changelog</span>
-                        </button>
-                        <button type="button" class="tray-item tray-sub-item" data-action="website">
-                            <span class="ico" data-ico="globe"></span>
-                            <span class="label" id="lbl-website">Website</span>
-                        </button>
-                        <button type="button" class="tray-item tray-sub-item" data-action="donate">
-                            <span class="ico ico-heart" data-ico="heart"></span>
-                            <span class="label" id="lbl-donate">Donate</span>
-                        </button>
-                        <div class="tray-sub-sep"></div>
-                        <button type="button" class="tray-item tray-sub-item" data-action="about-modal">
-                            <span class="ico" data-ico="info"></span>
-                            <span class="label" id="lbl-about">About...</span>
-                        </button>
-                        <button type="button" class="tray-item tray-sub-item" data-action="check-updates">
-                            <span class="ico" data-ico="refresh"></span>
-                            <span class="label" id="lbl-check-updates">Check for Update...</span>
-                        </button>
+                        <div class="tray-group">
+                            <button type="button" class="tray-item tray-sub-item" data-action="pin-tray-icon">
+                                <span class="ico" data-ico="pin"></span>
+                                <span class="label" id="lbl-pin-tray">Pin icon to taskbar...</span>
+                            </button>
+                            <button type="button" class="tray-item tray-sub-item" data-action="datetime-properties">
+                                <span class="ico" data-ico="clock"></span>
+                                <span class="label" id="lbl-datetime">Date and time properties...</span>
+                            </button>
+                            <div class="tray-sub-sep"></div>
+                            <button type="button" class="tray-item tray-sub-item" data-action="faq">
+                                <span class="ico" data-ico="faq"></span>
+                                <span class="label" id="lbl-faq">FAQ</span>
+                            </button>
+                            <button type="button" class="tray-item tray-sub-item" data-action="changelog">
+                                <span class="ico" data-ico="changelog"></span>
+                                <span class="label" id="lbl-changelog">Changelog</span>
+                            </button>
+                            <button type="button" class="tray-item tray-sub-item" data-action="website">
+                                <span class="ico" data-ico="globe"></span>
+                                <span class="label" id="lbl-website">Website</span>
+                            </button>
+                            <button type="button" class="tray-item tray-sub-item" data-action="donate">
+                                <span class="ico ico-heart" data-ico="heart"></span>
+                                <span class="label" id="lbl-donate">Donate</span>
+                            </button>
+                            <div class="tray-sub-sep"></div>
+                            <button type="button" class="tray-item tray-sub-item" data-action="about-modal">
+                                <span class="ico" data-ico="info"></span>
+                                <span class="label" id="lbl-about">About...</span>
+                            </button>
+                            <button type="button" class="tray-item tray-sub-item" data-action="check-updates">
+                                <span class="ico" data-ico="refresh"></span>
+                                <span class="label" id="lbl-check-updates">Check for Update...</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="tray-divider" id="tray-divider-suite"></div>
+                    <!-- ── SUITE SUB-VIEW ── -->
+                    <div class="tray-view tray-view-sub" id="view-suite">
+                        <div class="tray-sub-header">
+                            <button type="button" class="tray-back-btn" id="btn-back-suite">
+                                <span class="ico" data-ico="back"></span>
+                                <span class="label" id="lbl-back-suite">Back</span>
+                            </button>
+                            <span class="tray-sub-title" id="lbl-suite-title">CyberGems</span>
+                        </div>
 
-                <!-- Suite Group (CyberNotes style) -->
-                <div class="tray-group" id="tray-group-suite">
-                    <button type="button" class="tray-item tray-help-toggle" id="btn-suite-toggle" aria-expanded="false">
-                        <span class="ico" data-ico="gem"></span>
-                        <span class="label" id="lbl-suite">More from CyberGems</span>
-                        <span class="chev" data-ico="back"></span>
-                    </button>
-                    <div class="tray-help-sub tray-suite-sub" id="tray-suite-sub" hidden>
-                        <!-- Populated dynamically from suite-data.js -->
+                        <div class="tray-divider"></div>
+
+                        <div class="tray-group tray-suite-list" id="tray-suite-list">
+                            <!-- Populated dynamically from suite-data.js -->
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <div class="tray-group">
+                            <button type="button" class="tray-item tray-suite-all-btn" id="btn-suite-more">
+                                <span class="ico" data-ico="globe"></span>
+                                <span class="label" id="lbl-suite-all">View all at cybergems.org →</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="tray-divider"></div>
-
-                <!-- Exit Group -->
-                <div class="tray-group tray-group-exit">
-                    <button type="button" class="tray-item tray-item-exit" data-action="quit">
-                        <span class="ico" data-ico="power"></span>
-                        <span class="label" id="lbl-quit">Exit</span>
-                    </button>
                 </div>
             </div>
             <!-- About opens the dedicated About window (backend routes the

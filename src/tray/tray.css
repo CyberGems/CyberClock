@@ -281,58 +281,127 @@
         box-shadow: 0 0 6px rgba(32, 191, 223, 0.7);
     }
 
-    /* ── Help section (expandable, CyberLauncher-style) ──────── */
-    .tray-help-toggle .chev {
+    /* ── Drill-down Sliding Views ───────────────────────────── */
+    .tray-deck {
+        width: 100%;
+        position: relative;
+    }
+    .tray-view {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Active view visibility & smooth slide transitions */
+    .tray-deck[data-view="main"] #view-main {
+        display: block;
+        animation: trayViewFade 0.16s ease;
+    }
+    .tray-deck[data-view="main"] #view-help,
+    .tray-deck[data-view="main"] #view-suite {
+        display: none;
+    }
+
+    .tray-deck[data-view="help"] #view-main,
+    .tray-deck[data-view="suite"] #view-main {
+        display: none;
+    }
+
+    .tray-deck[data-view="help"] #view-help {
+        display: block;
+        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tray-deck[data-view="help"] #view-suite {
+        display: none;
+    }
+
+    .tray-deck[data-view="suite"] #view-suite {
+        display: block;
+        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tray-deck[data-view="suite"] #view-help {
+        display: none;
+    }
+
+    @keyframes trayViewSlideRight {
+        from {
+            opacity: 0;
+            transform: translateX(22px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    @keyframes trayViewFade {
+        from {
+            opacity: 0;
+            transform: translateX(-16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Drill-down navigation items on main view */
+    .tray-nav-item .tray-nav-arrow {
         margin-left: auto;
         color: var(--text-lo);
-        transform: rotate(-90deg);
-        transition: transform 0.15s ease;
+        transform: rotate(180deg);
+        width: 14px;
+        height: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.15s ease, color 0.15s ease;
     }
-    .tray-help-toggle.open .chev {
-        transform: rotate(90deg);
+    .tray-nav-item:hover .tray-nav-arrow {
+        color: var(--accent-a);
+        transform: rotate(180deg) translateX(-2px);
     }
-    .tray-help-sub {
+
+    /* Sub-view header with back button */
+    .tray-sub-header {
         display: flex;
-        flex-direction: column;
-        gap: 1px;
-        margin: 2px 0 2px 8px;
-        padding-left: 8px;
-        border-left: 1px solid var(--border);
-        max-height: 220px;
-        overflow-y: auto;
-        overflow-x: hidden !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 8px 5px;
+        min-height: 36px;
+        box-sizing: border-box;
     }
-    .tray-suite-sub {
-        max-height: 180px;
-        overflow-y: auto;
-        overflow-x: hidden !important;
+    .tray-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(var(--rgb-accent), 0.08);
+        border: 1px solid rgba(var(--rgb-accent), 0.22);
+        border-radius: 8px;
+        color: var(--accent-a);
+        padding: 4px 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s, transform 0.12s, color 0.15s, border-color 0.15s;
     }
-    .tray-help-sub::-webkit-scrollbar,
-    .tray-suite-sub::-webkit-scrollbar,
-    .tray-card::-webkit-scrollbar {
-        width: 4px;
+    .tray-back-btn:hover {
+        background: rgba(var(--rgb-accent), 0.18);
+        border-color: var(--accent-a);
+        color: #ffffff;
+        transform: translateX(-2px);
     }
-    ::-webkit-scrollbar:horizontal {
-        display: none !important;
-        height: 0 !important;
-        width: 0 !important;
+    .tray-back-btn .ico {
+        width: 13px;
+        height: 13px;
+        display: inline-flex;
     }
-    .tray-help-sub::-webkit-scrollbar-track,
-    .tray-suite-sub::-webkit-scrollbar-track,
-    .tray-card::-webkit-scrollbar-track {
-        background: transparent;
+    .tray-sub-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-md);
+        letter-spacing: 0.3px;
     }
-    .tray-help-sub::-webkit-scrollbar-thumb,
-    .tray-suite-sub::-webkit-scrollbar-thumb,
-    .tray-card::-webkit-scrollbar-thumb {
-        background: rgba(var(--rgb-accent), 0.25);
-        border-radius: 4px;
-    }
-    .tray-help-sub::-webkit-scrollbar-thumb:hover,
-    .tray-suite-sub::-webkit-scrollbar-thumb:hover,
-    .tray-card::-webkit-scrollbar-thumb:hover {
-        background: rgba(var(--rgb-accent), 0.5);
-    }
+
     .tray-sub-item {
         min-height: 26px;
         font-size: 11.5px;
@@ -348,11 +417,11 @@
         height: 14px;
     }
     .tray-sub-item-img {
-        width: 14px;
-        height: 14px;
-        border-radius: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
         flex-shrink: 0;
-        margin-right: 2px;
+        margin-right: 4px;
         display: block;
     }
     .tray-sub-sep {
@@ -364,6 +433,48 @@
     .tray-sub-item .ico.ico-heart {
         color: #f43f5e;
         filter: drop-shadow(0 0 4px rgba(244, 63, 94, 0.45));
+    }
+
+    /* Suite list & view all button */
+    .tray-suite-list {
+        max-height: 310px;
+        overflow-y: auto;
+        overflow-x: hidden !important;
+    }
+    .tray-suite-list::-webkit-scrollbar,
+    .tray-card::-webkit-scrollbar {
+        width: 4px;
+    }
+    ::-webkit-scrollbar:horizontal {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+    .tray-suite-list::-webkit-scrollbar-track,
+    .tray-card::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .tray-suite-list::-webkit-scrollbar-thumb,
+    .tray-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--rgb-accent), 0.25);
+        border-radius: 4px;
+    }
+    .tray-suite-list::-webkit-scrollbar-thumb:hover,
+    .tray-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--rgb-accent), 0.5);
+    }
+    .tray-suite-all-btn {
+        font-size: 11px;
+        color: var(--accent-a);
+        justify-content: center;
+        border: 1px solid rgba(var(--rgb-accent), 0.15);
+        border-radius: 8px;
+        background: rgba(var(--rgb-accent), 0.04);
+    }
+    .tray-suite-all-btn:hover {
+        background: rgba(var(--rgb-accent), 0.14);
+        border-color: var(--accent-a);
+        color: #ffffff;
     }
 
     .tray-item-exit .ico {
