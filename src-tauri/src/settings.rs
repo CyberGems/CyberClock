@@ -160,6 +160,7 @@ pub struct AppSettings {
     pub clock_auto_sync: bool,
     pub clock_drift_ms: Option<i64>,
     pub clock_checked_at: Option<i64>,
+    pub show_suite_recommendations: bool,
 }
 
 impl Default for AppSettings {
@@ -223,6 +224,7 @@ impl Default for AppSettings {
             clock_auto_sync: false,
             clock_drift_ms: None,
             clock_checked_at: None,
+            show_suite_recommendations: true,
         }
     }
 }

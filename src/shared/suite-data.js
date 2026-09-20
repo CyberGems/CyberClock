@@ -1,0 +1,121 @@
+/**
+ * CyberGems Suite — Catalog of sister apps.
+ * Bundled as a synchronous JS module to avoid async fetch / CORS issues in webviews.
+ * CyberGems © 2026
+ */
+window.CC_SUITE_DATA = {
+    updated: "2026-09-18",
+    count: 10,
+    apps: [
+        {
+            slug: "cyberclock",
+            name: "CyberClock",
+            tagline: {
+                en: "Clock, calendar, timer, stopwatch, relaxation, and compact floating time tools for Windows.",
+                es: "Reloj, calendario, temporizador, cronómetro, relajación y herramientas flotantes compactas para Windows."
+            },
+            site: "https://cybergems.org/apps/cyberclock/",
+            repo: "https://github.com/CyberGems/CyberClock",
+            wiki: "https://github.com/CyberGems/CyberClock/wiki"
+        },
+        {
+            slug: "cyberfeeds",
+            name: "CyberFeeds",
+            tagline: {
+                en: "A local-first RSS & Atom reader built for speed, privacy and clean reading.",
+                es: "Un lector RSS y Atom local-first creado para la velocidad, la privacidad y la lectura limpia."
+            },
+            site: "https://cybergems.org/apps/cyberfeeds/",
+            repo: "https://github.com/CyberGems/CyberFeeds",
+            wiki: "https://github.com/CyberGems/CyberFeeds/wiki"
+        },
+        {
+            slug: "cyberlauncher",
+            name: "CyberLauncher",
+            tagline: {
+                en: "Windows application launcher with hot corners, scheduler, system monitor, glassmorphic UI and integrated terminal.",
+                es: "Lanzador de aplicaciones con esquinas activas, programador, monitor del sistema, interfaz glassmórfica y terminal integrada."
+            },
+            site: "https://cybergems.org/apps/cyberlauncher/",
+            repo: "https://github.com/CyberGems/CyberLauncher",
+            wiki: "https://github.com/CyberGems/CyberLauncher/wiki"
+        },
+        {
+            slug: "cybermanager",
+            name: "CyberManager",
+            tagline: {
+                en: "Lightweight, high-capacity virtualized task manager with instant search and compact mode.",
+                es: "Gestor de tareas ligero y virtualizado de alta capacidad, con búsqueda instantánea y modo compacto."
+            },
+            site: "https://cybergems.org/apps/cybermanager/",
+            repo: "https://github.com/CyberGems/CyberManager",
+            wiki: "https://github.com/CyberGems/CyberManager/wiki"
+        },
+        {
+            slug: "cybernotes",
+            name: "CyberNotes",
+            tagline: {
+                en: "Privacy-focused note-taking app with rich text, folders, tabs and floating notes.",
+                es: "App de notas centrada en la privacidad con texto enriquecido, carpetas, pestañas y notas flotantes."
+            },
+            site: "https://cybergems.org/apps/cybernotes/",
+            repo: "https://github.com/CyberGems/CyberNotes",
+            wiki: "https://github.com/CyberGems/CyberNotes/wiki"
+        },
+        {
+            slug: "cyberpaste",
+            name: "CyberPaste",
+            tagline: {
+                en: "Recall anything you have ever copied: text, code, images, files: 100% local.",
+                es: "Recupera todo lo que hayas copiado: texto, código, imágenes, archivos: 100% local."
+            },
+            site: "https://cybergems.org/apps/cyberpaste/",
+            repo: "https://github.com/CyberGems/CyberPaste",
+            wiki: "https://github.com/CyberGems/CyberPaste/wiki"
+        },
+        {
+            slug: "cybersnap",
+            name: "CyberSnap",
+            tagline: {
+                en: "Screen capture and annotation suite with vector tools, high-speed OCR, screen recording and color picker.",
+                es: "Suite de captura y anotación con herramientas vectoriales, OCR de alta velocidad, grabación de pantalla y selector de color."
+            },
+            site: "https://cybergems.org/apps/cybersnap/",
+            repo: "https://github.com/CyberGems/CyberSnap",
+            wiki: "https://github.com/CyberGems/CyberSnap/wiki"
+        },
+        {
+            slug: "cybertray",
+            name: "CyberTray",
+            tagline: {
+                en: "High-performance tray launcher with hotspots, system monitoring, process manager and PIN-protected file vault.",
+                es: "Lanzador en bandeja de alto rendimiento con zonas activas, monitor del sistema, gestor de procesos y bóveda con PIN."
+            },
+            site: "https://cybergems.org/apps/cybertray/",
+            repo: "https://github.com/CyberGems/CyberTray",
+            wiki: "https://github.com/CyberGems/CyberTray/wiki"
+        },
+        {
+            slug: "cyberviewer",
+            name: "CyberViewer",
+            tagline: {
+                en: "A fast, lightweight image viewer with the essential editing tools built in.",
+                es: "Un visor de imágenes rápido y ligero con las herramientas de edición esenciales integradas."
+            },
+            site: "https://cybergems.org/apps/cyberviewer/",
+            repo: "https://github.com/CyberGems/CyberViewer",
+            wiki: "https://github.com/CyberGems/CyberViewer/wiki"
+        },
+        {
+            slug: "cyberwall",
+            name: "CyberWall",
+            tagline: {
+                en: "A per-application firewall powered by the WFP kernel engine. Default deny, real-time prompts.",
+                es: "Un firewall por aplicación impulsado por el motor kernel WFP. Denegación por defecto, avisos en tiempo real."
+            },
+            site: "https://cybergems.org/apps/cyberwall/",
+            repo: "https://github.com/CyberGems/CyberWall",
+            wiki: "https://github.com/CyberGems/CyberWall/wiki"
+        }
+    ]
+};

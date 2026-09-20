@@ -32,13 +32,22 @@
         -webkit-backdrop-filter: blur(28px) saturate(1.8);
         border: 1px solid var(--border);
         border-radius: 16px;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: calc(100vh - 40px);
         position: relative;
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.55),
             0 0 20px rgba(var(--rgb-accent), 0.12),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
         animation: tray-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tray-card::-webkit-scrollbar {
+        width: 4px;
+    }
+    .tray-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--rgb-accent), 0.3);
+        border-radius: 2px;
     }
 
     @keyframes tray-fade-in {

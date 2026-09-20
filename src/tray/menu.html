@@ -11,13 +11,14 @@
         <script src="../shared/tint.js"></script>
         <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
+        <script src="../shared/suite-data.js"></script>
         <link rel="stylesheet" href="tray.css" />
     </head>
     <body>
         <div class="tray-root" id="tray-root">
             <div class="tray-card" role="menu">
                 <!-- Header (suite-standard branding: icon + name, click -> About) -->
-                <button type="button" class="tray-header" data-action="about-modal" title="CyberClock — About" id="btn-about">
+                <button type="button" class="tray-header" data-action="about-modal" title="CyberClock: About" id="btn-about">
                     <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
                     <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.5.0</span></span>
                 </button>
@@ -146,17 +147,17 @@
                     </div>
                 </div>
 
-                <div class="tray-divider"></div>
+                <div class="tray-divider" id="tray-divider-suite"></div>
 
                 <!-- Suite Group (CyberNotes style) -->
-                <div class="tray-group">
+                <div class="tray-group" id="tray-group-suite">
                     <button type="button" class="tray-item tray-help-toggle" id="btn-suite-toggle" aria-expanded="false">
                         <span class="ico" data-ico="gem"></span>
                         <span class="label" id="lbl-suite">More from CyberGems</span>
                         <span class="chev" data-ico="back"></span>
                     </button>
                     <div class="tray-help-sub tray-suite-sub" id="tray-suite-sub" hidden>
-                        <!-- Populated dynamically from suite.json -->
+                        <!-- Populated dynamically from suite-data.js -->
                     </div>
                 </div>
 

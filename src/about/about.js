@@ -50,7 +50,7 @@
     let updatePortable = false;
     let updateMsStore = false;
 
-    // ── Theme / language / auto-update toggle ───────────────
+    // ── Theme / language / auto-update toggle / suite showcase ──
     function applySettings(s) {
         window.CCTint.apply(s.theme || "ice");
         if (window.ccI18n) {
@@ -59,6 +59,13 @@
         }
         const autoEl = document.getElementById("ab-autoup");
         if (autoEl) autoEl.checked = s.autoUpdate !== false;
+
+        const showSuite = s.showSuiteRecommendations !== false;
+        const suiteLabel = document.getElementById("ab-suite-label");
+        const suiteCard = document.getElementById("ab-suite-card");
+        if (suiteLabel) suiteLabel.style.display = showSuite ? "" : "none";
+        if (suiteCard) suiteCard.style.display = showSuite ? "" : "none";
+
         renderUpdateState();
     }
 
@@ -285,7 +292,7 @@
     }
 
     // ── CyberGems Suite Showcase ──────────────────────────────
-    async function initSuiteShowcase() {
+    function initSuiteShowcase() {
         const grid = document.getElementById("ab-suite-grid");
         const moreBtn = document.getElementById("ab-suite-more");
         if (moreBtn) {
@@ -294,39 +301,50 @@
         if (!grid) return;
 
         try {
-            const res = await fetch("../assets/suite/suite.json");
-            if (!res.ok) return;
-            const data = await res.json();
-            const apps = Array.isArray(data?.apps) ? data.apps : [];
-            const lang = window.ccI18n ? window.ccI18n.getLanguage() : "en";
-            const isEs = lang === "es";
-
-            // Exclude CyberClock from its own showcase
-            const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
-            grid.innerHTML = "";
-
-            for (const app of sisters) {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "ab-suite-btn";
-                const pitch = (isEs ? app.tagline?.es : app.tagline?.en) || app.name;
-                btn.title = `${app.name} — ${pitch}`;
-                btn.setAttribute("aria-label", btn.title);
-
-                const img = document.createElement("img");
-                img.src = `../assets/suite/${app.slug}.png`;
-                img.alt = app.name;
-                btn.appendChild(img);
-
-                btn.addEventListener("click", () => {
-                    const target = app.site || `https://cybergems.org/apps/${app.slug}/`;
-                    openUrl(target);
-                });
-
-                grid.appendChild(btn);
+            let apps = window.CC_SUITE_DATA ? window.CC_SUITE_DATA.apps : null;
+            if (!Array.isArray(apps) || !apps.length) {
+                // Fallback attempt
+                fetch("../assets/suite/suite.json")
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (Array.isArray(data?.apps)) renderSuiteButtons(grid, data.apps);
+                    })
+                    .catch(() => {});
+                return;
             }
+            renderSuiteButtons(grid, apps);
         } catch (e) {
             console.warn("Could not load suite showcase:", e);
+        }
+    }
+
+    function renderSuiteButtons(grid, apps) {
+        const lang = window.ccI18n ? window.ccI18n.getLanguage() : "en";
+        const isEs = lang === "es";
+
+        // Exclude CyberClock from its own showcase
+        const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
+        grid.innerHTML = "";
+
+        for (const app of sisters) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "ab-suite-btn";
+            const pitch = (isEs ? app.tagline?.es : app.tagline?.en) || app.name;
+            btn.title = `${app.name}: ${pitch}`;
+            btn.setAttribute("aria-label", btn.title);
+
+            const img = document.createElement("img");
+            img.src = `../assets/suite/${app.slug}.png`;
+            img.alt = app.name;
+            btn.appendChild(img);
+
+            btn.addEventListener("click", () => {
+                const target = app.site || `https://cybergems.org/apps/${app.slug}/`;
+                openUrl(target);
+            });
+
+            grid.appendChild(btn);
         }
     }
     initSuiteShowcase();

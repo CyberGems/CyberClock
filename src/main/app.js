@@ -584,6 +584,8 @@
         if (suMiniEl) suMiniEl.checked = s.startInMiniMode !== false;
         const audioMuteEl = document.getElementById("s-audio-mute");
         if (audioMuteEl) audioMuteEl.checked = s.audioMuted === true;
+        const showSuiteEl = document.getElementById("s-show-suite");
+        if (showSuiteEl) showSuiteEl.checked = s.showSuiteRecommendations !== false;
 
         const clockAccEl = document.getElementById("s-clock-acc");
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
@@ -5526,6 +5528,9 @@
             if (sBtnTimeSyncTask) {
                 sBtnTimeSyncTask.disabled = isRegistered;
             }
+            if (sClockAutoSync) {
+                sClockAutoSync.disabled = !isRegistered;
+            }
             if (autoRow) {
                 autoRow.classList.toggle("is-disabled", !isRegistered);
             }
@@ -5538,6 +5543,13 @@
     if (sClockAutoSync) {
         sClockAutoSync.addEventListener("change", (e) => {
             window.cc.saveSettings({ clockAutoSync: e.target.checked });
+        });
+    }
+
+    const sShowSuite = document.getElementById("s-show-suite");
+    if (sShowSuite) {
+        sShowSuite.addEventListener("change", (e) => {
+            window.cc.saveSettings({ showSuiteRecommendations: e.target.checked });
         });
     }
 

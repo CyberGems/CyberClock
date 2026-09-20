@@ -165,7 +165,12 @@
         setLbl("lbl-donate", T("tray.donate", "Donate"));
         setLbl("lbl-about", T("tray.about", "About..."));
         setLbl("lbl-check-updates", T("tray.checkUpdates", "Check for Update..."));
-        setLbl("lbl-suite", T("tray.suiteTitle", "More from CyberGems"));
+        // Suite section visibility
+        const showSuite = state.show_suite_recommendations !== false;
+        const suiteGroup = document.getElementById("tray-group-suite");
+        const suiteDivider = document.getElementById("tray-divider-suite");
+        if (suiteGroup) suiteGroup.hidden = !showSuite;
+        if (suiteDivider) suiteDivider.hidden = !showSuite;
 
         // Header version label
         if (state.version) {
@@ -262,6 +267,10 @@
     }
 
     function setHelpOpen(open) {
+        if (!helpSub || !helpToggle) return;
+        if (open && suiteSub && !suiteSub.hidden) {
+            setSuiteOpen(false);
+        }
         helpSub.hidden = !open;
         helpToggle.setAttribute("aria-expanded", String(open));
         helpToggle.classList.toggle("open", open);
@@ -281,6 +290,9 @@
     const suiteSub = document.getElementById("tray-suite-sub");
     function setSuiteOpen(open) {
         if (!suiteSub || !suiteToggle) return;
+        if (open && helpSub && !helpSub.hidden) {
+            setHelpOpen(false);
+        }
         suiteSub.hidden = !open;
         suiteToggle.setAttribute("aria-expanded", String(open));
         suiteToggle.classList.toggle("open", open);
@@ -294,41 +306,51 @@
         });
     }
 
-    async function loadSuiteTrayItems() {
+    function loadSuiteTrayItems() {
         if (!suiteSub) return;
         try {
-            const res = await fetch("../assets/suite/suite.json");
-            if (!res.ok) return;
-            const data = await res.json();
-            const apps = Array.isArray(data?.apps) ? data.apps : [];
-
-            // Exclude CyberClock
-            const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
-            suiteSub.innerHTML = "";
-
-            for (const app of sisters) {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "tray-item tray-sub-item";
-                const img = document.createElement("img");
-                img.className = "tray-sub-item-img";
-                img.src = `../assets/suite/${app.slug}.png`;
-                img.alt = "";
-                const lbl = document.createElement("span");
-                lbl.className = "label";
-                lbl.textContent = app.name;
-                btn.appendChild(img);
-                btn.appendChild(lbl);
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openUrl(app.site || `https://cybergems.org/apps/${app.slug}/`);
-                    setTimeout(() => hideMenu(), 250);
-                });
-                suiteSub.appendChild(btn);
+            let apps = window.CC_SUITE_DATA ? window.CC_SUITE_DATA.apps : null;
+            if (!Array.isArray(apps) || !apps.length) {
+                fetch("../assets/suite/suite.json")
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (Array.isArray(data?.apps)) renderTraySuiteApps(data.apps);
+                    })
+                    .catch(() => {});
+                return;
             }
+            renderTraySuiteApps(apps);
         } catch (e) {
             console.warn("loadSuiteTrayItems error:", e);
+        }
+    }
+
+    function renderTraySuiteApps(apps) {
+        if (!suiteSub) return;
+        // Exclude CyberClock
+        const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
+        suiteSub.innerHTML = "";
+
+        for (const app of sisters) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "tray-item tray-sub-item";
+            const img = document.createElement("img");
+            img.className = "tray-sub-item-img";
+            img.src = `../assets/suite/${app.slug}.png`;
+            img.alt = "";
+            const lbl = document.createElement("span");
+            lbl.className = "label";
+            lbl.textContent = app.name;
+            btn.appendChild(img);
+            btn.appendChild(lbl);
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openUrl(app.site || `https://cybergems.org/apps/${app.slug}/`);
+                setTimeout(() => hideMenu(), 250);
+            });
+            suiteSub.appendChild(btn);
         }
     }
     loadSuiteTrayItems();

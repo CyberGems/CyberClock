@@ -2535,6 +2535,7 @@ pub struct TrayMenuState {
     /// Friendly form of the configured show/hide hotkey
     /// ("Alt+Shift+C"); empty when the shortcut is disabled.
     pub hotkey: String,
+    pub show_suite_recommendations: bool,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -2706,6 +2707,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         mini_click_through: settings.mini_click_through,
         relax_playing,
         hotkey: friendly_hotkey(&settings.hotkey_toggle),
+        show_suite_recommendations: settings.show_suite_recommendations,
     }
 }
 

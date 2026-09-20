@@ -3838,6 +3838,13 @@
         opacity: 0.4;
         pointer-events: none;
     }
+    .s-row.is-disabled {
+        opacity: 0.42;
+        cursor: not-allowed;
+    }
+    .s-row.is-disabled * {
+        pointer-events: none;
+    }
     .s-screen-card {
         display: flex;
         align-items: center;
