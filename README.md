@@ -16,7 +16,11 @@
   <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>
 </p>
 
-A feature-rich desktop clock application with a futuristic neon aesthetic. CyberClock combines practical utilities (clock, calendar, timer, stopwatch) with a wellness module featuring procedural ambient sound synthesis for relaxation and mindfulness. Built with **Tauri v2** and **Rust**.
+---
+
+## What is CyberClock?
+
+CyberClock is a feature-rich desktop clock for Windows that brings everyday timekeeping, productivity tools, and moments of relaxation into one polished interface. It combines analog and digital clocks, a full calendar, countdown timer, precision stopwatch, alarms, compact Mini Mode, and independent floating time tools. A wellness module adds procedurally generated ambient soundscapes and guided breathing, while local customization lets the experience adapt to your desktop. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
