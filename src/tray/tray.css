@@ -300,15 +300,22 @@
         border-left: 1px solid var(--border);
         max-height: 220px;
         overflow-y: auto;
+        overflow-x: hidden !important;
     }
     .tray-suite-sub {
         max-height: 180px;
         overflow-y: auto;
+        overflow-x: hidden !important;
     }
     .tray-help-sub::-webkit-scrollbar,
     .tray-suite-sub::-webkit-scrollbar,
     .tray-card::-webkit-scrollbar {
         width: 4px;
+    }
+    ::-webkit-scrollbar:horizontal {
+        display: none !important;
+        height: 0 !important;
+        width: 0 !important;
     }
     .tray-help-sub::-webkit-scrollbar-track,
     .tray-suite-sub::-webkit-scrollbar-track,
@@ -330,6 +337,11 @@
         min-height: 26px;
         font-size: 11.5px;
         padding: 4px 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .tray-sub-item:hover {
+        transform: none;
     }
     .tray-sub-item .ico {
         width: 14px;
