@@ -717,7 +717,7 @@ fn show_about_window(app: &AppHandle) {
             Ok(s) if s.width > 100 && s.height > 100 => s,
             _ => tauri::PhysicalSize {
                 width: (740.0 * scale).round() as u32,
-                height: (590.0 * scale).round() as u32,
+                height: (600.0 * scale).round() as u32,
             },
         };
         let work = m.work_area();
@@ -2840,9 +2840,11 @@ async fn tray_menu_action(app: AppHandle, action: String) {
             }
         }
         "about" => {
-            // Dedicated About window (option B): show in place instead of
-            // switching the clock to full mode.
             show_about_window(&app);
+        }
+        "check-updates" | "check_updates" => {
+            show_about_window(&app);
+            let _ = app.emit("about:trigger-check", ());
         }
         "quit" => {
             exit_app(&app);

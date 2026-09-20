@@ -106,12 +106,12 @@ body {
     flex: 1 1 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 18px 18px 18px;
+    padding: 12px 18px 10px;
 }
 
 /* Themed scrollbar (same look as CyberSnap's) */
 .ab-content::-webkit-scrollbar {
-    width: 12px;
+    width: 8px;
     background: transparent;
 }
 .ab-content::-webkit-scrollbar-thumb {
@@ -128,8 +128,8 @@ body {
 .ab-hero {
     display: flex;
     align-items: center;
-    gap: 36px;
-    margin: 4px 0 20px;
+    gap: 28px;
+    margin: 2px 0 12px;
 }
 .ab-hero-left {
     display: flex;
@@ -137,9 +137,9 @@ body {
     flex: 0 0 auto;
 }
 .ab-logo {
-    width: 80px;
-    height: 80px;
-    margin-right: 20px;
+    width: 70px;
+    height: 70px;
+    margin-right: 16px;
     border-radius: 12px;
     filter: drop-shadow(0 0 18px rgba(var(--rgb-accent), 0.36));
     animation: ab-logo-breathe 2.4s ease-in-out infinite;
@@ -160,7 +160,7 @@ body {
 .ab-name {
     font-family: "Segoe UI Variable Display", "Segoe UI", system-ui,
         sans-serif;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
@@ -172,7 +172,7 @@ body {
     color: var(--ab-name-accent);
 }
 .ab-version {
-    font-size: 14px;
+    font-size: 13px;
     opacity: 0.5;
     margin-top: 4px;
     color: var(--ab-text-primary);
@@ -182,23 +182,23 @@ body {
     min-width: 200px;
     background: var(--ab-card);
     border: 1px solid var(--ab-separator);
-    border-radius: 12px;
-    padding: 22px 18px;
+    border-radius: 10px;
+    padding: 12px 16px;
 }
 .ab-desc {
     margin: 0;
-    font-size: 13px;
-    line-height: 24px;
+    font-size: 12.5px;
+    line-height: 20px;
     color: var(--ab-text-primary);
     opacity: 0.78;
 }
 
 /* ── Section label ─────────────────────────────────────────── */
 .ab-section-label {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--accent-a);
-    margin: 4px 0 8px;
+    margin: 2px 0 5px;
 }
 
 /* ── Settings card ─────────────────────────────────────────── */
@@ -206,13 +206,13 @@ body {
     background: var(--ab-card);
     border: 1px solid var(--ab-separator);
     border-radius: 4px;
-    padding: 9px 14px;
-    margin-bottom: 10px;
+    padding: 6px 14px;
+    margin-bottom: 8px;
 }
 .ab-setting-row {
     display: flex;
     align-items: center;
-    min-height: 52px;
+    min-height: 44px;
 }
 .ab-setting-icon {
     flex: 0 0 auto;
@@ -401,7 +401,8 @@ body {
     height: 15px;
     display: block;
 }
-.ab-footer-btn svg path {
+.ab-footer-btn svg path,
+.ab-footer-btn svg rect {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.5;
@@ -439,10 +440,10 @@ button:focus-visible {
 
 /* ── Suite Showcase ────────────────────────────────────────── */
 .ab-suite-card {
-    padding: 14px 16px;
+    padding: 10px 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 .ab-suite-grid {
     display: flex;
@@ -452,8 +453,8 @@ button:focus-visible {
     gap: 10px;
 }
 .ab-suite-btn {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -471,8 +472,8 @@ button:focus-visible {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), var(--glow-xs);
 }
 .ab-suite-btn img {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     display: block;
     pointer-events: none;

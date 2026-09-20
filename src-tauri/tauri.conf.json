@@ -74,7 +74,7 @@
                                     "label":  "about",
                                     "title":  "About CyberClock",
                                     "width":  740,
-                                    "height":  590,
+                                    "height":  600,
                                     "minWidth":  600,
                                     "minHeight":  480,
                                     "resizable":  true,

@@ -314,6 +314,9 @@
         onTrayMenuHide: (cb) => {
             return subscribe("tray-menu-hide", cb);
         },
+        onCheckUpdatesTrigger: (cb) => {
+            return subscribe("about:trigger-check", cb);
+        },
 
         // ── Cleanup ───────────────────────────────────────────────
         off: async (channel) => {

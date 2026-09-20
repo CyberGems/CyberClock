@@ -292,6 +292,12 @@
         });
     }
 
+    if (window.cc && window.cc.onCheckUpdatesTrigger) {
+        window.cc.onCheckUpdatesTrigger(() => {
+            handleUpdateAction();
+        });
+    }
+
     // ── Auto-update toggle ──────────────────────────────────
     const autoUp = document.getElementById("ab-autoup");
     if (autoUp) {

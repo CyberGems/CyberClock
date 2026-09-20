@@ -408,8 +408,10 @@
                     window.cc.openDatetimeProperties();
                 }
                 setTimeout(() => hideMenu(), 250);
-            } else if (action === "about-modal" || action === "check-updates") {
+            } else if (action === "about-modal") {
                 runAction("about");
+            } else if (action === "check-updates") {
+                runAction("check-updates");
             } else if (HELP_URLS[action]) {
                 openUrl(HELP_URLS[action]);
                 setTimeout(() => hideMenu(), 250);
