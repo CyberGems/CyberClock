@@ -91,6 +91,7 @@
     let updateDetails = { version: "", bullets: [], url: "" };
     let updateDetailsToken = 0;
     let updateNoticeDismissed = false;
+    let updateNoticeShownVersion = "";
     let updatePortable = false;
 
     function updateText(key, fallback, vars = {}) {
@@ -126,8 +127,7 @@
             updateNoticeDismissed ||
             state === "idle" ||
             state === "checking" ||
-            state === "not-available" ||
-            state === "error"
+            state === "not-available"
         ) {
             hideUpdateNotice();
             return;
@@ -148,33 +148,40 @@
         const version = updateStatus.version || updateDetails.version || "";
         const isDownloaded = state === "downloaded";
         const isDownloading = state === "downloading";
+        const isError = state === "error";
         const titleEl = document.getElementById("update-notice-title");
         versionEl.textContent = version ? `v${version}` : "";
         if (titleEl) {
-            titleEl.textContent = isDownloaded
-                ? updateText("updates.readyTitle", "Update ready to install")
-                : isDownloading
-                    ? updateText("updates.downloadingTitle", "Downloading CyberClock")
-                    : updateText("updates.availableTitle", "A new version is ready");
+            titleEl.textContent = isError
+                ? updateText("updates.errorTitle", "Update failed")
+                : isDownloaded
+                    ? updateText("updates.readyTitle", "Update ready to install")
+                    : isDownloading
+                        ? updateText("updates.downloadingTitle", "Downloading CyberClock")
+                        : updateText("updates.availableTitle", "A new version is ready");
         }
         listEl.replaceChildren();
-        for (const bullet of updateDetails.bullets || []) {
-            const item = document.createElement("li");
-            item.textContent = bullet;
-            listEl.appendChild(item);
+        if (!isError) {
+            for (const bullet of updateDetails.bullets || []) {
+                const item = document.createElement("li");
+                item.textContent = bullet;
+                listEl.appendChild(item);
+            }
         }
-        emptyEl.hidden = listEl.children.length > 0;
+        emptyEl.hidden = isError || listEl.children.length > 0;
 
         const isAvailable = state === "available";
-        summaryEl.textContent = isDownloaded
-            ? updateText("updates.downloaded", "Update downloaded and ready to install.")
-            : isDownloading
-                ? updateText("updates.downloading", "Downloading update ({pct}%)…", {
-                    pct: Math.round(updateStatus.percent ?? 0),
-                })
-                : updatePortable
-                    ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
-                    : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", { version });
+        summaryEl.textContent = isError
+            ? (updateStatus.message || updateText("updates.errorTitle", "Update failed"))
+            : isDownloaded
+                ? updateText("updates.downloaded", "Update downloaded and ready to install.")
+                : isDownloading
+                    ? updateText("updates.downloading", "Downloading update ({pct}%)…", {
+                        pct: Math.round(updateStatus.percent ?? 0),
+                    })
+                    : updatePortable
+                        ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
+                        : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", { version });
 
         progressEl.hidden = !isDownloading;
         if (isDownloading) {
@@ -183,15 +190,18 @@
             progressFill.style.width = `${pct}%`;
         }
 
-        actionBtn.textContent = isDownloaded
-            ? updateText("updates.install", "Install & restart")
-            : updatePortable
-                ? updateText("updates.downloadPortable", "Open download page")
-                : updateText("updates.download", "Download update");
+        actionBtn.textContent = isError
+            ? updateText("updates.retry", "Retry")
+            : isDownloaded
+                ? updateText("updates.install", "Install & restart")
+                : updatePortable
+                    ? updateText("updates.downloadPortable", "Open download page")
+                    : updateText("updates.download", "Download update");
         actionBtn.disabled = isDownloading;
-        skipBtn.hidden = !isAvailable;
+        skipBtn.hidden = isError || !isAvailable;
         releaseBtn.hidden = !version;
 
+        updateNoticeShownVersion = version;
         notice.hidden = false;
         requestAnimationFrame(() => notice.classList.add("open"));
     }
@@ -217,7 +227,10 @@
     function handleUpdateStatus(payload) {
         const next = payload || { state: "idle" };
         if (next.state === "available") {
-            if (next.version && next.version !== updateStatus.version) {
+            // Only reset the dismissed flag when a genuinely new version
+            // is discovered. Re-checks that find the same version (e.g.
+            // from the About window) must not resurface the popup.
+            if (next.version && next.version !== updateNoticeShownVersion) {
                 updateNoticeDismissed = false;
             }
             updateStatus = next;
@@ -244,6 +257,15 @@
         const actionBtn = document.getElementById("update-notice-action");
         if (actionBtn) actionBtn.disabled = true;
         try {
+            // Retry from error: re-check then download if an update is found.
+            if (updateStatus.state === "error") {
+                const res = await window.cc.checkForUpdates();
+                if (res?.ok && res.version) {
+                    updateStatus = { state: "available", version: res.version };
+                    await window.cc.downloadUpdate();
+                }
+                return;
+            }
             if (updateStatus.state === "downloaded") {
                 await window.cc.installUpdate();
                 return;
@@ -255,8 +277,15 @@
             await window.cc.downloadUpdate();
         } catch (error) {
             console.error("Update action failed:", error);
-            updateStatus = { state: "error", message: String(error?.message || error) };
-            hideUpdateNotice();
+            // Preserve version so a subsequent re-check for the same
+            // version does not resurface the popup (issue #2 fix).
+            updateStatus = {
+                state: "error",
+                version: updateStatus.version,
+                message: String(error?.message || error),
+            };
+            updateNoticeDismissed = false;
+            renderUpdateNotice();
         } finally {
             if (actionBtn && updateStatus.state !== "downloading") actionBtn.disabled = false;
         }

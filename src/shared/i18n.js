@@ -472,6 +472,8 @@
             "updates.downloading": "Downloading update ({pct}%)…",
             "updates.downloaded": "Update downloaded and ready to install.",
             "updates.portableHint": "Portable builds are updated from the release page.",
+            "updates.errorTitle": "Update failed",
+            "updates.retry": "Retry",
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Multi-Monitor Support",
@@ -1037,6 +1039,8 @@
             "updates.downloading": "Descargando actualización ({pct}%)…",
             "updates.downloaded": "Actualización descargada y lista para instalar.",
             "updates.portableHint": "Las versiones portables se actualizan desde la página del release.",
+            "updates.errorTitle": "Error de actualización",
+            "updates.retry": "Reintentar",
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Soporte Multi-Monitor",
