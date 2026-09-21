@@ -938,9 +938,7 @@ fn run_clock_check(app: &AppHandle, notify_allowed: bool) -> ClockAccuracy {
 
             if m.drift_ms.abs() <= CLOCK_DRIFT_NOTIFY_MS {
                 CLOCK_DRIFT_NOTIFIED.store(false, Ordering::SeqCst);
-            } else if notify_allowed
-                && !CLOCK_DRIFT_NOTIFIED.swap(true, Ordering::SeqCst)
-            {
+            } else if notify_allowed && !CLOCK_DRIFT_NOTIFIED.swap(true, Ordering::SeqCst) {
                 send_clock_notification(app, m.drift_ms);
             }
             status(Some(m.drift_ms), Some(m.source))
@@ -968,8 +966,14 @@ fn clock_accuracy_loop(app: AppHandle) {
         let check = run_clock_check(&app, true);
         if let Some(drift) = check.drift_ms {
             let s = load_settings(&app);
-            if s.clock_auto_sync && drift.abs() > CLOCK_DRIFT_NOTIFY_MS && is_time_sync_task_registered() {
-                info!("clock accuracy: auto-syncing system clock due to drift of {} ms", drift);
+            if s.clock_auto_sync
+                && drift.abs() > CLOCK_DRIFT_NOTIFY_MS
+                && is_time_sync_task_registered()
+            {
+                info!(
+                    "clock accuracy: auto-syncing system clock due to drift of {} ms",
+                    drift
+                );
                 let _ = sync_system_clock_internal(&app);
             }
             break;
@@ -981,7 +985,10 @@ fn clock_accuracy_loop(app: AppHandle) {
         if s.clock_accuracy_enabled {
             let check = run_clock_check(&app, true);
             if let Some(drift) = check.drift_ms {
-                if s.clock_auto_sync && drift.abs() > CLOCK_DRIFT_NOTIFY_MS && is_time_sync_task_registered() {
+                if s.clock_auto_sync
+                    && drift.abs() > CLOCK_DRIFT_NOTIFY_MS
+                    && is_time_sync_task_registered()
+                {
                     info!("clock accuracy: auto-syncing system clock (periodic) due to drift of {} ms", drift);
                     let _ = sync_system_clock_internal(&app);
                 }
@@ -1093,7 +1100,9 @@ fn is_time_sync_task_registered() -> bool {
         }
     }
     // 2. Also check if the task file exists in System32\Tasks
-    std::path::Path::new(r"C:\Windows\System32\Tasks").join(TIME_SYNC_TASK_NAME).exists()
+    std::path::Path::new(r"C:\Windows\System32\Tasks")
+        .join(TIME_SYNC_TASK_NAME)
+        .exists()
 }
 
 #[cfg(not(target_os = "windows"))]
@@ -1110,7 +1119,10 @@ fn sync_system_clock_internal(app: &AppHandle) -> Result<ClockAccuracy, String> 
         let has_task = is_time_sync_task_registered();
         let mut ran_ok = false;
         if has_task {
-            info!("sync_system_clock: triggering scheduled task {}", TIME_SYNC_TASK_NAME);
+            info!(
+                "sync_system_clock: triggering scheduled task {}",
+                TIME_SYNC_TASK_NAME
+            );
             let status = Command::new("schtasks.exe")
                 .args(["/run", "/tn", TIME_SYNC_TASK_NAME])
                 .creation_flags(0x0800_0000)
@@ -1125,7 +1137,14 @@ fn sync_system_clock_internal(app: &AppHandle) -> Result<ClockAccuracy, String> 
             info!("sync_system_clock: task run failed or not registered, invoking elevated cmd");
             let script = "Start-Process cmd.exe -ArgumentList '/c net start w32time & w32tm /resync /force' -Verb RunAs -WindowStyle Hidden -Wait";
             let status = Command::new("powershell.exe")
-                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script])
+                .args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    script,
+                ])
                 .creation_flags(0x0800_0000)
                 .status()
                 .map_err(|e| format!("failed to launch elevated time sync: {}", e))?;
@@ -1183,7 +1202,14 @@ try {{
                 ps1_path.to_string_lossy()
             );
             let _ = Command::new("powershell.exe")
-                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &launcher])
+                .args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    &launcher,
+                ])
                 .creation_flags(0x0800_0000)
                 .status();
             let _ = std::fs::remove_file(&ps1_path);
@@ -1196,7 +1222,8 @@ try {{
             let _ = tx.send(Err("Unsupported operating system".to_string()));
         }
     });
-    rx.recv().unwrap_or_else(|_| Err("task setup thread crashed".to_string()))
+    rx.recv()
+        .unwrap_or_else(|_| Err("task setup thread crashed".to_string()))
 }
 
 #[tauri::command]
@@ -1212,7 +1239,14 @@ async fn remove_time_sync_task() -> Result<bool, String> {
                 TIME_SYNC_TASK_NAME
             );
             let _ = Command::new("powershell.exe")
-                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &script])
+                .args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    &script,
+                ])
                 .creation_flags(0x0800_0000)
                 .output();
 
@@ -1223,7 +1257,8 @@ async fn remove_time_sync_task() -> Result<bool, String> {
             let _ = tx.send(Err("Unsupported operating system".to_string()));
         }
     });
-    rx.recv().unwrap_or_else(|_| Err("task removal thread crashed".to_string()))
+    rx.recv()
+        .unwrap_or_else(|_| Err("task removal thread crashed".to_string()))
 }
 
 #[tauri::command]
@@ -1233,7 +1268,8 @@ async fn sync_system_clock(app: AppHandle) -> Result<ClockAccuracy, String> {
     std::thread::spawn(move || {
         let _ = tx.send(sync_system_clock_internal(&app_for_thread));
     });
-    rx.recv().unwrap_or_else(|_| Err("sync thread crashed".to_string()))
+    rx.recv()
+        .unwrap_or_else(|_| Err("sync thread crashed".to_string()))
 }
 
 // ─────────────────────────────────────────────────────────────
