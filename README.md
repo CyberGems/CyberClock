@@ -92,7 +92,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **3 Custom Alarms** — With day-of-week repetition
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
+- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
 - **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
 - **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
 - **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
