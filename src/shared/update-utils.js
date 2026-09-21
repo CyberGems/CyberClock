@@ -12,9 +12,9 @@
     const API_URL = "https://api.github.com/repos/CyberGems/CyberClock";
 
     function releaseUrl(version) {
-        return version
-            ? `${REPO_URL}/releases/tag/v${encodeURIComponent(version)}`
-            : `${REPO_URL}/releases`;
+        if (!version) return `${REPO_URL}/releases`;
+        const clean = String(version).replace(/^v+/i, "");
+        return `${REPO_URL}/releases/tag/v${encodeURIComponent(clean)}`;
     }
 
     function cleanLine(line) {
@@ -57,10 +57,11 @@
         };
 
         if (!version) return details;
+        const cleanVersion = String(version).replace(/^v+/i, "");
 
         try {
             const response = await fetch(
-                `${API_URL}/releases/tags/v${encodeURIComponent(version)}`,
+                `${API_URL}/releases/tags/v${encodeURIComponent(cleanVersion)}`,
                 {
                     headers: {
                         Accept: "application/vnd.github+json",
