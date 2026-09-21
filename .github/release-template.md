@@ -4,7 +4,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-A new gem-inspired analog dial leads a substantial update that adds floating timing tools, personal greetings, clock-accuracy alerts, customizable global shortcuts, smarter monitor placement, and a thoroughly refined settings experience.
+Drill-down sliding navigation transforms the tray menu experience, alongside one-click update checks from the tray, About window dimensional refinements, dynamic update status feedback, and sister-app suite showcase integration.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -13,35 +13,20 @@ A new gem-inspired analog dial leads a substantial update that adds floating tim
 
 ### ✨ Key Features & Highlights
 
-- 💎 **Gem Crown analog dial**:
-  - A new multicolor, faceted dial design with prismatic accents, gemstone hour markers, and an animated sparkle sweep.
+- 🗂️ **Drill-down sliding navigation for the tray menu**:
+  - Submenus (such as Help and More from CyberGems) now transition via smooth, modern horizontal sliding decks instead of expanding vertically, preventing scrollbars, jitter, and clipped actions.
 
-- ⏱️ **Floating timer and stopwatch tools**:
-  - Open independent windows from the tray or Mini Mode, with local state, skin inheritance, and quick-add timer presets from 30 seconds to 15 minutes.
+- 🔄 **Direct update checking from the tray**:
+  - Selecting "Check for updates..." from the tray Help menu now immediately brings up the dedicated About window and initiates an instant check.
 
-- 👋 **Personal welcome greeting**:
-  - Add an optional name in Settings to receive a time-aware greeting beside the CyberClock brand in Full Mode.
+- ℹ️ **Refined About window**:
+  - Perfectly balanced height without default scrollbars or excess whitespace, restored crisp SVG icons for GitHub and issue reporting, and a dedicated button to explore sister apps online.
 
-- 🕐 **Windows date and time, one click away**:
-  - New entries in the tray menu (Help) and in Settings open the classic Windows "Date and Time" dialog, right where you need them.
+- 💡 **Dynamic update status feedback**:
+  - High-visibility status indicators: clear green checkmark when up to date, radiant cyber-cyan glow for new releases, animated progress indicators, and informative error diagnostics.
 
-- 🎯 **Clock accuracy monitor with wrong-time alerts**:
-  - CyberClock now measures its drift against network time servers at startup and every 6 hours, and shows the result under Settings › Windows Integration with a "Check now" button.
-  - If the system clock is off by more than a minute (dead CMOS battery, timezone mishap), a Windows notification warns you immediately — before your alarms and chimes fire at the wrong time.
-  - Read-only and privilege-free: SNTP first, automatic HTTP fallback on networks that block NTP.
-
-- ⌨️ **Global hotkey to show / hide the clock (optional)**:
-  - Alt+Shift+C by default. Click the field in Settings › General and press your own combination; the X button disables it and the restore button brings the default back.
-  - Invalid or already-taken combinations are rejected and the previous one stays.
-
-- 🖥️ **Automatic monitor + full mode locked to the work area**:
-  - Full mode now opens on the monitor where the mouse is (CyberLauncher style), with a toggle in the Display tab to use a fixed preferred display instead.
-  - Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, dragging and double-click maximize/restore are disabled, and the phantom taskbar button after a Windows boot start is gone.
-
-- 🎨 **Settings polish**:
-  - The General tab leads the list, so the language selector comes first.
-  - Every control got an accent-tinted icon tile, helper texts are larger and brighter, and toggles now read clearly in the ON state with every accent tint.
-  - The Display tab matches the rest of the settings: whole display cards are clickable (no more tiny "Move here" button), and the active monitor is unmistakable.
+- 🌐 **CyberGems Suite showcase integration**:
+  - Interactive showcase of sister apps in both the About dialog and the tray menu, with configurable visibility toggles in Settings.
 
 --- 
 
