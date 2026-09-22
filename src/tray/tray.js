@@ -1,6 +1,9 @@
     let currentMenuState = null;
     const rootEl = document.getElementById("tray-root");
     let appVersion = "";
+    let trayPinTipAutomatic = false;
+    let trayPinTipAutoTimer = null;
+    const TRAY_PIN_TIP_SEEN_KEY = "cyberclock_tray_pin_tip_seen";
 
     // Discrete zoom stops for the mini clock (slider index → factor).
     const ZOOM_STEPS = [0.5, 1, 2, 4];
@@ -185,6 +188,15 @@
         setLbl("lbl-help-title", T("tray.help", "Help"));
         setLbl("lbl-suite-title", T("tray.suite", "More from CyberGems"));
         setLbl("lbl-suite-all", T("tray.suiteAll", "View all at cybergems.org →"));
+        setLbl("lbl-pin-tip-title", T("tray.pinTip.title", "Keep CyberClock visible in the tray"));
+        setLbl("lbl-pin-tip-dont-show", T("tray.pinTip.dontShow", "Don't show again"));
+        setLbl("lbl-pin-tip-got-it", T("tray.pinTip.gotIt", "Got it"));
+        setLbl("lbl-pin-tip-open-settings", T("tray.pinTip.openSettings", "Open Windows Settings"));
+        setLbl("lbl-back-pin-tip", T("tray.back", "Back"));
+        renderTrayPinTipBody(T(
+            "tray.pinTip.body",
+            "Windows may hide new tray icons behind the overflow (^). Drag CyberClock onto the taskbar, or pin it in Windows Settings."
+        ));
 
         // Suite section visibility
         const showSuite = state.show_suite_recommendations !== false;
@@ -295,6 +307,93 @@
         reportSizeSoon();
     }
 
+    function renderTrayPinTipBody(text) {
+        const body = document.getElementById("tray-pin-tip-body");
+        if (!body) return;
+
+        body.replaceChildren();
+        const marker = "(^)";
+        const markerIndex = text.indexOf(marker);
+        if (markerIndex < 0) {
+            body.textContent = text;
+            return;
+        }
+
+        const beforeMarker = text.slice(0, markerIndex);
+        const afterMarker = text.slice(markerIndex + marker.length);
+        const match = beforeMarker.match(/^(.*\s)(\S+\s+\S+\s*)$/s);
+        const prefix = match ? match[1] : beforeMarker;
+        const overflowLead = match ? match[2].trimEnd() : "";
+
+        body.appendChild(document.createTextNode(prefix));
+
+        const noWrapGroup = document.createElement("span");
+        noWrapGroup.className = "tray-pin-tip-overflow-group";
+        noWrapGroup.appendChild(document.createTextNode(overflowLead));
+
+        const indicator = document.createElement("span");
+        indicator.className = "tray-overflow-indicator";
+        indicator.setAttribute("aria-hidden", "true");
+        noWrapGroup.appendChild(indicator);
+
+        body.appendChild(noWrapGroup);
+        body.appendChild(document.createTextNode(afterMarker));
+    }
+
+    function hasSeenTrayPinTip() {
+        try {
+            return window.localStorage.getItem(TRAY_PIN_TIP_SEEN_KEY) === "true";
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function rememberTrayPinTip() {
+        try {
+            window.localStorage.setItem(TRAY_PIN_TIP_SEEN_KEY, "true");
+        } catch (_) {
+            // localStorage can be unavailable in restricted webviews.
+        }
+    }
+
+    function openTrayPinTip(automatic) {
+        if (trayPinTipAutoTimer) {
+            clearTimeout(trayPinTipAutoTimer);
+            trayPinTipAutoTimer = null;
+        }
+        trayPinTipAutomatic = automatic === true;
+        const checkbox = document.getElementById("tray-pin-tip-dont-show");
+        if (checkbox) checkbox.checked = trayPinTipAutomatic;
+        switchView("pin-tip");
+    }
+
+    function closeTrayPinTip() {
+        const checkbox = document.getElementById("tray-pin-tip-dont-show");
+        if (checkbox && checkbox.checked) rememberTrayPinTip();
+        trayPinTipAutomatic = false;
+        switchView("main");
+    }
+
+    function openTrayPinTipSettings() {
+        const checkbox = document.getElementById("tray-pin-tip-dont-show");
+        if (checkbox && checkbox.checked) rememberTrayPinTip();
+        if (window.cc && window.cc.openTaskbarSettings) {
+            window.cc.openTaskbarSettings().catch((e) => {
+                console.error("openTaskbarSettings failed:", e);
+            });
+        }
+        setTimeout(() => hideMenu(), 250);
+    }
+
+    function scheduleAutomaticTrayPinTip() {
+        if (hasSeenTrayPinTip()) return;
+        if (trayPinTipAutoTimer) clearTimeout(trayPinTipAutoTimer);
+        trayPinTipAutoTimer = setTimeout(() => {
+            trayPinTipAutoTimer = null;
+            if (!hasSeenTrayPinTip()) openTrayPinTip(true);
+        }, 220);
+    }
+
     const btnNavHelp = document.getElementById("btn-nav-help");
     if (btnNavHelp) {
         btnNavHelp.addEventListener("click", (e) => {
@@ -319,6 +418,33 @@
             e.preventDefault();
             e.stopPropagation();
             switchView("main");
+        });
+    }
+
+    const btnBackPinTip = document.getElementById("btn-back-pin-tip");
+    if (btnBackPinTip) {
+        btnBackPinTip.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeTrayPinTip();
+        });
+    }
+
+    const btnPinTipGotIt = document.getElementById("btn-pin-tip-got-it");
+    if (btnPinTipGotIt) {
+        btnPinTipGotIt.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeTrayPinTip();
+        });
+    }
+
+    const btnPinTipSettings = document.getElementById("btn-pin-tip-settings");
+    if (btnPinTipSettings) {
+        btnPinTipSettings.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openTrayPinTipSettings();
         });
     }
 
@@ -399,10 +525,7 @@
             e.stopPropagation();
             const action = btn.dataset.action;
             if (action === "pin-tray-icon") {
-                if (window.cc && window.cc.openTaskbarSettings) {
-                    window.cc.openTaskbarSettings();
-                }
-                setTimeout(() => hideMenu(), 250);
+                openTrayPinTip(false);
             } else if (action === "datetime-properties") {
                 if (window.cc && window.cc.openDatetimeProperties) {
                     window.cc.openDatetimeProperties();
@@ -498,6 +621,7 @@
                 // The tray window is persistent (hidden, not destroyed), so
                 // any expanded submenu must collapse so it always opens clean.
                 collapseAllSubmenus();
+                scheduleAutomaticTrayPinTip();
                 if (window.cc.getTrayMenuState) {
                     window.cc.getTrayMenuState().then(renderState).catch(console.error);
                 }

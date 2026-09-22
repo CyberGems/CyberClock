@@ -297,11 +297,13 @@
         animation: trayViewFade 0.16s ease;
     }
     .tray-deck[data-view="main"] #view-help,
+    .tray-deck[data-view="main"] #view-pin-tip,
     .tray-deck[data-view="main"] #view-suite {
         display: none;
     }
 
     .tray-deck[data-view="help"] #view-main,
+    .tray-deck[data-view="pin-tip"] #view-main,
     .tray-deck[data-view="suite"] #view-main {
         display: none;
     }
@@ -312,6 +314,21 @@
     }
     .tray-deck[data-view="help"] #view-suite {
         display: none;
+    }
+
+    .tray-deck[data-view="help"] #view-pin-tip,
+    .tray-deck[data-view="suite"] #view-pin-tip {
+        display: none;
+    }
+
+    .tray-deck[data-view="pin-tip"] #view-help,
+    .tray-deck[data-view="pin-tip"] #view-suite {
+        display: none;
+    }
+
+    .tray-deck[data-view="pin-tip"] #view-pin-tip {
+        display: block;
+        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .tray-deck[data-view="suite"] #view-suite {
@@ -400,6 +417,125 @@
         font-weight: 600;
         color: var(--text-md);
         letter-spacing: 0.3px;
+    }
+
+    /* ── Tray pin tip ─────────────────────────────────────────── */
+    .tray-pin-tip-content {
+        padding: 10px 12px 12px;
+    }
+    .tray-pin-tip-hero {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .tray-pin-tip-logo-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        border: 1px solid rgba(var(--rgb-accent), 0.24);
+        border-radius: 10px;
+        background: rgba(var(--rgb-accent), 0.08);
+        box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.14);
+    }
+    .tray-pin-tip-logo {
+        display: block;
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+    }
+    .tray-pin-tip-body {
+        min-width: 0;
+        margin: 0;
+        color: var(--text-md);
+        font-size: 11.5px;
+        line-height: 1.52;
+    }
+    .tray-pin-tip-overflow-group {
+        display: inline-flex;
+        align-items: baseline;
+        white-space: nowrap;
+    }
+    .tray-overflow-indicator {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.2em;
+        height: 1.2em;
+        margin: 0 0.2em;
+        flex: 0 0 auto;
+        transform: translateY(0.04em);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text-hi);
+        opacity: 0.78;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .tray-overflow-indicator::before {
+        width: 0.42em;
+        height: 0.42em;
+        content: "";
+        border-top: 1.5px solid currentColor;
+        border-left: 1.5px solid currentColor;
+        transform: translateY(0.12em) rotate(45deg);
+    }
+    .tray-pin-tip-check {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 11px;
+        color: var(--text-lo);
+        font-size: 10.5px;
+        cursor: pointer;
+    }
+    .tray-pin-tip-check input {
+        width: 13px;
+        height: 13px;
+        margin: 0;
+        accent-color: var(--accent-a);
+    }
+    .tray-pin-tip-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 11px;
+    }
+    .tray-pin-tip-btn {
+        min-width: 0;
+        flex: 1 1 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 7px;
+        font-family: inherit;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.25;
+        cursor: pointer;
+        transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
+    }
+    .tray-pin-tip-btn:active {
+        transform: scale(0.98);
+    }
+    .tray-pin-tip-btn-secondary {
+        color: var(--text-md);
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .tray-pin-tip-btn-secondary:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--border-bright);
+    }
+    .tray-pin-tip-btn-primary {
+        color: #ffffff;
+        border-color: rgba(var(--rgb-accent), 0.42);
+        background: rgba(var(--rgb-accent), 0.2);
+    }
+    .tray-pin-tip-btn-primary:hover {
+        border-color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.3);
     }
 
     .tray-sub-item {
