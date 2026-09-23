@@ -101,6 +101,8 @@
         if (lblTimer) lblTimer.textContent = window.ccI18n ? window.ccI18n.t("float.newTimer") : "New Timer";
         const lblSw = document.getElementById("lbl-stopwatch");
         if (lblSw) lblSw.textContent = window.ccI18n ? window.ccI18n.t("float.newStopwatch") : "New Stopwatch";
+        const lblCal = document.getElementById("lbl-calendar");
+        if (lblCal) lblCal.textContent = window.ccI18n ? window.ccI18n.t("float.newCalendar") : "New Calendar";
         const lblRelax = document.getElementById("lbl-relax");
         if (lblRelax) lblRelax.textContent = window.ccI18n ? window.ccI18n.t("tray.relax") : "Relax";
 

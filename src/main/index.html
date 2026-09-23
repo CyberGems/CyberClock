@@ -190,6 +190,9 @@
                                 </button>
                                 <button class="cal-nav" id="cal-prev">‹</button>
                                 <button class="cal-nav" id="cal-next">›</button>
+                                <button class="cal-nav" id="cal-float-btn" data-tooltip="Floating calendar" data-i18n-attr="data-tooltip:tooltip.floatingCalendar" data-tooltip-dir="bottom">
+                                    <span data-ico="expand" style="display:inline-flex;width:12px;height:12px;"></span>
+                                </button>
                             </div>
                             <div class="cal-months" id="cal-months"></div>
                             <div class="cal-bottom">
@@ -640,7 +643,10 @@
                                     <span data-i18n="settings.appearance.dialAutoCycle">Auto-change dial style</span>
                                     <small data-i18n="settings.appearance.dialAutoCycleDesc">Automatically rotate the clock style over time</small>
                                 </div>
-                                <input type="checkbox" id="s-clock-auto-cycle" class="s-toggle" />
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-clock-auto-cycle" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
                             <div class="s-row s-sub-row" id="s-clock-auto-cycle-sub" style="display: none;">
                                 <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>
@@ -1451,18 +1457,18 @@
                             <div class="s-sec-t" data-i18n="settings.mini.designMode">Design Mode</div>
                             <div class="s-row" style="flex-wrap: wrap; gap: 8px; padding: 8px 0;">
                                 <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;">
-                                    <button class="s-fmt" data-mini-design="1">1</button>
-                                    <button class="s-fmt" data-mini-design="2">2</button>
-                                    <button class="s-fmt" data-mini-design="3">3</button>
-                                    <button class="s-fmt" data-mini-design="4">4</button>
-                                    <button class="s-fmt" data-mini-design="5">5</button>
-                                    <button class="s-fmt" data-mini-design="6">6</button>
-                                    <button class="s-fmt" data-mini-design="7">7</button>
-                                    <button class="s-fmt" data-mini-design="8">8</button>
-                                    <button class="s-fmt" data-mini-design="9">9</button>
-                                    <button class="s-fmt" data-mini-design="10">10</button>
-                                    <button class="s-fmt" data-mini-design="11">11</button>
-                                    <button class="s-fmt" data-mini-design="12">12</button>
+                                    <button class="s-fmt" data-mini-design="1" data-tooltip="1: Cyber Bar Pro" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom">1</button>
+                                    <button class="s-fmt" data-mini-design="2" data-tooltip="2: Holo Display" data-i18n-attr="data-tooltip:settings.mini.skin.2" data-tooltip-dir="bottom">2</button>
+                                    <button class="s-fmt" data-mini-design="3" data-tooltip="3: Digital Matrix" data-i18n-attr="data-tooltip:settings.mini.skin.3" data-tooltip-dir="bottom">3</button>
+                                    <button class="s-fmt" data-mini-design="4" data-tooltip="4: Glass Orb" data-i18n-attr="data-tooltip:settings.mini.skin.4" data-tooltip-dir="bottom">4</button>
+                                    <button class="s-fmt" data-mini-design="5" data-tooltip="5: Neon Circuit" data-i18n-attr="data-tooltip:settings.mini.skin.5" data-tooltip-dir="bottom">5</button>
+                                    <button class="s-fmt" data-mini-design="6" data-tooltip="6: Zen Minimal" data-i18n-attr="data-tooltip:settings.mini.skin.6" data-tooltip-dir="bottom">6</button>
+                                    <button class="s-fmt" data-mini-design="7" data-tooltip="7: Sunset Pulse" data-i18n-attr="data-tooltip:settings.mini.skin.7" data-tooltip-dir="bottom">7</button>
+                                    <button class="s-fmt" data-mini-design="8" data-tooltip="8: Frost Crystal" data-i18n-attr="data-tooltip:settings.mini.skin.8" data-tooltip-dir="bottom">8</button>
+                                    <button class="s-fmt" data-mini-design="9" data-tooltip="9: Neo Tokyo" data-i18n-attr="data-tooltip:settings.mini.skin.9" data-tooltip-dir="bottom">9</button>
+                                    <button class="s-fmt" data-mini-design="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom">10</button>
+                                    <button class="s-fmt" data-mini-design="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom">11</button>
+                                    <button class="s-fmt" data-mini-design="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom">12</button>
                                 </div>
                             </div>
                             <div class="s-row">
@@ -1471,7 +1477,10 @@
                                     <span data-i18n="settings.mini.skinAutoCycle">Auto-change skin</span>
                                     <small data-i18n="settings.mini.skinAutoCycleDesc">Automatically rotate the mini clock skin over time</small>
                                 </div>
-                                <input type="checkbox" id="s-mini-auto-cycle" class="s-toggle" />
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-mini-auto-cycle" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
                             <div class="s-row s-sub-row" id="s-mini-auto-cycle-sub" style="display: none;">
                                 <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>

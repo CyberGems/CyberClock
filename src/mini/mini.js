@@ -178,10 +178,7 @@
         window.CCTint.apply(s.theme || "ice");
 
         window.ccI18n.setLang(s.language || "auto");
-        const btnAot = document.getElementById("btn-aot");
-        if (btnAot) btnAot.title = window.ccI18n.t("mini.tooltip.aot");
-        const btnFull = document.getElementById("btn-full");
-        if (btnFull) btnFull.title = window.ccI18n.t("mini.tooltip.full");
+        window.ccI18n.apply(document);
 
         const shell = document.getElementById("shell");
         if (shell) {

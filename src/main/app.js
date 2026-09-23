@@ -3323,14 +3323,22 @@
             }
             renderCalendar();
         });
-    document
-        .getElementById("cal-today")
-        .addEventListener("click", () => {
-            const t = new Date();
-            calYear = t.getFullYear();
-            calMonth = t.getMonth();
-            renderCalendar();
-        });
+        document
+            .getElementById("cal-today")
+            .addEventListener("click", () => {
+                const t = new Date();
+                calYear = t.getFullYear();
+                calMonth = t.getMonth();
+                renderCalendar();
+            });
+        const calFloatBtn = document.getElementById("cal-float-btn");
+        if (calFloatBtn) {
+            calFloatBtn.addEventListener("click", () => {
+                if (window.cc && window.cc.spawnFloat) {
+                    window.cc.spawnFloat("cal");
+                }
+            });
+        }
 
     // ── Note modal ────────────────────────────────────────────────
     let noteEditKey = null;

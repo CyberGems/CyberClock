@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+        <title>CyberClock Calendar</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/tint.js"></script>
+        <script src="../shared/i18n.js"></script>
+        <script src="../shared/icons.js"></script>
+        <link rel="stylesheet" href="cal.css" />
+    </head>
+    <body data-tint="ice">
+        <div class="float-cal-shell" id="cal-shell">
+            <div class="cal-hdr" id="cal-hdr">
+                <div class="cal-nav-group no-drag">
+                    <button class="cal-btn" id="btn-cal-prev" data-tooltip="Previous month" data-i18n-attr="data-tooltip:float.prevMonth" data-tooltip-dir="bottom">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="cal-btn" id="btn-cal-today" data-tooltip="Today" data-i18n-attr="data-tooltip:float.today" data-tooltip-dir="bottom">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+                            <circle cx="12" cy="12" r="5"></circle>
+                        </svg>
+                    </button>
+                    <button class="cal-btn" id="btn-cal-next" data-tooltip="Next month" data-i18n-attr="data-tooltip:float.nextMonth" data-tooltip-dir="bottom">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="cal-title" id="cal-title">agosto 2026</div>
+                <div class="cal-win-ctl no-drag">
+                    <button class="cal-btn btn-close" id="btn-cal-close" data-tooltip="Close" data-i18n-attr="data-tooltip:float.close" data-tooltip-dir="bottom">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="cal-weekdays" id="cal-weekdays">
+                <span>lun.</span>
+                <span>mar.</span>
+                <span>mié.</span>
+                <span>jue.</span>
+                <span>vie.</span>
+                <span class="cal-we">sáb.</span>
+                <span class="cal-we">dom.</span>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <script src="cal.js"></script>
+    </body>
+</html>

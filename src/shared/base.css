@@ -336,3 +336,66 @@ input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
   0%,100%{ box-shadow: var(--glow-sm) }
   50%    { box-shadow: var(--glow-md) }
 }
+
+/* ── Suite Standard Custom Tooltips ([data-tooltip]) ────── */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, 6px);
+  background: rgba(10, 16, 26, 0.95);
+  border: 1px solid rgba(var(--rgb-accent), 0.35);
+  color: var(--accent-a);
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-family: var(--font-ui);
+  font-size: calc(10.5px * var(--ui-scale, 1));
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), var(--glow-xs);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999;
+}
+@keyframes cc-tooltip-autohide {
+  0%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+[data-tooltip]:not([data-tooltip=""]):hover::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 0.35s;
+  animation: cc-tooltip-autohide 4s forwards;
+  animation-delay: 0.35s;
+}
+[data-tooltip-dir="bottom"]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -6px);
+}
+[data-tooltip-dir="bottom"]:not([data-tooltip=""]):hover::after {
+  transform: translate(-50%, 0);
+  transition-delay: 0.35s;
+}
+[data-tooltip-dir="left"]::after {
+  left: auto;
+  right: calc(100% + 8px);
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+}
+[data-tooltip-dir="left"]:not([data-tooltip=""]):hover::after {
+  transform: translateY(-50%) translateX(0);
+  transition-delay: 0.35s;
+  animation-delay: 0.35s;
+}
+

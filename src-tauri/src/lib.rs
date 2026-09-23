@@ -371,6 +371,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     let _spawn_guard = lock_or_recover(&FLOAT_SPAWN_LOCK);
     let kind = match kind {
         "timer" => "timer",
+        "cal" | "calendar" => "cal",
         _ => "sw",
     };
     if float_window_count(app) >= MAX_FLOAT_WINDOWS {
@@ -392,16 +393,18 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     } else {
         1.0
     };
-    // Both kinds start at the same compact size; an idle timer opens
-    // its preset chooser as an overlay over the clock face instead of
-    // growing the window (frontend syncSize() keeps them in sync).
-    let (title, wide, tall) = if kind == "timer" {
-        ("Timer · CyberClock", 280.0, 52.0)
-    } else {
-        ("Stopwatch · CyberClock", 280.0, 52.0)
+    // Compact size per float kind
+    let (title, wide, tall) = match kind {
+        "timer" => ("Timer · CyberClock", 280.0, 52.0),
+        "cal" => ("Calendar · CyberClock", 260.0, 252.0),
+        _ => ("Stopwatch · CyberClock", 280.0, 52.0),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
-    let url = WebviewUrl::App("float/float.html".into());
+    let url = if kind == "cal" {
+        WebviewUrl::App("float/cal.html".into())
+    } else {
+        WebviewUrl::App("float/float.html".into())
+    };
     // The window label encodes the kind ("float-timer-3" / "float-sw-3");
     // the frontend reads it via getCurrentWindow().label. A plain
     // path-only WebviewUrl::App is used because the PathBuf variant
@@ -1984,6 +1987,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         }
         "new_timer" => spawn_float_window(&app, "timer").is_some(),
         "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
+        "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "close" => {
             exit_app(&app);
             true
@@ -2861,6 +2865,9 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         }
         "new_stopwatch" => {
             spawn_float_window(&app, "sw");
+        }
+        "new_calendar" | "new_calendar_tray" => {
+            spawn_float_window(&app, "cal");
         }
         "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());

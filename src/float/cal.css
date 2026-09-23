@@ -1,0 +1,161 @@
+/* ═══════════════════════════════════════════════════════════
+   CyberClock — Floating Calendar Window
+   CyberGems © 2026
+═══════════════════════════════════════════════════════════ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+}
+
+.float-cal-shell {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #12141a 0%, #08090c 100%);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+    border-radius: 12px;
+    box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.8),
+        0 0 16px rgba(var(--rgb-accent), 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    padding: 10px 12px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.cal-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+    margin-bottom: 6px;
+    -webkit-app-region: drag;
+    padding: 0 2px;
+}
+
+.cal-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    -webkit-app-region: no-drag;
+}
+
+.cal-win-ctl {
+    display: flex;
+    align-items: center;
+    -webkit-app-region: no-drag;
+}
+
+.cal-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #94a3b8;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cal-btn:hover {
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.14);
+}
+
+.cal-btn.btn-close:hover {
+    color: #ff4d6d;
+    background: rgba(255, 77, 109, 0.16);
+}
+
+.cal-title {
+    font-family: var(--font-brand, "Space Grotesk", sans-serif);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    text-transform: capitalize;
+    text-align: center;
+    flex: 1;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+}
+
+.cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #8fa0b5;
+    letter-spacing: 0.3px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(var(--rgb-accent), 0.12);
+    margin-bottom: 4px;
+}
+
+.cal-weekdays span {
+    padding: 2px 0;
+}
+
+.cal-weekdays .cal-we {
+    color: #f59e0b;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 2px;
+    flex: 1;
+}
+
+.cal-day-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: default;
+    color: #f1f5f9;
+    transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #f59e0b;
+}
+
+.cal-day-cell.cal-other {
+    color: #424e60;
+    opacity: 0.65;
+}
+
+.cal-day-cell.cal-today {
+    background: rgba(var(--rgb-accent), 0.22);
+    border: 1px solid var(--accent-a);
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--accent-a);
+}
+
+.cal-day-cell:hover:not(.cal-other) {
+    background: rgba(var(--rgb-accent), 0.12);
+}
