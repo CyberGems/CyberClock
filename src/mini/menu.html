@@ -95,22 +95,66 @@
 
             <!-- TAB 2: Customization & Appearance -->
             <div class="ctx-tab-panel" id="tab-panel-customize" style="display: none;">
+                <!-- SECTION: Layout Form Factor -->
+                <div class="ctx-section">
+                    <div class="ctx-section-title" data-i18n="settings.mini.layoutTitle">Layout</div>
+                    <div class="layout-toggle-group">
+                        <button class="layout-btn" id="btn-layout-stacked" data-layout="stacked" data-tooltip="2 Filas (Compacto)" data-i18n-attr="data-tooltip:settings.mini.layoutStacked" data-tooltip-dir="bottom">
+                            <span class="layout-ico">⚏</span>
+                            <span class="layout-txt" data-i18n="settings.mini.layoutStackedShort">2 Filas</span>
+                        </button>
+                        <button class="layout-btn" id="btn-layout-inline" data-layout="inline" data-tooltip="1 Fila (Barra Larga)" data-i18n-attr="data-tooltip:settings.mini.layoutInline" data-tooltip-dir="bottom">
+                            <span class="layout-ico">▭</span>
+                            <span class="layout-txt" data-i18n="settings.mini.layoutInlineShort">1 Fila</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- SECTION: Design Mode -->
                 <div class="ctx-section">
-                    <div class="ctx-section-title" data-i18n="settings.mini.designMode">Design Mode</div>
+                    <div class="section-title-row">
+                        <div class="ctx-section-title" data-i18n="settings.mini.designMode">Design Mode</div>
+                        <button class="btn-gallery-link" id="btn-open-gallery" data-tooltip="Explorar Galería de Diseños" data-i18n-attr="data-tooltip:settings.mini.openGallery" data-tooltip-dir="bottom" data-tooltip-align="right">
+                            <span class="gallery-ico">⊞</span>
+                            <span class="gallery-lbl" data-i18n="settings.mini.openGallery">Galería...</span>
+                        </button>
+                    </div>
                     <div class="design-picker" id="design-picker">
-                        <button class="design-btn" data-mode="1" data-tooltip="1: Cyber Bar Pro" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom" data-tooltip-align="left">1</button>
+                        <button class="design-btn" data-mode="1" data-tooltip="1: Titanium Mech" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom" data-tooltip-align="left">1</button>
                         <button class="design-btn" data-mode="2" data-tooltip="2: Holo Display" data-i18n-attr="data-tooltip:settings.mini.skin.2" data-tooltip-dir="bottom" data-tooltip-align="left">2</button>
                         <button class="design-btn" data-mode="3" data-tooltip="3: Digital Matrix" data-i18n-attr="data-tooltip:settings.mini.skin.3" data-tooltip-dir="bottom">3</button>
                         <button class="design-btn" data-mode="4" data-tooltip="4: Glass Orb" data-i18n-attr="data-tooltip:settings.mini.skin.4" data-tooltip-dir="bottom">4</button>
                         <button class="design-btn" data-mode="5" data-tooltip="5: Neon Circuit" data-i18n-attr="data-tooltip:settings.mini.skin.5" data-tooltip-dir="bottom" data-tooltip-align="right">5</button>
-                        <button class="design-btn" data-mode="6" data-tooltip="6: Zen Minimal" data-i18n-attr="data-tooltip:settings.mini.skin.6" data-tooltip-dir="bottom" data-tooltip-align="right">6</button>
+                        <button class="design-btn" data-mode="6" data-tooltip="6: Zen Minimal" data-i18n-attr="data-tooltip:settings.mini.skin.6" data-tooltip-dir="bottom" data-tooltip-align="left">6</button>
                         <button class="design-btn" data-mode="7" data-tooltip="7: Sunset Pulse" data-i18n-attr="data-tooltip:settings.mini.skin.7" data-tooltip-dir="bottom" data-tooltip-align="left">7</button>
-                        <button class="design-btn" data-mode="8" data-tooltip="8: Frost Crystal" data-i18n-attr="data-tooltip:settings.mini.skin.8" data-tooltip-dir="bottom" data-tooltip-align="left">8</button>
+                        <button class="design-btn" data-mode="8" data-tooltip="8: Frost Crystal" data-i18n-attr="data-tooltip:settings.mini.skin.8" data-tooltip-dir="bottom">8</button>
                         <button class="design-btn" data-mode="9" data-tooltip="9: Neo Tokyo" data-i18n-attr="data-tooltip:settings.mini.skin.9" data-tooltip-dir="bottom">9</button>
-                        <button class="design-btn" data-mode="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom">10</button>
-                        <button class="design-btn" data-mode="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom" data-tooltip-align="right">11</button>
-                        <button class="design-btn" data-mode="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom" data-tooltip-align="right">12</button>
+                        <button class="design-btn" data-mode="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom" data-tooltip-align="right">10</button>
+                        <button class="design-btn" data-mode="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom" data-tooltip-align="left">11</button>
+                        <button class="design-btn" data-mode="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom" data-tooltip-align="left">12</button>
+                        <button class="design-btn" data-mode="13" data-tooltip="13: Cyber Deck" data-i18n-attr="data-tooltip:settings.mini.skin.13" data-tooltip-dir="bottom">13</button>
+                        <button class="design-btn" data-mode="14" data-tooltip="14: Apex Aero" data-i18n-attr="data-tooltip:settings.mini.skin.14" data-tooltip-dir="bottom">14</button>
+                        <button class="design-btn" data-mode="15" data-tooltip="15: Abyssal Bio" data-i18n-attr="data-tooltip:settings.mini.skin.15" data-tooltip-dir="bottom" data-tooltip-align="right">15</button>
+                    </div>
+                </div>
+
+                <!-- SECTION: Typography Studio -->
+                <div class="ctx-section" id="ctx-typography">
+                    <div class="ctx-section-title" data-i18n="settings.mini.fontTitle">Typography</div>
+                    <div class="typo-row">
+                        <select id="font-family-select" class="typo-select" data-tooltip="Typography" data-i18n-attr="data-tooltip:settings.mini.fontTitle" data-tooltip-dir="bottom" data-tooltip-align="left">
+                            <option value="default" data-i18n="settings.mini.fontDefault">Predeterminada</option>
+                            <option value="Orbitron">Orbitron (Cyber)</option>
+                            <option value="Share Tech Mono">Share Tech Mono (Tactical)</option>
+                            <option value="JetBrains Mono">JetBrains Mono (Matrix)</option>
+                            <option value="Space Grotesk">Space Grotesk (Modern)</option>
+                            <option value="Outfit">Outfit (Clean)</option>
+                        </select>
+                        <div class="typo-actions">
+                            <button class="typo-btn" id="btn-font-bold" data-tooltip="Negrita" data-i18n-attr="data-tooltip:settings.mini.fontBold" data-tooltip-dir="bottom"><b>B</b></button>
+                            <button class="typo-btn" id="btn-font-italic" data-tooltip="Cursiva" data-i18n-attr="data-tooltip:settings.mini.fontItalic" data-tooltip-dir="bottom"><i>I</i></button>
+                            <button class="typo-btn reset" id="btn-font-reset" data-tooltip="Restablecer" data-i18n-attr="data-tooltip:settings.mini.fontReset" data-tooltip-dir="bottom" data-tooltip-align="right">↺</button>
+                        </div>
                     </div>
                 </div>
 
@@ -185,6 +229,20 @@
                             <div class="toggle-thumb"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: Visual Skin Gallery Overlay -->
+            <div class="gallery-view" id="gallery-view" style="display: none;">
+                <div class="gallery-header">
+                    <div class="gallery-title-group">
+                        <span class="gallery-title" data-i18n="gallery.title">Galería de Diseños Mini</span>
+                        <span class="gallery-subtitle" data-i18n="gallery.subtitle">15 diseños en formatos de 2 filas y 1 fila</span>
+                    </div>
+                    <button class="gallery-close-btn" id="btn-close-gallery" data-tooltip="Cerrar Galería" data-i18n-attr="data-tooltip:gallery.close" data-tooltip-dir="bottom" data-tooltip-align="right">✕</button>
+                </div>
+                <div class="gallery-grid" id="gallery-grid">
+                    <!-- Populated dynamically with rich cards in menu.js -->
                 </div>
             </div>
         </div>

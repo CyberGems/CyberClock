@@ -230,11 +230,81 @@
         text-shadow: 0 0 6px rgba(var(--rgb-accent), 0.3);
     }
     
-    /* Design picker grid */
+    /* Layout Form Factor Toggle Group */
+    .layout-toggle-group {
+        display: flex;
+        gap: 6px;
+        margin-top: 2px;
+    }
+    .layout-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        height: 28px;
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.16s ease;
+    }
+    .layout-btn .layout-ico {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+    .layout-btn:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #ffffff;
+        border-color: rgba(var(--rgb-accent), 0.4);
+    }
+    .layout-btn.active {
+        background: rgba(var(--rgb-accent), 0.22);
+        border-color: var(--accent-a);
+        color: var(--accent-a);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
+        font-weight: 700;
+    }
+
+    /* Section Title with Gallery Link */
+    .section-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .btn-gallery-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--accent-a);
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: all 0.14s ease;
+        opacity: 0.85;
+    }
+    .btn-gallery-link:hover {
+        opacity: 1;
+        background: rgba(var(--rgb-accent), 0.15);
+        text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
+        transform: translateY(-1px);
+    }
+
+    /* Design picker grid (3 rows of 5 buttons) */
     .design-picker {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 6px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
         margin-top: 2px;
     }
     .design-btn {
@@ -261,6 +331,205 @@
         border-color: var(--accent-a);
         color: var(--accent-a);
         box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+    }
+
+    /* Typography Studio */
+    .typo-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+    }
+    .typo-select {
+        flex: 1;
+        height: 26px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 10.5px;
+        padding: 0 6px;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.14s ease;
+    }
+    .typo-select:hover, .typo-select:focus {
+        border-color: var(--accent-a);
+    }
+    .typo-select option {
+        background: #181920;
+        color: #ffffff;
+    }
+    .typo-actions {
+        display: flex;
+        gap: 4px;
+    }
+    .typo-btn {
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.14s ease;
+    }
+    .typo-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-color: rgba(var(--rgb-accent), 0.4);
+    }
+    .typo-btn.active {
+        background: rgba(var(--rgb-accent), 0.25);
+        border-color: var(--accent-a);
+        color: var(--accent-a);
+        box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+    }
+    .typo-btn.reset:hover {
+        color: #ffb700;
+        border-color: rgba(255, 183, 0, 0.5);
+    }
+
+    /* ── Visual Skin Gallery Overlay / Subview ── */
+    body.gallery-open {
+        padding: 6px 12px 14px 12px;
+    }
+    .ctx-menu.gallery-mode {
+        width: 356px;
+        max-height: 480px;
+    }
+    .gallery-view {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        animation: ctx-fade-in 0.18s ease-out;
+    }
+    .gallery-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gallery-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .gallery-title {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent-a);
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+    }
+    .gallery-subtitle {
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 9.5px;
+        color: rgba(255, 255, 255, 0.55);
+    }
+    .gallery-close-btn {
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.14s ease;
+    }
+    .gallery-close-btn:hover {
+        background: rgba(255, 45, 85, 0.2);
+        border-color: #ff2d55;
+        color: #ff4d6d;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .gallery-grid::-webkit-scrollbar {
+        width: 3px;
+    }
+    .gallery-grid::-webkit-scrollbar-thumb {
+        background: rgba(var(--rgb-accent), 0.35);
+        border-radius: 3px;
+    }
+    .gallery-card {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .gallery-card:hover {
+        background: rgba(var(--rgb-accent), 0.1);
+        border-color: rgba(var(--rgb-accent), 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 10px rgba(var(--rgb-accent), 0.2);
+    }
+    .gallery-card.active {
+        background: rgba(var(--rgb-accent), 0.18);
+        border-color: var(--accent-a);
+        box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .gallery-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .gallery-card-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.85);
+    }
+    .gallery-card.active .gallery-card-badge {
+        background: var(--accent-a);
+        color: #0b0f17;
+    }
+    .gallery-card-name {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .gallery-card-preview {
+        height: 26px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     /* Opacity Slider Control */

@@ -149,6 +149,14 @@ pub struct AppSettings {
     pub mini_collapse_date: bool,
     pub mini_solar_real: bool,
     pub mini_zoom: f64,
+    #[serde(default)]
+    pub mini_layout: Option<String>,
+    #[serde(default)]
+    pub mini_custom_font: Option<String>,
+    #[serde(default)]
+    pub mini_font_bold: Option<bool>,
+    #[serde(default)]
+    pub mini_font_italic: Option<bool>,
     // Mouse events pass through the mini clock (toggle lives outside the
     // mini window — tray menu and Settings — because the window stops
     // responding to clicks while this is on).
@@ -259,6 +267,10 @@ impl Default for AppSettings {
             mini_collapse_date: false,
             mini_solar_real: false,
             mini_zoom: 1.0,
+            mini_layout: None,
+            mini_custom_font: None,
+            mini_font_bold: None,
+            mini_font_italic: None,
             mini_click_through: false,
             mini_no_animations: false,
             ui_scale: 1.0,

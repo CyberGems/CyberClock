@@ -1488,10 +1488,21 @@
                     <!-- Mini Mode -->
                     <div class="s-panel" id="stab-mini">
                         <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.mini.layoutTitle">Layout</div>
+                            <div class="s-row" style="gap: 8px; padding: 6px 0;">
+                                <button class="s-fmt" id="s-mini-layout-stacked" data-mini-layout="stacked" style="flex: 1;" data-tooltip="2 Filas (Compacto)" data-i18n-attr="data-tooltip:settings.mini.layoutStacked" data-tooltip-dir="bottom">
+                                    <span>⚏ </span><span data-i18n="settings.mini.layoutStackedShort">2 Filas</span>
+                                </button>
+                                <button class="s-fmt" id="s-mini-layout-inline" data-mini-layout="inline" style="flex: 1;" data-tooltip="1 Fila (Barra Larga)" data-i18n-attr="data-tooltip:settings.mini.layoutInline" data-tooltip-dir="bottom">
+                                    <span>▭ </span><span data-i18n="settings.mini.layoutInlineShort">1 Fila</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.mini.designMode">Design Mode</div>
                             <div class="s-row" style="flex-wrap: wrap; gap: 8px; padding: 8px 0;">
-                                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;">
-                                    <button class="s-fmt" data-mini-design="1" data-tooltip="1: Cyber Bar Pro" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom">1</button>
+                                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:100%;">
+                                    <button class="s-fmt" data-mini-design="1" data-tooltip="1: Titanium Mech" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom">1</button>
                                     <button class="s-fmt" data-mini-design="2" data-tooltip="2: Holo Display" data-i18n-attr="data-tooltip:settings.mini.skin.2" data-tooltip-dir="bottom">2</button>
                                     <button class="s-fmt" data-mini-design="3" data-tooltip="3: Digital Matrix" data-i18n-attr="data-tooltip:settings.mini.skin.3" data-tooltip-dir="bottom">3</button>
                                     <button class="s-fmt" data-mini-design="4" data-tooltip="4: Glass Orb" data-i18n-attr="data-tooltip:settings.mini.skin.4" data-tooltip-dir="bottom">4</button>
@@ -1503,7 +1514,33 @@
                                     <button class="s-fmt" data-mini-design="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom">10</button>
                                     <button class="s-fmt" data-mini-design="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom">11</button>
                                     <button class="s-fmt" data-mini-design="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom">12</button>
+                                    <button class="s-fmt" data-mini-design="13" data-tooltip="13: Cyber Deck" data-i18n-attr="data-tooltip:settings.mini.skin.13" data-tooltip-dir="bottom">13</button>
+                                    <button class="s-fmt" data-mini-design="14" data-tooltip="14: Apex Aero" data-i18n-attr="data-tooltip:settings.mini.skin.14" data-tooltip-dir="bottom">14</button>
+                                    <button class="s-fmt" data-mini-design="15" data-tooltip="15: Abyssal Bio" data-i18n-attr="data-tooltip:settings.mini.skin.15" data-tooltip-dir="bottom">15</button>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.mini.fontTitle">Typography</div>
+                            <div class="s-row" style="gap: 8px; padding: 6px 0; align-items: center;">
+                                <select id="s-mini-font" class="sched-select" style="flex: 1;">
+                                    <option value="default" data-i18n="settings.mini.fontDefault">Predeterminada</option>
+                                    <option value="Orbitron">Orbitron (Cyber)</option>
+                                    <option value="Share Tech Mono">Share Tech Mono (Tactical)</option>
+                                    <option value="JetBrains Mono">JetBrains Mono (Matrix)</option>
+                                    <option value="Space Grotesk">Space Grotesk (Modern)</option>
+                                    <option value="Outfit">Outfit (Clean)</option>
+                                </select>
+                                <label class="s-tog" data-tooltip="Negrita" data-i18n-attr="data-tooltip:settings.mini.fontBold" data-tooltip-dir="bottom">
+                                    <input type="checkbox" id="s-mini-font-bold" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                                <span style="font-size: 11px; font-weight: 700;">B</span>
+                                <label class="s-tog" data-tooltip="Cursiva" data-i18n-attr="data-tooltip:settings.mini.fontItalic" data-tooltip-dir="bottom">
+                                    <input type="checkbox" id="s-mini-font-italic" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                                <span style="font-size: 11px; font-style: italic;">I</span>
                             </div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="refresh"></span>

@@ -81,64 +81,193 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       SKIN 1: Cyber Bar Pro
+       UNIVERSAL FORM FACTOR LAYOUTS
+       Every skin supports both "stacked" (2-row compact ~48px)
+       and "inline" (1-row slim bar ~34px) independently of visual theme.
+       ═══════════════════════════════════════════════════════ */
+    /* ── STACKED LAYOUT (2-Row Compact) ── */
+    .mini-shell[data-layout="stacked"] {
+        height: 48px;
+    }
+    .mini-shell[data-layout="stacked"] .time-block {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0px;
+    }
+    .mini-shell[data-layout="stacked"][data-design] #mini-time {
+        font-size: 20px;
+        line-height: 1.1;
+    }
+    .mini-shell[data-layout="stacked"][data-design] #mini-date {
+        font-size: 9.5px;
+        line-height: 1.2;
+        margin-top: 1px;
+    }
+    .mini-shell[data-layout="stacked"] .controls {
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+    }
+    .mini-shell[data-layout="stacked"] .sep {
+        display: block;
+    }
+
+    /* ── INLINE LAYOUT (1-Row Slim Bar) ── */
+    .mini-shell[data-layout="inline"] {
+        height: 34px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .mini-shell[data-layout="inline"] .time-block {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 7px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
+    .mini-shell[data-layout="inline"][data-design] #mini-time {
+        font-size: 13.5px;
+        line-height: 1;
+    }
+    .mini-shell[data-layout="inline"][data-design] #mini-date {
+        font-size: 10px;
+        line-height: 1;
+        margin-top: 0;
+        white-space: nowrap;
+    }
+    .mini-shell[data-layout="inline"] .controls {
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+    }
+    .mini-shell[data-layout="inline"] .sep {
+        display: none !important;
+    }
+
+    /* ── CUSTOM SKIN HEIGHT OVERRIDES ── */
+    .mini-shell[data-layout="stacked"][data-design="3"] { height: 46px; }
+    .mini-shell[data-layout="stacked"][data-design="4"] { height: 52px; }
+    .mini-shell[data-layout="inline"][data-design="4"]  { height: 36px; }
+    .mini-shell[data-layout="stacked"][data-design="5"] { height: 50px; }
+    .mini-shell[data-layout="inline"][data-design="10"] { height: 32px; }
+
+    /* ── TYPOGRAPHY CUSTOMIZATION HOOKS ── */
+    .mini-shell #mini-time {
+        font-family: var(--mini-custom-font, inherit);
+        font-weight: var(--mini-custom-weight, inherit);
+        font-style: var(--mini-custom-style, inherit);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SKIN 1: Titanium Mech / Exo-Armor
+       Heavy industrial exo-chassis with 45° chamfered armor plates,
+       titanium gunmetal brushed alloy, dual hazard caution stripes,
+       corner titanium bolt rivets, and tactical amber digital LED.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="1"] .mini-bg {
-        background: linear-gradient(135deg, var(--bg-02) 0%, var(--bg-01) 50%, var(--bg-02) 100%);
+        background:
+            repeating-linear-gradient(
+                -45deg,
+                rgba(255, 170, 0, 0.12) 0,
+                rgba(255, 170, 0, 0.12) 4px,
+                transparent 4px,
+                transparent 8px
+            ),
+            linear-gradient(135deg, #131720 0%, #1c222e 40%, #161b24 70%, #0d1017 100%);
+        backdrop-filter: blur(16px);
     }
     .mini-shell[data-design="1"] {
-        height: 48px;
-        border: 1px solid var(--border-bright);
-        border-left: 4px solid var(--accent-a);
-        border-radius: 10px;
-        padding: 0 14px 0 8px;
-        gap: 12px;
+        clip-path: polygon(
+            8px 0%, calc(100% - 8px) 0%,
+            100% 8px, 100% calc(100% - 8px),
+            calc(100% - 8px) 100%, 8px 100%,
+            0% calc(100% - 8px), 0% 8px
+        );
+        border: 1px solid rgba(255, 180, 20, 0.45);
+        border-radius: 0;
+        padding: 0 14px 0 10px;
+        gap: 10px;
         box-shadow:
-            0 4px 20px rgba(0, 0, 0, 0.4),
-            0 0 20px rgba(var(--rgb-accent), 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 8px 30px rgba(0, 0, 0, 0.65),
+            0 0 20px rgba(255, 170, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.5);
     }
     .mini-shell[data-design="1"]::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 10%;
-        right: 10%;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--accent-a), transparent);
-        opacity: 0.6;
+        inset: 2px;
+        pointer-events: none;
+        background:
+            radial-gradient(circle 2px at 10px 4px, #ffb700 80%, transparent 100%),
+            radial-gradient(circle 2px at calc(100% - 10px) 4px, #ffb700 80%, transparent 100%),
+            radial-gradient(circle 2px at 10px calc(100% - 4px), #ffb700 80%, transparent 100%),
+            radial-gradient(circle 2px at calc(100% - 10px) calc(100% - 4px), #ffb700 80%, transparent 100%),
+            linear-gradient(90deg, transparent, rgba(255, 180, 20, 0.4) 20%, rgba(255, 180, 20, 0.4) 80%, transparent);
+        background-repeat: no-repeat;
+        background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 1px;
+        background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+        opacity: 0.85;
+    }
+    .mini-shell[data-design="1"]::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(80, 95, 120, 0.3);
+        pointer-events: none;
     }
     .mini-shell[data-design="1"] #mini-time {
         font-family: "Share Tech Mono", monospace;
-        font-size: 22px;
-        font-weight: 400;
-        color: var(--accent-a);
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(var(--rgb-accent), 0.5);
+        font-weight: 700;
+        color: #ffb700;
+        letter-spacing: 1.5px;
+        text-shadow:
+            0 0 10px rgba(255, 183, 0, 0.65),
+            0 0 25px rgba(255, 130, 0, 0.35);
         white-space: nowrap;
     }
     .mini-shell[data-design="1"] #mini-date {
         font-family: "Share Tech Mono", monospace;
-        font-size: 10px;
-        letter-spacing: 2px;
-        color: var(--text-md);
+        font-weight: 500;
+        letter-spacing: 1.5px;
+        color: #f3c262;
+        opacity: 0.85;
         text-transform: uppercase;
         white-space: nowrap;
+        text-shadow: 0 0 6px rgba(255, 183, 0, 0.3);
     }
     .mini-shell[data-design="1"] .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--accent-a);
-        box-shadow: 0 0 8px var(--accent-a);
-        --led-halo: var(--accent-a);
-        --led-period: 3.2s;
-        animation: led-core-breathe var(--led-period, 3.2s) steps(16) infinite;
+        width: 10px;
+        height: 10px;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        border-radius: 0;
+        background: #ffb700;
+        box-shadow: 0 0 10px #ffb700, 0 0 20px rgba(255, 130, 0, 0.5);
+        --led-halo: #ffb700;
+        --led-period: 2.8s;
+        animation: led-core-breathe 2.8s steps(16) infinite;
     }
     .mini-shell[data-design="1"] .sep {
         width: 1px;
         height: 24px;
-        background: linear-gradient(to bottom, transparent, var(--border-bright), transparent);
+        background: linear-gradient(to bottom, transparent, rgba(255, 180, 20, 0.4), transparent);
+    }
+    .mini-shell[data-design="1"] .ctl-btn {
+        color: rgba(255, 183, 0, 0.7);
+    }
+    .mini-shell[data-design="1"] .ctl-btn:hover {
+        color: #ffb700;
+        background: rgba(255, 183, 0, 0.15);
+    }
+    .mini-shell[data-design="1"] #btn-aot.active {
+        color: #ffb700;
+    }
+    .mini-shell[data-design="1"] #btn-aot.active .ctl-ico {
+        filter: drop-shadow(0 0 6px rgba(255, 183, 0, 0.85));
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -153,7 +282,6 @@
         backdrop-filter: blur(20px) saturate(1.8);
     }
     .mini-shell[data-design="2"] {
-        height: 48px;
         border: 1px solid rgba(122, 162, 247, 0.35);
         border-radius: 10px;
         padding: 0 10px;
@@ -579,7 +707,6 @@
         backdrop-filter: blur(10px);
     }
     .mini-shell[data-design="6"] {
-        height: 48px;
         border: 1px solid rgba(var(--rgb-accent), 0.2);
         border-radius: 24px;
         padding: 0 16px;
@@ -621,56 +748,8 @@
         background: linear-gradient(to bottom, transparent, rgba(var(--rgb-accent), 0.2), transparent);
     }
 
-    /* Center time-block for tall skins that need it */
-    .mini-shell[data-design="1"] .time-block,
-    .mini-shell[data-design="4"] .time-block,
-    .mini-shell[data-design="5"] .time-block,
-    .mini-shell[data-design="6"] .time-block {
-        align-items: center;
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       SHARED SINGLE-ROW OVERRIDES — Skins 7‑12
-       ═══════════════════════════════════════════════════════ */
-    .mini-shell[data-design="7"] .time-block,
-    .mini-shell[data-design="8"] .time-block,
-    .mini-shell[data-design="9"] .time-block,
-    .mini-shell[data-design="10"] .time-block,
-    .mini-shell[data-design="11"] .time-block,
-    .mini-shell[data-design="12"] .time-block {
-        flex-direction: row;
-        align-items: center;
-        gap: 5px;
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-    }
-    .mini-shell[data-design="7"] .controls,
-    .mini-shell[data-design="8"] .controls,
-    .mini-shell[data-design="9"] .controls,
-    .mini-shell[data-design="10"] .controls,
-    .mini-shell[data-design="11"] .controls,
-    .mini-shell[data-design="12"] .controls {
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
+    .mini-shell .status-dot {
         flex-shrink: 0;
-    }
-    .mini-shell[data-design="7"] .status-dot,
-    .mini-shell[data-design="8"] .status-dot,
-    .mini-shell[data-design="9"] .status-dot,
-    .mini-shell[data-design="10"] .status-dot,
-    .mini-shell[data-design="11"] .status-dot,
-    .mini-shell[data-design="12"] .status-dot {
-        flex-shrink: 0;
-    }
-    .mini-shell[data-design="7"] .sep,
-    .mini-shell[data-design="8"] .sep,
-    .mini-shell[data-design="9"] .sep,
-    .mini-shell[data-design="10"] .sep,
-    .mini-shell[data-design="11"] .sep,
-    .mini-shell[data-design="12"] .sep {
-        display: none;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -690,7 +769,6 @@
             #ffa94d 100%);
     }
     .mini-shell[data-design="7"] {
-        height: 34px;
         border: 1px solid rgba(255, 138, 101, 0.4);
         border-radius: 22px;
         padding: 0 10px;
@@ -903,6 +981,11 @@
             rgba(100, 130, 210, 0) 72%);
         box-shadow: 0 0 12px rgba(160, 185, 245, 0.4);
     }
+    .mini-shell[data-design="7"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(255, 138, 101, 0.4), transparent);
+    }
 
     /* ═══════════════════════════════════════════════════════
        SKIN 8: Frost Crystal
@@ -912,7 +995,6 @@
         backdrop-filter: blur(24px) saturate(2);
     }
     .mini-shell[data-design="8"] {
-        height: 34px;
         border: 1px solid rgba(120, 170, 210, 0.5);
         border-radius: 10px;
         padding: 0 10px;
@@ -1000,6 +1082,11 @@
         color: #2c6aa0;
         filter: drop-shadow(0 0 4px rgba(60, 130, 190, 0.5));
     }
+    .mini-shell[data-design="8"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(120, 170, 210, 0.4), transparent);
+    }
 
     /* ═══════════════════════════════════════════════════════
        SKIN 9: Neo Tokyo
@@ -1008,7 +1095,6 @@
         background: #0d0d1a;
     }
     .mini-shell[data-design="9"] {
-        height: 34px;
         border: 1px solid #ff2975;
         border-right: 3px solid #00fff0;
         border-radius: 6px;
@@ -1075,6 +1161,11 @@
         color: #00fff0;
         filter: drop-shadow(0 0 6px rgba(0, 255, 240, 0.6));
     }
+    .mini-shell[data-design="9"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(255, 41, 117, 0.4), transparent);
+    }
 
     /* ═══════════════════════════════════════════════════════
        SKIN 10: Obsidian
@@ -1083,7 +1174,6 @@
         background: #0c0c0e;
     }
     .mini-shell[data-design="10"] {
-        height: 32px;
         border: 1px solid rgba(212, 165, 116, 0.2);
         border-radius: 4px;
         padding: 0 10px;
@@ -1143,6 +1233,11 @@
         color: #d4a574;
         filter: drop-shadow(0 0 4px rgba(212, 165, 116, 0.4));
     }
+    .mini-shell[data-design="10"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(212, 165, 116, 0.3), transparent);
+    }
 
     /* ═══════════════════════════════════════════════════════
        SKIN 11: Synthwave
@@ -1151,7 +1246,6 @@
         background: linear-gradient(180deg, #0d0d2b 0%, #1a0a2e 50%, #0d0d2b 100%);
     }
     .mini-shell[data-design="11"] {
-        height: 34px;
         border: 1px solid rgba(255, 0, 128, 0.3);
         border-radius: 8px;
         padding: 0 8px;
@@ -1237,6 +1331,11 @@
         color: #00ffff;
         filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.5));
     }
+    .mini-shell[data-design="11"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(255, 0, 128, 0.4), transparent);
+    }
 
     /* ═══════════════════════════════════════════════════════
        SKIN 12: Quantum
@@ -1245,7 +1344,6 @@
         background: #050508;
     }
     .mini-shell[data-design="12"] {
-        height: 34px;
         border: 1px solid rgba(0, 255, 65, 0.2);
         border-radius: 4px;
         padding: 0 8px;
@@ -1335,6 +1433,331 @@
         color: #00ff41;
         filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.5));
     }
+    .mini-shell[data-design="12"] .sep {
+        width: 1px;
+        height: 24px;
+        background: linear-gradient(to bottom, transparent, rgba(0, 255, 65, 0.3), transparent);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SKIN 13: Cyber Deck / Retro Tape OLED
+       Warm vintage amber OLED screen with rotating tape reel gears,
+       VU audio meter level pips, and retro-tech industrial casing.
+       ═══════════════════════════════════════════════════════ */
+    .mini-shell[data-design="13"] .mini-bg {
+        background:
+            radial-gradient(ellipse at 80% 50%, rgba(255, 157, 0, 0.08), transparent 60%),
+            linear-gradient(145deg, #0e0d13 0%, #15131a 45%, #0b0a0f 100%);
+        backdrop-filter: blur(12px);
+    }
+    .mini-shell[data-design="13"] {
+        border: 1px solid rgba(255, 160, 20, 0.4);
+        border-radius: 6px;
+        padding: 0 12px;
+        gap: 8px;
+        box-shadow:
+            0 6px 24px rgba(0, 0, 0, 0.6),
+            0 0 16px rgba(255, 140, 0, 0.12),
+            inset 0 1px 0 rgba(255, 200, 100, 0.15),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+        position: relative;
+        overflow: hidden;
+    }
+    .mini-shell[data-design="13"]::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 14%;
+        width: 20px;
+        height: 20px;
+        transform: translateY(-50%);
+        border: 1.5px dashed rgba(255, 160, 20, 0.35);
+        border-radius: 50%;
+        box-shadow: inset 0 0 6px rgba(255, 160, 20, 0.2);
+        animation: tape-reel-spin 6s linear infinite;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    .mini-shell[data-design="13"]::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 25%;
+        width: 20px;
+        height: 20px;
+        transform: translateY(-50%);
+        border: 1.5px dashed rgba(255, 160, 20, 0.25);
+        border-radius: 50%;
+        box-shadow: inset 0 0 6px rgba(255, 160, 20, 0.15);
+        animation: tape-reel-spin 6s linear infinite reverse;
+        pointer-events: none;
+        opacity: 0.45;
+    }
+    @keyframes tape-reel-spin {
+        from { transform: translateY(-50%) rotate(0deg); }
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+    .mini-shell[data-design="13"] #mini-time {
+        font-family: "Share Tech Mono", monospace;
+        font-weight: 700;
+        color: #ff9d00;
+        letter-spacing: 1.5px;
+        text-shadow:
+            0 0 8px rgba(255, 157, 0, 0.75),
+            0 0 22px rgba(255, 110, 0, 0.4);
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="13"] #mini-date {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 9.5px;
+        color: #79d68c;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        text-shadow: 0 0 6px rgba(121, 214, 140, 0.4);
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="13"] .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff2d55;
+        box-shadow: 0 0 10px #ff2d55, 0 0 20px rgba(255, 45, 85, 0.5);
+        --led-halo: #ff2d55;
+        --led-period: 2s;
+        animation: led-core-breathe 2s steps(16) infinite;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="13"] .sep {
+        width: 1px;
+        height: 22px;
+        background: linear-gradient(to bottom, transparent, rgba(255, 160, 20, 0.4), transparent);
+    }
+    .mini-shell[data-design="13"] .ctl-btn {
+        color: rgba(255, 160, 20, 0.6);
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="13"] .ctl-btn:hover {
+        color: #ff9d00;
+        background: rgba(255, 160, 20, 0.15);
+    }
+    .mini-shell[data-design="13"] #btn-aot.active {
+        color: #ff9d00;
+        filter: drop-shadow(0 0 6px rgba(255, 157, 0, 0.8));
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SKIN 14: Apex Aero / Hypercar Telemetry
+       Aerodynamic race cockpit telemetry with carbon fiber weave,
+       RPM tachometer gauge arc, and electric hyper-cyan & scarlet glow.
+       ═══════════════════════════════════════════════════════ */
+    .mini-shell[data-design="14"] .mini-bg {
+        background:
+            radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.12), transparent 45%),
+            linear-gradient(135deg, #090b10 0%, #10141c 50%, #07080d 100%);
+        backdrop-filter: blur(16px);
+    }
+    .mini-shell[data-design="14"] {
+        border: 1px solid rgba(0, 240, 255, 0.4);
+        border-radius: 8px;
+        padding: 0 12px;
+        gap: 8px;
+        box-shadow:
+            0 6px 24px rgba(0, 0, 0, 0.6),
+            0 0 20px rgba(0, 240, 255, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        position: relative;
+        overflow: hidden;
+    }
+    .mini-shell[data-design="14"]::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.02) 0,
+                rgba(255, 255, 255, 0.02) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+        pointer-events: none;
+    }
+    .mini-shell[data-design="14"]::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+            transparent 0%,
+            #00f0ff 30%,
+            #00ff66 65%,
+            #ffd000 85%,
+            #ff003c 100%);
+        box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+        pointer-events: none;
+    }
+    .mini-shell[data-design="14"] #mini-time {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-style: italic;
+        color: #00f0ff;
+        letter-spacing: 1.5px;
+        text-shadow:
+            0 0 10px rgba(0, 240, 255, 0.75),
+            0 0 26px rgba(0, 240, 255, 0.35);
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="14"] #mini-date {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 500;
+        font-size: 8.5px;
+        color: rgba(220, 245, 255, 0.75);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="14"] .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff003c;
+        box-shadow: 0 0 10px #ff003c, 0 0 22px rgba(255, 0, 60, 0.6);
+        --led-halo: #ff003c;
+        --led-period: 1.6s;
+        animation: led-core-breathe 1.6s steps(16) infinite;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="14"] .sep {
+        width: 1px;
+        height: 22px;
+        background: linear-gradient(to bottom, transparent, rgba(0, 240, 255, 0.5), transparent);
+    }
+    .mini-shell[data-design="14"] .ctl-btn {
+        color: rgba(0, 240, 255, 0.6);
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="14"] .ctl-btn:hover {
+        color: #00f0ff;
+        background: rgba(0, 240, 255, 0.15);
+    }
+    .mini-shell[data-design="14"] #btn-aot.active {
+        color: #00f0ff;
+        filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.85));
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SKIN 15: Abyssal Bio / Neuro-Pulse
+       Bioluminescent deep ocean synaptic pulse with organic
+       radii, undulating teal-violet waves, and neural glow.
+       ═══════════════════════════════════════════════════════ */
+    .mini-shell[data-design="15"] .mini-bg {
+        background:
+            radial-gradient(ellipse at 20% 60%, rgba(38, 255, 217, 0.12), transparent 55%),
+            radial-gradient(ellipse at 80% 40%, rgba(192, 132, 252, 0.12), transparent 55%),
+            linear-gradient(135deg, #020b14 0%, #041822 50%, #080d24 100%);
+        backdrop-filter: blur(20px);
+    }
+    .mini-shell[data-design="15"] {
+        border: 1px solid rgba(38, 255, 217, 0.4);
+        border-radius: 18px;
+        padding: 0 14px;
+        gap: 10px;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.65),
+            0 0 24px rgba(38, 255, 217, 0.16),
+            inset 0 1px 0 rgba(192, 132, 252, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .mini-shell[data-design="15"]::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(38, 255, 217, 0.08) 35%,
+            rgba(192, 132, 252, 0.12) 50%,
+            rgba(38, 255, 217, 0.08) 65%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: neuro-wave 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes neuro-wave {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    .mini-shell[data-design="15"] #mini-time {
+        font-family: "Outfit", sans-serif;
+        font-weight: 600;
+        color: #26ffd9;
+        letter-spacing: 1px;
+        text-shadow:
+            0 0 10px rgba(38, 255, 217, 0.75),
+            0 0 26px rgba(192, 132, 252, 0.45);
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="15"] #mini-date {
+        font-family: "Outfit", sans-serif;
+        font-weight: 400;
+        font-size: 10px;
+        color: #c084fc;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="15"] .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #26ffd9;
+        box-shadow: 0 0 12px #26ffd9, 0 0 26px rgba(192, 132, 252, 0.6);
+        --led-halo: #26ffd9;
+        --led-period: 3.2s;
+        animation: led-core-breathe 3.2s steps(16) infinite;
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="15"] .sep {
+        width: 1px;
+        height: 22px;
+        background: linear-gradient(to bottom, transparent, rgba(38, 255, 217, 0.4), transparent);
+    }
+    .mini-shell[data-design="15"] .ctl-btn {
+        color: rgba(38, 255, 217, 0.6);
+        position: relative;
+        z-index: 1;
+    }
+    .mini-shell[data-design="15"] .ctl-btn:hover {
+        color: #26ffd9;
+        background: rgba(38, 255, 217, 0.15);
+    }
+    .mini-shell[data-design="15"] #btn-aot.active {
+        color: #26ffd9;
+        filter: drop-shadow(0 0 6px rgba(38, 255, 217, 0.85));
+    }
 
     /* ═══════════════════════════════════════════════════════
        COMMON ELEMENTS
@@ -1347,32 +1770,19 @@
                     margin 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Collapsed heights for vertical skins (1 to 6) */
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="1"] { height: 34px; gap: 8px; padding: 0 10px 0 8px; }
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="2"] { height: 38px; gap: 8px; padding: 0 10px; }
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="3"] { height: 34px; gap: 8px; padding: 0 10px; }
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="4"] { height: 36px; gap: 8px; padding: 0 10px; }
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="5"] { height: 34px; gap: 8px; padding: 0 10px; }
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="6"] { height: 34px; gap: 8px; padding: 0 10px; }
-
-    /* Keep controls in a stable compact row for vertical skins in collapse-date mode */
-    .mini-shell.collapse-date[data-design="1"] .controls,
-    .mini-shell.collapse-date[data-design="2"] .controls,
-    .mini-shell.collapse-date[data-design="3"] .controls,
-    .mini-shell.collapse-date[data-design="4"] .controls,
-    .mini-shell.collapse-date[data-design="5"] .controls,
-    .mini-shell.collapse-date[data-design="6"] .controls {
+    /* ── Universal Date Collapsing by Form Factor ── */
+    /* Stacked (2-row) collapse: collapses vertically */
+    .mini-shell[data-layout="stacked"].collapse-date:not(.is-expanded) {
+        height: 34px;
+        gap: 8px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .mini-shell[data-layout="stacked"].collapse-date:not(.is-expanded) .controls {
         flex-direction: row;
         gap: 4px;
     }
-
-    /* In vertical skins (1-6), hide date vertically when not expanded */
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="1"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="2"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="3"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="4"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="5"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="6"] #mini-date {
+    .mini-shell[data-layout="stacked"].collapse-date:not(.is-expanded) #mini-date {
         max-height: 0;
         opacity: 0;
         transform: translateY(-4px);
@@ -1382,13 +1792,8 @@
         pointer-events: none;
     }
 
-    /* In horizontal single-row skins (7-12), hide date horizontally when not expanded */
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="7"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="8"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="9"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="10"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="11"] #mini-date,
-    .mini-shell.collapse-date:not(.is-expanded)[data-design="12"] #mini-date {
+    /* Inline (1-row) collapse: collapses horizontally */
+    .mini-shell[data-layout="inline"].collapse-date:not(.is-expanded) #mini-date {
         max-width: 0;
         opacity: 0;
         transform: scaleX(0.8);
@@ -1715,11 +2120,27 @@
         50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* ── Per-Skin Tooltip Theming ── */
-    /* Skin 1: Cyber Bar Pro */
+    /* Skin 1: Titanium Mech */
     .mini-tip[data-design="1"] {
-        border-left: 3px solid var(--accent-a);
+        background: #11141a;
+        border: 1px solid rgba(255, 180, 20, 0.5);
+        border-left: 3px solid #ffb700;
         font-family: "Share Tech Mono", monospace;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 180, 20, 0.2);
+    }
+    .mini-tip[data-design="1"]::after {
+        background: #11141a;
+        border-color: rgba(255, 180, 20, 0.5);
+    }
+    .mini-tip[data-design="1"] .mini-tip-date,
+    .mini-tip[data-design="1"] .mini-tip-stat b {
+        color: #ffb700;
+        text-shadow: 0 0 8px rgba(255, 183, 0, 0.6);
+    }
+    .mini-tip[data-design="1"] .mini-tip-action-btn {
+        border-color: #ffb700;
+        color: #ffb700;
+        background: rgba(255, 183, 0, 0.12);
     }
 
     /* Skin 2: Holo Display */
@@ -1997,6 +2418,75 @@
         border-color: #8a5cff;
         color: #b79cff;
         background: rgba(138, 92, 255, 0.12);
+    }
+
+    /* Skin 13: Cyber Deck */
+    .mini-tip[data-design="13"] {
+        background: #0e0d13;
+        border: 1px solid rgba(255, 160, 20, 0.4);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(255, 160, 20, 0.15);
+        font-family: "Share Tech Mono", monospace;
+    }
+    .mini-tip[data-design="13"]::after {
+        background: #0e0d13;
+        border-color: rgba(255, 160, 20, 0.4);
+    }
+    .mini-tip[data-design="13"] .mini-tip-date,
+    .mini-tip[data-design="13"] .mini-tip-stat b {
+        color: #ff9d00;
+        text-shadow: 0 0 8px rgba(255, 157, 0, 0.6);
+    }
+    .mini-tip[data-design="13"] .mini-tip-action-btn {
+        border-color: #ff9d00;
+        color: #ff9d00;
+        background: rgba(255, 157, 0, 0.12);
+    }
+
+    /* Skin 14: Apex Aero */
+    .mini-tip[data-design="14"] {
+        background: #090b10;
+        border: 1px solid rgba(0, 240, 255, 0.4);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 240, 255, 0.15);
+        font-family: "Orbitron", sans-serif;
+    }
+    .mini-tip[data-design="14"]::after {
+        background: #090b10;
+        border-color: rgba(0, 240, 255, 0.4);
+    }
+    .mini-tip[data-design="14"] .mini-tip-date,
+    .mini-tip[data-design="14"] .mini-tip-stat b {
+        color: #00f0ff;
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+    .mini-tip[data-design="14"] .mini-tip-action-btn {
+        border-color: #00f0ff;
+        color: #00f0ff;
+        background: rgba(0, 240, 255, 0.12);
+    }
+
+    /* Skin 15: Abyssal Bio */
+    .mini-tip[data-design="15"] {
+        background: #03141e;
+        border: 1px solid rgba(38, 255, 217, 0.4);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(38, 255, 217, 0.18);
+        font-family: "Outfit", sans-serif;
+    }
+    .mini-tip[data-design="15"]::after {
+        background: #03141e;
+        border-color: rgba(38, 255, 217, 0.4);
+    }
+    .mini-tip[data-design="15"] .mini-tip-date,
+    .mini-tip[data-design="15"] .mini-tip-stat b {
+        color: #26ffd9;
+        text-shadow: 0 0 8px rgba(38, 255, 217, 0.6);
+    }
+    .mini-tip[data-design="15"] .mini-tip-action-btn {
+        border-color: #26ffd9;
+        color: #26ffd9;
+        background: rgba(38, 255, 217, 0.12);
     }
 
     /* ── Zoom (50/100/200/400%) ─────────────────────────────

@@ -801,11 +801,25 @@
         }
         if (typeof applySchedUI === "function") applySchedUI(s);
 
+        // Mini mode layout
+        const miniLayout = s.miniLayout || "stacked";
+        document.querySelectorAll('[data-mini-layout]').forEach((b) => {
+            b.classList.toggle('on', b.dataset.miniLayout === miniLayout);
+        });
+
         // Mini mode controls
         const miniDesign = s.miniDesign || 1;
         document.querySelectorAll('[data-mini-design]').forEach((b) => {
             b.classList.toggle('on', parseInt(b.dataset.miniDesign) === miniDesign);
         });
+
+        // Mini mode typography
+        const miniFont = document.getElementById('s-mini-font');
+        if (miniFont) miniFont.value = s.miniCustomFont || 'default';
+        const miniFontBold = document.getElementById('s-mini-font-bold');
+        if (miniFontBold) miniFontBold.checked = Boolean(s.miniFontBold);
+        const miniFontItalic = document.getElementById('s-mini-font-italic');
+        if (miniFontItalic) miniFontItalic.checked = Boolean(s.miniFontItalic);
         // Mini zoom — discrete stops, slider index → factor (100% default)
         const ZOOM_STEPS = [0.5, 1, 2, 4];
         const miniZoom = document.getElementById('s-mini-zoom');
@@ -5990,6 +6004,16 @@
             openSettings("general", "#s-display-name");
         });
     }
+    // Mini layout controls
+    document.querySelectorAll('[data-mini-layout]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const layout = btn.dataset.miniLayout;
+            document.querySelectorAll('[data-mini-layout]').forEach((b) => b.classList.remove('on'));
+            btn.classList.add('on');
+            window.cc.saveSettings({ miniLayout: layout });
+        });
+    });
+
     // Mini mode settings
     document.querySelectorAll('[data-mini-design]').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -6002,6 +6026,27 @@
             window.cc.saveSettings({ miniDesign: mode });
         });
     });
+
+    const sMiniFont = document.getElementById('s-mini-font');
+    if (sMiniFont) {
+        sMiniFont.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniCustomFont: e.target.value });
+        });
+    }
+
+    const sMiniFontBold = document.getElementById('s-mini-font-bold');
+    if (sMiniFontBold) {
+        sMiniFontBold.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniFontBold: e.target.checked });
+        });
+    }
+
+    const sMiniFontItalic = document.getElementById('s-mini-font-italic');
+    if (sMiniFontItalic) {
+        sMiniFontItalic.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniFontItalic: e.target.checked });
+        });
+    }
 
     const sMiniAutoCycle = document.getElementById("s-mini-auto-cycle");
     if (sMiniAutoCycle) {

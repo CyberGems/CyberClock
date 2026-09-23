@@ -109,14 +109,33 @@
     // mini.css), so these are the window dimensions, in logical px.
     // ═══════════════════════════════════════════════════════
 
-    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
-    const DESIGN_WIDTHS  = { 1: 260, 2: 260, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
+    // Each skin defines base dimensions (w, h) and collapsed dimensions (cw, ch)
+    // for both "stacked" (2-row compact) and "inline" (1-row slim bar) form factors.
+    const DESIGN_SIZES = {
+        1:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
+        2:  { stacked: { w: 260, h: 48, cw: 260, ch: 38 }, inline: { w: 310, h: 34, cw: 195, ch: 34 } },
+        3:  { stacked: { w: 260, h: 46, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
+        4:  { stacked: { w: 260, h: 52, cw: 260, ch: 36 }, inline: { w: 310, h: 36, cw: 190, ch: 36 } },
+        5:  { stacked: { w: 260, h: 50, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
+        6:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
+        7:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
+        8:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
+        9:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 200, ch: 34 } },
+        10: { stacked: { w: 260, h: 48, cw: 260, ch: 32 }, inline: { w: 300, h: 32, cw: 180, ch: 32 } },
+        11: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 175, ch: 34 } },
+        12: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 170, ch: 34 } },
+        13: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
+        14: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
+        15: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } }
+    };
 
-    // Collapsed widths: single-row skins must fit the worst-case 12h+seconds
-    // string ("12:34:56 PM") at their native font size — measured per skin
-    // (see git history for the deficit audit that set these).
-    const COLLAPSED_HEIGHTS = { 1: 34, 2: 38, 3: 34, 4: 36, 5: 34, 6: 34, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
-    const COLLAPSED_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 188, 8: 188, 9: 200, 10: 180, 11: 175, 12: 170 };
+    function getEffectiveLayout() {
+        if (cfg.miniLayout === "stacked" || cfg.miniLayout === "inline") {
+            return cfg.miniLayout;
+        }
+        const d = parseInt(cfg.miniDesign, 10) || 1;
+        return d <= 6 ? "stacked" : "inline";
+    }
 
     // Discrete zoom stops for the mini clock (slider index → factor).
     const ZOOM_STEPS = [0.5, 1, 2, 4];
@@ -132,16 +151,20 @@
     let lastAppliedHeight = 0;
 
     function getCurrentTargetSize() {
-        const design = cfg.miniDesign || 1;
+        const design = Math.min(15, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
+        const layout = getEffectiveLayout();
         const isCollapsible = cfg.miniCollapseDate === true;
         const zoom = zoomFactor();
 
-        let baseWidth = DESIGN_WIDTHS[design] || 260;
-        let baseHeight = DESIGN_HEIGHTS[design] || 48;
+        const skinSizes = DESIGN_SIZES[design] || DESIGN_SIZES[1];
+        const layoutSizes = skinSizes[layout] || skinSizes.stacked;
+
+        let baseWidth = layoutSizes.w;
+        let baseHeight = layoutSizes.h;
 
         if (isCollapsible && !isHovered) {
-            baseWidth = COLLAPSED_WIDTHS[design] || baseWidth;
-            baseHeight = COLLAPSED_HEIGHTS[design] || baseHeight;
+            baseWidth = layoutSizes.cw || baseWidth;
+            baseHeight = layoutSizes.ch || baseHeight;
         }
 
         if (isTipVisible) {
@@ -163,13 +186,16 @@
     }
 
     let lastDesign = null;
+    let lastLayout = null;
     let lastCollapse = null;
     let lastZoom = null;
     function applySettings(s) {
         const designChanged = s.miniDesign !== lastDesign;
+        const layoutChanged = s.miniLayout !== lastLayout;
         const collapseChanged = s.miniCollapseDate !== lastCollapse;
         const zoomChanged = s.miniZoom !== lastZoom && s.miniZoom !== undefined;
         lastDesign = s.miniDesign;
+        lastLayout = s.miniLayout;
         lastCollapse = s.miniCollapseDate;
         lastZoom = s.miniZoom;
 
@@ -182,11 +208,33 @@
 
         const shell = document.getElementById("shell");
         if (shell) {
-            shell.dataset.design = s.miniDesign || "1";
+            const activeDesign = Math.min(15, Math.max(1, parseInt(s.miniDesign, 10) || 1));
+            const activeLayout = s.miniLayout || (activeDesign <= 6 ? "stacked" : "inline");
+            shell.dataset.design = String(activeDesign);
+            shell.dataset.layout = activeLayout;
             shell.classList.toggle("collapse-date", s.miniCollapseDate === true);
             shell.style.setProperty("--bg-op", s.miniBgOpacity ?? 1.0);
             shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
             shell.style.setProperty("--mini-zoom", String(zoomFactor()));
+
+            // Typography Studio: Custom font, weight & style
+            if (s.miniCustomFont && s.miniCustomFont !== "default") {
+                shell.style.setProperty("--mini-custom-font", `"${s.miniCustomFont}", sans-serif`);
+            } else {
+                shell.style.removeProperty("--mini-custom-font");
+            }
+
+            if (s.miniFontBold !== undefined && s.miniFontBold !== null) {
+                shell.style.setProperty("--mini-custom-weight", s.miniFontBold ? "700" : "400");
+            } else {
+                shell.style.removeProperty("--mini-custom-weight");
+            }
+
+            if (s.miniFontItalic !== undefined && s.miniFontItalic !== null) {
+                shell.style.setProperty("--mini-custom-style", s.miniFontItalic ? "italic" : "normal");
+            } else {
+                shell.style.removeProperty("--mini-custom-style");
+            }
         }
         const tipEl = document.getElementById("mini-tip");
         if (tipEl) {
@@ -226,8 +274,8 @@
             }
         }
 
-        // Resize window to match the skin height/width when design or collapse setting changes
-        if (designChanged || collapseChanged || zoomChanged || lastAppliedWidth === 0) {
+        // Resize window to match the skin height/width when design, layout or collapse setting changes
+        if (designChanged || layoutChanged || collapseChanged || zoomChanged || lastAppliedWidth === 0) {
             // Zoom changes re-anchor the window to its visual center (see
             // set_window_size); design/collapse swaps keep the top-left anchor.
             syncWindowSize(true, zoomChanged);
@@ -546,13 +594,13 @@
         const ms = mins * 60 * 1000;
         miniAutoCycleTimer = setInterval(() => {
             if (document.hidden || activeBackendLabel === "main") return;
-            const cur = Math.min(12, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
+            const cur = Math.min(15, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
             let next;
             if (cfg.miniAutoCycleMode === "random") {
-                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter((n) => n !== cur);
+                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].filter((n) => n !== cur);
                 next = others[Math.floor(Math.random() * others.length)];
             } else {
-                next = (cur % 12) + 1;
+                next = (cur % 15) + 1;
             }
             cfg.miniDesign = next;
             window.cc.saveSettings({ miniDesign: next });
