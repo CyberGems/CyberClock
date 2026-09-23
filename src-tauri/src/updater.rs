@@ -80,12 +80,21 @@ pub fn init_updater(app: &AppHandle, auto_update: bool) {
     #[cfg(not(feature = "msstore"))]
     {
         set_auto_update(auto_update);
+
+        #[cfg(debug_assertions)]
+        {
+            let _ = (app, auto_update);
+            info!("Updater: background auto-check disabled in debug mode");
+            return;
+        }
+
+        #[cfg(not(debug_assertions))]
         if auto_update {
             let app = app.clone();
             tauri::async_runtime::spawn(async move {
                 sleep(Duration::from_secs(8)).await;
                 if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
-                    let _ = perform_check(&app).await;
+                    perform_background_check(&app).await;
                 }
             });
         }
@@ -254,6 +263,52 @@ async fn perform_check(app: &AppHandle) -> Result<serde_json::Value, String> {
                 },
             );
             Err(msg)
+        }
+    }
+}
+
+#[cfg(all(not(feature = "msstore"), not(debug_assertions)))]
+async fn perform_background_check(app: &AppHandle) {
+    let updater = match app.updater() {
+        Ok(u) => u,
+        Err(e) => {
+            info!("Updater: background check unavailable: {}", e);
+            return;
+        }
+    };
+
+    match updater.check().await {
+        Ok(Some(update)) => {
+            let version = update.version.clone();
+            {
+                let state = app.state::<UpdaterState>();
+                *lock_or_recover(&state.pending) = Some(PendingUpdate {
+                    update,
+                    bytes: None,
+                });
+            }
+            *lock_or_recover(&PENDING_VERSION) = Some(version.clone());
+
+            emit_status(
+                app,
+                UpdateStatusPayload {
+                    state: "available".into(),
+                    version: Some(version.clone()),
+                    percent: None,
+                    message: None,
+                },
+            );
+
+            info!("Updater: background update available -> v{}", version);
+        }
+        Ok(None) => {
+            *lock_or_recover(&PENDING_VERSION) = None;
+            info!("Updater: background check finished (up to date)");
+        }
+        Err(e) => {
+            // Background check failures (offline, rate limit, timeout, etc.)
+            // must NOT emit error status or display error popups to the user.
+            info!("Updater: background check skipped/failed: {}", e);
         }
     }
 }

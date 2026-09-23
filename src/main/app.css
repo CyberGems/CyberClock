@@ -4458,6 +4458,8 @@
     .ctx-item .ico .cc-ico {
         width: 14px;
         height: 14px;
+        fill: none;
+        stroke: url(#cc-grad-main);
         color: var(--accent-a);
         filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.5));
         transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s;
@@ -4485,6 +4487,7 @@
         filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
     }
     .ctx-item.danger .ico .cc-ico {
+        stroke: url(#cc-grad-danger);
         color: #ff5577;
         filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
     }

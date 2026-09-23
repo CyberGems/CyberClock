@@ -68,24 +68,19 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        opacity: 0.8;
-    }
-    .ctx-item .ico .cc-ico {
-        width: 14px;
-        height: 14px;
+        opacity: 1;
     }
 
     /* ── Eye-candy icons: duotone gradient stroke + neon glow ── */
-    .ctx-item .ico {
-        opacity: 1; /* was 0.8 — let the glow breathe */
-    }
+    .ctx-item .ico .cc-ico,
     .cc-ico-fx {
         width: 16px;
         height: 16px;
         overflow: visible; /* don't clip the glow */
         fill: none;
         stroke: url(#cc-grad-menu);
-        stroke-width: 1.9;
+        color: var(--accent-a, #00d4ff);
+        stroke-width: 1.75;
         stroke-linecap: round;
         stroke-linejoin: round;
         filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.5));
@@ -93,6 +88,7 @@
             transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
             filter 0.18s;
     }
+    .ctx-item:hover .cc-ico,
     .ctx-item:hover .cc-ico-fx {
         transform: scale(1.18);
         animation: ico-glow 1.5s ease-in-out infinite;
@@ -141,10 +137,13 @@
         background: rgba(255, 68, 68, 0.12);
         color: #ffffff;
     }
+    .ctx-item.danger .ico .cc-ico,
     .ctx-item.danger .ico .cc-ico-fx {
         stroke: url(#cc-grad-danger);
+        color: #ff5577;
         filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
     }
+    .ctx-item.danger:hover .cc-ico,
     .ctx-item.danger:hover .cc-ico-fx {
         animation: ico-glow-danger 1.5s ease-in-out infinite;
     }

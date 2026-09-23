@@ -171,8 +171,20 @@
         emptyEl.hidden = isError || listEl.children.length > 0;
 
         const isAvailable = state === "available";
+        let errorMessage = updateStatus.message || "";
+        const isTechnicalOrUrl =
+            errorMessage.includes("error sending request") ||
+            errorMessage.includes("http") ||
+            errorMessage.includes("tcp") ||
+            errorMessage.includes("connection");
+        if (!errorMessage || isTechnicalOrUrl) {
+            errorMessage = updateText(
+                "updates.networkError",
+                "Could not connect to the update server. Check your internet connection."
+            );
+        }
         summaryEl.textContent = isError
-            ? (updateStatus.message || updateText("updates.errorTitle", "Update failed"))
+            ? errorMessage
             : isDownloaded
                 ? updateText("updates.downloaded", "Update downloaded and ready to install.")
                 : isDownloading
@@ -248,6 +260,13 @@
         if (next.state === "downloading" || next.state === "downloaded") {
             updateNoticeDismissed = false;
             renderUpdateNotice();
+        } else if (next.state === "error") {
+            // Only render an error if the notice is ALREADY open (e.g. active download failed).
+            // Background checks must never pop up an error modal unprompted.
+            const notice = document.getElementById("update-notice");
+            if (notice && notice.classList.contains("open")) {
+                renderUpdateNotice();
+            }
         } else if (next.state !== "checking") {
             renderUpdateNotice();
         }
