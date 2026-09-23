@@ -68,6 +68,10 @@
                     if (settingsLbl) settingsLbl.textContent = window.ccI18n.t("menu.settings");
                     const closeLbl = document.querySelector('.ctx-item[data-action="close"] .label');
                     if (closeLbl) closeLbl.textContent = window.ccI18n.t("tray.quit");
+                    const tabActions = document.getElementById("tab-btn-actions");
+                    if (tabActions) tabActions.textContent = window.ccI18n.t("menu.tabActions");
+                    const tabCustomize = document.getElementById("tab-btn-customize");
+                    if (tabCustomize) tabCustomize.textContent = window.ccI18n.t("menu.tabCustomize");
                 }
                 
                 // Active Design
@@ -219,6 +223,19 @@
         if (window.cc && window.cc.closeMenuPopup) {
             setTimeout(() => window.cc.closeMenuPopup(), 200);
         }
+    });
+
+    // Tab switching (Actions vs Customize)
+    document.querySelectorAll(".ctx-tab").forEach((tabBtn) => {
+        tabBtn.addEventListener("click", () => {
+            const target = tabBtn.dataset.tab;
+            document.querySelectorAll(".ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
+            document.querySelectorAll(".ctx-tab-panel").forEach((p) => {
+                const isTarget = p.id === `tab-panel-${target}`;
+                p.style.display = isTarget ? "flex" : "none";
+                p.classList.toggle("on", isTarget);
+            });
+        });
     });
 
     // Menu action click handlers (full, timer, settings, etc.)

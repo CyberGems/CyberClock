@@ -56,6 +56,12 @@
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
       d="M6 18h12"/>
   </symbol>
+  <symbol id="cc-i-tray" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 3v10m0 0l-3.5-3.5M12 13l3.5-3.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+      d="M4 14.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.5"/>
+  </symbol>
   <symbol id="cc-i-x" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
       d="M18 6 6 18"/>

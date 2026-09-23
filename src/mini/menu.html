@@ -43,130 +43,141 @@
         </svg>
 
         <div class="ctx-menu" id="ctx-menu">
-            <div class="ctx-item" data-action="full">
-                <span class="ico" data-ico="expand"></span>
-                <span class="label">Full Mode</span>
+            <!-- TAB BAR -->
+            <div class="ctx-tabs" id="ctx-tabs">
+                <button class="ctx-tab on" id="tab-btn-actions" data-tab="actions" data-i18n="menu.tabActions">Actions</button>
+                <button class="ctx-tab" id="tab-btn-customize" data-tab="customize" data-i18n="menu.tabCustomize">Customize</button>
             </div>
-            <div class="ctx-sep"></div>
-            <div class="ctx-item" data-action="new_timer">
-                <span class="ico" data-ico="timer"></span>
-                <span class="label">Timer</span>
-            </div>
-            <div class="ctx-item" data-action="new_stopwatch">
-                <span class="ico" data-ico="stopwatch"></span>
-                <span class="label">Stopwatch</span>
-            </div>
-            <div class="ctx-item" data-action="new_calendar">
-                <span class="ico" data-ico="calendar"></span>
-                <span class="label">Calendar</span>
-            </div>
-            <div class="ctx-item" data-action="relax">
-                <span class="ico" data-ico="lotus"></span>
-                <span class="label">Relax</span>
-            </div>
-            
-            <div class="ctx-sep"></div>
-            
-            <!-- SECTION: Design Mode -->
-            <div class="ctx-section">
-                <div class="ctx-section-title" data-i18n="settings.mini.designMode">Design Mode</div>
-                <div class="design-picker" id="design-picker">
-                    <button class="design-btn" data-mode="1" data-tooltip="1: Cyber Bar Pro" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom">1</button>
-                    <button class="design-btn" data-mode="2" data-tooltip="2: Holo Display" data-i18n-attr="data-tooltip:settings.mini.skin.2" data-tooltip-dir="bottom">2</button>
-                    <button class="design-btn" data-mode="3" data-tooltip="3: Digital Matrix" data-i18n-attr="data-tooltip:settings.mini.skin.3" data-tooltip-dir="bottom">3</button>
-                    <button class="design-btn" data-mode="4" data-tooltip="4: Glass Orb" data-i18n-attr="data-tooltip:settings.mini.skin.4" data-tooltip-dir="bottom">4</button>
-                    <button class="design-btn" data-mode="5" data-tooltip="5: Neon Circuit" data-i18n-attr="data-tooltip:settings.mini.skin.5" data-tooltip-dir="bottom">5</button>
-                    <button class="design-btn" data-mode="6" data-tooltip="6: Zen Minimal" data-i18n-attr="data-tooltip:settings.mini.skin.6" data-tooltip-dir="bottom">6</button>
-                    <button class="design-btn" data-mode="7" data-tooltip="7: Sunset Pulse" data-i18n-attr="data-tooltip:settings.mini.skin.7" data-tooltip-dir="bottom">7</button>
-                    <button class="design-btn" data-mode="8" data-tooltip="8: Frost Crystal" data-i18n-attr="data-tooltip:settings.mini.skin.8" data-tooltip-dir="bottom">8</button>
-                    <button class="design-btn" data-mode="9" data-tooltip="9: Neo Tokyo" data-i18n-attr="data-tooltip:settings.mini.skin.9" data-tooltip-dir="bottom">9</button>
-                    <button class="design-btn" data-mode="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom">10</button>
-                    <button class="design-btn" data-mode="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom">11</button>
-                    <button class="design-btn" data-mode="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom">12</button>
+
+            <!-- TAB 1: Actions & Windows -->
+            <div class="ctx-tab-panel on" id="tab-panel-actions">
+                <div class="ctx-item" data-action="full">
+                    <span class="ico" data-ico="expand"></span>
+                    <span class="label">Full Mode</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item" data-action="new_timer">
+                    <span class="ico" data-ico="timer"></span>
+                    <span class="label">Timer</span>
+                </div>
+                <div class="ctx-item" data-action="new_stopwatch">
+                    <span class="ico" data-ico="stopwatch"></span>
+                    <span class="label">Stopwatch</span>
+                </div>
+                <div class="ctx-item" data-action="new_calendar">
+                    <span class="ico" data-ico="calendar"></span>
+                    <span class="label">Calendar</span>
+                </div>
+                <div class="ctx-item" data-action="relax">
+                    <span class="ico" data-ico="lotus"></span>
+                    <span class="label">Relax</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item" data-action="settings">
+                    <span class="ico" data-ico="gear"></span>
+                    <span class="label">Settings</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item danger" data-action="close">
+                    <span class="ico" data-ico="power"></span>
+                    <span class="label" data-i18n="tray.quit">Exit</span>
+                    <span class="shortcut">Alt+F4</span>
                 </div>
             </div>
 
-            <!-- SECTION: Zoom -->
-            <div class="ctx-section">
-                <div class="ctx-section-title" data-i18n="settings.mini.zoom">Zoom</div>
-                <div class="slider-row">
-                    <input type="range" id="zoom-slider" min="0" max="3" step="1" value="1" />
-                    <span class="slider-val" id="zoom-val">100%</span>
-                </div>
-            </div>
-
-            <!-- SECTION: Transparency -->
-            <div class="ctx-section">
-                <div class="ctx-section-title" data-i18n="settings.mini.bg">Background</div>
-                <div class="slider-row">
-                    <input type="range" id="bg-opacity-slider" min="0" max="100" value="100" />
-                    <span class="slider-val" id="bg-opacity-val">100%</span>
-                </div>
-                <div class="ctx-section-title" data-i18n="settings.mini.content">Content</div>
-                <div class="slider-row">
-                    <input type="range" id="opacity-slider" min="20" max="100" value="100" />
-                    <span class="slider-val" id="opacity-val">100%</span>
-                </div>
-            </div>
-
-            <!-- SECTION: Collapse Date Toggle -->
-            <div class="switch-row" id="ctx-collapse">
-                <span class="switch-lbl">Collapse Date</span>
-                <div class="toggle" id="toggle-collapse">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
+            <!-- TAB 2: Customization & Appearance -->
+            <div class="ctx-tab-panel" id="tab-panel-customize" style="display: none;">
+                <!-- SECTION: Design Mode -->
+                <div class="ctx-section">
+                    <div class="ctx-section-title" data-i18n="settings.mini.designMode">Design Mode</div>
+                    <div class="design-picker" id="design-picker">
+                        <button class="design-btn" data-mode="1" data-tooltip="1: Cyber Bar Pro" data-i18n-attr="data-tooltip:settings.mini.skin.1" data-tooltip-dir="bottom">1</button>
+                        <button class="design-btn" data-mode="2" data-tooltip="2: Holo Display" data-i18n-attr="data-tooltip:settings.mini.skin.2" data-tooltip-dir="bottom">2</button>
+                        <button class="design-btn" data-mode="3" data-tooltip="3: Digital Matrix" data-i18n-attr="data-tooltip:settings.mini.skin.3" data-tooltip-dir="bottom">3</button>
+                        <button class="design-btn" data-mode="4" data-tooltip="4: Glass Orb" data-i18n-attr="data-tooltip:settings.mini.skin.4" data-tooltip-dir="bottom">4</button>
+                        <button class="design-btn" data-mode="5" data-tooltip="5: Neon Circuit" data-i18n-attr="data-tooltip:settings.mini.skin.5" data-tooltip-dir="bottom">5</button>
+                        <button class="design-btn" data-mode="6" data-tooltip="6: Zen Minimal" data-i18n-attr="data-tooltip:settings.mini.skin.6" data-tooltip-dir="bottom">6</button>
+                        <button class="design-btn" data-mode="7" data-tooltip="7: Sunset Pulse" data-i18n-attr="data-tooltip:settings.mini.skin.7" data-tooltip-dir="bottom">7</button>
+                        <button class="design-btn" data-mode="8" data-tooltip="8: Frost Crystal" data-i18n-attr="data-tooltip:settings.mini.skin.8" data-tooltip-dir="bottom">8</button>
+                        <button class="design-btn" data-mode="9" data-tooltip="9: Neo Tokyo" data-i18n-attr="data-tooltip:settings.mini.skin.9" data-tooltip-dir="bottom">9</button>
+                        <button class="design-btn" data-mode="10" data-tooltip="10: Obsidian" data-i18n-attr="data-tooltip:settings.mini.skin.10" data-tooltip-dir="bottom">10</button>
+                        <button class="design-btn" data-mode="11" data-tooltip="11: Synthwave" data-i18n-attr="data-tooltip:settings.mini.skin.11" data-tooltip-dir="bottom">11</button>
+                        <button class="design-btn" data-mode="12" data-tooltip="12: Quantum" data-i18n-attr="data-tooltip:settings.mini.skin.12" data-tooltip-dir="bottom">12</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- SECTION: Position Lock Switch -->
-            <div class="switch-row" id="ctx-lock">
-                <span class="switch-lbl">Position Lock</span>
-                <div class="toggle" id="toggle-lock">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
+                <!-- SECTION: Zoom -->
+                <div class="ctx-section">
+                    <div class="ctx-section-title" data-i18n="settings.mini.zoom">Zoom</div>
+                    <div class="slider-row">
+                        <input type="range" id="zoom-slider" min="0" max="3" step="1" value="1" />
+                        <span class="slider-val" id="zoom-val">100%</span>
                     </div>
                 </div>
-            </div>
-            
-            <!-- SECTION: Always on Top Toggle -->
-            <div class="switch-row" id="ctx-aot">
-                <span class="switch-lbl">Always on Top</span>
-                <div class="toggle" id="toggle-aot">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- SECTION: Disable Animations Toggle -->
-            <div class="switch-row" id="ctx-anim">
-                <span class="switch-lbl">Disable Animations</span>
-                <div class="toggle" id="toggle-anim">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
+                <!-- SECTION: Transparency -->
+                <div class="ctx-section">
+                    <div class="ctx-section-title" data-i18n="settings.mini.bg">Background</div>
+                    <div class="slider-row">
+                        <input type="range" id="bg-opacity-slider" min="0" max="100" value="100" />
+                        <span class="slider-val" id="bg-opacity-val">100%</span>
+                    </div>
+                    <div class="ctx-section-title" data-i18n="settings.mini.content">Content</div>
+                    <div class="slider-row">
+                        <input type="range" id="opacity-slider" min="20" max="100" value="100" />
+                        <span class="slider-val" id="opacity-val">100%</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- SECTION: Real Sun Cycle (design 7 only, hidden otherwise) -->
-            <div class="switch-row" id="ctx-solar" style="display: none;">
-                <span class="switch-lbl">Real Sun Cycle</span>
-                <div class="toggle" id="toggle-solar">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
+                <!-- SECTION: Collapse Date Toggle -->
+                <div class="switch-row" id="ctx-collapse">
+                    <span class="switch-lbl">Collapse Date</span>
+                    <div class="toggle" id="toggle-collapse">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="ctx-item" data-action="settings">
-                <span class="ico" data-ico="gear"></span>
-                <span class="label">Settings</span>
-            </div>
-            <div class="ctx-sep"></div>
-            <div class="ctx-item danger" data-action="close">
-                <span class="ico" data-ico="power"></span>
-                <span class="label" data-i18n="tray.quit">Exit</span>
-                <span class="shortcut">Alt+F4</span>
+
+                <!-- SECTION: Position Lock Switch -->
+                <div class="switch-row" id="ctx-lock">
+                    <span class="switch-lbl">Position Lock</span>
+                    <div class="toggle" id="toggle-lock">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECTION: Always on Top Toggle -->
+                <div class="switch-row" id="ctx-aot">
+                    <span class="switch-lbl">Always on Top</span>
+                    <div class="toggle" id="toggle-aot">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Disable Animations Toggle -->
+                <div class="switch-row" id="ctx-anim">
+                    <span class="switch-lbl">Disable Animations</span>
+                    <div class="toggle" id="toggle-anim">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Real Sun Cycle (design 7 only, hidden otherwise) -->
+                <div class="switch-row" id="ctx-solar" style="display: none;">
+                    <span class="switch-lbl">Real Sun Cycle</span>
+                    <div class="toggle" id="toggle-solar">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

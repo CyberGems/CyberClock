@@ -104,7 +104,7 @@
                             </button>
                         </div>
                     </div>
-                    <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom">
+                    <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom" data-tooltip-align="right">
                         <span data-ico="x"></span>
                     </button>
                 </div>
@@ -1277,6 +1277,18 @@
                                 ></label>
                             </div>
                             <div class="s-row">
+                                <span class="s-row-ico" data-ico="tray"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.onCloseAction">On window close</span>
+                                    <small data-i18n="settings.general.onCloseActionDesc">Choose whether closing the window minimizes to tray or exits</small>
+                                </div>
+                                <select id="s-close-action" class="sched-select">
+                                    <option value="ask" data-i18n="settings.general.onCloseAsk">Ask every time</option>
+                                    <option value="tray" data-i18n="settings.general.onCloseTray">Minimize to tray</option>
+                                    <option value="quit" data-i18n="settings.general.onCloseQuit">Exit CyberClock</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
                                 <span class="s-row-ico" data-ico="keyboard"></span>
                                 <div class="s-lbl">
                                     <span data-i18n="settings.general.hotkey">Show / Hide Clock</span>
@@ -1794,10 +1806,9 @@
                 <span class="label" data-i18n="menu.settings">Settings</span>
             </div>
             <div class="ctx-sep"></div>
-            <div class="ctx-item danger" id="ctx-btn-close">
-                <span class="ico"><span data-ico="power"></span></span>
-                <span class="label" data-i18n="menu.close">Close</span>
-                <span class="shortcut">Alt+F4</span>
+            <div class="ctx-item" id="ctx-btn-close">
+                <span class="ico"><span data-ico="tray"></span></span>
+                <span class="label" data-i18n="menu.minimizeToTray">Minimizar a la bandeja</span>
             </div>
         </div>
         <!-- ═══ TEXT CONTEXT MENU (Inputs & Textareas) ═════════════════ -->
@@ -1826,6 +1837,32 @@
             <div class="ctx-item danger" id="ctx-text-clear">
                 <span class="ico"><span data-ico="trash"></span></span>
                 <span class="label" data-i18n="ctx.clear">Clear</span>
+            </div>
+        </div>
+
+        <!-- ═══ FIRST CLOSE CONFIRMATION MODAL ═════════════════════════ -->
+        <div class="first-close-overlay" id="first-close-overlay" hidden>
+            <div class="first-close-modal" role="dialog" aria-modal="true" aria-labelledby="first-close-title">
+                <div class="first-close-header">
+                    <h2 id="first-close-title" data-i18n="closeModal.title">Cerrar ventana</h2>
+                </div>
+                <div class="first-close-body">
+                    <p class="first-close-desc" data-i18n="closeModal.desc">¿Qué te gustaría hacer al cerrar la ventana? Minimizar a la bandeja mantiene CyberClock en segundo plano; salir la cierra por completo.</p>
+                    <label class="first-close-remember">
+                        <input type="checkbox" id="first-close-remember-chk" />
+                        <span data-i18n="closeModal.remember">Recordar mi elección</span>
+                    </label>
+                    <div class="first-close-actions">
+                        <button type="button" class="first-close-btn is-quit" id="btn-first-close-quit">
+                            <span data-i18n="closeModal.quit">Salir</span>
+                            <span class="modal-key-badge" data-i18n="closeModal.space">Espacio</span>
+                        </button>
+                        <button type="button" class="first-close-btn is-tray" id="btn-first-close-tray">
+                            <span data-i18n="closeModal.minimize">Minimizar a la bandeja</span>
+                            <span class="modal-key-badge">↵</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

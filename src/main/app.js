@@ -671,6 +671,13 @@
         const showSuiteEl = document.getElementById("s-show-suite");
         if (showSuiteEl) showSuiteEl.checked = s.showSuiteRecommendations !== false;
 
+        const closeActionEl = document.getElementById("s-close-action");
+        if (closeActionEl) {
+            if (s.closeToTray === true) closeActionEl.value = "tray";
+            else if (s.closeToTray === false) closeActionEl.value = "quit";
+            else closeActionEl.value = "ask";
+        }
+
         const clockAccEl = document.getElementById("s-clock-acc");
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
         const clockAutoSyncEl = document.getElementById("s-clock-auto-sync");
@@ -5414,6 +5421,16 @@
             });
         });
     // Master audio mute (same setting the tray toggle drives)
+    const sCloseAction = document.getElementById("s-close-action");
+    if (sCloseAction) {
+        sCloseAction.addEventListener("change", (e) => {
+            const val = e.target.value;
+            let closeToTray = null;
+            if (val === "tray") closeToTray = true;
+            else if (val === "quit") closeToTray = false;
+            window.cc.saveSettings({ closeToTray });
+        });
+    }
     const sAudioMute = document.getElementById("s-audio-mute");
     if (sAudioMute) {
         sAudioMute.addEventListener("change", (e) => {
@@ -6044,12 +6061,80 @@
             btnAot.classList.toggle("on", on);
         });
     }
+    // ── First-Close Confirmation Modal ───────────────────────
+    const firstCloseOverlay = document.getElementById("first-close-overlay");
+    const firstCloseRememberChk = document.getElementById("first-close-remember-chk");
+    const btnFirstCloseQuit = document.getElementById("btn-first-close-quit");
+    const btnFirstCloseTray = document.getElementById("btn-first-close-tray");
+
+    function openFirstCloseModal() {
+        if (!firstCloseOverlay) return;
+        if (firstCloseRememberChk) firstCloseRememberChk.checked = false;
+        firstCloseOverlay.hidden = false;
+    }
+
+    function closeFirstCloseModal() {
+        if (firstCloseOverlay) firstCloseOverlay.hidden = true;
+    }
+
+    function handleFirstCloseChoice(action) {
+        closeFirstCloseModal();
+        const remember = firstCloseRememberChk ? firstCloseRememberChk.checked : false;
+        if (remember) {
+            window.cc.saveSettings({ closeToTray: action === "tray" });
+        }
+        if (action === "tray") {
+            window.cc.hideWindow("main");
+        } else {
+            if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
+            else window.close();
+        }
+    }
+
+    if (btnFirstCloseQuit) {
+        btnFirstCloseQuit.addEventListener("click", () => handleFirstCloseChoice("quit"));
+    }
+    if (btnFirstCloseTray) {
+        btnFirstCloseTray.addEventListener("click", () => handleFirstCloseChoice("tray"));
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if (!firstCloseOverlay || firstCloseOverlay.hidden) return;
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            e.stopPropagation();
+            closeFirstCloseModal();
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            handleFirstCloseChoice("tray");
+        } else if (e.key === " " || e.code === "Space") {
+            const tag = (e.target && e.target.tagName) || "";
+            if (tag === "INPUT" || tag === "BUTTON") return;
+            e.preventDefault();
+            e.stopPropagation();
+            handleFirstCloseChoice("quit");
+        }
+    });
+
+    function requestWindowClose() {
+        if (cfg && cfg.closeToTray === true) {
+            window.cc.hideWindow("main");
+        } else if (cfg && cfg.closeToTray === false) {
+            if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
+            else window.close();
+        } else {
+            openFirstCloseModal();
+        }
+    }
+
     document
         .getElementById("btn-mini")
         .addEventListener("click", () => window.cc.goMini());
     document
         .getElementById("btn-close")
-        .addEventListener("click", () => window.cc.hideWindow("main"));
+        .addEventListener("click", () => requestWindowClose());
 
     // ── Titlebar Brand (click -> About window) ────────────────
     const tbarBrand = document.getElementById("tbar-brand");
