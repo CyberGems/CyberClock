@@ -151,6 +151,23 @@
     }
 
 
+    const TIMER_LAST_KEY = "cyberclock_timer_last_seconds";
+
+    function loadLastTimer() {
+        try {
+            const v = parseInt(localStorage.getItem(TIMER_LAST_KEY), 10);
+            if (Number.isFinite(v) && v > 0) return v;
+        } catch (_) {}
+        return 0;
+    }
+
+    function saveLastTimer(secs) {
+        if (!Number.isFinite(secs) || secs <= 0) return;
+        try {
+            localStorage.setItem(TIMER_LAST_KEY, String(Math.round(secs)));
+        } catch (_) {}
+    }
+
     let tTotal = 0, tAcc = 0, tRunning = false, tLastTick = 0, tInt = null, tTitleSec = -1;
 
     function timerIdle() { return KIND === "timer" && !tRunning && tAcc <= 0; }
@@ -196,6 +213,7 @@
         if (KIND !== "timer" || !Number.isFinite(secs) || secs <= 0) return;
         tTotal = Math.max(0, tTotal) + secs;
         tAcc = Math.max(0, tAcc) + secs;
+        saveLastTimer(tTotal);
         tHideDone();
         document.getElementById("float-prog").hidden = false;
         tPaint();
@@ -236,7 +254,15 @@
     function tToggle() {
         if (tRunning) { tPause(); return; }
         if (tAcc <= 0) {
-            tAdd(60);
+            const last = loadLastTimer();
+            if (last > 0) {
+                tTotal = last;
+                tAcc = last;
+                document.getElementById("float-prog").hidden = false;
+                tPaint();
+            } else {
+                tAdd(60);
+            }
         }
         tGo();
     }
@@ -438,7 +464,18 @@
         }
     });
 
-    document.getElementById("float-prog").hidden = true;
+    if (KIND === "timer") {
+        const last = loadLastTimer();
+        if (last > 0) {
+            tTotal = last;
+            tAcc = last;
+            document.getElementById("float-prog").hidden = false;
+        } else {
+            document.getElementById("float-prog").hidden = true;
+        }
+    } else {
+        document.getElementById("float-prog").hidden = true;
+    }
     document.getElementById("float-done").hidden = true;
 
     window.cc.onInit((s) => applySettings(s || {}));
