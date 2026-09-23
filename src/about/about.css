@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════
-   CyberClock — About Window (CyberSnap standard layout)
-   Mirrors the CyberSnap AboutWindow.xaml design: borderless
-   rounded window, custom title bar, hero block, one settings
-   card, muted footer with icon links.
+   CyberClock — About Window (Cyber-Neon Obsidian Standard)
+   Unified with the CyberClock Full Mode design system:
+   Obsidian background, cyber scanlines, Space Grotesk
+   technical headers, neon glassmorphic cards and glows.
    CyberGems © 2026
 ═══════════════════════════════════════════════════════════ */
 
@@ -16,57 +16,74 @@ body {
     background: transparent !important;
     user-select: none;
     -webkit-user-select: none;
-    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui,
-        -apple-system, sans-serif;
-    color: var(--ab-text-primary);
+    font-family: var(--font-ui, "Outfit", system-ui, sans-serif);
+    color: var(--text-hi, #f2f5f8);
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Window plate: 10px rounded, 1px accent-tinted border */
+/* ── Window Plate: 12px rounded, obsidian gradient, neon border ── */
 .about-window {
     position: absolute;
     inset: 1px;
     margin: 1px;
     display: flex;
     flex-direction: column;
-    background: rgb(13, 15, 23); /* BgPrimary — CyberSnap dark default */
-    border: 1px solid rgba(var(--rgb-accent), 0.30);
-    border-radius: 10px;
+    background: radial-gradient(ellipse 130% 90% at 50% -25%, rgba(var(--rgb-accent), 0.12) 0%, rgba(10, 14, 23, 0.96) 55%, #06080e 100%) !important;
+    border: 1px solid rgba(var(--rgb-accent), 0.28);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.90), 0 0 30px rgba(var(--rgb-accent), 0.10);
     overflow: hidden;
 }
 
-/* ── Theme tokens (dark default, follows --rgb-accent per skin) ── */
-:root {
-    --ab-text-primary: #e6f0ff;
-    --ab-text-secondary: #a0b4d2;
-    --ab-text-muted: #6e82a0;
-    --ab-card: #171a28;
-    --ab-input-bg: #12141f;
-    --ab-separator: rgba(255, 255, 255, 0.16);
-    --ab-name-accent: #2ea9bd; /* logo teal, unified with --brand-name-accent */
+/* ── Subtle Cyber Scanlines Backdrop ── */
+.scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    opacity: 0.35;
+    z-index: 1;
 }
 
 /* ── Title bar ─────────────────────────────────────────────── */
 .ab-titlebar {
     flex: 0 0 auto;
-    min-height: 40px;
+    min-height: 42px;
     display: flex;
     align-items: center;
-    padding-left: 14px;
-    gap: 8px;
+    padding-left: 16px;
+    gap: 10px;
+    background: rgba(8, 11, 18, 0.80);
+    border-bottom: 1px solid rgba(var(--rgb-accent), 0.10);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     -webkit-app-region: drag;
+    position: relative;
+    z-index: 10;
 }
 .ab-title-ico {
-    color: var(--ab-text-secondary);
+    color: var(--accent-a);
     display: inline-flex;
+    align-items: center;
+    filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.6));
 }
 .ab-title-ico .cc-ico {
     width: 16px;
     height: 16px;
 }
 .ab-title-text {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ab-text-primary);
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-hi, #f2f5f8);
     white-space: nowrap;
 }
 .ab-title-spacer {
@@ -75,30 +92,32 @@ body {
 .ab-title-btn {
     -webkit-app-region: no-drag;
     width: 46px;
-    height: 32px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: transparent;
     border: none;
-    color: var(--ab-text-secondary);
+    color: var(--text-md, #96a2b4);
     cursor: pointer;
+    transition: background 0.16s ease, color 0.16s ease;
 }
 .ab-title-btn .cc-ico {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
 }
 .ab-title-btn:hover {
-    background: rgba(var(--rgb-accent), 0.12);
-    color: var(--ab-text-primary);
+    background: rgba(var(--rgb-accent), 0.14);
+    color: var(--text-hi);
 }
 .ab-close {
-    border-radius: 0 9px 0 0; /* rounds into the window corner */
+    border-radius: 0 11px 0 0;
     margin-right: -1px;
 }
 .ab-close:hover {
-    background: #e81123;
+    background: rgba(239, 68, 68, 0.85);
     color: #fff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
 /* ── Scrollable content ────────────────────────────────────── */
@@ -106,189 +125,242 @@ body {
     flex: 1 1 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 18px 10px;
+    padding: 14px 22px 14px;
+    position: relative;
+    z-index: 5;
 }
 
-/* Themed scrollbar (same look as CyberSnap's) */
 .ab-content::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
     background: transparent;
 }
 .ab-content::-webkit-scrollbar-thumb {
     border-radius: 3px;
-    background: var(--ab-text-secondary);
-    margin: 2px 0 2px 4px;
-    opacity: 0.35;
+    background: rgba(var(--rgb-accent), 0.25);
 }
 .ab-content:hover::-webkit-scrollbar-thumb {
-    opacity: 1;
+    background: rgba(var(--rgb-accent), 0.45);
 }
 
-/* ── Hero ──────────────────────────────────────────────────── */
+/* ── Hero Block ────────────────────────────────────────────── */
 .ab-hero {
     display: flex;
     align-items: center;
-    gap: 28px;
-    margin: 2px 0 12px;
+    gap: 20px;
+    padding: 10px 14px 14px;
+    background: rgba(12, 16, 26, 0.60);
+    border: 1px solid rgba(var(--rgb-accent), 0.14);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin-bottom: 14px;
 }
-.ab-hero-left {
+.ab-logo-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    width: 68px;
+    height: 68px;
     display: flex;
     align-items: center;
-    flex: 0 0 auto;
+    justify-content: center;
 }
 .ab-logo {
-    width: 70px;
-    height: 70px;
-    margin-right: 16px;
-    border-radius: 12px;
-    filter: drop-shadow(0 0 18px rgba(var(--rgb-accent), 0.36));
-    animation: ab-logo-breathe 2.4s ease-in-out infinite;
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 16px rgba(var(--rgb-accent), 0.45));
+    animation: ab-logo-breathe 2.8s ease-in-out infinite;
+}
+.ab-logo-glow {
+    position: absolute;
+    inset: -6px;
+    border-radius: 20px;
+    background: radial-gradient(circle, rgba(var(--rgb-accent), 0.28) 0%, transparent 70%);
+    z-index: 1;
+    pointer-events: none;
+    animation: ab-logo-breathe 2.8s ease-in-out infinite;
 }
 @keyframes ab-logo-breathe {
-    0%,
-    100% {
-        filter: drop-shadow(0 0 18px rgba(var(--rgb-accent), 0.28));
+    0%, 100% {
+        filter: drop-shadow(0 0 14px rgba(var(--rgb-accent), 0.32));
+        opacity: 0.85;
     }
     50% {
-        filter: drop-shadow(0 0 18px rgba(var(--rgb-accent), 0.54));
+        filter: drop-shadow(0 0 24px rgba(var(--rgb-accent), 0.65));
+        opacity: 1;
     }
 }
-.ab-id {
+.ab-brand-info {
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }
+.ab-name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 .ab-name {
-    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui,
-        sans-serif;
-    font-size: 28px;
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 26px;
     font-weight: 700;
+    letter-spacing: -0.5px;
     line-height: 1.1;
     white-space: nowrap;
 }
 .ab-name-a {
-    color: var(--ab-text-primary);
+    color: var(--text-hi, #f2f5f8);
 }
 .ab-name-b {
-    color: var(--ab-name-accent);
+    color: var(--accent-a);
+    text-shadow: 0 0 16px rgba(var(--rgb-accent), 0.50);
 }
-.ab-version {
-    font-size: 13px;
-    opacity: 0.5;
-    margin-top: 4px;
-    color: var(--ab-text-primary);
-}
-.ab-desc-card {
-    flex: 1 1 200px;
-    min-width: 200px;
-    background: var(--ab-card);
-    border: 1px solid var(--ab-separator);
-    border-radius: 10px;
-    padding: 12px 16px;
+.ab-version-chip {
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(var(--rgb-accent), 0.10);
+    border: 1px solid rgba(var(--rgb-accent), 0.28);
+    color: var(--accent-a);
+    letter-spacing: 0.4px;
 }
 .ab-desc {
-    margin: 0;
+    margin: 6px 0 0;
+    font-family: var(--font-ui, "Outfit", sans-serif);
     font-size: 12.5px;
-    line-height: 20px;
-    color: var(--ab-text-primary);
-    opacity: 0.78;
+    line-height: 1.55;
+    color: var(--text-md, #96a2b4);
 }
 
-/* ── Section label ─────────────────────────────────────────── */
+/* ── Technical Section Header ──────────────────────────────── */
 .ab-section-label {
-    font-size: 12px;
-    font-weight: 600;
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
     color: var(--accent-a);
-    margin: 2px 0 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 8px 2px;
+}
+.ab-sec-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-a);
+    filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.6));
+}
+.ab-sec-ico .cc-ico {
+    width: 14px;
+    height: 14px;
 }
 
-/* ── Settings card ─────────────────────────────────────────── */
+/* ── Cyber Cards ───────────────────────────────────────────── */
 .ab-card {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-separator);
-    border-radius: 4px;
-    padding: 6px 14px;
+    background: rgba(12, 16, 25, 0.72);
+    border: 1px solid rgba(var(--rgb-accent), 0.15);
+    border-radius: 10px;
+    padding: 8px 16px;
     margin-bottom: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 .ab-setting-row {
     display: flex;
     align-items: center;
-    min-height: 44px;
+    min-height: 48px;
 }
 .ab-setting-icon {
     flex: 0 0 auto;
-    width: 28px;
-    height: 28px;
-    margin-right: 10px;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--ab-text-primary);
-    opacity: 0.92;
+    background: rgba(var(--rgb-accent), 0.08);
+    border: 1px solid rgba(var(--rgb-accent), 0.18);
+    border-radius: 8px;
+    color: var(--accent-a);
 }
 .ab-setting-icon .cc-ico {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
 }
 .ab-setting-text {
     flex: 1 1 auto;
     min-width: 0;
-    margin-right: 12px;
+    margin-right: 14px;
 }
 .ab-setting-title {
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
     font-size: 13px;
-    color: var(--ab-text-primary);
+    font-weight: 600;
+    color: var(--text-hi, #f2f5f8);
 }
 .ab-setting-desc {
     font-size: 11.5px;
-    opacity: 0.72;
+    color: var(--text-md, #96a2b4);
     margin-top: 3px;
-    line-height: 1.5;
-    color: var(--ab-text-primary);
+    line-height: 1.45;
     transition: color 0.2s ease;
 }
 .ab-setting-desc.is-up-to-date {
     color: #34d399; /* emerald green */
-    opacity: 1;
     font-weight: 500;
 }
 .ab-setting-desc.is-available {
     color: #38bdf8; /* cyber cyan */
-    opacity: 1;
     font-weight: 600;
     text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
 .ab-setting-desc.is-error {
     color: #fb7185; /* rose / red */
-    opacity: 1;
     font-weight: 500;
 }
 .ab-setting-desc.is-checking {
     color: var(--accent-a);
-    opacity: 0.95;
 }
 .ab-hairline {
     height: 1px;
-    background: var(--ab-separator);
-    margin: 9px 0;
+    background: rgba(var(--rgb-accent), 0.08);
+    margin: 4px 0;
 }
 
-/* ── Button (Check Now / Update Now) ───────────────────────── */
+/* ── Cyber Action Button (Check Now / Update Now) ──────────── */
 .ab-btn {
     flex: 0 0 auto;
-    min-width: 88px;
-    height: 30px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-family: inherit;
-    color: var(--ab-text-primary);
-    background: var(--ab-input-bg);
-    border: 1px solid var(--ab-separator);
-    border-radius: 4px;
+    min-width: 96px;
+    height: 32px;
+    padding: 6px 14px;
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.12);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+    border-radius: 6px;
     cursor: pointer;
     white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .ab-btn:hover:not(:disabled) {
-    background: rgba(var(--rgb-accent), 0.10);
+    background: rgba(var(--rgb-accent), 0.24);
+    border-color: var(--accent-a);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.40);
+    transform: translateY(-1px);
 }
 .ab-btn:active:not(:disabled) {
     transform: scale(0.96);
@@ -298,7 +370,7 @@ body {
     cursor: default;
 }
 
-/* ── Toggle switch (40×20 pill, thumb 12×12) ──────────────── */
+/* ── Cyber Neon Toggle Switch ──────────────────────────────── */
 .ab-switch {
     flex: 0 0 auto;
     display: inline-block;
@@ -310,13 +382,13 @@ body {
     pointer-events: none;
 }
 .ab-switch-track {
-    width: 40px;
+    width: 38px;
     height: 20px;
     border-radius: 10px;
-    border: 1px solid var(--ab-text-secondary);
-    background: transparent;
+    border: 1px solid rgba(var(--rgb-accent), 0.32);
+    background: rgba(var(--rgb-accent), 0.06);
     position: relative;
-    transition: background 0.18s, border-color 0.18s;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .ab-switch-thumb {
     position: absolute;
@@ -326,50 +398,119 @@ body {
     height: 12px;
     margin-top: -6px;
     border-radius: 50%;
-    background: var(--ab-text-secondary);
-    transition: transform 0.18s, background 0.18s;
+    background: var(--text-md, #96a2b4);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
 }
 .ab-switch:hover .ab-switch-track {
-    background: rgba(var(--rgb-accent), 0.10);
-    border-color: var(--ab-text-primary);
+    background: rgba(var(--rgb-accent), 0.14);
+    border-color: var(--accent-a);
 }
 .ab-switch:hover .ab-switch-thumb {
-    background: var(--ab-text-primary);
+    background: var(--text-hi, #ffffff);
 }
 .ab-switch input:checked + .ab-switch-track {
     background: var(--accent-a);
     border-color: var(--accent-a);
+    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.50);
 }
 .ab-switch input:checked + .ab-switch-track .ab-switch-thumb {
-    background: var(--ab-input-bg);
-    transform: translateX(20px);
+    background: #06080e;
+    transform: translateX(18px);
 }
 .ab-switch input:focus-visible + .ab-switch-track {
-    border-color: var(--ab-text-primary);
+    outline: 2px solid var(--accent-a);
+    outline-offset: 2px;
 }
 
-/* ── Download progress ─────────────────────────────────────── */
+/* ── Download Progress ─────────────────────────────────────── */
 .ab-progress {
-    margin: 8px 0 8px 38px;
+    margin: 8px 0 8px 44px;
 }
 .ab-progress-text {
-    font-size: 10.5px;
-    opacity: 0.5;
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    color: var(--text-md, #96a2b4);
     margin-bottom: 6px;
-    color: var(--ab-text-primary);
 }
 .ab-progress-bar {
     height: 4px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(var(--rgb-accent), 0.12);
     overflow: hidden;
 }
 .ab-progress-fill {
     height: 100%;
     width: 0%;
     background: var(--accent-a);
-    box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.5);
+    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
     transition: width 0.25s ease;
+}
+
+/* ── Suite Showcase ────────────────────────────────────────── */
+.ab-suite-card {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.ab-suite-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.ab-suite-btn {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--rgb-accent), 0.05);
+    border: 1px solid rgba(var(--rgb-accent), 0.16);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ab-suite-btn:hover {
+    transform: translateY(-3px) scale(1.06);
+    background: rgba(var(--rgb-accent), 0.16);
+    border-color: var(--accent-a);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.60), 0 0 14px rgba(var(--rgb-accent), 0.35);
+}
+.ab-suite-btn img {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: block;
+    pointer-events: none;
+}
+.ab-suite-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+}
+.ab-suite-more-btn {
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.08);
+    border: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-radius: 20px;
+    padding: 5px 18px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.ab-suite-more-btn:hover {
+    background: rgba(var(--rgb-accent), 0.20);
+    border-color: var(--accent-a);
+    color: var(--text-hi);
+    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.30);
+    transform: translateY(-1px);
 }
 
 /* ── Footer ────────────────────────────────────────────────── */
@@ -377,10 +518,14 @@ body {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
-    border-top: 1px solid var(--ab-separator);
-    background: rgba(31, 0, 0, 0.06);
+    gap: 12px;
+    padding: 10px 22px;
+    border-top: 1px solid rgba(var(--rgb-accent), 0.10);
+    background: rgba(6, 8, 14, 0.90);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 10;
 }
 .ab-footer-copy {
     flex: 1 1 auto;
@@ -388,34 +533,34 @@ body {
     border: none;
     padding: 0;
     text-align: left;
-    font-size: 10px;
-    font-weight: 600;
-    font-family: inherit;
-    color: var(--ab-text-muted);
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-lo, #5c687a);
     cursor: pointer;
-    transition: color 0.15s;
+    transition: color 0.16s ease;
 }
 .ab-footer-copy:hover {
-    color: var(--ab-text-primary);
+    color: var(--accent-a);
 }
 .ab-footer-links {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 .ab-footer-btn {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: none;
-    border-radius: 6px;
-    color: var(--ab-text-muted);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text-md, #96a2b4);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .ab-footer-btn svg {
     width: 15px;
@@ -431,97 +576,31 @@ body {
     stroke-linejoin: round;
 }
 .ab-footer-btn:hover {
-    background: rgba(var(--rgb-accent), 0.10);
-    color: var(--ab-text-primary);
+    background: rgba(var(--rgb-accent), 0.12);
+    border-color: rgba(var(--rgb-accent), 0.24);
+    color: var(--accent-a);
+    box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.25);
+    transform: translateY(-1px);
 }
-/* GitHub mark is FILLED, not stroked */
 #ab-link-github svg path {
     fill: currentColor;
     stroke: none;
 }
-/* Tag dot is filled */
 #ab-link-releases svg .ab-tag-dot {
     fill: currentColor;
     stroke: none;
 }
-/* Donate heart keeps its rose color in both states (CyberWall pattern) */
 .ab-heart {
     color: #f43f5e;
 }
 .ab-heart:hover {
     color: #fb7185;
-    background: rgba(244, 63, 94, 0.12);
+    background: rgba(244, 63, 94, 0.14);
+    border-color: rgba(244, 63, 94, 0.35);
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.40);
 }
 
-/* ── Accessibility: visible focus ring ─────────────────────── */
-button:focus-visible {
-    outline: 2px solid var(--accent-a);
-    outline-offset: 1px;
-}
-
-/* ── Suite Showcase ────────────────────────────────────────── */
-.ab-suite-card {
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.ab-suite-grid {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-.ab-suite-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--rgb-accent), 0.05);
-    border: 1px solid rgba(var(--rgb-accent), 0.18);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
-}
-.ab-suite-btn:hover {
-    transform: translateY(-2px) scale(1.06);
-    background: rgba(var(--rgb-accent), 0.14);
-    border-color: var(--accent-a);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), var(--glow-xs);
-}
-.ab-suite-btn img {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    display: block;
-    pointer-events: none;
-}
-.ab-suite-footer {
-    display: flex;
-    justify-content: center;
-    padding-top: 4px;
-}
-.ab-suite-more-btn {
-    font-size: 11px;
-    font-family: inherit;
-    color: var(--accent-a);
-    background: transparent;
-    border: 1px solid rgba(var(--rgb-accent), 0.25);
-    border-radius: 6px;
-    padding: 4px 14px;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.ab-suite-more-btn:hover {
-    background: rgba(var(--rgb-accent), 0.15);
-    border-color: var(--accent-a);
-    color: var(--text-hi);
-}
-
-/* ── Cyber-Neon Tooltips (Suite Standard) ── */
+/* ── Cyber-Neon Tooltips (Suite Standard) ─────────────────── */
 [data-tooltip] {
     position: relative;
 }
@@ -604,4 +683,3 @@ button:focus-visible {
     text-align: center;
     line-height: 1.4;
 }
-

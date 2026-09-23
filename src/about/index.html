@@ -16,7 +16,10 @@
     </head>
     <body>
         <div class="about-window" id="about-root" role="dialog" aria-modal="true" aria-labelledby="ab-title-text">
-            <!-- ── Title bar (CyberSnap standard: brand + min + close) ── -->
+            <!-- Scanlines overlay -->
+            <div class="scanlines"></div>
+
+            <!-- ── Title bar ── -->
             <div class="ab-titlebar" id="ab-titlebar">
                 <span class="ab-title-ico" data-ico="info"></span>
                 <span class="ab-title-text" id="ab-title-text" data-i18n="about.title">About CyberClock</span>
@@ -27,18 +30,19 @@
 
             <!-- ── Scrollable content ── -->
             <div class="ab-content">
-                <!-- Hero: logo + wordmark + version, description card -->
+                <!-- Hero: logo + wordmark + version chip + description -->
                 <div class="ab-hero">
-                    <div class="ab-hero-left">
-                        <img class="ab-logo" id="ab-logo" src="../assets/images/icon.png" alt="" />
-                        <div class="ab-id">
+                    <div class="ab-logo-wrap">
+                        <img class="ab-logo" id="ab-logo" src="../assets/images/icon.png" alt="CyberClock" />
+                        <div class="ab-logo-glow"></div>
+                    </div>
+                    <div class="ab-brand-info">
+                        <div class="ab-name-row">
                             <div class="ab-name">
                                 <span class="ab-name-a">Cyber</span><span class="ab-name-b">Clock</span>
                             </div>
-                            <div class="ab-version" id="ab-version">Version v…</div>
+                            <span class="ab-version-chip" id="ab-version">Version v…</span>
                         </div>
-                    </div>
-                    <div class="ab-desc-card">
                         <p class="ab-desc" id="ab-desc" data-i18n="about.description">
                             CyberClock is a premium cyber-neon clock for Windows — analog dial, calendar dashboard, alarms and relaxation sessions.
                         </p>
@@ -46,7 +50,10 @@
                 </div>
 
                 <!-- Updates & Maintenance card -->
-                <div class="ab-section-label" data-i18n="about.maintenance">Updates &amp; Maintenance</div>
+                <div class="ab-section-label">
+                    <span class="ab-sec-ico" data-ico="refresh"></span>
+                    <span data-i18n="about.maintenance">Updates &amp; Maintenance</span>
+                </div>
                 <div class="ab-card">
                     <div class="ab-setting-row">
                         <div class="ab-setting-icon" data-ico="gear"></div>
@@ -80,7 +87,10 @@
                 </div>
 
                 <!-- CyberGems Suite Showcase -->
-                <div class="ab-section-label" id="ab-suite-label" data-i18n="about.suiteTitle">More from CyberGems</div>
+                <div class="ab-section-label" id="ab-suite-label">
+                    <span class="ab-sec-ico" data-ico="spark"></span>
+                    <span data-i18n="about.suiteTitle">More from CyberGems</span>
+                </div>
                 <div class="ab-card ab-suite-card" id="ab-suite-card">
                     <div class="ab-suite-grid" id="ab-suite-grid"></div>
                     <div class="ab-suite-footer">
