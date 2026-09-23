@@ -4012,6 +4012,14 @@
     #s-clock-name {
         padding-right: 30px;
     }
+    .s-brand-row {
+        transition: opacity 0.22s ease, filter 0.22s ease;
+    }
+    .s-brand-row.is-disabled {
+        opacity: 0.38;
+        pointer-events: none;
+        filter: grayscale(0.6);
+    }
     .s-inp:focus {
         border-color: var(--border-active);
         color: var(--text-hi);

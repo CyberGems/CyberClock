@@ -626,6 +626,7 @@
         if (clockShowBrandEl) {
             clockShowBrandEl.checked = s.clockShowBrand !== false;
         }
+        syncClockBrandUI(s.clockShowBrand !== false);
         // Hide analog clock / hide calendar (full-mode Home): collapse either
         // panel and let the other absorb the full width.
         const hideClock = s.fullHideClock === true;
@@ -5840,14 +5841,34 @@
     // input before this runs via onInit → applySettings ordering).
     refreshClockNameRestoreBtn();
 
+    function syncClockBrandUI(show) {
+        const isShown = show !== false;
+        const brandWrap = document.getElementById("s-clock-brand-wrap");
+        const nameInp = document.getElementById("s-clock-name");
+        const restoreBtn = document.getElementById("s-clock-name-restore");
+        if (brandWrap) {
+            brandWrap.classList.toggle("is-disabled", !isShown);
+        }
+        if (nameInp) {
+            nameInp.disabled = !isShown;
+        }
+        if (restoreBtn && !isShown) {
+            restoreBtn.style.display = "none";
+        } else if (typeof refreshClockNameRestoreBtn === "function") {
+            refreshClockNameRestoreBtn();
+        }
+    }
+
     const sClockShowBrand = document.getElementById("s-clock-show-brand");
     if (sClockShowBrand) {
         sClockShowBrand.addEventListener("change", () => {
             const on = sClockShowBrand.checked;
             cfg.clockShowBrand = on;
+            syncClockBrandUI(on);
             window.cc.saveSettings({ clockShowBrand: on });
         });
     }
+    syncClockBrandUI(cfg.clockShowBrand !== false);
 
     // Optional display name for the full-mode welcome greeting. Saved on
     // change so typing stays local and does not trigger a write per key.

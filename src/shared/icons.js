@@ -193,6 +193,11 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M6 5h10l-1.5 3L16 11H6"/>
   </symbol>
+  <symbol id="cc-i-tag" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <circle cx="7" cy="7" r="1.5" fill="currentColor"/>
+  </symbol>
   <symbol id="cc-i-copy" viewBox="0 0 24 24">
     <rect x="9" y="9" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
     <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"

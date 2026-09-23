@@ -621,11 +621,46 @@
                             <div class="s-sec-d" data-i18n="settings.appearance.themeDesc">Defines the accent color used across the interface.</div>
                             <div class="tint-grid" id="tint-grid"><!-- swatches built by app.js from shared/tint.js --></div>
                         </div>
+
+                        <!-- General Display -->
                         <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.appearance.clockDisplay">Clock Display</div>
+                            <div class="s-sec-t" data-i18n="settings.appearance.generalDisplay">General Display</div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl" data-i18n="settings.appearance.dialDesign">Dial Design</div>
+                                <div class="s-lbl" data-i18n="settings.appearance.timeFormat">Time Format</div>
+                                <div class="s-fmts">
+                                    <button class="s-fmt on" data-fmt="24h">24H</button
+                                    ><button class="s-fmt" data-fmt="12h">12H</button>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="timer"></span>
+                                <div class="s-lbl" data-i18n="settings.appearance.showSeconds">Show Seconds</div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-sec" checked />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="keyboard"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.textSize">Text Size</span>
+                                    <small data-i18n="settings.appearance.textSizeDesc">Scales labels and text; clock digits stay fixed</small>
+                                </div>
+                                <div class="s-fmts" id="s-ui-scale">
+                                    <button class="s-fmt" data-ui-scale="0.9" data-i18n="settings.appearance.sizeSmall">Small</button
+                                    ><button class="s-fmt on" data-ui-scale="1" data-i18n="settings.appearance.sizeNormal">Normal</button
+                                    ><button class="s-fmt" data-ui-scale="1.1" data-i18n="settings.appearance.sizeLarge">Large</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analog Clock -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.appearance.analogSection">Analog Clock</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="clock"></span>
+                                <div class="s-lbl" data-i18n="settings.appearance.dialDesign">Dial Style</div>
                                 <div class="s-fmts" id="s-dial-design">
                                     <button class="s-fmt on" data-clock-design="1" data-i18n="settings.appearance.dialClassic">Classic</button
                                     ><button class="s-fmt" data-clock-design="2" data-i18n="settings.appearance.dialMinimal">Minimal</button
@@ -667,45 +702,22 @@
                                 </select>
                             </div>
                             <div class="s-row">
-                                <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl" data-i18n="settings.appearance.timeFormat">Time Format</div>
-                                <div class="s-fmts">
-                                    <button class="s-fmt on" data-fmt="24h">
-                                        24H</button
-                                    ><button class="s-fmt" data-fmt="12h">
-                                        12H
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="keyboard"></span>
+                                <span class="s-row-ico" data-ico="tag"></span>
                                 <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.textSize">Text Size</span>
-                                    <small data-i18n="settings.appearance.textSizeDesc">Scales labels and text; clock digits stay fixed</small>
+                                    <span data-i18n="settings.appearance.showClockBrand">Show Brand on Clock</span>
+                                    <small data-i18n="settings.appearance.showClockBrandDesc">Display customized brand name on the clock face</small>
                                 </div>
-                                <div class="s-fmts" id="s-ui-scale">
-                                    <button class="s-fmt" data-ui-scale="0.9" data-i18n="settings.appearance.sizeSmall">Small</button
-                                    ><button class="s-fmt on" data-ui-scale="1" data-i18n="settings.appearance.sizeNormal">Normal</button
-                                    ><button class="s-fmt" data-ui-scale="1.1" data-i18n="settings.appearance.sizeLarge">Large</button>
-                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-clock-show-brand" checked />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="timer"></span>
-                                <div class="s-lbl" data-i18n="settings.appearance.showSeconds">Show Seconds</div>
-                                <label class="s-tog"
-                                    ><input
-                                        type="checkbox"
-                                        id="s-sec"
-                                        checked />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-row">
+                            <div class="s-row s-brand-row" id="s-clock-brand-wrap">
                                 <span class="s-row-ico" data-ico="flag"></span>
-                                <div class="s-lbl" data-i18n="settings.appearance.clockName">Clock Name</div>
-                                <!-- Overlay host keeps the button out of flow:
-                                     the input never moves when it appears. -->
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.clockName">Brand Text</span>
+                                    <small data-i18n="settings.appearance.clockNameDesc">Custom text shown across the middle of the dial (up to 12 chars)</small>
+                                </div>
                                 <div class="s-name-wrap">
                                     <input
                                         type="text"
@@ -728,17 +740,11 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="tag"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.showClockBrand">Show Brand on Clock</span>
-                                    <small data-i18n="settings.appearance.showClockBrandDesc">Display customized brand name on the analog clock dial</small>
-                                </div>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-clock-show-brand" checked />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
+                        </div>
+
+                        <!-- Screen Layout -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.appearance.layoutSection">Screen Layout</div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="eye-off"></span>
                                 <div class="s-lbl">
@@ -753,7 +759,7 @@
                                 <span class="s-row-ico" data-ico="eye-off"></span>
                                 <div class="s-lbl">
                                     <span data-i18n="settings.appearance.hideCalendar">Hide Calendar</span>
-                                    <small data-i18n="settings.appearance.hideCalendarDesc">Analog clock takes the full width</small>
+                                    <small data-i18n="settings.appearance.hideCalendarDesc">Clock takes the full width</small>
                                 </div>
                                 <label class="s-tog"><input type="checkbox" id="s-hide-cal" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>

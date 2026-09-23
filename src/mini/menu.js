@@ -77,6 +77,8 @@
                     if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
                     const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');
                     if (settingsLbl) settingsLbl.textContent = window.ccI18n.t("menu.settings");
+                    const aboutLbl = document.querySelector('.ctx-item[data-action="about"] .label');
+                    if (aboutLbl) aboutLbl.textContent = window.ccI18n.t("about.title");
                     const closeLbl = document.querySelector('.ctx-item[data-action="close"] .label');
                     if (closeLbl) closeLbl.textContent = window.ccI18n.t("tray.quit");
                     const tabActions = document.getElementById("tab-btn-actions");

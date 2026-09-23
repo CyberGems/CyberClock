@@ -44,6 +44,10 @@ impl Default for CustomAlarm {
     }
 }
 
+fn default_true() -> bool {
+    true
+}
+
 fn default_auto_cycle_interval() -> u32 {
     15
 }
@@ -151,8 +155,10 @@ pub struct AppSettings {
     #[serde(default)]
     pub full_hide_calendar: bool,
 
-    // Analog dial design for the full-mode clock (1..8)
+    // Analog dial design for the full-mode clock (1..10)
     pub clock_design: u32,
+    #[serde(default = "default_true")]
+    pub clock_show_brand: bool,
     #[serde(default)]
     pub clock_auto_cycle: bool,
     #[serde(default = "default_auto_cycle_interval")]
@@ -241,6 +247,7 @@ impl Default for AppSettings {
             full_hide_clock: false,
             full_hide_calendar: false,
             clock_design: 1,
+            clock_show_brand: true,
             clock_auto_cycle: false,
             clock_auto_cycle_interval: 15,
             clock_auto_cycle_mode: "sequential".to_string(),

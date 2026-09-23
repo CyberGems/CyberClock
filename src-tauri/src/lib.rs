@@ -1854,7 +1854,7 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
 static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 =
-    std::sync::atomic::AtomicU32::new(315);
+    std::sync::atomic::AtomicU32::new(360);
 
 fn position_mini_context_menu(
     menu: &WebviewWindow,
