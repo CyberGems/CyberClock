@@ -99,6 +99,12 @@ pub struct AppSettings {
     pub mini_position: Option<(i32, i32)>,
     pub mini_opacity: f64,
     pub mini_bg_opacity: f64,
+    #[serde(default)]
+    pub float_cal_opacity: Option<f64>,
+    #[serde(default)]
+    pub float_timer_opacity: Option<f64>,
+    #[serde(default)]
+    pub float_sw_opacity: Option<f64>,
     pub mini_design: u32,
     pub mini_position_locked: bool,
     pub preferred_display_id: Option<u32>,
@@ -199,6 +205,9 @@ impl Default for AppSettings {
             mini_position: None,
             mini_opacity: 1.0,
             mini_bg_opacity: 1.0,
+            float_cal_opacity: None,
+            float_timer_opacity: None,
+            float_sw_opacity: None,
             mini_design: 1,
             mini_position_locked: false,
             preferred_display_id: None,

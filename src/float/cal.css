@@ -22,6 +22,8 @@ html, body {
 .float-cal-shell {
     width: 100%;
     height: 100%;
+    opacity: var(--cal-opacity, 1);
+    transition: opacity 0.15s ease;
     background: linear-gradient(160deg, #12141a 0%, #08090c 100%);
     border: 1px solid rgba(var(--rgb-accent), 0.35);
     border-radius: 12px;
@@ -86,15 +88,27 @@ html, body {
 
 .cal-title {
     font-family: var(--font-brand, "Space Grotesk", sans-serif);
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: 0.3px;
     text-transform: capitalize;
     text-align: center;
     flex: 1;
-    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 5px;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+}
+
+.cal-title:hover {
+    background: rgba(var(--rgb-accent), 0.14);
+    color: var(--accent-a);
+    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.2);
 }
 
 .cal-weekdays {
@@ -127,6 +141,7 @@ html, body {
 }
 
 .cal-day-cell {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,4 +173,251 @@ html, body {
 
 .cal-day-cell:hover:not(.cal-other) {
     background: rgba(var(--rgb-accent), 0.12);
+}
+
+/* Day with note has an accent glowing dot under the number */
+.cal-day-cell.has-note::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    transform: translateX(-50%);
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: var(--accent-a);
+    box-shadow: 0 0 5px var(--accent-a);
+    pointer-events: none;
+}
+
+.cal-day-cell.cal-today.has-note::after {
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Quick Month & Year Picker Popover
+   ═══════════════════════════════════════════════════════ */
+.cal-picker-popover {
+    position: absolute;
+    inset: 38px 10px 10px 10px;
+    background: rgba(14, 16, 22, 0.96);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(var(--rgb-accent), 0.15);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 50;
+    animation: cal-pop-in 0.14s ease-out;
+}
+
+.cal-picker-popover[hidden] {
+    display: none !important;
+}
+
+@keyframes cal-pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.picker-year-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 6px 4px;
+    border-bottom: 1px solid rgba(var(--rgb-accent), 0.15);
+}
+
+.picker-btn {
+    background: transparent;
+    border: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-radius: 5px;
+    color: #94a3b8;
+    width: 26px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.picker-btn:hover {
+    background: rgba(var(--rgb-accent), 0.18);
+    color: var(--accent-a);
+    border-color: var(--accent-a);
+}
+
+.picker-year-label {
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-weight: 700;
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.picker-months-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 5px;
+    flex: 1;
+}
+
+.picker-month-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    text-transform: capitalize;
+    transition: all 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.picker-month-btn:hover {
+    background: rgba(var(--rgb-accent), 0.18);
+    color: var(--accent-a);
+    border-color: rgba(var(--rgb-accent), 0.4);
+}
+
+.picker-month-btn.active {
+    background: var(--accent-a);
+    color: #0b0f17;
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--accent-a);
+    border-color: var(--accent-a);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Custom Cyber Context Menu
+   ═══════════════════════════════════════════════════════ */
+.cal-ctx-menu {
+    position: absolute;
+    background: rgba(14, 17, 24, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(var(--rgb-accent), 0.4);
+    border-radius: 10px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 18px rgba(var(--rgb-accent), 0.2);
+    padding: 5px;
+    min-width: 175px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    animation: cal-pop-in 0.12s ease-out;
+}
+
+.cal-ctx-menu[hidden] {
+    display: none !important;
+}
+
+.cal-ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 9px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 11.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cal-ctx-item:hover {
+    background: rgba(var(--rgb-accent), 0.18);
+    color: var(--accent-a);
+}
+
+.cal-ctx-item.ctx-danger:hover {
+    background: rgba(255, 77, 109, 0.18);
+    color: #ff4d6d;
+}
+
+.ctx-label {
+    flex: 1;
+}
+
+.ctx-check {
+    font-size: 11px;
+    color: var(--accent-a);
+    opacity: 0;
+}
+
+.ctx-check.visible {
+    opacity: 1;
+}
+
+.cal-ctx-sep {
+    height: 1px;
+    background: rgba(var(--rgb-accent), 0.15);
+    margin: 3px 2px;
+}
+
+.cal-ctx-section {
+    padding: 3px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cal-ctx-section-title {
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #64748b;
+}
+
+.cal-ctx-opacity-chips {
+    display: flex;
+    gap: 3px;
+}
+
+.cal-op-chip {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    padding: 3px 0;
+    color: #94a3b8;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    text-align: center;
+}
+
+.cal-op-chip:hover {
+    background: rgba(var(--rgb-accent), 0.15);
+    color: var(--accent-a);
+}
+
+.cal-op-chip.active {
+    background: var(--accent-a);
+    color: #0b0f17;
+    font-weight: 700;
+    border-color: var(--accent-a);
+    box-shadow: 0 0 6px var(--accent-a);
 }

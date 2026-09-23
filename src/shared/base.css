@@ -399,3 +399,44 @@ input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
   animation-delay: 0.35s;
 }
 
+/* Align: right */
+[data-tooltip-align="right"]::after {
+  left: auto;
+  right: 0;
+  transform: translate(0, 6px);
+}
+[data-tooltip-align="right"]:not([data-tooltip=""]):hover::after {
+  transform: translate(0, 0);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="right"]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+  left: auto;
+  right: 0;
+  transform: translate(0, -6px);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="right"]:not([data-tooltip=""]):hover::after {
+  transform: translate(0, 0);
+}
+
+/* Align: left */
+[data-tooltip-align="left"]::after {
+  left: 0;
+  right: auto;
+  transform: translate(0, 6px);
+}
+[data-tooltip-align="left"]:not([data-tooltip=""]):hover::after {
+  transform: translate(0, 0);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="left"]::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  transform: translate(0, -6px);
+}
+[data-tooltip-dir="bottom"][data-tooltip-align="left"]:not([data-tooltip=""]):hover::after {
+  transform: translate(0, 0);
+}
+
+

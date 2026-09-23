@@ -28,8 +28,8 @@
 
     let cfg = {};
 
-    const DESIGN_HEIGHTS = { 1: 48, 2: 56, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
-    const DESIGN_WIDTHS  = { 1: 260, 2: 320, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
+    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
+    const DESIGN_WIDTHS  = { 1: 260, 2: 260, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
     function zoomFactor() {
         const z = cfg.miniZoom ?? 1;
         return Number.isFinite(z) && z > 0 ? z : 1;
@@ -324,7 +324,10 @@
         const sh = shellEl();
         sh.dataset.design = cfg.miniDesign || "1";
         sh.style.setProperty("--bg-op", cfg.miniBgOpacity ?? 1.0);
-        sh.style.setProperty("--fg-op", cfg.miniOpacity ?? 1.0);
+        const activeOpacity = KIND === "timer"
+            ? (cfg.floatTimerOpacity ?? cfg.miniOpacity ?? 1.0)
+            : (cfg.floatSwOpacity ?? cfg.miniOpacity ?? 1.0);
+        sh.style.setProperty("--fg-op", activeOpacity);
         sh.style.setProperty("--mini-zoom", String(zoomFactor()));
         document.body.classList.toggle("no-scanlines", cfg.miniScanlines === false);
         document.body.classList.toggle("no-animations", cfg.miniNoAnimations === true);

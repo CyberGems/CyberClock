@@ -153,11 +153,11 @@
         backdrop-filter: blur(20px) saturate(1.8);
     }
     .mini-shell[data-design="2"] {
-        height: 56px;
+        height: 48px;
         border: 1px solid rgba(122, 162, 247, 0.35);
-        border-radius: 12px;
-        padding: 0 16px;
-        gap: 14px;
+        border-radius: 10px;
+        padding: 0 10px;
+        gap: 8px;
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
             inset 0 1px 0 rgba(160, 200, 255, 0.12),
@@ -167,17 +167,17 @@
         /* HUD corner brackets */
         content: '';
         position: absolute;
-        inset: 5px;
-        border-radius: 8px;
+        inset: 4px;
+        border-radius: 6px;
         background:
-            linear-gradient(to bottom, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) top left / 14px 1px no-repeat,
-            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) top left / 1px 14px no-repeat,
-            linear-gradient(to bottom, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) top right / 14px 1px no-repeat,
-            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) top right / 1px 14px no-repeat,
-            linear-gradient(to top, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) bottom left / 14px 1px no-repeat,
-            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 10px, transparent 10px) bottom left / 1px 14px no-repeat,
-            linear-gradient(to top, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) bottom right / 14px 1px no-repeat,
-            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 10px, transparent 10px) bottom right / 1px 14px no-repeat;
+            linear-gradient(to bottom, rgba(122, 162, 247, 0.55) 0 8px, transparent 8px) top left / 10px 1px no-repeat,
+            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 8px, transparent 8px) top left / 1px 10px no-repeat,
+            linear-gradient(to bottom, rgba(160, 107, 255, 0.55) 0 8px, transparent 8px) top right / 10px 1px no-repeat,
+            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 8px, transparent 8px) top right / 1px 10px no-repeat,
+            linear-gradient(to top, rgba(122, 162, 247, 0.55) 0 8px, transparent 8px) bottom left / 10px 1px no-repeat,
+            linear-gradient(to right, rgba(122, 162, 247, 0.55) 0 8px, transparent 8px) bottom left / 1px 10px no-repeat,
+            linear-gradient(to top, rgba(160, 107, 255, 0.55) 0 8px, transparent 8px) bottom right / 10px 1px no-repeat,
+            linear-gradient(to left, rgba(160, 107, 255, 0.55) 0 8px, transparent 8px) bottom right / 1px 10px no-repeat;
         pointer-events: none;
     }
     .mini-shell[data-design="2"]::after {
@@ -186,7 +186,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: linear-gradient(135deg,
             rgba(55, 230, 255, 0.07) 0%,
             transparent 45%,
@@ -203,7 +203,7 @@
            painted once, breathing via opacity steps. */
         content: '';
         position: absolute;
-        inset: -8px -20px;
+        inset: -6px -16px;
         background: radial-gradient(ellipse at 30% 55%, rgba(55, 230, 255, 0.16), transparent 65%),
                     radial-gradient(ellipse at 70% 55%, rgba(160, 107, 255, 0.13), transparent 65%);
         animation: led-breathe 4.4s steps(16) infinite;
@@ -215,11 +215,11 @@
         z-index: 1;
         font-family: "JetBrains Mono", monospace;
         font-weight: 700;
-        font-size: 24px;
+        font-size: 20px;
         /* Chromatic aberration: the two offset shadows bleed red/cyan
            past the gradient-filled glyphs, like a misaligned hologram. */
         color: #37e6ff;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
         text-shadow:
             -1.5px 0 12px rgba(255, 77, 141, 0.55),
             1.5px 0 14px rgba(55, 230, 255, 0.65),
@@ -231,24 +231,24 @@
         z-index: 1;
         font-family: "Share Tech Mono", monospace;
         font-weight: 400;
-        font-size: 12px;
+        font-size: 10px;
         color: rgba(170, 205, 255, 0.62);
-        letter-spacing: 1.5px;
+        letter-spacing: 0.8px;
         white-space: nowrap;
     }
     .mini-shell[data-design="2"] .status-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: #7aa2f7;
-        box-shadow: 0 0 12px #7aa2f7;
+        box-shadow: 0 0 10px #7aa2f7;
         --led-halo: #7aa2f7;
         --led-period: 3.6s;
         animation: led-core-breathe 3.6s steps(16) infinite;
     }
     .mini-shell[data-design="2"] .sep {
         width: 1px;
-        height: 28px;
+        height: 24px;
         background: linear-gradient(to bottom, transparent, rgba(122, 162, 247, 0.5), transparent);
     }
     .mini-shell[data-design="2"] .ctl-btn {
