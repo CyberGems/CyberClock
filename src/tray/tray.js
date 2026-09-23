@@ -1,9 +1,6 @@
     let currentMenuState = null;
     const rootEl = document.getElementById("tray-root");
     let appVersion = "";
-    let trayPinTipAutomatic = false;
-    let trayPinTipAutoTimer = null;
-    const TRAY_PIN_TIP_SEEN_KEY = "cyberclock_tray_pin_tip_seen";
 
     // Discrete zoom stops for the mini clock (slider index → factor).
     const ZOOM_STEPS = [0.5, 1, 2, 4];
@@ -194,7 +191,6 @@
         setLbl("lbl-suite-title", T("tray.suite", "More from CyberGems"));
         setLbl("lbl-suite-all", T("tray.suiteAll", "View all at cybergems.org →"));
         setLbl("lbl-pin-tip-title", T("tray.pinTip.title", "Keep CyberClock visible in the tray"));
-        setLbl("lbl-pin-tip-dont-show", T("tray.pinTip.dontShow", "Don't show again"));
         setLbl("lbl-pin-tip-got-it", T("tray.pinTip.gotIt", "Got it"));
         setLbl("lbl-pin-tip-open-settings", T("tray.pinTip.openSettings", "Open Windows Settings"));
         setLbl("lbl-back-pin-tip", T("tray.back", "Back"));
@@ -345,58 +341,21 @@
         body.appendChild(document.createTextNode(afterMarker));
     }
 
-    function hasSeenTrayPinTip() {
-        try {
-            return window.localStorage.getItem(TRAY_PIN_TIP_SEEN_KEY) === "true";
-        } catch (_) {
-            return false;
-        }
-    }
-
-    function rememberTrayPinTip() {
-        try {
-            window.localStorage.setItem(TRAY_PIN_TIP_SEEN_KEY, "true");
-        } catch (_) {
-            // localStorage can be unavailable in restricted webviews.
-        }
-    }
-
-    function openTrayPinTip(automatic) {
-        if (trayPinTipAutoTimer) {
-            clearTimeout(trayPinTipAutoTimer);
-            trayPinTipAutoTimer = null;
-        }
-        trayPinTipAutomatic = automatic === true;
-        const checkbox = document.getElementById("tray-pin-tip-dont-show");
-        if (checkbox) checkbox.checked = trayPinTipAutomatic;
+    function openTrayPinTip() {
         switchView("pin-tip");
     }
 
     function closeTrayPinTip() {
-        const checkbox = document.getElementById("tray-pin-tip-dont-show");
-        if (checkbox && checkbox.checked) rememberTrayPinTip();
-        trayPinTipAutomatic = false;
-        switchView("main");
+        switchView("help");
     }
 
     function openTrayPinTipSettings() {
-        const checkbox = document.getElementById("tray-pin-tip-dont-show");
-        if (checkbox && checkbox.checked) rememberTrayPinTip();
         if (window.cc && window.cc.openTaskbarSettings) {
             window.cc.openTaskbarSettings().catch((e) => {
                 console.error("openTaskbarSettings failed:", e);
             });
         }
         setTimeout(() => hideMenu(), 250);
-    }
-
-    function scheduleAutomaticTrayPinTip() {
-        if (hasSeenTrayPinTip()) return;
-        if (trayPinTipAutoTimer) clearTimeout(trayPinTipAutoTimer);
-        trayPinTipAutoTimer = setTimeout(() => {
-            trayPinTipAutoTimer = null;
-            if (!hasSeenTrayPinTip()) openTrayPinTip(true);
-        }, 220);
     }
 
     const btnNavHelp = document.getElementById("btn-nav-help");
@@ -532,7 +491,7 @@
             if (action === "center-widgets") {
                 runAction("center_widgets");
             } else if (action === "pin-tray-icon") {
-                openTrayPinTip(false);
+                openTrayPinTip();
             } else if (action === "datetime-properties") {
                 if (window.cc && window.cc.openDatetimeProperties) {
                     window.cc.openDatetimeProperties();
@@ -628,7 +587,6 @@
                 // The tray window is persistent (hidden, not destroyed), so
                 // any expanded submenu must collapse so it always opens clean.
                 collapseAllSubmenus();
-                scheduleAutomaticTrayPinTip();
                 if (window.cc.getTrayMenuState) {
                     window.cc.getTrayMenuState().then(renderState).catch(console.error);
                 }

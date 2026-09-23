@@ -418,6 +418,21 @@
         color: var(--text-md);
         letter-spacing: 0.3px;
     }
+    .tray-pin-tip-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 9px 12px 6px;
+        min-height: auto;
+    }
+    .tray-pin-tip-header .tray-sub-title {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-hi);
+        line-height: 1.35;
+        letter-spacing: 0.2px;
+    }
 
     /* ── Tray pin tip ─────────────────────────────────────────── */
     .tray-pin-tip-content {
@@ -483,25 +498,10 @@
         border-left: 1.5px solid currentColor;
         transform: translateY(0.12em) rotate(45deg);
     }
-    .tray-pin-tip-check {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        margin-top: 11px;
-        color: var(--text-lo);
-        font-size: 10.5px;
-        cursor: pointer;
-    }
-    .tray-pin-tip-check input {
-        width: 13px;
-        height: 13px;
-        margin: 0;
-        accent-color: var(--accent-a);
-    }
     .tray-pin-tip-actions {
         display: flex;
         gap: 6px;
-        margin-top: 11px;
+        margin-top: 14px;
     }
     .tray-pin-tip-btn {
         min-width: 0;

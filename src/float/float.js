@@ -130,6 +130,7 @@
             cancelAnimationFrame(swRaf); swRaf = null;
             swPaint();
         } else {
+            hideActionTicker();
             swRunning = true; swStart = performance.now();
             swRaf = requestAnimationFrame(swLoop);
         }
@@ -202,6 +203,7 @@
 
     function tGo() {
         if (tAcc <= 0) return;
+        hideActionTicker();
         tRunning = true;
         tLastTick = Date.now();
         clearInterval(tInt);
@@ -314,13 +316,12 @@
         syncIdleState();
     }
 
-    // ═══════════════════════════════════════════════════════
-    // ACTION TICKER (Inline Button Tooltips)
-    // ═══════════════════════════════════════════════════════
-    const tickerIco = document.getElementById("ticker-ico");
-    const tickerText = document.getElementById("ticker-text");
+    function isRunning() {
+        return KIND === "sw" ? swRunning : tRunning;
+    }
 
     function showActionTicker(actionKey, iconHtml) {
+        if (isRunning()) return;
         const sh = shellEl();
         if (!sh || !tickerText) return;
         tickerText.textContent = window.ccI18n ? window.ccI18n.t(actionKey) : actionKey;
@@ -433,20 +434,12 @@
         } else if (e.key === "r" || e.key === "R") {
             if (KIND === "sw") swReset(); else tReset();
         } else if (e.key === "Escape") {
-            if (choosing) { closePresets(); return; }
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         }
     });
 
-    if (KIND === "timer") {
-        document.getElementById("float-presets").hidden = true;
-        document.getElementById("float-prog").hidden = true;
-    } else {
-        document.getElementById("float-presets").hidden = true;
-        document.getElementById("float-prog").hidden = true;
-    }
+    document.getElementById("float-prog").hidden = true;
     document.getElementById("float-done").hidden = true;
-    syncPresetBtn();
 
     window.cc.onInit((s) => applySettings(s || {}));
     window.cc.onSettingsUpdated((s) => applySettings(s || {}));
