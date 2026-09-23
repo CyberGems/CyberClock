@@ -38,7 +38,7 @@
     // Initialize Canvas Resolution
     function initCanvasResolution() {
         const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-        const cssSize = 280;
+        const cssSize = 270;
         const targetRes = Math.round(cssSize * dpr);
         if (canvas.width !== targetRes || canvas.height !== targetRes) {
             canvas.width = targetRes;
@@ -176,15 +176,17 @@
         });
     }
 
-    // ── Context Menu ─────────────────────────────────────────────
+    // ── Context Menu (Top-Layer Inside Window) ───────────────────
     function openContextMenu(clientX, clientY) {
-        const menuWidth = 210;
-        const menuHeight = 240;
-        const maxX = 280 - menuWidth - 6;
-        const maxY = 280 - menuHeight - 6;
+        ctxMenu.hidden = false;
+        const menuWidth = ctxMenu.offsetWidth || 204;
+        const menuHeight = ctxMenu.offsetHeight || 215;
 
-        const x = Math.max(6, Math.min(clientX, maxX));
-        const y = Math.max(6, Math.min(clientY, maxY));
+        const maxX = window.innerWidth - menuWidth - 8;
+        const maxY = window.innerHeight - menuHeight - 8;
+
+        const x = Math.max(8, Math.min(clientX, maxX));
+        const y = Math.max(8, Math.min(clientY, maxY));
 
         ctxMenu.style.left = `${x}px`;
         ctxMenu.style.top = `${y}px`;
@@ -197,7 +199,6 @@
         }
 
         syncOpacityChips(currentOpacity());
-        ctxMenu.hidden = false;
     }
 
     function closeContextMenu() {
@@ -327,27 +328,36 @@
         }, { passive: true });
     }
 
-    // ── Window Dragging from Entire Dial Face ────────────────────
-    if (shell) {
-        shell.addEventListener("mousedown", (e) => {
-            // Exclude interactive elements: buttons, context menu, chips
-            if (e.target.closest("button, .analog-ov-btn, .analog-ctx-menu, .analog-op-chip, .analog-skin-btn")) return;
-            if (e.button !== 0) return; // Only primary left-click
-            if (cfg.miniPositionLocked === true) return;
+    // ── Window Dragging ──────────────────────────────────────────
+    function handleDragStart(e) {
+        if (e.target.closest("button, .analog-ov-btn, .analog-ctx-menu, .analog-op-chip, .analog-skin-btn")) return;
+        if (e.button !== 0) return;
+        if (cfg.miniPositionLocked === true) return;
 
-            e.preventDefault();
-            document.body.classList.add("is-dragging");
-            if (window.cc && window.cc.startDragging) {
-                window.cc.startDragging()
-                    .then(() => document.body.classList.remove("is-dragging"))
-                    .catch(() => document.body.classList.remove("is-dragging"));
-            }
-        });
+        if (ctxMenu && !ctxMenu.hidden) {
+            closeContextMenu();
+            return;
+        }
 
-        window.addEventListener("mouseup", () => {
-            document.body.classList.remove("is-dragging");
-        });
+        e.preventDefault();
+        document.body.classList.add("is-dragging");
+        if (window.cc && window.cc.startDragging) {
+            window.cc.startDragging()
+                .then(() => document.body.classList.remove("is-dragging"))
+                .catch(() => document.body.classList.remove("is-dragging"));
+        }
     }
+
+    if (shell) {
+        shell.addEventListener("mousedown", handleDragStart);
+    }
+    document.body.addEventListener("mousedown", (e) => {
+        if (e.target === document.body) handleDragStart(e);
+    });
+
+    window.addEventListener("mouseup", () => {
+        document.body.classList.remove("is-dragging");
+    });
 
     // Window Resize Handling
     window.addEventListener("resize", () => {

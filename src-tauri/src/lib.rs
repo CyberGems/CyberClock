@@ -404,7 +404,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     let (title, wide, tall) = match kind {
         "timer" => ("Timer · CyberClock", 280.0, 52.0),
         "cal" => ("Calendar · CyberClock", 286.0, 268.0),
-        "analog" => ("Analog Clock · CyberClock", 280.0, 280.0),
+        "analog" => ("Analog Clock · CyberClock", 300.0, 300.0),
         _ => ("Stopwatch · CyberClock", 280.0, 52.0),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
