@@ -119,6 +119,44 @@
         // Shift to Mon = 0 ... Sun = 6
         const startOffset = (firstDayRaw + 6) % 7;
 
+        // Helper to construct a day cell with crisp text, permanent LED dot and peek tooltip
+        function createDayCell(d, key, isOther, isWeekend, isToday, rowIdx, colIdx) {
+            const cell = document.createElement("div");
+            let cls = "cal-day-cell";
+            if (isOther) cls += " cal-other";
+            if (isWeekend) cls += " cal-weekend";
+            if (isToday) cls += " cal-today";
+
+            const numSpan = document.createElement("span");
+            numSpan.className = "cal-day-num";
+            numSpan.textContent = String(d);
+            cell.appendChild(numSpan);
+
+            const note = calNotes[key];
+            if (note && note.trim()) {
+                cls += " has-note";
+                const dot = document.createElement("span");
+                dot.className = "cal-note-dot";
+                cell.appendChild(dot);
+
+                cell.setAttribute("data-tooltip", note.trim());
+                cell.setAttribute("data-tooltip-dir", rowIdx === 0 ? "bottom" : "top");
+                if (colIdx <= 1) {
+                    cell.setAttribute("data-tooltip-align", "left");
+                } else if (colIdx >= 5) {
+                    cell.setAttribute("data-tooltip-align", "right");
+                }
+            }
+
+            cell.className = cls;
+            cell.addEventListener("click", () => {
+                document.querySelectorAll(".cal-day-cell.cal-selected").forEach(c => c.classList.remove("cal-selected"));
+                cell.classList.add("cal-selected");
+            });
+
+            return cell;
+        }
+
         // Previous month overflow days
         const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
         const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
@@ -126,40 +164,21 @@
         for (let i = startOffset - 1; i >= 0; i--) {
             const dayNum = prevMonthDays - i;
             const key = isoKey(prevYear, prevMonth, dayNum);
-            const note = calNotes[key];
-
-            const cell = document.createElement("div");
-            let cls = "cal-day-cell cal-other";
-            if (note && note.trim()) {
-                cls += " has-note";
-                cell.setAttribute("data-tooltip", note.trim());
-                cell.setAttribute("data-tooltip-dir", "bottom");
-            }
-            cell.className = cls;
-            cell.textContent = String(dayNum);
-            gridEl.appendChild(cell);
+            const colIdx = (startOffset - 1 - i) % 7;
+            const rowIdx = 0;
+            const isWeekend = colIdx >= 5;
+            gridEl.appendChild(createDayCell(dayNum, key, true, isWeekend, false, rowIdx, colIdx));
         }
 
         // Current month days
         for (let d = 1; d <= daysInMonth; d++) {
-            const cell = document.createElement("div");
-            const dayOfWeek = (startOffset + d - 1) % 7;
-            const isWeekend = dayOfWeek >= 5;
+            const dayIndex = startOffset + d - 1;
+            const colIdx = dayIndex % 7;
+            const rowIdx = Math.floor(dayIndex / 7);
+            const isWeekend = colIdx >= 5;
             const isToday = isCurrentMonth && d === todayDate;
             const key = isoKey(viewYear, viewMonth, d);
-            const note = calNotes[key];
-
-            let cls = "cal-day-cell";
-            if (isWeekend) cls += " cal-weekend";
-            if (isToday) cls += " cal-today";
-            if (note && note.trim()) {
-                cls += " has-note";
-                cell.setAttribute("data-tooltip", note.trim());
-                cell.setAttribute("data-tooltip-dir", "top");
-            }
-            cell.className = cls;
-            cell.textContent = String(d);
-            gridEl.appendChild(cell);
+            gridEl.appendChild(createDayCell(d, key, false, isWeekend, isToday, rowIdx, colIdx));
         }
 
         // Next month trailing overflow days (pad to 35 or 42 cells for visual balance)
@@ -169,19 +188,12 @@
         const nextYear = viewMonth === 11 ? viewYear + 1 : viewYear;
         const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
         for (let next = 1; next <= trailingDays; next++) {
+            const dayIndex = startOffset + daysInMonth + next - 1;
+            const colIdx = dayIndex % 7;
+            const rowIdx = Math.floor(dayIndex / 7);
+            const isWeekend = colIdx >= 5;
             const key = isoKey(nextYear, nextMonth, next);
-            const note = calNotes[key];
-
-            const cell = document.createElement("div");
-            let cls = "cal-day-cell cal-other";
-            if (note && note.trim()) {
-                cls += " has-note";
-                cell.setAttribute("data-tooltip", note.trim());
-                cell.setAttribute("data-tooltip-dir", "bottom");
-            }
-            cell.className = cls;
-            cell.textContent = String(next);
-            gridEl.appendChild(cell);
+            gridEl.appendChild(createDayCell(next, key, true, isWeekend, false, rowIdx, colIdx));
         }
     }
 
@@ -477,6 +489,27 @@
                 renderCalendar();
             }
         }, { passive: true });
+    }
+
+    // ── Window Dragging from Any Dead Space ──────────────────────
+    if (shell) {
+        shell.addEventListener("mousedown", (e) => {
+            // Exclude interactive elements: buttons, popover, day cells, context menu, op-chips
+            if (e.target.closest("button, .cal-btn, .picker-btn, .picker-month-btn, .cal-ctx-menu, .cal-picker-popover, #cal-title, .cal-op-chip")) return;
+            if (e.button !== 0) return; // Only primary left-click
+            if (cfg.miniPositionLocked === true) return;
+
+            e.preventDefault();
+            document.body.classList.add("is-dragging");
+            if (window.cc && window.cc.startDragging) {
+                window.cc.startDragging()
+                    .then(() => document.body.classList.remove("is-dragging"))
+                    .catch(() => document.body.classList.remove("is-dragging"));
+            }
+        });
+        window.addEventListener("mouseup", () => {
+            document.body.classList.remove("is-dragging");
+        });
     }
 
     // ── Load Initial Settings ────────────────────────────────────
