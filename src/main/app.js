@@ -622,6 +622,10 @@
                 refreshClockNameRestoreBtn();
             }
         }
+        const clockShowBrandEl = document.getElementById("s-clock-show-brand");
+        if (clockShowBrandEl) {
+            clockShowBrandEl.checked = s.clockShowBrand !== false;
+        }
         // Hide analog clock / hide calendar (full-mode Home): collapse either
         // panel and let the other absorb the full width.
         const hideClock = s.fullHideClock === true;
@@ -2939,6 +2943,7 @@
         // word one letter per exact second, swinging left↔right like a
         // metronome. The text is user-editable (settings: clockBrand);
         // empty falls back to the default, and it is always uppercased.
+        if (cfg.clockShowBrand !== false) {
         ctx.save();
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
@@ -2995,6 +3000,7 @@
             wx += widths[i] + tracking;
         }
         ctx.restore();
+        }
 
         // Hands — per-design character:
         // 1 (Classic), 3 (Segments): standard cast-shadowed hands
@@ -5833,6 +5839,15 @@
     // Initial visibility for the loaded settings (applySettings fills the
     // input before this runs via onInit → applySettings ordering).
     refreshClockNameRestoreBtn();
+
+    const sClockShowBrand = document.getElementById("s-clock-show-brand");
+    if (sClockShowBrand) {
+        sClockShowBrand.addEventListener("change", () => {
+            const on = sClockShowBrand.checked;
+            cfg.clockShowBrand = on;
+            window.cc.saveSettings({ clockShowBrand: on });
+        });
+    }
 
     // Optional display name for the full-mode welcome greeting. Saved on
     // change so typing stays local and does not trigger a write per key.

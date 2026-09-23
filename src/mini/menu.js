@@ -37,9 +37,9 @@
         requestAnimationFrame(() => {
             const el = document.getElementById("ctx-menu");
             if (!el) return;
-            const h = el.offsetHeight + 20;
+            const h = el.offsetHeight + 28;
             if (window.cc && window.cc.miniMenuReady) {
-                window.cc.miniMenuReady(270, h);
+                window.cc.miniMenuReady(286, h);
             }
         });
     }

@@ -1958,7 +1958,7 @@ fn open_mini_context_menu(
         }
 
         let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
-        position_mini_context_menu(&menu, 270.0, last_h);
+        position_mini_context_menu(&menu, 286.0, last_h);
 
         let _ = menu.show();
         let _ = menu.set_focus();

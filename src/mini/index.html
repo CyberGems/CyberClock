@@ -21,10 +21,16 @@
             <div class="time-block">
                 <div id="mini-time">00:00:00</div>
                 <div id="mini-date">SAT · 01 JAN 2026</div>
+                <div class="mini-action-ticker" id="mini-action-ticker" aria-hidden="true">
+                    <div class="ticker-badge">
+                        <span class="ticker-ico" id="ticker-ico"></span>
+                        <span class="ticker-text" id="ticker-text"></span>
+                    </div>
+                </div>
             </div>
             <div class="sep"></div>
             <div class="controls">
-                <button class="ctl-btn" id="btn-aot" data-tooltip="Always on Top" data-i18n-attr="data-tooltip:mini.tooltip.aot" data-tooltip-dir="left">
+                <button class="ctl-btn" id="btn-aot" aria-label="Always on Top" data-i18n-attr="aria-label:mini.tooltip.aot">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <g transform="rotate(45 12 12)">
@@ -33,7 +39,7 @@
                         </g>
                     </svg>
                 </button>
-                <button class="ctl-btn" id="btn-full" data-tooltip="Full mode" data-i18n-attr="data-tooltip:mini.tooltip.full" data-tooltip-dir="left">
+                <button class="ctl-btn" id="btn-full" aria-label="Full mode" data-i18n-attr="aria-label:mini.tooltip.full">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M15 3h6v6"/>

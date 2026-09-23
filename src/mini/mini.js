@@ -490,12 +490,16 @@
             collapseDate();
             syncWindowSize();
         });
+        controlsEl.addEventListener("mouseleave", () => {
+            hideActionTicker();
+        });
     }
 
     document.body.addEventListener("mouseleave", () => {
         isTimeBlockHovered = false;
         isTipHovered = false;
         hideTipNow();
+        hideActionTicker();
         miniHovered = false;
         collapseDate();
         syncMiniMotion();
@@ -595,14 +599,52 @@
     });
 
     // ═══════════════════════════════════════════════════════
+    // ACTION TICKER (Inline Button Tooltips)
+    // ═══════════════════════════════════════════════════════
+    const tickerIco = document.getElementById("ticker-ico");
+    const tickerText = document.getElementById("ticker-text");
+    const pinIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(45 12 12)"><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.58A2 2 0 0 1 15 9.18V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.18a2 2 0 0 1-.78 1.58l-2.78 3.58A2 2 0 0 0 5 15.24Z"/><path d="M12 17v5"/></g></svg>`;
+    const fullIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>`;
+
+    function showActionTicker(actionKey, iconHtml) {
+        if (!shellEl || !tickerText) return;
+        tickerText.textContent = window.ccI18n ? window.ccI18n.t(actionKey) : actionKey;
+        if (tickerIco) tickerIco.innerHTML = iconHtml || "";
+        shellEl.classList.add("has-action-ticker");
+    }
+
+    function hideActionTicker() {
+        if (!shellEl) return;
+        shellEl.classList.remove("has-action-ticker");
+    }
+
+    // ═══════════════════════════════════════════════════════
     // BUTTON HANDLERS
     // ═══════════════════════════════════════════════════════
-    document.getElementById("btn-full").addEventListener("click", () => window.cc.goFull());
-    document.getElementById("btn-aot").addEventListener("click", async () => {
-        const on = !document.getElementById("btn-aot").classList.contains("active");
-        window.cc.saveSettings({ alwaysOnTop: on });
-        document.getElementById("btn-aot").classList.toggle("active", on);
-    });
+    const btnFull = document.getElementById("btn-full");
+    const btnAot = document.getElementById("btn-aot");
+
+    if (btnFull) {
+        btnFull.addEventListener("click", () => window.cc.goFull());
+        btnFull.addEventListener("mouseenter", () => {
+            showActionTicker("mini.action.full", fullIcoSvg);
+        });
+        btnFull.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnAot) {
+        btnAot.addEventListener("click", async () => {
+            const on = !btnAot.classList.contains("active");
+            window.cc.saveSettings({ alwaysOnTop: on });
+            btnAot.classList.toggle("active", on);
+            showActionTicker(on ? "mini.action.aotActive" : "mini.action.aot", pinIcoSvg);
+        });
+        btnAot.addEventListener("mouseenter", () => {
+            const isActive = btnAot.classList.contains("active");
+            showActionTicker(isActive ? "mini.action.aotActive" : "mini.action.aot", pinIcoSvg);
+        });
+        btnAot.addEventListener("mouseleave", hideActionTicker);
+    }
 
     // ═══════════════════════════════════════════════════════
     // CONTEXT MENU
@@ -635,6 +677,7 @@
 
         // Immediately cancel and dismiss the hover popup if visible/pending.
         hideTipNow();
+        hideActionTicker();
         collapseDate();
         syncWindowSize();
 

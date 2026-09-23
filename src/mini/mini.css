@@ -1399,12 +1399,97 @@
     }
 
     .time-block {
+        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: center;
         min-width: 0;
         overflow: hidden;
         flex: 1;
+    }
+
+    #mini-time,
+    #mini-date {
+        transition: opacity 0.16s cubic-bezier(0.4, 0, 0.2, 1),
+                    transform 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mini-shell.has-action-ticker #mini-time,
+    .mini-shell.has-action-ticker #mini-date {
+        opacity: 0 !important;
+        transform: translateY(-2px) scale(0.96);
+        pointer-events: none;
+    }
+
+    .mini-shell.has-action-ticker .status-dot {
+        opacity: 0.35;
+        transition: opacity 0.18s ease;
+    }
+
+    /* ── Inline Action Ticker (Replaces clock content on button hover) ── */
+    .mini-action-ticker {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(3px) scale(0.96);
+        transition: opacity 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+        z-index: 10;
+        overflow: hidden;
+        padding: 0 4px;
+    }
+
+    .mini-shell.has-action-ticker .mini-action-ticker {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .ticker-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        max-width: 100%;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: rgba(var(--rgb-accent), 0.14);
+        border: 1px solid rgba(var(--rgb-accent), 0.35);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        font-family: var(--font-ui, "Outfit", sans-serif);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: var(--accent-a);
+        text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ticker-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+    }
+
+    .ticker-ico svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.7));
+    }
+
+    .ticker-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     .controls {
         display: flex;

@@ -175,8 +175,11 @@
             "calendar.stat.daysLeftYear": "Days left in year",
             "calendar.stat.daysLeftMonth": "Left in month",
             "calendar.stat.moon": "Moon phase",
-            "mini.tooltip.aot": "Toggle Always on Top",
+            "mini.tooltip.aot": "Always on Top",
             "mini.tooltip.full": "Full mode",
+            "mini.action.aot": "Always on Top",
+            "mini.action.aotActive": "Always on Top: ON",
+            "mini.action.full": "Full mode",
             "mini.tip.todaysNote": "Today's note",
             "mini.tip.upcoming": "upcoming",
             "mini.tip.noNotes": "No notes for today",
@@ -367,6 +370,8 @@
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
             "settings.appearance.clockNameRestore": "Reset",
             "settings.appearance.clockNameRestoreTip": "Restore the default brand name",
+            "settings.appearance.showClockBrand": "Show Brand on Clock",
+            "settings.appearance.showClockBrandDesc": "Display customized brand name on the analog clock dial",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
@@ -802,8 +807,11 @@
             "calendar.stat.daysLeftYear": "Días restantes del año",
             "calendar.stat.daysLeftMonth": "Restantes del mes",
             "calendar.stat.moon": "Fase lunar",
-            "mini.tooltip.aot": "Alternar siempre visible",
+            "mini.tooltip.aot": "Siempre visible",
             "mini.tooltip.full": "Modo completo",
+            "mini.action.aot": "Siempre visible",
+            "mini.action.aotActive": "Siempre visible: SÍ",
+            "mini.action.full": "Modo completo",
             "mini.tip.todaysNote": "Nota de hoy",
             "mini.tip.upcoming": "próximos",
             "mini.tip.noNotes": "Sin notas para hoy",
@@ -994,6 +1002,8 @@
             "settings.appearance.clockNamePlaceholder": "CYBERGEMS",
             "settings.appearance.clockNameRestore": "Restablecer",
             "settings.appearance.clockNameRestoreTip": "Restaurar la marca por defecto",
+            "settings.appearance.showClockBrand": "Mostrar marca en el reloj",
+            "settings.appearance.showClockBrandDesc": "Mostrar el texto de marca en la esfera del reloj analógico",
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
