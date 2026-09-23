@@ -2112,30 +2112,30 @@
         for (let k = 0; k < 4; k++) {
             const ca = cardAngles[k];
             ctx.save();
-            ctx.translate(cx + Math.cos(ca) * (R * 0.93), cy + Math.sin(ca) * (R * 0.93));
+            ctx.translate(cx + Math.cos(ca) * (R * 0.94), cy + Math.sin(ca) * (R * 0.94));
             ctx.rotate(ca + Math.PI / 2);
             ctx.beginPath();
-            const bw = R * 0.045, bh = R * 0.055;
+            const bw = R * 0.034, bh = R * 0.040;
             ctx.rect(-bw, -bh / 2, bw * 2, bh);
             ctx.fillStyle = "#12151e";
             ctx.fill();
             ctx.strokeStyle = c.accent;
-            ctx.lineWidth = 1.8;
-            ctx.shadowBlur = 8;
+            ctx.lineWidth = 1.6;
+            ctx.shadowBlur = 6;
             ctx.stroke();
             // Warning status LED
             ctx.beginPath();
-            ctx.arc(0, 0, R * 0.012, 0, Math.PI * 2);
+            ctx.arc(0, 0, R * 0.010, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
             ctx.fill();
             ctx.restore();
         }
 
         // 5. Magnetic Plasma Confinement Guide Rings
-        [0.78, 0.62, 0.44].forEach((cr, idx) => {
+        [0.72, 0.56, 0.38].forEach((cr, idx) => {
             ctx.beginPath();
             ctx.arc(cx, cy, R * cr, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${c.rgb},${0.18 + idx * 0.08})`;
+            ctx.strokeStyle = `rgba(${c.rgb},${0.16 + idx * 0.07})`;
             ctx.lineWidth = 1.2;
             ctx.setLineDash(idx === 1 ? [4, 6] : [8, 4]);
             ctx.stroke();
@@ -2148,15 +2148,15 @@
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
             const cosA = Math.cos(a), sinA = Math.sin(a);
 
-            // Magnetic Injector Coil Body (trapezoid from R*0.46 to R*0.76)
+            // Magnetic Injector Coil Body (trapezoid from R*0.38 to R*0.65)
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(a + Math.PI / 2);
 
-            const wInner = R * 0.024;
-            const wOuter = R * 0.048;
-            const yInner = -R * 0.46;
-            const yOuter = -R * 0.76;
+            const wInner = R * 0.022;
+            const wOuter = R * 0.042;
+            const yInner = -R * 0.38;
+            const yOuter = -R * 0.65;
 
             ctx.beginPath();
             ctx.moveTo(-wInner, yInner);
@@ -2184,18 +2184,18 @@
 
             // High-voltage node cap at outer end
             ctx.beginPath();
-            ctx.arc(0, yOuter - R * 0.015, R * 0.016, 0, Math.PI * 2);
+            ctx.arc(0, yOuter - R * 0.013, R * 0.014, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 8;
             ctx.fill();
 
             ctx.restore();
 
-            // Hour Numeral inside outer track (at R * 0.82)
-            const numR = R * 0.82;
+            // Hour Numeral inside outer track (at R * 0.80) with ample buffer
+            const numR = R * 0.80;
             const nx = cx + cosA * numR;
             const ny = cy + sinA * numR;
-            ctx.font = `bold ${Math.round(R * 0.09)}px Orbitron, monospace`;
+            ctx.font = `bold ${Math.round(R * 0.082)}px Orbitron, monospace`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillStyle = c.accent;
@@ -2205,23 +2205,30 @@
         }
 
         // 7. Central Core Tokamak Chamber
-        const coreR = R * 0.30;
+        const coreR = R * 0.28;
         ctx.beginPath();
         ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(12, 16, 24, 0.9)";
+        ctx.fillStyle = "rgba(12, 16, 24, 0.92)";
         ctx.fill();
         ctx.strokeStyle = c.accent;
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 12;
+        ctx.lineWidth = 1.8;
+        ctx.shadowBlur = 10;
         ctx.stroke();
 
-        // Technical Telemetry Silkscreen in Core Chamber
-        ctx.font = `600 ${Math.round(R * 0.045)}px "Space Grotesk", monospace`;
-        ctx.textAlign = "center";
-        ctx.fillStyle = `rgba(${c.rgb},.65)`;
-        ctx.shadowBlur = 0;
-        ctx.fillText("TOKAMAK // MK-IV", cx, cy - coreR * 0.38);
-        ctx.fillText("FLUX: 100%", cx, cy + coreR * 0.42);
+        // High-tech concentric containment rings inside chamber (uncluttered center)
+        ctx.beginPath();
+        ctx.arc(cx, cy, coreR * 0.70, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.32)`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, coreR * 0.40, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.22)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
         ctx.restore();
         return off;
@@ -2264,32 +2271,32 @@
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(cx, cy, R * 0.87, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${c.rgb},.18)`;
+        ctx.arc(cx, cy, R * 0.88, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.16)`;
         ctx.lineWidth = 1.0;
         ctx.stroke();
 
-        // 60 Plated Through-Hole Vias (Minute ticks) along outer perimeter
+        // 60 Plated Through-Hole Vias (Minute ticks) along outer perimeter (R * 0.91)
         for (let i = 0; i < 60; i++) {
             const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
             const isHour = i % 5 === 0;
-            const vr = R * 0.90;
+            const vr = R * 0.91;
             const vx = cx + Math.cos(a) * vr;
             const vy = cy + Math.sin(a) * vr;
 
             ctx.beginPath();
-            ctx.arc(vx, vy, isHour ? R * 0.016 : R * 0.009, 0, Math.PI * 2);
+            ctx.arc(vx, vy, isHour ? R * 0.015 : R * 0.008, 0, Math.PI * 2);
             ctx.fillStyle = isHour ? c.accent : `rgba(${c.rgb},.40)`;
             ctx.fill();
             // Drill hole center
             ctx.beginPath();
-            ctx.arc(vx, vy, isHour ? R * 0.007 : R * 0.004, 0, Math.PI * 2);
+            ctx.arc(vx, vy, isHour ? R * 0.006 : R * 0.0035, 0, Math.PI * 2);
             ctx.fillStyle = "#0c1017";
             ctx.fill();
         }
 
         // 3. Central Microprocessor Package (QFP-32 Die)
-        const chipSz = R * 0.24;
+        const chipSz = R * 0.22;
         ctx.save();
         ctx.translate(cx, cy);
 
@@ -2301,12 +2308,12 @@
         ctx.strokeStyle = `rgba(${c.rgb},.60)`;
         ctx.lineWidth = 1.8;
         ctx.shadowColor = c.accent;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 8;
         ctx.stroke();
 
         // Chip Pin 1 Index Marker (corner dot)
         ctx.beginPath();
-        ctx.arc(-chipSz + R * 0.035, -chipSz + R * 0.035, R * 0.014, 0, Math.PI * 2);
+        ctx.arc(-chipSz + R * 0.030, -chipSz + R * 0.030, R * 0.012, 0, Math.PI * 2);
         ctx.fillStyle = c.accent;
         ctx.fill();
 
@@ -2317,87 +2324,141 @@
         ctx.strokeStyle = `rgba(${c.rgb},.45)`;
         for (let p = 0; p < pins; p++) {
             const offset = -chipSz * 0.8 + p * pinSpan;
-            ctx.beginPath(); ctx.moveTo(offset, -chipSz); ctx.lineTo(offset, -chipSz - R * 0.04); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(offset, chipSz); ctx.lineTo(offset, chipSz + R * 0.04); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-chipSz, offset); ctx.lineTo(-chipSz - R * 0.04, offset); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(chipSz, offset); ctx.lineTo(chipSz + R * 0.04, offset); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(offset, -chipSz); ctx.lineTo(offset, -chipSz - R * 0.035); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(offset, chipSz); ctx.lineTo(offset, chipSz + R * 0.035); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-chipSz, offset); ctx.lineTo(-chipSz - R * 0.035, offset); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(chipSz, offset); ctx.lineTo(chipSz + R * 0.035, offset); ctx.stroke();
         }
 
-        // Silkscreen Text on Chip
-        ctx.font = `bold ${Math.round(R * 0.048)}px "Space Grotesk", monospace`;
+        // Subtle silicon core die outline (middle stays clear of text for clock hand pivot)
+        ctx.beginPath();
+        ctx.rect(-chipSz * 0.38, -chipSz * 0.38, chipSz * 0.76, chipSz * 0.76);
+        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Silkscreen Text on Chip — succinct and placed near edges, away from hand axis
+        ctx.font = `bold ${Math.round(R * 0.034)}px "Space Grotesk", monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = c.accent;
         ctx.shadowBlur = 0;
-        ctx.fillText("CYBER-CPU", 0, -R * 0.05);
-        ctx.font = `600 ${Math.round(R * 0.036)}px "Space Grotesk", monospace`;
-        ctx.fillStyle = `rgba(${c.rgb},.70)`;
-        ctx.fillText("64-BIT // CLK", 0, R * 0.03);
-        ctx.fillText("REV 4.2", 0, R * 0.09);
+        ctx.fillText("CPU-64", 0, -chipSz * 0.64);
+        ctx.font = `600 ${Math.round(R * 0.026)}px "Space Grotesk", monospace`;
+        ctx.fillStyle = `rgba(${c.rgb},.65)`;
+        ctx.fillText("CLK", 0, chipSz * 0.64);
 
         ctx.restore();
 
-        // 4. 12 Primary PCB Bus Signal Traces (with authentic 45-degree elbows!)
+        // 4. 12 PCB Signal Bus Traces & SMD Components (radial clearance < 0.68)
         for (let i = 0; i < 12; i++) {
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
             const cosA = Math.cos(a), sinA = Math.sin(a);
+            const isCardinal = i % 3 === 0;
 
-            const x0 = cx + cosA * (R * 0.33);
-            const y0 = cy + sinA * (R * 0.33);
+            const rStart = R * 0.26;
+            const rEnd = R * 0.67;
 
-            const elbowA = a + (i % 2 === 0 ? 0.22 : -0.22);
-            const x1 = cx + Math.cos(elbowA) * (R * 0.52);
-            const y1 = cy + Math.sin(elbowA) * (R * 0.52);
+            // Route trace: straight for cardinal hours, 45° elbow for intermediate hours
+            if (isCardinal) {
+                const x0 = cx + cosA * rStart;
+                const y0 = cy + sinA * rStart;
+                const x2 = cx + cosA * rEnd;
+                const y2 = cy + sinA * rEnd;
 
-            const x2 = cx + cosA * (R * 0.74);
-            const y2 = cy + sinA * (R * 0.74);
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = `rgba(${c.rgb},.38)`;
+                ctx.lineWidth = 1.6;
+                ctx.stroke();
 
+                // SMD Component at R * 0.52 (away from numerals)
+                const smdDist = R * 0.52;
+                ctx.save();
+                ctx.translate(cx + cosA * smdDist, cy + sinA * smdDist);
+                ctx.rotate(a + Math.PI / 2);
+                const pw = R * 0.038, ph = R * 0.018;
+                ctx.beginPath();
+                ctx.rect(-pw, -ph, pw * 2, ph * 2);
+                ctx.fillStyle = "#1e222a";
+                ctx.fill();
+                ctx.strokeStyle = `rgba(${c.rgb},.55)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.fillStyle = c.accent;
+                ctx.fillRect(-pw, -ph, pw * 0.40, ph * 2);
+                ctx.fillRect(pw - pw * 0.40, -ph, pw * 0.40, ph * 2);
+                ctx.restore();
+            } else {
+                const x0 = cx + cosA * rStart;
+                const y0 = cy + sinA * rStart;
+
+                const elbowOffset = (i % 2 === 0 ? 0.16 : -0.16);
+                const elbowA = a + elbowOffset;
+                const x1 = cx + Math.cos(elbowA) * (R * 0.45);
+                const y1 = cy + Math.sin(elbowA) * (R * 0.45);
+
+                const x2 = cx + cosA * rEnd;
+                const y2 = cy + sinA * rEnd;
+
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = `rgba(${c.rgb},.38)`;
+                ctx.lineWidth = 1.6;
+                ctx.stroke();
+
+                // Plated Via at elbow turn
+                ctx.beginPath();
+                ctx.arc(x1, y1, R * 0.010, 0, Math.PI * 2);
+                ctx.fillStyle = c.accent;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x1, y1, R * 0.004, 0, Math.PI * 2);
+                ctx.fillStyle = "#0c1017";
+                ctx.fill();
+
+                // SMD Component on final trace segment at R * 0.58
+                const smdDist = R * 0.58;
+                ctx.save();
+                ctx.translate(cx + cosA * smdDist, cy + sinA * smdDist);
+                ctx.rotate(a + Math.PI / 2);
+                const pw = R * 0.034, ph = R * 0.016;
+                ctx.beginPath();
+                ctx.rect(-pw, -ph, pw * 2, ph * 2);
+                ctx.fillStyle = "#1e222a";
+                ctx.fill();
+                ctx.strokeStyle = `rgba(${c.rgb},.50)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.fillStyle = c.accent;
+                ctx.fillRect(-pw, -ph, pw * 0.38, ph * 2);
+                ctx.fillRect(pw - pw * 0.38, -ph, pw * 0.38, ph * 2);
+                ctx.restore();
+            }
+
+            // Test Point Via at trace terminus (R * 0.67)
+            const tx = cx + cosA * rEnd;
+            const ty = cy + sinA * rEnd;
             ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            ctx.lineTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = `rgba(${c.rgb},.38)`;
-            ctx.lineWidth = 1.6;
-            ctx.stroke();
-
-            // Plated Via at elbow turn
-            ctx.beginPath();
-            ctx.arc(x1, y1, R * 0.012, 0, Math.PI * 2);
+            ctx.arc(tx, ty, R * 0.011, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x1, y1, R * 0.005, 0, Math.PI * 2);
+            ctx.arc(tx, ty, R * 0.004, 0, Math.PI * 2);
             ctx.fillStyle = "#0c1017";
             ctx.fill();
 
-            // 5. 12 SMD Component Hour Pads & Silkscreen Brackets [ 12 ]
-            ctx.save();
-            ctx.translate(x2, y2);
-            ctx.rotate(a + Math.PI / 2);
-
-            const pw = R * 0.045, ph = R * 0.024;
-            ctx.beginPath();
-            ctx.rect(-pw, -ph, pw * 2, ph * 2);
-            ctx.fillStyle = "#1e222a";
-            ctx.fill();
-            ctx.strokeStyle = `rgba(${c.rgb},.55)`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.fillStyle = c.accent;
-            ctx.shadowBlur = 6;
-            ctx.fillRect(-pw, -ph, pw * 0.45, ph * 2);
-            ctx.fillRect(pw - pw * 0.45, -ph, pw * 0.45, ph * 2);
-
-            ctx.restore();
-
-            // Hour Silkscreen Numeral & Brackets: [ 01 ], [ 12 ]
-            const numR = R * 0.81;
+            // 5. Hour Silkscreen Numeral & Brackets: [01], [12] (placed at R * 0.80)
+            // Zero overlap: test via is at 0.67, numeral is at 0.80, minute via is at 0.91
+            const numR = R * 0.80;
             const hNum = i === 0 ? 12 : i;
             const nx = cx + cosA * numR;
             const ny = cy + sinA * numR;
-            const txt = hNum < 10 ? `[ 0${hNum} ]` : `[ ${hNum} ]`;
-            ctx.font = `bold ${Math.round(R * 0.068)}px "Space Grotesk", monospace`;
+            const txt = hNum < 10 ? `[0${hNum}]` : `[${hNum}]`;
+            ctx.font = `bold ${Math.round(R * 0.062)}px "Space Grotesk", monospace`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillStyle = c.accent;
@@ -2889,16 +2950,16 @@
             ctx.shadowBlur = 8;
             // Inner plasma vortex arcs
             ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.26, plasmaRot, plasmaRot + Math.PI * 0.6);
+            ctx.arc(cx, cy, R * 0.23, plasmaRot, plasmaRot + Math.PI * 0.6);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.26, plasmaRot + Math.PI, plasmaRot + Math.PI * 1.6);
+            ctx.arc(cx, cy, R * 0.23, plasmaRot + Math.PI, plasmaRot + Math.PI * 1.6);
             ctx.stroke();
             // Core breathing energy glow
             const pulse = 0.10 + 0.08 * (1 + Math.sin(Date.now() / 500));
             ctx.fillStyle = `rgba(${c.rgb},${pulse})`;
             ctx.beginPath();
-            ctx.arc(cx, cy, R * 0.16, 0, Math.PI * 2);
+            ctx.arc(cx, cy, R * 0.14, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
@@ -2908,8 +2969,8 @@
             const pulseStep = Math.floor((Date.now() / 400) % 4);
             const cardAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
             const a = cardAngles[pulseStep];
-            const px = cx + Math.cos(a) * (R * 0.52);
-            const py = cy + Math.sin(a) * (R * 0.52);
+            const px = cx + Math.cos(a) * (R * 0.67);
+            const py = cy + Math.sin(a) * (R * 0.67);
             ctx.save();
             ctx.fillStyle = c.accent;
             ctx.shadowColor = c.accent;
