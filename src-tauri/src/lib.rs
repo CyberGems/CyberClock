@@ -339,7 +339,7 @@ fn reset_settings(app: AppHandle) -> AppSettings {
 
 #[tauri::command]
 fn close_window(window: WebviewWindow) {
-    if window.label() == "main" {
+    if window.label() == "main" || window.label() == "mini" {
         exit_app(window.app_handle());
     } else {
         let _ = window.close();
@@ -1270,6 +1270,137 @@ fn clamp_current_window_to_monitors(window: WebviewWindow) -> bool {
     #[cfg(windows)]
     attach_window_drag_subclass(&window);
     clamp_window_to_monitors(&window)
+}
+
+#[cfg(not(windows))]
+fn get_all_work_areas() -> Vec<WinRect> {
+    Vec::new()
+}
+
+/// Relocate open mini clock and floating widgets to the center of the
+/// active display (where the user's cursor currently is).
+fn center_open_widgets_on_active_monitor(app: &AppHandle) {
+    #[cfg(windows)]
+    let active_work_area: Option<WinRect> = {
+        use windows_sys::Win32::Foundation::POINT;
+        use windows_sys::Win32::Graphics::Gdi::{
+            GetMonitorInfoW, MonitorFromPoint, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+        };
+        use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
+        let mut pt = POINT { x: 0, y: 0 };
+        unsafe {
+            if GetCursorPos(&mut pt) != 0 {
+                let mon = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+                if !mon.is_null() {
+                    let mut info = MONITORINFO {
+                        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+                        ..Default::default()
+                    };
+                    if GetMonitorInfoW(mon, &mut info) != 0 {
+                        Some(WinRect {
+                            left: info.rcWork.left,
+                            top: info.rcWork.top,
+                            right: info.rcWork.right,
+                            bottom: info.rcWork.bottom,
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }
+    };
+
+    #[cfg(not(windows))]
+    let active_work_area: Option<WinRect> = None;
+
+    let target_wa = active_work_area.or_else(|| {
+        let work_areas = get_all_work_areas();
+        work_areas.first().copied()
+    });
+
+    let Some(wa) = target_wa else { return };
+    let wa_w = wa.right - wa.left;
+    let wa_h = wa.bottom - wa.top;
+    if wa_w <= 0 || wa_h <= 0 {
+        return;
+    }
+
+    let settings = load_settings(app);
+    let is_mini = settings.window_mode != "full";
+
+    // 1. Center the mini clock if in mini mode
+    if is_mini {
+        if let Some(mini) = app.get_webview_window("mini") {
+            let size = mini.outer_size().unwrap_or(tauri::PhysicalSize::new(260, 48));
+            let mw = size.width as i32;
+            let mh = size.height as i32;
+            let cx = wa.left + (wa_w - mw).max(0) / 2;
+            let cy = wa.top + (wa_h - mh).max(0) / 2;
+
+            let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(cx, cy)));
+            let _ = mini.unminimize();
+            let _ = mini.show();
+            refresh_taskbar_tab(&mini);
+            clamp_window_to_monitors(&mini);
+
+            let _ = update_settings(app, |s| {
+                s.mini_position = Some((cx, cy));
+                Ok(())
+            });
+        }
+    }
+
+    // 2. Center and arrange all open floating widgets
+    let mut float_windows = Vec::new();
+    for (label, win) in app.webview_windows() {
+        if label.starts_with("float-") && win.is_visible().unwrap_or(false) {
+            float_windows.push(win);
+        }
+    }
+    float_windows.sort_by(|a, b| a.label().cmp(b.label()));
+
+    for (i, win) in float_windows.into_iter().enumerate() {
+        let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(280, 240));
+        let fw = size.width as i32;
+        let fh = size.height as i32;
+        let base_x = wa.left + (wa_w - fw).max(0) / 2;
+        let base_y = wa.top + (wa_h - fh).max(0) / 2;
+
+        let stagger = (i as i32) * 32;
+        let y_offset = if is_mini { 54 + stagger } else { stagger };
+        let fx = base_x + stagger;
+        let fy = base_y + y_offset;
+
+        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(fx, fy)));
+        let _ = win.unminimize();
+        let _ = win.show();
+        clamp_window_to_monitors(&win);
+
+        let label = win.label().to_string();
+        if label.starts_with("float-cal") {
+            let _ = update_settings(app, |s| {
+                s.float_cal_position = Some((fx, fy));
+                Ok(())
+            });
+        } else if label.starts_with("float-analog") {
+            let _ = update_settings(app, |s| {
+                s.float_analog_position = Some((fx, fy));
+                Ok(())
+            });
+        }
+    }
+
+    let _ = app.emit("settings:updated", load_settings(app));
+}
+
+#[tauri::command]
+fn center_open_widgets(app: AppHandle) {
+    center_open_widgets_on_active_monitor(&app);
 }
 
 /// The monitor that currently holds the mouse pointer: the "active"
@@ -2450,6 +2581,10 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             exit_app(&app);
             true
         }
+        "center_widgets" | "center-widgets" => {
+            center_open_widgets_on_active_monitor(&app);
+            true
+        }
         "aot" => {
             let aot = {
                 let mut settings = load_settings(&app);
@@ -3347,6 +3482,9 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         "about" => {
             show_about_window(&app);
         }
+        "center_widgets" | "center-widgets" => {
+            center_open_widgets_on_active_monitor(&app);
+        }
         "check-updates" | "check_updates" => {
             show_about_window(&app);
             let _ = app.emit("about:trigger-check", ());
@@ -3628,7 +3766,14 @@ pub fn run() {
                 // not toggle maximize/restore in the first place.
                 let _ = main.set_maximizable(false);
                 let main_for_resize = main.clone();
+                let app_for_main = app.handle().clone();
                 main.on_window_event(move |event| match event {
+                    WindowEvent::CloseRequested { api, .. } => {
+                        if !APP_EXITING.load(Ordering::SeqCst) {
+                            api.prevent_close();
+                            exit_app(&app_for_main);
+                        }
+                    }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         if main_for_resize.is_minimized().unwrap_or(true) {
                             return;
@@ -3668,6 +3813,12 @@ pub fn run() {
                 let mini_for_resize = mini.clone();
                 let app_for_resize = app.handle().clone();
                 mini.on_window_event(move |event| match event {
+                    WindowEvent::CloseRequested { api, .. } => {
+                        if !APP_EXITING.load(Ordering::SeqCst) {
+                            api.prevent_close();
+                            exit_app(&app_for_resize);
+                        }
+                    }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         restore_target_size(&mini_for_resize);
                         // While the settings peek is docked, follow
@@ -3809,7 +3960,8 @@ pub fn run() {
             sync_system_clock,
             set_hotkey,
             open_external_url,
-            clamp_current_window_to_monitors
+            clamp_current_window_to_monitors,
+            center_open_widgets
         ]);
 
     // Build the app without starting the event loop, so the settings

@@ -66,6 +66,14 @@
       d="M3 8V3h5M21 8V3h-5M3 16v5h5M21 16v5h-5"/>
     <rect x="7" y="7" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
   </symbol>
+  <symbol id="cc-i-target" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="7.75" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <circle cx="12" cy="12" r="2.75" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <line x1="12" y1="2" x2="12" y2="5.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="12" y1="18.5" x2="12" y2="22" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="2" y1="12" x2="5.5" y2="12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="18.5" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+  </symbol>
   <symbol id="cc-i-tray" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
       d="M12 3v10m0 0l-3.5-3.5M12 13l3.5-3.5"/>
