@@ -4003,6 +4003,14 @@
                 }
             });
         }
+        const clockFloatBtn = document.getElementById("clock-float-btn");
+        if (clockFloatBtn) {
+            clockFloatBtn.addEventListener("click", () => {
+                if (window.cc && window.cc.spawnFloat) {
+                    window.cc.spawnFloat("analog");
+                }
+            });
+        }
 
     // ── Note modal ────────────────────────────────────────────────
     let noteEditKey = null;

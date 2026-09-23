@@ -36,11 +36,17 @@ html, body {
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    cursor: grab;
 }
 
+.float-cal-shell:active,
 body.is-dragging,
 body.is-dragging * {
     cursor: grabbing !important;
+}
+
+button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .cal-op-chip, .cal-ctx-item {
+    cursor: pointer !important;
 }
 
 .cal-hdr {

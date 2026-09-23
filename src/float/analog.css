@@ -1,0 +1,343 @@
+/* ═══════════════════════════════════════════════════════════
+   CyberClock — Floating Analog Clock Window
+   CyberGems © 2026
+═══════════════════════════════════════════════════════════ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+}
+
+.float-analog-shell {
+    width: 100%;
+    height: 100%;
+    opacity: var(--analog-opacity, 1);
+    transition: opacity 0.15s ease;
+    background: radial-gradient(circle at center, rgba(18, 20, 26, 0.95) 0%, rgba(8, 9, 12, 0.98) 75%, rgba(0, 0, 0, 0.92) 100%);
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.85),
+        0 0 20px rgba(var(--rgb-accent), 0.22),
+        inset 0 0 24px rgba(0, 0, 0, 0.8),
+        inset 0 1px 1px rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+}
+
+.float-analog-shell:active,
+body.is-dragging,
+body.is-dragging * {
+    cursor: grabbing !important;
+}
+
+#analog-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+/* ── Hover Controls Overlay ─────────────────────────────────── */
+.analog-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    z-index: 20;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.float-analog-shell:hover .analog-overlay,
+.analog-overlay:focus-within {
+    opacity: 1;
+}
+
+.analog-ov-btn {
+    pointer-events: auto;
+    background: rgba(14, 17, 23, 0.85);
+    border: 1px solid rgba(var(--rgb-accent), 0.3);
+    outline: none;
+    color: #94a3b8;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.analog-ov-btn:hover {
+    color: var(--accent-a, #00d4ff);
+    border-color: var(--accent-a, #00d4ff);
+    background: rgba(var(--rgb-accent), 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 8px rgba(var(--rgb-accent), 0.4);
+    transform: scale(1.08);
+}
+
+.analog-ov-btn:active {
+    transform: scale(0.95);
+}
+
+.analog-ov-btn.btn-close {
+    position: absolute;
+    top: 14px;
+    right: 28px;
+}
+
+.analog-ov-btn.btn-close:hover {
+    color: #ff5577;
+    border-color: #ff5577;
+    background: rgba(255, 85, 119, 0.18);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 8px rgba(255, 85, 119, 0.4);
+}
+
+/* Discreet Bottom Dial Skin Cycler */
+.analog-dial-cycler {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.analog-dial-badge {
+    background: rgba(14, 17, 23, 0.85);
+    border: 1px solid rgba(var(--rgb-accent), 0.3);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-a, #00d4ff);
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    cursor: default;
+}
+
+/* ── Custom Cyber Context Menu ──────────────────────────────── */
+.analog-ctx-menu {
+    position: absolute;
+    width: 210px;
+    background: rgba(16, 19, 26, 0.96);
+    border: 1px solid rgba(var(--rgb-accent), 0.4);
+    border-radius: 10px;
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.9),
+        0 0 16px rgba(var(--rgb-accent), 0.25);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 6px;
+    z-index: 100;
+    pointer-events: auto;
+    animation: ctxFadeIn 0.12s ease-out;
+}
+
+@keyframes ctxFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.analog-ctx-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px 6px 8px;
+}
+
+.ctx-hdr-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent-a, #00d4ff);
+}
+
+.ctx-hdr-skin {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.analog-ctx-sep {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 0;
+}
+
+.analog-ctx-section {
+    padding: 4px 6px;
+}
+
+.analog-ctx-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.analog-skin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3px;
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
+}
+
+.analog-skin-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.analog-skin-grid::-webkit-scrollbar-thumb {
+    background: rgba(var(--rgb-accent), 0.4);
+    border-radius: 2px;
+}
+
+.analog-skin-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #cbd5e1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.12s ease;
+}
+
+.analog-skin-btn:hover {
+    background: rgba(var(--rgb-accent), 0.15);
+    border-color: rgba(var(--rgb-accent), 0.4);
+    color: #ffffff;
+}
+
+.analog-skin-btn.active {
+    background: rgba(var(--rgb-accent), 0.25);
+    border-color: var(--accent-a, #00d4ff);
+    color: var(--accent-a, #00d4ff);
+    font-weight: 600;
+}
+
+.analog-skin-btn.active::after {
+    content: "✓";
+    font-size: 9px;
+    color: var(--accent-a, #00d4ff);
+    margin-left: 2px;
+}
+
+.analog-ctx-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer !important;
+    transition: all 0.12s ease;
+    text-align: left;
+}
+
+.analog-ctx-item:hover {
+    background: rgba(var(--rgb-accent), 0.15);
+    color: #ffffff;
+}
+
+.analog-ctx-item.ctx-danger:hover {
+    background: rgba(255, 85, 119, 0.15);
+    color: #ff5577;
+}
+
+.analog-ctx-item .ctx-check {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--accent-a, #00d4ff);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.analog-ctx-item .ctx-check.visible {
+    opacity: 1;
+}
+
+.analog-ctx-opacity-chips {
+    display: flex;
+    gap: 3px;
+}
+
+.analog-op-chip {
+    flex: 1;
+    padding: 3px 0;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer !important;
+    transition: all 0.12s ease;
+    text-align: center;
+}
+
+.analog-op-chip:hover {
+    background: rgba(var(--rgb-accent), 0.15);
+    color: #ffffff;
+    border-color: rgba(var(--rgb-accent), 0.3);
+}
+
+.analog-op-chip.active {
+    background: rgba(var(--rgb-accent), 0.25);
+    border-color: var(--accent-a, #00d4ff);
+    color: var(--accent-a, #00d4ff);
+}

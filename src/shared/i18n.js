@@ -639,7 +639,25 @@
             "about.linkGithub": "View project on GitHub",
             "about.linkIssues": "Report a bug or open an issue",
             "about.linkReleases": "View releases and changelogs",
-            "about.linkDonate": "Donate to project"
+            "about.linkDonate": "Donate to project",
+            "float.calTitle": "Calendar",
+            "float.analogTitle": "Analog Clock",
+            "float.newCalendar": "New Calendar",
+            "float.newAnalog": "New Analog Clock",
+            "float.prevMonth": "Previous month",
+            "float.nextMonth": "Next month",
+            "float.today": "Today",
+            "float.pickMonthYear": "Select month or year",
+            "float.quickPicker": "Month & Year Selector",
+            "float.close": "Close",
+            "float.alwaysOnTop": "Always on Top",
+            "float.opacity": "Opacity",
+            "float.fullMode": "Open Full Mode",
+            "float.nextSkin": "Next design",
+            "float.prevSkin": "Previous design",
+            "float.skin": "Design",
+            "tooltip.floatingCalendar": "Floating calendar",
+            "tooltip.floatingClock": "Floating analog clock"
         },
         es: {
             "relax.audioSpectrum": "Espectro de Audio",
@@ -1275,7 +1293,25 @@
             "about.linkGithub": "Ver proyecto en GitHub",
             "about.linkIssues": "Reportar un problema o sugerencia",
             "about.linkReleases": "Ver versiones y notas de cambios",
-            "about.linkDonate": "Donar al proyecto"
+            "about.linkDonate": "Donar al proyecto",
+            "float.calTitle": "Calendario",
+            "float.analogTitle": "Reloj Análogo",
+            "float.newCalendar": "Nuevo Calendario",
+            "float.newAnalog": "Nuevo Reloj Análogo",
+            "float.prevMonth": "Mes anterior",
+            "float.nextMonth": "Mes siguiente",
+            "float.today": "Hoy",
+            "float.pickMonthYear": "Seleccionar mes o año",
+            "float.quickPicker": "Selector de mes y año",
+            "float.close": "Cerrar",
+            "float.alwaysOnTop": "Siempre visible",
+            "float.opacity": "Opacidad",
+            "float.fullMode": "Abrir Modo Completo",
+            "float.nextSkin": "Siguiente diseño",
+            "float.prevSkin": "Diseño anterior",
+            "float.skin": "Diseño",
+            "tooltip.floatingCalendar": "Calendario flotante",
+            "tooltip.floatingClock": "Reloj análogo flotante"
         }
     };
 

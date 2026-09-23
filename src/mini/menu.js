@@ -73,6 +73,8 @@
                     if (stopwatchLbl) stopwatchLbl.textContent = window.ccI18n.t("float.newStopwatch");
                     const calendarLbl = document.querySelector('.ctx-item[data-action="new_calendar"] .label');
                     if (calendarLbl) calendarLbl.textContent = window.ccI18n.t("float.newCalendar");
+                    const analogLbl = document.querySelector('.ctx-item[data-action="new_analog"] .label');
+                    if (analogLbl) analogLbl.textContent = window.ccI18n.t("float.newAnalog");
                     const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
                     if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
                     const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');

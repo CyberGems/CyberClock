@@ -106,6 +106,18 @@ pub struct AppSettings {
     #[serde(default)]
     pub float_cal_opacity: Option<f64>,
     #[serde(default)]
+    pub float_cal_open: bool,
+    #[serde(default)]
+    pub float_cal_position: Option<(i32, i32)>,
+    #[serde(default)]
+    pub float_analog_open: bool,
+    #[serde(default)]
+    pub float_analog_position: Option<(i32, i32)>,
+    #[serde(default)]
+    pub float_analog_opacity: Option<f64>,
+    #[serde(default)]
+    pub float_analog_design: Option<u32>,
+    #[serde(default)]
     pub float_timer_opacity: Option<f64>,
     #[serde(default)]
     pub float_sw_opacity: Option<f64>,
@@ -214,6 +226,12 @@ impl Default for AppSettings {
             mini_opacity: 1.0,
             mini_bg_opacity: 1.0,
             float_cal_opacity: None,
+            float_cal_open: false,
+            float_cal_position: None,
+            float_analog_open: false,
+            float_analog_position: None,
+            float_analog_opacity: None,
+            float_analog_design: None,
             float_timer_opacity: None,
             float_sw_opacity: None,
             close_to_tray: None,

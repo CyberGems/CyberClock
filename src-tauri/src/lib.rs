@@ -3,7 +3,7 @@ use chrono::{Local, Timelike};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
 use tauri::tray::TrayIconBuilder;
 use tauri::{
@@ -106,6 +106,7 @@ static MINI_TARGET_WIDTH: AtomicU32 = AtomicU32::new(260);
 static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
 static FLOAT_SEQ: AtomicU32 = AtomicU32::new(0);
 static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
+static APP_EXITING: AtomicBool = AtomicBool::new(false);
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
@@ -324,7 +325,11 @@ fn reset_settings(app: AppHandle) -> AppSettings {
 
 #[tauri::command]
 fn close_window(window: WebviewWindow) {
-    let _ = window.close();
+    if window.label() == "main" {
+        exit_app(window.app_handle());
+    } else {
+        let _ = window.close();
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -337,6 +342,7 @@ fn close_window(window: WebviewWindow) {
 //   "Failed to unregister class Chrome_WidgetWin_0. Error = 1412"
 // (ERROR_CLASS_HAS_WINDOWS) in the terminal on exit.
 fn exit_app(app: &AppHandle) {
+    APP_EXITING.store(true, Ordering::SeqCst);
     for window in app.webview_windows().values() {
         let _ = window.close();
     }
@@ -372,6 +378,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     let kind = match kind {
         "timer" => "timer",
         "cal" | "calendar" => "cal",
+        "analog" => "analog",
         _ => "sw",
     };
     if float_window_count(app) >= MAX_FLOAT_WINDOWS {
@@ -397,11 +404,14 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     let (title, wide, tall) = match kind {
         "timer" => ("Timer · CyberClock", 280.0, 52.0),
         "cal" => ("Calendar · CyberClock", 286.0, 268.0),
+        "analog" => ("Analog Clock · CyberClock", 280.0, 280.0),
         _ => ("Stopwatch · CyberClock", 280.0, 52.0),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
     let url = if kind == "cal" {
         WebviewUrl::App("float/cal.html".into())
+    } else if kind == "analog" {
+        WebviewUrl::App("float/analog.html".into())
     } else {
         WebviewUrl::App("float/float.html".into())
     };
@@ -411,34 +421,62 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     // resolves through Url::join, which can mangle a "?kind=" query
     // into the file path and produce an unloadable webview.
     // Open the window on the monitor where the user invoked it (tray
-    // click), near the cursor and clamped inside that monitor's bounds.
+    // click), near the cursor and clamped inside that monitor's bounds,
+    // or restore saved position if available.
+    let mut custom_pos = false;
     let (mut pos_x, mut pos_y) = (200.0 + cascade, 200.0 + cascade);
-    if let Ok(cursor) = app.cursor_position() {
-        let mon = app
-            .monitor_from_point(cursor.x, cursor.y)
-            .ok()
-            .flatten()
-            .or_else(|| app.primary_monitor().ok().flatten());
-        if let Some(mon) = mon {
-            let sf = mon.scale_factor();
-            let work_area = mon.work_area();
-            let mpos = work_area.position;
-            let msize = work_area.size;
-            let win_w = wide * zoom * sf;
-            let win_h = tall * zoom * sf;
-            let margin = 12.0;
-            let min_x = mpos.x as f64 + margin;
-            let min_y = mpos.y as f64 + margin;
-            let max_x = (mpos.x as f64 + msize.width as f64 - win_w - margin).max(min_x);
-            let max_y = (mpos.y as f64 + msize.height as f64 - win_h - margin).max(min_y);
-            // Center on the cursor, with the cascade offset so repeated
-            // spawns do not stack exactly on top of each other.
-            let x = cursor.x - win_w / 2.0 + cascade;
-            let y = cursor.y - win_h / 2.0 + cascade;
-            pos_x = x.clamp(min_x, max_x) / sf;
-            pos_y = y.clamp(min_y, max_y) / sf;
+    if kind == "cal" {
+        if let Some((x, y)) = settings.float_cal_position {
+            pos_x = x as f64;
+            pos_y = y as f64;
+            custom_pos = true;
+        }
+    } else if kind == "analog" {
+        if let Some((x, y)) = settings.float_analog_position {
+            pos_x = x as f64;
+            pos_y = y as f64;
+            custom_pos = true;
         }
     }
+
+    if custom_pos {
+        if let Ok(monitors) = app.available_monitors() {
+            let in_bounds = monitors
+                .iter()
+                .any(|m| is_position_in_monitor(pos_x as i32, pos_y as i32, m));
+            if !in_bounds {
+                custom_pos = false;
+            }
+        }
+    }
+
+    if !custom_pos {
+        if let Ok(cursor) = app.cursor_position() {
+            let mon = app
+                .monitor_from_point(cursor.x, cursor.y)
+                .ok()
+                .flatten()
+                .or_else(|| app.primary_monitor().ok().flatten());
+            if let Some(mon) = mon {
+                let sf = mon.scale_factor();
+                let work_area = mon.work_area();
+                let mpos = work_area.position;
+                let msize = work_area.size;
+                let win_w = wide * zoom * sf;
+                let win_h = tall * zoom * sf;
+                let margin = 12.0;
+                let min_x = mpos.x as f64 + margin;
+                let min_y = mpos.y as f64 + margin;
+                let max_x = (mpos.x as f64 + msize.width as f64 - win_w - margin).max(min_x);
+                let max_y = (mpos.y as f64 + msize.height as f64 - win_h - margin).max(min_y);
+                let x = cursor.x - win_w / 2.0 + cascade;
+                let y = cursor.y - win_h / 2.0 + cascade;
+                pos_x = x.clamp(min_x, max_x) / sf;
+                pos_y = y.clamp(min_y, max_y) / sf;
+            }
+        }
+    }
+
     let builder = WebviewWindowBuilder::new(app, &label, url)
         .title(title)
         .inner_size(wide * zoom, tall * zoom)
@@ -456,6 +494,19 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         .focused(true);
     match builder.build() {
         Ok(win) => {
+            if kind == "cal" {
+                let app_handle = app.clone();
+                let _ = update_settings(&app_handle, |s| {
+                    s.float_cal_open = true;
+                    Ok(())
+                });
+            } else if kind == "analog" {
+                let app_handle = app.clone();
+                let _ = update_settings(&app_handle, |s| {
+                    s.float_analog_open = true;
+                    Ok(())
+                });
+            }
             remember_window_target(
                 &win,
                 (wide * zoom).round() as u32,
@@ -463,11 +514,55 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
             );
             let float_for_resize = win.clone();
             let float_label = win.label().to_string();
+            let app_for_event = app.clone();
+            let kind_for_event = kind.to_string();
             win.on_window_event(move |event| match event {
                 WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                     restore_target_size(&float_for_resize);
                 }
-                WindowEvent::Destroyed => forget_float_target(&float_label),
+                WindowEvent::Moved(pos) => {
+                    if kind_for_event == "cal" {
+                        let _ = update_settings(&app_for_event, |s| {
+                            s.float_cal_position = Some((pos.x, pos.y));
+                            Ok(())
+                        });
+                    } else if kind_for_event == "analog" {
+                        let _ = update_settings(&app_for_event, |s| {
+                            s.float_analog_position = Some((pos.x, pos.y));
+                            Ok(())
+                        });
+                    }
+                }
+                WindowEvent::Destroyed => {
+                    forget_float_target(&float_label);
+                    if !APP_EXITING.load(Ordering::SeqCst) {
+                        if kind_for_event == "cal" {
+                            let cal_count = app_for_event
+                                .webview_windows()
+                                .keys()
+                                .filter(|l| l.starts_with("float-cal-"))
+                                .count();
+                            if cal_count == 0 {
+                                let _ = update_settings(&app_for_event, |s| {
+                                    s.float_cal_open = false;
+                                    Ok(())
+                                });
+                            }
+                        } else if kind_for_event == "analog" {
+                            let analog_count = app_for_event
+                                .webview_windows()
+                                .keys()
+                                .filter(|l| l.starts_with("float-analog-"))
+                                .count();
+                            if analog_count == 0 {
+                                let _ = update_settings(&app_for_event, |s| {
+                                    s.float_analog_open = false;
+                                    Ok(())
+                                });
+                            }
+                        }
+                    }
+                }
                 _ => {}
             });
             info!("spawn_float: {} opened ({})", label, kind);
@@ -2000,6 +2095,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         "new_timer" => spawn_float_window(&app, "timer").is_some(),
         "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
+        "new_analog" => spawn_float_window(&app, "analog").is_some(),
         "close" => {
             exit_app(&app);
             true
@@ -2881,6 +2977,9 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         "new_calendar" | "new_calendar_tray" => {
             spawn_float_window(&app, "cal");
         }
+        "new_analog" | "new_analog_tray" => {
+            spawn_float_window(&app, "analog");
+        }
         "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
@@ -3100,6 +3199,14 @@ fn show_initial_window(app: &AppHandle) {
     }
 
     broadcast_active_window(app, if is_mini { "mini" } else { "main" });
+
+    // Restore floating windows if they were open before closing
+    if settings.float_cal_open {
+        spawn_float_window(app, "cal");
+    }
+    if settings.float_analog_open {
+        spawn_float_window(app, "analog");
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
