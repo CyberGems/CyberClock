@@ -343,4 +343,9 @@
             listenerRegistry.delete(channel);
         }
     };
+
+    // Ensure edge clamping and drag subclass are active for this window
+    if (HAS_TAURI) {
+        invoke("clamp_current_window_to_monitors").catch(() => {});
+    }
 })();

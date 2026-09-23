@@ -107,6 +107,7 @@ static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
 static FLOAT_SEQ: AtomicU32 = AtomicU32::new(0);
 static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
 static APP_EXITING: AtomicBool = AtomicBool::new(false);
+static EDGE_LIMITS_ENABLED: AtomicBool = AtomicBool::new(true);
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
@@ -273,6 +274,7 @@ fn get_settings(app: AppHandle) -> AppSettings {
 #[tauri::command]
 fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, String> {
     set_auto_update(settings.auto_update);
+    EDGE_LIMITS_ENABLED.store(settings.mini_edge_limits, Ordering::Release);
     let _ = persist(&app, &settings);
 
     // Reset next run for relax scheduler
@@ -291,6 +293,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
 fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSettings, String> {
     let merged = settings::patch_settings(&app, patch)?;
     set_auto_update(merged.auto_update);
+    EDGE_LIMITS_ENABLED.store(merged.mini_edge_limits, Ordering::Release);
 
     // Reset next run for relax scheduler
     let state = app.state::<AlarmState>();
@@ -315,6 +318,7 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
 fn reset_settings(app: AppHandle) -> AppSettings {
     let default_settings = AppSettings::default();
     set_auto_update(default_settings.auto_update);
+    EDGE_LIMITS_ENABLED.store(default_settings.mini_edge_limits, Ordering::Release);
     let _ = persist(&app, &default_settings);
 
     // Reset next run for relax scheduler
@@ -523,6 +527,8 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
                 (tall * zoom).round() as u32,
             );
             clamp_window_to_monitors(&win);
+            #[cfg(windows)]
+            attach_window_drag_subclass(&win);
             let float_for_resize = win.clone();
             let float_label = win.label().to_string();
             let app_for_event = app.clone();
@@ -1000,23 +1006,28 @@ fn clamp_window_to_monitors(window: &WebviewWindow) -> bool {
         _ => return false,
     };
 
-    let monitors = match window.available_monitors() {
-        Ok(m) if !m.is_empty() => m,
+    #[cfg(windows)]
+    let work_areas = get_all_work_areas();
+    #[cfg(not(windows))]
+    let work_areas: Vec<WinRect> = match window.available_monitors() {
+        Ok(monitors) if !monitors.is_empty() => monitors
+            .iter()
+            .map(|m| {
+                let wa = m.work_area();
+                WinRect {
+                    left: wa.position.x,
+                    top: wa.position.y,
+                    right: wa.position.x + wa.size.width as i32,
+                    bottom: wa.position.y + wa.size.height as i32,
+                }
+            })
+            .collect(),
         _ => return false,
     };
 
-    let work_areas: Vec<WinRect> = monitors
-        .iter()
-        .map(|m| {
-            let wa = m.work_area();
-            WinRect {
-                left: wa.position.x,
-                top: wa.position.y,
-                right: wa.position.x + wa.size.width as i32,
-                bottom: wa.position.y + wa.size.height as i32,
-            }
-        })
-        .collect();
+    if work_areas.is_empty() {
+        return false;
+    }
 
     let win_w = size.width as i32;
     let win_h = size.height as i32;
@@ -1030,6 +1041,24 @@ fn clamp_window_to_monitors(window: &WebviewWindow) -> bool {
         right: pos.x + win_w,
         bottom: pos.y + win_h,
     };
+
+    if clamp_rect_coords(&mut cur, &work_areas, edge_limits) {
+        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            cur.left, cur.top,
+        )));
+        return true;
+    }
+
+    false
+}
+
+fn clamp_rect_coords(cur: &mut WinRect, work_areas: &[WinRect], edge_limits: bool) -> bool {
+    let orig = *cur;
+    let win_w = cur.right - cur.left;
+    let win_h = cur.bottom - cur.top;
+    if win_w <= 0 || win_h <= 0 || work_areas.is_empty() {
+        return false;
+    }
 
     // Up to 2 iterations for multi-axis stability
     for _ in 0..2 {
@@ -1143,18 +1172,103 @@ fn clamp_window_to_monitors(window: &WebviewWindow) -> bool {
         }
     }
 
-    if cur.left != pos.x || cur.top != pos.y {
-        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-            cur.left, cur.top,
-        )));
-        return true;
+    cur.left != orig.left || cur.top != orig.top
+}
+
+#[cfg(windows)]
+unsafe extern "system" fn enum_monitors_callback(
+    hmonitor: windows_sys::Win32::Graphics::Gdi::HMONITOR,
+    _hdc: windows_sys::Win32::Graphics::Gdi::HDC,
+    _rect: *mut windows_sys::Win32::Foundation::RECT,
+    lparam: windows_sys::Win32::Foundation::LPARAM,
+) -> i32 {
+    use windows_sys::Win32::Graphics::Gdi::{GetMonitorInfoW, MONITORINFO};
+    let list = &mut *(lparam as *mut Vec<WinRect>);
+    let mut info = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    if GetMonitorInfoW(hmonitor, &mut info) != 0 {
+        list.push(WinRect {
+            left: info.rcWork.left,
+            top: info.rcWork.top,
+            right: info.rcWork.right,
+            bottom: info.rcWork.bottom,
+        });
+    }
+    1
+}
+
+#[cfg(windows)]
+fn get_all_work_areas() -> Vec<WinRect> {
+    use windows_sys::Win32::Graphics::Gdi::EnumDisplayMonitors;
+    let mut list = Vec::new();
+    unsafe {
+        EnumDisplayMonitors(
+            std::ptr::null_mut(),
+            std::ptr::null(),
+            Some(enum_monitors_callback),
+            &mut list as *mut _ as isize,
+        );
+    }
+    list
+}
+
+#[cfg(windows)]
+unsafe extern "system" fn window_drag_subclass_proc(
+    hwnd: windows_sys::Win32::Foundation::HWND,
+    msg: u32,
+    wparam: windows_sys::Win32::Foundation::WPARAM,
+    lparam: windows_sys::Win32::Foundation::LPARAM,
+    uid_subclass: usize,
+    _ref_data: usize,
+) -> windows_sys::Win32::Foundation::LRESULT {
+    use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{WM_MOVING, WM_NCDESTROY};
+
+    if msg == WM_MOVING {
+        if EDGE_LIMITS_ENABLED.load(Ordering::Acquire) {
+            let rect = &mut *(lparam as *mut windows_sys::Win32::Foundation::RECT);
+            let work_areas = get_all_work_areas();
+            if !work_areas.is_empty() {
+                let mut cur = WinRect {
+                    left: rect.left,
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                };
+                if clamp_rect_coords(&mut cur, &work_areas, true) {
+                    rect.left = cur.left;
+                    rect.top = cur.top;
+                    rect.right = cur.right;
+                    rect.bottom = cur.bottom;
+                }
+            }
+        }
+        DefSubclassProc(hwnd, msg, wparam, lparam);
+        return 1;
     }
 
-    false
+    if msg == WM_NCDESTROY {
+        RemoveWindowSubclass(hwnd, Some(window_drag_subclass_proc), uid_subclass);
+    }
+    DefSubclassProc(hwnd, msg, wparam, lparam)
+}
+
+#[cfg(windows)]
+fn attach_window_drag_subclass(window: &WebviewWindow) {
+    if let Ok(hwnd) = window.hwnd() {
+        use windows_sys::Win32::UI::Shell::SetWindowSubclass;
+        unsafe {
+            SetWindowSubclass(hwnd.0 as _, Some(window_drag_subclass_proc), 0xCC01, 0);
+        }
+    }
 }
 
 #[tauri::command]
 fn clamp_current_window_to_monitors(window: WebviewWindow) -> bool {
+    #[cfg(windows)]
+    attach_window_drag_subclass(&window);
     clamp_window_to_monitors(&window)
 }
 
@@ -3426,6 +3540,8 @@ fn show_initial_window(app: &AppHandle) {
             }
         }
         clamp_window_to_monitors(&mini);
+        #[cfg(windows)]
+        attach_window_drag_subclass(&mini);
         let _ = mini.show();
         // Re-assert the taskbar DeleteTab: at a Run-key boot start the
         // taskbar may not exist yet, and the one-shot registration tao
@@ -3547,6 +3663,8 @@ pub fn run() {
             // Webview2 to apply incorrect scaling (progressive ~20% shrink).
             // Re-apply the mini target only when the physical size is wrong.
             if let Some(mini) = app.get_webview_window("mini") {
+                #[cfg(windows)]
+                attach_window_drag_subclass(&mini);
                 let mini_for_resize = mini.clone();
                 let app_for_resize = app.handle().clone();
                 mini.on_window_event(move |event| match event {
@@ -3590,6 +3708,7 @@ pub fn run() {
 
             // Load settings and show initial window
             let settings = load_settings(app.handle());
+            EDGE_LIMITS_ENABLED.store(settings.mini_edge_limits, Ordering::Release);
             init_updater(app.handle(), settings.auto_update);
             show_initial_window(app.handle());
 

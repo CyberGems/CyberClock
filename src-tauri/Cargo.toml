@@ -51,7 +51,13 @@ tauri-plugin-single-instance = "2"
 # taskbar). Already present in the dependency tree via Tauri's plugins;
 # this only narrows the enabled feature set for direct use.
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Globalization"] }
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Globalization",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+] }
 
 [profile.release]
 strip = true
