@@ -24,8 +24,9 @@
     padding-right: 16px;
     gap: 14px;
 }
-.float-shell[data-kind="sw"] .time-block {
-    overflow: visible;
+.float-shell .time-block {
+    position: relative;
+    overflow: hidden;
 }
 .float-shell[data-kind="sw"] .controls {
     gap: 6px;
@@ -59,9 +60,9 @@
    stack, matching the clock's right-side control language. */
 .float-window-sep {
     width: 1px;
-    height: 28px;
+    height: 24px;
     flex: 0 0 1px;
-    margin: 0 3px;
+    margin: 0 4px;
     background: linear-gradient(
         to bottom,
         transparent,
@@ -72,13 +73,18 @@
 .float-window-controls {
     display: flex;
     flex: 0 0 auto;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 4px;
 }
 .float-window-controls .ctl-btn {
     margin: 0;
+}
+.float-window-controls #btn-close:hover {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.16);
+    box-shadow: 0 0 8px rgba(255, 82, 82, 0.35);
 }
 
 /* Skin 4 uses a light glass face. Keep float controls readable against
@@ -287,3 +293,13 @@
 
 /* The timer's idle preset row is included in the same shell and its
    extra height is provided by float.js. */
+
+/* While floating timer or stopwatch is in idle/paused state, freeze ambient animations */
+body.float-idle .float-shell,
+body.float-idle .float-shell::before,
+body.float-idle .float-shell::after,
+body.float-idle .float-shell *,
+body.float-idle .float-shell *::before,
+body.float-idle .float-shell *::after {
+    animation-play-state: paused !important;
+}

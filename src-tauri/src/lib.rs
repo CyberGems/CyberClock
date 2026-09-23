@@ -416,10 +416,10 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     };
     // Compact size per float kind
     let (title, wide, tall) = match kind {
-        "timer" => ("Timer · CyberClock", 280.0, 52.0),
+        "timer" => ("Timer · CyberClock", 286.0, 52.0),
         "cal" => ("Calendar · CyberClock", 286.0, 268.0),
         "analog" => ("Analog Clock · CyberClock", 316.0, 316.0),
-        _ => ("Stopwatch · CyberClock", 280.0, 52.0),
+        _ => ("Stopwatch · CyberClock", 286.0, 52.0),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
     let url = if kind == "cal" {
@@ -1333,29 +1333,21 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
     let settings = load_settings(app);
     let is_mini = settings.window_mode != "full";
 
-    // 1. Center the mini clock if in mini mode
+    // Categorize open windows into modular dashboard columns:
+    // Column 1 (Bars): Mini clock (if active) + Timers & Stopwatches
+    // Column 2 (Calendar): Floating Calendar
+    // Column 3 (Analog): Floating Analog Clock
+    let mut bars: Vec<(WebviewWindow, i32, i32)> = Vec::new();
+    let mut cals: Vec<(WebviewWindow, i32, i32)> = Vec::new();
+    let mut analogs: Vec<(WebviewWindow, i32, i32)> = Vec::new();
+
     if is_mini {
         if let Some(mini) = app.get_webview_window("mini") {
             let size = mini.outer_size().unwrap_or(tauri::PhysicalSize::new(260, 48));
-            let mw = size.width as i32;
-            let mh = size.height as i32;
-            let cx = wa.left + (wa_w - mw).max(0) / 2;
-            let cy = wa.top + (wa_h - mh).max(0) / 2;
-
-            let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(cx, cy)));
-            let _ = mini.unminimize();
-            let _ = mini.show();
-            refresh_taskbar_tab(&mini);
-            clamp_window_to_monitors(&mini);
-
-            let _ = update_settings(app, |s| {
-                s.mini_position = Some((cx, cy));
-                Ok(())
-            });
+            bars.push((mini, size.width as i32, size.height as i32));
         }
     }
 
-    // 2. Center and arrange all open floating widgets
     let mut float_windows = Vec::new();
     for (label, win) in app.webview_windows() {
         if label.starts_with("float-") && win.is_visible().unwrap_or(false) {
@@ -1364,35 +1356,97 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
     }
     float_windows.sort_by(|a, b| a.label().cmp(b.label()));
 
-    for (i, win) in float_windows.into_iter().enumerate() {
-        let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(280, 240));
-        let fw = size.width as i32;
-        let fh = size.height as i32;
-        let base_x = wa.left + (wa_w - fw).max(0) / 2;
-        let base_y = wa.top + (wa_h - fh).max(0) / 2;
-
-        let stagger = (i as i32) * 32;
-        let y_offset = if is_mini { 54 + stagger } else { stagger };
-        let fx = base_x + stagger;
-        let fy = base_y + y_offset;
-
-        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(fx, fy)));
-        let _ = win.unminimize();
-        let _ = win.show();
-        clamp_window_to_monitors(&win);
-
+    for win in float_windows {
         let label = win.label().to_string();
         if label.starts_with("float-cal") {
-            let _ = update_settings(app, |s| {
-                s.float_cal_position = Some((fx, fy));
-                Ok(())
-            });
+            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 268));
+            cals.push((win, size.width as i32, size.height as i32));
         } else if label.starts_with("float-analog") {
-            let _ = update_settings(app, |s| {
-                s.float_analog_position = Some((fx, fy));
-                Ok(())
-            });
+            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(316, 316));
+            analogs.push((win, size.width as i32, size.height as i32));
+        } else {
+            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 52));
+            bars.push((win, size.width as i32, size.height as i32));
         }
+    }
+
+    let mut active_cols: Vec<Vec<(WebviewWindow, i32, i32)>> = Vec::new();
+    if !bars.is_empty() {
+        active_cols.push(bars);
+    }
+    if !cals.is_empty() {
+        active_cols.push(cals);
+    }
+    if !analogs.is_empty() {
+        active_cols.push(analogs);
+    }
+
+    if active_cols.is_empty() {
+        return;
+    }
+
+    let col_gap = 16;
+    let row_gap = 10;
+
+    let total_width: i32 = active_cols
+        .iter()
+        .map(|col| col.iter().map(|(_, w, _)| *w).max().unwrap_or(0))
+        .sum::<i32>()
+        + (active_cols.len().saturating_sub(1) as i32) * col_gap;
+
+    let max_height: i32 = active_cols
+        .iter()
+        .map(|col| {
+            let heights_sum: i32 = col.iter().map(|(_, _, h)| *h).sum();
+            let gaps: i32 = (col.len().saturating_sub(1) as i32) * row_gap;
+            heights_sum + gaps
+        })
+        .max()
+        .unwrap_or(0);
+
+    let start_x = wa.left + ((wa_w - total_width).max(0)) / 2;
+    let group_top_y = wa.top + ((wa_h - max_height).max(0)) / 2;
+
+    let mut current_col_x = start_x;
+    for col in active_cols {
+        let col_w = col.iter().map(|(_, w, _)| *w).max().unwrap_or(0);
+        let col_h: i32 = col.iter().map(|(_, _, h)| *h).sum::<i32>()
+            + (col.len().saturating_sub(1) as i32) * row_gap;
+        let col_top_y = group_top_y + (max_height - col_h).max(0) / 2;
+
+        let mut curr_y = col_top_y;
+        for (win, w, h) in col {
+            let win_x = current_col_x + (col_w - w).max(0) / 2;
+            let win_y = curr_y;
+
+            let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(win_x, win_y)));
+            let _ = win.unminimize();
+            let _ = win.show();
+            clamp_window_to_monitors(&win);
+
+            let label = win.label().to_string();
+            if label == "mini" {
+                refresh_taskbar_tab(&win);
+                let _ = update_settings(app, |s| {
+                    s.mini_position = Some((win_x, win_y));
+                    Ok(())
+                });
+            } else if label.starts_with("float-cal") {
+                let _ = update_settings(app, |s| {
+                    s.float_cal_position = Some((win_x, win_y));
+                    Ok(())
+                });
+            } else if label.starts_with("float-analog") {
+                let _ = update_settings(app, |s| {
+                    s.float_analog_position = Some((win_x, win_y));
+                    Ok(())
+                });
+            }
+
+            curr_y += h + row_gap;
+        }
+
+        current_col_x += col_w + col_gap;
     }
 
     let _ = app.emit("settings:updated", load_settings(app));

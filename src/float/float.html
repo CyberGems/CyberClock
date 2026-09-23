@@ -22,22 +22,28 @@
             <div class="time-block">
                 <div id="mini-time">00:00.0</div>
                 <div id="mini-date">STOPWATCH</div>
+                <div class="mini-action-ticker" id="mini-action-ticker" aria-hidden="true">
+                    <div class="ticker-badge">
+                        <span class="ticker-ico" id="ticker-ico"></span>
+                        <span class="ticker-text" id="ticker-text"></span>
+                    </div>
+                </div>
             </div>
             <div class="sep"></div>
             <div class="controls">
-                <button class="ctl-btn" id="btn-presets" title="Pick minutes" hidden>
+                <button class="ctl-btn" id="btn-presets" aria-label="Pick minutes" hidden>
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>
                     </svg>
                 </button>
-                <button class="ctl-btn" id="btn-start" title="Start">
+                <button class="ctl-btn" id="btn-start" aria-label="Start">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M7 4.5v15l13-7.5Z"/>
                     </svg>
                 </button>
-                <button class="ctl-btn" id="btn-reset" title="Reset">
+                <button class="ctl-btn" id="btn-reset" aria-label="Reset">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
@@ -45,13 +51,13 @@
                 </button>
                 <span class="float-window-sep" aria-hidden="true"></span>
                 <span class="float-window-controls">
-                    <button class="ctl-btn" id="btn-min" title="Minimize">
+                    <button class="ctl-btn" id="btn-min" aria-label="Minimize">
                         <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M5 12h14"/>
                         </svg>
                     </button>
-                    <button class="ctl-btn" id="btn-close" title="Close">
+                    <button class="ctl-btn" id="btn-close" aria-label="Close">
                         <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
@@ -69,7 +75,7 @@
             <div class="float-prog" id="float-prog" hidden><div class="float-prog-fill" id="float-prog-fill"></div></div>
             <div class="float-done" id="float-done" hidden>
                 <span id="float-done-txt">TIME'S UP!</span>
-                <button class="ctl-btn" id="btn-dismiss" title="Dismiss">
+                <button class="ctl-btn" id="btn-dismiss" aria-label="Dismiss">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M20 6 9 17l-5-5"/>

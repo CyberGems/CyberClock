@@ -81,6 +81,10 @@
     const ICO_PAUSE = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14M16 5v14"/></svg>';
     const ICO_TIMER = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>';
     const ICO_BACK = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+    const ICO_RESET = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
+    const ICO_MIN = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
+    const ICO_CLOSE = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
+    const ICO_DISMISS = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
     /* Preset chooser state: an idle timer adds a second row for the
        quick-pick panel ("+" button) inside the same window shell. */
@@ -92,7 +96,7 @@
         b.hidden = !(KIND === "timer" && !tRunning);
         if (!b.hidden) {
             b.innerHTML = choosing ? ICO_BACK : ICO_TIMER;
-            b.title = window.ccI18n.t(choosing ? "float.back" : "float.pickMinutes");
+            b.removeAttribute("title");
         }
     }
 
@@ -117,7 +121,7 @@
         const b = document.getElementById("btn-start");
         if (!b) return;
         b.innerHTML = running ? ICO_PAUSE : ICO_PLAY;
-        b.title = running ? window.ccI18n.t("float.pause") : window.ccI18n.t("float.start");
+        b.removeAttribute("title");
     }
 
     let swRunning = false, swStart = 0, swPaused = 0, swElapsed = 0, swRaf = null, swTitleSec = -1;
@@ -142,6 +146,14 @@
 
     function swLoop() { swPaint(); if (swRunning) swRaf = requestAnimationFrame(swLoop); }
 
+    function syncIdleState() {
+        const running = KIND === "sw" ? swRunning : tRunning;
+        document.body.classList.toggle("float-idle", !running);
+        document.body.classList.toggle("float-running", running);
+        const sh = shellEl();
+        if (sh) sh.classList.toggle("float-idle", !running);
+    }
+
     function swToggle() {
         if (swRunning) {
             swElapsed = performance.now() - swStart + swPaused;
@@ -154,6 +166,7 @@
         }
         shellEl().classList.toggle("float-running", swRunning);
         setStartIcon(swRunning);
+        syncIdleState();
     }
 
     function swReset() {
@@ -163,6 +176,7 @@
         shellEl().classList.remove("float-running");
         setStartIcon(false);
         swPaint();
+        syncIdleState();
         document.title = window.ccI18n.t("float.stopwatchTitle");
     }
 
@@ -231,6 +245,7 @@
         setStartIcon(true);
         syncSize(true);
         tPaint();
+        syncIdleState();
     }
 
     function tPause() {
@@ -248,6 +263,7 @@
         shellEl().classList.remove("float-running");
         setStartIcon(false);
         tPaint();
+        syncIdleState();
     }
 
     function tToggle() {
@@ -273,6 +289,7 @@
         setStartIcon(false);
         syncSize(true);
         tPaint();
+        syncIdleState();
         document.title = window.ccI18n.t("float.timerTitle");
     }
 
@@ -285,6 +302,7 @@
         setStartIcon(false);
         syncPresetBtn();
         tPaint();
+        syncIdleState();
         const txt = document.getElementById("float-done-txt");
         if (txt) txt.textContent = window.ccI18n.t("float.timesUp");
         document.getElementById("float-done").hidden = false;
@@ -300,10 +318,6 @@
         subEl().textContent = KIND === "timer"
             ? window.ccI18n.t("float.timerSub")
             : window.ccI18n.t("float.stopwatchSub");
-        document.getElementById("btn-min").title = window.ccI18n.t("float.minimize");
-        document.getElementById("btn-close").title = window.ccI18n.t("float.close");
-        document.getElementById("btn-reset").title = window.ccI18n.t("float.reset");
-        document.getElementById("btn-dismiss").title = window.ccI18n.t("float.dismiss");
         syncPresetBtn();
         setStartIcon(KIND === "sw" ? swRunning : tRunning);
         if (KIND === "sw" && swElapsed === 0 && !swRunning) {
@@ -340,23 +354,104 @@
         applyTexts();
         if (KIND === "sw") swPaint(); else tPaint();
         syncSize(true);
+        syncIdleState();
     }
-    document.getElementById("btn-start").addEventListener("click", () => {
-        if (KIND === "sw") swToggle(); else tToggle();
-    });
-    document.getElementById("btn-reset").addEventListener("click", () => {
-        if (KIND === "sw") swReset(); else tReset();
-    });
-    document.getElementById("btn-min").addEventListener("click", () => {
-        if (window.cc && window.cc.minimizeWindow) window.cc.minimizeWindow();
-    });
-    document.getElementById("btn-close").addEventListener("click", () => {
-        if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
-    });
-    document.getElementById("btn-dismiss").addEventListener("click", () => tReset());
-    document.getElementById("btn-presets").addEventListener("click", () => {
-        if (choosing) closePresets(); else openPresets();
-    });
+
+    // ═══════════════════════════════════════════════════════
+    // ACTION TICKER (Inline Button Tooltips)
+    // ═══════════════════════════════════════════════════════
+    const tickerIco = document.getElementById("ticker-ico");
+    const tickerText = document.getElementById("ticker-text");
+
+    function showActionTicker(actionKey, iconHtml) {
+        const sh = shellEl();
+        if (!sh || !tickerText) return;
+        tickerText.textContent = window.ccI18n ? window.ccI18n.t(actionKey) : actionKey;
+        if (tickerIco) tickerIco.innerHTML = iconHtml || "";
+        sh.classList.add("has-action-ticker");
+    }
+
+    function hideActionTicker() {
+        const sh = shellEl();
+        if (!sh) return;
+        sh.classList.remove("has-action-ticker");
+    }
+
+    const btnStart = document.getElementById("btn-start");
+    const btnReset = document.getElementById("btn-reset");
+    const btnPresets = document.getElementById("btn-presets");
+    const btnMin = document.getElementById("btn-min");
+    const btnClose = document.getElementById("btn-close");
+    const btnDismiss = document.getElementById("btn-dismiss");
+
+    function getStartTickerState() {
+        const running = KIND === "sw" ? swRunning : tRunning;
+        return {
+            key: running ? "float.pause" : "float.start",
+            ico: running ? ICO_PAUSE : ICO_PLAY
+        };
+    }
+
+    if (btnStart) {
+        btnStart.addEventListener("click", () => {
+            if (KIND === "sw") swToggle(); else tToggle();
+            const st = getStartTickerState();
+            showActionTicker(st.key, st.ico);
+        });
+        btnStart.addEventListener("mouseenter", () => {
+            const st = getStartTickerState();
+            showActionTicker(st.key, st.ico);
+        });
+        btnStart.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnReset) {
+        btnReset.addEventListener("click", () => {
+            if (KIND === "sw") swReset(); else tReset();
+            hideActionTicker();
+        });
+        btnReset.addEventListener("mouseenter", () => showActionTicker("float.reset", ICO_RESET));
+        btnReset.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnMin) {
+        btnMin.addEventListener("click", () => {
+            hideActionTicker();
+            if (window.cc && window.cc.minimizeWindow) window.cc.minimizeWindow();
+        });
+        btnMin.addEventListener("mouseenter", () => showActionTicker("float.minimize", ICO_MIN));
+        btnMin.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnClose) {
+        btnClose.addEventListener("click", () => {
+            hideActionTicker();
+            if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
+        });
+        btnClose.addEventListener("mouseenter", () => showActionTicker("float.close", ICO_CLOSE));
+        btnClose.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnDismiss) {
+        btnDismiss.addEventListener("click", () => {
+            hideActionTicker();
+            tReset();
+        });
+        btnDismiss.addEventListener("mouseenter", () => showActionTicker("float.dismiss", ICO_DISMISS));
+        btnDismiss.addEventListener("mouseleave", hideActionTicker);
+    }
+
+    if (btnPresets) {
+        btnPresets.addEventListener("click", () => {
+            if (choosing) closePresets(); else openPresets();
+            showActionTicker(choosing ? "float.back" : "float.pickMinutes", choosing ? ICO_BACK : ICO_TIMER);
+        });
+        btnPresets.addEventListener("mouseenter", () => {
+            showActionTicker(choosing ? "float.back" : "float.pickMinutes", choosing ? ICO_BACK : ICO_TIMER);
+        });
+        btnPresets.addEventListener("mouseleave", hideActionTicker);
+    }
+
     const presets = document.querySelectorAll(".float-preset");
     for (const b of presets) b.addEventListener("click", () => tAdd(Number(b.dataset.s)));
     document.getElementById("float-presets").addEventListener("click", (e) => {
