@@ -298,6 +298,16 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
 
     apply_always_on_top(&app, merged.always_on_top);
     apply_mini_click_through(&app, merged.mini_click_through);
+    if merged.mini_edge_limits {
+        if let Some(mini) = app.get_webview_window("mini") {
+            clamp_window_to_monitors(&mini);
+        }
+        for (label, win) in app.webview_windows() {
+            if label.starts_with("float-") {
+                clamp_window_to_monitors(&win);
+            }
+        }
+    }
     Ok(merged)
 }
 
@@ -512,6 +522,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
                 (wide * zoom).round() as u32,
                 (tall * zoom).round() as u32,
             );
+            clamp_window_to_monitors(&win);
             let float_for_resize = win.clone();
             let float_label = win.label().to_string();
             let app_for_event = app.clone();
@@ -601,6 +612,7 @@ fn move_window(window: WebviewWindow, x: i32, y: i32) {
     let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
         x, y,
     )));
+    clamp_window_to_monitors(&window);
 }
 
 #[tauri::command]
@@ -920,6 +932,230 @@ fn find_monitor_for_window(window: &WebviewWindow) -> Option<(usize, tauri::Moni
     }
 
     None
+}
+
+#[derive(Clone, Copy, Debug)]
+struct WinRect {
+    left: i32,
+    top: i32,
+    right: i32,
+    bottom: i32,
+}
+
+#[allow(dead_code)]
+impl WinRect {
+    fn width(&self) -> i32 {
+        self.right - self.left
+    }
+    fn height(&self) -> i32 {
+        self.bottom - self.top
+    }
+    fn overlaps_vertical(&self, top: i32, bottom: i32) -> bool {
+        self.top < bottom && self.bottom > top
+    }
+    fn overlaps_horizontal(&self, left: i32, right: i32) -> bool {
+        self.left < right && self.right > left
+    }
+    fn intersection_area(&self, other: &WinRect) -> i64 {
+        let ix0 = self.left.max(other.left);
+        let ix1 = self.right.min(other.right);
+        let iy0 = self.top.max(other.top);
+        let iy1 = self.bottom.min(other.bottom);
+        if ix1 > ix0 && iy1 > iy0 {
+            (ix1 - ix0) as i64 * (iy1 - iy0) as i64
+        } else {
+            0
+        }
+    }
+    fn distance_squared_to_point(&self, px: i32, py: i32) -> i64 {
+        let dx = if px < self.left {
+            self.left - px
+        } else if px > self.right {
+            px - self.right
+        } else {
+            0
+        };
+        let dy = if py < self.top {
+            self.top - py
+        } else if py > self.bottom {
+            py - self.bottom
+        } else {
+            0
+        };
+        (dx as i64) * (dx as i64) + (dy as i64) * (dy as i64)
+    }
+}
+
+/// Clamp a floating window (mini clock, timer, calendar, analog clock) to the
+/// multi-monitor work areas. Across adjacent monitors, windows transition freely.
+/// At edges where there is no adjacent monitor, window edges are clamped so they
+/// cannot be dragged off-screen or lost in the void.
+fn clamp_window_to_monitors(window: &WebviewWindow) -> bool {
+    let app = window.app_handle();
+    let settings = load_settings(app);
+    let edge_limits = settings.mini_edge_limits;
+
+    let (pos, size) = match (window.outer_position(), window.outer_size()) {
+        (Ok(p), Ok(s)) => (p, s),
+        _ => return false,
+    };
+
+    let monitors = match window.available_monitors() {
+        Ok(m) if !m.is_empty() => m,
+        _ => return false,
+    };
+
+    let work_areas: Vec<WinRect> = monitors
+        .iter()
+        .map(|m| {
+            let wa = m.work_area();
+            WinRect {
+                left: wa.position.x,
+                top: wa.position.y,
+                right: wa.position.x + wa.size.width as i32,
+                bottom: wa.position.y + wa.size.height as i32,
+            }
+        })
+        .collect();
+
+    let win_w = size.width as i32;
+    let win_h = size.height as i32;
+    if win_w <= 0 || win_h <= 0 {
+        return false;
+    }
+
+    let mut cur = WinRect {
+        left: pos.x,
+        top: pos.y,
+        right: pos.x + win_w,
+        bottom: pos.y + win_h,
+    };
+
+    // Up to 2 iterations for multi-axis stability
+    for _ in 0..2 {
+        let center_x = cur.left + win_w / 2;
+        let center_y = cur.top + win_h / 2;
+
+        // Find primary monitor: contains center, highest overlap, or nearest
+        let primary_idx = {
+            if let Some(idx) = work_areas.iter().position(|r| {
+                center_x >= r.left && center_x < r.right && center_y >= r.top && center_y < r.bottom
+            }) {
+                idx
+            } else {
+                let (best_idx, best_overlap) = work_areas
+                    .iter()
+                    .enumerate()
+                    .map(|(i, r)| (i, r.intersection_area(&cur)))
+                    .max_by_key(|&(_, a)| a)
+                    .unwrap_or((0, 0));
+                if best_overlap > 0 {
+                    best_idx
+                } else {
+                    work_areas
+                        .iter()
+                        .enumerate()
+                        .min_by_key(|(_, r)| r.distance_squared_to_point(center_x, center_y))
+                        .map(|(i, _)| i)
+                        .unwrap_or(0)
+                }
+            }
+        };
+
+        let primary = work_areas[primary_idx];
+
+        if !edge_limits {
+            // Safety fallback: if 100% disconnected from all screens, snap to nearest
+            let total_overlap: i64 = work_areas.iter().map(|r| r.intersection_area(&cur)).sum();
+            if total_overlap == 0 {
+                let target_x = cur.left.clamp(primary.left, (primary.right - win_w).max(primary.left));
+                let target_y = cur.top.clamp(primary.top, (primary.bottom - win_h).max(primary.top));
+                cur.left = target_x;
+                cur.right = target_x + win_w;
+                cur.top = target_y;
+                cur.bottom = target_y + win_h;
+            }
+            break;
+        }
+
+        // Left boundary: if cur.left < primary.left, check if another monitor is adjacent to the left
+        // spanning the window's vertical range [cur.top, cur.bottom].
+        if cur.left < primary.left {
+            let has_left_monitor = work_areas.iter().enumerate().any(|(i, r)| {
+                i != primary_idx
+                    && r.right >= primary.left - 16
+                    && r.left < primary.left
+                    && r.overlaps_vertical(cur.top, cur.bottom)
+            });
+            if !has_left_monitor {
+                let shift = primary.left - cur.left;
+                cur.left += shift;
+                cur.right += shift;
+            }
+        }
+
+        // Right boundary: if cur.right > primary.right, check if another monitor is adjacent to the right
+        // spanning the window's vertical range [cur.top, cur.bottom].
+        if cur.right > primary.right {
+            let has_right_monitor = work_areas.iter().enumerate().any(|(i, r)| {
+                i != primary_idx
+                    && r.left <= primary.right + 16
+                    && r.right > primary.right
+                    && r.overlaps_vertical(cur.top, cur.bottom)
+            });
+            if !has_right_monitor {
+                let shift = cur.right - primary.right;
+                cur.left -= shift;
+                cur.right -= shift;
+            }
+        }
+
+        // Top boundary: if cur.top < primary.top, check if another monitor is adjacent above
+        // spanning the window's horizontal range [cur.left, cur.right].
+        if cur.top < primary.top {
+            let has_top_monitor = work_areas.iter().enumerate().any(|(i, r)| {
+                i != primary_idx
+                    && r.bottom >= primary.top - 16
+                    && r.top < primary.top
+                    && r.overlaps_horizontal(cur.left, cur.right)
+            });
+            if !has_top_monitor {
+                let shift = primary.top - cur.top;
+                cur.top += shift;
+                cur.bottom += shift;
+            }
+        }
+
+        // Bottom boundary: if cur.bottom > primary.bottom, check if another monitor is adjacent below
+        // spanning the window's horizontal range [cur.left, cur.right].
+        if cur.bottom > primary.bottom {
+            let has_bottom_monitor = work_areas.iter().enumerate().any(|(i, r)| {
+                i != primary_idx
+                    && r.top <= primary.bottom + 16
+                    && r.bottom > primary.bottom
+                    && r.overlaps_horizontal(cur.left, cur.right)
+            });
+            if !has_bottom_monitor {
+                let shift = cur.bottom - primary.bottom;
+                cur.top -= shift;
+                cur.bottom -= shift;
+            }
+        }
+    }
+
+    if cur.left != pos.x || cur.top != pos.y {
+        let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            cur.left, cur.top,
+        )));
+        return true;
+    }
+
+    false
+}
+
+#[tauri::command]
+fn clamp_current_window_to_monitors(window: WebviewWindow) -> bool {
+    clamp_window_to_monitors(&window)
 }
 
 /// The monitor that currently holds the mouse pointer: the "active"
@@ -1835,7 +2071,7 @@ fn switch_to_mini_mode(app: AppHandle) {
                 )));
             }
         }
-
+        clamp_window_to_monitors(&mini);
         let _ = mini.show();
         let _ = mini.set_focus();
         // Hide/show can drop the ignore-cursor flag on Windows — re-apply
@@ -2260,6 +2496,7 @@ fn reset_mini_position(app: AppHandle) {
 #[tauri::command]
 fn save_mini_position(app: AppHandle) -> bool {
     if let Some(mini) = app.get_webview_window("mini") {
+        clamp_window_to_monitors(&mini);
         if let Ok(pos) = mini.outer_position() {
             let mut settings = load_settings(&app);
             settings.mini_position = Some((pos.x, pos.y));
@@ -3188,6 +3425,7 @@ fn show_initial_window(app: &AppHandle) {
                 }
             }
         }
+        clamp_window_to_monitors(&mini);
         let _ = mini.show();
         // Re-assert the taskbar DeleteTab: at a Run-key boot start the
         // taskbar may not exist yet, and the one-shot registration tao
@@ -3451,7 +3689,8 @@ pub fn run() {
             remove_time_sync_task,
             sync_system_clock,
             set_hotkey,
-            open_external_url
+            open_external_url,
+            clamp_current_window_to_monitors
         ]);
 
     // Build the app without starting the event loop, so the settings

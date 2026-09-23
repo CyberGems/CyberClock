@@ -111,8 +111,17 @@
             try {
                 const currentWindow = window.__TAURI__.window.getCurrentWindow();
                 await currentWindow.startDragging();
+                await invoke("clamp_current_window_to_monitors");
             } catch (err) {
                 console.warn('startDragging failed:', err);
+            }
+        },
+        clampToMonitors: async () => {
+            if (!HAS_TAURI) return;
+            try {
+                await invoke("clamp_current_window_to_monitors");
+            } catch (err) {
+                console.warn('clampToMonitors failed:', err);
             }
         },
 

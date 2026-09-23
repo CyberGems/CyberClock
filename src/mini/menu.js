@@ -187,6 +187,8 @@
                     if (solarLbl) solarLbl.textContent = window.ccI18n.t("settings.mini.solarReal");
                     const animLbl = document.querySelector("#ctx-anim .switch-lbl");
                     if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.noAnimations");
+                    const edgeLimitsLbl = document.querySelector("#ctx-edge-limits .switch-lbl");
+                    if (edgeLimitsLbl) edgeLimitsLbl.textContent = window.ccI18n.t("settings.mini.edgeLimits");
                     const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
                     if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
                     const timerLbl = document.querySelector('.ctx-item[data-action="new_timer"] .label');
@@ -270,6 +272,10 @@
                 // Disable Animations
                 const toggleAnim = document.getElementById("toggle-anim");
                 if (toggleAnim) toggleAnim.classList.toggle("on", cfg.miniNoAnimations || false);
+
+                // Edge Boundaries
+                const toggleEdgeLimits = document.getElementById("toggle-edge-limits");
+                if (toggleEdgeLimits) toggleEdgeLimits.classList.toggle("on", cfg.miniEdgeLimits !== false);
 
                 // AOT
                 updateAotState(cfg.alwaysOnTop || false);
@@ -448,6 +454,22 @@
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniNoAnimations: on });
+            }
+            if (window.cc && window.cc.closeMenuPopup) {
+                setTimeout(() => window.cc.closeMenuPopup(), 200);
+            }
+        });
+    }
+
+    // Edge Boundaries toggle handler
+    const edgeLimitsRow = document.getElementById("ctx-edge-limits");
+    if (edgeLimitsRow) {
+        edgeLimitsRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-edge-limits");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniEdgeLimits: on });
             }
             if (window.cc && window.cc.closeMenuPopup) {
                 setTimeout(() => window.cc.closeMenuPopup(), 200);
