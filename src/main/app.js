@@ -529,6 +529,31 @@
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
     }
 
+    let clockAutoCycleTimer = null;
+    function setupClockAutoCycle() {
+        if (clockAutoCycleTimer) {
+            clearInterval(clockAutoCycleTimer);
+            clockAutoCycleTimer = null;
+        }
+        if (!cfg.clockAutoCycle || (typeof isMainActive === "function" && !isMainActive())) return;
+        const mins = Math.max(1, parseInt(cfg.clockAutoCycleInterval, 10) || 15);
+        const ms = mins * 60 * 1000;
+        clockAutoCycleTimer = setInterval(() => {
+            if (document.hidden || (typeof isMainActive === "function" && !isMainActive())) return;
+            const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+            let next;
+            if (cfg.clockAutoCycleMode === "random") {
+                const others = [1, 2, 3, 4, 5, 6, 7, 8].filter((n) => n !== cur);
+                next = others[Math.floor(Math.random() * others.length)];
+            } else {
+                next = (cur % 8) + 1;
+            }
+            cfg.clockDesign = next;
+            window.cc.saveSettings({ clockDesign: next });
+            updateDialDesignUI(next);
+        }, ms);
+    }
+
     function cycleDialDesign(delta) {
         const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
         let next = cur + delta;
@@ -576,6 +601,17 @@
         // Covers BOTH the Settings picker and the floating dial
         // switcher — they share the data-clock-design contract.
         updateDialDesignUI(s.clockDesign);
+
+        const clockAutoCycleEl = document.getElementById("s-clock-auto-cycle");
+        if (clockAutoCycleEl) clockAutoCycleEl.checked = s.clockAutoCycle === true;
+        const clockAutoCycleSub = document.getElementById("s-clock-auto-cycle-sub");
+        if (clockAutoCycleSub) clockAutoCycleSub.style.display = s.clockAutoCycle ? "flex" : "none";
+        const clockAutoCycleIntervalEl = document.getElementById("s-clock-auto-cycle-interval");
+        if (clockAutoCycleIntervalEl) clockAutoCycleIntervalEl.value = String(s.clockAutoCycleInterval || 15);
+        const clockAutoCycleModeEl = document.getElementById("s-clock-auto-cycle-mode");
+        if (clockAutoCycleModeEl) clockAutoCycleModeEl.value = s.clockAutoCycleMode || "sequential";
+        setupClockAutoCycle();
+
         const clockNameEl = document.getElementById("s-clock-name");
         if (clockNameEl) {
             clockNameEl.value = s.clockBrand || "CYBERGEMS";
@@ -792,6 +828,15 @@
         if (miniClickThrough) miniClickThrough.checked = s.miniClickThrough === true;
         const miniAnim = document.getElementById('s-mini-anim');
         if (miniAnim) miniAnim.checked = s.miniNoAnimations === true;
+
+        const miniAutoCycleEl = document.getElementById("s-mini-auto-cycle");
+        if (miniAutoCycleEl) miniAutoCycleEl.checked = s.miniAutoCycle === true;
+        const miniAutoCycleSub = document.getElementById("s-mini-auto-cycle-sub");
+        if (miniAutoCycleSub) miniAutoCycleSub.style.display = s.miniAutoCycle ? "flex" : "none";
+        const miniAutoCycleIntervalEl = document.getElementById("s-mini-auto-cycle-interval");
+        if (miniAutoCycleIntervalEl) miniAutoCycleIntervalEl.value = String(s.miniAutoCycleInterval || 15);
+        const miniAutoCycleModeEl = document.getElementById("s-mini-auto-cycle-mode");
+        if (miniAutoCycleModeEl) miniAutoCycleModeEl.value = s.miniAutoCycleMode || "sequential";
     }
 
     function showCustomFile(which, p) {
@@ -985,6 +1030,7 @@
     }
 
     function updateGreeting() {
+        const hour = new Date().getHours();
         const key = welcomeGreetingKey();
         const name = String(cfg.displayName || "").trim().replace(/\s+/g, " ").slice(0, 32);
         const suffix = name ? ", " + name : "";
@@ -996,6 +1042,23 @@
                 calEl.innerHTML = `${escapeHtml(baseGreeting)}, <span class="cal-greeting-name">${escapeHtml(name)}</span>`;
             } else {
                 calEl.textContent = text;
+            }
+        }
+        const icoEl = document.getElementById("cal-greeting-ico");
+        if (icoEl) {
+            let icoName = "moon";
+            let timeClass = "time-evening";
+            if (hour >= 5 && hour < 12) {
+                icoName = "coffee";
+                timeClass = "time-morning";
+            } else if (hour >= 12 && hour < 18) {
+                icoName = "sun";
+                timeClass = "time-afternoon";
+            }
+            icoEl.className = `cal-greeting-ico ${timeClass}`;
+            icoEl.setAttribute("data-ico", icoName);
+            if (window.ccIcons && window.ccIcons.replaceIcons) {
+                window.ccIcons.replaceIcons(icoEl.parentElement);
             }
         }
         const tbarEl = document.getElementById("tbar-welcome");
@@ -1011,7 +1074,13 @@
         mainActive = nv;
         document.body.classList.toggle("cc-inactive", !nv);
         if (nv && !wasActive) updateGreeting();
-        if (nv) setupClock();
+        if (nv) {
+            setupClock();
+            setupClockAutoCycle();
+        } else if (clockAutoCycleTimer) {
+            clearInterval(clockAutoCycleTimer);
+            clockAutoCycleTimer = null;
+        }
         syncHomeClock();
         syncDigitalClock();
     }
@@ -5092,6 +5161,36 @@
         });
     }
 
+    const sClockAutoCycle = document.getElementById("s-clock-auto-cycle");
+    if (sClockAutoCycle) {
+        sClockAutoCycle.addEventListener("change", (e) => {
+            const val = e.target.checked;
+            cfg.clockAutoCycle = val;
+            const sub = document.getElementById("s-clock-auto-cycle-sub");
+            if (sub) sub.style.display = val ? "flex" : "none";
+            window.cc.saveSettings({ clockAutoCycle: val });
+            setupClockAutoCycle();
+        });
+    }
+    const sClockAutoCycleInterval = document.getElementById("s-clock-auto-cycle-interval");
+    if (sClockAutoCycleInterval) {
+        sClockAutoCycleInterval.addEventListener("change", (e) => {
+            const val = parseInt(e.target.value, 10) || 15;
+            cfg.clockAutoCycleInterval = val;
+            window.cc.saveSettings({ clockAutoCycleInterval: val });
+            setupClockAutoCycle();
+        });
+    }
+    const sClockAutoCycleMode = document.getElementById("s-clock-auto-cycle-mode");
+    if (sClockAutoCycleMode) {
+        sClockAutoCycleMode.addEventListener("change", (e) => {
+            const val = e.target.value;
+            cfg.clockAutoCycleMode = val;
+            window.cc.saveSettings({ clockAutoCycleMode: val });
+            setupClockAutoCycle();
+        });
+    }
+
 
     // Toggles
     document
@@ -5194,6 +5293,33 @@
             window.cc.saveSettings({ miniDesign: mode });
         });
     });
+
+    const sMiniAutoCycle = document.getElementById("s-mini-auto-cycle");
+    if (sMiniAutoCycle) {
+        sMiniAutoCycle.addEventListener("change", (e) => {
+            const val = e.target.checked;
+            cfg.miniAutoCycle = val;
+            const sub = document.getElementById("s-mini-auto-cycle-sub");
+            if (sub) sub.style.display = val ? "flex" : "none";
+            window.cc.saveSettings({ miniAutoCycle: val });
+        });
+    }
+    const sMiniAutoCycleInterval = document.getElementById("s-mini-auto-cycle-interval");
+    if (sMiniAutoCycleInterval) {
+        sMiniAutoCycleInterval.addEventListener("change", (e) => {
+            const val = parseInt(e.target.value, 10) || 15;
+            cfg.miniAutoCycleInterval = val;
+            window.cc.saveSettings({ miniAutoCycleInterval: val });
+        });
+    }
+    const sMiniAutoCycleMode = document.getElementById("s-mini-auto-cycle-mode");
+    if (sMiniAutoCycleMode) {
+        sMiniAutoCycleMode.addEventListener("change", (e) => {
+            const val = e.target.value;
+            cfg.miniAutoCycleMode = val;
+            window.cc.saveSettings({ miniAutoCycleMode: val });
+        });
+    }
     const sMiniBgOp = document.getElementById('s-minibg-op');
     if (sMiniBgOp) {
         sMiniBgOp.addEventListener('input', (e) => {

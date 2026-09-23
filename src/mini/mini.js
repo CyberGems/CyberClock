@@ -235,6 +235,7 @@
             // set_window_size); design/collapse swaps keep the top-left anchor.
             syncWindowSize(true, zoomChanged);
         }
+        setupMiniAutoCycle();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -532,10 +533,41 @@
     // reports another window as the active one (full mode). The clock
     // text still updates every second regardless.
     let miniHovered = false;
+    let miniAutoCycleTimer = null;
+    function setupMiniAutoCycle() {
+        if (miniAutoCycleTimer) {
+            clearInterval(miniAutoCycleTimer);
+            miniAutoCycleTimer = null;
+        }
+        if (!cfg || !cfg.miniAutoCycle) return;
+        if (document.hidden || activeBackendLabel === "main") return;
+        const mins = Math.max(1, parseInt(cfg.miniAutoCycleInterval, 10) || 15);
+        const ms = mins * 60 * 1000;
+        miniAutoCycleTimer = setInterval(() => {
+            if (document.hidden || activeBackendLabel === "main") return;
+            const cur = Math.min(12, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
+            let next;
+            if (cfg.miniAutoCycleMode === "random") {
+                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter((n) => n !== cur);
+                next = others[Math.floor(Math.random() * others.length)];
+            } else {
+                next = (cur % 12) + 1;
+            }
+            cfg.miniDesign = next;
+            window.cc.saveSettings({ miniDesign: next });
+        }, ms);
+    }
+
     function syncMiniMotion() {
         const shouldPause =
             document.hidden || activeBackendLabel === "main";
         document.body.classList.toggle("mini-paused", shouldPause);
+        if (!shouldPause) {
+            setupMiniAutoCycle();
+        } else if (miniAutoCycleTimer) {
+            clearInterval(miniAutoCycleTimer);
+            miniAutoCycleTimer = null;
+        }
     }
     // The Rust backend is the only reliable source of truth for which
     // window is on screen (WebView2 keeps reporting hidden windows as

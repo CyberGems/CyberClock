@@ -90,6 +90,23 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M12 2.5v2.25M12 19.25v2.25M4.42 4.42l1.6 1.6M18.98 18.98l-1.6-1.6M2.5 12h2.25M19.25 12h2.25M4.42 19.58l1.6-1.6M18.98 5.02l-1.6 1.6"/>
   </symbol>
+  <symbol id="cc-i-moon" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </symbol>
+  <symbol id="cc-i-coffee" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+    <line x1="6" y1="1" x2="6" y2="4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="10" y1="1" x2="10" y2="4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <line x1="14" y1="1" x2="14" y2="4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="cc-i-spark" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 3c0 4.5-4.5 9-9 9 4.5 0 9 4.5 9 9 0-4.5 4.5-9 9-9-4.5 0-9-4.5-9-9Z"/>
+  </symbol>
   <symbol id="cc-i-list" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M9.5 6h11M9.5 12h11M9.5 18h11"/>

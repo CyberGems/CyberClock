@@ -198,19 +198,17 @@
                                     <div class="cal-agenda-list" id="cal-agenda-list"></div>
                                 </div>
                                 <div class="cal-dash cal-stats">
-                                    <div class="cal-dash-t"><span class="cal-t-ico" data-ico="sun"></span> <span data-i18n="calendar.todayPanel">Today</span></div>
-                                    <div class="cal-greeting-card" id="cal-greeting-card" data-tooltip="Click to personalize your greeting" data-i18n-attr="data-tooltip:tooltip.editName" data-tooltip-dir="up">
-                                        <div class="cal-greeting-lead">
-                                            <span class="cal-greeting-dot"></span>
-                                            <span class="cal-greeting-text" id="cal-greeting-text"></span>
-                                        </div>
+                                    <div class="cal-dash-t"><span class="cal-t-ico" data-ico="spark"></span> <span data-i18n="calendar.todayPanel">Today</span></div>
+                                    <div class="cal-greeting-row" id="cal-greeting-card" data-tooltip="Click to personalize your greeting" data-i18n-attr="data-tooltip:tooltip.editName" data-tooltip-dir="up">
+                                        <span class="cal-greeting-ico" id="cal-greeting-ico"></span>
+                                        <span class="cal-greeting-text" id="cal-greeting-text"></span>
+                                    </div>
+                                    <div class="cal-doy-card">
+                                        <span class="cal-doy-lbl" data-i18n="calendar.stat.dayOfYear">Day of year</span>
+                                        <span class="cal-doy-val" id="stat-doy">—</span>
                                     </div>
                                     <div class="stat-row">
-                                        <span class="stat-lbl" data-i18n="calendar.stat.dayOfYear">Day of year</span>
-                                        <span class="stat-val" id="stat-doy">—</span>
-                                    </div>
-                                    <div class="stat-row">
-                                        <span class="stat-lbl" data-i18n="calendar.stat.week">ISO week</span>
+                                        <span class="stat-lbl" data-i18n="calendar.stat.week">Week</span>
                                         <span class="stat-val" id="stat-week">—</span>
                                     </div>
                                     <div class="stat-row">
@@ -635,6 +633,30 @@
                                     ><button class="s-fmt" data-clock-design="7" data-i18n="settings.appearance.dialMatrix">Hex Matrix</button
                                     ><button class="s-fmt" data-clock-design="8" data-i18n="settings.appearance.dialGemCrown">Gem Crown</button>
                                 </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.dialAutoCycle">Auto-change dial style</span>
+                                    <small data-i18n="settings.appearance.dialAutoCycleDesc">Automatically rotate the clock style over time</small>
+                                </div>
+                                <input type="checkbox" id="s-clock-auto-cycle" class="s-toggle" />
+                            </div>
+                            <div class="s-row s-sub-row" id="s-clock-auto-cycle-sub" style="display: none;">
+                                <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>
+                                <select id="s-clock-auto-cycle-interval" class="sched-select">
+                                    <option value="1" data-i18n="settings.cycle.1m">Every 1 min</option>
+                                    <option value="5" data-i18n="settings.cycle.5m">Every 5 min</option>
+                                    <option value="15" selected data-i18n="settings.cycle.15m">Every 15 min</option>
+                                    <option value="30" data-i18n="settings.cycle.30m">Every 30 min</option>
+                                    <option value="60" data-i18n="settings.cycle.1h">Every 1 hour</option>
+                                    <option value="1440" data-i18n="settings.cycle.daily">Daily</option>
+                                </select>
+                                <div class="s-lbl" style="margin-left: 12px;" data-i18n="settings.cycle.mode">Order</div>
+                                <select id="s-clock-auto-cycle-mode" class="sched-select">
+                                    <option value="sequential" selected data-i18n="settings.cycle.sequential">Sequential</option>
+                                    <option value="random" data-i18n="settings.cycle.random">Random</option>
+                                </select>
                             </div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="clock"></span>
@@ -1442,6 +1464,30 @@
                                     <button class="s-fmt" data-mini-design="11">11</button>
                                     <button class="s-fmt" data-mini-design="12">12</button>
                                 </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.skinAutoCycle">Auto-change skin</span>
+                                    <small data-i18n="settings.mini.skinAutoCycleDesc">Automatically rotate the mini clock skin over time</small>
+                                </div>
+                                <input type="checkbox" id="s-mini-auto-cycle" class="s-toggle" />
+                            </div>
+                            <div class="s-row s-sub-row" id="s-mini-auto-cycle-sub" style="display: none;">
+                                <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>
+                                <select id="s-mini-auto-cycle-interval" class="sched-select">
+                                    <option value="1" data-i18n="settings.cycle.1m">Every 1 min</option>
+                                    <option value="5" data-i18n="settings.cycle.5m">Every 5 min</option>
+                                    <option value="15" selected data-i18n="settings.cycle.15m">Every 15 min</option>
+                                    <option value="30" data-i18n="settings.cycle.30m">Every 30 min</option>
+                                    <option value="60" data-i18n="settings.cycle.1h">Every 1 hour</option>
+                                    <option value="1440" data-i18n="settings.cycle.daily">Daily</option>
+                                </select>
+                                <div class="s-lbl" style="margin-left: 12px;" data-i18n="settings.cycle.mode">Order</div>
+                                <select id="s-mini-auto-cycle-mode" class="sched-select">
+                                    <option value="sequential" selected data-i18n="settings.cycle.sequential">Sequential</option>
+                                    <option value="random" data-i18n="settings.cycle.random">Random</option>
+                                </select>
                             </div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="expand"></span>

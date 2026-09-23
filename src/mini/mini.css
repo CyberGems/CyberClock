@@ -357,28 +357,6 @@
         position: relative;
         overflow: hidden;
     }
-    .mini-shell[data-design="4"]::before {
-        /* Moving refraction: GPU-composited transform sweep instead of
-           CPU-heavy background-position repaints. */
-        content: '';
-        position: absolute;
-        top: 2px;
-        left: -80%;
-        width: 260%;
-        height: 58%;
-        background: linear-gradient(110deg,
-            transparent 0%,
-            transparent 38%,
-            rgba(255, 255, 255, 0.3) 46%,
-            rgba(255, 255, 255, 0.98) 50%,
-            rgba(255, 255, 255, 0.38) 54%,
-            transparent 62%,
-            transparent 100%);
-        border-radius: 24px;
-        will-change: transform, opacity;
-        animation: glass-refraction 4s ease-in-out infinite;
-        pointer-events: none;
-    }
     .mini-shell[data-design="4"]::after {
         /* The accent-tinted rim now breathes opacity only on its own layer,
            avoiding constant box-shadow blur re-rasterization on the CPU. */
@@ -417,15 +395,16 @@
         z-index: 1;
     }
     .mini-shell[data-design="4"] .status-dot {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
-        background: transparent;
-        border: 1px solid color-mix(in srgb, var(--accent-b) 58%, #b8cfe5);
+        background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-a) 35%, #162438) 0%, #08111e 100%);
+        border: 1.5px solid color-mix(in srgb, var(--accent-a) 90%, #0a1829);
         box-shadow:
-            0 0 0 1px color-mix(in srgb, var(--accent-a) 26%, transparent),
-            0 0 14px color-mix(in srgb, var(--accent-a) 38%, transparent),
-            inset 0 0 4px color-mix(in srgb, var(--accent-a) 26%, transparent);
+            0 0 0 1px color-mix(in srgb, var(--accent-a) 50%, rgba(10, 20, 35, 0.35)),
+            0 2px 7px rgba(0, 0, 0, 0.28),
+            0 0 12px color-mix(in srgb, var(--accent-a) 80%, transparent),
+            inset 0 1px 3px rgba(0, 0, 0, 0.6);
         animation: none;
         position: relative;
         z-index: 1;
@@ -433,30 +412,35 @@
     .mini-shell[data-design="4"] .status-dot::before {
         top: 50%;
         left: 50%;
-        width: 220%;
-        height: 220%;
+        width: 250%;
+        height: 250%;
+        border-radius: 50%;
         transform: translate(-50%, -50%);
         background: conic-gradient(
             from 0deg,
-            transparent 0deg 215deg,
-            color-mix(in srgb, var(--accent-a) 28%, transparent) 250deg,
-            color-mix(in srgb, #ffffff 88%, var(--accent-a)) 292deg,
-            transparent 330deg 360deg
+            transparent 0deg 180deg,
+            color-mix(in srgb, var(--accent-a) 45%, transparent) 210deg,
+            var(--accent-a) 265deg,
+            color-mix(in srgb, var(--accent-b) 90%, #081220) 290deg,
+            var(--accent-a) 310deg,
+            transparent 335deg 360deg
         );
-        opacity: 0.95;
+        filter: drop-shadow(0 0 4px var(--accent-a)) drop-shadow(0 0 7px color-mix(in srgb, var(--accent-b) 75%, #050d18));
+        opacity: 1;
         will-change: transform;
-        animation: glass-lens-orbit 2.4s linear infinite;
+        animation: glass-lens-orbit 2.2s linear infinite;
     }
     .mini-shell[data-design="4"] .status-dot::after {
         content: '';
         position: absolute;
-        inset: 3px;
+        inset: 2px;
         border-radius: 50%;
         background: radial-gradient(circle at 35% 30%,
-            rgba(255, 255, 255, 0.8),
-            color-mix(in srgb, var(--accent-a) 45%, transparent) 48%,
-            transparent 76%);
-        opacity: 0.75;
+            #ffffff 0%,
+            var(--accent-a) 35%,
+            color-mix(in srgb, var(--accent-b) 85%, #081220) 80%);
+        box-shadow: 0 0 10px var(--accent-a), 0 0 2px rgba(0, 0, 0, 0.5);
+        opacity: 1;
         will-change: transform, opacity;
         animation: glass-lens-pulse 2.6s ease-in-out infinite;
     }
@@ -1989,16 +1973,7 @@
         0%, 100% { opacity: 0.75; }
         50% { opacity: 1; }
     }
-    @keyframes glass-refraction {
-        0%, 100% {
-            transform: translateX(-32%);
-            opacity: 0.38;
-        }
-        50% {
-            transform: translateX(32%);
-            opacity: 0.98;
-        }
-    }
+
     @keyframes glass-lens-orbit {
         from { transform: translate(-50%, -50%) rotate(0deg); }
         to { transform: translate(-50%, -50%) rotate(360deg); }

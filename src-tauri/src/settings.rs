@@ -44,6 +44,14 @@ impl Default for CustomAlarm {
     }
 }
 
+fn default_auto_cycle_interval() -> u32 {
+    15
+}
+
+fn default_auto_cycle_mode() -> String {
+    "sequential".to_string()
+}
+
 impl Default for AlarmSettings {
     fn default() -> Self {
         Self {
@@ -135,9 +143,21 @@ pub struct AppSettings {
     #[serde(default)]
     pub full_hide_calendar: bool,
 
-    // Analog dial design for the full-mode clock (1 = Classic,
-    // 2 = Minimal, 3 = Neon Segments, 4 = Cyber HUD, 5 = Aurora).
+    // Analog dial design for the full-mode clock (1..8)
     pub clock_design: u32,
+    #[serde(default)]
+    pub clock_auto_cycle: bool,
+    #[serde(default = "default_auto_cycle_interval")]
+    pub clock_auto_cycle_interval: u32,
+    #[serde(default = "default_auto_cycle_mode")]
+    pub clock_auto_cycle_mode: String,
+
+    #[serde(default)]
+    pub mini_auto_cycle: bool,
+    #[serde(default = "default_auto_cycle_interval")]
+    pub mini_auto_cycle_interval: u32,
+    #[serde(default = "default_auto_cycle_mode")]
+    pub mini_auto_cycle_mode: String,
 
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
@@ -209,6 +229,12 @@ impl Default for AppSettings {
             full_hide_clock: false,
             full_hide_calendar: false,
             clock_design: 1,
+            clock_auto_cycle: false,
+            clock_auto_cycle_interval: 15,
+            clock_auto_cycle_mode: "sequential".to_string(),
+            mini_auto_cycle: false,
+            mini_auto_cycle_interval: 15,
+            mini_auto_cycle_mode: "sequential".to_string(),
             custom_alarms: vec![
                 CustomAlarm::default(),
                 CustomAlarm::default(),
