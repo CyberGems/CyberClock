@@ -38,7 +38,7 @@
     // Initialize Canvas Resolution
     function initCanvasResolution() {
         const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-        const cssSize = 270;
+        const cssSize = 266;
         const targetRes = Math.round(cssSize * dpr);
         if (canvas.width !== targetRes || canvas.height !== targetRes) {
             canvas.width = targetRes;
