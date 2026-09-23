@@ -1851,6 +1851,92 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 // Clock context menu
 // ─────────────────────────────────────────────────────────────
 
+static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
+    std::sync::Mutex::new(None);
+static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 =
+    std::sync::atomic::AtomicU32::new(315);
+
+fn position_mini_context_menu(
+    menu: &WebviewWindow,
+    logical_w: f64,
+    logical_h: f64,
+) {
+    let scale = menu.scale_factor().unwrap_or(1.0);
+    let menu_width = (logical_w * scale).round() as i32;
+    let menu_height = (logical_h * scale).round() as i32;
+    let gap = (8.0 * scale).round() as i32;
+
+    let anchor = MINI_MENU_ANCHOR.lock().ok().and_then(|g| *g);
+    let (clock_x, clock_y, clock_w, clock_h, screen_x, screen_y) = match anchor {
+        Some(a) => a,
+        None => return,
+    };
+
+    if let Ok(monitors) = menu.available_monitors() {
+        let found_monitor = monitors
+            .iter()
+            .find(|m| is_position_in_monitor(screen_x, screen_y, m))
+            .or_else(|| monitors.first());
+
+        if let Some(found_monitor) = found_monitor {
+            let work_area = found_monitor.work_area();
+            let monitor_pos = work_area.position;
+            let monitor_size = work_area.size;
+
+            let mon_left = monitor_pos.x;
+            let mon_top = monitor_pos.y;
+            let mon_right = monitor_pos.x + monitor_size.width as i32;
+            let mon_bottom = monitor_pos.y + monitor_size.height as i32;
+
+            let room_below = clock_y + clock_h + gap + menu_height <= mon_bottom;
+            let room_above = clock_y - gap - menu_height >= mon_top;
+            let room_right = clock_x + clock_w + gap + menu_width <= mon_right;
+            let room_left = clock_x - gap - menu_width >= mon_left;
+
+            let (mut pos_x, mut pos_y) = if room_below {
+                (clock_x, clock_y + clock_h + gap)
+            } else if room_above {
+                (clock_x, clock_y - menu_height - gap)
+            } else {
+                let clock_center = clock_x + clock_w / 2;
+                let mon_center = mon_left + (mon_right - mon_left) / 2;
+                let go_right = if room_right && room_left {
+                    clock_center <= mon_center
+                } else {
+                    room_right
+                };
+                let x = if go_right {
+                    clock_x + clock_w + gap
+                } else {
+                    clock_x - menu_width - gap
+                };
+                (x, clock_y)
+            };
+
+            if pos_x + menu_width > mon_right {
+                pos_x = mon_right - menu_width;
+            }
+            if pos_x < mon_left {
+                pos_x = mon_left;
+            }
+            if pos_y + menu_height > mon_bottom {
+                pos_y = mon_bottom - menu_height;
+            }
+            if pos_y < mon_top {
+                pos_y = mon_top;
+            }
+
+            let _ = menu.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+                width: menu_width as u32,
+                height: menu_height as u32,
+            }));
+            let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                pos_x, pos_y,
+            )));
+        }
+    }
+}
+
 #[tauri::command]
 fn open_mini_context_menu(
     app: AppHandle,
@@ -1861,104 +1947,30 @@ fn open_mini_context_menu(
     screen_y: i32,
 ) {
     if let Some(menu) = app.get_webview_window("menu") {
-        // Get screen dimensions to prevent menu from going off-screen
-        if let Ok(monitors) = menu.available_monitors() {
-            // Find the monitor where the click happened
-            let found_monitor = monitors
-                .iter()
-                .find(|m| is_position_in_monitor(screen_x, screen_y, m));
+        let (clock_x, clock_y, clock_w, clock_h) =
+            match (window.outer_position(), window.outer_size()) {
+                (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
+                _ => (screen_x, screen_y, 0, 0),
+            };
 
-            if let Some(found_monitor) = found_monitor {
-                let work_area = found_monitor.work_area();
-                let monitor_pos = work_area.position;
-                let monitor_size = work_area.size;
-                let scale = found_monitor.scale_factor();
-
-                // Menu dimensions (logical px in tauri.conf.json) → physical
-                let menu_width = (270.0 * scale) as i32;
-                let menu_height = (560.0 * scale) as i32;
-                let gap = (8.0 * scale) as i32;
-
-                // Monitor edges
-                let mon_left = monitor_pos.x;
-                let mon_top = monitor_pos.y;
-                let mon_right = monitor_pos.x + monitor_size.width as i32;
-                let mon_bottom = monitor_pos.y + monitor_size.height as i32;
-
-                // Anchor the menu to the invoking clock window (not the cursor)
-                // so it never covers the clock while the user adjusts sliders.
-                let (clock_x, clock_y, clock_w, clock_h) =
-                    match (window.outer_position(), window.outer_size()) {
-                        (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
-                        _ => (screen_x, screen_y, 0, 0),
-                    };
-
-                // Does the menu fit on each side of the clock (with a gap)?
-                let room_below = clock_y + clock_h + gap + menu_height <= mon_bottom;
-                let room_above = clock_y - gap - menu_height >= mon_top;
-                let room_right = clock_x + clock_w + gap + menu_width <= mon_right;
-                let room_left = clock_x - gap - menu_width >= mon_left;
-
-                // Placement priority: below → above → side. Below/above read best when
-                // they fit; sides handle the case where the clock sits mid-screen and
-                // there's no vertical room either way.
-                let (mut pos_x, mut pos_y) = if room_below {
-                    (clock_x, clock_y + clock_h + gap)
-                } else if room_above {
-                    (clock_x, clock_y - menu_height - gap)
-                } else {
-                    // Go to the side with more room: if the clock leans left of the
-                    // monitor centre, open on the right, and vice-versa.
-                    let clock_center = clock_x + clock_w / 2;
-                    let mon_center = mon_left + (mon_right - mon_left) / 2;
-                    let go_right = if room_right && room_left {
-                        clock_center <= mon_center
-                    } else {
-                        room_right
-                    };
-                    let x = if go_right {
-                        clock_x + clock_w + gap
-                    } else {
-                        clock_x - menu_width - gap
-                    };
-                    (x, clock_y) // vertical is clamped to the screen below
-                };
-
-                // Final clamp so the menu always stays fully on the monitor
-                if pos_x + menu_width > mon_right {
-                    pos_x = mon_right - menu_width;
-                }
-                if pos_x < mon_left {
-                    pos_x = mon_left;
-                }
-                if pos_y + menu_height > mon_bottom {
-                    pos_y = mon_bottom - menu_height;
-                }
-                if pos_y < mon_top {
-                    pos_y = mon_top;
-                }
-
-                // Set position using physical coordinates
-                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                    pos_x, pos_y,
-                )));
-            } else {
-                // Fallback: just use the screen coordinates directly
-                // This handles edge cases where click is between monitors
-                let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                    screen_x, screen_y,
-                )));
-            }
-        } else {
-            // Fallback if we can't get monitors
-            let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                screen_x, screen_y,
-            )));
+        if let Ok(mut g) = MINI_MENU_ANCHOR.lock() {
+            *g = Some((clock_x, clock_y, clock_w, clock_h, screen_x, screen_y));
         }
+
+        let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
+        position_mini_context_menu(&menu, 270.0, last_h);
 
         let _ = menu.show();
         let _ = menu.set_focus();
         refresh_taskbar_tab(&menu);
+    }
+}
+
+#[tauri::command]
+fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
+    MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
+    if let Some(menu) = app.get_webview_window("menu") {
+        position_mini_context_menu(&menu, width, height);
     }
 }
 
@@ -3305,6 +3317,7 @@ pub fn run() {
             set_mini_preview,
             open_mini_context_menu,
             close_mini_context_menu,
+            mini_menu_ready,
             menu_action,
             get_tray_menu_state,
             report_relax_playing,

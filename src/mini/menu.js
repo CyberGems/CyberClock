@@ -33,6 +33,17 @@
         document.getElementById("toggle-aot").classList.toggle("on", on);
     }
 
+    function reportMenuHeight() {
+        requestAnimationFrame(() => {
+            const el = document.getElementById("ctx-menu");
+            if (!el) return;
+            const h = el.offsetHeight + 20;
+            if (window.cc && window.cc.miniMenuReady) {
+                window.cc.miniMenuReady(270, h);
+            }
+        });
+    }
+
     // Sync menu options with saved configurations
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
@@ -111,7 +122,10 @@
                 // AOT
                 updateAotState(cfg.alwaysOnTop || false);
             }
+            reportMenuHeight();
         });
+    } else {
+        reportMenuHeight();
     }
 
     // Design Mode click handlers (allows previewing multiple layouts without closing)
@@ -235,6 +249,7 @@
                 p.style.display = isTarget ? "flex" : "none";
                 p.classList.toggle("on", isTarget);
             });
+            reportMenuHeight();
         });
     });
 
@@ -272,3 +287,6 @@
             window.cc.closeMenuPopup();
         }
     });
+
+    window.addEventListener("DOMContentLoaded", reportMenuHeight);
+    reportMenuHeight();

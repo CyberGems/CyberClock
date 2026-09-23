@@ -97,6 +97,12 @@
         closeMiniContextMenu: async () => {
             await invoke("close_mini_context_menu");
         },
+        miniMenuReady: async (width, height) => {
+            await invoke("mini_menu_ready", {
+                width: Number(width) || 270,
+                height: Number(height) || 315
+            });
+        },
         showAboutWindow: async () => {
             await invoke("tray_menu_action", { action: "about" });
         },

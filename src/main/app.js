@@ -507,14 +507,16 @@
             5: "settings.appearance.dialQuantum",
             6: "settings.appearance.dialChrono",
             7: "settings.appearance.dialMatrix",
-            8: "settings.appearance.dialGemCrown",
+            8: "settings.appearance.dialReactor",
+            9: "settings.appearance.dialCircuit",
+            10: "settings.appearance.dialGemCrown",
         };
         const key = keys[designNum] || keys[1];
         return window.ccI18n ? window.ccI18n.t(key) : "Classic";
     }
 
     function updateDialDesignUI(designNum) {
-        const design = Math.min(8, Math.max(1, parseInt(designNum, 10) || 1));
+        const design = Math.min(10, Math.max(1, parseInt(designNum, 10) || 1));
         const val = String(design);
         document
             .querySelectorAll("[data-clock-design]")
@@ -523,7 +525,7 @@
             );
         const badgeNum = document.getElementById("dial-badge-num");
         const badgeEl = document.getElementById("dial-badge");
-        if (badgeNum) badgeNum.textContent = `${design}/8`;
+        if (badgeNum) badgeNum.textContent = `${design}/10`;
         if (badgeEl) badgeEl.setAttribute("data-tooltip", getDialDesignName(design));
         const ctxDialLbl = document.getElementById("ctx-dial-current-lbl");
         if (ctxDialLbl) ctxDialLbl.textContent = getDialDesignName(design);
@@ -540,13 +542,13 @@
         const ms = mins * 60 * 1000;
         clockAutoCycleTimer = setInterval(() => {
             if (document.hidden || (typeof isMainActive === "function" && !isMainActive())) return;
-            const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+            const cur = Math.min(10, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
             let next;
             if (cfg.clockAutoCycleMode === "random") {
-                const others = [1, 2, 3, 4, 5, 6, 7, 8].filter((n) => n !== cur);
+                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((n) => n !== cur);
                 next = others[Math.floor(Math.random() * others.length)];
             } else {
-                next = (cur % 8) + 1;
+                next = (cur % 10) + 1;
             }
             cfg.clockDesign = next;
             window.cc.saveSettings({ clockDesign: next });
@@ -555,10 +557,10 @@
     }
 
     function cycleDialDesign(delta) {
-        const cur = Math.min(8, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
+        const cur = Math.min(10, Math.max(1, parseInt(cfg.clockDesign, 10) || 1));
         let next = cur + delta;
-        if (next > 8) next = 1;
-        if (next < 1) next = 8;
+        if (next > 10) next = 1;
+        if (next < 1) next = 10;
         cfg.clockDesign = next;
         window.cc.saveSettings({ clockDesign: next });
         updateDialDesignUI(next);
@@ -1247,16 +1249,18 @@
         if (design === 5) return buildFaceQuantum(W, H, cx, cy, R, c);
         if (design === 6) return buildFaceChrono(W, H, cx, cy, R, c);
         if (design === 7) return buildFaceMatrix(W, H, cx, cy, R, c);
-        if (design === 8) return buildFaceGemCrown(W, H, cx, cy, R, c);
+        if (design === 8) return buildFaceReactor(W, H, cx, cy, R, c);
+        if (design === 9) return buildFaceCircuit(W, H, cx, cy, R, c);
+        if (design === 10) return buildFaceGemCrown(W, H, cx, cy, R, c);
         return buildFaceClassic(W, H, cx, cy, R, c);
     }
 
-    // Settings id of the analog dial design (1..8). Unknown values and
+    // Settings id of the analog dial design (1..10). Unknown values and
     // missing keys fall back to the Classic face, matching the backend
     // default (clockDesign: 1).
     function currentClockDesign() {
         const d = parseInt(cfg.clockDesign, 10);
-        return d >= 1 && d <= 8 ? d : 1;
+        return d >= 1 && d <= 10 ? d : 1;
     }
 
     // ── Design 1: Classic (bezel + domed glass + 12/3/6/9 numerals) ──
@@ -2043,7 +2047,365 @@
         return off;
     }
 
-    // ── Design 8: Gem Crown (multi-colored precious gem markers,
+    // ── Design 8: Reactor Core (Fusion Tokamak / Arc Reactor plasma core,
+    //    magnetic containment rings, 12 radial injector coils, thermal slots) ──
+    function buildFaceReactor(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // 1. Deep Vacuum Chamber Background
+        const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.02);
+        bgGrad.addColorStop(0, `rgba(${c.rgb},.16)`);
+        bgGrad.addColorStop(0.35, `rgba(${c.rgb},.06)`);
+        bgGrad.addColorStop(0.75, "rgba(10,12,18,.92)");
+        bgGrad.addColorStop(1, "rgba(6,8,12,.98)");
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.98, 0, Math.PI * 2);
+        ctx.fillStyle = bgGrad;
+        ctx.fill();
+
+        // 2. Heavy Industrial Containment Ring (Bezel)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.94, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.50)`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+
+        // Inner containment rim
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.88, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // 3. 60 Peripheral Thermal Exhaust Slots
+        for (let i = 0; i < 60; i++) {
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+            const isHour = i % 5 === 0;
+            const r1 = isHour ? R * 0.885 : R * 0.90;
+            const r2 = R * 0.935;
+            const x1 = cx + Math.cos(a) * r1;
+            const y1 = cy + Math.sin(a) * r1;
+            const x2 = cx + Math.cos(a) * r2;
+            const y2 = cy + Math.sin(a) * r2;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = isHour ? c.accent : `rgba(${c.rgb},.32)`;
+            ctx.lineWidth = isHour ? 2.2 : 1;
+            ctx.stroke();
+        }
+
+        // 4. Primary Magnetic Stabilizers / Clamps at 12, 3, 6, 9
+        const cardAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+        for (let k = 0; k < 4; k++) {
+            const ca = cardAngles[k];
+            ctx.save();
+            ctx.translate(cx + Math.cos(ca) * (R * 0.93), cy + Math.sin(ca) * (R * 0.93));
+            ctx.rotate(ca + Math.PI / 2);
+            ctx.beginPath();
+            const bw = R * 0.045, bh = R * 0.055;
+            ctx.rect(-bw, -bh / 2, bw * 2, bh);
+            ctx.fillStyle = "#12151e";
+            ctx.fill();
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.8;
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+            // Warning status LED
+            ctx.beginPath();
+            ctx.arc(0, 0, R * 0.012, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // 5. Magnetic Plasma Confinement Guide Rings
+        [0.78, 0.62, 0.44].forEach((cr, idx) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * cr, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${c.rgb},${0.18 + idx * 0.08})`;
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash(idx === 1 ? [4, 6] : [8, 4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        });
+
+        // 6. 12 Radial Tokamak Injector Coils / Stator Blocks
+        for (let i = 0; i < 12; i++) {
+            const hNum = i === 0 ? 12 : i;
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const cosA = Math.cos(a), sinA = Math.sin(a);
+
+            // Magnetic Injector Coil Body (trapezoid from R*0.46 to R*0.76)
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(a + Math.PI / 2);
+
+            const wInner = R * 0.024;
+            const wOuter = R * 0.048;
+            const yInner = -R * 0.46;
+            const yOuter = -R * 0.76;
+
+            ctx.beginPath();
+            ctx.moveTo(-wInner, yInner);
+            ctx.lineTo(-wOuter, yOuter);
+            ctx.lineTo(wOuter, yOuter);
+            ctx.lineTo(wInner, yInner);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(18, 22, 32, 0.75)";
+            ctx.fill();
+            ctx.strokeStyle = `rgba(${c.rgb},.40)`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            // Magnetic coil winding ribs (3 cross lines)
+            for (let rib = 1; rib <= 3; rib++) {
+                const ry = yInner + (yOuter - yInner) * (rib / 4);
+                const rw = wInner + (wOuter - wInner) * (rib / 4);
+                ctx.beginPath();
+                ctx.moveTo(-rw, ry);
+                ctx.lineTo(rw, ry);
+                ctx.strokeStyle = `rgba(${c.rgb},.28)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // High-voltage node cap at outer end
+            ctx.beginPath();
+            ctx.arc(0, yOuter - R * 0.015, R * 0.016, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.shadowBlur = 10;
+            ctx.fill();
+
+            ctx.restore();
+
+            // Hour Numeral inside outer track (at R * 0.82)
+            const numR = R * 0.82;
+            const nx = cx + cosA * numR;
+            const ny = cy + sinA * numR;
+            ctx.font = `bold ${Math.round(R * 0.09)}px Orbitron, monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = c.accent;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 6;
+            ctx.fillText(hNum < 10 ? `0${hNum}` : `${hNum}`, nx, ny);
+        }
+
+        // 7. Central Core Tokamak Chamber
+        const coreR = R * 0.30;
+        ctx.beginPath();
+        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(12, 16, 24, 0.9)";
+        ctx.fill();
+        ctx.strokeStyle = c.accent;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+
+        // Technical Telemetry Silkscreen in Core Chamber
+        ctx.font = `600 ${Math.round(R * 0.045)}px "Space Grotesk", monospace`;
+        ctx.textAlign = "center";
+        ctx.fillStyle = `rgba(${c.rgb},.65)`;
+        ctx.shadowBlur = 0;
+        ctx.fillText("TOKAMAK // MK-IV", cx, cy - coreR * 0.38);
+        ctx.fillText("FLUX: 100%", cx, cy + coreR * 0.42);
+
+        ctx.restore();
+        return off;
+    }
+
+    // ── Design 9: Circuit PCB (Silicon microprocessor, 45-degree bus traces,
+    //    SMD solder pads, micro-vias, ground plane matrix) ──
+    function buildFaceCircuit(W, H, cx, cy, R, c) {
+        const off = document.createElement("canvas");
+        off.width = W;
+        off.height = H;
+        const ctx = off.getContext("2d");
+
+        // 1. Matte Dark Green / Obsidian PCB Ground Plane
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.98, 0, Math.PI * 2);
+        ctx.fillStyle = "#0c1017";
+        ctx.fill();
+
+        // Subtle micro ground matrix (crosshairs / grid points)
+        ctx.save();
+        ctx.fillStyle = `rgba(${c.rgb},.06)`;
+        const step = R * 0.12;
+        for (let gx = cx - R * 0.9; gx <= cx + R * 0.9; gx += step) {
+            for (let gy = cy - R * 0.9; gy <= cy + R * 0.9; gy += step) {
+                const dist = Math.hypot(gx - cx, gy - cy);
+                if (dist < R * 0.88 && dist > R * 0.32) {
+                    ctx.fillRect(gx - 1, gy - 1, 2, 2);
+                }
+            }
+        }
+        ctx.restore();
+
+        // 2. Outer PCB Circular Bus Ground Track
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.93, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.35)`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.87, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.18)`;
+        ctx.lineWidth = 1.0;
+        ctx.stroke();
+
+        // 60 Plated Through-Hole Vias (Minute ticks) along outer perimeter
+        for (let i = 0; i < 60; i++) {
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+            const isHour = i % 5 === 0;
+            const vr = R * 0.90;
+            const vx = cx + Math.cos(a) * vr;
+            const vy = cy + Math.sin(a) * vr;
+
+            ctx.beginPath();
+            ctx.arc(vx, vy, isHour ? R * 0.016 : R * 0.009, 0, Math.PI * 2);
+            ctx.fillStyle = isHour ? c.accent : `rgba(${c.rgb},.40)`;
+            ctx.fill();
+            // Drill hole center
+            ctx.beginPath();
+            ctx.arc(vx, vy, isHour ? R * 0.007 : R * 0.004, 0, Math.PI * 2);
+            ctx.fillStyle = "#0c1017";
+            ctx.fill();
+        }
+
+        // 3. Central Microprocessor Package (QFP-32 Die)
+        const chipSz = R * 0.24;
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        // Chip shadow & body
+        ctx.beginPath();
+        ctx.rect(-chipSz, -chipSz, chipSz * 2, chipSz * 2);
+        ctx.fillStyle = "#141822";
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${c.rgb},.60)`;
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = c.accent;
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+
+        // Chip Pin 1 Index Marker (corner dot)
+        ctx.beginPath();
+        ctx.arc(-chipSz + R * 0.035, -chipSz + R * 0.035, R * 0.014, 0, Math.PI * 2);
+        ctx.fillStyle = c.accent;
+        ctx.fill();
+
+        // Micro Pin Leads (6 pins on each of 4 edges)
+        const pins = 6;
+        const pinSpan = (chipSz * 1.6) / (pins - 1);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = `rgba(${c.rgb},.45)`;
+        for (let p = 0; p < pins; p++) {
+            const offset = -chipSz * 0.8 + p * pinSpan;
+            ctx.beginPath(); ctx.moveTo(offset, -chipSz); ctx.lineTo(offset, -chipSz - R * 0.04); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(offset, chipSz); ctx.lineTo(offset, chipSz + R * 0.04); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-chipSz, offset); ctx.lineTo(-chipSz - R * 0.04, offset); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(chipSz, offset); ctx.lineTo(chipSz + R * 0.04, offset); ctx.stroke();
+        }
+
+        // Silkscreen Text on Chip
+        ctx.font = `bold ${Math.round(R * 0.048)}px "Space Grotesk", monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = c.accent;
+        ctx.shadowBlur = 0;
+        ctx.fillText("CYBER-CPU", 0, -R * 0.05);
+        ctx.font = `600 ${Math.round(R * 0.036)}px "Space Grotesk", monospace`;
+        ctx.fillStyle = `rgba(${c.rgb},.70)`;
+        ctx.fillText("64-BIT // CLK", 0, R * 0.03);
+        ctx.fillText("REV 4.2", 0, R * 0.09);
+
+        ctx.restore();
+
+        // 4. 12 Primary PCB Bus Signal Traces (with authentic 45-degree elbows!)
+        for (let i = 0; i < 12; i++) {
+            const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const cosA = Math.cos(a), sinA = Math.sin(a);
+
+            const x0 = cx + cosA * (R * 0.33);
+            const y0 = cy + sinA * (R * 0.33);
+
+            const elbowA = a + (i % 2 === 0 ? 0.22 : -0.22);
+            const x1 = cx + Math.cos(elbowA) * (R * 0.52);
+            const y1 = cy + Math.sin(elbowA) * (R * 0.52);
+
+            const x2 = cx + cosA * (R * 0.74);
+            const y2 = cy + sinA * (R * 0.74);
+
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = `rgba(${c.rgb},.38)`;
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            // Plated Via at elbow turn
+            ctx.beginPath();
+            ctx.arc(x1, y1, R * 0.012, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x1, y1, R * 0.005, 0, Math.PI * 2);
+            ctx.fillStyle = "#0c1017";
+            ctx.fill();
+
+            // 5. 12 SMD Component Hour Pads & Silkscreen Brackets [ 12 ]
+            ctx.save();
+            ctx.translate(x2, y2);
+            ctx.rotate(a + Math.PI / 2);
+
+            const pw = R * 0.045, ph = R * 0.024;
+            ctx.beginPath();
+            ctx.rect(-pw, -ph, pw * 2, ph * 2);
+            ctx.fillStyle = "#1e222a";
+            ctx.fill();
+            ctx.strokeStyle = `rgba(${c.rgb},.55)`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = c.accent;
+            ctx.shadowBlur = 6;
+            ctx.fillRect(-pw, -ph, pw * 0.45, ph * 2);
+            ctx.fillRect(pw - pw * 0.45, -ph, pw * 0.45, ph * 2);
+
+            ctx.restore();
+
+            // Hour Silkscreen Numeral & Brackets: [ 01 ], [ 12 ]
+            const numR = R * 0.81;
+            const hNum = i === 0 ? 12 : i;
+            const nx = cx + cosA * numR;
+            const ny = cy + sinA * numR;
+            const txt = hNum < 10 ? `[ 0${hNum} ]` : `[ ${hNum} ]`;
+            ctx.font = `bold ${Math.round(R * 0.068)}px "Space Grotesk", monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = c.accent;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 5;
+            ctx.fillText(txt, nx, ny);
+        }
+
+        ctx.restore();
+        return off;
+    }
+
+    // ── Design 10: Gem Crown (multi-colored precious gem markers,
     //    prismatic bezel, iridescent face, faceted gem hour nodes) ──
     //
     // Gem palette: 4 cardinal gems + 8 interpolated intermediate stones.
@@ -2407,7 +2769,7 @@
         // Segments keeps the rim flat: its 60-segment ring IS the
         // second indicator, a second glow would fight it.
         if (design !== 3) {
-            const rimR = design === 5 || design === 7 || design === 8 ? R * 0.94 : R * 0.985;
+            const rimR = design === 5 || design === 7 || design === 8 || design === 9 || design === 10 ? R * 0.94 : R * 0.985;
             const br =
                 0.68 +
                 0.18 * (1 - Math.cos((Date.now() * 2 * Math.PI) / 3200));
@@ -2512,10 +2874,51 @@
             ctx.restore();
         }
 
-        // ── Gem Crown: Prismatic sparkle sweep (design 8) ──
+        // ── Reactor Core: Dynamic Plasma Vortex & Flux Pulse (design 8) ──
+        if (design === 8) {
+            const plasmaRot = ((Date.now() / 4200) % (Math.PI * 2));
+            ctx.save();
+            ctx.strokeStyle = `rgba(${c.rgb},.35)`;
+            ctx.lineWidth = 1.4;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 8;
+            // Inner plasma vortex arcs
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.26, plasmaRot, plasmaRot + Math.PI * 0.6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.26, plasmaRot + Math.PI, plasmaRot + Math.PI * 1.6);
+            ctx.stroke();
+            // Core breathing energy glow
+            const pulse = 0.10 + 0.08 * (1 + Math.sin(Date.now() / 500));
+            ctx.fillStyle = `rgba(${c.rgb},${pulse})`;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ── Circuit PCB: Dynamic Clock Signal Activity (design 9) ──
+        if (design === 9) {
+            const pulseStep = Math.floor((Date.now() / 400) % 4);
+            const cardAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+            const a = cardAngles[pulseStep];
+            const px = cx + Math.cos(a) * (R * 0.52);
+            const py = cy + Math.sin(a) * (R * 0.52);
+            ctx.save();
+            ctx.fillStyle = c.accent;
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(px, py, R * 0.016, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // ── Gem Crown: Prismatic sparkle sweep (design 10) ──
         // A highlight "spark" travels around the gem crown ring,
         // illuminating each gem as it passes (one revolution per 12s)
-        if (design === 8) {
+        if (design === 10) {
             const sparkAngle = ((Date.now() / 12000) % 1) * Math.PI * 2 - Math.PI / 2;
             const sparkR = R * 0.82;
             const sparkX = cx + Math.cos(sparkAngle) * sparkR;
@@ -2681,6 +3084,57 @@
             ctx.stroke();
             ctx.restore();
         } else if (design === 8) {
+            reactorHand(ctx, cx, cy, hrA, R * 0.50, 4.8, c.accent);
+            reactorHand(ctx, cx, cy, minA, R * 0.74, 3.4, c.accent);
+            // Reactor Core second hand: high-energy ion beam with plasma particle tip
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.16), cy - Math.sin(secA) * (R * 0.16));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.86), cy + Math.sin(secA) * (R * 0.86));
+            ctx.stroke();
+            // Ion particle at tip
+            const ix = cx + Math.cos(secA) * (R * 0.86);
+            const iy = cy + Math.sin(secA) * (R * 0.86);
+            ctx.beginPath();
+            ctx.arc(ix, iy, R * 0.016, 0, Math.PI * 2);
+            ctx.fillStyle = c.handSec;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(ix, iy, R * 0.007, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.restore();
+        } else if (design === 9) {
+            circuitHand(ctx, cx, cy, hrA, R * 0.48, 5.2, c.accent);
+            circuitHand(ctx, cx, cy, minA, R * 0.72, 3.6, c.accent);
+            // Circuit PCB second hand: precision gold probe needle with SMD square balance
+            ctx.save();
+            ctx.strokeStyle = c.handSec;
+            ctx.lineWidth = 1.2;
+            ctx.shadowColor = c.handSec;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.cos(secA) * (R * 0.14), cy - Math.sin(secA) * (R * 0.14));
+            ctx.lineTo(cx + Math.cos(secA) * (R * 0.85), cy + Math.sin(secA) * (R * 0.85));
+            ctx.stroke();
+            // SMD balance square at tail
+            const bx = cx - Math.cos(secA) * (R * 0.10);
+            const by = cy - Math.sin(secA) * (R * 0.10);
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.rotate(secA);
+            ctx.beginPath();
+            const sq = R * 0.016;
+            ctx.rect(-sq, -sq, sq * 2, sq * 2);
+            ctx.fillStyle = c.handSec;
+            ctx.fill();
+            ctx.restore();
+            ctx.restore();
+        } else if (design === 10) {
             gemHand(ctx, cx, cy, hrA, R * 0.50, 4.0, c.accent);
             gemHand(ctx, cx, cy, minA, R * 0.74, 2.8, c.accent);
             // Gem Crown second hand: slim needle with gem tip
@@ -2783,8 +3237,41 @@
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.012, 0, Math.PI * 2);
             ctx.fillStyle = "#ffffff";
-            ctx.fill();
         } else if (design === 8) {
+            // Reactor Core: pulsing tokamak core with concentric plasma containment rings
+            ctx.shadowBlur = 16;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.038, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${c.rgb},.35)`;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.022, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 0.010, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        } else if (design === 9) {
+            // Circuit PCB: gold-plated square CPU die cap with pin 1 marker
+            ctx.shadowBlur = 10;
+            const dieSz = R * 0.032;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.rect(-dieSz, -dieSz, dieSz * 2, dieSz * 2);
+            ctx.fillStyle = "#1e222a";
+            ctx.strokeStyle = c.accent;
+            ctx.lineWidth = 1.5;
+            ctx.fill();
+            ctx.stroke();
+            // Pin 1 dot
+            ctx.beginPath();
+            ctx.arc(-dieSz * 0.52, -dieSz * 0.52, R * 0.005, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
+            ctx.fill();
+            ctx.restore();
+        } else if (design === 10) {
             // Gem Crown: enlarged luxury prismatic jewel center with
             // a wider orbiting halo of faceted gem satellites and
             // counter-rotating light facets around the hand base.
@@ -3060,7 +3547,109 @@
         ctx.restore();
     }
 
-    // ── Gem Crown Hand (Design 8) ──
+    // ── Reactor Core Hand (Design 8) ──
+    // Tapered dual-rail ion-channel lance with luminescent tip and industrial counterweight
+    function reactorHand(ctx, cx, cy, angle, len, width, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+
+        // Base counterweight notch
+        ctx.lineWidth = width * 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-width * 0.8, len * 0.16);
+        ctx.lineTo(width * 0.8, len * 0.16);
+        ctx.lineTo(width * 0.5, 0);
+        ctx.lineTo(-width * 0.5, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Main dual-rail magnetic blade
+        ctx.lineWidth = width * 0.45;
+        const w = width * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(-w, 0);
+        ctx.lineTo(-w * 0.35, -len * 0.74);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(w, 0);
+        ctx.lineTo(w * 0.35, -len * 0.74);
+        ctx.stroke();
+
+        // Core plasma emitter tip
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.5, -len * 0.72);
+        ctx.lineTo(0, -len);
+        ctx.lineTo(w * 0.5, -len * 0.72);
+        ctx.closePath();
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowBlur = 14;
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    // ── Circuit PCB Hand (Design 9) ──
+    // Copper PCB bus trace with plated solder contact pad and 45-degree chamfered arrow
+    function circuitHand(ctx, cx, cy, angle, len, width, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+
+        // Tail via pad (circular ring with inner hole)
+        const tailLen = len * 0.15;
+        ctx.beginPath();
+        ctx.arc(0, tailLen, width * 0.85, 0, Math.PI * 2);
+        ctx.lineWidth = width * 0.4;
+        ctx.stroke();
+
+        // Main trace bus
+        ctx.lineWidth = width * 0.65;
+        ctx.beginPath();
+        ctx.moveTo(0, tailLen - width * 0.85);
+        ctx.lineTo(0, -len * 0.65);
+        ctx.stroke();
+
+        // SMD Component contact block at 65% mark
+        const padY = -len * 0.65;
+        const pw = width * 1.1;
+        const ph = len * 0.12;
+        ctx.beginPath();
+        ctx.rect(-pw, padY - ph, pw * 2, ph);
+        ctx.fillStyle = "#1e222a";
+        ctx.fill();
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Solder fillets
+        ctx.fillStyle = color;
+        ctx.fillRect(-pw, padY - ph, pw * 2, ph * 0.28);
+        ctx.fillRect(-pw, padY - ph * 0.28, pw * 2, ph * 0.28);
+
+        // 45-degree chamfered arrow tip
+        ctx.beginPath();
+        ctx.moveTo(-width * 0.6, padY - ph);
+        ctx.lineTo(0, -len);
+        ctx.lineTo(width * 0.6, padY - ph);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // ── Gem Crown Hand (Design 10) ──
     // Slim polished hand with a small hexagonal gem set near the tip,
     // evoking haute horlogerie jewelled hands.
     function gemHand(ctx, cx, cy, angle, len, width, color) {
