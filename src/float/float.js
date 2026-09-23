@@ -63,12 +63,12 @@
         // The float owns more controls than the mini clock, so it gets a
         // wider base geometry. The window controls are stacked vertically,
         // so every skin gets enough height for that compact right-side group.
-        const width = Math.max(bw + (KIND === "timer" ? 88 : 72), KIND === "timer" ? 370 : 350);
+        const width = Math.max(bw + 72, 350);
         const baseHeight = Math.max(
             bh + (KIND === "sw" ? 14 : 10),
             KIND === "sw" ? 58 : 52
         );
-        const height = baseHeight + (KIND === "timer" && choosing ? 54 : 0);
+        const height = KIND === "timer" ? 92 : baseHeight;
         const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
@@ -85,37 +85,6 @@
     const ICO_MIN = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
     const ICO_CLOSE = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
     const ICO_DISMISS = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-
-    /* Preset chooser state: an idle timer adds a second row for the
-       quick-pick panel ("+" button) inside the same window shell. */
-    let choosing = false;
-
-    function syncPresetBtn() {
-        const b = document.getElementById("btn-presets");
-        if (!b) return;
-        b.hidden = !(KIND === "timer" && !tRunning);
-        if (!b.hidden) {
-            b.innerHTML = choosing ? ICO_BACK : ICO_TIMER;
-            b.removeAttribute("title");
-        }
-    }
-
-    function openPresets() {
-        if (KIND !== "timer" || tRunning) return;
-        choosing = true;
-        shellEl().classList.add("float-choosing");
-        document.getElementById("float-presets").hidden = false;
-        syncPresetBtn();
-        syncSize(true, true);
-    }
-
-    function closePresets() {
-        choosing = false;
-        shellEl().classList.remove("float-choosing");
-        document.getElementById("float-presets").hidden = true;
-        syncPresetBtn();
-        syncSize(true, true);
-    }
 
     function setStartIcon(running) {
         const b = document.getElementById("btn-start");
@@ -223,13 +192,11 @@
     }
 
     function tAdd(secs) {
-        if (KIND !== "timer" || tRunning || !Number.isFinite(secs) || secs <= 0) return;
+        if (KIND !== "timer" || !Number.isFinite(secs) || secs <= 0) return;
         tTotal = Math.max(0, tTotal) + secs;
         tAcc = Math.max(0, tAcc) + secs;
         tHideDone();
         document.getElementById("float-prog").hidden = false;
-        setStartIcon(false);
-        syncPresetBtn();
         tPaint();
     }
 
@@ -239,11 +206,9 @@
         tLastTick = Date.now();
         clearInterval(tInt);
         tInt = setInterval(tTick, 100);
-        closePresets();
         document.getElementById("float-prog").hidden = false;
         shellEl().classList.add("float-running");
         setStartIcon(true);
-        syncSize(true);
         tPaint();
         syncIdleState();
     }
@@ -269,8 +234,7 @@
     function tToggle() {
         if (tRunning) { tPause(); return; }
         if (tAcc <= 0) {
-            openPresets();
-            return;
+            tAdd(60);
         }
         tGo();
     }
@@ -281,13 +245,10 @@
         tTotal = 0; tAcc = 0; tTitleSec = -1;
         const btns = document.querySelectorAll(".float-preset");
         for (const b of btns) b.classList.remove("armed");
-        closePresets();
         document.getElementById("float-prog").hidden = true;
-        syncPresetBtn();
         shellEl().classList.remove("float-running", "float-warn", "float-done");
         tHideDone();
         setStartIcon(false);
-        syncSize(true);
         tPaint();
         syncIdleState();
         document.title = window.ccI18n.t("float.timerTitle");
@@ -300,7 +261,6 @@
         shellEl().classList.remove("float-running", "float-warn");
         shellEl().classList.add("float-done");
         setStartIcon(false);
-        syncPresetBtn();
         tPaint();
         syncIdleState();
         const txt = document.getElementById("float-done-txt");
@@ -318,7 +278,6 @@
         subEl().textContent = KIND === "timer"
             ? window.ccI18n.t("float.timerSub")
             : window.ccI18n.t("float.stopwatchSub");
-        syncPresetBtn();
         setStartIcon(KIND === "sw" ? swRunning : tRunning);
         if (KIND === "sw" && swElapsed === 0 && !swRunning) {
             document.title = window.ccI18n.t("float.stopwatchTitle");
@@ -347,9 +306,7 @@
         document.body.classList.toggle("no-animations", cfg.miniNoAnimations === true);
         if (window.audioEngine) window.audioEngine.setMuted(cfg.audioMuted === true);
         if (KIND === "timer") {
-            document.getElementById("float-presets").hidden = !choosing;
             document.getElementById("float-prog").hidden = timerIdle();
-            syncPresetBtn();
         }
         applyTexts();
         if (KIND === "sw") swPaint(); else tPaint();
@@ -395,8 +352,7 @@
     if (btnStart) {
         btnStart.addEventListener("click", () => {
             if (KIND === "sw") swToggle(); else tToggle();
-            const st = getStartTickerState();
-            showActionTicker(st.key, st.ico);
+            hideActionTicker();
         });
         btnStart.addEventListener("mouseenter", () => {
             const st = getStartTickerState();
@@ -441,22 +397,8 @@
         btnDismiss.addEventListener("mouseleave", hideActionTicker);
     }
 
-    if (btnPresets) {
-        btnPresets.addEventListener("click", () => {
-            if (choosing) closePresets(); else openPresets();
-            showActionTicker(choosing ? "float.back" : "float.pickMinutes", choosing ? ICO_BACK : ICO_TIMER);
-        });
-        btnPresets.addEventListener("mouseenter", () => {
-            showActionTicker(choosing ? "float.back" : "float.pickMinutes", choosing ? ICO_BACK : ICO_TIMER);
-        });
-        btnPresets.addEventListener("mouseleave", hideActionTicker);
-    }
-
     const presets = document.querySelectorAll(".float-preset");
     for (const b of presets) b.addEventListener("click", () => tAdd(Number(b.dataset.s)));
-    document.getElementById("float-presets").addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) closePresets();
-    });
 
     shellEl().addEventListener("mousedown", (e) => {
         if (e.target.closest(".controls, .float-preset, .float-done")) return;

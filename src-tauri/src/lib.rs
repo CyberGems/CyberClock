@@ -416,7 +416,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     };
     // Compact size per float kind
     let (title, wide, tall) = match kind {
-        "timer" => ("Timer · CyberClock", 286.0, 52.0),
+        "timer" => ("Timer · CyberClock", 286.0, 92.0),
         "cal" => ("Calendar · CyberClock", 286.0, 268.0),
         "analog" => ("Analog Clock · CyberClock", 316.0, 316.0),
         _ => ("Stopwatch · CyberClock", 286.0, 52.0),
@@ -1364,6 +1364,9 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
         } else if label.starts_with("float-analog") {
             let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(316, 316));
             analogs.push((win, size.width as i32, size.height as i32));
+        } else if label.starts_with("float-timer") {
+            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 92));
+            bars.push((win, size.width as i32, size.height as i32));
         } else {
             let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 52));
             bars.push((win, size.width as i32, size.height as i32));

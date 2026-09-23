@@ -135,29 +135,32 @@
     display: none;
 }
 
-/* Idle timer: keep the clock face in the first row and place presets
-   below it, still inside one continuous outer shell. */
-.float-shell.float-choosing {
+/* Timer variant: permanent 2-row card layout */
+.float-shell[data-kind="timer"] {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-rows: minmax(0, 1fr) auto;
     column-gap: 12px;
-    row-gap: 8px;
+    row-gap: 6px;
     align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
-.float-shell.float-choosing > .status-dot {
+.float-shell[data-kind="timer"] > .status-dot {
     grid-column: 1;
     grid-row: 1;
 }
-.float-shell.float-choosing > .time-block {
+.float-shell[data-kind="timer"] > .time-block {
     grid-column: 2;
     grid-row: 1;
     min-width: 0;
 }
-.float-shell.float-choosing > .sep {
+.float-shell[data-kind="timer"] > .sep {
     display: none;
 }
-.float-shell.float-choosing > .controls {
+.float-shell[data-kind="timer"] > .controls {
     grid-column: 3;
     grid-row: 1;
 }
@@ -176,18 +179,20 @@
     min-width: 0;
     z-index: 2;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     justify-content: stretch;
-    padding: 8px 0 10px;
+    padding: 6px 0 2px;
     border: 0;
-    border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+    border-top: 1px solid rgba(var(--rgb-accent), 0.22);
     border-radius: 0;
     background: transparent;
     box-shadow: none;
     opacity: var(--fg-op, 1);
 }
-.float-presets[hidden] { display: none; }
+.float-shell[data-kind="sw"] .float-presets {
+    display: none !important;
+}
 
 .float-preset {
     flex: 1 1 0;

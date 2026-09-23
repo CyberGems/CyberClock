@@ -31,12 +31,6 @@
             </div>
             <div class="sep"></div>
             <div class="controls">
-                <button class="ctl-btn" id="btn-presets" aria-label="Pick minutes" hidden>
-                    <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>
-                    </svg>
-                </button>
                 <button class="ctl-btn" id="btn-start" aria-label="Start">
                     <svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -65,12 +59,12 @@
                     </button>
                 </span>
             </div>
-            <div class="float-presets" id="float-presets" hidden>
-                <button class="float-preset" data-s="30">30s</button>
-                <button class="float-preset" data-s="60">1m</button>
-                <button class="float-preset" data-s="300">5m</button>
-                <button class="float-preset" data-s="600">10m</button>
-                <button class="float-preset" data-s="900">15m</button>
+            <div class="float-presets" id="float-presets">
+                <button class="float-preset" data-s="30">+30s</button>
+                <button class="float-preset" data-s="60">+1m</button>
+                <button class="float-preset" data-s="300">+5m</button>
+                <button class="float-preset" data-s="600">+10m</button>
+                <button class="float-preset" data-s="900">+15m</button>
             </div>
             <div class="float-prog" id="float-prog" hidden><div class="float-prog-fill" id="float-prog-fill"></div></div>
             <div class="float-done" id="float-done" hidden>
