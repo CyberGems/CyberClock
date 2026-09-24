@@ -74,6 +74,9 @@
     function setupMenuForCaller(info) {
         menuShownTime = Date.now();
         activeCaller = info || { caller: "mini", kind: "mini" };
+        if (galleryView && galleryView.style.display !== "none") {
+            closeGallery();
+        }
         const isTimer = activeCaller.kind === "timer";
         const isSw = activeCaller.kind === "sw";
         const isFloat = isTimer || isSw;
@@ -294,6 +297,8 @@
 
     function openGallery() {
         if (!galleryView) return;
+        const timerView = document.getElementById("ctx-timer-view");
+        if (timerView) timerView.style.display = "none";
         if (ctxTabs) ctxTabs.style.display = "none";
         if (panelActions) panelActions.style.display = "none";
         if (panelCustomize) panelCustomize.style.display = "none";
@@ -311,9 +316,22 @@
         galleryView.style.display = "none";
         document.body.classList.remove("gallery-open");
         if (ctxMenu) ctxMenu.classList.remove("gallery-mode");
-        if (ctxTabs) ctxTabs.style.display = "flex";
-        if (panelCustomize) panelCustomize.style.display = "flex";
-        if (panelActions) panelActions.style.display = "none";
+
+        const isFloat = activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw");
+        const timerView = document.getElementById("ctx-timer-view");
+
+        if (isFloat) {
+            if (timerView) timerView.style.display = "flex";
+            if (ctxTabs) ctxTabs.style.display = "none";
+            if (panelActions) panelActions.style.display = "none";
+            if (panelCustomize) panelCustomize.style.display = "none";
+        } else {
+            if (timerView) timerView.style.display = "none";
+            if (ctxTabs) ctxTabs.style.display = "flex";
+            const onTab = document.querySelector(".ctx-tab.on")?.dataset.tab || "customize";
+            if (panelCustomize) panelCustomize.style.display = onTab === "customize" ? "flex" : "none";
+            if (panelActions) panelActions.style.display = onTab === "actions" ? "flex" : "none";
+        }
 
         reportMenuHeight();
     }
@@ -812,6 +830,9 @@
     window.addEventListener("blur", () => {
         // Prevent spurious blur during initial focus transition
         if (Date.now() - menuShownTime < 350) return;
+        if (galleryView && galleryView.style.display !== "none") {
+            closeGallery();
+        }
         if (window.cc && window.cc.closeMenuPopup) {
             window.cc.closeMenuPopup();
         }

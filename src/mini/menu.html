@@ -51,15 +51,17 @@
                         <input type="text" id="ctx-timer-name-input" class="ctx-timer-name-input" maxlength="24" spellcheck="false" placeholder="Timer 1" data-tooltip="Rename timer" data-i18n-attr="data-tooltip:float.renameTimer, placeholder:float.timerNamePlaceholder" />
                         <span class="ctx-timer-edit-icon" title="Edit">✎</span>
                     </div>
-                    <span class="ctx-timer-skin-badge" id="ctx-timer-skin-badge">Skin 1</span>
                 </div>
 
                 <div class="ctx-sep"></div>
 
                 <div class="ctx-section">
                     <div class="ctx-section-header">
-                        <span class="ctx-section-title" data-i18n="float.skin">Design</span>
-                        <button class="ctx-gallery-link" id="btn-timer-gallery-link" data-i18n="gallery.title">Gallery...</button>
+                        <div class="ctx-section-title-wrap">
+                            <span class="ctx-section-title" data-i18n="float.skin">Design</span>
+                            <span class="ctx-timer-skin-badge" id="ctx-timer-skin-badge">Skin 1</span>
+                        </div>
+                        <button class="ctx-gallery-link" id="btn-timer-gallery-link" data-i18n="gallery.linkShort">Gallery...</button>
                     </div>
                     <div class="timer-skin-pills" id="timer-skin-pills">
                         <!-- Populated dynamically (1..15) in menu.js -->

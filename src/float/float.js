@@ -429,6 +429,9 @@
         return KIND === "sw" ? swRunning : tRunning;
     }
 
+    const tickerIco = document.getElementById("ticker-ico");
+    const tickerText = document.getElementById("ticker-text");
+
     function showActionTicker(actionKey, iconHtml) {
         if (isRunning()) return;
         const sh = shellEl();

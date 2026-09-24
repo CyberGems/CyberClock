@@ -27,9 +27,17 @@
 .float-shell .time-block {
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+.float-shell #mini-time,
+.float-shell #mini-date {
+    text-align: left !important;
 }
 .float-shell #mini-date {
-    max-width: 140px;
+    max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -120,7 +120,7 @@
         border: 1px solid rgba(var(--rgb-accent), 0.3);
         white-space: nowrap;
         text-overflow: ellipsis;
-        max-width: 75px;
+        max-width: 90px;
         overflow: hidden;
     }
     .ctx-section-header {
@@ -128,6 +128,11 @@
         align-items: center;
         justify-content: space-between;
         padding: 0 4px 4px 4px;
+    }
+    .ctx-section-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
     .ctx-gallery-link {
         background: transparent;
