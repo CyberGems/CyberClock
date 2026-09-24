@@ -160,9 +160,9 @@ body.is-dragging * {
     border: 1px solid rgba(var(--rgb-accent), 0.45);
     border-radius: 10px;
     box-shadow:
-        0 12px 32px rgba(0, 0, 0, 0.9),
-        0 0 20px rgba(var(--rgb-accent), 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 8px 20px rgba(0, 0, 0, 0.88),
+        0 0 12px rgba(var(--rgb-accent), 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     padding: 5px;

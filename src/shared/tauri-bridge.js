@@ -100,6 +100,9 @@
         closeMiniContextMenu: async () => {
             await invoke("close_mini_context_menu");
         },
+        getMenuCaller: async () => {
+            return await invoke("get_menu_caller");
+        },
         miniMenuReady: async (width, height) => {
             await invoke("mini_menu_ready", {
                 width: Number(width) || 270,

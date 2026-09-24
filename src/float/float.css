@@ -28,6 +28,12 @@
     position: relative;
     overflow: hidden;
 }
+.float-shell #mini-date {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .float-shell[data-kind="sw"] .controls {
     gap: 6px;
     padding: 4px 0;

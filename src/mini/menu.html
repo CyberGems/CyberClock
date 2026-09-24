@@ -43,6 +43,84 @@
         </svg>
 
         <div class="ctx-menu" id="ctx-menu">
+            <!-- VIEW: Dedicated Timer Context Panel -->
+            <div class="ctx-timer-view" id="ctx-timer-view" style="display: none;">
+                <div class="ctx-timer-header">
+                    <div class="ctx-timer-title-wrap">
+                        <span class="ico timer-ico" data-ico="timer"></span>
+                        <input type="text" id="ctx-timer-name-input" class="ctx-timer-name-input" maxlength="24" spellcheck="false" placeholder="Timer 1" data-tooltip="Rename timer" data-i18n-attr="data-tooltip:float.renameTimer, placeholder:float.timerNamePlaceholder" />
+                        <span class="ctx-timer-edit-icon" title="Edit">✎</span>
+                    </div>
+                    <span class="ctx-timer-skin-badge" id="ctx-timer-skin-badge">Skin 1</span>
+                </div>
+
+                <div class="ctx-sep"></div>
+
+                <div class="ctx-section">
+                    <div class="ctx-section-header">
+                        <span class="ctx-section-title" data-i18n="float.skin">Design</span>
+                        <button class="ctx-gallery-link" id="btn-timer-gallery-link" data-i18n="gallery.title">Gallery...</button>
+                    </div>
+                    <div class="timer-skin-pills" id="timer-skin-pills">
+                        <!-- Populated dynamically (1..15) in menu.js -->
+                    </div>
+                </div>
+
+                <div class="ctx-sep"></div>
+
+                <div class="switch-row" id="ctx-timer-sound">
+                    <span class="switch-lbl" data-i18n="float.soundOnComplete">Sound on finish</span>
+                    <div class="toggle on" id="toggle-timer-sound">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="switch-row" id="ctx-timer-loop">
+                    <span class="switch-lbl" data-i18n="float.autoRestart">Auto-restart on finish</span>
+                    <div class="toggle" id="toggle-timer-loop">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="switch-row" id="ctx-timer-aot">
+                    <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                    <div class="toggle" id="toggle-timer-aot">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="switch-row" id="ctx-timer-taskbar">
+                    <span class="switch-lbl" data-i18n="settings.taskbar.widgetsTitle">Show in Taskbar</span>
+                    <div class="toggle" id="toggle-timer-taskbar">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ctx-sep"></div>
+
+                <div class="ctx-item" data-action="new_timer">
+                    <span class="ico" data-ico="timer"></span>
+                    <span class="label" data-i18n="float.newTimer">New Timer</span>
+                </div>
+                <div class="ctx-item" data-action="close_other_timers">
+                    <span class="ico" data-ico="power"></span>
+                    <span class="label" data-i18n="float.closeOtherTimers">Close other timers</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item danger" data-action="close_current_timer">
+                    <span class="ico" data-ico="close"></span>
+                    <span class="label" data-i18n="float.closeThisTimer">Close this timer</span>
+                </div>
+            </div>
+
             <!-- TAB BAR -->
             <div class="ctx-tabs" id="ctx-tabs">
                 <button class="ctx-tab on" id="tab-btn-actions" data-tab="actions" data-i18n="menu.tabActions">Actions</button>

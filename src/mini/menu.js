@@ -1,5 +1,75 @@
     let currentDesign = 1;
     let alwaysOnTop = false;
+    let activeCaller = { caller: "mini", kind: "mini" };
+
+    function buildTimerSkinPills() {
+        const container = document.getElementById("timer-skin-pills");
+        if (!container) return;
+        container.innerHTML = "";
+        for (let i = 1; i <= 15; i++) {
+            const pill = document.createElement("button");
+            pill.className = "timer-skin-pill";
+            pill.dataset.skin = String(i);
+            pill.textContent = String(i);
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                selectTimerSkin(i);
+            });
+            container.appendChild(pill);
+        }
+    }
+
+    function selectTimerSkin(mode) {
+        syncTimerDesignUI(mode);
+        if (window.cc && window.cc.saveSettings) {
+            window.cc.saveSettings({ timerDesign: mode });
+        }
+    }
+
+    function syncTimerDesignUI(mode) {
+        const badge = document.getElementById("ctx-timer-skin-badge");
+        if (badge) {
+            const meta = SKINS_META.find((s) => s.id === mode);
+            const name = meta && window.ccI18n ? window.ccI18n.t(meta.key) : `Skin ${mode}`;
+            badge.textContent = name.replace(/^\d+:\s*/, "");
+        }
+        document.querySelectorAll(".timer-skin-pill").forEach((p) => {
+            p.classList.toggle("active", parseInt(p.dataset.skin, 10) === mode);
+        });
+    }
+
+    function setupMenuForCaller(info) {
+        activeCaller = info || { caller: "mini", kind: "mini" };
+        const isTimer = activeCaller.kind === "timer";
+        const timerView = document.getElementById("ctx-timer-view");
+        const tabs = document.getElementById("ctx-tabs");
+        const actionsPanel = document.getElementById("tab-panel-actions");
+        const customizePanel = document.getElementById("tab-panel-customize");
+
+        if (isTimer) {
+            if (timerView) timerView.style.display = "flex";
+            if (tabs) tabs.style.display = "none";
+            if (actionsPanel) actionsPanel.style.display = "none";
+            if (customizePanel) customizePanel.style.display = "none";
+
+            const customName = localStorage.getItem("cc_name_" + activeCaller.caller);
+            const match = activeCaller.caller.match(/float-timer-(\d+)/);
+            const num = match ? match[1] : "1";
+            const defaultName = window.ccI18n ? window.ccI18n.t("float.timerNumbered", { n: num }) : `Timer ${num}`;
+            const nameInput = document.getElementById("ctx-timer-name-input");
+            if (nameInput) nameInput.value = customName || defaultName || `Timer ${num}`;
+
+            const tDesign = cfg.timerDesign || cfg.miniDesign || 1;
+            syncTimerDesignUI(tDesign);
+        } else {
+            if (timerView) timerView.style.display = "none";
+            if (tabs) tabs.style.display = "flex";
+            const onTab = document.querySelector(".ctx-tab.on")?.dataset.tab || "actions";
+            if (actionsPanel) actionsPanel.style.display = onTab === "actions" ? "flex" : "none";
+            if (customizePanel) customizePanel.style.display = onTab === "customize" ? "flex" : "none";
+        }
+        reportMenuHeight();
+    }
 
     // Discrete zoom stops (slider index → factor). 100% is the default.
     const ZOOM_STEPS = [0.5, 1, 2, 4];
@@ -86,9 +156,14 @@
             c.classList.toggle("active", parseInt(c.dataset.mode) === mode);
         });
         syncSolarVisibility(mode);
+        syncTimerDesignUI(mode);
 
         if (window.cc && window.cc.saveSettings) {
-            window.cc.saveSettings({ miniDesign: mode });
+            if (activeCaller && activeCaller.kind === "timer") {
+                window.cc.saveSettings({ timerDesign: mode });
+            } else {
+                window.cc.saveSettings({ miniDesign: mode });
+            }
         }
     }
 
@@ -279,6 +354,18 @@
 
                 // AOT
                 updateAotState(cfg.alwaysOnTop || false);
+
+                // Dedicated Timer Toggles & Design
+                const tglTimerSound = document.getElementById("toggle-timer-sound");
+                if (tglTimerSound) tglTimerSound.classList.toggle("on", cfg.timerSoundEnabled !== false);
+                const tglTimerLoop = document.getElementById("toggle-timer-loop");
+                if (tglTimerLoop) tglTimerLoop.classList.toggle("on", cfg.timerAutoRestart === true);
+                const tglTimerTaskbar = document.getElementById("toggle-timer-taskbar");
+                if (tglTimerTaskbar) tglTimerTaskbar.classList.toggle("on", cfg.showWidgetsInTaskbar === true);
+                const tglTimerAot = document.getElementById("toggle-timer-aot");
+                if (tglTimerAot) tglTimerAot.classList.toggle("on", Boolean(cfg.alwaysOnTop));
+                const tDesign = cfg.timerDesign || cfg.miniDesign || 1;
+                syncTimerDesignUI(tDesign);
             }
             reportMenuHeight();
         });
@@ -539,6 +626,103 @@
             }
         }
     });
+
+    // ── Dedicated Timer Listeners ─────────────────────────────────
+    buildTimerSkinPills();
+
+    const timerNameInput = document.getElementById("ctx-timer-name-input");
+    if (timerNameInput) {
+        const commitTimerName = () => {
+            if (!activeCaller || activeCaller.kind !== "timer") return;
+            const val = timerNameInput.value.trim();
+            if (val) {
+                localStorage.setItem("cc_name_" + activeCaller.caller, val);
+            } else {
+                localStorage.removeItem("cc_name_" + activeCaller.caller);
+            }
+            if (window.__TAURI__ && window.__TAURI__.event) {
+                window.__TAURI__.event.emit("widget:rename", { label: activeCaller.caller, name: val });
+            }
+        };
+        timerNameInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                commitTimerName();
+                timerNameInput.blur();
+            }
+        });
+        timerNameInput.addEventListener("change", commitTimerName);
+    }
+
+    const tglTimerSoundRow = document.getElementById("ctx-timer-sound");
+    if (tglTimerSoundRow) {
+        tglTimerSoundRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-sound");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ timerSoundEnabled: on });
+            }
+        });
+    }
+
+    const tglTimerLoopRow = document.getElementById("ctx-timer-loop");
+    if (tglTimerLoopRow) {
+        tglTimerLoopRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-loop");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ timerAutoRestart: on });
+            }
+        });
+    }
+
+    const tglTimerAotRow = document.getElementById("ctx-timer-aot");
+    if (tglTimerAotRow) {
+        tglTimerAotRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-aot");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            updateAotState(on);
+            if (window.cc && window.cc.menuAction) {
+                window.cc.menuAction("aot");
+            }
+        });
+    }
+
+    const tglTimerTaskbarRow = document.getElementById("ctx-timer-taskbar");
+    if (tglTimerTaskbarRow) {
+        tglTimerTaskbarRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-taskbar");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ showWidgetsInTaskbar: on });
+            }
+        });
+    }
+
+    const btnTimerGallery = document.getElementById("btn-timer-gallery-link");
+    if (btnTimerGallery) {
+        btnTimerGallery.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openGallery();
+        });
+    }
+
+    // Listen for caller event and query current caller
+    if (window.__TAURI__ && window.__TAURI__.event) {
+        window.__TAURI__.event.listen("menu:caller", (e) => {
+            if (e.payload) {
+                setupMenuForCaller(e.payload);
+            }
+        });
+    }
+    if (window.cc && window.cc.getMenuCaller) {
+        window.cc.getMenuCaller().then((info) => {
+            if (info) setupMenuForCaller(info);
+        }).catch(() => {});
+    }
 
     // Close menu popup when it loses focus (click on other windows)
     window.addEventListener("blur", () => {

@@ -2496,6 +2496,8 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
+static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> =
+    std::sync::Mutex::new(None);
 static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 =
     std::sync::atomic::AtomicU32::new(360);
 
@@ -2600,13 +2602,46 @@ fn open_mini_context_menu(
             *g = Some((clock_x, clock_y, clock_w, clock_h, screen_x, screen_y));
         }
 
+        let caller_label = window.label().to_string();
+        if let Ok(mut c) = CURRENT_MENU_CALLER.lock() {
+            *c = Some(caller_label.clone());
+        }
+
         let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
         position_mini_context_menu(&menu, 286.0, last_h);
+
+        let caller_kind = if caller_label.starts_with("float-timer-") {
+            "timer"
+        } else if caller_label.starts_with("float-sw-") {
+            "sw"
+        } else {
+            "mini"
+        };
+        let _ = menu.emit("menu:caller", serde_json::json!({
+            "caller": caller_label,
+            "kind": caller_kind
+        }));
 
         let _ = menu.show();
         let _ = menu.set_focus();
         refresh_taskbar_tab(&menu);
     }
+}
+
+#[tauri::command]
+fn get_menu_caller() -> Option<serde_json::Value> {
+    let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone())?;
+    let kind = if caller.starts_with("float-timer-") {
+        "timer"
+    } else if caller.starts_with("float-sw-") {
+        "sw"
+    } else {
+        "mini"
+    };
+    Some(serde_json::json!({
+        "caller": caller,
+        "kind": kind
+    }))
 }
 
 #[tauri::command]
@@ -2644,6 +2679,22 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "new_analog" => spawn_float_window(&app, "analog").is_some(),
+        "close_other_timers" => {
+            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            for (label, win) in app.webview_windows() {
+                if label.starts_with("float-timer-") && label != caller {
+                    let _ = win.close();
+                }
+            }
+            true
+        }
+        "close_current_timer" => {
+            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            if let Some(win) = app.get_webview_window(&caller) {
+                let _ = win.close();
+            }
+            true
+        }
         "close" => {
             exit_app(&app);
             true
@@ -4001,6 +4052,7 @@ pub fn run() {
             close_mini_context_menu,
             mini_menu_ready,
             menu_action,
+            get_menu_caller,
             get_tray_menu_state,
             report_relax_playing,
             hide_tray_menu,

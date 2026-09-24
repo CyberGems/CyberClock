@@ -9,22 +9,54 @@
     // The kind is encoded in the window label ("float-timer-3" /
     // "float-sw-3"); the query string is only a best-effort hint.
     let KIND = params.get("kind") === "timer" ? "timer" : "sw";
+    let WINDOW_LABEL = "";
     function kindFromLabel() {
-        if (params.get("kind") === "timer" || params.get("kind") === "sw") {
-            return params.get("kind");
-        }
         try {
             if (window.__TAURI__ && window.__TAURI__.window && window.__TAURI__.window.getCurrentWindow) {
                 const w = window.__TAURI__.window.getCurrentWindow();
                 const lbl = typeof w.label === "string" ? w.label : "";
+                WINDOW_LABEL = lbl;
                 if (lbl.indexOf("float-timer-") === 0) return "timer";
                 if (lbl.indexOf("float-sw-") === 0) return "sw";
             }
         } catch (e) { /* keep default */ }
+        if (params.get("kind") === "timer" || params.get("kind") === "sw") {
+            return params.get("kind");
+        }
         return KIND;
     }
     KIND = kindFromLabel();
     document.getElementById("shell").dataset.kind = KIND;
+
+    const seqMatch = WINDOW_LABEL.match(/float-(?:timer|sw)-(\d+)/);
+    const seqNum = seqMatch ? parseInt(seqMatch[1], 10) : 1;
+
+    function getWidgetName() {
+        const stored = localStorage.getItem("cc_name_" + WINDOW_LABEL);
+        if (stored && stored.trim()) return stored.trim();
+        if (KIND === "timer") {
+            return window.ccI18n.t("float.timerNumbered", { n: seqNum }) || `Timer ${seqNum}`;
+        }
+        return window.ccI18n.t("float.stopwatchNumbered", { n: seqNum }) || `Stopwatch ${seqNum}`;
+    }
+
+    window.addEventListener("storage", (e) => {
+        if (e.key === "cc_name_" + WINDOW_LABEL) {
+            applyTexts();
+        }
+    });
+    if (window.__TAURI__ && window.__TAURI__.event) {
+        window.__TAURI__.event.listen("widget:rename", (e) => {
+            if (e.payload && e.payload.label === WINDOW_LABEL) {
+                if (e.payload.name) {
+                    localStorage.setItem("cc_name_" + WINDOW_LABEL, e.payload.name);
+                } else {
+                    localStorage.removeItem("cc_name_" + WINDOW_LABEL);
+                }
+                applyTexts();
+            }
+        });
+    }
 
     let cfg = {};
 
@@ -56,7 +88,9 @@
 
     let lastW = 0, lastH = 0;
     function syncSize(force, recenter = false) {
-        const design = cfg.miniDesign || 1;
+        const design = (KIND === "timer" && cfg.timerDesign)
+            ? cfg.timerDesign
+            : (cfg.miniDesign || 1);
         const zoom = zoomFactor();
         const bw = DESIGN_WIDTHS[design] || 280;
         const bh = DESIGN_HEIGHTS[design] || 48;
@@ -295,23 +329,34 @@
         if (txt) txt.textContent = window.ccI18n.t("float.timesUp");
         document.getElementById("float-done").hidden = false;
         try {
-            if (cfg.audioMuted !== true && window.audioEngine) {
+            const soundEnabled = cfg.timerSoundEnabled !== false;
+            if (soundEnabled && cfg.audioMuted !== true && window.audioEngine) {
                 window.audioEngine.resume();
-                window.audioEngine.chime("chime-digital", cfg.alarmVolume ?? 0.75);
+                window.audioEngine.chime("chime-crystal", cfg.alarmVolume ?? 0.75);
             }
         } catch (e) { /* audio must never break the widget */ }
-        document.title = window.ccI18n.t("float.timesUp") + " · CyberClock";
+        const name = getWidgetName();
+        document.title = `${window.ccI18n.t("float.timesUp")} · ${name}`;
+
+        if (cfg.timerAutoRestart === true && tTotal > 0) {
+            setTimeout(() => {
+                if (cfg.timerAutoRestart === true && tTotal > 0 && !tRunning) {
+                    tAcc = tTotal;
+                    tHideDone();
+                    tGo();
+                }
+            }, 1000);
+        }
     }
     function applyTexts() {
-        subEl().textContent = KIND === "timer"
-            ? window.ccI18n.t("float.timerSub")
-            : window.ccI18n.t("float.stopwatchSub");
+        const name = getWidgetName();
+        subEl().textContent = name.toUpperCase();
         setStartIcon(KIND === "sw" ? swRunning : tRunning);
         if (KIND === "sw" && swElapsed === 0 && !swRunning) {
-            document.title = window.ccI18n.t("float.stopwatchTitle");
+            document.title = `${name} · CyberClock`;
         }
         if (KIND === "timer" && tTotal === 0) {
-            document.title = window.ccI18n.t("float.timerTitle");
+            document.title = `${name} · CyberClock`;
             if (!document.getElementById("float-done").hidden) {
                 document.getElementById("float-done-txt").textContent = window.ccI18n.t("float.timesUp");
             }
@@ -323,7 +368,10 @@
         window.CCTint.apply(cfg.theme || "ice");
         window.ccI18n.setLang(cfg.language || "auto");
         const sh = shellEl();
-        sh.dataset.design = cfg.miniDesign || "1";
+        const activeDesign = (KIND === "timer" && cfg.timerDesign)
+            ? cfg.timerDesign
+            : (cfg.miniDesign || "1");
+        sh.dataset.design = activeDesign;
         sh.style.setProperty("--bg-op", cfg.miniBgOpacity ?? 1.0);
         const activeOpacity = KIND === "timer"
             ? (cfg.floatTimerOpacity ?? cfg.miniOpacity ?? 1.0)

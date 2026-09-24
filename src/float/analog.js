@@ -182,11 +182,12 @@
         const menuWidth = ctxMenu.offsetWidth || 204;
         const menuHeight = ctxMenu.offsetHeight || 215;
 
-        const maxX = window.innerWidth - menuWidth - 8;
-        const maxY = window.innerHeight - menuHeight - 8;
+        const margin = 16;
+        const maxX = window.innerWidth - menuWidth - margin;
+        const maxY = window.innerHeight - menuHeight - margin;
 
-        const x = Math.max(8, Math.min(clientX, maxX));
-        const y = Math.max(8, Math.min(clientY, maxY));
+        const x = Math.max(margin, Math.min(clientX, maxX));
+        const y = Math.max(margin, Math.min(clientY, maxY));
 
         ctxMenu.style.left = `${x}px`;
         ctxMenu.style.top = `${y}px`;

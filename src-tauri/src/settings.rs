@@ -44,6 +44,10 @@ impl Default for CustomAlarm {
     }
 }
 
+fn default_timer_sound() -> bool {
+    true
+}
+
 fn default_true() -> bool {
     true
 }
@@ -121,6 +125,12 @@ pub struct AppSettings {
     pub float_timer_opacity: Option<f64>,
     #[serde(default)]
     pub float_sw_opacity: Option<f64>,
+    #[serde(default = "default_timer_sound")]
+    pub timer_sound_enabled: bool,
+    #[serde(default)]
+    pub timer_auto_restart: bool,
+    #[serde(default)]
+    pub timer_design: Option<u32>,
     #[serde(default)]
     pub close_to_tray: Option<bool>,
     #[serde(default)]
@@ -246,6 +256,9 @@ impl Default for AppSettings {
             float_analog_design: None,
             float_timer_opacity: None,
             float_sw_opacity: None,
+            timer_sound_enabled: true,
+            timer_auto_restart: false,
+            timer_design: None,
             close_to_tray: None,
             show_widgets_in_taskbar: false,
             mini_design: 1,
