@@ -867,6 +867,9 @@
         if (miniAutoCycleIntervalEl) miniAutoCycleIntervalEl.value = String(s.miniAutoCycleInterval || 15);
         const miniAutoCycleModeEl = document.getElementById("s-mini-auto-cycle-mode");
         if (miniAutoCycleModeEl) miniAutoCycleModeEl.value = s.miniAutoCycleMode || "sequential";
+
+        const sWidgetsTaskbar = document.getElementById("s-widgets-taskbar");
+        if (sWidgetsTaskbar) sWidgetsTaskbar.checked = s.showWidgetsInTaskbar === true;
     }
 
     function showCustomFile(which, p) {
@@ -6145,6 +6148,32 @@
             window.cc.saveSettings({ miniEdgeLimits: e.target.checked });
         });
     }
+
+    const sWidgetsTaskbar = document.getElementById("s-widgets-taskbar");
+    if (sWidgetsTaskbar) {
+        sWidgetsTaskbar.addEventListener("change", (e) => {
+            window.cc.saveSettings({ showWidgetsInTaskbar: e.target.checked });
+        });
+    }
+
+    const btnCenterWidgets = document.getElementById("s-btn-center-widgets");
+    if (btnCenterWidgets) {
+        btnCenterWidgets.addEventListener("click", () => {
+            if (window.cc && window.cc.centerOpenWidgets) {
+                window.cc.centerOpenWidgets();
+            }
+        });
+    }
+
+    const btnPinTaskbar = document.getElementById("s-btn-pin-taskbar");
+    if (btnPinTaskbar) {
+        btnPinTaskbar.addEventListener("click", () => {
+            if (window.cc && window.cc.openTaskbarSettings) {
+                window.cc.openTaskbarSettings();
+            }
+        });
+    }
+
     document
         .getElementById("s-aot")
         .addEventListener("change", (e) =>

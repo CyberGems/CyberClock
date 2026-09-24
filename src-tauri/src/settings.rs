@@ -123,6 +123,8 @@ pub struct AppSettings {
     pub float_sw_opacity: Option<f64>,
     #[serde(default)]
     pub close_to_tray: Option<bool>,
+    #[serde(default)]
+    pub show_widgets_in_taskbar: bool,
     pub mini_design: u32,
     pub mini_position_locked: bool,
     pub preferred_display_id: Option<u32>,
@@ -245,6 +247,7 @@ impl Default for AppSettings {
             float_timer_opacity: None,
             float_sw_opacity: None,
             close_to_tray: None,
+            show_widgets_in_taskbar: false,
             mini_design: 1,
             mini_position_locked: false,
             preferred_display_id: None,

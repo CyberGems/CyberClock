@@ -46,6 +46,9 @@
         spawnFloat: async (kind) => {
             return await invoke("spawn_float", { kind });
         },
+        centerOpenWidgets: async () => {
+            await invoke("center_open_widgets");
+        },
         // ── Window management ─────────────────────────────────────
         openWindow: async (name) => {
             await invoke("open_window", { name });

@@ -539,6 +539,17 @@
             "updates.networkError": "Could not connect to the update server. Check your internet connection.",
             "updates.retry": "Retry",
 
+            // Settings modal - Taskbar & Desktop Widgets
+            "settings.taskbarWidgets.title": "Taskbar & Desktop Widgets",
+            "settings.taskbarWidgets.showInTaskbar": "Show widgets in taskbar",
+            "settings.taskbarWidgets.showInTaskbarDesc": "Show individual taskbar buttons for floating timer, stopwatch and calendar (disabled keeps taskbar clean)",
+            "settings.taskbarWidgets.centerWidgets": "Center widgets on screen",
+            "settings.taskbarWidgets.centerWidgetsDesc": "Relocate all open widgets and clocks to the center of the active monitor",
+            "settings.taskbarWidgets.centerNow": "Center now",
+            "settings.taskbarWidgets.pinTaskbar": "Pin icon to taskbar",
+            "settings.taskbarWidgets.pinTaskbarDesc": "Open Windows settings to keep the CyberClock tray icon permanently visible",
+            "settings.taskbarWidgets.openSettings": "Windows Settings",
+
             // Settings modal - Display
             "settings.display.multiMonitor": "Multi-Monitor Support",
             "settings.display.desc1": "Full mode fills the selected display's work area, respecting the taskbar on any edge.",
@@ -1233,6 +1244,17 @@
             "updates.errorTitle": "Error de actualización",
             "updates.networkError": "No se pudo conectar con el servidor de actualizaciones. Revisa tu conexión a internet.",
             "updates.retry": "Reintentar",
+
+            // Settings modal - Taskbar & Desktop Widgets
+            "settings.taskbarWidgets.title": "Barra de tareas y Widgets",
+            "settings.taskbarWidgets.showInTaskbar": "Mostrar widgets en la barra de tareas",
+            "settings.taskbarWidgets.showInTaskbarDesc": "Muestra botones individuales en la barra de tareas para el temporizador, cronómetro y calendario (desactivado para mantener la barra limpia)",
+            "settings.taskbarWidgets.centerWidgets": "Centrar widgets en pantalla",
+            "settings.taskbarWidgets.centerWidgetsDesc": "Reubica todos los widgets y relojes abiertos al centro del monitor activo",
+            "settings.taskbarWidgets.centerNow": "Centrar ahora",
+            "settings.taskbarWidgets.pinTaskbar": "Fijar icono en la barra de tareas",
+            "settings.taskbarWidgets.pinTaskbarDesc": "Abre la configuración de Windows para mantener el icono de CyberClock siempre visible en la bandeja",
+            "settings.taskbarWidgets.openSettings": "Configuración de Windows",
 
             // Settings modal - Display
             "settings.display.multiMonitor": "Soporte Multi-Monitor",

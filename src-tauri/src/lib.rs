@@ -311,6 +311,11 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
             }
         }
     }
+    for (label, win) in app.webview_windows() {
+        if label.starts_with("float-") {
+            let _ = win.set_skip_taskbar(!merged.show_widgets_in_taskbar);
+        }
+    }
     Ok(merged)
 }
 
@@ -327,6 +332,11 @@ fn reset_settings(app: AppHandle) -> AppSettings {
 
     apply_always_on_top(&app, default_settings.always_on_top);
     apply_mini_click_through(&app, default_settings.mini_click_through);
+    for (label, win) in app.webview_windows() {
+        if label.starts_with("float-") {
+            let _ = win.set_skip_taskbar(true);
+        }
+    }
 
     // Broadcast updated settings to all windows
     let _ = app.emit("settings:updated", &default_settings);
@@ -502,7 +512,7 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         .minimizable(true)
         .maximizable(false)
         .closable(true)
-        .skip_taskbar(false)
+        .skip_taskbar(!settings.show_widgets_in_taskbar)
         .always_on_top(settings.always_on_top)
         .visible(true)
         .focused(true);

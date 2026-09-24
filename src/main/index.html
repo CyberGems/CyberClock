@@ -1351,6 +1351,45 @@
                                 ></label>
                             </div>
                         </div>
+
+                        <!-- Taskbar & Desktop Widgets Section -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.taskbarWidgets.title">Taskbar & Desktop Widgets</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="compact"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.taskbarWidgets.showInTaskbar">Show widgets in taskbar</span>
+                                    <small data-i18n="settings.taskbarWidgets.showInTaskbarDesc">Show individual taskbar buttons for floating timer, stopwatch and calendar (disabled keeps taskbar clean)</small>
+                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-widgets-taskbar" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="target"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.taskbarWidgets.centerWidgets">Center widgets on screen</span>
+                                    <small data-i18n="settings.taskbarWidgets.centerWidgetsDesc">Relocate all open widgets and clocks to the center of the active monitor</small>
+                                </div>
+                                <button type="button" class="s-abtn" id="s-btn-center-widgets" style="padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span class="ico" data-ico="target"></span>
+                                    <span data-i18n="settings.taskbarWidgets.centerNow">Center now</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="pin"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.taskbarWidgets.pinTaskbar">Pin icon to taskbar</span>
+                                    <small data-i18n="settings.taskbarWidgets.pinTaskbarDesc">Open Windows settings to keep the CyberClock tray icon permanently visible</small>
+                                </div>
+                                <button type="button" class="s-abtn" id="s-btn-pin-taskbar" style="padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span class="ico" data-ico="pin"></span>
+                                    <span data-i18n="settings.taskbarWidgets.openSettings">Windows Settings</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.general.relaxVolume">Relaxation Volume</div>
                             <div class="s-vol-row">
