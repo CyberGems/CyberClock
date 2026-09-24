@@ -476,7 +476,8 @@
     for (const b of presets) b.addEventListener("click", () => tAdd(Number(b.dataset.s)));
 
     shellEl().addEventListener("mousedown", (e) => {
-        if (e.target.closest(".controls, .float-preset, .float-done")) return;
+        if (window.cc && window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
+        if (e.target.closest(".controls, .float-preset, #btn-dismiss")) return;
         if (e.button !== 0) return;
         if (cfg.miniPositionLocked === true) return;
         e.preventDefault();

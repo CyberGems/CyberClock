@@ -267,6 +267,10 @@
     font-weight: 700;
     letter-spacing: 2px;
     color: #fff;
+    cursor: grab;
+}
+.float-done:active {
+    cursor: grabbing;
 }
 .float-done[hidden] { display: none; }
 

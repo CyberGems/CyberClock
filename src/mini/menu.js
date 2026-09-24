@@ -1,6 +1,35 @@
     let currentDesign = 1;
     let alwaysOnTop = false;
     let activeCaller = { caller: "mini", kind: "mini" };
+    let currentCfg = {};
+    let menuShownTime = 0;
+
+    // Discrete zoom stops (slider index → factor). 100% is the default.
+    const ZOOM_STEPS = [0.5, 1, 2, 4];
+
+    function zoomIndexFor(z) {
+        const i = ZOOM_STEPS.indexOf(z);
+        return i >= 0 ? i : 1;
+    }
+
+    // 15 Skins Metadata with signature styling for the visual gallery cards
+    const SKINS_META = [
+        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
+        { id: 2, key: "settings.mini.skin.2", bg: "rgba(0, 240, 255, 0.08)", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', monospace", sample: "12:45:00" },
+        { id: 3, key: "settings.mini.skin.3", bg: "rgba(0, 255, 65, 0.07)", border: "rgba(0, 255, 65, 0.35)", color: "#00ff41", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
+        { id: 4, key: "settings.mini.skin.4", bg: "rgba(255, 255, 255, 0.06)", border: "rgba(255, 255, 255, 0.3)", color: "#ffffff", font: "'Outfit', sans-serif", sample: "12:45:00" },
+        { id: 5, key: "settings.mini.skin.5", bg: "rgba(255, 0, 128, 0.08)", border: "rgba(255, 0, 128, 0.4)", color: "#ff0080", font: "'Orbitron', sans-serif", sample: "12:45:00" },
+        { id: 6, key: "settings.mini.skin.6", bg: "rgba(255, 255, 255, 0.04)", border: "rgba(255, 255, 255, 0.15)", color: "#e6e6e6", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
+        { id: 7, key: "settings.mini.skin.7", bg: "linear-gradient(135deg, rgba(255, 80, 50, 0.15), rgba(150, 40, 200, 0.15))", border: "rgba(255, 100, 50, 0.4)", color: "#ff7e47", font: "'Outfit', sans-serif", sample: "12:45:00" },
+        { id: 8, key: "settings.mini.skin.8", bg: "rgba(180, 230, 255, 0.08)", border: "rgba(180, 230, 255, 0.4)", color: "#aee4ff", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
+        { id: 9, key: "settings.mini.skin.9", bg: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 120, 0.1))", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
+        { id: 10, key: "settings.mini.skin.10", bg: "#0c0d10", border: "rgba(255, 255, 255, 0.12)", color: "#f0f0f0", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
+        { id: 11, key: "settings.mini.skin.11", bg: "linear-gradient(135deg, rgba(255, 45, 120, 0.15), rgba(120, 40, 255, 0.15))", border: "rgba(255, 45, 120, 0.4)", color: "#ff4090", font: "'Orbitron', sans-serif", sample: "12:45:00" },
+        { id: 12, key: "settings.mini.skin.12", bg: "rgba(138, 43, 226, 0.12)", border: "rgba(138, 43, 226, 0.45)", color: "#c084fc", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
+        { id: 13, key: "settings.mini.skin.13", bg: "linear-gradient(135deg, #121008, #1a1608)", border: "rgba(255, 153, 0, 0.4)", color: "#ff9d00", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
+        { id: 14, key: "settings.mini.skin.14", bg: "linear-gradient(135deg, #0e1117, #131720)", border: "rgba(0, 229, 255, 0.45)", color: "#00e5ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
+        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(0, 255, 200, 0.45)", color: "#00ffc8", font: "'Outfit', sans-serif", sample: "12:45:00" }
+    ];
 
     function buildTimerSkinPills() {
         const container = document.getElementById("timer-skin-pills");
@@ -39,6 +68,7 @@
     }
 
     function setupMenuForCaller(info) {
+        menuShownTime = Date.now();
         activeCaller = info || { caller: "mini", kind: "mini" };
         const isTimer = activeCaller.kind === "timer";
         const timerView = document.getElementById("ctx-timer-view");
@@ -59,7 +89,7 @@
             const nameInput = document.getElementById("ctx-timer-name-input");
             if (nameInput) nameInput.value = customName || defaultName || `Timer ${num}`;
 
-            const tDesign = cfg.timerDesign || cfg.miniDesign || 1;
+            const tDesign = currentCfg.timerDesign || currentCfg.miniDesign || 1;
             syncTimerDesignUI(tDesign);
         } else {
             if (timerView) timerView.style.display = "none";
@@ -70,33 +100,6 @@
         }
         reportMenuHeight();
     }
-
-    // Discrete zoom stops (slider index → factor). 100% is the default.
-    const ZOOM_STEPS = [0.5, 1, 2, 4];
-
-    function zoomIndexFor(z) {
-        const i = ZOOM_STEPS.indexOf(z);
-        return i >= 0 ? i : 1;
-    }
-
-    // 15 Skins Metadata with signature styling for the visual gallery cards
-    const SKINS_META = [
-        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 2, key: "settings.mini.skin.2", bg: "rgba(0, 240, 255, 0.08)", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', monospace", sample: "12:45:00" },
-        { id: 3, key: "settings.mini.skin.3", bg: "rgba(0, 255, 65, 0.07)", border: "rgba(0, 255, 65, 0.35)", color: "#00ff41", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
-        { id: 4, key: "settings.mini.skin.4", bg: "rgba(255, 255, 255, 0.06)", border: "rgba(255, 255, 255, 0.3)", color: "#ffffff", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 5, key: "settings.mini.skin.5", bg: "rgba(255, 0, 128, 0.08)", border: "rgba(255, 0, 128, 0.4)", color: "#ff0080", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 6, key: "settings.mini.skin.6", bg: "rgba(255, 255, 255, 0.04)", border: "rgba(255, 255, 255, 0.15)", color: "#e6e6e6", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
-        { id: 7, key: "settings.mini.skin.7", bg: "linear-gradient(135deg, rgba(255, 80, 50, 0.15), rgba(150, 40, 200, 0.15))", border: "rgba(255, 100, 50, 0.4)", color: "#ff7e47", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 8, key: "settings.mini.skin.8", bg: "rgba(180, 230, 255, 0.08)", border: "rgba(180, 230, 255, 0.4)", color: "#aee4ff", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
-        { id: 9, key: "settings.mini.skin.9", bg: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 120, 0.1))", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 10, key: "settings.mini.skin.10", bg: "#0c0d10", border: "rgba(255, 255, 255, 0.12)", color: "#f0f0f0", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
-        { id: 11, key: "settings.mini.skin.11", bg: "linear-gradient(135deg, rgba(255, 45, 120, 0.15), rgba(120, 40, 255, 0.15))", border: "rgba(255, 45, 120, 0.4)", color: "#ff4090", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 12, key: "settings.mini.skin.12", bg: "rgba(138, 43, 226, 0.12)", border: "rgba(138, 43, 226, 0.45)", color: "#c084fc", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 13, key: "settings.mini.skin.13", bg: "linear-gradient(135deg, #121008, #1a1608)", border: "rgba(255, 153, 0, 0.4)", color: "#ff9d00", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 14, key: "settings.mini.skin.14", bg: "linear-gradient(135deg, #0e1117, #131720)", border: "rgba(0, 229, 255, 0.45)", color: "#00e5ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(0, 255, 200, 0.45)", color: "#00ffc8", font: "'Outfit', sans-serif", sample: "12:45:00" }
-    ];
 
     // The Real Sun Cycle toggle only applies to the Sunset Pulse skin
     // (design 7); show the row only when that design is active.
@@ -243,6 +246,7 @@
     // Sync menu options with saved configurations
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
+            currentCfg = cfg || {};
             if (cfg) {
                 // Accent tint
                 if (cfg.theme) window.CCTint.apply(cfg.theme);
@@ -726,6 +730,8 @@
 
     // Close menu popup when it loses focus (click on other windows)
     window.addEventListener("blur", () => {
+        // Prevent spurious blur during initial focus transition
+        if (Date.now() - menuShownTime < 350) return;
         if (window.cc && window.cc.closeMenuPopup) {
             window.cc.closeMenuPopup();
         }

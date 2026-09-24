@@ -111,8 +111,8 @@ body.is-dragging * {
 
 .analog-ov-btn.btn-close {
     position: absolute;
-    top: 14px;
-    right: 28px;
+    top: 36px;
+    right: 36px;
 }
 
 .analog-ov-btn.btn-close:hover {
@@ -153,15 +153,15 @@ body.is-dragging * {
 .analog-ctx-menu {
     position: absolute;
     width: 204px;
-    max-height: calc(100% - 16px);
+    max-height: 250px;
     overflow-y: auto;
     overflow-x: hidden;
     background: rgba(14, 17, 24, 0.97);
     border: 1px solid rgba(var(--rgb-accent), 0.45);
     border-radius: 10px;
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.88),
-        0 0 12px rgba(var(--rgb-accent), 0.28),
+        0 4px 14px rgba(0, 0, 0, 0.85),
+        0 0 8px rgba(var(--rgb-accent), 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
