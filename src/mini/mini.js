@@ -649,7 +649,6 @@
     // ═══════════════════════════════════════════════════════
     // ACTION TICKER (Inline Button Tooltips)
     // ═══════════════════════════════════════════════════════
-    const shellEl = document.getElementById("shell");
     const tickerIco = document.getElementById("ticker-ico");
     const tickerText = document.getElementById("ticker-text");
     const pinIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(45 12 12)"><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.58A2 2 0 0 1 15 9.18V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.18a2 2 0 0 1-.78 1.58l-2.78 3.58A2 2 0 0 0 5 15.24Z"/><path d="M12 17v5"/></g></svg>`;
