@@ -104,7 +104,6 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
 
 static MINI_TARGET_WIDTH: AtomicU32 = AtomicU32::new(260);
 static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
-static FLOAT_SEQ: AtomicU32 = AtomicU32::new(0);
 static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
 static APP_EXITING: AtomicBool = AtomicBool::new(false);
 static EDGE_LIMITS_ENABLED: AtomicBool = AtomicBool::new(true);
@@ -412,12 +411,12 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         );
         return None;
     }
-    let seq = FLOAT_SEQ.fetch_add(1, Ordering::SeqCst) + 1;
-    let label = format!("float-{}-{}", kind, seq);
-    if app.get_webview_window(&label).is_some() {
-        warn!("spawn_float: label collision {}", label);
-        return None;
+    // Find the first available slot 1, 2, 3...
+    let mut seq = 1;
+    while app.get_webview_window(&format!("float-{}-{}", kind, seq)).is_some() {
+        seq += 1;
     }
+    let label = format!("float-{}-{}", kind, seq);
     let settings = load_settings(app);
     let zoom = if settings.mini_zoom.is_finite() && settings.mini_zoom > 0.0 {
         settings.mini_zoom
@@ -2645,6 +2644,15 @@ fn get_menu_caller() -> Option<serde_json::Value> {
 }
 
 #[tauri::command]
+fn get_open_float_labels(app: AppHandle) -> Vec<String> {
+    app.webview_windows()
+        .keys()
+        .filter(|k| k.starts_with("float-"))
+        .cloned()
+        .collect()
+}
+
+#[tauri::command]
 fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
     MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
     if let Some(menu) = app.get_webview_window("menu") {
@@ -2688,7 +2696,16 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             }
             true
         }
-        "close_current_timer" => {
+        "close_other_sw" => {
+            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            for (label, win) in app.webview_windows() {
+                if label.starts_with("float-sw-") && label != caller {
+                    let _ = win.close();
+                }
+            }
+            true
+        }
+        "close_current_timer" | "close_current_sw" => {
             let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
             if let Some(win) = app.get_webview_window(&caller) {
                 let _ = win.close();
@@ -4053,6 +4070,7 @@ pub fn run() {
             mini_menu_ready,
             menu_action,
             get_menu_caller,
+            get_open_float_labels,
             get_tray_menu_state,
             report_relax_playing,
             hide_tray_menu,

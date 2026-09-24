@@ -264,6 +264,9 @@
         closeMenuPopup: async () => {
             await invoke("close_mini_context_menu");
         },
+        getOpenFloatLabels: async () => {
+            return (await invoke("get_open_float_labels")) || [];
+        },
 
         // ── Tray Menu popup (CyberPaste style) ────────────────────
         getTrayMenuState: async () => {

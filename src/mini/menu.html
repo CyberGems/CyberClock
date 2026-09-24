@@ -47,7 +47,7 @@
             <div class="ctx-timer-view" id="ctx-timer-view" style="display: none;">
                 <div class="ctx-timer-header">
                     <div class="ctx-timer-title-wrap">
-                        <span class="ico timer-ico" data-ico="timer"></span>
+                        <span class="ico timer-ico" id="ctx-float-header-ico" data-ico="timer"></span>
                         <input type="text" id="ctx-timer-name-input" class="ctx-timer-name-input" maxlength="24" spellcheck="false" placeholder="Timer 1" data-tooltip="Rename timer" data-i18n-attr="data-tooltip:float.renameTimer, placeholder:float.timerNamePlaceholder" />
                         <span class="ctx-timer-edit-icon" title="Edit">✎</span>
                     </div>
@@ -96,7 +96,7 @@
                 </div>
 
                 <div class="switch-row" id="ctx-timer-taskbar">
-                    <span class="switch-lbl" data-i18n="settings.taskbar.widgetsTitle">Show in Taskbar</span>
+                    <span class="switch-lbl" data-i18n="float.showInTaskbar">Show in Taskbar</span>
                     <div class="toggle" id="toggle-timer-taskbar">
                         <div class="toggle-track">
                             <div class="toggle-thumb"></div>
@@ -106,18 +106,18 @@
 
                 <div class="ctx-sep"></div>
 
-                <div class="ctx-item" data-action="new_timer">
-                    <span class="ico" data-ico="timer"></span>
-                    <span class="label" data-i18n="float.newTimer">New Timer</span>
+                <div class="ctx-item" id="ctx-action-new" data-action="new_timer">
+                    <span class="ico" id="ctx-action-new-ico" data-ico="timer"></span>
+                    <span class="label" id="ctx-action-new-lbl" data-i18n="float.newTimer">New Timer</span>
                 </div>
-                <div class="ctx-item" data-action="close_other_timers">
+                <div class="ctx-item" id="ctx-action-close-others" data-action="close_other_timers">
                     <span class="ico" data-ico="power"></span>
-                    <span class="label" data-i18n="float.closeOtherTimers">Close other timers</span>
+                    <span class="label" id="ctx-action-close-others-lbl" data-i18n="float.closeOtherTimers">Close other timers</span>
                 </div>
                 <div class="ctx-sep"></div>
-                <div class="ctx-item danger" data-action="close_current_timer">
-                    <span class="ico" data-ico="close"></span>
-                    <span class="label" data-i18n="float.closeThisTimer">Close this timer</span>
+                <div class="ctx-item danger" id="ctx-action-close-current" data-action="close_current_timer">
+                    <span class="ico" data-ico="x" style="color: #ff5470;"></span>
+                    <span class="label" id="ctx-action-close-current-lbl" data-i18n="float.closeThisTimer">Close this timer</span>
                 </div>
             </div>
 

@@ -31,19 +31,54 @@
     const seqMatch = WINDOW_LABEL.match(/float-(?:timer|sw)-(\d+)/);
     const seqNum = seqMatch ? parseInt(seqMatch[1], 10) : 1;
 
+    function getSlotNumber() {
+        const stored = localStorage.getItem("cc_slot_" + WINDOW_LABEL);
+        return stored ? parseInt(stored, 10) : seqNum;
+    }
+
+    async function initSlotNumber() {
+        try {
+            if (window.cc && window.cc.getOpenFloatLabels) {
+                const labels = await window.cc.getOpenFloatLabels();
+                const prefix = `float-${KIND}-`;
+                const occupiedSlots = new Set();
+                for (const lbl of labels) {
+                    if (lbl === WINDOW_LABEL || !lbl.startsWith(prefix)) continue;
+                    const custom = localStorage.getItem("cc_name_" + lbl);
+                    if (!custom || !custom.trim()) {
+                        const slot = parseInt(localStorage.getItem("cc_slot_" + lbl) || lbl.replace(prefix, ""), 10);
+                        if (slot) occupiedSlots.add(slot);
+                    }
+                }
+                let s = 1;
+                while (occupiedSlots.has(s)) s++;
+                localStorage.setItem("cc_slot_" + WINDOW_LABEL, String(s));
+                applyTexts();
+                return;
+            }
+        } catch (_) {}
+        localStorage.setItem("cc_slot_" + WINDOW_LABEL, String(seqNum));
+        applyTexts();
+    }
+
     function getWidgetName() {
         const stored = localStorage.getItem("cc_name_" + WINDOW_LABEL);
         if (stored && stored.trim()) return stored.trim();
+        const slot = getSlotNumber();
         if (KIND === "timer") {
-            return window.ccI18n.t("float.timerNumbered", { n: seqNum }) || `Timer ${seqNum}`;
+            return window.ccI18n.t("float.timerNumbered", { n: slot }) || `Timer ${slot}`;
         }
-        return window.ccI18n.t("float.stopwatchNumbered", { n: seqNum }) || `Stopwatch ${seqNum}`;
+        return window.ccI18n.t("float.stopwatchNumbered", { n: slot }) || `Stopwatch ${slot}`;
     }
 
     window.addEventListener("storage", (e) => {
-        if (e.key === "cc_name_" + WINDOW_LABEL) {
+        if (e.key === "cc_name_" + WINDOW_LABEL || e.key === "cc_slot_" + WINDOW_LABEL) {
             applyTexts();
         }
+    });
+    window.addEventListener("beforeunload", () => {
+        localStorage.removeItem("cc_name_" + WINDOW_LABEL);
+        localStorage.removeItem("cc_slot_" + WINDOW_LABEL);
     });
     if (window.__TAURI__ && window.__TAURI__.event) {
         window.__TAURI__.event.listen("widget:rename", (e) => {
@@ -527,8 +562,12 @@
     }
     document.getElementById("float-done").hidden = true;
 
-    window.cc.onInit((s) => applySettings(s || {}));
+    window.cc.onInit((s) => {
+        applySettings(s || {});
+        initSlotNumber();
+    });
     window.cc.onSettingsUpdated((s) => applySettings(s || {}));
+    initSlotNumber();
 })();
 
 

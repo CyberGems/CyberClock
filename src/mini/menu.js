@@ -51,7 +51,11 @@
     function selectTimerSkin(mode) {
         syncTimerDesignUI(mode);
         if (window.cc && window.cc.saveSettings) {
-            window.cc.saveSettings({ timerDesign: mode });
+            if (activeCaller && activeCaller.kind === "sw") {
+                window.cc.saveSettings({ swDesign: mode, miniDesign: mode });
+            } else {
+                window.cc.saveSettings({ timerDesign: mode });
+            }
         }
     }
 
@@ -71,25 +75,96 @@
         menuShownTime = Date.now();
         activeCaller = info || { caller: "mini", kind: "mini" };
         const isTimer = activeCaller.kind === "timer";
+        const isSw = activeCaller.kind === "sw";
+        const isFloat = isTimer || isSw;
+
         const timerView = document.getElementById("ctx-timer-view");
         const tabs = document.getElementById("ctx-tabs");
         const actionsPanel = document.getElementById("tab-panel-actions");
         const customizePanel = document.getElementById("tab-panel-customize");
 
-        if (isTimer) {
+        if (isFloat) {
             if (timerView) timerView.style.display = "flex";
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
 
-            const customName = localStorage.getItem("cc_name_" + activeCaller.caller);
-            const match = activeCaller.caller.match(/float-timer-(\d+)/);
-            const num = match ? match[1] : "1";
-            const defaultName = window.ccI18n ? window.ccI18n.t("float.timerNumbered", { n: num }) : `Timer ${num}`;
-            const nameInput = document.getElementById("ctx-timer-name-input");
-            if (nameInput) nameInput.value = customName || defaultName || `Timer ${num}`;
+            // Sound and loop only apply to timers
+            const rowSound = document.getElementById("ctx-timer-sound");
+            if (rowSound) rowSound.style.display = isTimer ? "flex" : "none";
+            const rowLoop = document.getElementById("ctx-timer-loop");
+            if (rowLoop) rowLoop.style.display = isTimer ? "flex" : "none";
 
-            const tDesign = currentCfg.timerDesign || currentCfg.miniDesign || 1;
+            // Header icon
+            const hdrIco = document.getElementById("ctx-float-header-ico");
+            if (hdrIco) {
+                hdrIco.setAttribute("data-ico", isTimer ? "timer" : "stopwatch");
+                if (window.ccIcons && window.ccIcons.replaceIcons) {
+                    window.ccIcons.replaceIcons(hdrIco.parentElement);
+                }
+            }
+
+            // Name input & placeholder
+            const customName = localStorage.getItem("cc_name_" + activeCaller.caller);
+            const assignedSlot = localStorage.getItem("cc_slot_" + activeCaller.caller);
+            const match = activeCaller.caller.match(/float-(?:timer|sw)-(\d+)/);
+            const num = assignedSlot || (match ? match[1] : "1");
+
+            const defaultName = window.ccI18n
+                ? window.ccI18n.t(isTimer ? "float.timerNumbered" : "float.stopwatchNumbered", { n: num })
+                : (isTimer ? `Timer ${num}` : `Stopwatch ${num}`);
+            const placeholder = window.ccI18n
+                ? window.ccI18n.t(isTimer ? "float.timerNamePlaceholder" : "float.swNamePlaceholder")
+                : (isTimer ? "Timer name..." : "Stopwatch name...");
+            const tooltip = window.ccI18n
+                ? window.ccI18n.t(isTimer ? "float.renameTimer" : "float.renameSw")
+                : (isTimer ? "Rename timer" : "Rename stopwatch");
+
+            const nameInput = document.getElementById("ctx-timer-name-input");
+            if (nameInput) {
+                nameInput.value = customName || defaultName;
+                nameInput.placeholder = placeholder;
+                nameInput.setAttribute("data-tooltip", tooltip);
+            }
+
+            // Bottom action buttons (New, Close others, Close this)
+            const actNew = document.getElementById("ctx-action-new");
+            if (actNew) {
+                actNew.dataset.action = isTimer ? "new_timer" : "new_stopwatch";
+                const lbl = document.getElementById("ctx-action-new-lbl");
+                if (lbl && window.ccI18n) {
+                    lbl.textContent = window.ccI18n.t(isTimer ? "float.newTimer" : "float.newStopwatch");
+                }
+                const ico = document.getElementById("ctx-action-new-ico");
+                if (ico) {
+                    ico.setAttribute("data-ico", isTimer ? "timer" : "stopwatch");
+                    if (window.ccIcons && window.ccIcons.replaceIcons) {
+                        window.ccIcons.replaceIcons(actNew);
+                    }
+                }
+            }
+
+            const actCloseOthers = document.getElementById("ctx-action-close-others");
+            if (actCloseOthers) {
+                actCloseOthers.dataset.action = isTimer ? "close_other_timers" : "close_other_sw";
+                const lbl = document.getElementById("ctx-action-close-others-lbl");
+                if (lbl && window.ccI18n) {
+                    lbl.textContent = window.ccI18n.t(isTimer ? "float.closeOtherTimers" : "float.closeOtherSw");
+                }
+            }
+
+            const actCloseCurrent = document.getElementById("ctx-action-close-current");
+            if (actCloseCurrent) {
+                actCloseCurrent.dataset.action = isTimer ? "close_current_timer" : "close_current_sw";
+                const lbl = document.getElementById("ctx-action-close-current-lbl");
+                if (lbl && window.ccI18n) {
+                    lbl.textContent = window.ccI18n.t(isTimer ? "float.closeThisTimer" : "float.closeThisSw");
+                }
+            }
+
+            const tDesign = isTimer
+                ? (currentCfg.timerDesign || currentCfg.miniDesign || 1)
+                : (currentCfg.swDesign || currentCfg.miniDesign || 1);
             syncTimerDesignUI(tDesign);
         } else {
             if (timerView) timerView.style.display = "none";
@@ -99,6 +174,7 @@
             if (customizePanel) customizePanel.style.display = onTab === "customize" ? "flex" : "none";
         }
         reportMenuHeight();
+        setTimeout(reportMenuHeight, 40);
     }
 
     // The Real Sun Cycle toggle only applies to the Sunset Pulse skin
@@ -136,7 +212,7 @@
                 }
                 return;
             }
-            const h = el.offsetHeight + 28;
+            const h = Math.max(el.scrollHeight, el.offsetHeight) + 32;
             if (window.cc && window.cc.miniMenuReady) {
                 window.cc.miniMenuReady(286, h);
             }
@@ -164,6 +240,8 @@
         if (window.cc && window.cc.saveSettings) {
             if (activeCaller && activeCaller.kind === "timer") {
                 window.cc.saveSettings({ timerDesign: mode });
+            } else if (activeCaller && activeCaller.kind === "sw") {
+                window.cc.saveSettings({ swDesign: mode, miniDesign: mode });
             } else {
                 window.cc.saveSettings({ miniDesign: mode });
             }
@@ -290,6 +368,8 @@
                     if (tabActions) tabActions.textContent = window.ccI18n.t("menu.tabActions");
                     const tabCustomize = document.getElementById("tab-btn-customize");
                     if (tabCustomize) tabCustomize.textContent = window.ccI18n.t("menu.tabCustomize");
+                    const taskbarLbl = document.querySelector("#ctx-timer-taskbar .switch-lbl");
+                    if (taskbarLbl) taskbarLbl.textContent = window.ccI18n.t("float.showInTaskbar");
                 }
                 
                 // Active Layout Form Factor
@@ -637,7 +717,7 @@
     const timerNameInput = document.getElementById("ctx-timer-name-input");
     if (timerNameInput) {
         const commitTimerName = () => {
-            if (!activeCaller || activeCaller.kind !== "timer") return;
+            if (!activeCaller || (activeCaller.kind !== "timer" && activeCaller.kind !== "sw")) return;
             const val = timerNameInput.value.trim();
             if (val) {
                 localStorage.setItem("cc_name_" + activeCaller.caller, val);
