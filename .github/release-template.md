@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/CyberGems/CyberClock/main/src-tauri/icons/icon.png" width="120" alt="CyberClock">
+  <img src="https://raw.githubusercontent.com/CyberGems/CyberClock/master/src-tauri/icons/icon.png" width="120" alt="CyberClock">
 </p>
 
 ## 📋 CyberClock {{VERSION}}: Release Notes
