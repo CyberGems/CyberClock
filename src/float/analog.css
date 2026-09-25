@@ -149,13 +149,14 @@ body.is-dragging * {
     cursor: default;
 }
 
-/* ── Custom Cyber Context Menu (Unclipped, Top-Layer) ────────── */
 .analog-ctx-menu {
     position: absolute;
     width: 204px;
-    max-height: 250px;
+    max-height: calc(100% - 20px);
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
     background: rgba(14, 17, 24, 0.97);
     border: 1px solid rgba(var(--rgb-accent), 0.45);
     border-radius: 10px;
@@ -169,6 +170,15 @@ body.is-dragging * {
     z-index: 100;
     pointer-events: auto;
     animation: ctxFadeIn 0.12s ease-out;
+}
+
+.analog-ctx-menu::-webkit-scrollbar {
+    width: 3px;
+}
+
+.analog-ctx-menu::-webkit-scrollbar-thumb {
+    background: rgba(var(--rgb-accent), 0.4);
+    border-radius: 2px;
 }
 
 @keyframes ctxFadeIn {
@@ -197,19 +207,6 @@ body.is-dragging * {
     color: var(--accent-a, #00d4ff);
 }
 
-.ctx-hdr-skin {
-    font-size: 9.5px;
-    font-weight: 600;
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.06);
-    padding: 1px 5px;
-    border-radius: 4px;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .analog-ctx-sep {
     height: 1px;
     background: rgba(255, 255, 255, 0.08);
@@ -234,19 +231,6 @@ body.is-dragging * {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 3px;
-    max-height: 92px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
-}
-
-.analog-skin-grid::-webkit-scrollbar {
-    width: 3px;
-}
-
-.analog-skin-grid::-webkit-scrollbar-thumb {
-    background: rgba(var(--rgb-accent), 0.4);
-    border-radius: 2px;
 }
 
 .analog-skin-btn {

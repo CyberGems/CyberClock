@@ -664,7 +664,7 @@
         clearTimeout(tickerTimer);
         tickerTimer = setTimeout(() => {
             hideActionTicker();
-        }, 1500);
+        }, 1100);
     }
 
     function hideActionTicker() {
