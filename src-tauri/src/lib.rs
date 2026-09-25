@@ -22,7 +22,8 @@ use settings::{
     update as update_settings,
 };
 pub use settings::{
-    AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SettingsStore,
+    AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SavedFloatWidget,
+    SettingsStore,
 };
 use updater::{
     check_for_updates, download_update, get_app_version, init_updater, install_update, is_msstore,
@@ -397,6 +398,15 @@ fn float_window_count(app: &AppHandle) -> usize {
 }
 
 fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
+    spawn_float_window_with_slot(app, kind, None, None)
+}
+
+fn spawn_float_window_with_slot(
+    app: &AppHandle,
+    kind: &str,
+    target_label: Option<&str>,
+    target_pos: Option<(i32, i32)>,
+) -> Option<String> {
     let _spawn_guard = lock_or_recover(&FLOAT_SPAWN_LOCK);
     let kind = match kind {
         "timer" => "timer",
@@ -411,12 +421,24 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
         );
         return None;
     }
-    // Find the first available slot 1, 2, 3...
-    let mut seq = 1;
-    while app.get_webview_window(&format!("float-{}-{}", kind, seq)).is_some() {
-        seq += 1;
-    }
-    let label = format!("float-{}-{}", kind, seq);
+    let (seq, label) = if let Some(lbl) = target_label {
+        if app.get_webview_window(lbl).is_some() {
+            return None;
+        }
+        let parsed_seq = lbl
+            .split('-')
+            .last()
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(1);
+        (parsed_seq, lbl.to_string())
+    } else {
+        // Find the first available slot 1, 2, 3...
+        let mut seq = 1;
+        while app.get_webview_window(&format!("float-{}-{}", kind, seq)).is_some() {
+            seq += 1;
+        }
+        (seq, format!("float-{}-{}", kind, seq))
+    };
     let settings = load_settings(app);
     let zoom = if settings.mini_zoom.is_finite() && settings.mini_zoom > 0.0 {
         settings.mini_zoom
@@ -448,7 +470,11 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
     // or restore saved position if available.
     let mut custom_pos = false;
     let (mut pos_x, mut pos_y) = (200.0 + cascade, 200.0 + cascade);
-    if kind == "cal" {
+    if let Some((x, y)) = target_pos {
+        pos_x = x as f64;
+        pos_y = y as f64;
+        custom_pos = true;
+    } else if kind == "cal" {
         if let Some((x, y)) = settings.float_cal_position {
             pos_x = x as f64;
             pos_y = y as f64;
@@ -529,6 +555,25 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
                     s.float_analog_open = true;
                     Ok(())
                 });
+            } else if kind == "timer" || kind == "sw" {
+                let app_handle = app.clone();
+                let l = label.clone();
+                let k = kind.to_string();
+                let initial_pos = Some((pos_x as i32, pos_y as i32));
+                let _ = update_settings(&app_handle, |s| {
+                    if let Some(entry) = s.open_float_widgets.iter_mut().find(|w| w.label == l) {
+                        if entry.position.is_none() {
+                            entry.position = initial_pos;
+                        }
+                    } else {
+                        s.open_float_widgets.push(SavedFloatWidget {
+                            kind: k,
+                            label: l,
+                            position: initial_pos,
+                        });
+                    }
+                    Ok(())
+                });
             }
             remember_window_target(
                 &win,
@@ -555,6 +600,23 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
                     } else if kind_for_event == "analog" {
                         let _ = update_settings(&app_for_event, |s| {
                             s.float_analog_position = Some((pos.x, pos.y));
+                            Ok(())
+                        });
+                    } else if kind_for_event == "timer" || kind_for_event == "sw" {
+                        let _ = update_settings(&app_for_event, |s| {
+                            if let Some(entry) = s
+                                .open_float_widgets
+                                .iter_mut()
+                                .find(|w| w.label == float_label)
+                            {
+                                entry.position = Some((pos.x, pos.y));
+                            } else {
+                                s.open_float_widgets.push(SavedFloatWidget {
+                                    kind: kind_for_event.clone(),
+                                    label: float_label.clone(),
+                                    position: Some((pos.x, pos.y)),
+                                });
+                            }
                             Ok(())
                         });
                     }
@@ -586,6 +648,11 @@ fn spawn_float_window(app: &AppHandle, kind: &str) -> Option<String> {
                                     Ok(())
                                 });
                             }
+                        } else if kind_for_event == "timer" || kind_for_event == "sw" {
+                            let _ = update_settings(&app_for_event, |s| {
+                                s.open_float_widgets.retain(|w| w.label != float_label);
+                                Ok(())
+                            });
                         }
                     }
                 }
@@ -3828,11 +3895,17 @@ fn show_initial_window(app: &AppHandle) {
     broadcast_active_window(app, if is_mini { "mini" } else { "main" });
 
     // Restore floating windows if they were open before closing
-    if settings.float_cal_open {
-        spawn_float_window(app, "cal");
-    }
-    if settings.float_analog_open {
-        spawn_float_window(app, "analog");
+    if settings.restore_float_widgets {
+        if settings.float_cal_open {
+            spawn_float_window(app, "cal");
+        }
+        if settings.float_analog_open {
+            spawn_float_window(app, "analog");
+        }
+        let saved_widgets = settings.open_float_widgets.clone();
+        for widget in saved_widgets {
+            spawn_float_window_with_slot(app, &widget.kind, Some(&widget.label), widget.position);
+        }
     }
 }
 

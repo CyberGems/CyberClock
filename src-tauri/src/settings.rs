@@ -60,6 +60,24 @@ fn default_auto_cycle_mode() -> String {
     "sequential".to_string()
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct SavedFloatWidget {
+    pub kind: String,
+    pub label: String,
+    pub position: Option<(i32, i32)>,
+}
+
+impl Default for SavedFloatWidget {
+    fn default() -> Self {
+        Self {
+            kind: "timer".to_string(),
+            label: "float-timer-1".to_string(),
+            position: None,
+        }
+    }
+}
+
 impl Default for AlarmSettings {
     fn default() -> Self {
         Self {
@@ -135,6 +153,10 @@ pub struct AppSettings {
     pub close_to_tray: Option<bool>,
     #[serde(default)]
     pub show_widgets_in_taskbar: bool,
+    #[serde(default = "default_true")]
+    pub restore_float_widgets: bool,
+    #[serde(default)]
+    pub open_float_widgets: Vec<SavedFloatWidget>,
     pub mini_design: u32,
     pub mini_position_locked: bool,
     pub preferred_display_id: Option<u32>,
@@ -261,6 +283,8 @@ impl Default for AppSettings {
             timer_design: None,
             close_to_tray: None,
             show_widgets_in_taskbar: false,
+            restore_float_widgets: true,
+            open_float_widgets: Vec::new(),
             mini_design: 1,
             mini_position_locked: false,
             preferred_display_id: None,

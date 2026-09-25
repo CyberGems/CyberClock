@@ -717,6 +717,27 @@
     document.querySelectorAll(".ctx-item[data-action]").forEach((el) => {
         el.addEventListener("click", () => {
             const action = el.dataset.action;
+            if (action === "close_current_timer" || action === "close_current_sw") {
+                if (activeCaller && activeCaller.caller) {
+                    localStorage.removeItem("cc_name_" + activeCaller.caller);
+                    localStorage.removeItem("cc_slot_" + activeCaller.caller);
+                    localStorage.removeItem("cc_timer_last_" + activeCaller.caller);
+                }
+            } else if (action === "close_other_timers" || action === "close_other_sw") {
+                try {
+                    const prefix = action === "close_other_timers" ? "float-timer-" : "float-sw-";
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && (k.startsWith("cc_name_" + prefix) || k.startsWith("cc_slot_" + prefix) || k.startsWith("cc_timer_last_" + prefix))) {
+                            if (!activeCaller || !k.endsWith(activeCaller.caller)) {
+                                keysToRemove.push(k);
+                            }
+                        }
+                    }
+                    keysToRemove.forEach(k => localStorage.removeItem(k));
+                } catch (_) {}
+            }
             if (window.cc && window.cc.menuAction) {
                 window.cc.menuAction(action);
             }

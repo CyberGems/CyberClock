@@ -870,6 +870,8 @@
 
         const sWidgetsTaskbar = document.getElementById("s-widgets-taskbar");
         if (sWidgetsTaskbar) sWidgetsTaskbar.checked = s.showWidgetsInTaskbar === true;
+        const sRestoreFloatWidgets = document.getElementById("s-restore-float-widgets");
+        if (sRestoreFloatWidgets) sRestoreFloatWidgets.checked = s.restoreFloatWidgets !== false;
     }
 
     function showCustomFile(which, p) {
@@ -6153,6 +6155,13 @@
     if (sWidgetsTaskbar) {
         sWidgetsTaskbar.addEventListener("change", (e) => {
             window.cc.saveSettings({ showWidgetsInTaskbar: e.target.checked });
+        });
+    }
+
+    const sRestoreFloatWidgets = document.getElementById("s-restore-float-widgets");
+    if (sRestoreFloatWidgets) {
+        sRestoreFloatWidgets.addEventListener("change", (e) => {
+            window.cc.saveSettings({ restoreFloatWidgets: e.target.checked });
         });
     }
 

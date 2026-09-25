@@ -37,6 +37,11 @@
     }
 
     async function initSlotNumber() {
+        const storedSlot = localStorage.getItem("cc_slot_" + WINDOW_LABEL);
+        if (storedSlot) {
+            applyTexts();
+            return;
+        }
         try {
             if (window.cc && window.cc.getOpenFloatLabels) {
                 const labels = await window.cc.getOpenFloatLabels();
@@ -75,10 +80,6 @@
         if (e.key === "cc_name_" + WINDOW_LABEL || e.key === "cc_slot_" + WINDOW_LABEL) {
             applyTexts();
         }
-    });
-    window.addEventListener("beforeunload", () => {
-        localStorage.removeItem("cc_name_" + WINDOW_LABEL);
-        localStorage.removeItem("cc_slot_" + WINDOW_LABEL);
     });
     if (window.__TAURI__ && window.__TAURI__.event) {
         window.__TAURI__.event.listen("widget:rename", (e) => {
@@ -224,6 +225,10 @@
 
     function loadLastTimer() {
         try {
+            if (WINDOW_LABEL) {
+                const perWindow = parseInt(localStorage.getItem("cc_timer_last_" + WINDOW_LABEL), 10);
+                if (Number.isFinite(perWindow) && perWindow > 0) return perWindow;
+            }
             const v = parseInt(localStorage.getItem(TIMER_LAST_KEY), 10);
             if (Number.isFinite(v) && v > 0) return v;
         } catch (_) {}
@@ -234,6 +239,9 @@
         if (!Number.isFinite(secs) || secs <= 0) return;
         try {
             localStorage.setItem(TIMER_LAST_KEY, String(Math.round(secs)));
+            if (WINDOW_LABEL) {
+                localStorage.setItem("cc_timer_last_" + WINDOW_LABEL, String(Math.round(secs)));
+            }
         } catch (_) {}
     }
 
@@ -499,9 +507,18 @@
         btnMin.addEventListener("mouseleave", hideActionTicker);
     }
 
+    function cleanupSelfStorage() {
+        if (WINDOW_LABEL) {
+            localStorage.removeItem("cc_name_" + WINDOW_LABEL);
+            localStorage.removeItem("cc_slot_" + WINDOW_LABEL);
+            localStorage.removeItem("cc_timer_last_" + WINDOW_LABEL);
+        }
+    }
+
     if (btnClose) {
         btnClose.addEventListener("click", () => {
             hideActionTicker();
+            cleanupSelfStorage();
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         });
         btnClose.addEventListener("mouseenter", () => showActionTicker("float.close", ICO_CLOSE));
@@ -554,6 +571,7 @@
         } else if (e.key === "r" || e.key === "R") {
             if (KIND === "sw") swReset(); else tReset();
         } else if (e.key === "Escape") {
+            cleanupSelfStorage();
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         }
     });
