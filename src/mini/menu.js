@@ -130,7 +130,7 @@
                 nameInput.setAttribute("data-tooltip", tooltip);
             }
 
-            // Bottom action buttons (New, Close others, Close this)
+            // Bottom action buttons (New, Other float, Close others, Close this)
             const actNew = document.getElementById("ctx-action-new");
             if (actNew) {
                 actNew.dataset.action = isTimer ? "new_timer" : "new_stopwatch";
@@ -143,6 +143,22 @@
                     ico.setAttribute("data-ico", isTimer ? "timer" : "stopwatch");
                     if (window.ccIcons && window.ccIcons.replaceIcons) {
                         window.ccIcons.replaceIcons(actNew);
+                    }
+                }
+            }
+
+            const actOther = document.getElementById("ctx-action-other-float");
+            if (actOther) {
+                actOther.dataset.action = isTimer ? "new_stopwatch" : "new_timer";
+                const lbl = document.getElementById("ctx-action-other-float-lbl");
+                if (lbl && window.ccI18n) {
+                    lbl.textContent = window.ccI18n.t(isTimer ? "float.newStopwatch" : "float.newTimer");
+                }
+                const ico = document.getElementById("ctx-action-other-float-ico");
+                if (ico) {
+                    ico.setAttribute("data-ico", isTimer ? "stopwatch" : "timer");
+                    if (window.ccIcons && window.ccIcons.replaceIcons) {
+                        window.ccIcons.replaceIcons(actOther);
                     }
                 }
             }

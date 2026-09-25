@@ -266,21 +266,50 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     border-radius: inherit;
     background: rgba(8, 10, 14, 0.96);
     box-shadow: inset 0 0 0 1px var(--border-bright);
-    font-family: "Orbitron", sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #fff;
     cursor: grab;
 }
 .float-done:active {
     cursor: grabbing;
 }
 .float-done[hidden] { display: none; }
+
+.float-done-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--rgb-accent), 0.45);
+    background: rgba(var(--rgb-accent), 0.14);
+    color: #ffffff;
+    cursor: pointer;
+    font-family: "Orbitron", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    transition: all 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+    user-select: none;
+    outline: none;
+}
+.float-done-btn:hover {
+    background: rgba(var(--rgb-accent), 0.28);
+    border-color: var(--accent-a);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.45);
+    transform: scale(1.02);
+}
+.float-done-btn:active {
+    transform: scale(0.97);
+}
+.float-done-btn .ctl-ico {
+    width: 17px;
+    height: 17px;
+    color: var(--accent-a);
+    flex-shrink: 0;
+}
 
 /* Running dot: reuse the skin's LED, force it on while running */
 .mini-shell.float-running .status-dot {

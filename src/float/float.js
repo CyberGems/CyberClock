@@ -431,6 +431,7 @@
 
     const tickerIco = document.getElementById("ticker-ico");
     const tickerText = document.getElementById("ticker-text");
+    let tickerTimer = null;
 
     function showActionTicker(actionKey, iconHtml) {
         if (isRunning()) return;
@@ -439,9 +440,15 @@
         tickerText.textContent = window.ccI18n ? window.ccI18n.t(actionKey) : actionKey;
         if (tickerIco) tickerIco.innerHTML = iconHtml || "";
         sh.classList.add("has-action-ticker");
+
+        clearTimeout(tickerTimer);
+        tickerTimer = setTimeout(() => {
+            hideActionTicker();
+        }, 1500);
     }
 
     function hideActionTicker() {
+        clearTimeout(tickerTimer);
         const sh = shellEl();
         if (!sh) return;
         sh.classList.remove("has-action-ticker");
