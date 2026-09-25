@@ -126,6 +126,8 @@
     function syncSize(force, recenter = false) {
         const design = (KIND === "timer" && cfg.timerDesign)
             ? cfg.timerDesign
+            : (KIND === "sw" && cfg.swDesign)
+            ? cfg.swDesign
             : (cfg.miniDesign || 1);
         const zoom = zoomFactor();
         const bw = DESIGN_WIDTHS[design] || 280;
@@ -413,6 +415,8 @@
         const sh = shellEl();
         const activeDesign = (KIND === "timer" && cfg.timerDesign)
             ? cfg.timerDesign
+            : (KIND === "sw" && cfg.swDesign)
+            ? cfg.swDesign
             : (cfg.miniDesign || "1");
         sh.dataset.design = activeDesign;
         sh.style.setProperty("--bg-op", cfg.miniBgOpacity ?? 1.0);

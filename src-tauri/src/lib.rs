@@ -472,6 +472,7 @@ fn spawn_float_window_with_slot(
     // click), near the cursor and clamped inside that monitor's bounds,
     // or restore saved position if available.
     let mut custom_pos = false;
+    let mut target_phys_pos: Option<(i32, i32)> = None;
     let (mut pos_x, mut pos_y) = (200.0 + cascade, 200.0 + cascade);
     if let Some((x, y)) = target_pos {
         pos_x = x as f64;
@@ -492,11 +493,16 @@ fn spawn_float_window_with_slot(
     }
 
     if custom_pos {
+        let px = pos_x as i32;
+        let py = pos_y as i32;
         if let Ok(monitors) = app.available_monitors() {
-            let in_bounds = monitors
-                .iter()
-                .any(|m| is_position_in_monitor(pos_x as i32, pos_y as i32, m));
-            if !in_bounds {
+            let found_mon = monitors.iter().find(|m| is_position_in_monitor(px, py, m));
+            if let Some(m) = found_mon {
+                target_phys_pos = Some((px, py));
+                let sf = m.scale_factor();
+                pos_x = px as f64 / sf;
+                pos_y = py as f64 / sf;
+            } else {
                 custom_pos = false;
             }
         }
@@ -546,6 +552,11 @@ fn spawn_float_window_with_slot(
         .focused(true);
     match builder.build() {
         Ok(win) => {
+            if let Some((px, py)) = target_phys_pos {
+                let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                    px, py,
+                )));
+            }
             if kind == "cal" {
                 let app_handle = app.clone();
                 let _ = update_settings(&app_handle, |s| {
@@ -562,7 +573,7 @@ fn spawn_float_window_with_slot(
                 let app_handle = app.clone();
                 let l = label.clone();
                 let k = kind.to_string();
-                let initial_pos = Some((pos_x as i32, pos_y as i32));
+                let initial_pos = target_phys_pos.or(Some((pos_x as i32, pos_y as i32)));
                 let _ = update_settings(&app_handle, |s| {
                     if let Some(entry) = s.open_float_widgets.iter_mut().find(|w| w.label == l) {
                         if entry.position.is_none() {

@@ -52,7 +52,7 @@
         syncTimerDesignUI(mode);
         if (window.cc && window.cc.saveSettings) {
             if (activeCaller && activeCaller.kind === "sw") {
-                window.cc.saveSettings({ swDesign: mode, miniDesign: mode });
+                window.cc.saveSettings({ swDesign: mode });
             } else {
                 window.cc.saveSettings({ timerDesign: mode });
             }
@@ -260,7 +260,7 @@
             if (activeCaller && activeCaller.kind === "timer") {
                 window.cc.saveSettings({ timerDesign: mode });
             } else if (activeCaller && activeCaller.kind === "sw") {
-                window.cc.saveSettings({ swDesign: mode, miniDesign: mode });
+                window.cc.saveSettings({ swDesign: mode });
             } else {
                 window.cc.saveSettings({ miniDesign: mode });
             }
@@ -482,7 +482,10 @@
                 if (tglTimerTaskbar) tglTimerTaskbar.classList.toggle("on", cfg.showWidgetsInTaskbar === true);
                 const tglTimerAot = document.getElementById("toggle-timer-aot");
                 if (tglTimerAot) tglTimerAot.classList.toggle("on", Boolean(cfg.alwaysOnTop));
-                const tDesign = cfg.timerDesign || cfg.miniDesign || 1;
+                const isSw = activeCaller && activeCaller.kind === "sw";
+                const tDesign = isSw
+                    ? (cfg.swDesign || cfg.miniDesign || 1)
+                    : (cfg.timerDesign || cfg.miniDesign || 1);
                 syncTimerDesignUI(tDesign);
             }
             reportMenuHeight();

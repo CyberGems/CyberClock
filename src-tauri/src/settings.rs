@@ -150,6 +150,8 @@ pub struct AppSettings {
     #[serde(default)]
     pub timer_design: Option<u32>,
     #[serde(default)]
+    pub sw_design: Option<u32>,
+    #[serde(default)]
     pub close_to_tray: Option<bool>,
     #[serde(default)]
     pub show_widgets_in_taskbar: bool,
@@ -281,6 +283,7 @@ impl Default for AppSettings {
             timer_sound_enabled: true,
             timer_auto_restart: false,
             timer_design: None,
+            sw_design: None,
             close_to_tray: None,
             show_widgets_in_taskbar: false,
             restore_float_widgets: true,
