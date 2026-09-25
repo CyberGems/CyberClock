@@ -427,14 +427,17 @@ fn spawn_float_window_with_slot(
         }
         let parsed_seq = lbl
             .split('-')
-            .last()
+            .next_back()
             .and_then(|s| s.parse::<u32>().ok())
             .unwrap_or(1);
         (parsed_seq, lbl.to_string())
     } else {
         // Find the first available slot 1, 2, 3...
         let mut seq = 1;
-        while app.get_webview_window(&format!("float-{}-{}", kind, seq)).is_some() {
+        while app
+            .get_webview_window(&format!("float-{}-{}", kind, seq))
+            .is_some()
+        {
             seq += 1;
         }
         (seq, format!("float-{}-{}", kind, seq))
@@ -1151,7 +1154,7 @@ fn clamp_rect_coords(cur: &mut WinRect, work_areas: &[WinRect], edge_limits: boo
                 let (best_idx, best_overlap) = work_areas
                     .iter()
                     .enumerate()
-                    .map(|(i, r)| (i, r.intersection_area(&cur)))
+                    .map(|(i, r)| (i, r.intersection_area(cur)))
                     .max_by_key(|&(_, a)| a)
                     .unwrap_or((0, 0));
                 if best_overlap > 0 {
@@ -1171,10 +1174,14 @@ fn clamp_rect_coords(cur: &mut WinRect, work_areas: &[WinRect], edge_limits: boo
 
         if !edge_limits {
             // Safety fallback: if 100% disconnected from all screens, snap to nearest
-            let total_overlap: i64 = work_areas.iter().map(|r| r.intersection_area(&cur)).sum();
+            let total_overlap: i64 = work_areas.iter().map(|r| r.intersection_area(cur)).sum();
             if total_overlap == 0 {
-                let target_x = cur.left.clamp(primary.left, (primary.right - win_w).max(primary.left));
-                let target_y = cur.top.clamp(primary.top, (primary.bottom - win_h).max(primary.top));
+                let target_x = cur
+                    .left
+                    .clamp(primary.left, (primary.right - win_w).max(primary.left));
+                let target_y = cur
+                    .top
+                    .clamp(primary.top, (primary.bottom - win_h).max(primary.top));
                 cur.left = target_x;
                 cur.right = target_x + win_w;
                 cur.top = target_y;
@@ -1419,7 +1426,9 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
 
     if is_mini {
         if let Some(mini) = app.get_webview_window("mini") {
-            let size = mini.outer_size().unwrap_or(tauri::PhysicalSize::new(260, 48));
+            let size = mini
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(260, 48));
             bars.push((mini, size.width as i32, size.height as i32));
         }
     }
@@ -1435,16 +1444,24 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
     for win in float_windows {
         let label = win.label().to_string();
         if label.starts_with("float-cal") {
-            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 268));
+            let size = win
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(286, 268));
             cals.push((win, size.width as i32, size.height as i32));
         } else if label.starts_with("float-analog") {
-            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(316, 316));
+            let size = win
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(316, 316));
             analogs.push((win, size.width as i32, size.height as i32));
         } else if label.starts_with("float-timer") {
-            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 92));
+            let size = win
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(286, 92));
             bars.push((win, size.width as i32, size.height as i32));
         } else {
-            let size = win.outer_size().unwrap_or(tauri::PhysicalSize::new(286, 52));
+            let size = win
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(286, 52));
             bars.push((win, size.width as i32, size.height as i32));
         }
     }
@@ -1498,7 +1515,9 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
             let win_x = current_col_x + (col_w - w).max(0) / 2;
             let win_y = curr_y;
 
-            let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(win_x, win_y)));
+            let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                win_x, win_y,
+            )));
             let _ = win.unminimize();
             let _ = win.show();
             clamp_window_to_monitors(&win);
@@ -2560,18 +2579,13 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 // Clock context menu
 // ─────────────────────────────────────────────────────────────
 
+#[allow(clippy::type_complexity)]
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
-static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> =
-    std::sync::Mutex::new(None);
-static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 =
-    std::sync::atomic::AtomicU32::new(360);
+static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(360);
 
-fn position_mini_context_menu(
-    menu: &WebviewWindow,
-    logical_w: f64,
-    logical_h: f64,
-) {
+fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f64) {
     let scale = menu.scale_factor().unwrap_or(1.0);
     let menu_width = (logical_w * scale).round() as i32;
     let menu_height = (logical_h * scale).round() as i32;
@@ -2683,10 +2697,13 @@ fn open_mini_context_menu(
         } else {
             "mini"
         };
-        let _ = menu.emit("menu:caller", serde_json::json!({
-            "caller": caller_label,
-            "kind": caller_kind
-        }));
+        let _ = menu.emit(
+            "menu:caller",
+            serde_json::json!({
+                "caller": caller_label,
+                "kind": caller_kind
+            }),
+        );
 
         let _ = menu.show();
         let _ = menu.set_focus();
@@ -2755,7 +2772,11 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "new_analog" => spawn_float_window(&app, "analog").is_some(),
         "close_other_timers" => {
-            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            let caller = CURRENT_MENU_CALLER
+                .lock()
+                .ok()
+                .and_then(|c| c.clone())
+                .unwrap_or_default();
             for (label, win) in app.webview_windows() {
                 if label.starts_with("float-timer-") && label != caller {
                     let _ = win.close();
@@ -2764,7 +2785,11 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             true
         }
         "close_other_sw" => {
-            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            let caller = CURRENT_MENU_CALLER
+                .lock()
+                .ok()
+                .and_then(|c| c.clone())
+                .unwrap_or_default();
             for (label, win) in app.webview_windows() {
                 if label.starts_with("float-sw-") && label != caller {
                     let _ = win.close();
@@ -2773,7 +2798,11 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             true
         }
         "close_current_timer" | "close_current_sw" => {
-            let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone()).unwrap_or_default();
+            let caller = CURRENT_MENU_CALLER
+                .lock()
+                .ok()
+                .and_then(|c| c.clone())
+                .unwrap_or_default();
             if let Some(win) = app.get_webview_window(&caller) {
                 let _ = win.close();
             }
@@ -3976,11 +4005,11 @@ pub fn run() {
                 let main_for_resize = main.clone();
                 let app_for_main = app.handle().clone();
                 main.on_window_event(move |event| match event {
-                    WindowEvent::CloseRequested { api, .. } => {
-                        if !APP_EXITING.load(Ordering::SeqCst) {
-                            api.prevent_close();
-                            exit_app(&app_for_main);
-                        }
+                    WindowEvent::CloseRequested { api, .. }
+                        if !APP_EXITING.load(Ordering::SeqCst) =>
+                    {
+                        api.prevent_close();
+                        exit_app(&app_for_main);
                     }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         if main_for_resize.is_minimized().unwrap_or(true) {
@@ -4021,11 +4050,11 @@ pub fn run() {
                 let mini_for_resize = mini.clone();
                 let app_for_resize = app.handle().clone();
                 mini.on_window_event(move |event| match event {
-                    WindowEvent::CloseRequested { api, .. } => {
-                        if !APP_EXITING.load(Ordering::SeqCst) {
-                            api.prevent_close();
-                            exit_app(&app_for_resize);
-                        }
+                    WindowEvent::CloseRequested { api, .. }
+                        if !APP_EXITING.load(Ordering::SeqCst) =>
+                    {
+                        api.prevent_close();
+                        exit_app(&app_for_resize);
                     }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         restore_target_size(&mini_for_resize);

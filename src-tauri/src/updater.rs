@@ -6,7 +6,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 #[cfg(not(feature = "msstore"))]
 use tauri_plugin_updater::UpdaterExt;
-#[cfg(not(feature = "msstore"))]
+#[cfg(all(not(feature = "msstore"), not(debug_assertions)))]
 use tokio::time::sleep;
 use tokio::time::timeout;
 
@@ -85,7 +85,6 @@ pub fn init_updater(app: &AppHandle, auto_update: bool) {
         {
             let _ = (app, auto_update);
             info!("Updater: background auto-check disabled in debug mode");
-            return;
         }
 
         #[cfg(not(debug_assertions))]
