@@ -32,11 +32,11 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 | Need | Solution |
 |---|---|
-| Sleek timekeeping | Canvas-rendered analog clock + digital display with 8 selectable dial designs |
-| Stay organized | Full calendar with agenda, day notes, statistics, and moon phase |
-| Time your work | Countdown timer and precision stopwatch, including independent floating windows |
+| Sleek timekeeping | Canvas-rendered analog clock + digital display with 10 selectable dial designs |
+| Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
+| Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
-| Save screen space | Mini mode — compact always-on-top clock bar with 12 skins |
+| Save screen space | Mini mode — compact always-on-top clock bar with 15 unique skins |
 | Make it yours | 8 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
 
 ---
@@ -45,16 +45,20 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 🕐 Clock & Calendar
 - **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
-- **Eight Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, and the multicolor Gem Crown dial
+- **Ten Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, Reactor Core, Circuit PCB, and the multicolor Gem Crown dial
 - **Digital Display** — Space Grotesk font with fixed-width digit cells (12H / 24H)
 - **Full Calendar** — Month view with agenda, day notes, and statistics
 - **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
 - **Day Notes** — Attach notes to specific dates with an editor modal
+- **Floating Calendar Widget** — Standalone compact desktop calendar with quick note peeks, multi-month navigation, and dedicated context menu
+- **Floating Analog Clock Widget** — Desktop floating analog clock with customizable dial designs, always-on-top, and taskbar visibility
 
 ### ⏱️ Timer & Stopwatch
 - **Countdown Timer** — Large digital display with milliseconds, preset buttons, visual progress bar, and warning state
 - **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
-- **Floating Timer and Stopwatch** — Open independent compact windows from the tray or Mini Mode menu; each window keeps its own state and inherits the active skin, tint, language, and zoom
+- **Floating Desktop Widgets** — Open independent compact timer and stopwatch windows with multi-slot support; widgets are remembered and restored across application restarts
+- **Independent Skins & Renaming** — Choose distinct skins per widget type (Mini Clock, Timer, Stopwatch) and customize widget titles
+- **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, or calendars from any active widget's context menu
 - **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown
 - **Resting Digits** — Untouched all-zero timer/stopwatch digits rest dimmed until a time is armed or the count starts
 
@@ -72,8 +76,8 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
 
 ### 📌 Mini Mode
-- **12 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
-- **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse the selected Mini Mode design with layouts sized for their controls
+- **15 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
+- **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
 - **Position Lock** — Prevent accidental dragging
