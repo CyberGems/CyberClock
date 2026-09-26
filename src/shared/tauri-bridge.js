@@ -308,6 +308,9 @@
         onAlarmChime: (cb) => {
             return subscribe("alarm:chime", cb);
         },
+        onVoiceAnnounceTime: (cb) => {
+            return subscribe("voice:announce-time", cb);
+        },
         onRelaxTrigger: (cb) => {
             return subscribe("relax:trigger", cb);
         },

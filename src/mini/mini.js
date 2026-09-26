@@ -647,6 +647,14 @@
         else window.audioEngine.chime(p.sound || "chime-digital", cfg.alarmVolume || 0.75);
     });
 
+    if (window.cc && window.cc.onVoiceAnnounceTime) {
+        window.cc.onVoiceAnnounceTime((p) => {
+            if (window.VoiceAnnouncer) {
+                window.VoiceAnnouncer.announce(cfg, p.hour, p.minute);
+            }
+        });
+    }
+
     // ═══════════════════════════════════════════════════════
     // ACTION TICKER (Inline Button Tooltips)
     // ═══════════════════════════════════════════════════════

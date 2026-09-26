@@ -39,6 +39,7 @@ pub struct AlarmState {
     pub last_quarter_hour: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub last_half_hour: Mutex<Option<(u32, u32)>>,    // (hour, minute)
     pub last_full_hour: Mutex<Option<u32>>,           // hour
+    pub last_voice_announcement: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
     // Live relax playback state, reported by the main window so the tray
     // can show what's playing without touching the audio engine itself.
@@ -3232,6 +3233,47 @@ fn check_alarms(app: &AppHandle) {
             });
 
             emit_to_active(app, "alarm:chime", alarm_data);
+        }
+    }
+
+    // Check voice time announcer
+    if settings.voice_announcer.enabled {
+        let is_interval_hit = match settings.voice_announcer.interval.as_str() {
+            "15m" => minute % 15 == 0,
+            "30m" => minute == 0 || minute == 30,
+            _ => minute == 0,
+        };
+
+        if is_interval_hit {
+            let in_quiet = if settings.voice_announcer.quiet_hours_enabled {
+                let (sh, sm) = parse_time(&settings.voice_announcer.quiet_hours_start);
+                let (eh, em) = parse_time(&settings.voice_announcer.quiet_hours_end);
+                let now_minutes = hour * 60 + minute;
+                let start_minutes = sh * 60 + sm;
+                let end_minutes = eh * 60 + em;
+                if start_minutes <= end_minutes {
+                    now_minutes >= start_minutes && now_minutes <= end_minutes
+                } else {
+                    now_minutes >= start_minutes || now_minutes <= end_minutes
+                }
+            } else {
+                false
+            };
+
+            if !in_quiet {
+                let mut last = lock_or_recover(&alarm_state.last_voice_announcement);
+                if last.map_or(true, |(h, m)| h != hour || m != minute) {
+                    *last = Some((hour, minute));
+                    drop(last);
+
+                    let announce_data = serde_json::json!({
+                        "hour": hour,
+                        "minute": minute
+                    });
+
+                    emit_to_active(app, "voice:announce-time", announce_data);
+                }
+            }
         }
     }
 }

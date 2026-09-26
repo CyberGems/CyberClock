@@ -112,6 +112,38 @@ impl Default for RelaxSchedulerSettings {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
+pub struct VoiceAnnouncerSettings {
+    pub enabled: bool,
+    pub interval: String,
+    pub voice_gender: String,
+    pub voice_name: Option<String>,
+    pub style: String,
+    pub chime_before: bool,
+    pub quiet_hours_enabled: bool,
+    pub quiet_hours_start: String,
+    pub quiet_hours_end: String,
+    pub volume: f64,
+}
+
+impl Default for VoiceAnnouncerSettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            interval: "1h".to_string(),
+            voice_gender: "auto".to_string(),
+            voice_name: None,
+            style: "natural".to_string(),
+            chime_before: true,
+            quiet_hours_enabled: false,
+            quiet_hours_start: "22:00".to_string(),
+            quiet_hours_end: "08:00".to_string(),
+            volume: 0.85,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(default, rename_all = "camelCase")]
 pub struct AppSettings {
     pub theme: String,
     pub clock_format: String,
@@ -247,6 +279,8 @@ pub struct AppSettings {
     pub custom_alarms: Vec<CustomAlarm>,
 
     pub relax_scheduler: RelaxSchedulerSettings,
+    #[serde(default)]
+    pub voice_announcer: VoiceAnnouncerSettings,
 
     pub language: String,
     // Optional name used by the full-mode welcome greeting.
@@ -354,6 +388,7 @@ impl Default for AppSettings {
                 CustomAlarm::default(),
             ],
             relax_scheduler: RelaxSchedulerSettings::default(),
+            voice_announcer: VoiceAnnouncerSettings::default(),
             language: "auto".to_string(),
             display_name: String::new(),
             breathe_pattern: "box".to_string(),

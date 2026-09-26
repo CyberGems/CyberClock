@@ -502,6 +502,105 @@
     }
 
     // ══════════════════════════════════════════════════════════════
+    // VOICE ANNOUNCER HELPERS
+    // ══════════════════════════════════════════════════════════════
+    function buildVoiceQuietTimeOptions() {
+        const is12 = cfg.clockFormat === '12h';
+        ['start', 'end'].forEach(prefix => {
+            const hSel = document.getElementById(`s-voice-quiet-${prefix}-h`);
+            const mSel = document.getElementById(`s-voice-quiet-${prefix}-m`);
+            const apSel = document.getElementById(`s-voice-quiet-${prefix}-ap`);
+            if (!hSel || !mSel) return;
+            hSel.innerHTML = '';
+            const hStart = is12 ? 1 : 0, hEnd = is12 ? 12 : 23;
+            for (let h = hStart; h <= hEnd; h++) {
+                const o = document.createElement('option');
+                o.value = String(h); o.textContent = pad(h);
+                hSel.appendChild(o);
+            }
+            if (!mSel.options.length) {
+                for (let m = 0; m <= 59; m++) {
+                    const o = document.createElement('option');
+                    o.value = String(m); o.textContent = pad(m);
+                    mSel.appendChild(o);
+                }
+            }
+            if (apSel) apSel.style.display = is12 ? '' : 'none';
+        });
+    }
+
+    function setVoiceQuietTime(prefix, hhmm) {
+        const defaultTime = prefix === 'start' ? '22:00' : '08:00';
+        const [H, M] = (hhmm || defaultTime).split(':').map(Number);
+        const is12 = cfg.clockFormat === '12h';
+        const hSel = document.getElementById(`s-voice-quiet-${prefix}-h`);
+        const mSel = document.getElementById(`s-voice-quiet-${prefix}-m`);
+        const apSel = document.getElementById(`s-voice-quiet-${prefix}-ap`);
+        if (!hSel) return;
+        if (mSel) mSel.value = String(isNaN(M) ? 0 : M);
+        const validH = isNaN(H) ? (prefix === 'start' ? 22 : 8) : H;
+        if (is12) {
+            let h12 = validH % 12; if (h12 === 0) h12 = 12;
+            hSel.value = String(h12);
+            if (apSel) apSel.value = validH >= 12 ? 'PM' : 'AM';
+        } else {
+            hSel.value = String(validH);
+        }
+    }
+
+    function getVoiceQuietTime(prefix) {
+        const is12 = cfg.clockFormat === '12h';
+        const hSel = document.getElementById(`s-voice-quiet-${prefix}-h`);
+        const mSel = document.getElementById(`s-voice-quiet-${prefix}-m`);
+        const apSel = document.getElementById(`s-voice-quiet-${prefix}-ap`);
+        if (!hSel) return prefix === 'start' ? '22:00' : '08:00';
+        let H = parseInt(hSel.value, 10);
+        const M = mSel ? parseInt(mSel.value, 10) : 0;
+        if (is12 && apSel) {
+            if (apSel.value === 'AM') { if (H === 12) H = 0; }
+            else { if (H !== 12) H += 12; }
+        }
+        return pad(H) + ':' + pad(M);
+    }
+
+    function populateVoiceSelectOptions() {
+        const sel = document.getElementById('s-voice-select');
+        if (!sel) return;
+        const currentVal = sel.value;
+        const va = cfg.voiceAnnouncer || {};
+        const savedVal = va.voiceName || va.voiceGender || 'auto';
+
+        sel.innerHTML = `
+            <option value="auto" data-i18n="voice.auto">${window.ccI18n ? window.ccI18n.t("voice.auto") : "System Default"}</option>
+            <option value="female" data-i18n="voice.female">${window.ccI18n ? window.ccI18n.t("voice.female") : "Female Voice"}</option>
+            <option value="male" data-i18n="voice.male">${window.ccI18n ? window.ccI18n.t("voice.male") : "Male Voice"}</option>
+        `;
+
+        if (window.VoiceAnnouncer) {
+            const voices = window.VoiceAnnouncer.getVoices();
+            if (voices && voices.length > 0) {
+                const grp = document.createElement('optgroup');
+                grp.label = window.ccI18n ? (window.ccI18n.t("voice.voice") || "Voices") : "Voices";
+                voices.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.textContent = `${v.name} (${v.lang})`;
+                    grp.appendChild(opt);
+                });
+                sel.appendChild(grp);
+            }
+        }
+
+        if (savedVal && Array.from(sel.options).some(o => o.value === savedVal)) {
+            sel.value = savedVal;
+        } else if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) {
+            sel.value = currentVal;
+        } else {
+            sel.value = 'auto';
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════
     // SETTINGS APPLICATION
     // ══════════════════════════════════════════════════════════════
 
@@ -779,6 +878,32 @@
         if (alSchedEn) alSchedEn.checked = !!s.alarmScheduleEnabled;
         setAlarmSchedTime("start", s.alarmScheduleStart || "08:00");
         setAlarmSchedTime("end", s.alarmScheduleEnd || "17:00");
+
+        // Voice Time Announcer (Talking Clock)
+        const va = s.voiceAnnouncer || {};
+        const vEn = document.getElementById("s-voice-en");
+        if (vEn) vEn.checked = !!va.enabled;
+        const vInt = document.getElementById("s-voice-interval");
+        if (vInt) vInt.value = va.interval || "1h";
+        const vSty = document.getElementById("s-voice-style");
+        if (vSty) vSty.value = va.style || "natural";
+        const vChime = document.getElementById("s-voice-chime");
+        if (vChime) vChime.checked = va.chimeBefore !== false;
+        const vQuietEn = document.getElementById("s-voice-quiet-en");
+        if (vQuietEn) vQuietEn.checked = !!va.quietHoursEnabled;
+        const vQuietRow = document.getElementById("s-voice-quiet-row");
+        if (vQuietRow) vQuietRow.style.display = va.quietHoursEnabled ? "" : "none";
+        buildVoiceQuietTimeOptions();
+        setVoiceQuietTime("start", va.quietHoursStart || "22:00");
+        setVoiceQuietTime("end", va.quietHoursEnd || "08:00");
+        populateVoiceSelectOptions();
+        const vVol = document.getElementById("s-voice-vol");
+        if (vVol) {
+            const vv = Math.round((va.volume ?? 0.85) * 100);
+            vVol.value = vv;
+            const vvVal = document.getElementById("s-voice-vol-val");
+            if (vvVal) vvVal.textContent = vv + "%";
+        }
 
         const avEl = document.getElementById("s-avol");
         if (avEl) {
@@ -6910,6 +7035,128 @@
         }
     });
 
+    // Voice Time Announcer (Talking Clock)
+    const sVoiceEn = document.getElementById("s-voice-en");
+    if (sVoiceEn) {
+        sVoiceEn.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, enabled: e.target.checked } });
+        });
+    }
+
+    const sVoiceInterval = document.getElementById("s-voice-interval");
+    if (sVoiceInterval) {
+        sVoiceInterval.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, interval: e.target.value } });
+        });
+    }
+
+    const sVoiceSelect = document.getElementById("s-voice-select");
+    if (sVoiceSelect) {
+        sVoiceSelect.addEventListener("change", (e) => {
+            const val = e.target.value;
+            const va = cfg.voiceAnnouncer || {};
+            if (val === 'female' || val === 'male' || val === 'auto') {
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, voiceGender: val, voiceName: null } });
+            } else {
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, voiceGender: 'custom', voiceName: val } });
+            }
+        });
+    }
+
+    const sVoiceStyle = document.getElementById("s-voice-style");
+    if (sVoiceStyle) {
+        sVoiceStyle.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, style: e.target.value } });
+        });
+    }
+
+    const sVoiceChime = document.getElementById("s-voice-chime");
+    if (sVoiceChime) {
+        sVoiceChime.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, chimeBefore: e.target.checked } });
+        });
+    }
+
+    const sVoiceQuietEn = document.getElementById("s-voice-quiet-en");
+    if (sVoiceQuietEn) {
+        sVoiceQuietEn.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            const row = document.getElementById("s-voice-quiet-row");
+            if (row) row.style.display = e.target.checked ? "" : "none";
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursEnabled: e.target.checked } });
+        });
+    }
+
+    ['s-voice-quiet-start-h', 's-voice-quiet-start-m', 's-voice-quiet-start-ap'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", () => {
+                const va = cfg.voiceAnnouncer || {};
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursStart: getVoiceQuietTime("start") } });
+            });
+        }
+    });
+
+    ['s-voice-quiet-end-h', 's-voice-quiet-end-m', 's-voice-quiet-end-ap'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", () => {
+                const va = cfg.voiceAnnouncer || {};
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursEnd: getVoiceQuietTime("end") } });
+            });
+        }
+    });
+
+    const sVoiceVol = document.getElementById("s-voice-vol");
+    if (sVoiceVol) {
+        sVoiceVol.addEventListener("input", (e) => {
+            const num = document.getElementById("s-voice-vol-val");
+            if (num) num.textContent = e.target.value + "%";
+            clearTimeout(sDebounce.vvol);
+            sDebounce.vvol = setTimeout(() => {
+                const va = cfg.voiceAnnouncer || {};
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, volume: e.target.value / 100 } });
+            }, 300);
+        });
+    }
+
+    const sVoiceTest = document.getElementById("s-voice-test");
+    if (sVoiceTest) {
+        sVoiceTest.addEventListener("click", () => {
+            if (window.VoiceAnnouncer) {
+                const now = new Date();
+                const sel = document.getElementById("s-voice-select");
+                const sty = document.getElementById("s-voice-style");
+                const chm = document.getElementById("s-voice-chime");
+                const vol = document.getElementById("s-voice-vol");
+                const selVal = sel ? sel.value : 'auto';
+                const isGender = selVal === 'female' || selVal === 'male' || selVal === 'auto';
+                const testCfg = {
+                    ...cfg,
+                    voiceAnnouncer: {
+                        ...(cfg.voiceAnnouncer || {}),
+                        voiceGender: isGender ? selVal : 'custom',
+                        voiceName: isGender ? null : selVal,
+                        style: sty ? sty.value : 'natural',
+                        chimeBefore: chm ? chm.checked : true,
+                        volume: vol ? (parseInt(vol.value, 10) / 100) : 0.85
+                    }
+                };
+                window.VoiceAnnouncer.announce(testCfg, now.getHours(), now.getMinutes());
+            }
+        });
+    }
+
+    if (window.VoiceAnnouncer && window.VoiceAnnouncer.onVoicesReady) {
+        window.VoiceAnnouncer.onVoicesReady(() => {
+            populateVoiceSelectOptions();
+        });
+    }
+
     // Volumes
     document.getElementById("s-avol").addEventListener("input", (e) => {
         document.getElementById("s-avol-val").textContent =
@@ -7651,6 +7898,14 @@
                 cfg.alarmVolume || 0.75,
             );
     });
+
+    if (window.cc && window.cc.onVoiceAnnounceTime) {
+        window.cc.onVoiceAnnounceTime((p) => {
+            if (window.VoiceAnnouncer) {
+                window.VoiceAnnouncer.announce(cfg, p.hour, p.minute);
+            }
+        });
+    }
 
     // Tray quick toggle: play/pause the relax audio without navigating.
     if (window.cc && window.cc.onTrayRelaxToggle) {
