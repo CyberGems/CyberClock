@@ -195,13 +195,18 @@
                 <div class="ctx-section">
                     <div class="ctx-section-title" data-i18n="settings.mini.layoutTitle">Layout</div>
                     <div class="layout-toggle-group">
-                        <button class="layout-btn" id="btn-layout-stacked" data-layout="stacked" data-tooltip="2 Filas (Compacto)" data-i18n-attr="data-tooltip:settings.mini.layoutStacked" data-tooltip-dir="bottom">
-                            <span class="layout-ico">⚏</span>
-                            <span class="layout-txt" data-i18n="settings.mini.layoutStackedShort">2 Filas</span>
-                        </button>
                         <button class="layout-btn" id="btn-layout-inline" data-layout="inline" data-tooltip="1 Fila (Barra Larga)" data-i18n-attr="data-tooltip:settings.mini.layoutInline" data-tooltip-dir="bottom">
-                            <span class="layout-ico">▭</span>
+                            <svg class="layout-ico" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+                                <rect x="2" y="6" width="12" height="4" rx="1.2" />
+                            </svg>
                             <span class="layout-txt" data-i18n="settings.mini.layoutInlineShort">1 Fila</span>
+                        </button>
+                        <button class="layout-btn" id="btn-layout-stacked" data-layout="stacked" data-tooltip="2 Filas (Compacto)" data-i18n-attr="data-tooltip:settings.mini.layoutStacked" data-tooltip-dir="bottom">
+                            <svg class="layout-ico" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+                                <rect x="2" y="3.5" width="12" height="3.5" rx="1" />
+                                <rect x="2" y="9" width="12" height="3.5" rx="1" />
+                            </svg>
+                            <span class="layout-txt" data-i18n="settings.mini.layoutStackedShort">2 Filas</span>
                         </button>
                     </div>
                 </div>
@@ -210,9 +215,9 @@
                 <div class="ctx-section">
                     <div class="section-title-row">
                         <div class="ctx-section-title" data-i18n="settings.mini.designMode">Design Mode</div>
-                        <button class="btn-gallery-link" id="btn-open-gallery" data-tooltip="Explorar Galería de Diseños" data-i18n-attr="data-tooltip:settings.mini.openGallery" data-tooltip-dir="bottom" data-tooltip-align="right">
+                        <button class="btn-gallery-link" id="btn-open-gallery" data-tooltip="Explorar Galería de Diseños" data-i18n-attr="data-tooltip:settings.mini.openGalleryTip" data-tooltip-dir="bottom" data-tooltip-align="right">
                             <span class="gallery-ico">⊞</span>
-                            <span class="gallery-lbl" data-i18n="settings.mini.openGallery">Galería...</span>
+                            <span class="gallery-lbl" data-i18n="gallery.linkShort">Galería...</span>
                         </button>
                     </div>
                     <div class="design-picker" id="design-picker">

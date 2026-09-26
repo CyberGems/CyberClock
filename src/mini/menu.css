@@ -20,7 +20,7 @@
         background: #181920;
         border: 1px solid rgba(255, 255, 255, 0.09);
         padding: 6px;
-        width: 250px;
+        width: 256px;
         border-radius: 10px;
         box-sizing: border-box;
         overflow-y: auto;
@@ -382,13 +382,18 @@
         transition: all 0.16s ease;
     }
     .layout-btn .layout-ico {
-        font-size: 12px;
-        opacity: 0.8;
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.85;
+        transition: opacity 0.16s ease;
     }
-    .layout-btn:hover {
-        background: rgba(255, 255, 255, 0.06);
-        color: #ffffff;
-        border-color: rgba(var(--rgb-accent), 0.4);
+    .layout-btn:hover .layout-ico,
+    .layout-btn.active .layout-ico {
+        opacity: 1;
     }
     .layout-btn.active {
         background: rgba(var(--rgb-accent), 0.22);
@@ -467,9 +472,14 @@
         align-items: center;
         gap: 6px;
         margin-top: 2px;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .typo-select {
-        flex: 1;
+        flex: 1 1 0;
+        min-width: 0;
+        width: 0;
         height: 26px;
         background: rgba(0, 0, 0, 0.45);
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -481,6 +491,9 @@
         outline: none;
         cursor: pointer;
         transition: border-color 0.14s ease;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
     }
     .typo-select:hover, .typo-select:focus {
         border-color: var(--accent-a);
@@ -492,10 +505,12 @@
     .typo-actions {
         display: flex;
         gap: 4px;
+        flex-shrink: 0;
     }
     .typo-btn {
         width: 26px;
         height: 26px;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -745,4 +760,14 @@
     }
     .toggle.on .toggle-thumb {
         left: 18px;
+    }
+
+    /* ── Suite Tooltip Override: Solid Opaque Obsidian (No Bleed/Overlap) ── */
+    [data-tooltip]::after {
+        background: #0c101a !important;
+        border: 1px solid rgba(var(--rgb-accent), 0.5) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), 0 0 10px rgba(var(--rgb-accent), 0.35) !important;
+        z-index: 9999 !important;
     }

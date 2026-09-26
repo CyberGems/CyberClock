@@ -233,7 +233,7 @@
             }
             const h = Math.max(el.scrollHeight, el.offsetHeight) + 32;
             if (window.cc && window.cc.miniMenuReady) {
-                window.cc.miniMenuReady(286, h);
+                window.cc.miniMenuReady(292, h);
             }
         });
     }
@@ -877,6 +877,9 @@
             window.cc.closeMenuPopup();
         }
     });
+
+    // Suppress browser default context menu inside menu popup
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
 
     window.addEventListener("DOMContentLoaded", reportMenuHeight);
     reportMenuHeight();

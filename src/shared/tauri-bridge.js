@@ -357,4 +357,11 @@
     if (HAS_TAURI) {
         invoke("clamp_current_window_to_monitors").catch(() => {});
     }
+
+    // Suppress native browser / WebView2 context menus across all windows
+    if (typeof window !== "undefined") {
+        window.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
+    }
 })();

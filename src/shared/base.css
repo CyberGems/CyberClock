@@ -347,8 +347,8 @@ input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translate(-50%, 6px);
-  background: rgba(10, 16, 26, 0.95);
-  border: 1px solid rgba(var(--rgb-accent), 0.35);
+  background: #0b0f19;
+  border: 1px solid rgba(var(--rgb-accent), 0.45);
   color: var(--accent-a);
   padding: 6px 12px;
   border-radius: 5px;
@@ -361,10 +361,8 @@ input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
   pointer-events: none;
   transition: opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), var(--glow-xs);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 999;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9), var(--glow-xs);
+  z-index: 9999;
 }
 @keyframes cc-tooltip-autohide {
   0%, 80% { opacity: 1; }
