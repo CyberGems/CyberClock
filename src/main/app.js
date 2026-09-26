@@ -7175,16 +7175,19 @@
         });
     }
 
+    const sVoiceRefreshBtn = document.getElementById("s-voice-refresh-btn");
+
     const sVoiceAddBtn = document.getElementById("s-voice-add-btn");
     if (sVoiceAddBtn) {
         sVoiceAddBtn.addEventListener("click", () => {
+            if (sVoiceRefreshBtn) {
+                sVoiceRefreshBtn.disabled = false;
+            }
             if (window.cc && window.cc.openExternalUrl) {
                 window.cc.openExternalUrl("ms-settings:speech");
             }
         });
     }
-
-    const sVoiceRefreshBtn = document.getElementById("s-voice-refresh-btn");
     if (sVoiceRefreshBtn) {
         sVoiceRefreshBtn.addEventListener("click", () => {
             const icon = sVoiceRefreshBtn.querySelector("[data-ico]");

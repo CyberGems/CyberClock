@@ -422,7 +422,7 @@
             "voice.testTip": "Test voice announcement",
             "voice.addVoices": "Add voices…",
             "voice.addVoicesTip": "Open Windows Settings to install Spanish or other language voices",
-            "voice.refreshTip": "Refresh installed voices list",
+            "voice.refreshTip": "Refresh voice list after installing new voices in Windows",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Welcome",
@@ -1227,7 +1227,7 @@
             "voice.testTip": "Probar locución de voz",
             "voice.addVoices": "Agregar voces…",
             "voice.addVoicesTip": "Abrir la configuración de Windows para instalar voces en español u otros idiomas",
-            "voice.refreshTip": "Actualizar lista de voces instaladas",
+            "voice.refreshTip": "Actualizar lista tras instalar nuevas voces en Windows",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Toque personal",
