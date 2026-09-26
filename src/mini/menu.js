@@ -512,7 +512,20 @@
 
                 // Position Lock
                 const toggleLock = document.getElementById("toggle-lock");
-                if (toggleLock) toggleLock.classList.toggle("on", cfg.miniPositionLocked || false);
+                if (toggleLock) {
+                    let isLocked = false;
+                    if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
+                        const perWin = localStorage.getItem("cc_locked_" + activeCaller.caller);
+                        if (perWin !== null) {
+                            isLocked = perWin === "true";
+                        } else {
+                            isLocked = activeCaller.kind === "timer" ? !!cfg.timerPositionLocked : !!cfg.swPositionLocked;
+                        }
+                    } else {
+                        isLocked = !!cfg.miniPositionLocked;
+                    }
+                    toggleLock.classList.toggle("on", isLocked);
+                }
 
                 // Collapse Date
                 const toggleCollapse = document.getElementById("toggle-collapse");
@@ -686,8 +699,24 @@
             const tgl = document.getElementById("toggle-lock");
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniPositionLocked: on });
+            if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
+                try {
+                    localStorage.setItem("cc_locked_" + activeCaller.caller, String(on));
+                } catch (_) {}
+                if (window.cc && window.cc.saveSettings) {
+                    if (activeCaller.kind === "timer") {
+                        currentCfg.timerPositionLocked = on;
+                        window.cc.saveSettings({ timerPositionLocked: on });
+                    } else {
+                        currentCfg.swPositionLocked = on;
+                        window.cc.saveSettings({ swPositionLocked: on });
+                    }
+                }
+            } else {
+                if (window.cc && window.cc.saveSettings) {
+                    currentCfg.miniPositionLocked = on;
+                    window.cc.saveSettings({ miniPositionLocked: on });
+                }
             }
             if (window.cc && window.cc.closeMenuPopup) {
                 setTimeout(() => window.cc.closeMenuPopup(), 200);
@@ -783,6 +812,7 @@
                     localStorage.removeItem("cc_name_" + activeCaller.caller);
                     localStorage.removeItem("cc_slot_" + activeCaller.caller);
                     localStorage.removeItem("cc_timer_last_" + activeCaller.caller);
+                    localStorage.removeItem("cc_locked_" + activeCaller.caller);
                 }
             } else if (action === "close_other_timers" || action === "close_other_sw") {
                 try {
@@ -790,7 +820,7 @@
                     const keysToRemove = [];
                     for (let i = 0; i < localStorage.length; i++) {
                         const k = localStorage.key(i);
-                        if (k && (k.startsWith("cc_name_" + prefix) || k.startsWith("cc_slot_" + prefix) || k.startsWith("cc_timer_last_" + prefix))) {
+                        if (k && (k.startsWith("cc_name_" + prefix) || k.startsWith("cc_slot_" + prefix) || k.startsWith("cc_timer_last_" + prefix) || k.startsWith("cc_locked_" + prefix))) {
                             if (!activeCaller || !k.endsWith(activeCaller.caller)) {
                                 keysToRemove.push(k);
                             }

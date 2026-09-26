@@ -6851,10 +6851,13 @@
             if (e.target.checked) {
                 document.getElementById("s-full-en").checked = false;
                 document.getElementById("s-quart-en").checked = false;
+                const sVEn = document.getElementById("s-voice-en");
+                if (sVEn) sVEn.checked = false;
                 window.cc.saveSettings({
                     alarmHalfHour: { ...cfg.alarmHalfHour, enabled: true },
                     alarmFullHour: { ...cfg.alarmFullHour, enabled: false },
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
+                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false },
+                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
                 });
             } else {
                 window.cc.saveSettings({
@@ -6868,10 +6871,13 @@
             if (e.target.checked) {
                 document.getElementById("s-half-en").checked = false;
                 document.getElementById("s-quart-en").checked = false;
+                const sVEn = document.getElementById("s-voice-en");
+                if (sVEn) sVEn.checked = false;
                 window.cc.saveSettings({
                     alarmFullHour: { ...cfg.alarmFullHour, enabled: true },
                     alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
+                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false },
+                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
                 });
             } else {
                 window.cc.saveSettings({
@@ -6885,10 +6891,13 @@
             if (e.target.checked) {
                 document.getElementById("s-half-en").checked = false;
                 document.getElementById("s-full-en").checked = false;
+                const sVEn = document.getElementById("s-voice-en");
+                if (sVEn) sVEn.checked = false;
                 window.cc.saveSettings({
                     alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: true },
                     alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
-                    alarmFullHour: { ...cfg.alarmFullHour, enabled: false }
+                    alarmFullHour: { ...cfg.alarmFullHour, enabled: false },
+                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
                 });
             } else {
                 window.cc.saveSettings({
@@ -7040,7 +7049,22 @@
     if (sVoiceEn) {
         sVoiceEn.addEventListener("change", (e) => {
             const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, enabled: e.target.checked } });
+            if (e.target.checked) {
+                const sHalf = document.getElementById("s-half-en");
+                if (sHalf) sHalf.checked = false;
+                const sFull = document.getElementById("s-full-en");
+                if (sFull) sFull.checked = false;
+                const sQuart = document.getElementById("s-quart-en");
+                if (sQuart) sQuart.checked = false;
+                window.cc.saveSettings({
+                    alarmHalfHour: { ...(cfg.alarmHalfHour || {}), enabled: false },
+                    alarmFullHour: { ...(cfg.alarmFullHour || {}), enabled: false },
+                    alarmQuarterHour: { ...(cfg.alarmQuarterHour || {}), enabled: false },
+                    voiceAnnouncer: { ...va, enabled: true }
+                });
+            } else {
+                window.cc.saveSettings({ voiceAnnouncer: { ...va, enabled: false } });
+            }
         });
     }
 
@@ -7157,6 +7181,21 @@
             if (window.cc && window.cc.openExternalUrl) {
                 window.cc.openExternalUrl("ms-settings:speech");
             }
+        });
+    }
+
+    const sVoiceRefreshBtn = document.getElementById("s-voice-refresh-btn");
+    if (sVoiceRefreshBtn) {
+        sVoiceRefreshBtn.addEventListener("click", () => {
+            const icon = sVoiceRefreshBtn.querySelector("[data-ico]");
+            if (icon) icon.classList.add("is-spinning");
+            setTimeout(() => {
+                if (icon) icon.classList.remove("is-spinning");
+            }, 600);
+            if (window.VoiceAnnouncer && window.VoiceAnnouncer.reloadVoices) {
+                window.VoiceAnnouncer.reloadVoices();
+            }
+            populateVoiceSelectOptions();
         });
     }
 

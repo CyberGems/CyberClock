@@ -3182,8 +3182,8 @@ fn check_alarms(app: &AppHandle) {
 
     let alarm_state = app.state::<AlarmState>();
 
-    // Check quarter-hour alarm (at :00, :15, :30, and :45)
-    if settings.alarm_quarter_hour.enabled && (minute % 15 == 0) {
+    // Check quarter-hour alarm (at :00, :15, :30, and :45) - suppressed if voice announcer is active
+    if !settings.voice_announcer.enabled && settings.alarm_quarter_hour.enabled && (minute % 15 == 0) {
         let mut last = lock_or_recover(&alarm_state.last_quarter_hour);
         if last.map_or(true, |(h, m)| h != hour || m != minute) {
             *last = Some((hour, minute));
@@ -3200,8 +3200,8 @@ fn check_alarms(app: &AppHandle) {
         }
     }
 
-    // Check half-hour alarm (at :00 and :30)
-    if settings.alarm_half_hour.enabled && (minute == 0 || minute == 30) {
+    // Check half-hour alarm (at :00 and :30) - suppressed if voice announcer is active
+    if !settings.voice_announcer.enabled && settings.alarm_half_hour.enabled && (minute == 0 || minute == 30) {
         let mut last = lock_or_recover(&alarm_state.last_half_hour);
         if last.map_or(true, |(h, m)| h != hour || m != minute) {
             *last = Some((hour, minute));
@@ -3218,8 +3218,8 @@ fn check_alarms(app: &AppHandle) {
         }
     }
 
-    // Check full-hour alarm
-    if settings.alarm_full_hour.enabled && minute == 0 {
+    // Check full-hour alarm - suppressed if voice announcer is active
+    if !settings.voice_announcer.enabled && settings.alarm_full_hour.enabled && minute == 0 {
         let mut last = lock_or_recover(&alarm_state.last_full_hour);
         if last.map_or(true, |h| h != hour) {
             *last = Some(hour);

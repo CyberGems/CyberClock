@@ -387,7 +387,7 @@
     function handleDragStart(e) {
         if (e.target.closest("button, .analog-ov-btn, .analog-ctx-menu, .analog-op-chip, .analog-skin-btn")) return;
         if (e.button !== 0) return;
-        if (cfg.miniPositionLocked === true) return;
+        if (cfg.analogPositionLocked === true) return;
 
         if (ctxMenu && !ctxMenu.hidden) {
             closeContextMenu();

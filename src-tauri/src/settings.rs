@@ -201,6 +201,14 @@ pub struct AppSettings {
     pub open_float_widgets: Vec<SavedFloatWidget>,
     pub mini_design: u32,
     pub mini_position_locked: bool,
+    #[serde(default)]
+    pub timer_position_locked: bool,
+    #[serde(default)]
+    pub sw_position_locked: bool,
+    #[serde(default)]
+    pub analog_position_locked: bool,
+    #[serde(default)]
+    pub cal_position_locked: bool,
     pub preferred_display_id: Option<u32>,
     // When true, full mode opens on the monitor that currently holds
     // the mouse pointer (the "active" monitor) instead of the
@@ -339,6 +347,10 @@ impl Default for AppSettings {
             open_float_widgets: Vec::new(),
             mini_design: 1,
             mini_position_locked: false,
+            timer_position_locked: false,
+            sw_position_locked: false,
+            analog_position_locked: false,
+            cal_position_locked: false,
             preferred_display_id: None,
             display_auto: true,
             hotkey_toggle: "Alt+Shift+C".to_string(),

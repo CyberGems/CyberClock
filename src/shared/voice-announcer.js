@@ -162,6 +162,11 @@
             if (!voices || voices.length === 0) loadVoices();
             return voices;
         },
+        reloadVoices: () => {
+            loadVoices();
+            notifyVoicesReady();
+            return voices;
+        },
         onVoicesReady: (cb) => {
             if (typeof cb !== 'function') return;
             voicesListeners.push(cb);

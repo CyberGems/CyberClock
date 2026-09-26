@@ -603,7 +603,11 @@
         if (window.cc && window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
         if (e.target.closest(".controls, .float-preset, #btn-dismiss")) return;
         if (e.button !== 0) return;
-        if (cfg.miniPositionLocked === true) return;
+        const perWinLock = localStorage.getItem("cc_locked_" + WINDOW_LABEL);
+        const isLocked = perWinLock !== null
+            ? perWinLock === "true"
+            : (KIND === "timer" ? cfg.timerPositionLocked === true : cfg.swPositionLocked === true);
+        if (isLocked) return;
         e.preventDefault();
         if (window.cc && window.cc.startDragging) window.cc.startDragging().catch(() => {});
     });

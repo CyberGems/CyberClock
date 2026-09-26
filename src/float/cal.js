@@ -798,7 +798,7 @@
             // Exclude interactive elements: buttons, popover, day cells, context menu, op-chips
             if (e.target.closest("button, .cal-btn, .picker-btn, .picker-month-btn, .cal-ctx-menu, .cal-picker-popover, #cal-title, .cal-op-chip")) return;
             if (e.button !== 0) return; // Only primary left-click
-            if (cfg.miniPositionLocked === true) return;
+            if (cfg.calPositionLocked === true) return;
 
             e.preventDefault();
             document.body.classList.add("is-dragging");
