@@ -95,6 +95,25 @@
 .float-window-controls .ctl-btn {
     margin: 0;
 }
+.float-window-controls #btn-menu {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.float-shell:hover .float-window-controls #btn-menu,
+.float-shell:focus-within .float-window-controls #btn-menu,
+.float-window-controls #btn-menu:focus-visible,
+.float-window-controls #btn-menu.menu-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+.float-window-controls #btn-menu.menu-open::after {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
 .float-window-controls #btn-close:hover {
     color: #ff5252;
     background: rgba(255, 82, 82, 0.16);

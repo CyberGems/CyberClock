@@ -519,6 +519,40 @@
         }
     }
 
+    const btnMenu = document.getElementById("btn-menu");
+    if (btnMenu) {
+        btnMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+            btnMenu.blur();
+            const rect = btnMenu.getBoundingClientRect();
+            const clientX = Math.round(rect.left + rect.width / 2);
+            const clientY = Math.round(rect.bottom + 4);
+
+            if (window.cc && window.cc.openMiniContextMenu) {
+                if (window.cc.getWindowPosition) {
+                    window.cc.getWindowPosition().then(winPos => {
+                        window.cc.openMiniContextMenu({
+                            x: clientX, y: clientY,
+                            screenX: winPos[0] + clientX, screenY: winPos[1] + clientY,
+                        });
+                    }).catch(() => {
+                        window.cc.openMiniContextMenu({
+                            x: clientX, y: clientY,
+                            screenX: clientX, screenY: clientY,
+                        });
+                    });
+                } else {
+                    window.cc.openMiniContextMenu({
+                        x: clientX, y: clientY,
+                        screenX: clientX, screenY: clientY,
+                    });
+                }
+            }
+        });
+        btnMenu.addEventListener("mouseenter", () => showActionTicker("float.menuTooltip", ICO_SETTINGS));
+        btnMenu.addEventListener("mouseleave", hideActionTicker);
+    }
+
     if (btnClose) {
         btnClose.addEventListener("click", () => {
             hideActionTicker();

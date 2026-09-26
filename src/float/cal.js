@@ -220,6 +220,14 @@
             const name = getSkinName(s);
             pill.setAttribute("data-tooltip", name);
             pill.setAttribute("data-tooltip-dir", "bottom");
+
+            const col = (s.id - 1) % 5;
+            if (col === 0 || col === 1) {
+                pill.setAttribute("data-tooltip-align", "left");
+            } else if (col === 3 || col === 4) {
+                pill.setAttribute("data-tooltip-align", "right");
+            }
+
             pill.addEventListener("click", (e) => {
                 e.stopPropagation();
                 selectCalSkin(s.id, true);
