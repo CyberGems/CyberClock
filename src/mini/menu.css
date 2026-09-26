@@ -408,11 +408,17 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: relative;
+        z-index: 10;
+    }
+    .section-title-row:hover,
+    .section-title-row:focus-within {
+        z-index: 100;
     }
     .btn-gallery-link {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
         background: transparent;
         border: none;
         outline: none;
@@ -425,12 +431,30 @@
         border-radius: 4px;
         transition: all 0.14s ease;
         opacity: 0.85;
+        line-height: 1;
+        position: relative;
+        z-index: 30;
     }
     .btn-gallery-link:hover {
         opacity: 1;
         background: rgba(var(--rgb-accent), 0.15);
         text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
         transform: translateY(-1px);
+        z-index: 50;
+    }
+    .btn-gallery-link .gallery-ico {
+        width: 11px;
+        height: 11px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -0.5px;
+    }
+    .btn-gallery-link .gallery-lbl {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
     }
 
     /* Design picker grid (3 rows of 5 buttons) */
@@ -439,6 +463,12 @@
         grid-template-columns: repeat(5, 1fr);
         gap: 5px;
         margin-top: 2px;
+        position: relative;
+        z-index: 1;
+    }
+    .design-picker:hover,
+    .design-picker:focus-within {
+        z-index: 20;
     }
     .design-btn {
         background: rgba(0, 0, 0, 0.3);
