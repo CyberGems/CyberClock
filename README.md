@@ -50,7 +50,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Full Calendar** — Month view with agenda, day notes, and statistics
 - **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
 - **Day Notes** — Attach notes to specific dates with an editor modal
-- **Floating Calendar Widget** — Standalone compact desktop calendar with quick note peeks, multi-month navigation, and dedicated context menu
+- **Floating Calendar Widget** — Standalone compact desktop calendar with 10 cyberpunk/neon skins, daily auto-rotation, date picker popover, quick note peeks, multi-month navigation, and dedicated context menu
 - **Floating Analog Clock Widget** — Desktop floating analog clock with customizable dial designs, always-on-top, and taskbar visibility
 
 ### ⏱️ Timer & Stopwatch
@@ -59,8 +59,8 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Floating Desktop Widgets** — Open independent compact timer and stopwatch windows with multi-slot support; widgets are remembered and restored across application restarts
 - **Independent Skins & Renaming** — Choose distinct skins per widget type (Mini Clock, Timer, Stopwatch) and customize widget titles
 - **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, or calendars from any active widget's context menu
-- **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown
-- **Resting Digits** — Untouched all-zero timer/stopwatch digits rest dimmed until a time is armed or the count starts
+- **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown (can be hidden via context menu)
+- **Resting Digits & Enlarged Display** — Enhanced counter digits across all skins, with resting all-zero state dimmed until armed
 
 ### 🧘 Relaxation Module
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
@@ -80,13 +80,15 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
-- **Position Lock** — Prevent accidental dragging
+- **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar)
+- **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
 - **Collapse Date** — Show date only on hover
 - **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock (toggled from the tray menu or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes
+- **Voice Time Announcer (Talking Clock)** — Verbally announces the time at intervals (:15, :30, :00) with selectable system voices, customizable style (Natural, Cyber/Tactical, Concise), optional soft pre-chime, quiet hours, and direct shortcut to install Windows voices
 - **Quarter-Hour Chimes** — :00, :15, :30, :45
 - **Half-Hour Chimes** — :00, :30
 - **Full-Hour Chimes** — :00
