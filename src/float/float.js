@@ -507,7 +507,7 @@
             hideActionTicker();
             if (window.cc && window.cc.minimizeWindow) window.cc.minimizeWindow();
         });
-        btnMin.addEventListener("mouseenter", () => showActionTicker("float.minimize", ICO_MIN));
+        btnMin.addEventListener("mouseenter", () => showActionTicker("float.minTooltip", ICO_MIN));
         btnMin.addEventListener("mouseleave", hideActionTicker);
     }
 

@@ -1518,6 +1518,27 @@
                     <!-- Display -->
                     <div class="s-panel" id="stab-display">
                         <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.display.behaviorTitle">Inactivity & Revert</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="compact"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.display.autoRevert">Auto-revert to Mini Mode</span>
+                                    <small data-i18n="settings.display.autoRevertDesc">Automatically return to Mini Mode after a period of inactivity</small>
+                                </div>
+                                <select id="s-full-auto-revert" class="sched-select">
+                                    <option value="0" data-i18n="settings.display.autoRevertNever">Never (Disabled)</option>
+                                    <option value="15" data-i18n="settings.display.autoRevert15s">After 15 seconds</option>
+                                    <option value="30" data-i18n="settings.display.autoRevert30s">After 30 seconds</option>
+                                    <option value="60" data-i18n="settings.display.autoRevert1m">After 1 minute</option>
+                                    <option value="120" data-i18n="settings.display.autoRevert2m">After 2 minutes</option>
+                                    <option value="300" data-i18n="settings.display.autoRevert5m">After 5 minutes</option>
+                                    <option value="600" data-i18n="settings.display.autoRevert10m">After 10 minutes</option>
+                                    <option value="900" data-i18n="settings.display.autoRevert15m">After 15 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.display.multiMonitor">Multi-Monitor Support</div>
                             <div class="s-sec-d" data-i18n="settings.display.desc1">Full mode covers the selected display completely, edge to edge.</div>
                             <div class="s-sec-d" data-i18n="settings.display.desc2">In Mini Mode, drag the clock to any monitor: the position is remembered.</div>

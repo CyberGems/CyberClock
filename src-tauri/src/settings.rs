@@ -218,6 +218,8 @@ pub struct AppSettings {
     pub full_hide_clock: bool,
     #[serde(default)]
     pub full_hide_calendar: bool,
+    #[serde(default)]
+    pub full_auto_revert_secs: Option<u32>,
 
     // Analog dial design for the full-mode clock (1..10)
     pub clock_design: u32,
@@ -331,6 +333,7 @@ impl Default for AppSettings {
             ui_scale: 1.0,
             full_hide_clock: false,
             full_hide_calendar: false,
+            full_auto_revert_secs: None,
             clock_design: 1,
             clock_show_brand: true,
             clock_auto_cycle: false,

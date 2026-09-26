@@ -428,7 +428,8 @@
                 btn.classList.add("active");
             }
             btn.textContent = name;
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
                 viewYear = pickerYear;
                 viewMonth = idx;
                 closePicker();
@@ -539,6 +540,11 @@
     if (ctxMenu) {
         ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());
         ctxMenu.addEventListener("pointerdown", (e) => e.stopPropagation());
+    }
+
+    if (popoverEl) {
+        popoverEl.addEventListener("mousedown", (e) => e.stopPropagation());
+        popoverEl.addEventListener("pointerdown", (e) => e.stopPropagation());
     }
 
     if (btnMenu) {
@@ -777,8 +783,8 @@
     // ── Window Dragging from Any Dead Space ──────────────────────
     if (shell) {
         shell.addEventListener("mousedown", (e) => {
-            // Never process or close menu if click started inside the context menu itself
-            if (e.target.closest("#cal-context-menu, .cal-ctx-menu")) return;
+            // Never process or close menu/popover if click started inside the context menu or popover itself
+            if (e.target.closest("#cal-context-menu, .cal-ctx-menu, #cal-picker-popover, .cal-picker-popover")) return;
 
             if (ctxMenu && !ctxMenu.hidden) {
                 closeContextMenu();

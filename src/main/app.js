@@ -699,6 +699,9 @@
         const displayAutoEl = document.getElementById("s-display-auto");
         if (displayAutoEl) displayAutoEl.checked = s.displayAuto !== false;
         if (typeof syncDisplayAutoUI === "function") syncDisplayAutoUI(s.displayAuto !== false);
+        const fullAutoRevertEl = document.getElementById("s-full-auto-revert");
+        if (fullAutoRevertEl) fullAutoRevertEl.value = String(s.fullAutoRevertSecs || 0);
+        if (typeof syncFullAutoRevertTimer === "function") syncFullAutoRevertTimer(s.fullAutoRevertSecs || 0);
         if (typeof renderHotkey === "function") renderHotkey();
         if (typeof renderClockAccuracy === "function") renderClockAccuracy(s);
         if (typeof updateClockDriftBanner === "function") updateClockDriftBanner(s);
@@ -6382,6 +6385,94 @@
         sDisplayAuto.addEventListener("change", (e) => {
             window.cc.saveSettings({ displayAuto: e.target.checked });
             syncDisplayAutoUI(e.target.checked);
+        });
+    }
+
+    // ── Full Mode Idle Auto-Revert to Mini ───────────────────────
+    let fullAutoRevertSecs = 0;
+    let fullAutoRevertTimer = null;
+    let lastFullUserActivity = Date.now();
+
+    function isFullModeRevertBlocked() {
+        if (document.hidden) return true;
+        const sOverlay = document.getElementById("s-overlay");
+        if (sOverlay && sOverlay.classList.contains("open")) return true;
+        const anyModal = document.querySelector(".modal-overlay.open, .alarm-overlay.open, #first-close-overlay.open");
+        if (anyModal) return true;
+        const tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || (tag === "SELECT" && document.activeElement.id !== "s-full-auto-revert")) return true;
+        return false;
+    }
+
+    function checkFullAutoRevert() {
+        if (fullAutoRevertSecs <= 0) return;
+        if (isFullModeRevertBlocked()) {
+            scheduleFullAutoRevertCheck(3000);
+            return;
+        }
+        const elapsed = (Date.now() - lastFullUserActivity) / 1000;
+        if (elapsed >= fullAutoRevertSecs) {
+            if (window.cc && window.cc.goMini) {
+                window.cc.goMini();
+            }
+        } else {
+            scheduleFullAutoRevertCheck(Math.max(1000, (fullAutoRevertSecs - elapsed) * 1000));
+        }
+    }
+
+    function scheduleFullAutoRevertCheck(delayMs) {
+        clearTimeout(fullAutoRevertTimer);
+        if (fullAutoRevertSecs <= 0) return;
+        const timeout = delayMs != null ? delayMs : (fullAutoRevertSecs * 1000);
+        fullAutoRevertTimer = setTimeout(checkFullAutoRevert, timeout);
+    }
+
+    function onFullUserActivity() {
+        lastFullUserActivity = Date.now();
+        if (fullAutoRevertSecs > 0) {
+            scheduleFullAutoRevertCheck();
+        }
+    }
+
+    function syncFullAutoRevertTimer(secs) {
+        fullAutoRevertSecs = Number(secs) || 0;
+        lastFullUserActivity = Date.now();
+        clearTimeout(fullAutoRevertTimer);
+        if (fullAutoRevertSecs > 0) {
+            scheduleFullAutoRevertCheck();
+        }
+    }
+
+    let lastActivityThrottle = 0;
+    function handleUserActivityThrottled() {
+        const now = Date.now();
+        if (now - lastActivityThrottle < 1000) return;
+        lastActivityThrottle = now;
+        onFullUserActivity();
+    }
+
+    ["pointermove", "pointerdown", "keydown", "wheel", "touchstart"].forEach((evt) => {
+        window.addEventListener(evt, handleUserActivityThrottled, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+            onFullUserActivity();
+        } else {
+            clearTimeout(fullAutoRevertTimer);
+        }
+    });
+
+    window.addEventListener("focus", () => {
+        onFullUserActivity();
+    });
+
+    const sFullAutoRevert = document.getElementById("s-full-auto-revert");
+    if (sFullAutoRevert) {
+        sFullAutoRevert.addEventListener("change", (e) => {
+            const val = parseInt(e.target.value, 10) || 0;
+            window.cc.saveSettings({ fullAutoRevertSecs: val });
+            syncFullAutoRevertTimer(val);
         });
     }
 
