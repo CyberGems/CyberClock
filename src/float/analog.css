@@ -28,7 +28,7 @@ html, body {
     height: 266px;
     opacity: var(--analog-opacity, 1);
     transition: opacity 0.15s ease;
-    background: radial-gradient(circle at center, rgba(18, 20, 26, 0.96) 0%, rgba(8, 9, 12, 0.98) 75%, rgba(0, 0, 0, 0.94) 100%);
+    background: radial-gradient(circle at center, rgba(14, 17, 24, 0.95) 0%, rgba(8, 10, 15, 0.98) 100%);
     border-radius: 50%;
     position: relative;
     overflow: hidden;
@@ -37,14 +37,11 @@ html, body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    /* Softly feathered multi-layer shadow with 25px clearance to guarantee zero clipping on bottom */
     box-shadow:
-        0 4px 14px rgba(0, 0, 0, 0.60),
-        0 1px 4px rgba(0, 0, 0, 0.35),
-        0 0 10px rgba(var(--rgb-accent), 0.16),
-        inset 0 0 20px rgba(0, 0, 0, 0.8),
-        inset 0 1px 1px rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(var(--rgb-accent), 0.35);
+        0 8px 24px rgba(0, 0, 0, 0.65),
+        0 2px 8px rgba(0, 0, 0, 0.35),
+        0 0 10px rgba(var(--rgb-accent), 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 1;
 }
 

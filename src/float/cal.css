@@ -387,6 +387,14 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     display: none !important;
 }
 
+.cal-ctx-menu [data-tooltip]::after {
+    white-space: normal !important;
+    max-width: 155px;
+    width: max-content;
+    text-align: center;
+    line-height: 1.3;
+}
+
 /* Tabs: Acciones vs Personalizar */
 .cal-ctx-tabs {
     display: flex;
