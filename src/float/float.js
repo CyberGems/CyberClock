@@ -106,8 +106,8 @@
 
     let cfg = {};
 
-    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34 };
-    const DESIGN_WIDTHS  = { 1: 260, 2: 260, 3: 260, 4: 260, 5: 260, 6: 260, 7: 300, 8: 300, 9: 300, 10: 260, 11: 300, 12: 300 };
+    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34, 13: 48, 14: 48, 15: 48 };
+    const DESIGN_WIDTHS  = { 1: 280, 2: 280, 3: 295, 4: 280, 5: 295, 6: 280, 7: 300, 8: 300, 9: 300, 10: 280, 11: 300, 12: 300, 13: 290, 14: 295, 15: 290 };
     function zoomFactor() {
         const z = cfg.miniZoom ?? 1;
         return Number.isFinite(z) && z > 0 ? z : 1;
@@ -157,7 +157,7 @@
         // The float owns more controls than the mini clock, so it gets a
         // wider base geometry. The window controls are stacked vertically,
         // so every skin gets enough height for that compact right-side group.
-        const width = Math.max(bw + 76, 360);
+        const width = Math.max(bw + (KIND === "sw" ? 115 : 95), KIND === "sw" ? 395 : 375);
         const baseHeight = Math.max(
             bh + (KIND === "sw" ? 14 : 10),
             KIND === "sw" ? 60 : 54

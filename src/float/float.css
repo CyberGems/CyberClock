@@ -26,18 +26,31 @@
 }
 .float-shell .time-block {
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 .float-shell #mini-time {
-    font-size: 26px !important;
+    font-size: 24px !important;
     line-height: 1.05 !important;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-align: left !important;
+    white-space: nowrap !important;
+    padding-right: 6px;
+}
+.float-shell[data-design="3"] #mini-time {
+    letter-spacing: 0.4px;
+}
+.float-shell[data-design="5"] #mini-time {
+    letter-spacing: 0.8px;
+}
+.float-shell[data-design="14"] #mini-time {
+    letter-spacing: 0.6px;
+    padding-right: 8px;
 }
 .float-shell #mini-date {
     font-size: 10px !important;
