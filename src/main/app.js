@@ -7151,6 +7151,15 @@
         });
     }
 
+    const sVoiceAddBtn = document.getElementById("s-voice-add-btn");
+    if (sVoiceAddBtn) {
+        sVoiceAddBtn.addEventListener("click", () => {
+            if (window.cc && window.cc.openExternalUrl) {
+                window.cc.openExternalUrl("ms-settings:speech");
+            }
+        });
+    }
+
     if (window.VoiceAnnouncer && window.VoiceAnnouncer.onVoicesReady) {
         window.VoiceAnnouncer.onVoicesReady(() => {
             populateVoiceSelectOptions();

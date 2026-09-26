@@ -420,6 +420,8 @@
             "voice.quietTo": "to",
             "voice.test": "Test",
             "voice.testTip": "Test voice announcement",
+            "voice.addVoices": "Add voices…",
+            "voice.addVoicesTip": "Open Windows Settings to install Spanish or other language voices",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Welcome",
@@ -1222,6 +1224,8 @@
             "voice.quietTo": "a",
             "voice.test": "Probar",
             "voice.testTip": "Probar locución de voz",
+            "voice.addVoices": "Agregar voces…",
+            "voice.addVoicesTip": "Abrir la configuración de Windows para instalar voces en español u otros idiomas",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Toque personal",
