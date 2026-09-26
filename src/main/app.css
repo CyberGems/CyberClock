@@ -4323,6 +4323,27 @@
     @keyframes cc-spin {
         to { transform: rotate(360deg); }
     }
+    #s-voice-announcer-blk .s-alarm-lbl {
+        width: 110px;
+        flex-shrink: 0;
+    }
+    .s-alarm-row.s-voice-row {
+        flex-wrap: nowrap;
+    }
+    .s-alarm-row.s-voice-row #s-voice-select {
+        flex: 1;
+        min-width: 0;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .s-abtn.s-abtn-icon {
+        padding: 6px 9px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
     .s-teaser {
         background: var(--bg-01);
         border: 1px solid var(--border);

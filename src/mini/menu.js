@@ -226,8 +226,26 @@
                                 : (cfg.swDesign || cfg.miniDesign || 1);
                         }
                         syncTimerDesignUI(freshDesign);
+
+                        const tglTimerLock = document.getElementById("toggle-timer-lock");
+                        if (tglTimerLock) {
+                            const perWin = localStorage.getItem("cc_locked_" + activeCaller.caller);
+                            const isLocked = perWin !== null
+                                ? perWin === "true"
+                                : (isTimer ? !!cfg.timerPositionLocked : !!cfg.swPositionLocked);
+                            tglTimerLock.classList.toggle("on", isLocked);
+                        }
                     }
                 }).catch(() => {});
+            }
+
+            const tglTimerLock = document.getElementById("toggle-timer-lock");
+            if (tglTimerLock) {
+                const perWin = localStorage.getItem("cc_locked_" + activeCaller.caller);
+                const isLocked = perWin !== null
+                    ? perWin === "true"
+                    : (isTimer ? !!currentCfg.timerPositionLocked : !!currentCfg.swPositionLocked);
+                tglTimerLock.classList.toggle("on", isLocked);
             }
         } else {
             if (timerView) timerView.style.display = "none";
@@ -553,6 +571,19 @@
                 if (tglTimerTaskbar) tglTimerTaskbar.classList.toggle("on", cfg.showWidgetsInTaskbar === true);
                 const tglTimerAot = document.getElementById("toggle-timer-aot");
                 if (tglTimerAot) tglTimerAot.classList.toggle("on", Boolean(cfg.alwaysOnTop));
+                const tglTimerLock = document.getElementById("toggle-timer-lock");
+                if (tglTimerLock) {
+                    let isLocked = false;
+                    if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
+                        const perWin = localStorage.getItem("cc_locked_" + activeCaller.caller);
+                        if (perWin !== null) {
+                            isLocked = perWin === "true";
+                        } else {
+                            isLocked = activeCaller.kind === "timer" ? !!cfg.timerPositionLocked : !!cfg.swPositionLocked;
+                        }
+                    }
+                    tglTimerLock.classList.toggle("on", isLocked);
+                }
                 const isSw = activeCaller && activeCaller.kind === "sw";
                 const tDesign = isSw
                     ? (cfg.swDesign || cfg.miniDesign || 1)
@@ -733,6 +764,32 @@
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniCollapseDate: on });
+            }
+            if (window.cc && window.cc.closeMenuPopup) {
+                setTimeout(() => window.cc.closeMenuPopup(), 200);
+            }
+        });
+    }
+
+    const timerLockRow = document.getElementById("ctx-timer-lock");
+    if (timerLockRow) {
+        timerLockRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-lock");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
+                try {
+                    localStorage.setItem("cc_locked_" + activeCaller.caller, String(on));
+                } catch (_) {}
+                if (window.cc && window.cc.saveSettings) {
+                    if (activeCaller.kind === "timer") {
+                        currentCfg.timerPositionLocked = on;
+                        window.cc.saveSettings({ timerPositionLocked: on });
+                    } else {
+                        currentCfg.swPositionLocked = on;
+                        window.cc.saveSettings({ swPositionLocked: on });
+                    }
+                }
             }
             if (window.cc && window.cc.closeMenuPopup) {
                 setTimeout(() => window.cc.closeMenuPopup(), 200);

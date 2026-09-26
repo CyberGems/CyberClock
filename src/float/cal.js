@@ -28,6 +28,8 @@
     const ctxMenu = document.getElementById("cal-context-menu");
     const ctxAot = document.getElementById("ctx-aot");
     const ctxAotCheck = document.getElementById("ctx-aot-check");
+    const ctxLock = document.getElementById("ctx-lock");
+    const ctxLockCheck = document.getElementById("ctx-lock-check");
     const ctxToday = document.getElementById("ctx-today");
     const ctxPicker = document.getElementById("ctx-picker");
     const ctxFull = document.getElementById("ctx-full");
@@ -522,6 +524,8 @@
             }).catch(() => {});
         }
 
+        if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", Boolean(cfg.calPositionLocked));
+
         // Sync opacity chips
         syncOpacityChips(currentOpacity());
 
@@ -584,6 +588,18 @@
                 isAot = !!res;
                 ctxAotCheck.classList.toggle("visible", isAot);
             }
+        });
+    }
+
+    if (ctxLock) {
+        ctxLock.addEventListener("click", () => {
+            closeContextMenu();
+            const next = !cfg.calPositionLocked;
+            cfg.calPositionLocked = next;
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ calPositionLocked: next });
+            }
+            if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", next);
         });
     }
 

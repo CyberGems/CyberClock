@@ -208,6 +208,9 @@
             }).catch(() => {});
         }
 
+        const ctxLockCheck = document.getElementById("ctx-lock-check");
+        if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", Boolean(cfg.analogPositionLocked));
+
         syncOpacityChips(currentOpacity());
     }
 
@@ -253,6 +256,20 @@
                 isAot = !!res;
                 ctxAotCheck.classList.toggle("visible", isAot);
             }
+        });
+    }
+
+    const ctxLock = document.getElementById("ctx-lock");
+    const ctxLockCheck = document.getElementById("ctx-lock-check");
+    if (ctxLock) {
+        ctxLock.addEventListener("click", () => {
+            closeContextMenu();
+            const next = !cfg.analogPositionLocked;
+            cfg.analogPositionLocked = next;
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ analogPositionLocked: next });
+            }
+            if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", next);
         });
     }
 
