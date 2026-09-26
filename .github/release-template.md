@@ -37,6 +37,39 @@ Voice Time Announcer brings verbal speech time announcements with system voices,
   - Enlarged 26px counter digits, resting dimmed state when zeroed, and fixed chamfer alignment on Skin 1.
   - Floating timer quick presets toggle to show or hide +30s to +15m buttons on demand.
 
+<details>
+<summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
+
+### 🚀 Novedades de esta versión
+
+El Locutor de Hora por Voz (Reloj Parlante) incorpora anuncios hablados de la hora con voces nativas de Windows, estilos natural y táctico, y horas de silencio, junto a la atenuación por inactividad (Auto-Fade) en Modo Mini, calendario flotante y bloqueo de posición independiente por widget.
+
+---
+
+### ✨ Novedades destacadas
+
+- 🗣️ **Locutor de Hora por Voz (Reloj Parlante)**:
+  - Anuncia verbalmente la hora a intervalos (:15, :30, :00) mediante síntesis de voz nativa de Windows.
+  - Permite elegir entre voz predeterminada, masculina, femenina o cualquier voz SAPI/OneCore instalada, con acceso directo para instalar paquetes de voces en Windows.
+  - Tres estilos de locución: **Natural**, **Ciber-táctico** o **Conciso**.
+  - Pre-timbre suave opcional, ventana de horas de silencio y de-conflicto inteligente con las campanadas horarias.
+
+- 🕶️ **Auto-Fade (Atenuación por Inactividad)**:
+  - El Modo Mini se atenúa automáticamente tras unos segundos de inactividad (70%, 50%, 30% o 15%), recuperando el 100% de brillo al pasar el ratón.
+
+- 🔒 **Bloqueo de posición contextual e independiente**:
+  - Mini Reloj, Temporizadores, Cronómetros, Reloj Analógico y Calendario cuentan con bloqueo de posición individual accesible desde sus menús contextuales.
+
+- 📅 **Widgets Flotantes de Calendario y Reloj Analógico**:
+  - Calendario de escritorio independiente con 10 skins futuristas, rotación diaria automática, selector emergente de fecha y menú contextual.
+  - Reloj analógico flotante con esferas ciber-neón y visibilidad configurable en la barra de tareas.
+
+- ⏱️ **Facelift de Temporizador y Cronómetro**:
+  - Dígitos de contador ampliados a 26px, estado en reposo atenuado en ceros y corrección de chaflanes en el Skin 1.
+  - Selector en el menú contextual del temporizador flotante para mostrar u ocultar presets rápidos (+30s a +15m).
+
+</details>
+
 --- 
 
 ### 📦 Downloads & Packages

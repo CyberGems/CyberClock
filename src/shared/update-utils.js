@@ -42,7 +42,7 @@
 
         // 2. Check for details summary block or header: <summary>...Español...</summary> or ### ...Español...
         if (lang === "es") {
-            const esBlockRegex = /(?:<details>[\s\S]*?<summary>[^<]*(?:español|spanish)[^<]*<\/summary>([\s\S]*?)<\/details>)|(?:#{2,4}\s*(?:.*?(?:español|novedades|cambios).*?)\r?\n([\s\S]*?)(?=(?:#{2,4}\s)|<\/details>|$))/i;
+            const esBlockRegex = /(?:<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>([\s\S]*?)<\/details>)|(?:#{2,4}\s*(?:.*?(?:español|novedades|cambios).*?)\r?\n([\s\S]*?)(?=(?:#{2,4}\s)|<\/details>|$))/i;
             const esMatch = markdown.match(esBlockRegex);
             const content = esMatch ? (esMatch[1] || esMatch[2]) : null;
             if (content && content.trim()) {
@@ -51,7 +51,7 @@
         }
 
         // 3. Fallback: if user is on English, or no Spanish block exists, exclude any Spanish details blocks so English remains clean
-        return markdown.replace(/<details>[\s\S]*?<summary>[^<]*(?:español|spanish)[^<]*<\/summary>[\s\S]*?<\/details>/gi, "");
+        return markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, "");
     }
 
     function parseChangelogPeek(markdown, limit = 4) {
