@@ -2494,6 +2494,82 @@
         background: rgba(38, 255, 217, 0.12);
     }
 
+    /* ── Mini Mode Update Notice ─────────────────────────── */
+    .ctl-btn.btn-update {
+        color: var(--accent-a, #00f0ff);
+        animation: mini-update-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes mini-update-pulse {
+        0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 2px var(--accent-a, #00f0ff)); }
+        50% { opacity: 1; filter: drop-shadow(0 0 7px var(--accent-a, #00f0ff)); }
+    }
+    .mini-tip-update {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .mini-tip-update-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .mini-tip-update-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        color: var(--accent-a, #00f0ff);
+        text-transform: uppercase;
+    }
+    .mini-tip-update-ver {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: rgba(var(--rgb-accent, 0, 240, 255), 0.18);
+        border: 1px solid rgba(var(--rgb-accent, 0, 240, 255), 0.4);
+        color: var(--accent-a, #00f0ff);
+    }
+    .mini-tip-update-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 2px;
+    }
+    .mini-tip-update-btn {
+        flex: 1;
+        padding: 5px 8px;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 10.5px;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.18s ease;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: 1px solid var(--border);
+        background: var(--bg-02, rgba(255, 255, 255, 0.05));
+        color: var(--text-hi, #fff);
+    }
+    .mini-tip-update-btn.primary {
+        background: rgba(var(--rgb-accent, 0, 240, 255), 0.2);
+        border-color: var(--accent-a, #00f0ff);
+        color: var(--accent-a, #00f0ff);
+    }
+    .mini-tip-update-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent, 0, 240, 255), 0.35);
+    }
+
     /* ── Zoom (50/100/200/400%) ─────────────────────────────
        The shell renders at its natural skin size and the zoom
        multiplies it via transform. The window itself is resized

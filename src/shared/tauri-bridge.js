@@ -238,6 +238,9 @@
         installUpdate: async () => {
             return await invoke("install_update");
         },
+        getPendingUpdate: async () => {
+            return await invoke("get_pending_update");
+        },
         onUpdateStatus: (cb) => {
             return subscribe("update:status", cb);
         },

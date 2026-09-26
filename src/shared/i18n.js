@@ -187,6 +187,10 @@
             "mini.tip.scheduleClear": "Your schedule is clear",
             "mini.tip.oneUpcoming": "1 upcoming event",
             "mini.tip.nUpcoming": "{n} upcoming events",
+            "mini.update.available": "New version available",
+            "mini.update.view": "View & Update",
+            "mini.update.dismiss": "Dismiss",
+            "mini.tooltip.update": "Update available ({v}): click to view",
 
             "timer.title": "Timer",
             "timer.hours": "HOURS",
@@ -992,6 +996,10 @@
             "mini.tip.scheduleClear": "Tu agenda está despejada",
             "mini.tip.oneUpcoming": "1 evento próximo",
             "mini.tip.nUpcoming": "{n} eventos próximos",
+            "mini.update.available": "Nueva versión disponible",
+            "mini.update.view": "Ver y actualizar",
+            "mini.update.dismiss": "Descartar",
+            "mini.tooltip.update": "Actualización disponible ({v}): clic para ver",
 
             "timer.title": "Temporizador",
             "timer.hours": "HORAS",

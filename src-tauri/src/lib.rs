@@ -2740,6 +2740,11 @@ fn get_menu_caller() -> Option<serde_json::Value> {
 }
 
 #[tauri::command]
+fn get_pending_update() -> Option<String> {
+    pending_update_version()
+}
+
+#[tauri::command]
 fn get_open_float_labels(app: AppHandle) -> Vec<String> {
     app.webview_windows()
         .keys()
@@ -4248,6 +4253,7 @@ pub fn run() {
             is_portable,
             is_msstore,
             check_for_updates,
+            get_pending_update,
             download_update,
             install_update,
             open_taskbar_settings,

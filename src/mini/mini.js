@@ -328,6 +328,57 @@
         // Build with DOM nodes so user note text can never inject HTML.
         tipEl.replaceChildren();
 
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
+            const updBlock = document.createElement("div");
+            updBlock.className = "mini-tip-update";
+
+            const updHeader = document.createElement("div");
+            updHeader.className = "mini-tip-update-header";
+
+            const updTitle = document.createElement("span");
+            updTitle.className = "mini-tip-update-title";
+            updTitle.textContent = `🚀 ${t("mini.update.available")}`;
+
+            const updVer = document.createElement("span");
+            updVer.className = "mini-tip-update-ver";
+            updVer.textContent = `v${availableUpdateVersion}`;
+
+            updHeader.appendChild(updTitle);
+            updHeader.appendChild(updVer);
+            updBlock.appendChild(updHeader);
+
+            const updActions = document.createElement("div");
+            updActions.className = "mini-tip-update-actions";
+
+            const btnOpen = document.createElement("button");
+            btnOpen.type = "button";
+            btnOpen.className = "mini-tip-update-btn primary";
+            btnOpen.textContent = t("mini.update.view");
+            btnOpen.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (window.cc && window.cc.goFull) {
+                    window.cc.goFull();
+                }
+            });
+
+            const btnDismiss = document.createElement("button");
+            btnDismiss.type = "button";
+            btnDismiss.className = "mini-tip-update-btn";
+            btnDismiss.textContent = t("mini.update.dismiss");
+            btnDismiss.addEventListener("click", (e) => {
+                e.stopPropagation();
+                skipUpdate(availableUpdateVersion);
+                refreshTipContent();
+                updateBadgeVisibility();
+            });
+
+            updActions.appendChild(btnOpen);
+            updActions.appendChild(btnDismiss);
+            updBlock.appendChild(updActions);
+
+            tipEl.appendChild(updBlock);
+        }
+
         const dateDiv = document.createElement("div");
         dateDiv.className = "mini-tip-date";
         dateDiv.textContent = dateStr;
@@ -810,4 +861,80 @@
         isMouseOverMini = false;
         resetAutoFadeTimer();
     });
+
+    // ═══════════════════════════════════════════════════════
+    // UPDATE NOTIFICATIONS
+    // ═══════════════════════════════════════════════════════
+    let availableUpdateVersion = null;
+
+    function isUpdateSkipped(ver) {
+        if (!ver) return true;
+        try {
+            return localStorage.getItem("cc_update_skip_version") === ver ||
+                   localStorage.getItem("cyberclock_skip_update_version") === ver;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function skipUpdate(ver) {
+        if (!ver) return;
+        try {
+            localStorage.setItem("cc_update_skip_version", ver);
+            localStorage.setItem("cyberclock_skip_update_version", ver);
+        } catch (_) {}
+    }
+
+    function updateBadgeVisibility() {
+        const btnMiniUpdate = document.getElementById("btn-mini-update");
+        if (!btnMiniUpdate) return;
+        const show = Boolean(availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion));
+        btnMiniUpdate.style.display = show ? "inline-flex" : "none";
+        if (show) {
+            const tipText = t("mini.tooltip.update", { v: availableUpdateVersion });
+            btnMiniUpdate.setAttribute("data-tooltip", tipText);
+        }
+    }
+
+    function setAvailableUpdate(ver) {
+        if (!ver || isUpdateSkipped(ver)) return;
+        availableUpdateVersion = ver;
+        updateBadgeVisibility();
+        refreshTipContent();
+    }
+
+    const btnMiniUpdate = document.getElementById("btn-mini-update");
+    if (btnMiniUpdate) {
+        btnMiniUpdate.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (window.cc && window.cc.goFull) {
+                window.cc.goFull();
+            }
+        });
+        btnMiniUpdate.addEventListener("mouseenter", (e) => {
+            e.stopPropagation();
+            showActionTicker("update", availableUpdateVersion ? `v${availableUpdateVersion}` : "Update");
+        });
+        btnMiniUpdate.addEventListener("mouseleave", () => {
+            hideActionTicker();
+        });
+    }
+
+    if (window.cc && window.cc.getPendingUpdate) {
+        window.cc.getPendingUpdate().then((ver) => {
+            if (ver) setAvailableUpdate(ver);
+        }).catch(() => {});
+    }
+
+    if (window.cc && window.cc.onUpdateStatus) {
+        window.cc.onUpdateStatus((payload) => {
+            if (payload && payload.state === "available" && payload.version) {
+                setAvailableUpdate(payload.version);
+            } else if (payload && (payload.state === "idle" || payload.state === "not-found")) {
+                availableUpdateVersion = null;
+                updateBadgeVisibility();
+                refreshTipContent();
+            }
+        });
+    }
 

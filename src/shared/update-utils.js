@@ -27,9 +27,37 @@
             .trim();
     }
 
+    function extractLanguageSection(markdown) {
+        if (!markdown) return "";
+        const lang = (window.ccI18n && typeof window.ccI18n.getLanguage === "function")
+            ? window.ccI18n.getLanguage()
+            : "en";
+
+        // 1. Check for explicit comment tags: <!-- lang:es --> ... <!-- /lang:es -->
+        const commentRegex = new RegExp(`<!--\\s*lang:${lang}\\s*-->([\\s\\S]*?)<!--\\s*/lang:${lang}\\s*-->`, "i");
+        const commentMatch = markdown.match(commentRegex);
+        if (commentMatch && commentMatch[1]?.trim()) {
+            return commentMatch[1].trim();
+        }
+
+        // 2. Check for details summary block or header: <summary>...Español...</summary> or ### ...Español...
+        if (lang === "es") {
+            const esBlockRegex = /(?:<details>[\s\S]*?<summary>[^<]*(?:español|spanish)[^<]*<\/summary>([\s\S]*?)<\/details>)|(?:#{2,4}\s*(?:.*?(?:español|novedades|cambios).*?)\r?\n([\s\S]*?)(?=(?:#{2,4}\s)|<\/details>|$))/i;
+            const esMatch = markdown.match(esBlockRegex);
+            const content = esMatch ? (esMatch[1] || esMatch[2]) : null;
+            if (content && content.trim()) {
+                return content.trim();
+            }
+        }
+
+        // 3. Fallback: if user is on English, or no Spanish block exists, exclude any Spanish details blocks so English remains clean
+        return markdown.replace(/<details>[\s\S]*?<summary>[^<]*(?:español|spanish)[^<]*<\/summary>[\s\S]*?<\/details>/gi, "");
+    }
+
     function parseChangelogPeek(markdown, limit = 4) {
         if (!markdown) return [];
-        const lines = String(markdown)
+        const targetedMarkdown = extractLanguageSection(markdown);
+        const lines = String(targetedMarkdown)
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter(Boolean);
