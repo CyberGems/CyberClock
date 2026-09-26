@@ -68,6 +68,7 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 .cal-win-ctl {
     display: flex;
     align-items: center;
+    gap: 3px;
     flex-shrink: 0;
 }
 
@@ -353,10 +354,10 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     background: rgba(14, 17, 24, 0.98);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(var(--rgb-accent), 0.4);
-    border-radius: 10px;
+    border-radius: 9px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 18px rgba(var(--rgb-accent), 0.25);
-    padding: 6px;
-    width: 195px;
+    padding: 5px;
+    width: 190px;
     max-height: calc(100vh - 12px);
     overflow-y: auto;
     overflow-x: hidden;
@@ -365,8 +366,7 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    animation: cal-pop-in 0.12s ease-out;
+    gap: 2px;
 }
 
 .cal-ctx-menu::-webkit-scrollbar {
@@ -386,7 +386,7 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     display: flex;
     background: rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 2px;
     gap: 2px;
     margin-bottom: 2px;
@@ -396,12 +396,12 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     flex: 1;
     background: transparent;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     color: #94a3b8;
     font-family: var(--font-ui, "Outfit", sans-serif);
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 600;
-    padding: 4px 6px;
+    padding: 3px 5px;
     cursor: pointer;
     transition: all 0.14s ease;
     text-align: center;
@@ -421,25 +421,33 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 .cal-ctx-panel {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1.5px;
 }
 
 .cal-ctx-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     width: 100%;
-    padding: 5.5px 8px;
+    padding: 3.5px 7px;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     color: #e2e8f0;
     font-family: var(--font-ui, "Outfit", sans-serif);
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
     transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cal-ctx-item svg {
+    flex-shrink: 0;
+    color: var(--accent-a);
+    opacity: 0.9;
+    width: 12px;
+    height: 12px;
 }
 
 .cal-ctx-item:hover {
@@ -450,6 +458,12 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 .cal-ctx-item.ctx-danger:hover {
     background: rgba(255, 77, 109, 0.18);
     color: #ff4d6d;
+}
+
+.cal-ctx-sep {
+    height: 1px;
+    background: rgba(var(--rgb-accent), 0.15);
+    margin: 2px 2px;
 }
 
 .ctx-label {
@@ -494,6 +508,42 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     color: #64748b;
 }
 
+.cal-skin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cal-auto-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 18px;
+    padding: 0 5px;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 9.5px;
+    font-weight: 600;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.14s ease;
+}
+
+.cal-auto-pill:hover {
+    color: #ffffff;
+    border-color: rgba(var(--rgb-accent), 0.5);
+    background: rgba(var(--rgb-accent), 0.12);
+}
+
+.cal-auto-pill.active {
+    background: rgba(var(--rgb-accent), 0.22);
+    border-color: var(--accent-a);
+    color: var(--accent-a);
+    box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.35);
+}
+
 .cal-skin-badge {
     font-size: 9px;
     font-weight: 700;
@@ -502,6 +552,10 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     padding: 1px 6px;
     border-radius: 4px;
     letter-spacing: 0.3px;
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cal-skin-grid {

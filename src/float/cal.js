@@ -37,12 +37,14 @@
     const ctxClose = document.getElementById("ctx-close");
     const opChips = document.querySelectorAll(".cal-op-chip");
 
+    const btnMenu = document.getElementById("btn-cal-menu");
     const tabBtnActions = document.getElementById("tab-btn-actions");
     const tabBtnStyle = document.getElementById("tab-btn-style");
     const panelActions = document.getElementById("panel-actions");
     const panelStyle = document.getElementById("panel-style");
     const skinBadge = document.getElementById("cal-skin-badge");
     const skinGrid = document.getElementById("cal-skin-grid");
+    const btnSkinAuto = document.getElementById("btn-skin-auto");
 
     const CAL_SKINS = [
         { id: 1, key: "float.calSkin.1", fallback: "Cyber Obsidian" },
@@ -57,6 +59,7 @@
         { id: 10, key: "float.calSkin.10", fallback: "Cyber Deck" }
     ];
     let currentSkinId = 1;
+    let isAutoRotate = false;
 
     const MONTHS_ES = [
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -94,6 +97,14 @@
         });
     }
 
+    function getDailySkinId(date = new Date()) {
+        const start = new Date(date.getFullYear(), 0, 0);
+        const diff = date - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        return ((dayOfYear - 1) % 10) + 1; // 1 to 10
+    }
+
     function setTab(tabName) {
         if (tabName === "style") {
             if (tabBtnActions) tabBtnActions.classList.remove("active");
@@ -106,6 +117,7 @@
             if (panelActions) panelActions.style.display = "flex";
             if (panelStyle) panelStyle.style.display = "none";
         }
+        repositionContextMenu();
     }
 
     if (tabBtnActions) {
@@ -138,7 +150,8 @@
         }
         const skin = CAL_SKINS.find(s => s.id === numId) || CAL_SKINS[0];
         if (skinBadge) {
-            skinBadge.textContent = getSkinName(skin);
+            const skinName = getSkinName(skin);
+            skinBadge.textContent = isAutoRotate ? `↻ ${skinName}` : skinName;
         }
         if (skinGrid) {
             skinGrid.querySelectorAll(".cal-skin-pill").forEach(p => {
@@ -146,6 +159,16 @@
             });
         }
         if (save) {
+            if (isAutoRotate) {
+                isAutoRotate = false;
+                if (btnSkinAuto) btnSkinAuto.classList.remove("active");
+                try {
+                    localStorage.setItem("cc_float_cal_auto_rotate", "0");
+                } catch (_) {}
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatCalAutoRotate: false });
+                }
+            }
             try {
                 localStorage.setItem("cc_float_cal_design", String(numId));
             } catch (_) {}
@@ -153,6 +176,37 @@
                 window.cc.saveSettings({ floatCalDesign: numId });
             }
         }
+    }
+
+    function setAutoRotate(enabled, save = true) {
+        isAutoRotate = !!enabled;
+        if (btnSkinAuto) {
+            btnSkinAuto.classList.toggle("active", isAutoRotate);
+        }
+        if (isAutoRotate) {
+            const dailyId = getDailySkinId();
+            selectCalSkin(dailyId, false);
+            const skin = CAL_SKINS.find(s => s.id === dailyId) || CAL_SKINS[0];
+            if (skinBadge) skinBadge.textContent = `↻ ${getSkinName(skin)}`;
+        } else {
+            const skin = CAL_SKINS.find(s => s.id === currentSkinId) || CAL_SKINS[0];
+            if (skinBadge) skinBadge.textContent = getSkinName(skin);
+        }
+        if (save) {
+            try {
+                localStorage.setItem("cc_float_cal_auto_rotate", isAutoRotate ? "1" : "0");
+            } catch (_) {}
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalAutoRotate: isAutoRotate });
+            }
+        }
+    }
+
+    if (btnSkinAuto) {
+        btnSkinAuto.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setAutoRotate(!isAutoRotate, true);
+        });
     }
 
     function buildSkinPills() {
@@ -173,7 +227,10 @@
             skinGrid.appendChild(pill);
         });
         const activeSkin = CAL_SKINS.find(s => s.id === currentSkinId) || CAL_SKINS[0];
-        if (skinBadge) skinBadge.textContent = getSkinName(activeSkin);
+        if (skinBadge) {
+            const skinName = getSkinName(activeSkin);
+            skinBadge.textContent = isAutoRotate ? `↻ ${skinName}` : skinName;
+        }
     }
 
     function applySettings(s) {
@@ -191,7 +248,18 @@
 
         buildSkinPills();
 
-        if (cfg.floatCalDesign) {
+        if (typeof cfg.floatCalAutoRotate === "boolean") {
+            isAutoRotate = cfg.floatCalAutoRotate;
+        } else {
+            try {
+                isAutoRotate = localStorage.getItem("cc_float_cal_auto_rotate") === "1";
+            } catch (_) {}
+        }
+        if (btnSkinAuto) btnSkinAuto.classList.toggle("active", isAutoRotate);
+
+        if (isAutoRotate) {
+            selectCalSkin(getDailySkinId(), false);
+        } else if (cfg.floatCalDesign) {
             selectCalSkin(cfg.floatCalDesign, false);
         } else {
             try {
@@ -386,26 +454,55 @@
     }
 
     // ── Custom Cyber Context Menu ────────────────────────────────
+    function repositionContextMenu() {
+        if (!ctxMenu || ctxMenu.hidden) return;
+        const maxW = (shell && shell.clientWidth) || window.innerWidth || 286;
+        const maxH = (shell && shell.clientHeight) || window.innerHeight || 268;
+        const menuWidth = ctxMenu.offsetWidth || 190;
+        const menuHeight = ctxMenu.offsetHeight || 190;
+
+        let curTop = parseInt(ctxMenu.style.top, 10) || 8;
+        let curLeft = parseInt(ctxMenu.style.left, 10) || 8;
+
+        if (curTop + menuHeight > maxH - 8) {
+            curTop = Math.max(8, maxH - menuHeight - 8);
+        }
+        if (curLeft + menuWidth > maxW - 8) {
+            curLeft = Math.max(8, maxW - menuWidth - 8);
+        }
+
+        ctxMenu.style.top = `${curTop}px`;
+        ctxMenu.style.left = `${curLeft}px`;
+        ctxMenu.style.maxHeight = `${Math.max(100, maxH - curTop - 8)}px`;
+    }
+
     function openContextMenu(clientX, clientY) {
         closePicker();
 
         // Make menu visible first so layout engine computes accurate offset dimensions
         ctxMenu.hidden = false;
 
-        const menuWidth = ctxMenu.offsetWidth || 185;
+        const maxW = (shell && shell.clientWidth) || window.innerWidth || 286;
+        const maxH = (shell && shell.clientHeight) || window.innerHeight || 268;
+        const menuWidth = ctxMenu.offsetWidth || 190;
         const menuHeight = ctxMenu.offsetHeight || 190;
 
-        const maxW = window.innerWidth || document.documentElement.clientWidth || 286;
-        const maxH = window.innerHeight || document.documentElement.clientHeight || 268;
+        let x = clientX;
+        let y = clientY;
 
-        const maxX = Math.max(6, maxW - menuWidth - 6);
-        const maxY = Math.max(6, maxH - menuHeight - 6);
+        if (y + menuHeight > maxH - 8) {
+            y = maxH - menuHeight - 8;
+        }
+        if (y < 8) y = 8;
 
-        const x = Math.max(6, Math.min(clientX, maxX));
-        const y = Math.max(6, Math.min(clientY, maxY));
+        if (x + menuWidth > maxW - 8) {
+            x = maxW - menuWidth - 8;
+        }
+        if (x < 8) x = 8;
 
         ctxMenu.style.left = `${x}px`;
         ctxMenu.style.top = `${y}px`;
+        ctxMenu.style.maxHeight = `${Math.max(100, maxH - y - 8)}px`;
 
         // Sync Always on top
         if (window.__TAURI__ && window.__TAURI__.window) {
@@ -423,20 +520,33 @@
         if (ctxMenu) ctxMenu.hidden = true;
     }
 
+    if (btnMenu) {
+        btnMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (ctxMenu && !ctxMenu.hidden) {
+                closeContextMenu();
+            } else {
+                const rect = btnMenu.getBoundingClientRect();
+                openContextMenu(rect.right - 190, rect.bottom + 4);
+            }
+        });
+    }
+
     document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
         openContextMenu(e.clientX, e.clientY);
     });
 
-    document.addEventListener("click", (e) => {
-        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target)) {
+    // Close context menu & popovers immediately on pointerdown outside
+    document.addEventListener("pointerdown", (e) => {
+        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target) && (!btnMenu || !btnMenu.contains(e.target))) {
             closeContextMenu();
         }
         if (popoverEl && !popoverEl.hidden && !popoverEl.contains(e.target) && e.target !== titleEl) {
             closePicker();
         }
-    });
+    }, { capture: true });
 
     if (ctxAot) {
         ctxAot.addEventListener("click", async () => {
@@ -646,6 +756,14 @@
     // ── Window Dragging from Any Dead Space ──────────────────────
     if (shell) {
         shell.addEventListener("mousedown", (e) => {
+            if (ctxMenu && !ctxMenu.hidden) {
+                closeContextMenu();
+                return;
+            }
+            if (popoverEl && !popoverEl.hidden) {
+                closePicker();
+                return;
+            }
             // Exclude interactive elements: buttons, popover, day cells, context menu, op-chips
             if (e.target.closest("button, .cal-btn, .picker-btn, .picker-month-btn, .cal-ctx-menu, .cal-picker-popover, #cal-title, .cal-op-chip")) return;
             if (e.button !== 0) return; // Only primary left-click
@@ -676,13 +794,23 @@
     }
 
     try {
+        isAutoRotate = localStorage.getItem("cc_float_cal_auto_rotate") === "1";
+    } catch (_) {}
+    if (btnSkinAuto) btnSkinAuto.classList.toggle("active", isAutoRotate);
+
+    try {
         const saved = parseInt(localStorage.getItem("cc_float_cal_design"), 10);
         if (saved >= 1 && saved <= 10) {
             currentSkinId = saved;
         }
     } catch (_) {}
+
     buildSkinPills();
-    selectCalSkin(currentSkinId, false);
+    if (isAutoRotate) {
+        selectCalSkin(getDailySkinId(), false);
+    } else {
+        selectCalSkin(currentSkinId, false);
+    }
 
     renderCalendar();
 })();

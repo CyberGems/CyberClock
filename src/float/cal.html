@@ -35,6 +35,13 @@
                 </div>
                 <div class="cal-title no-drag" id="cal-title" role="button" tabindex="0" data-tooltip="Select month or year" data-i18n-attr="data-tooltip:float.pickMonthYear" data-tooltip-dir="bottom">agosto 2026</div>
                 <div class="cal-win-ctl no-drag">
+                    <button class="cal-btn" id="btn-cal-menu" data-tooltip="Menu and settings" data-i18n-attr="data-tooltip:float.menuTooltip" data-tooltip-dir="bottom">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="1.5"></circle>
+                            <circle cx="12" cy="5" r="1.5"></circle>
+                            <circle cx="12" cy="19" r="1.5"></circle>
+                        </svg>
+                    </button>
                     <button class="cal-btn btn-close" id="btn-cal-close" data-tooltip="Close" data-i18n-attr="data-tooltip:float.close" data-tooltip-dir="bottom" data-tooltip-align="right">
                         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -157,7 +164,15 @@
                     <div class="cal-ctx-section">
                         <div class="cal-ctx-section-header">
                             <span class="cal-ctx-section-title" data-i18n="float.skin">Design</span>
-                            <span class="cal-skin-badge" id="cal-skin-badge">Cyber Obsidian</span>
+                            <div class="cal-skin-header-actions">
+                                <button class="cal-auto-pill" id="btn-skin-auto" data-tooltip="Rotate design daily" data-i18n-attr="data-tooltip:float.dailyRotateTip" data-tooltip-dir="bottom">
+                                    <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                                    </svg>
+                                    <span data-i18n="float.auto">Auto</span>
+                                </button>
+                                <span class="cal-skin-badge" id="cal-skin-badge">Cyber Obsidian</span>
+                            </div>
                         </div>
                         <div class="cal-skin-grid" id="cal-skin-grid">
                             <!-- Populated with 10 design pills in cal.js -->
