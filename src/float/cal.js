@@ -514,10 +514,23 @@
 
         // Sync opacity chips
         syncOpacityChips(currentOpacity());
+
+        if (btnMenu) {
+            btnMenu.classList.add("menu-open");
+            btnMenu.blur();
+        }
     }
 
     function closeContextMenu() {
         if (ctxMenu) ctxMenu.hidden = true;
+        if (btnMenu) {
+            btnMenu.classList.remove("menu-open");
+        }
+    }
+
+    if (ctxMenu) {
+        ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());
+        ctxMenu.addEventListener("pointerdown", (e) => e.stopPropagation());
     }
 
     if (btnMenu) {
@@ -756,6 +769,9 @@
     // ── Window Dragging from Any Dead Space ──────────────────────
     if (shell) {
         shell.addEventListener("mousedown", (e) => {
+            // Never process or close menu if click started inside the context menu itself
+            if (e.target.closest("#cal-context-menu, .cal-ctx-menu")) return;
+
             if (ctxMenu && !ctxMenu.hidden) {
                 closeContextMenu();
                 return;

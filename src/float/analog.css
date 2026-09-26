@@ -109,6 +109,18 @@ body.is-dragging * {
     transform: scale(0.95);
 }
 
+.analog-ov-btn.btn-menu {
+    position: absolute;
+    top: 36px;
+    left: 36px;
+}
+
+.analog-ov-btn.btn-menu.menu-open::after {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
 .analog-ov-btn.btn-close {
     position: absolute;
     top: 36px;

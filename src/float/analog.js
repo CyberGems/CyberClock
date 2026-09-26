@@ -22,6 +22,7 @@
 
     const badgeText = document.getElementById("analog-badge-text");
     const dialBadge = document.getElementById("analog-dial-badge");
+    const btnMenu = document.getElementById("btn-analog-menu");
     const btnClose = document.getElementById("btn-analog-close");
     const btnPrev = document.getElementById("btn-dial-prev");
     const btnNext = document.getElementById("btn-dial-next");
@@ -185,7 +186,7 @@
         const menuWidth = ctxMenu.offsetWidth || 204;
         const menuHeight = ctxMenu.offsetHeight || 215;
 
-        const margin = 20;
+        const margin = 16;
         const maxX = window.innerWidth - menuWidth - margin;
         const maxY = window.innerHeight - menuHeight - margin;
 
@@ -194,6 +195,11 @@
 
         ctxMenu.style.left = `${x}px`;
         ctxMenu.style.top = `${y}px`;
+
+        if (btnMenu) {
+            btnMenu.classList.add("menu-open");
+            btnMenu.blur();
+        }
 
         if (window.__TAURI__ && window.__TAURI__.window) {
             window.__TAURI__.window.getCurrentWindow().isAlwaysOnTop().then((aot) => {
@@ -207,6 +213,24 @@
 
     function closeContextMenu() {
         if (ctxMenu) ctxMenu.hidden = true;
+        if (btnMenu) btnMenu.classList.remove("menu-open");
+    }
+
+    if (btnMenu) {
+        btnMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (ctxMenu && !ctxMenu.hidden) {
+                closeContextMenu();
+            } else {
+                const rect = btnMenu.getBoundingClientRect();
+                openContextMenu(rect.left, rect.bottom + 8);
+            }
+        });
+    }
+
+    if (ctxMenu) {
+        ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());
+        ctxMenu.addEventListener("pointerdown", (e) => e.stopPropagation());
     }
 
     document.addEventListener("contextmenu", (e) => {
@@ -215,11 +239,11 @@
         openContextMenu(e.clientX, e.clientY);
     });
 
-    document.addEventListener("click", (e) => {
-        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target)) {
+    document.addEventListener("pointerdown", (e) => {
+        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target) && (!btnMenu || !btnMenu.contains(e.target))) {
             closeContextMenu();
         }
-    });
+    }, { capture: true });
 
     if (ctxAot) {
         ctxAot.addEventListener("click", async () => {
