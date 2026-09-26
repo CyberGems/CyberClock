@@ -735,7 +735,10 @@
             "float.prevSkin": "Previous design",
             "float.skin": "Design",
             "tooltip.floatingCalendar": "Floating calendar",
-            "tooltip.floatingClock": "Floating analog clock"
+            "tooltip.floatingClock": "Floating analog clock",
+            "tray.updateBadgeTooltip": "New update available — click to view",
+            "about.updateAvailableKicker": "New version ready",
+            "about.updateSkipped": "Update {version} skipped"
         },
         es: {
             "relax.audioSpectrum": "Espectro de Audio",
@@ -1467,7 +1470,10 @@
             "float.prevSkin": "Diseño anterior",
             "float.skin": "Diseño",
             "tooltip.floatingCalendar": "Calendario flotante",
-            "tooltip.floatingClock": "Reloj análogo flotante"
+            "tooltip.floatingClock": "Reloj análogo flotante",
+            "tray.updateBadgeTooltip": "Nueva actualización disponible — clic para ver",
+            "about.updateAvailableKicker": "Nueva versión lista",
+            "about.updateSkipped": "Actualización {version} omitida"
         }
     };
 

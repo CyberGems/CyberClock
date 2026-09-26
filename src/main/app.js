@@ -193,7 +193,9 @@
                     })
                     : updatePortable
                         ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
-                        : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", { version });
+                        : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", {
+                            version: version ? (version.startsWith("v") ? version : "v" + version) : "",
+                        });
 
         progressEl.hidden = !isDownloading;
         if (isDownloading) {
@@ -311,7 +313,12 @@
     }
 
     function skipCurrentUpdate() {
-        if (updateStatus.version) localStorage.setItem(UPDATE_SKIP_KEY, updateStatus.version);
+        if (updateStatus.version) {
+            localStorage.setItem(UPDATE_SKIP_KEY, updateStatus.version);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ skippedUpdateVersion: updateStatus.version }).catch(console.error);
+            }
+        }
         updateNoticeDismissed = true;
         hideUpdateNotice();
     }

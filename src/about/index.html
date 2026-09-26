@@ -12,6 +12,7 @@
         <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <script src="../shared/suite-data.js"></script>
+        <script src="../shared/update-utils.js"></script>
         <link rel="stylesheet" href="about.css" />
     </head>
     <body>
@@ -77,12 +78,32 @@
                                 Check for the latest version and download updates directly.
                             </div>
                         </div>
-                        <button type="button" class="ab-btn" id="ab-update-btn" data-i18n="about.checkUpdates">Check Now</button>
+                        <button type="button" class="ab-btn" id="ab-update-btn" data-i18n="about.checkUpdates" data-tooltip="Check for the latest version" data-i18n-attr="data-tooltip:about.checkLatest" data-tooltip-dir="bottom">Check Now</button>
                     </div>
                     <!-- Download progress (hidden until downloading) -->
                     <div class="ab-progress" id="ab-progress" hidden>
                         <div class="ab-progress-text" id="ab-progress-text" data-i18n="about.statuses.downloading">Downloading update…</div>
                         <div class="ab-progress-bar"><div class="ab-progress-fill" id="ab-progress-fill"></div></div>
+                    </div>
+                    <!-- Update details & optional actions panel -->
+                    <div class="ab-update-panel" id="ab-update-panel" hidden>
+                        <div class="ab-update-box">
+                            <div class="ab-update-top">
+                                <div class="ab-update-info">
+                                    <span class="ab-update-tag" id="ab-update-new-ver">v…</span>
+                                    <span class="ab-update-label" data-i18n="about.updateAvailableKicker">New version ready</span>
+                                </div>
+                                <div class="ab-update-actions">
+                                    <button type="button" class="ab-panel-btn ghost" id="ab-skip-btn" data-i18n="updates.skip" data-tooltip="Skip this update" data-i18n-attr="data-tooltip:updates.skip" data-tooltip-dir="bottom">Skip this update</button>
+                                    <button type="button" class="ab-panel-btn ghost" id="ab-release-btn" data-i18n="updates.viewRelease" data-tooltip="View release" data-i18n-attr="data-tooltip:updates.viewRelease" data-tooltip-dir="bottom">View release</button>
+                                    <button type="button" class="ab-panel-btn primary" id="ab-download-btn" data-i18n="updates.download" data-tooltip="Download update" data-i18n-attr="data-tooltip:updates.download" data-tooltip-dir="bottom">Download update</button>
+                                </div>
+                            </div>
+                            <div class="ab-changelog-wrap" id="ab-changelog-wrap">
+                                <div class="ab-changelog-title" data-i18n="updates.whatsNew">What's new:</div>
+                                <ul class="ab-changelog-list" id="ab-changelog-list"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

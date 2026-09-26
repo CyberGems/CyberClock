@@ -204,11 +204,27 @@
         const btnNavSuite = document.getElementById("btn-nav-suite");
         if (btnNavSuite) btnNavSuite.hidden = !showSuite;
 
-        // Header version label
+        // Header version label and update LED
         if (state.version) {
             appVersion = state.version;
             const verEl = document.getElementById("app-ver");
             if (verEl) verEl.textContent = "v" + appVersion;
+        }
+
+        const updateLed = document.getElementById("tray-update-led");
+        const hasUpdate = Boolean(state.update_available);
+        if (updateLed) {
+            updateLed.hidden = !hasUpdate;
+        }
+        const btnAbout = document.getElementById("btn-about");
+        if (btnAbout) {
+            if (hasUpdate) {
+                btnAbout.setAttribute("data-tooltip", T("tray.updateBadgeTooltip", "New update available — click to view"));
+                btnAbout.setAttribute("data-tooltip-dir", "bottom");
+            } else {
+                btnAbout.setAttribute("data-tooltip", "CyberClock: About");
+                btnAbout.setAttribute("data-tooltip-dir", "bottom");
+            }
         }
 
         // Re-render icons if data-ico changed

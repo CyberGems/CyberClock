@@ -446,6 +446,123 @@ body {
     transition: width 0.25s ease;
 }
 
+/* ── About Update Panel (Inline changelog & actions) ────────── */
+.ab-update-panel {
+    margin-top: 4px;
+}
+.ab-update-panel[hidden] {
+    display: none !important;
+}
+.ab-update-box {
+    padding: 12px 14px 14px 44px;
+    background: rgba(var(--rgb-accent), 0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(var(--rgb-accent), 0.20);
+    margin-top: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.ab-update-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.ab-update-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ab-update-tag {
+    font-family: var(--font-mono, monospace);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.15);
+    border: 1px solid rgba(var(--rgb-accent), 0.35);
+    padding: 2px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+}
+.ab-update-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-hi, #ffffff);
+}
+.ab-update-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ab-panel-btn {
+    height: 28px;
+    padding: 4px 12px;
+    font-family: var(--font-display, "Space Grotesk", sans-serif);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+.ab-panel-btn.ghost {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-md, #96a2b4);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+.ab-panel-btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--text-hi, #ffffff);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+.ab-panel-btn.primary {
+    background: rgba(var(--rgb-accent), 0.16);
+    color: var(--accent-a);
+    border-color: rgba(var(--rgb-accent), 0.45);
+}
+.ab-panel-btn.primary:hover:not(:disabled) {
+    background: rgba(var(--rgb-accent), 0.32);
+    border-color: var(--accent-a);
+    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.45);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.ab-panel-btn.primary:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+.ab-changelog-wrap {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(var(--rgb-accent), 0.10);
+}
+.ab-changelog-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-lo, #64748b);
+    margin-bottom: 6px;
+}
+.ab-changelog-list {
+    margin: 0;
+    padding-left: 16px;
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 11.5px;
+    color: var(--text-md, #96a2b4);
+    line-height: 1.55;
+}
+.ab-changelog-list li {
+    margin-bottom: 3px;
+}
+.ab-changelog-list li::marker {
+    color: var(--accent-a);
+}
+
 /* ── Suite Showcase ────────────────────────────────────────── */
 .ab-suite-card {
     padding: 12px 16px;

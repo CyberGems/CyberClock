@@ -21,9 +21,10 @@
                     <!-- ── MAIN VIEW ── -->
                     <div class="tray-view" id="view-main">
                         <!-- Header (suite-standard branding: icon + name, click -> About) -->
-                        <button type="button" class="tray-header" data-action="about-modal" title="CyberClock: About" id="btn-about">
+                        <button type="button" class="tray-header" data-action="about-modal" data-tooltip="CyberClock: About" data-tooltip-dir="bottom" id="btn-about">
                             <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
                             <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.7.0</span></span>
+                            <span class="update-badge-led" id="tray-update-led" hidden></span>
                         </button>
 
                         <div class="tray-divider"></div>

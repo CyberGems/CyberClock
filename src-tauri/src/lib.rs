@@ -3572,12 +3572,19 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         .ok()
         .and_then(|g| g.clone());
 
+    let pending_ver = pending_update_version();
+    let is_skipped = match (&settings.skipped_update_version, &pending_ver) {
+        (Some(skipped), Some(pending)) => skipped == pending,
+        _ => false,
+    };
+    let update_available = pending_ver.is_some() && !is_skipped;
+
     TrayMenuState {
         version: app.package_info().version.to_string(),
         is_visible,
         window_mode: settings.window_mode.clone(),
         language: settings.language.clone(),
-        update_available: pending_update_version().is_some(),
+        update_available,
         theme: settings.theme.clone(),
         mini_zoom: settings.mini_zoom,
         auto_update: settings.auto_update,

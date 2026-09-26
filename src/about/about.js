@@ -69,6 +69,10 @@
             initSuiteShowcase();
         }
 
+        if (s.skippedUpdateVersion && updateStatus.version === s.skippedUpdateVersion && updateStatus.state === "available") {
+            updateStatus = { state: "skipped", version: updateStatus.version };
+        }
+
         renderUpdateState();
     }
 
@@ -145,10 +149,15 @@
 
         desc.classList.remove("is-up-to-date", "is-available", "is-error", "is-checking");
 
+        const updatePanel = document.getElementById("ab-update-panel");
+        const updateNewVer = document.getElementById("ab-update-new-ver");
+        const downloadBtn = document.getElementById("ab-download-btn");
+
         if (s.state === "idle") {
             btn.textContent = T("about.checkUpdates", "Check Now");
             setTip(T("about.checkLatest", "Check for the latest version"));
             desc.textContent = idleDesc;
+            if (updatePanel) updatePanel.hidden = true;
         } else if (s.state === "not-available") {
             desc.classList.add("is-up-to-date");
             btn.textContent = T("about.checkUpdates", "Check Now");
@@ -158,6 +167,7 @@
                 "{version}",
                 ver ? "v" + ver : "",
             );
+            if (updatePanel) updatePanel.hidden = true;
         } else if (s.state === "checking") {
             desc.classList.add("is-checking");
             btn.textContent = T("about.checkUpdates", "Check Now");
@@ -166,15 +176,28 @@
             desc.textContent = "⏳ " + T("about.statuses.checking", "Checking for updates…");
         } else if (s.state === "available") {
             desc.classList.add("is-available");
-            btn.textContent = updatePortable
-                ? T("updates.downloadPortable", "Open download page")
-                : T("about.updateNow", "Update Now");
-            setTip(T("about.viewDetails", "View update details and changelog"));
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            setTip(T("about.checkLatest", "Check for the latest version"));
+            const ver = s.version || "";
+            const cleanVer = ver ? (ver.startsWith("v") ? ver : "v" + ver) : "";
             desc.textContent =
                 "★ " + T("about.updateAvailable", "Update {0} available").replace(
                     "{0}",
-                    s.version || "",
+                    cleanVer,
                 );
+            if (updatePanel) {
+                updatePanel.hidden = false;
+                if (updateNewVer) updateNewVer.textContent = cleanVer || "v…";
+                if (downloadBtn) {
+                    downloadBtn.disabled = false;
+                    const dText = updatePortable
+                        ? T("updates.downloadPortable", "Open download page")
+                        : T("updates.download", "Download update");
+                    downloadBtn.textContent = dText;
+                    downloadBtn.setAttribute("data-tooltip", dText);
+                }
+                loadChangelogBullets(ver, s.releaseNotes);
+            }
         } else if (s.state === "downloading") {
             desc.classList.add("is-checking");
             btn.textContent = T("about.checkUpdates", "Check Now");
@@ -187,14 +210,36 @@
             ).replace("{pct}", String(pct));
             progressText.textContent = desc.textContent;
             progressFill.style.width = pct + "%";
+            if (updatePanel) {
+                updatePanel.hidden = false;
+                if (downloadBtn) {
+                    downloadBtn.disabled = true;
+                    downloadBtn.textContent = T("about.statuses.downloading", "Downloading update ({pct}%)…").replace("{pct}", String(pct));
+                }
+            }
         } else if (s.state === "downloaded") {
             desc.classList.add("is-available");
-            btn.textContent = T("about.installBtn", "Install & Restart");
-            setTip(T("about.installTooltip", "Install the update and restart"));
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            setTip(T("about.checkLatest", "Check for the latest version"));
             desc.textContent = "✓ " + T(
                 "about.statuses.downloaded",
                 "Update ready: click Install & Restart.",
             );
+            if (updatePanel) {
+                updatePanel.hidden = false;
+                if (downloadBtn) {
+                    downloadBtn.disabled = false;
+                    const iText = T("about.installBtn", "Install & Restart");
+                    downloadBtn.textContent = iText;
+                    downloadBtn.setAttribute("data-tooltip", T("about.installTooltip", "Install the update and restart"));
+                }
+            }
+        } else if (s.state === "skipped") {
+            btn.textContent = T("about.checkUpdates", "Check Now");
+            setTip(T("about.checkLatest", "Check for the latest version"));
+            const cleanVer = s.version ? (s.version.startsWith("v") ? s.version : "v" + s.version) : "";
+            desc.textContent = T("about.updateSkipped", "Update {version} skipped").replace("{version}", cleanVer);
+            if (updatePanel) updatePanel.hidden = true;
         } else if (s.state === "error") {
             desc.classList.add("is-error");
             btn.textContent = T("about.checkUpdates", "Check Now");
@@ -205,37 +250,99 @@
                 ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
                 : (rawMsg || T("about.statuses.error", "Could not check for updates. Check your internet connection."));
             desc.textContent = "✕ " + errText;
+            if (updatePanel) updatePanel.hidden = true;
         }
     }
 
-    async function handleUpdateAction() {
-        // Known update → download it. Progress arrives through the shared
-        // update:status event, matching the popup in the main window.
-        if (updateStatus.state === "available") {
+    let cachedChangelogVersion = null;
+    async function loadChangelogBullets(version, fallbackNotes = "") {
+        const listEl = document.getElementById("ab-changelog-list");
+        if (!listEl) return;
+        if (cachedChangelogVersion === version && listEl.children.length > 0) return;
+        cachedChangelogVersion = version;
+
+        listEl.replaceChildren();
+        let bullets = [];
+        if (window.ccUpdates && window.ccUpdates.fetchReleaseDetails) {
             try {
+                const details = await window.ccUpdates.fetchReleaseDetails(version, fallbackNotes);
+                bullets = details.bullets || [];
+            } catch (_) {}
+        }
+        if (!bullets.length && fallbackNotes) {
+            bullets = (window.ccUpdates && window.ccUpdates.parseChangelogPeek)
+                ? window.ccUpdates.parseChangelogPeek(fallbackNotes)
+                : [];
+        }
+        if (!bullets.length) {
+            const empty = document.createElement("li");
+            empty.textContent = T("updates.notesUnavailable", "Release notes are not available right now.");
+            listEl.appendChild(empty);
+            return;
+        }
+        for (const bullet of bullets) {
+            const li = document.createElement("li");
+            li.textContent = bullet;
+            listEl.appendChild(li);
+        }
+    }
+
+    function initUpdatePanelActions() {
+        const downloadBtn = document.getElementById("ab-download-btn");
+        const skipBtn = document.getElementById("ab-skip-btn");
+        const releaseBtn = document.getElementById("ab-release-btn");
+
+        if (downloadBtn && !downloadBtn._hasListener) {
+            downloadBtn._hasListener = true;
+            downloadBtn.addEventListener("click", async () => {
+                if (updateStatus.state === "downloaded") {
+                    try {
+                        await window.cc.installUpdate();
+                    } catch (e) {
+                        updateStatus = { state: "error", message: String(e?.message || e) };
+                        renderUpdateState();
+                    }
+                    return;
+                }
                 if (updatePortable) {
                     openUrl(
                         updateStatus.releaseUrl ||
                         (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version)),
                     );
-                } else {
-                    await window.cc.downloadUpdate();
+                    return;
                 }
-            } catch (e) {
-                updateStatus = { state: "error", message: String(e?.message || e) };
-                renderUpdateState();
-            }
-            return;
+                try {
+                    downloadBtn.disabled = true;
+                    await window.cc.downloadUpdate();
+                } catch (e) {
+                    updateStatus = { state: "error", message: String(e?.message || e) };
+                    renderUpdateState();
+                }
+            });
         }
-        if (updateStatus.state === "downloaded") {
-            try {
-                await window.cc.installUpdate();
-            } catch (e) {
-                updateStatus = { state: "error", message: String(e?.message || e) };
+
+        if (skipBtn && !skipBtn._hasListener) {
+            skipBtn._hasListener = true;
+            skipBtn.addEventListener("click", () => {
+                if (updateStatus.version && window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ skippedUpdateVersion: updateStatus.version }).catch(console.error);
+                }
+                updateStatus = { state: "skipped", version: updateStatus.version };
                 renderUpdateState();
-            }
-            return;
+            });
         }
+
+        if (releaseBtn && !releaseBtn._hasListener) {
+            releaseBtn._hasListener = true;
+            releaseBtn.addEventListener("click", () => {
+                const url = updateStatus.releaseUrl ||
+                    (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version));
+                if (url) openUrl(url);
+            });
+        }
+    }
+
+    async function checkForUpdatesOnly() {
         if (updateStatus.state === "checking" || updateStatus.state === "downloading") {
             return;
         }
@@ -253,21 +360,6 @@
                         "Could not check for updates. Check your internet connection.",
                     ),
                 };
-            } else if (updateStatus.state === "available" || updateStatus.state === "downloading" || updateStatus.state === "downloaded") {
-                // The backend broadcasts the authoritative state while the
-                // command is still resolving. Never replace that event with
-                // a stale default response from this window.
-                updateStatus = {
-                    ...updateStatus,
-                    version: updateStatus.version || res.version,
-                    releaseNotes: updateStatus.releaseNotes || res.releaseNotes,
-                    releaseUrl: updateStatus.releaseUrl || res.releaseUrl,
-                };
-            } else if (updateStatus.state === "not-available") {
-                // The event is authoritative when the current version is
-                // already installed. This also avoids a false positive while
-                // the About window is still loading its version label.
-                updateStatus = { state: "not-available", version: res.version || appVersion };
             } else if (res.version && appVersion && res.version !== appVersion) {
                 updateStatus = {
                     state: "available",
@@ -292,7 +384,8 @@
     }
 
     const updateBtn = document.getElementById("ab-update-btn");
-    if (updateBtn) updateBtn.addEventListener("click", handleUpdateAction);
+    if (updateBtn) updateBtn.addEventListener("click", checkForUpdatesOnly);
+    initUpdatePanelActions();
 
     if (window.cc && window.cc.onUpdateStatus) {
         window.cc.onUpdateStatus((payload) => {
@@ -303,7 +396,7 @@
 
     if (window.cc && window.cc.onCheckUpdatesTrigger) {
         window.cc.onCheckUpdatesTrigger(() => {
-            handleUpdateAction();
+            checkForUpdatesOnly();
         });
     }
 
