@@ -140,7 +140,8 @@
             bh + (KIND === "sw" ? 14 : 10),
             KIND === "sw" ? 58 : 52
         );
-        const height = KIND === "timer" ? 92 : baseHeight;
+        const showPresets = KIND === "timer" && cfg.timerShowPresets !== false;
+        const height = (KIND === "timer" && showPresets) ? 92 : baseHeight;
         const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
@@ -157,6 +158,7 @@
     const ICO_MIN = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
     const ICO_CLOSE = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
     const ICO_DISMISS = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    const ICO_SETTINGS = '<svg class="ctl-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>';
 
     function setStartIcon(running) {
         const b = document.getElementById("btn-start");
@@ -429,6 +431,10 @@
         document.body.classList.toggle("no-animations", cfg.miniNoAnimations === true);
         if (window.audioEngine) window.audioEngine.setMuted(cfg.audioMuted === true);
         if (KIND === "timer") {
+            const showPresets = cfg.timerShowPresets !== false;
+            const presetsEl = document.getElementById("float-presets");
+            if (presetsEl) presetsEl.hidden = !showPresets;
+            sh.classList.toggle("no-presets", !showPresets);
             document.getElementById("float-prog").hidden = timerIdle();
         }
         applyTexts();
@@ -549,7 +555,7 @@
                 }
             }
         });
-        btnMenu.addEventListener("mouseenter", () => showActionTicker("float.menuTooltip", ICO_SETTINGS));
+        btnMenu.addEventListener("mouseenter", () => showActionTicker("float.menu", ICO_SETTINGS));
         btnMenu.addEventListener("mouseleave", hideActionTicker);
     }
 

@@ -97,6 +97,8 @@
             if (rowSound) rowSound.style.display = isTimer ? "flex" : "none";
             const rowLoop = document.getElementById("ctx-timer-loop");
             if (rowLoop) rowLoop.style.display = isTimer ? "flex" : "none";
+            const rowPresets = document.getElementById("ctx-timer-presets");
+            if (rowPresets) rowPresets.style.display = isTimer ? "flex" : "none";
 
             // Header icon
             const hdrIco = document.getElementById("ctx-float-header-ico");
@@ -478,6 +480,8 @@
                 if (tglTimerSound) tglTimerSound.classList.toggle("on", cfg.timerSoundEnabled !== false);
                 const tglTimerLoop = document.getElementById("toggle-timer-loop");
                 if (tglTimerLoop) tglTimerLoop.classList.toggle("on", cfg.timerAutoRestart === true);
+                const tglTimerPresets = document.getElementById("toggle-timer-presets");
+                if (tglTimerPresets) tglTimerPresets.classList.toggle("on", cfg.timerShowPresets !== false);
                 const tglTimerTaskbar = document.getElementById("toggle-timer-taskbar");
                 if (tglTimerTaskbar) tglTimerTaskbar.classList.toggle("on", cfg.showWidgetsInTaskbar === true);
                 const tglTimerAot = document.getElementById("toggle-timer-aot");
@@ -815,6 +819,18 @@
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ timerAutoRestart: on });
+            }
+        });
+    }
+
+    const tglTimerPresetsRow = document.getElementById("ctx-timer-presets");
+    if (tglTimerPresetsRow) {
+        tglTimerPresetsRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-timer-presets");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ timerShowPresets: on });
             }
         });
     }

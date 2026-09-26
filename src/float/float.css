@@ -181,6 +181,15 @@
     padding-left: 16px;
     padding-right: 16px;
 }
+.float-shell[data-kind="timer"].no-presets {
+    grid-template-rows: 1fr;
+    row-gap: 0;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+.float-shell[data-kind="timer"].no-presets .float-presets {
+    display: none !important;
+}
 .float-shell[data-kind="timer"] > .status-dot {
     grid-column: 1;
     grid-row: 1;

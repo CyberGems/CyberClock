@@ -397,6 +397,7 @@
         pickerYear = viewYear;
         updatePickerYear();
         renderPickerMonths();
+        if (window.ccI18n && popoverEl) window.ccI18n.apply(popoverEl);
         popoverEl.hidden = false;
         closeContextMenu();
     }

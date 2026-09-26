@@ -153,6 +153,8 @@ pub struct AppSettings {
     pub timer_auto_restart: bool,
     #[serde(default)]
     pub timer_design: Option<u32>,
+    #[serde(default = "default_true")]
+    pub timer_show_presets: bool,
     #[serde(default)]
     pub sw_design: Option<u32>,
     #[serde(default)]
@@ -334,6 +336,7 @@ impl Default for AppSettings {
             full_hide_clock: false,
             full_hide_calendar: false,
             full_auto_revert_secs: None,
+            timer_show_presets: true,
             clock_design: 1,
             clock_show_brand: true,
             clock_auto_cycle: false,
