@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Floating widgets arrive with dedicated standalone calendar and analog clock modes, cross-widget launching, persistent desktop restoration across restarts, dedicated context menus, independent stopwatch designs, and multi-monitor edge-aware drag clamping.
+Voice Time Announcer brings verbal speech time announcements with system voices, natural and cyber styles, and quiet hours, alongside Mini Mode inactivity Auto-Fade, floating calendar, and independent widget position locking.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,21 +17,25 @@ Floating widgets arrive with dedicated standalone calendar and analog clock mode
 
 ### ✨ Key Features & Highlights
 
+- 🗣️ **Voice Time Announcer (Talking Clock)**:
+  - Verbally announces the time at intervals (:15, :30, :00) using native Windows speech synthesis.
+  - Choose between system default, male, female, or any installed Windows SAPI/OneCore voice, with a shortcut to install Windows voice packs.
+  - Three distinct speech styles: **Natural**, **Cyber / Tactical**, or **Concise**.
+  - Optional soft pre-chime, quiet hours silence window, and intelligent chime deconfliction.
+
+- 🕶️ **Auto-Fade (Inactivity Dimming)**:
+  - Mini Mode automatically dims during desktop inactivity (70%, 50%, 30%, or 15%), brightening back to 100% on mouse hover.
+
+- 🔒 **Independent Contextual Widget Position Locks**:
+  - Mini Clock, Timers, Stopwatches, Analog Clock, and Calendar now have separate position locks accessible right from their contextual menus.
+
 - 📅 **Floating Calendar & Analog Clock Widgets**:
-  - Standalone floating calendar widget with quick note peeks, multi-month navigation, and dedicated context menu.
+  - Standalone floating calendar widget with 10 cyberpunk skins, daily auto-rotation, date picker popover, and dedicated context menu.
   - Floating analog clock widget with modern cyber dials, skin picking, and customizable taskbar visibility.
 
-- ⏱️ **Persistent Widgets & Multi-Slot Timers/Stopwatches**:
-  - Open timers, stopwatches, calendar, and analog widgets are seamlessly remembered and restored upon application restart.
-  - Accurate physical-to-logical multi-monitor coordinate restoration preventing window jumps across dual/multi-display setups.
-
-- 🚀 **Cross-Widget Launching & Dedicated Context Menus**:
-  - Instantly spawn timers, stopwatches, analog clocks, or calendars directly from any active widget.
-  - Dedicated right-click menus for each widget featuring custom renaming, independent skins, audio alerts, and taskbar toggles.
-
-- 🎨 **Decoupled Skins & Independent Customization**:
-  - Independent skin preferences for Mini Clock, Timers, and Stopwatches.
-  - Sleek auto-hiding tooltips with smooth fades and refined obsidian aesthetics.
+- ⏱️ **Timer & Stopwatch Facelift**:
+  - Enlarged 26px counter digits, resting dimmed state when zeroed, and fixed chamfer alignment on Skin 1.
+  - Floating timer quick presets toggle to show or hide +30s to +15m buttons on demand.
 
 --- 
 
