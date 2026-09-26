@@ -868,6 +868,8 @@
         if (miniAnim) miniAnim.checked = s.miniNoAnimations === true;
         const miniEdgeLimits = document.getElementById('s-mini-edge-limits');
         if (miniEdgeLimits) miniEdgeLimits.checked = s.miniEdgeLimits !== false;
+        const miniAutoFade = document.getElementById('s-mini-auto-fade');
+        if (miniAutoFade) miniAutoFade.value = s.miniAutoFade || 'off';
 
         const miniAutoCycleEl = document.getElementById("s-mini-auto-cycle");
         if (miniAutoCycleEl) miniAutoCycleEl.checked = s.miniAutoCycle === true;
@@ -6158,6 +6160,12 @@
     if (sMiniEdgeLimits) {
         sMiniEdgeLimits.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniEdgeLimits: e.target.checked });
+        });
+    }
+    const sMiniAutoFade = document.getElementById('s-mini-auto-fade');
+    if (sMiniAutoFade) {
+        sMiniAutoFade.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniAutoFade: e.target.value });
         });
     }
 

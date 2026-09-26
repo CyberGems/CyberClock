@@ -92,6 +92,16 @@
                 applyTexts();
             }
         });
+        window.__TAURI__.event.listen("widget:redesign", (e) => {
+            if (e.payload && e.payload.label === WINDOW_LABEL) {
+                if (e.payload.design) {
+                    try {
+                        localStorage.setItem("cc_design_" + WINDOW_LABEL, String(e.payload.design));
+                    } catch (_) {}
+                    applySettings(cfg);
+                }
+            }
+        });
     }
 
     let cfg = {};
@@ -122,26 +132,38 @@
     const timeEl = () => document.getElementById("mini-time");
     const subEl = () => document.getElementById("mini-date");
 
-    let lastW = 0, lastH = 0;
-    function syncSize(force, recenter = false) {
-        const design = (KIND === "timer" && cfg.timerDesign)
+    function getEffectiveDesign() {
+        let localDesign = null;
+        try {
+            localDesign = localStorage.getItem("cc_design_" + WINDOW_LABEL);
+        } catch (_) {}
+        if (localDesign) {
+            const parsed = parseInt(localDesign, 10);
+            if (parsed >= 1 && parsed <= 15) return parsed;
+        }
+        return (KIND === "timer" && cfg.timerDesign)
             ? cfg.timerDesign
             : (KIND === "sw" && cfg.swDesign)
             ? cfg.swDesign
             : (cfg.miniDesign || 1);
+    }
+
+    let lastW = 0, lastH = 0;
+    function syncSize(force, recenter = false) {
+        const design = getEffectiveDesign();
         const zoom = zoomFactor();
         const bw = DESIGN_WIDTHS[design] || 280;
         const bh = DESIGN_HEIGHTS[design] || 48;
         // The float owns more controls than the mini clock, so it gets a
         // wider base geometry. The window controls are stacked vertically,
         // so every skin gets enough height for that compact right-side group.
-        const width = Math.max(bw + 72, 350);
+        const width = Math.max(bw + 76, 360);
         const baseHeight = Math.max(
             bh + (KIND === "sw" ? 14 : 10),
-            KIND === "sw" ? 58 : 52
+            KIND === "sw" ? 60 : 54
         );
         const showPresets = KIND === "timer" && cfg.timerShowPresets !== false;
-        const height = (KIND === "timer" && showPresets) ? 92 : baseHeight;
+        const height = (KIND === "timer" && showPresets) ? 96 : baseHeight;
         const w = Math.round(width * zoom), h = Math.round(height * zoom);
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
@@ -415,12 +437,8 @@
         window.CCTint.apply(cfg.theme || "ice");
         window.ccI18n.setLang(cfg.language || "auto");
         const sh = shellEl();
-        const activeDesign = (KIND === "timer" && cfg.timerDesign)
-            ? cfg.timerDesign
-            : (KIND === "sw" && cfg.swDesign)
-            ? cfg.swDesign
-            : (cfg.miniDesign || "1");
-        sh.dataset.design = activeDesign;
+        const activeDesign = getEffectiveDesign();
+        sh.dataset.design = String(activeDesign);
         sh.style.setProperty("--bg-op", cfg.miniBgOpacity ?? 1.0);
         const activeOpacity = KIND === "timer"
             ? (cfg.floatTimerOpacity ?? cfg.miniOpacity ?? 1.0)

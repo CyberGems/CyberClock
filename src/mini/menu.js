@@ -49,13 +49,25 @@
     }
 
     function selectTimerSkin(mode) {
-        syncTimerDesignUI(mode);
-        if (window.cc && window.cc.saveSettings) {
-            if (activeCaller && activeCaller.kind === "sw") {
+        if (activeCaller && activeCaller.caller) {
+            try {
+                localStorage.setItem("cc_design_" + activeCaller.caller, String(mode));
+            } catch (_) {}
+        }
+        if (activeCaller && activeCaller.kind === "sw") {
+            currentCfg.swDesign = mode;
+            if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ swDesign: mode });
-            } else {
+            }
+        } else {
+            currentCfg.timerDesign = mode;
+            if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ timerDesign: mode });
             }
+        }
+        syncTimerDesignUI(mode);
+        if (window.__TAURI__ && window.__TAURI__.event && activeCaller && activeCaller.caller) {
+            window.__TAURI__.event.emit("widget:redesign", { label: activeCaller.caller, design: mode });
         }
     }
 
@@ -183,10 +195,40 @@
                 }
             }
 
-            const tDesign = isTimer
-                ? (currentCfg.timerDesign || currentCfg.miniDesign || 1)
-                : (currentCfg.swDesign || currentCfg.miniDesign || 1);
+            let localDesign = null;
+            if (activeCaller && activeCaller.caller) {
+                try {
+                    localDesign = localStorage.getItem("cc_design_" + activeCaller.caller);
+                } catch (_) {}
+            }
+            let tDesign = localDesign ? parseInt(localDesign, 10) : 0;
+            if (!tDesign) {
+                tDesign = isTimer
+                    ? (currentCfg.timerDesign || currentCfg.miniDesign || 1)
+                    : (currentCfg.swDesign || currentCfg.miniDesign || 1);
+            }
             syncTimerDesignUI(tDesign);
+
+            if (window.cc && window.cc.getSettings) {
+                window.cc.getSettings().then((cfg) => {
+                    if (cfg) {
+                        currentCfg = Object.assign(currentCfg || {}, cfg);
+                        let freshLocal = null;
+                        if (activeCaller && activeCaller.caller) {
+                            try {
+                                freshLocal = localStorage.getItem("cc_design_" + activeCaller.caller);
+                            } catch (_) {}
+                        }
+                        let freshDesign = freshLocal ? parseInt(freshLocal, 10) : 0;
+                        if (!freshDesign) {
+                            freshDesign = isTimer
+                                ? (cfg.timerDesign || cfg.miniDesign || 1)
+                                : (cfg.swDesign || cfg.miniDesign || 1);
+                        }
+                        syncTimerDesignUI(freshDesign);
+                    }
+                }).catch(() => {});
+            }
         } else {
             if (timerView) timerView.style.display = "none";
             if (tabs) tabs.style.display = "flex";
@@ -258,12 +300,24 @@
         syncSolarVisibility(mode);
         syncTimerDesignUI(mode);
 
+        if (activeCaller && activeCaller.caller) {
+            try {
+                localStorage.setItem("cc_design_" + activeCaller.caller, String(mode));
+            } catch (_) {}
+        }
+        if (window.__TAURI__ && window.__TAURI__.event && activeCaller && activeCaller.caller) {
+            window.__TAURI__.event.emit("widget:redesign", { label: activeCaller.caller, design: mode });
+        }
+
         if (window.cc && window.cc.saveSettings) {
             if (activeCaller && activeCaller.kind === "timer") {
+                currentCfg.timerDesign = mode;
                 window.cc.saveSettings({ timerDesign: mode });
             } else if (activeCaller && activeCaller.kind === "sw") {
+                currentCfg.swDesign = mode;
                 window.cc.saveSettings({ swDesign: mode });
             } else {
+                currentCfg.miniDesign = mode;
                 window.cc.saveSettings({ miniDesign: mode });
             }
         }
@@ -880,6 +934,23 @@
         window.cc.getMenuCaller().then((info) => {
             if (info) setupMenuForCaller(info);
         }).catch(() => {});
+    }
+
+    if (window.cc && window.cc.onSettingsUpdated) {
+        window.cc.onSettingsUpdated((cfg) => {
+            if (cfg) {
+                currentCfg = Object.assign(currentCfg || {}, cfg);
+                if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
+                    const isTimer = activeCaller.kind === "timer";
+                    let localD = null;
+                    try {
+                        localD = localStorage.getItem("cc_design_" + activeCaller.caller);
+                    } catch (_) {}
+                    const td = localD ? parseInt(localD, 10) : (isTimer ? (cfg.timerDesign || cfg.miniDesign || 1) : (cfg.swDesign || cfg.miniDesign || 1));
+                    syncTimerDesignUI(td);
+                }
+            }
+        });
     }
 
     // Close menu popup when it loses focus (click on other windows)

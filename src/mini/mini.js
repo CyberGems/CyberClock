@@ -262,6 +262,7 @@
 
         updateClock();
         updateDriftIndicator();
+        resetAutoFadeTimer();
 
         // Real-sun cycle for the Sunset Pulse skin (design 7). Applied as a
         // data-solar phase attribute on the shell; CSS owns the palettes.
@@ -748,3 +749,57 @@
                 isDragging = false;
             });
     });
+
+    // ═══════════════════════════════════════════════════════
+    // INACTIVITY AUTO-FADE
+    // ═══════════════════════════════════════════════════════
+    let autoFadeTimer = null;
+    let isMouseOverMini = false;
+
+    function resetAutoFadeTimer() {
+        clearTimeout(autoFadeTimer);
+        const sh = document.getElementById("shell");
+        if (sh) sh.classList.remove("mini-auto-faded");
+
+        const setting = cfg.miniAutoFade;
+        if (!setting || setting === "off") return;
+
+        const parts = setting.split("_");
+        const targetOp = Math.max(0.1, Math.min(1.0, (parseInt(parts[0], 10) || 30) / 100));
+        const delayMs = Math.max(1000, (parseInt(parts[1], 10) || 5) * 1000);
+
+        if (sh) {
+            sh.style.setProperty("--auto-fade-op", String(targetOp));
+        }
+
+        if (!isMouseOverMini) {
+            autoFadeTimer = setTimeout(() => {
+                if (!isMouseOverMini) {
+                    const el = document.getElementById("shell");
+                    if (el) el.classList.add("mini-auto-faded");
+                }
+            }, delayMs);
+        }
+    }
+
+    document.addEventListener("mouseenter", () => {
+        isMouseOverMini = true;
+        clearTimeout(autoFadeTimer);
+        const sh = document.getElementById("shell");
+        if (sh) sh.classList.remove("mini-auto-faded");
+    });
+
+    document.addEventListener("mousemove", () => {
+        if (!isMouseOverMini) {
+            isMouseOverMini = true;
+        }
+        clearTimeout(autoFadeTimer);
+        const sh = document.getElementById("shell");
+        if (sh) sh.classList.remove("mini-auto-faded");
+    });
+
+    document.addEventListener("mouseleave", () => {
+        isMouseOverMini = false;
+        resetAutoFadeTimer();
+    });
+

@@ -1737,6 +1737,21 @@
                                 </label>
                             </div>
                             <div class="s-row">
+                                <span class="s-row-ico" data-ico="sun"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.mini.autoFade">Inactivity Auto-Fade</span>
+                                    <small data-i18n="settings.mini.autoFadeDesc">Dim mini clock when idle, restore on mouse hover</small>
+                                </div>
+                                <select id="s-mini-auto-fade" class="sched-select">
+                                    <option value="off" data-i18n="settings.mini.autoFadeOff">Disabled</option>
+                                    <option value="30_5" data-i18n="settings.mini.autoFade30_5">Dim to 30% after 5s</option>
+                                    <option value="30_10" data-i18n="settings.mini.autoFade30_10">Dim to 30% after 10s</option>
+                                    <option value="50_5" data-i18n="settings.mini.autoFade50_5">Dim to 50% after 5s</option>
+                                    <option value="50_10" data-i18n="settings.mini.autoFade50_10">Dim to 50% after 10s</option>
+                                    <option value="20_5" data-i18n="settings.mini.autoFade20_5">Dim to 20% after 5s</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
                                 <span class="s-row-ico" data-ico="bounds"></span>
                                 <div class="s-lbl">
                                     <span data-i18n="settings.mini.edgeLimits">Edge Boundaries</span>

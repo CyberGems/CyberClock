@@ -32,11 +32,19 @@
     justify-content: center;
     align-items: flex-start;
 }
-.float-shell #mini-time,
-.float-shell #mini-date {
+.float-shell #mini-time {
+    font-size: 26px !important;
+    line-height: 1.05 !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     text-align: left !important;
 }
 .float-shell #mini-date {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    letter-spacing: 1.2px;
+    opacity: 0.75;
+    text-align: left !important;
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
@@ -261,14 +269,13 @@
 
 .float-prog {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 12px;
+    right: 12px;
+    bottom: 2px;
     height: 3px;
     z-index: 2;
     background: rgba(255, 255, 255, 0.08);
-    border-bottom-left-radius: inherit;
-    border-bottom-right-radius: inherit;
+    border-radius: 2px;
     overflow: hidden;
 }
 .float-prog[hidden] { display: none; }

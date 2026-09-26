@@ -79,6 +79,10 @@
         z-index: 1;
         opacity: var(--fg-op, 1);
     }
+    .mini-shell.mini-auto-faded {
+        opacity: var(--auto-fade-op, 0.3) !important;
+        transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
 
     /* ═══════════════════════════════════════════════════════
        UNIVERSAL FORM FACTOR LAYOUTS
@@ -187,15 +191,11 @@
             calc(100% - 8px) 100%, 8px 100%,
             0% calc(100% - 8px), 0% 8px
         );
-        border: 1px solid rgba(255, 180, 20, 0.45);
+        border: none;
+        filter: drop-shadow(0 0 1px rgba(255, 180, 20, 0.85)) drop-shadow(0 0 6px rgba(255, 170, 0, 0.25));
         border-radius: 0;
         padding: 0 14px 0 10px;
         gap: 10px;
-        box-shadow:
-            0 8px 30px rgba(0, 0, 0, 0.65),
-            0 0 20px rgba(255, 170, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.5);
     }
     .mini-shell[data-design="1"]::before {
         content: '';
@@ -217,7 +217,13 @@
         content: '';
         position: absolute;
         inset: 0;
-        border: 1px solid rgba(80, 95, 120, 0.3);
+        clip-path: polygon(
+            8px 0%, calc(100% - 8px) 0%,
+            100% 8px, 100% calc(100% - 8px),
+            calc(100% - 8px) 100%, 8px 100%,
+            0% calc(100% - 8px), 0% 8px
+        );
+        border: none;
         pointer-events: none;
     }
     .mini-shell[data-design="1"] #mini-time {

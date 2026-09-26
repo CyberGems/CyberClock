@@ -209,6 +209,8 @@ pub struct AppSettings {
     pub mini_no_animations: bool,
     #[serde(default = "default_true")]
     pub mini_edge_limits: bool,
+    #[serde(default)]
+    pub mini_auto_fade: Option<String>,
 
     // Interface text scale for the full window (multiplier on the
     // text tier; display digits and layout metrics stay fixed).
@@ -332,6 +334,7 @@ impl Default for AppSettings {
             mini_click_through: false,
             mini_no_animations: false,
             mini_edge_limits: true,
+            mini_auto_fade: None,
             ui_scale: 1.0,
             full_hide_clock: false,
             full_hide_calendar: false,
