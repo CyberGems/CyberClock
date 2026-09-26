@@ -37,6 +37,27 @@
     const ctxClose = document.getElementById("ctx-close");
     const opChips = document.querySelectorAll(".cal-op-chip");
 
+    const tabBtnActions = document.getElementById("tab-btn-actions");
+    const tabBtnStyle = document.getElementById("tab-btn-style");
+    const panelActions = document.getElementById("panel-actions");
+    const panelStyle = document.getElementById("panel-style");
+    const skinBadge = document.getElementById("cal-skin-badge");
+    const skinGrid = document.getElementById("cal-skin-grid");
+
+    const CAL_SKINS = [
+        { id: 1, key: "float.calSkin.1", fallback: "Cyber Obsidian" },
+        { id: 2, key: "float.calSkin.2", fallback: "Holo Display" },
+        { id: 3, key: "float.calSkin.3", fallback: "Digital Matrix" },
+        { id: 4, key: "float.calSkin.4", fallback: "Glass Minimal" },
+        { id: 5, key: "float.calSkin.5", fallback: "Neon Tokyo" },
+        { id: 6, key: "float.calSkin.6", fallback: "Solar Gold" },
+        { id: 7, key: "float.calSkin.7", fallback: "Sunset Pulse" },
+        { id: 8, key: "float.calSkin.8", fallback: "Frost Crystal" },
+        { id: 9, key: "float.calSkin.9", fallback: "Quantum Violet" },
+        { id: 10, key: "float.calSkin.10", fallback: "Cyber Deck" }
+    ];
+    let currentSkinId = 1;
+
     const MONTHS_ES = [
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
         "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
@@ -73,6 +94,88 @@
         });
     }
 
+    function setTab(tabName) {
+        if (tabName === "style") {
+            if (tabBtnActions) tabBtnActions.classList.remove("active");
+            if (tabBtnStyle) tabBtnStyle.classList.add("active");
+            if (panelActions) panelActions.style.display = "none";
+            if (panelStyle) panelStyle.style.display = "flex";
+        } else {
+            if (tabBtnActions) tabBtnActions.classList.add("active");
+            if (tabBtnStyle) tabBtnStyle.classList.remove("active");
+            if (panelActions) panelActions.style.display = "flex";
+            if (panelStyle) panelStyle.style.display = "none";
+        }
+    }
+
+    if (tabBtnActions) {
+        tabBtnActions.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setTab("actions");
+        });
+    }
+    if (tabBtnStyle) {
+        tabBtnStyle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setTab("style");
+        });
+    }
+
+    function getSkinName(skin) {
+        if (window.ccI18n && window.ccI18n.t) {
+            const trans = window.ccI18n.t(skin.key);
+            if (trans && trans !== skin.key) return trans;
+        }
+        return skin.fallback;
+    }
+
+    function selectCalSkin(id, save = true) {
+        const numId = parseInt(id, 10);
+        if (!numId || numId < 1 || numId > 10) return;
+        currentSkinId = numId;
+        if (shell) {
+            shell.dataset.skin = String(numId);
+        }
+        const skin = CAL_SKINS.find(s => s.id === numId) || CAL_SKINS[0];
+        if (skinBadge) {
+            skinBadge.textContent = getSkinName(skin);
+        }
+        if (skinGrid) {
+            skinGrid.querySelectorAll(".cal-skin-pill").forEach(p => {
+                p.classList.toggle("active", parseInt(p.dataset.skinId, 10) === numId);
+            });
+        }
+        if (save) {
+            try {
+                localStorage.setItem("cc_float_cal_design", String(numId));
+            } catch (_) {}
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalDesign: numId });
+            }
+        }
+    }
+
+    function buildSkinPills() {
+        if (!skinGrid) return;
+        skinGrid.innerHTML = "";
+        CAL_SKINS.forEach(s => {
+            const pill = document.createElement("button");
+            pill.className = `cal-skin-pill${s.id === currentSkinId ? " active" : ""}`;
+            pill.dataset.skinId = String(s.id);
+            pill.textContent = String(s.id);
+            const name = getSkinName(s);
+            pill.setAttribute("data-tooltip", name);
+            pill.setAttribute("data-tooltip-dir", "bottom");
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                selectCalSkin(s.id, true);
+            });
+            skinGrid.appendChild(pill);
+        });
+        const activeSkin = CAL_SKINS.find(s => s.id === currentSkinId) || CAL_SKINS[0];
+        if (skinBadge) skinBadge.textContent = getSkinName(activeSkin);
+    }
+
     function applySettings(s) {
         if (!s) return;
         cfg = s;
@@ -84,6 +187,19 @@
         if (window.ccI18n) {
             window.ccI18n.setLang(cfg.language || "auto");
             window.ccI18n.apply(document);
+        }
+
+        buildSkinPills();
+
+        if (cfg.floatCalDesign) {
+            selectCalSkin(cfg.floatCalDesign, false);
+        } else {
+            try {
+                const saved = parseInt(localStorage.getItem("cc_float_cal_design"), 10);
+                if (saved >= 1 && saved <= 10) {
+                    selectCalSkin(saved, false);
+                }
+            } catch (_) {}
         }
 
         applyOpacity(currentOpacity());
@@ -272,10 +388,18 @@
     // ── Custom Cyber Context Menu ────────────────────────────────
     function openContextMenu(clientX, clientY) {
         closePicker();
-        const menuWidth = 185;
-        const menuHeight = 210;
-        const maxX = 280 - menuWidth - 6;
-        const maxY = 280 - menuHeight - 6;
+
+        // Make menu visible first so layout engine computes accurate offset dimensions
+        ctxMenu.hidden = false;
+
+        const menuWidth = ctxMenu.offsetWidth || 185;
+        const menuHeight = ctxMenu.offsetHeight || 190;
+
+        const maxW = window.innerWidth || document.documentElement.clientWidth || 286;
+        const maxH = window.innerHeight || document.documentElement.clientHeight || 268;
+
+        const maxX = Math.max(6, maxW - menuWidth - 6);
+        const maxY = Math.max(6, maxH - menuHeight - 6);
 
         const x = Math.max(6, Math.min(clientX, maxX));
         const y = Math.max(6, Math.min(clientY, maxY));
@@ -293,8 +417,6 @@
 
         // Sync opacity chips
         syncOpacityChips(currentOpacity());
-
-        ctxMenu.hidden = false;
     }
 
     function closeContextMenu() {
@@ -552,6 +674,15 @@
     if (window.cc && window.cc.onInit) {
         window.cc.onInit((s) => applySettings(s));
     }
+
+    try {
+        const saved = parseInt(localStorage.getItem("cc_float_cal_design"), 10);
+        if (saved >= 1 && saved <= 10) {
+            currentSkinId = saved;
+        }
+    } catch (_) {}
+    buildSkinPills();
+    selectCalSkin(currentSkinId, false);
 
     renderCalendar();
 })();

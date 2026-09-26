@@ -76,82 +76,104 @@
 
             <!-- Custom Cyber Context Menu -->
             <div class="cal-ctx-menu" id="cal-context-menu" hidden>
-                <button class="cal-ctx-item" id="ctx-aot">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="17" x2="12" y2="22"></line>
-                        <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.alwaysOnTop">Always on Top</span>
-                    <span class="ctx-check" id="ctx-aot-check">✓</span>
-                </button>
-                <button class="cal-ctx-item" id="ctx-today">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.today">Today</span>
-                </button>
-                <button class="cal-ctx-item" id="ctx-picker">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.quickPicker">Month & Year Selector</span>
-                </button>
-                <div class="cal-ctx-sep"></div>
-                <div class="cal-ctx-section">
-                    <span class="cal-ctx-section-title" data-i18n="float.opacity">Opacity</span>
-                    <div class="cal-ctx-opacity-chips">
-                        <button class="cal-op-chip" data-op="1.0">100%</button>
-                        <button class="cal-op-chip" data-op="0.85">85%</button>
-                        <button class="cal-op-chip" data-op="0.70">70%</button>
-                        <button class="cal-op-chip" data-op="0.50">50%</button>
+                <!-- TABS -->
+                <div class="cal-ctx-tabs">
+                    <button class="cal-ctx-tab active" id="tab-btn-actions" data-tab="actions" data-i18n="float.tabActions">Acciones</button>
+                    <button class="cal-ctx-tab" id="tab-btn-style" data-tab="style" data-i18n="float.tabStyle">Personalizar</button>
+                </div>
+
+                <!-- PANEL 1: Acciones -->
+                <div class="cal-ctx-panel" id="panel-actions">
+                    <button class="cal-ctx-item" id="ctx-today">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.today">Today</span>
+                    </button>
+                    <button class="cal-ctx-item" id="ctx-picker">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.quickPicker">Month & Year Selector</span>
+                    </button>
+                    <button class="cal-ctx-item" id="ctx-full">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.openFull">Open Full Mode</span>
+                    </button>
+                    <div class="cal-ctx-sep"></div>
+                    <button class="cal-ctx-item" id="ctx-new-timer">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="13" r="8"></circle>
+                            <path d="M12 9v4l2.5 2.5M9 2h6"></path>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.newTimer">New Timer</span>
+                    </button>
+                    <button class="cal-ctx-item" id="ctx-new-sw">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="13" r="8"></circle>
+                            <path d="M12 9v4M12 5V2M10 2h4"></path>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.newStopwatch">New Stopwatch</span>
+                    </button>
+                    <button class="cal-ctx-item" id="ctx-new-analog">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.analogTitle">Analog Clock</span>
+                    </button>
+                    <div class="cal-ctx-sep"></div>
+                    <button class="cal-ctx-item ctx-danger" id="ctx-close">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.close">Close</span>
+                    </button>
+                </div>
+
+                <!-- PANEL 2: Personalizar (Styles & Appearance) -->
+                <div class="cal-ctx-panel" id="panel-style" style="display: none;">
+                    <button class="cal-ctx-item" id="ctx-aot">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="17" x2="12" y2="22"></line>
+                            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                        </svg>
+                        <span class="ctx-label" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        <span class="ctx-check" id="ctx-aot-check">✓</span>
+                    </button>
+                    <div class="cal-ctx-sep"></div>
+                    <div class="cal-ctx-section">
+                        <div class="cal-ctx-section-header">
+                            <span class="cal-ctx-section-title" data-i18n="float.skin">Design</span>
+                            <span class="cal-skin-badge" id="cal-skin-badge">Cyber Obsidian</span>
+                        </div>
+                        <div class="cal-skin-grid" id="cal-skin-grid">
+                            <!-- Populated with 10 design pills in cal.js -->
+                        </div>
+                    </div>
+                    <div class="cal-ctx-sep"></div>
+                    <div class="cal-ctx-section">
+                        <span class="cal-ctx-section-title" data-i18n="float.opacity">Opacity</span>
+                        <div class="cal-ctx-opacity-chips">
+                            <button class="cal-op-chip" data-op="1.0">100%</button>
+                            <button class="cal-op-chip" data-op="0.85">85%</button>
+                            <button class="cal-op-chip" data-op="0.70">70%</button>
+                            <button class="cal-op-chip" data-op="0.50">50%</button>
+                        </div>
                     </div>
                 </div>
-                <div class="cal-ctx-sep"></div>
-                <button class="cal-ctx-item" id="ctx-full">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.openFull">Open Full Mode</span>
-                </button>
-                <div class="cal-ctx-sep"></div>
-                <button class="cal-ctx-item" id="ctx-new-timer">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="13" r="8"></circle>
-                        <path d="M12 9v4l2.5 2.5M9 2h6"></path>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.newTimer">New Timer</span>
-                </button>
-                <button class="cal-ctx-item" id="ctx-new-sw">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="13" r="8"></circle>
-                        <path d="M12 9v4M12 5V2M10 2h4"></path>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.newStopwatch">New Stopwatch</span>
-                </button>
-                <button class="cal-ctx-item" id="ctx-new-analog">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.analogTitle">Analog Clock</span>
-                </button>
-                <div class="cal-ctx-sep"></div>
-                <button class="cal-ctx-item ctx-danger" id="ctx-close">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    <span class="ctx-label" data-i18n="float.close">Close</span>
-                </button>
             </div>
         </div>
         <script src="cal.js"></script>

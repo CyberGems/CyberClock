@@ -345,24 +345,83 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 /* ═══════════════════════════════════════════════════════
    Custom Cyber Context Menu
    ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   Custom Cyber Context Menu (Tabbed & Bounded)
+   ═══════════════════════════════════════════════════════ */
 .cal-ctx-menu {
     position: absolute;
-    background: rgba(14, 17, 24, 0.96);
+    background: rgba(14, 17, 24, 0.98);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(var(--rgb-accent), 0.4);
     border-radius: 10px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 18px rgba(var(--rgb-accent), 0.2);
-    padding: 5px;
-    min-width: 175px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 18px rgba(var(--rgb-accent), 0.25);
+    padding: 6px;
+    width: 195px;
+    max-height: calc(100vh - 12px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
     z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     animation: cal-pop-in 0.12s ease-out;
+}
+
+.cal-ctx-menu::-webkit-scrollbar {
+    width: 3px;
+}
+.cal-ctx-menu::-webkit-scrollbar-thumb {
+    background: rgba(var(--rgb-accent), 0.4);
+    border-radius: 3px;
 }
 
 .cal-ctx-menu[hidden] {
     display: none !important;
+}
+
+/* Tabs: Acciones vs Personalizar */
+.cal-ctx-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.cal-ctx-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: #94a3b8;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    text-align: center;
+}
+
+.cal-ctx-tab:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.cal-ctx-tab.active {
+    background: rgba(var(--rgb-accent), 0.22);
+    color: var(--accent-a);
+    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+}
+
+.cal-ctx-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .cal-ctx-item {
@@ -370,7 +429,7 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     align-items: center;
     gap: 8px;
     width: 100%;
-    padding: 6px 9px;
+    padding: 5.5px 8px;
     background: transparent;
     border: none;
     border-radius: 6px;
@@ -414,10 +473,17 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 }
 
 .cal-ctx-section {
-    padding: 3px 6px;
+    padding: 2px 4px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.cal-ctx-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
 }
 
 .cal-ctx-section-title {
@@ -426,6 +492,53 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: #64748b;
+}
+
+.cal-skin-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.15);
+    padding: 1px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+}
+
+.cal-skin-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.cal-skin-pill {
+    height: 22px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.14s ease;
+}
+
+.cal-skin-pill:hover {
+    border-color: rgba(var(--rgb-accent), 0.5);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cal-skin-pill.active {
+    background: var(--accent-a);
+    border-color: var(--accent-a);
+    color: #0b0f17;
+    font-weight: 700;
+    box-shadow: 0 0 8px var(--accent-a);
 }
 
 .cal-ctx-opacity-chips {
@@ -458,4 +571,188 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     font-weight: 700;
     border-color: var(--accent-a);
     box-shadow: 0 0 6px var(--accent-a);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   10 Futuristic Themes for Floating Calendar Widget
+   ═══════════════════════════════════════════════════════════ */
+
+/* Skin 1: Cyber Obsidian (Default Classic) */
+#cal-shell[data-skin="1"],
+#cal-shell:not([data-skin]) {
+    background: linear-gradient(160deg, #12141a 0%, #08090c 100%);
+    border-color: rgba(var(--rgb-accent), 0.35);
+}
+
+/* Skin 2: Holo Display (Deep Electric Cyan/Blue) */
+#cal-shell[data-skin="2"] {
+    background: linear-gradient(160deg, #071529 0%, #020a14 100%);
+    border-color: rgba(0, 195, 255, 0.45);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 195, 255, 0.25);
+}
+#cal-shell[data-skin="2"] .cal-title {
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+#cal-shell[data-skin="2"] .cal-day-cell.cal-today {
+    background: rgba(0, 195, 255, 0.28);
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+}
+#cal-shell[data-skin="2"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #7dd3fc;
+}
+
+/* Skin 3: Digital Matrix (Phosphor Green Terminal) */
+#cal-shell[data-skin="3"] {
+    background: linear-gradient(160deg, #06150a 0%, #020b04 100%);
+    border-color: rgba(0, 255, 102, 0.4);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 255, 102, 0.2);
+}
+#cal-shell[data-skin="3"] .cal-title {
+    color: #00ff66;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+}
+#cal-shell[data-skin="3"] .cal-day-cell.cal-today {
+    background: rgba(0, 255, 102, 0.22);
+    border-color: #00ff66;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.6);
+}
+#cal-shell[data-skin="3"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #4ade80;
+}
+
+/* Skin 4: Glass Minimal (Zen Silver & Satin Frost) */
+#cal-shell[data-skin="4"] {
+    background: linear-gradient(160deg, rgba(28, 33, 44, 0.96) 0%, rgba(14, 16, 22, 0.98) 100%);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 255, 255, 0.1);
+}
+#cal-shell[data-skin="4"] .cal-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+#cal-shell[data-skin="4"] .cal-day-cell.cal-today {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+}
+#cal-shell[data-skin="4"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #e2e8f0;
+}
+
+/* Skin 5: Neon Tokyo (Anime Hot Magenta & Electric Violet) */
+#cal-shell[data-skin="5"] {
+    background: linear-gradient(160deg, #180820 0%, #0a030e 100%);
+    border-color: rgba(255, 0, 128, 0.45);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 0, 128, 0.25);
+}
+#cal-shell[data-skin="5"] .cal-title {
+    color: #ff2d87;
+    text-shadow: 0 0 10px rgba(255, 45, 135, 0.6);
+}
+#cal-shell[data-skin="5"] .cal-day-cell.cal-today {
+    background: rgba(255, 0, 128, 0.28);
+    border-color: #ff0080;
+    box-shadow: 0 0 12px rgba(255, 0, 128, 0.7);
+}
+#cal-shell[data-skin="5"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #00f5ff;
+}
+
+/* Skin 6: Solar Gold (Titanium Gold Luxury) */
+#cal-shell[data-skin="6"] {
+    background: linear-gradient(160deg, #1b160d 0%, #0c0905 100%);
+    border-color: rgba(255, 183, 0, 0.4);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 183, 0, 0.2);
+}
+#cal-shell[data-skin="6"] .cal-title {
+    color: #ffb700;
+    text-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+}
+#cal-shell[data-skin="6"] .cal-day-cell.cal-today {
+    background: rgba(255, 183, 0, 0.25);
+    border-color: #ffb700;
+    box-shadow: 0 0 12px rgba(255, 183, 0, 0.6);
+}
+#cal-shell[data-skin="6"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #f59e0b;
+}
+
+/* Skin 7: Sunset Pulse (Warm Coral Sunset) */
+#cal-shell[data-skin="7"] {
+    background: linear-gradient(160deg, #220e18 0%, #0e0514 100%);
+    border-color: rgba(255, 107, 74, 0.42);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 107, 74, 0.25);
+}
+#cal-shell[data-skin="7"] .cal-title {
+    color: #ff7e5f;
+    text-shadow: 0 0 10px rgba(255, 126, 95, 0.5);
+}
+#cal-shell[data-skin="7"] .cal-day-cell.cal-today {
+    background: rgba(255, 107, 74, 0.28);
+    border-color: #ff7e5f;
+    box-shadow: 0 0 12px rgba(255, 126, 95, 0.6);
+}
+#cal-shell[data-skin="7"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #c084fc;
+}
+
+/* Skin 8: Frost Crystal (Glacial Arctic Ice) */
+#cal-shell[data-skin="8"] {
+    background: linear-gradient(160deg, #091a26 0%, #040e16 100%);
+    border-color: rgba(103, 232, 249, 0.4);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(103, 232, 249, 0.22);
+}
+#cal-shell[data-skin="8"] .cal-title {
+    color: #a5f3fc;
+    text-shadow: 0 0 10px rgba(165, 243, 252, 0.5);
+}
+#cal-shell[data-skin="8"] .cal-day-cell.cal-today {
+    background: rgba(103, 232, 249, 0.24);
+    border-color: #67e8f9;
+    box-shadow: 0 0 12px rgba(103, 232, 249, 0.6);
+}
+#cal-shell[data-skin="8"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #38bdf8;
+}
+
+/* Skin 9: Quantum Violet (Cosmic Ultraviolet) */
+#cal-shell[data-skin="9"] {
+    background: linear-gradient(160deg, #130a24 0%, #07030e 100%);
+    border-color: rgba(179, 102, 255, 0.42);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(179, 102, 255, 0.25);
+}
+#cal-shell[data-skin="9"] .cal-title {
+    color: #c084fc;
+    text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);
+}
+#cal-shell[data-skin="9"] .cal-day-cell.cal-today {
+    background: rgba(179, 102, 255, 0.28);
+    border-color: #b366ff;
+    box-shadow: 0 0 12px rgba(179, 102, 255, 0.65);
+}
+#cal-shell[data-skin="9"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #e879f9;
+}
+
+/* Skin 10: Cyber Deck (Tactical Hazard Orange) */
+#cal-shell[data-skin="10"] {
+    background: linear-gradient(160deg, #17110a 0%, #0a0704 100%);
+    border-color: rgba(255, 115, 0, 0.45);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 115, 0, 0.25);
+}
+#cal-shell[data-skin="10"] .cal-title {
+    color: #ff8800;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+}
+#cal-shell[data-skin="10"] .cal-day-cell.cal-today {
+    background: rgba(255, 115, 0, 0.28);
+    border-color: #ff8800;
+    box-shadow: 0 0 12px rgba(255, 136, 0, 0.65);
+}
+#cal-shell[data-skin="10"] .cal-day-cell.cal-weekend:not(.cal-other) {
+    color: #facc15;
 }
