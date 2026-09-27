@@ -198,6 +198,8 @@ pub struct AppSettings {
     #[serde(default)]
     pub close_to_tray: Option<bool>,
     #[serde(default)]
+    pub close_action: Option<String>,
+    #[serde(default)]
     pub show_widgets_in_taskbar: bool,
     #[serde(default = "default_true")]
     pub restore_float_widgets: bool,
@@ -348,6 +350,7 @@ impl Default for AppSettings {
             sw_design: None,
             skipped_update_version: None,
             close_to_tray: None,
+            close_action: None,
             show_widgets_in_taskbar: false,
             restore_float_widgets: true,
             open_float_widgets: Vec::new(),

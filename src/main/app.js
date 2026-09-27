@@ -786,10 +786,12 @@
 
         const closeActionEl = document.getElementById("s-close-action");
         if (closeActionEl) {
-            if (s.closeToTray === true) closeActionEl.value = "tray";
-            else if (s.closeToTray === false) closeActionEl.value = "quit";
+            if (s.closeAction === "mini") closeActionEl.value = "mini";
+            else if (s.closeAction === "tray" || s.closeToTray === true) closeActionEl.value = "tray";
+            else if (s.closeAction === "quit" || s.closeToTray === false) closeActionEl.value = "quit";
             else closeActionEl.value = "ask";
         }
+        if (typeof updateCloseButtonTooltip === "function") updateCloseButtonTooltip();
 
         const clockAccEl = document.getElementById("s-clock-acc");
         if (clockAccEl) clockAccEl.checked = s.clockAccuracyEnabled !== false;
@@ -904,6 +906,7 @@
             const vvVal = document.getElementById("s-voice-vol-val");
             if (vvVal) vvVal.textContent = vv + "%";
         }
+        if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
 
         const avEl = document.getElementById("s-avol");
         if (avEl) {
@@ -6361,9 +6364,19 @@
         sCloseAction.addEventListener("change", (e) => {
             const val = e.target.value;
             let closeToTray = null;
-            if (val === "tray") closeToTray = true;
-            else if (val === "quit") closeToTray = false;
-            window.cc.saveSettings({ closeToTray });
+            let closeAction = null;
+            if (val === "tray") {
+                closeToTray = true;
+                closeAction = "tray";
+            } else if (val === "mini") {
+                closeToTray = null;
+                closeAction = "mini";
+            } else if (val === "quit") {
+                closeToTray = false;
+                closeAction = "quit";
+            }
+            window.cc.saveSettings({ closeToTray, closeAction });
+            if (typeof updateCloseButtonTooltip === "function") updateCloseButtonTooltip();
         });
     }
     const sAudioMute = document.getElementById("s-audio-mute");
@@ -6871,6 +6884,7 @@
                     alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false }
                 });
             }
+            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
         });
     document
         .getElementById("s-full-en")
@@ -6891,6 +6905,7 @@
                     alarmFullHour: { ...cfg.alarmFullHour, enabled: false }
                 });
             }
+            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
         });
     document
         .getElementById("s-quart-en")
@@ -6911,6 +6926,7 @@
                     alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
                 });
             }
+            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
         });
     document
         .getElementById("s-half-snd")
@@ -7075,6 +7091,7 @@
             } else {
                 window.cc.saveSettings({ voiceAnnouncer: { ...va, enabled: false } });
             }
+            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
         });
     }
 
@@ -7272,11 +7289,46 @@
             btnAot.classList.toggle("on", on);
         });
     }
-    // ── First-Close Confirmation Modal ───────────────────────
+    // ── First-Close Confirmation Modal & Close Action ─────────
     const firstCloseOverlay = document.getElementById("first-close-overlay");
     const firstCloseRememberChk = document.getElementById("first-close-remember-chk");
     const btnFirstCloseQuit = document.getElementById("btn-first-close-quit");
     const btnFirstCloseTray = document.getElementById("btn-first-close-tray");
+    const btnFirstCloseMini = document.getElementById("btn-first-close-mini");
+
+    function updateCloseButtonTooltip() {
+        const btnClose = document.getElementById("btn-close");
+        if (!btnClose) return;
+        const action = (cfg && cfg.closeAction) || (cfg && cfg.closeToTray === true ? "tray" : (cfg && cfg.closeToTray === false ? "quit" : "ask"));
+        let key = "closeBtn.ask";
+        if (action === "tray") key = "closeBtn.tray";
+        else if (action === "mini") key = "closeBtn.mini";
+        else if (action === "quit") key = "closeBtn.quit";
+
+        btnClose.setAttribute("data-i18n-attr", `data-tooltip:${key}, aria-label:${key}`);
+        if (window.ccI18n && window.ccI18n.t) {
+            const tipText = window.ccI18n.t(key);
+            btnClose.setAttribute("data-tooltip", tipText);
+            btnClose.setAttribute("aria-label", tipText);
+        }
+    }
+
+    function updateChimeStatesUI() {
+        const fEn = document.getElementById("s-full-en");
+        const hEn = document.getElementById("s-half-en");
+        const qEn = document.getElementById("s-quart-en");
+        const vEn = document.getElementById("s-voice-en");
+
+        const fCtrls = document.getElementById("s-full-ctrls");
+        const hCtrls = document.getElementById("s-half-ctrls");
+        const qCtrls = document.getElementById("s-quart-ctrls");
+        const vSub = document.getElementById("s-voice-subcontrols");
+
+        if (fCtrls) fCtrls.classList.toggle("is-disabled-controls", !fEn || !fEn.checked);
+        if (hCtrls) hCtrls.classList.toggle("is-disabled-controls", !hEn || !hEn.checked);
+        if (qCtrls) qCtrls.classList.toggle("is-disabled-controls", !qEn || !qEn.checked);
+        if (vSub) vSub.classList.toggle("is-disabled-controls", !vEn || !vEn.checked);
+    }
 
     function openFirstCloseModal() {
         if (!firstCloseOverlay) return;
@@ -7292,16 +7344,25 @@
         closeFirstCloseModal();
         const remember = firstCloseRememberChk ? firstCloseRememberChk.checked : false;
         if (remember) {
-            window.cc.saveSettings({ closeToTray: action === "tray" });
+            let closeToTray = null;
+            if (action === "tray") closeToTray = true;
+            else if (action === "quit") closeToTray = false;
+            window.cc.saveSettings({ closeToTray, closeAction: action });
         }
-        if (action === "tray") {
+        if (action === "mini") {
+            window.cc.goMini();
+        } else if (action === "tray") {
             window.cc.hideWindow("main");
         } else {
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
             else window.close();
         }
+        updateCloseButtonTooltip();
     }
 
+    if (btnFirstCloseMini) {
+        btnFirstCloseMini.addEventListener("click", () => handleFirstCloseChoice("mini"));
+    }
     if (btnFirstCloseQuit) {
         btnFirstCloseQuit.addEventListener("click", () => handleFirstCloseChoice("quit"));
     }
@@ -7310,7 +7371,14 @@
     }
 
     window.addEventListener("keydown", (e) => {
-        if (!firstCloseOverlay || firstCloseOverlay.hidden) return;
+        if (!firstCloseOverlay || firstCloseOverlay.hidden) {
+            if (e.altKey && (e.key === "F4" || e.code === "F4")) {
+                e.preventDefault();
+                e.stopPropagation();
+                requestWindowClose();
+            }
+            return;
+        }
 
         if (e.key === "Escape") {
             e.preventDefault();
@@ -7320,6 +7388,12 @@
             e.preventDefault();
             e.stopPropagation();
             handleFirstCloseChoice("tray");
+        } else if (e.key === "m" || e.key === "M" || e.code === "KeyM") {
+            const tag = (e.target && e.target.tagName) || "";
+            if (tag === "INPUT" || tag === "BUTTON") return;
+            e.preventDefault();
+            e.stopPropagation();
+            handleFirstCloseChoice("mini");
         } else if (e.key === " " || e.code === "Space") {
             const tag = (e.target && e.target.tagName) || "";
             if (tag === "INPUT" || tag === "BUTTON") return;
@@ -7330,14 +7404,23 @@
     });
 
     function requestWindowClose() {
-        if (cfg && cfg.closeToTray === true) {
+        const action = (cfg && cfg.closeAction) || (cfg && cfg.closeToTray === true ? "tray" : (cfg && cfg.closeToTray === false ? "quit" : null));
+        if (action === "mini") {
+            window.cc.goMini();
+        } else if (action === "tray") {
             window.cc.hideWindow("main");
-        } else if (cfg && cfg.closeToTray === false) {
+        } else if (action === "quit") {
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
             else window.close();
         } else {
             openFirstCloseModal();
         }
+    }
+
+    if (window.cc && window.cc.onCloseRequested) {
+        window.cc.onCloseRequested(() => {
+            requestWindowClose();
+        });
     }
 
     document

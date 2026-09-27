@@ -834,7 +834,7 @@
                                         <span data-i18n="settings.alarms.topOfHour">Top of the hour</span>
                                         <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00)</small>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                    <div id="s-full-ctrls" style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                                         <select id="s-full-snd">
                                             <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
                                             <option value="chime-digital" selected data-i18n="settings.alarms.sound.digital">Soft Chime</option>
@@ -868,7 +868,7 @@
                                         <span data-i18n="settings.alarms.halfHour">Half hour</span>
                                         <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00, :30)</small>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                    <div id="s-half-ctrls" style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                                         <select id="s-half-snd">
                                             <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
                                             <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
@@ -902,7 +902,7 @@
                                         <span data-i18n="settings.alarms.quarterHour">Quarter hour</span>
                                         <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00, :15, :30, :45)</small>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                    <div id="s-quart-ctrls" style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                                         <select id="s-quart-snd">
                                             <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
                                             <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
@@ -932,87 +932,124 @@
                         <!-- Voice Time Announcer (Talking Clock) -->
                         <div class="s-sec" id="s-voice-announcer-blk">
                             <div class="s-sec-t" data-i18n="voice.sectionTitle">Voice Time Announcer</div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.enable">Enable Voice Announcement</span>
+
+                            <!-- Enable Announcement -->
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="volume-high"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="voice.enable">Enable Voice Announcement</span>
+                                </div>
                                 <label class="s-tog">
                                     <input type="checkbox" id="s-voice-en" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.interval">Interval</span>
-                                <select id="s-voice-interval">
-                                    <option value="15m" data-i18n="voice.interval15m">Every 15 minutes</option>
-                                    <option value="30m" data-i18n="voice.interval30m">Every 30 minutes</option>
-                                    <option value="1h" selected data-i18n="voice.interval1h">Every hour (:00)</option>
-                                </select>
-                            </div>
-                            <div class="s-alarm-row s-voice-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.voice">Voice</span>
-                                <select id="s-voice-select">
-                                    <option value="auto" data-i18n="voice.auto">System Default</option>
-                                    <option value="female" data-i18n="voice.female">Female Voice</option>
-                                    <option value="male" data-i18n="voice.male">Male Voice</option>
-                                </select>
-                                <button class="s-abtn s-abtn-icon" id="s-voice-refresh-btn" type="button" disabled data-tooltip="Refresh voice list" data-i18n-attr="data-tooltip:voice.refreshTip">
-                                    <span data-ico="refresh"></span>
-                                </button>
-                                <button class="s-abtn" id="s-voice-add-btn" type="button" data-tooltip="Install Spanish and other voices in Windows Settings" data-i18n-attr="data-tooltip:voice.addVoicesTip">
-                                    <span data-ico="download"></span> <span data-i18n="voice.addVoices">Add voices…</span>
-                                </button>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.style">Announcement Style</span>
-                                <select id="s-voice-style">
-                                    <option value="natural" selected data-i18n="voice.styleNatural">Natural ("It's 11:15 PM")</option>
-                                    <option value="cyber" data-i18n="voice.styleCyber">Military / 24h ("Current time: 23 15 hours")</option>
-                                    <option value="concise" data-i18n="voice.styleConcise">Concise ("11:15")</option>
-                                </select>
-                                <button class="s-abtn" id="s-voice-test" type="button" data-tooltip="Test voice announcement" data-i18n-attr="data-tooltip:voice.testTip">
-                                    <span data-ico="play"></span> <span data-i18n="voice.test">Test</span>
-                                </button>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.volume">Voice Volume</span>
-                                <div class="s-vol-row" style="flex: 1; max-width: 180px; margin: 0;">
-                                    <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" />
-                                    <span class="s-vnum" id="s-voice-vol-val">85%</span>
-                                </div>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.chimeBefore">Soft chime before speaking</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-voice-chime" checked />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="voice.quietHours">Silence during this schedule</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-voice-quiet-en" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-alarm-row" id="s-voice-quiet-row" style="display: none;">
-                                <span class="s-alarm-lbl" data-i18n="voice.quietTime">Silent from</span>
-                                <div class="sched-time" style="margin: 0 4px;">
-                                    <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
+
+                            <!-- Voice subcontrols (dimmed when voice is disabled) -->
+                            <div id="s-voice-subcontrols">
+                                <!-- Interval -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="timer"></span>
+                                    <div class="s-lbl" data-i18n="voice.interval">Interval</div>
+                                    <select id="s-voice-interval" class="sched-select">
+                                        <option value="15m" data-i18n="voice.interval15m">Every 15 minutes</option>
+                                        <option value="30m" data-i18n="voice.interval30m">Every 30 minutes</option>
+                                        <option value="1h" selected data-i18n="voice.interval1h">Every hour (:00)</option>
                                     </select>
                                 </div>
-                                <span class="s-lbl" style="width: auto; margin: 0 4px;" data-i18n="voice.quietTo">to</span>
-                                <div class="sched-time" style="margin: 0 4px;">
-                                    <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
+
+                                <!-- Voice selection -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="user"></span>
+                                    <div class="s-lbl" data-i18n="voice.voice">Voice</div>
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <select id="s-voice-select">
+                                            <option value="auto" data-i18n="voice.auto">System Default</option>
+                                            <option value="female" data-i18n="voice.female">Female Voice</option>
+                                            <option value="male" data-i18n="voice.male">Male Voice</option>
+                                        </select>
+                                        <button class="s-abtn s-abtn-icon" id="s-voice-refresh-btn" type="button" disabled data-tooltip="Refresh voice list" data-i18n-attr="data-tooltip:voice.refreshTip">
+                                            <span data-ico="refresh"></span>
+                                        </button>
+                                        <button class="s-abtn" id="s-voice-add-btn" type="button" data-tooltip="Install Spanish and other voices in Windows Settings" data-i18n-attr="data-tooltip:voice.addVoicesTip">
+                                            <span data-ico="download"></span> <span data-i18n="voice.addVoices">Add voices…</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Style -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="message-square"></span>
+                                    <div class="s-lbl" data-i18n="voice.style">Announcement Style</div>
+                                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                        <select id="s-voice-style">
+                                            <option value="natural" selected data-i18n="voice.styleNatural">Natural ("It's 11:15 PM")</option>
+                                            <option value="cyber" data-i18n="voice.styleCyber">Military / 24h ("Current time: 23 15 hours")</option>
+                                            <option value="concise" data-i18n="voice.styleConcise">Concise ("11:15")</option>
+                                        </select>
+                                        <button class="s-abtn" id="s-voice-test" type="button" data-tooltip="Test voice announcement" data-i18n-attr="data-tooltip:voice.testTip">
+                                            <span data-ico="play"></span> <span data-i18n="voice.test">Test</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Volume -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="volume-low"></span>
+                                    <div class="s-lbl" data-i18n="voice.volume">Voice Volume</div>
+                                    <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
+                                        <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
+                                        <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" />
+                                        <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
+                                        <span class="s-vol-val" id="s-voice-vol-val">85%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Chime before speaking -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="bell"></span>
+                                    <div class="s-lbl" data-i18n="voice.chimeBefore">Soft chime before speaking</div>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-voice-chime" checked />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+
+                                <!-- Quiet hours toggle -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="moon"></span>
+                                    <div class="s-lbl" data-i18n="voice.quietHours">Silence during this schedule</div>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-voice-quiet-en" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+
+                                <!-- Quiet schedule times -->
+                                <div class="s-row" id="s-voice-quiet-row" style="display: none;">
+                                    <span class="s-row-ico" data-ico="clock"></span>
+                                    <div class="s-lbl">
+                                        <span data-i18n="voice.quietTime">Silent from</span>
+                                        <div class="sched-time" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
+                                            <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
+                                            <span class="sched-time-sep">:</span>
+                                            <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
+                                            <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
+                                        <span style="margin: 0 4px;" data-i18n="voice.quietTo">to</span>
+                                        <div class="sched-time" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
+                                            <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
+                                            <span class="sched-time-sep">:</span>
+                                            <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
+                                            <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1379,6 +1416,7 @@
                                 <select id="s-close-action" class="sched-select">
                                     <option value="ask" data-i18n="settings.general.onCloseAsk">Ask every time</option>
                                     <option value="tray" data-i18n="settings.general.onCloseTray">Minimize to tray</option>
+                                    <option value="mini" data-i18n="settings.general.onCloseMini">Switch to Mini Mode</option>
                                     <option value="quit" data-i18n="settings.general.onCloseQuit">Exit CyberClock</option>
                                 </select>
                             </div>
@@ -2085,6 +2123,10 @@
                         <button type="button" class="first-close-btn is-quit" id="btn-first-close-quit">
                             <span data-i18n="closeModal.quit">Salir</span>
                             <span class="modal-key-badge" data-i18n="closeModal.space">Espacio</span>
+                        </button>
+                        <button type="button" class="first-close-btn is-mini" id="btn-first-close-mini">
+                            <span data-i18n="closeModal.mini">Modo Mini</span>
+                            <span class="modal-key-badge">M</span>
                         </button>
                         <button type="button" class="first-close-btn is-tray" id="btn-first-close-tray">
                             <span data-i18n="closeModal.minimize">Minimizar a la bandeja</span>

@@ -4074,13 +4074,12 @@ pub fn run() {
                 // not toggle maximize/restore in the first place.
                 let _ = main.set_maximizable(false);
                 let main_for_resize = main.clone();
-                let app_for_main = app.handle().clone();
                 main.on_window_event(move |event| match event {
                     WindowEvent::CloseRequested { api, .. }
                         if !APP_EXITING.load(Ordering::SeqCst) =>
                     {
                         api.prevent_close();
-                        exit_app(&app_for_main);
+                        let _ = main_for_resize.emit("main:close-requested", ());
                     }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         if main_for_resize.is_minimized().unwrap_or(true) {

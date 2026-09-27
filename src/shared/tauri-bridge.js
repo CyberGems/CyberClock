@@ -347,6 +347,9 @@
         onCheckUpdatesTrigger: (cb) => {
             return subscribe("about:trigger-check", cb);
         },
+        onCloseRequested: (cb) => {
+            return subscribe("main:close-requested", cb);
+        },
 
         // ── Cleanup ───────────────────────────────────────────────
         off: async (channel) => {

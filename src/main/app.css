@@ -5004,6 +5004,17 @@
         color: #ffffff;
         box-shadow: 0 0 12px rgba(255, 77, 109, 0.35);
     }
+    .first-close-btn.is-mini {
+        background: rgba(var(--rgb-accent), 0.12);
+        border-color: rgba(var(--rgb-accent), 0.3);
+        color: var(--accent-a);
+    }
+    .first-close-btn.is-mini:hover {
+        background: rgba(var(--rgb-accent), 0.25);
+        border-color: var(--accent-a);
+        color: #ffffff;
+        box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.4);
+    }
     .first-close-btn.is-tray {
         background: var(--accent-a);
         color: #0b0f17;
@@ -5013,6 +5024,12 @@
         background: #ffffff;
         color: #0b0f17;
         box-shadow: 0 0 20px var(--accent-a);
+    }
+    .is-disabled-row,
+    .is-disabled-controls {
+        opacity: 0.42;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
     }
     .modal-key-badge {
         display: inline-flex;
