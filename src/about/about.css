@@ -565,14 +565,16 @@ body {
 
 /* ── Suite Showcase ────────────────────────────────────────── */
 .ab-suite-card {
-    padding: 12px 16px;
+    padding: 10px 16px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 .ab-suite-grid {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 12px;
@@ -603,22 +605,21 @@ body {
     display: block;
     pointer-events: none;
 }
-.ab-suite-footer {
-    display: flex;
-    justify-content: center;
-    padding-top: 4px;
-}
 .ab-suite-more-btn {
     font-family: var(--font-display, "Space Grotesk", sans-serif);
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
+    letter-spacing: 0.6px;
     color: var(--accent-a);
     background: rgba(var(--rgb-accent), 0.08);
-    border: 1px solid rgba(var(--rgb-accent), 0.25);
+    border: 1px solid rgba(var(--rgb-accent), 0.28);
     border-radius: 20px;
-    padding: 5px 18px;
+    padding: 0 16px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
     cursor: pointer;
     transition: all 0.18s ease;
 }
@@ -628,6 +629,9 @@ body {
     color: var(--text-hi);
     box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.30);
     transform: translateY(-1px);
+}
+.ab-suite-more-btn:active {
+    transform: scale(0.96);
 }
 
 /* ── Footer ────────────────────────────────────────────────── */

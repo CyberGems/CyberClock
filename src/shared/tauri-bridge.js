@@ -244,6 +244,9 @@
         onUpdateStatus: (cb) => {
             return subscribe("update:status", cb);
         },
+        onAboutOpened: (cb) => {
+            return subscribe("about:opened", cb);
+        },
 
         selectDisplay: async (id) => {
             return await invoke("select_display", { id });

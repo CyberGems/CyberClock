@@ -939,6 +939,7 @@ fn show_about_window(app: &AppHandle) {
     }
     let _ = win.show();
     let _ = win.set_focus();
+    let _ = app.emit("about:opened", ());
     refresh_taskbar_tab(&win);
 }
 

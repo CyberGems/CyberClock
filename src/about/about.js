@@ -411,7 +411,22 @@
     }
 
     // ── CyberGems Suite Showcase ──────────────────────────────
-    function initSuiteShowcase() {
+    let allSuiteApps = [];
+    let currentSuiteApps = [];
+
+    function pickRandomSisters(apps, count = 5) {
+        const sisters = (apps || []).filter((a) => a && a.slug !== "cyberclock");
+        const pool = [...sisters];
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const tmp = pool[i];
+            pool[i] = pool[j];
+            pool[j] = tmp;
+        }
+        return pool.slice(0, count);
+    }
+
+    function initSuiteShowcase(forceReshuffle = false) {
         const grid = document.getElementById("ab-suite-grid");
         const moreBtn = document.getElementById("ab-suite-more");
         if (moreBtn && !moreBtn._hasListener) {
@@ -420,18 +435,34 @@
         }
         if (!grid) return;
 
+        const populate = () => {
+            if (forceReshuffle || currentSuiteApps.length === 0) {
+                currentSuiteApps = pickRandomSisters(allSuiteApps, 5);
+            }
+            renderSuiteButtons(grid, currentSuiteApps);
+        };
+
+        if (allSuiteApps.length > 0) {
+            populate();
+            return;
+        }
+
         try {
             let apps = window.CC_SUITE_DATA ? window.CC_SUITE_DATA.apps : null;
-            if (!Array.isArray(apps) || !apps.length) {
-                fetch("../assets/suite/suite.json")
-                    .then((r) => r.json())
-                    .then((data) => {
-                        if (Array.isArray(data?.apps)) renderSuiteButtons(grid, data.apps);
-                    })
-                    .catch(() => {});
+            if (Array.isArray(apps) && apps.length) {
+                allSuiteApps = apps;
+                populate();
                 return;
             }
-            renderSuiteButtons(grid, apps);
+            fetch("../assets/suite/suite.json")
+                .then((r) => r.json())
+                .then((data) => {
+                    if (Array.isArray(data?.apps) && data.apps.length) {
+                        allSuiteApps = data.apps;
+                        populate();
+                    }
+                })
+                .catch(() => {});
         } catch (e) {
             console.warn("Could not load suite showcase:", e);
         }
@@ -441,11 +472,9 @@
         const lang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
         const isEs = lang === "es";
 
-        // Exclude CyberClock from its own showcase
-        const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
         grid.innerHTML = "";
 
-        for (const app of sisters) {
+        for (const app of apps) {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "ab-suite-btn";
@@ -477,7 +506,14 @@
             grid.appendChild(btn);
         }
     }
-    initSuiteShowcase();
+
+    initSuiteShowcase(true);
+
+    if (window.cc && window.cc.onAboutOpened) {
+        window.cc.onAboutOpened(() => {
+            initSuiteShowcase(true);
+        });
+    }
 
     // ── Title bar ─────────────────────────────────────────────
     const closeBtn = document.getElementById("ab-close");
