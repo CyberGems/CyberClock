@@ -47,11 +47,13 @@
 
     let appVersion = "";
     let updateStatus = { state: "idle" };
+    let currentSettings = {};
     let updatePortable = false;
     let updateMsStore = false;
 
     // ── Theme / language / auto-update toggle / suite showcase ──
     function applySettings(s) {
+        currentSettings = s || {};
         window.CCTint.apply(s.theme || "ice");
         if (window.ccI18n) {
             window.ccI18n.setLang(s.language || "auto");
@@ -535,4 +537,54 @@
         const el = document.getElementById(id);
         if (el) el.addEventListener("click", () => openUrl(url));
     }
+
+    // ── Diagnostic info copy ──────────────────────────────────
+    async function copyDiagnosticInfo() {
+        const diagBtn = document.getElementById("ab-link-diag");
+        const effectiveLang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
+        const theme = currentSettings.theme || "ice";
+        const autoUp = currentSettings.autoUpdate !== false;
+        const now = new Date();
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+        const offset = -now.getTimezoneOffset() / 60;
+        const offsetStr = `UTC${offset >= 0 ? "+" : ""}${offset}`;
+
+        let installType = "Standard (Installer)";
+        if (updatePortable) installType = "Portable";
+        else if (updateMsStore) installType = "Microsoft Store";
+
+        const lines = [
+            "### CyberClock Diagnostic Information",
+            `- **App Version:** v${appVersion || "unknown"}`,
+            `- **Installation Type:** ${installType}`,
+            `- **OS / Platform:** ${navigator.platform || "Windows"} (${navigator.userAgent})`,
+            `- **Display:** ${window.screen.width}x${window.screen.height} (DPR: ${window.devicePixelRatio || 1})`,
+            `- **Language:** ${currentSettings.language || "auto"} (Effective: ${effectiveLang})`,
+            `- **Theme:** ${theme}`,
+            `- **Startup Auto-Update:** ${autoUp ? "Enabled" : "Disabled"}`,
+            `- **Chimes Enabled:** ${currentSettings.chimes_enabled !== false ? "Yes" : "No"}`,
+            `- **Voice Announcer:** ${currentSettings.voice_enabled ? "Yes" : "No"}`,
+            `- **Audio Muted:** ${currentSettings.mute_audio ? "Yes" : "No"}`,
+            `- **Local Time:** ${now.toLocaleString()} (${tz}, ${offsetStr})`,
+        ];
+
+        const diagText = lines.join("\n");
+        try {
+            await navigator.clipboard.writeText(diagText);
+            if (diagBtn) {
+                const copiedTip = T("about.diagCopied", "Diagnostic info copied to clipboard!");
+                diagBtn.setAttribute("data-tooltip", copiedTip);
+                diagBtn.classList.add("ab-copied");
+                setTimeout(() => {
+                    diagBtn.classList.remove("ab-copied");
+                    diagBtn.setAttribute("data-tooltip", T("about.linkDiag", "Copy diagnostic information"));
+                }, 2200);
+            }
+        } catch (e) {
+            console.warn("Could not copy diagnostic info to clipboard:", e);
+        }
+    }
+
+    const diagBtn = document.getElementById("ab-link-diag");
+    if (diagBtn) diagBtn.addEventListener("click", copyDiagnosticInfo);
 })();

@@ -235,8 +235,12 @@ body {
     margin: 6px 0 0;
     font-family: var(--font-ui, "Outfit", sans-serif);
     font-size: 12.5px;
-    line-height: 1.55;
+    line-height: 1.5;
     color: var(--text-md, #96a2b4);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* ── Technical Section Header ──────────────────────────────── */
@@ -719,6 +723,12 @@ body {
     background: rgba(244, 63, 94, 0.14);
     border-color: rgba(244, 63, 94, 0.35);
     box-shadow: 0 0 12px rgba(244, 63, 94, 0.40);
+}
+.ab-footer-btn.ab-copied {
+    color: var(--accent-a);
+    background: rgba(var(--rgb-accent), 0.22);
+    border-color: rgba(var(--rgb-accent), 0.50);
+    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.45);
 }
 
 /* ── Cyber-Neon Tooltips (Suite Standard) ─────────────────── */
