@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Voice Time Announcer brings verbal speech time announcements with system voices, natural and cyber styles, and quiet hours, alongside Mini Mode inactivity Auto-Fade, floating calendar, and independent widget position locking.
+Dedicated chime volume controls and audio previews arrive in the Time tab alongside unified settings blocks for hourly chimes, flexible window closing options with Mini Mode, and streamlined modal escape navigation.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,56 +17,50 @@ Voice Time Announcer brings verbal speech time announcements with system voices,
 
 ### ✨ Key Features & Highlights
 
-- 🗣️ **Voice Time Announcer (Talking Clock)**:
-  - Verbally announces the time at intervals (:15, :30, :00) using native Windows speech synthesis.
-  - Choose between system default, male, female, or any installed Windows SAPI/OneCore voice, with a shortcut to install Windows voice packs.
-  - Three distinct speech styles: **Natural**, **Cyber / Tactical**, or **Concise**.
-  - Optional soft pre-chime, quiet hours silence window, and intelligent chime deconfliction.
+- 🔔 **Dedicated Hourly Chimes Volume & Audio Preview**:
+  - Independent volume slider for hourly chimes and interval alerts, preserving your master alarm volume.
+  - Dedicated sound preview test buttons next to each chime sound selector (:00, :30, :15) for immediate verification.
 
-- 🕶️ **Auto-Fade (Inactivity Dimming)**:
-  - Mini Mode automatically dims during desktop inactivity (70%, 50%, 30%, or 15%), brightening back to 100% on mouse hover.
+- 🕒 **Streamlined Time & Chimes Configuration**:
+  - Hourly Chimes and Voice Time Announcer reorganized into clean, unified function cards inside the Time settings tab.
+  - Alarms tab is now decluttered and dedicated exclusively to scheduled alarms and timers.
+  - Refined quiet hours schedule labels for clear silence windows.
 
-- 🔒 **Independent Contextual Widget Position Locks**:
-  - Mini Clock, Timers, Stopwatches, Analog Clock, and Calendar now have separate position locks accessible right from their contextual menus.
+- 🪟 **Enhanced Window Close Experience**:
+  - New "Switch to Mini Mode" option in the close confirmation dialog alongside minimize to tray and exit.
+  - Direct "X" close button in the dialog header, backdrop click dismissal, and `Esc` keyboard shortcut hints across all application modals.
 
-- 📅 **Floating Calendar & Analog Clock Widgets**:
-  - Standalone floating calendar widget with 10 cyberpunk skins, daily auto-rotation, date picker popover, and dedicated context menu.
-  - Floating analog clock widget with modern cyber dials, skin picking, and customizable taskbar visibility.
-
-- ⏱️ **Timer & Stopwatch Facelift**:
-  - Enlarged 26px counter digits, resting dimmed state when zeroed, and fixed chamfer alignment on Skin 1.
-  - Floating timer quick presets toggle to show or hide +30s to +15m buttons on demand.
+- 🌐 **Bilingual Release Notes & Complete i18n Synchronization**:
+  - Update notifications in Mini Mode and Full Mode with collapsible bilingual release notes.
+  - Complete English and Spanish string parity across all new controls, tooltips, and settings.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-El Locutor de Hora por Voz (Reloj Parlante) incorpora anuncios hablados de la hora con voces nativas de Windows, estilos natural y táctico, y horas de silencio, junto a la atenuación por inactividad (Auto-Fade) en Modo Mini, calendario flotante y bloqueo de posición independiente por widget.
+Llegan controles de volumen dedicado y pruebas de audio para campanadas en la pestaña Hora, junto a bloques de configuración unificados, opciones flexibles de cierre de ventana con Modo Mini y atajos de teclado Esc en modales.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🗣️ **Locutor de Hora por Voz (Reloj Parlante)**:
-  - Anuncia verbalmente la hora a intervalos (:15, :30, :00) mediante síntesis de voz nativa de Windows.
-  - Permite elegir entre voz predeterminada, masculina, femenina o cualquier voz SAPI/OneCore instalada, con acceso directo para instalar paquetes de voces en Windows.
-  - Tres estilos de locución: **Natural**, **Ciber-táctico** o **Conciso**.
-  - Pre-timbre suave opcional, ventana de horas de silencio y de-conflicto inteligente con las campanadas horarias.
+- 🔔 **Volumen dedicado de campanadas y vista previa de audio**:
+  - Deslizador de volumen independiente para las campanadas horarias y alertas de intervalo, preservando el volumen maestro de alarmas.
+  - Botones de prueba de sonido junto a cada selector de campanada (:00, :30, :15) para verificación inmediata.
 
-- 🕶️ **Auto-Fade (Atenuación por Inactividad)**:
-  - El Modo Mini se atenúa automáticamente tras unos segundos de inactividad (70%, 50%, 30% o 15%), recuperando el 100% de brillo al pasar el ratón.
+- 🕒 **Configuración optimizada de Hora y Campanadas**:
+  - Campanadas Horarias y Locutor de Hora por Voz reorganizados en tarjetas de función limpias y unificadas dentro de la pestaña Hora.
+  - La pestaña Alarmas queda despejada y dedicada exclusivamente a alarmas y temporizadores programados.
+  - Etiquetas refinadas para el horario de silencio ("Silenciar en este horario").
 
-- 🔒 **Bloqueo de posición contextual e independiente**:
-  - Mini Reloj, Temporizadores, Cronómetros, Reloj Analógico y Calendario cuentan con bloqueo de posición individual accesible desde sus menús contextuales.
+- 🪟 **Experiencia de cierre de ventana mejorada**:
+  - Nueva opción "Pasar a Modo Mini" en el diálogo de confirmación de cierre, junto a minimizar a la bandeja y salir.
+  - Botón de cierre directo ("X") en la cabecera del diálogo, cierre al hacer clic fuera del modal y atajos de teclado `Esc` en todos los modales.
 
-- 📅 **Widgets Flotantes de Calendario y Reloj Analógico**:
-  - Calendario de escritorio independiente con 10 skins futuristas, rotación diaria automática, selector emergente de fecha y menú contextual.
-  - Reloj analógico flotante con esferas ciber-neón y visibilidad configurable en la barra de tareas.
-
-- ⏱️ **Facelift de Temporizador y Cronómetro**:
-  - Dígitos de contador ampliados a 26px, estado en reposo atenuado en ceros y corrección de chaflanes en el Skin 1.
-  - Selector en el menú contextual del temporizador flotante para mostrar u ocultar presets rápidos (+30s a +15m).
+- 🌐 **Notas de versión bilingües y sincronización i18n completa**:
+  - Notificaciones de actualización en Modo Mini y Modo Completo con notas de versión bilingües desplegables.
+  - Paridad total entre inglés y español en todos los nuevos controles, tooltips y opciones.
 
 </details>
 

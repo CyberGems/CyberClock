@@ -89,23 +89,23 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 🔔 Alarms & Chimes
 - **Voice Time Announcer (Talking Clock)** — Verbally announces the time at intervals (:15, :30, :00) with selectable system voices, customizable style (Natural, Cyber/Tactical, Concise), optional soft pre-chime, quiet hours, and direct shortcut to install Windows voices
-- **Quarter-Hour Chimes** — :00, :15, :30, :45
-- **Half-Hour Chimes** — :00, :30
-- **Full-Hour Chimes** — :00
+- **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
+- **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
 - **6 Built-In Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, Music Box
 - **Custom Sound Support** — Load your own audio file
-- **Schedule Window** — Play alarms only during specific hours
+- **Schedule Window** — Silence chimes or play alarms only during specific hours
 - **3 Custom Alarms** — With day-of-week repetition
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
+- **Flexible Window Close** — Configurable close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
 - **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
 - **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
 - **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
 - **Clock Accuracy Guard** — Periodic NTP drift check shown in Settings, with a Windows notification when the system time is off by more than a minute
 - **Multi-Monitor Support** — Choose which display CyberClock appears on; display changes are detected and the window repositions itself
 - **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
-- **Auto-Updates** — Built-in Tauri updater with GitHub Releases
+- **Auto-Updates** — Built-in Tauri updater with GitHub Releases and in-app bilingual release notes
 - **Bilingual UI** — Full English and Spanish interface
 - **Accessible About Window** — Suite-standard About with links, donate options and check-for-update
 - **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
