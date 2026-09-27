@@ -2117,25 +2117,41 @@
                     </button>
                 </div>
                 <div class="first-close-body">
-                    <p class="first-close-desc" data-i18n="closeModal.desc">¿Qué te gustaría hacer al cerrar la ventana? Minimizar a la bandeja mantiene CyberClock en segundo plano; salir la cierra por completo.</p>
+                    <p class="first-close-desc">
+                        <span data-i18n="closeModal.promptPre">¿Qué opción prefieres al cerrar</span>
+                        <span class="first-close-inline-x" aria-hidden="true"><span data-ico="x"></span></span>
+                        <span data-i18n="closeModal.promptPost">la ventana?</span>
+                    </p>
+                    <div class="first-close-cards">
+                        <button type="button" class="first-close-card is-mini" id="btn-first-close-mini">
+                            <span class="first-close-card-ico"><span data-ico="compact"></span></span>
+                            <div class="first-close-card-text">
+                                <span class="first-close-card-title" data-i18n="closeModal.mini">Modo Mini</span>
+                                <span class="first-close-card-sub" data-i18n="closeModal.miniDesc">Mantiene un widget compacto en el escritorio</span>
+                            </div>
+                            <span class="modal-key-badge">M</span>
+                        </button>
+                        <button type="button" class="first-close-card is-tray" id="btn-first-close-tray">
+                            <span class="first-close-card-ico"><span data-ico="tray"></span></span>
+                            <div class="first-close-card-text">
+                                <span class="first-close-card-title" data-i18n="closeModal.minimize">Minimizar a la bandeja</span>
+                                <span class="first-close-card-sub" data-i18n="closeModal.trayDesc">Oculta esta ventana en segundo plano</span>
+                            </div>
+                            <span class="modal-key-badge">↵</span>
+                        </button>
+                        <button type="button" class="first-close-card is-quit" id="btn-first-close-quit">
+                            <span class="first-close-card-ico"><span data-ico="power"></span></span>
+                            <div class="first-close-card-text">
+                                <span class="first-close-card-title" data-i18n="closeModal.quit">Salir</span>
+                                <span class="first-close-card-sub" data-i18n="closeModal.quitDesc">Cierra CyberClock por completo</span>
+                            </div>
+                            <span class="modal-key-badge" data-i18n="closeModal.space">Espacio</span>
+                        </button>
+                    </div>
                     <label class="first-close-remember">
                         <input type="checkbox" id="first-close-remember-chk" />
                         <span data-i18n="closeModal.remember">Recordar mi elección</span>
                     </label>
-                    <div class="first-close-actions">
-                        <button type="button" class="first-close-btn is-quit" id="btn-first-close-quit">
-                            <span data-i18n="closeModal.quit">Salir</span>
-                            <span class="modal-key-badge" data-i18n="closeModal.space">Espacio</span>
-                        </button>
-                        <button type="button" class="first-close-btn is-mini" id="btn-first-close-mini">
-                            <span data-i18n="closeModal.mini">Modo Mini</span>
-                            <span class="modal-key-badge">M</span>
-                        </button>
-                        <button type="button" class="first-close-btn is-tray" id="btn-first-close-tray">
-                            <span data-i18n="closeModal.minimize">Minimizar a la bandeja</span>
-                            <span class="modal-key-badge">↵</span>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
