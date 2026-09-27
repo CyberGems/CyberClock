@@ -777,207 +777,161 @@
                     <!-- Time -->
                     <div class="s-panel" id="stab-time">
                         <!-- Hourly Chimes -->
-                        <div class="s-sec-t"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="settings.time.sectionChimes">Hourly Chimes</span></div>
-                        <div class="s-sec" style="margin-bottom: 12px;">
-                            <div class="s-sec-t" data-i18n="settings.chimes.volume">Chimes Volume</div>
-                            <div class="s-vol-row">
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.time.sectionChimes">Hourly Chimes</div>
+
+                            <!-- Chimes Volume -->
+                            <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
-                                <span style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-low"></span></span
-                                ><input
-                                    type="range"
-                                    id="s-cvol"
-                                    min="0"
-                                    max="100"
-                                    value="75"
-                                /><span
-                                    style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-high"></span></span
-                                ><span class="s-vol-val" id="s-cvol-val"
-                                    >75%</span
-                                >
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.chimes.volume">Chimes Volume</span>
+                                </div>
+                                <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
+                                    <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
+                                    <input type="range" class="s-rng" id="s-cvol" min="0" max="100" value="75" />
+                                    <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
+                                    <span class="s-vol-val" id="s-cvol-val">75%</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="s-sec" style="margin-bottom: 20px;">
-                            <div class="s-row" style="align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0;">
+
+                            <!-- Schedule window row -->
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="clock"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.alarms.playFrom">Play sound from</span>
+                                    <div class="sched-time" id="s-alarm-sched-start" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
+                                        <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
+                                        <span class="sched-time-sep">:</span>
+                                        <select class="sched-time-sel" id="s-alarm-sched-start-m" aria-label="Start Minute"></select>
+                                        <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-start-ap" aria-label="Start AM/PM" style="display:none">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                    <span data-i18n="settings.alarms.playTo">to</span>
+                                    <div class="sched-time" id="s-alarm-sched-end" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
+                                        <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
+                                        <span class="sched-time-sep">:</span>
+                                        <select class="sched-time-sel" id="s-alarm-sched-end-m" aria-label="End Minute"></select>
+                                        <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-end-ap" aria-label="End AM/PM" style="display:none">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                    <span data-i18n="settings.alarms.playOnly">only</span>
+                                </div>
                                 <label class="s-tog">
                                     <input type="checkbox" id="s-alarm-sched-en" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
-                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playFrom">Play sound from</span>
-                                <div class="sched-time" id="s-alarm-sched-start" style="margin: 0 4px;">
-                                    <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-alarm-sched-start-m" aria-label="Start Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-start-ap" aria-label="Start AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
+                            </div>
+
+                            <!-- Top of the hour row -->
+                            <div class="s-row" style="align-items: flex-start;">
+                                <span class="s-row-ico" data-ico="bell" style="margin-top: 2px;"></span>
+                                <div class="s-lbl">
+                                    <div>
+                                        <span data-i18n="settings.alarms.topOfHour">Top of the hour</span>
+                                        <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00)</small>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                        <select id="s-full-snd">
+                                            <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
+                                            <option value="chime-digital" selected data-i18n="settings.alarms.sound.digital">Soft Chime</option>
+                                            <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                            <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                            <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
+                                            <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
+                                        </select>
+                                        <button class="s-abtn" id="s-full-test" type="button">
+                                            <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
+                                        </button>
+                                        <button class="s-abtn" id="s-full-file" type="button">
+                                            <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
+                                        </button>
+                                    </div>
+                                    <div class="s-flbl" id="s-full-flbl" style="display: none">
+                                        <span id="s-full-fname"></span><span class="s-fclr" id="s-full-fclr"><span data-ico="x"></span></span>
+                                    </div>
                                 </div>
-                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playTo">to</span>
-                                <div class="sched-time" id="s-alarm-sched-end" style="margin: 0 4px;">
-                                    <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-alarm-sched-end-m" aria-label="End Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-end-ap" aria-label="End AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
+                                <label class="s-tog" style="margin-top: 4px;">
+                                    <input type="checkbox" id="s-full-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+
+                            <!-- Half hour row -->
+                            <div class="s-row" style="align-items: flex-start;">
+                                <span class="s-row-ico" data-ico="bell" style="margin-top: 2px;"></span>
+                                <div class="s-lbl">
+                                    <div>
+                                        <span data-i18n="settings.alarms.halfHour">Half hour</span>
+                                        <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00, :30)</small>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                        <select id="s-half-snd">
+                                            <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
+                                            <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
+                                            <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                            <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                            <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
+                                            <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
+                                        </select>
+                                        <button class="s-abtn" id="s-half-test" type="button">
+                                            <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
+                                        </button>
+                                        <button class="s-abtn" id="s-half-file" type="button">
+                                            <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
+                                        </button>
+                                    </div>
+                                    <div class="s-flbl" id="s-half-flbl" style="display: none">
+                                        <span id="s-half-fname"></span><span class="s-fclr" id="s-half-fclr"><span data-ico="x"></span></span>
+                                    </div>
                                 </div>
-                                <span class="s-lbl" style="width: auto;" data-i18n="settings.alarms.playOnly">only</span>
+                                <label class="s-tog" style="margin-top: 4px;">
+                                    <input type="checkbox" id="s-half-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
-                        </div>
 
-                        <!-- Top of the hour -->
-                        <div class="s-alarm-blk">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.topOfHour">Top of the hour</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-full-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-full-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
-                                        Crystal Bell
-                                    </option>
-                                    <option value="chime-digital" selected data-i18n="settings.alarms.sound.digital">
-                                        Soft Chime
-                                    </option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
-                                        Aurora
-                                    </option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-full-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                                <button class="s-abtn" id="s-full-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div
-                                class="s-flbl"
-                                id="s-full-flbl"
-                                style="display: none"
-                            >
-                                <span id="s-full-fname"></span
-                                ><span class="s-fclr" id="s-full-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Half hour -->
-                        <div class="s-alarm-blk">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.halfHour">Half hour</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-half-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-half-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
-                                        Crystal Bell
-                                    </option>
-                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">
-                                        Soft Chime
-                                    </option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
-                                        Aurora
-                                    </option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-half-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                                <button class="s-abtn" id="s-half-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div
-                                class="s-flbl"
-                                id="s-half-flbl"
-                                style="display: none"
-                            >
-                                <span id="s-half-fname"></span
-                                ><span class="s-fclr" id="s-half-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Quarter hour -->
-                        <div class="s-alarm-blk">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.quarterHour">Quarter hour</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-quart-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-quart-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">
-                                        Crystal Bell
-                                    </option>
-                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">
-                                        Soft Chime
-                                    </option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">
-                                        Aurora
-                                    </option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-quart-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                                <button class="s-abtn" id="s-quart-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div
-                                class="s-flbl"
-                                id="s-quart-flbl"
-                                style="display: none"
-                            >
-                                <span id="s-quart-fname"></span
-                                ><span class="s-fclr" id="s-quart-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
+                            <!-- Quarter hour row -->
+                            <div class="s-row" style="align-items: flex-start;">
+                                <span class="s-row-ico" data-ico="bell" style="margin-top: 2px;"></span>
+                                <div class="s-lbl">
+                                    <div>
+                                        <span data-i18n="settings.alarms.quarterHour">Quarter hour</span>
+                                        <small style="color: var(--text-lo); font-family: var(--font-mono); margin-left: 6px;">(:00, :15, :30, :45)</small>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                                        <select id="s-quart-snd">
+                                            <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
+                                            <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
+                                            <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                            <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                            <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
+                                            <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
+                                        </select>
+                                        <button class="s-abtn" id="s-quart-test" type="button">
+                                            <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
+                                        </button>
+                                        <button class="s-abtn" id="s-quart-file" type="button">
+                                            <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
+                                        </button>
+                                    </div>
+                                    <div class="s-flbl" id="s-quart-flbl" style="display: none">
+                                        <span id="s-quart-fname"></span><span class="s-fclr" id="s-quart-fclr"><span data-ico="x"></span></span>
+                                    </div>
+                                </div>
+                                <label class="s-tog" style="margin-top: 4px;">
+                                    <input type="checkbox" id="s-quart-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
                         </div>
 
                         <!-- Voice Time Announcer (Talking Clock) -->
-                        <div class="s-sec-t" style="margin: 22px 0 8px;"><span class="cal-t-ico" data-ico="volume-high"></span> <span data-i18n="voice.sectionTitle">Voice Time Announcer</span></div>
-                        <div class="s-alarm-blk" id="s-voice-announcer-blk">
-                            <div class="s-alarm-t">
-                                <span data-ico="volume-high"></span> <span data-i18n="voice.title">Talking Clock</span>
-                            </div>
+                        <div class="s-sec" id="s-voice-announcer-blk">
+                            <div class="s-sec-t" data-i18n="voice.sectionTitle">Voice Time Announcer</div>
                             <div class="s-alarm-row">
                                 <span class="s-alarm-lbl" data-i18n="voice.enable">Enable Voice Announcement</span>
                                 <label class="s-tog">
