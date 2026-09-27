@@ -7295,6 +7295,7 @@
     const btnFirstCloseQuit = document.getElementById("btn-first-close-quit");
     const btnFirstCloseTray = document.getElementById("btn-first-close-tray");
     const btnFirstCloseMini = document.getElementById("btn-first-close-mini");
+    const btnFirstCloseCancel = document.getElementById("btn-first-close-cancel");
 
     function updateCloseButtonTooltip() {
         const btnClose = document.getElementById("btn-close");
@@ -7368,6 +7369,16 @@
     }
     if (btnFirstCloseTray) {
         btnFirstCloseTray.addEventListener("click", () => handleFirstCloseChoice("tray"));
+    }
+    if (btnFirstCloseCancel) {
+        btnFirstCloseCancel.addEventListener("click", closeFirstCloseModal);
+    }
+    if (firstCloseOverlay) {
+        firstCloseOverlay.addEventListener("click", (e) => {
+            if (e.target === firstCloseOverlay) {
+                closeFirstCloseModal();
+            }
+        });
     }
 
     window.addEventListener("keydown", (e) => {

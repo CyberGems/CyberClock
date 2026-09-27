@@ -4932,6 +4932,11 @@
         gap: 16px;
         animation: cal-pop-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .first-close-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
     .first-close-header h2 {
         margin: 0;
         font-family: var(--font-brand, "Space Grotesk", sans-serif);
@@ -4939,6 +4944,27 @@
         font-weight: 700;
         color: #ffffff;
         letter-spacing: 0.3px;
+    }
+    .first-close-close-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-md, #94a3b8);
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+        margin: -4px -4px -4px 0;
+    }
+    .first-close-close-btn:hover {
+        color: #ffffff;
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
     }
     .first-close-body {
         display: flex;

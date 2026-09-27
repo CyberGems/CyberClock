@@ -562,7 +562,7 @@
                         <span data-ico="gear"></span>
                         <span data-i18n="menu.settings">Settings</span>
                     </div>
-                    <button class="s-close" id="s-close" type="button">
+                    <button class="s-close" id="s-close" type="button" data-tooltip="Close (Esc)" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.closeEsc, aria-label:common.closeEsc">
                         <span data-ico="x"></span>
                     </button>
                 </div>
@@ -1923,7 +1923,7 @@
                     <span class="note-head-ico" data-ico="calendar"></span>
                     <span class="note-date" id="note-date-lbl">—</span>
                     <div class="note-spacer"></div>
-                    <button class="s-close" id="note-close">
+                    <button class="s-close" id="note-close" type="button" data-tooltip="Close (Esc)" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.closeEsc, aria-label:common.closeEsc">
                         <span data-ico="x"></span>
                     </button>
                 </div>
@@ -1965,7 +1965,7 @@
                 <div class="note-head">
                     <span class="note-date" id="confirm-title-lbl" data-i18n="calendar.confirmDeleteTitle">Confirm Deletion</span>
                     <div class="note-spacer"></div>
-                    <button class="s-close" id="confirm-close">
+                    <button class="s-close" id="confirm-close" type="button" data-tooltip="Close (Esc)" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.closeEsc, aria-label:common.closeEsc">
                         <span data-ico="x"></span>
                     </button>
                 </div>
@@ -2112,6 +2112,9 @@
             <div class="first-close-modal" role="dialog" aria-modal="true" aria-labelledby="first-close-title">
                 <div class="first-close-header">
                     <h2 id="first-close-title" data-i18n="closeModal.title">Cerrar ventana</h2>
+                    <button type="button" class="first-close-close-btn" id="btn-first-close-cancel" data-tooltip="Cancelar (Esc)" data-tooltip-dir="left" data-i18n-attr="data-tooltip:closeModal.cancelTip, aria-label:closeModal.cancelTip">
+                        <span data-ico="x"></span>
+                    </button>
                 </div>
                 <div class="first-close-body">
                     <p class="first-close-desc" data-i18n="closeModal.desc">¿Qué te gustaría hacer al cerrar la ventana? Minimizar a la bandeja mantiene CyberClock en segundo plano; salir la cierra por completo.</p>
