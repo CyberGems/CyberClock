@@ -694,8 +694,9 @@
     window.cc.onSettingsUpdated((s) => applySettings(s));
 
     window.cc.onAlarmChime((p) => {
-        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false });
-        else window.audioEngine.chime(p.sound || "chime-digital", cfg.alarmVolume || 0.75);
+        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
+        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
+        else window.audioEngine.chime(p.sound || "chime-digital", vol);
     });
 
     if (window.cc && window.cc.onVoiceAnnounceTime) {

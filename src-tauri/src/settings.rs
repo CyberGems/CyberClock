@@ -60,6 +60,10 @@ fn default_auto_cycle_mode() -> String {
     "sequential".to_string()
 }
 
+fn default_alarm_volume() -> f64 {
+    0.75
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(default, rename_all = "camelCase")]
 pub struct SavedFloatWidget {
@@ -225,6 +229,8 @@ pub struct AppSettings {
     pub alarm_schedule_start: String,
     pub alarm_schedule_end: String,
     pub alarm_volume: f64,
+    #[serde(default = "default_alarm_volume")]
+    pub chime_volume: f64,
     pub relax_volume: f64,
     pub audio_muted: bool,
     pub relax_auto_timer: u32,
@@ -365,6 +371,7 @@ impl Default for AppSettings {
             alarm_schedule_start: "08:00".to_string(),
             alarm_schedule_end: "17:00".to_string(),
             alarm_volume: 0.75,
+            chime_volume: 0.75,
             relax_volume: 0.8,
             audio_muted: false,
             relax_auto_timer: 0,

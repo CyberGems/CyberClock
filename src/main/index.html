@@ -776,105 +776,24 @@
 
                     <!-- Time -->
                     <div class="s-panel" id="stab-time">
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.time.sectionWindows">Windows Date &amp; Time</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.datetime">Date and Time</span>
-                                    <small data-i18n="settings.general.datetimeDesc">Opens the Windows date and time properties dialog</small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-datetime" type="button">
-                                    <span data-ico="clock"></span>
-                                    <span data-i18n="settings.general.datetimeBtn">Open...</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.time.sectionSync">System Time Synchronization</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="check"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.clockAccuracy">Clock accuracy</span>
-                                    <small data-i18n="settings.general.clockAccuracyDesc">Checks the system clock against a time server and warns when it is off by more than a minute</small>
-                                </div>
-                                <label class="s-tog"
-                                    ><input type="checkbox" id="s-clock-acc" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="stopwatch"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.clockDrift">Difference</span>
-                                    <!-- Dynamic status: app.js owns this text
-                                         (drift, last check or unreachable);
-                                         data-i18n would clobber it on language
-                                         changes. -->
-                                    <small id="s-clock-status">Never checked</small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-clock-check" type="button">
-                                    <span data-ico="clock"></span>
-                                    <span data-i18n="settings.general.clockCheck">Check now</span>
-                                </button>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="refresh"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
-                                    <small id="s-timesync-run-status" class="s-status-badge" style="display:none"></small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-sync-time" type="button">
-                                    <span data-ico="refresh"></span>
-                                    <span id="s-btn-sync-time-lbl" data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
-                                </button>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="shield"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.timeSyncTitle">Unattended time synchronization</span>
-                                    <small data-i18n="settings.general.timeSyncDesc">Allows CyberClock to correct Windows time automatically. Clicking the "Authorize" button will prompt for Administrator permissions once</small>
-                                    <small id="s-timesync-task-status" class="s-status-badge">Pending authorization</small>
-                                </div>
-                                <button class="s-abtn" id="s-btn-timesync-task" type="button">
-                                    <span data-ico="shield"></span>
-                                    <span id="s-btn-timesync-task-lbl" data-i18n="settings.general.timeSyncBtnEnable">Authorize</span>
-                                </button>
-                            </div>
-                            <div class="s-row" id="s-row-clock-auto-sync">
-                                <span class="s-row-ico" data-ico="refresh"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.timeSyncAuto">Sync automatically if drift is detected at startup</span>
-                                    <small data-i18n="settings.general.timeSyncAutoDesc">Automatically synchronizes Windows clock in the background when drift exceeds 1 minute (requires authorization)</small>
-                                </div>
-                                <label class="s-tog"
-                                    ><input type="checkbox" id="s-clock-auto-sync" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Alarms -->
-                    <div class="s-panel" id="stab-alarms">
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.alarms.volume">Alarm Volume</div>
+                        <!-- Hourly Chimes -->
+                        <div class="s-sec-t"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="settings.time.sectionChimes">Hourly Chimes</span></div>
+                        <div class="s-sec" style="margin-bottom: 12px;">
+                            <div class="s-sec-t" data-i18n="settings.chimes.volume">Chimes Volume</div>
                             <div class="s-vol-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
                                 <span style="font-size: 10px; color: var(--text-md)"
                                     ><span data-ico="volume-low"></span></span
                                 ><input
                                     type="range"
-                                    id="s-avol"
+                                    id="s-cvol"
                                     min="0"
                                     max="100"
                                     value="75"
                                 /><span
                                     style="font-size: 10px; color: var(--text-md)"
                                     ><span data-ico="volume-high"></span></span
-                                ><span class="s-vol-val" id="s-avol-val"
+                                ><span class="s-vol-val" id="s-cvol-val"
                                     >75%</span
                                 >
                             </div>
@@ -1141,6 +1060,111 @@
                                         <option value="PM">PM</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Windows Date & Time -->
+                        <div class="s-sec" style="margin-top: 22px;">
+                            <div class="s-sec-t" data-i18n="settings.time.sectionWindows">Windows Date &amp; Time</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="clock"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.datetime">Date and Time</span>
+                                    <small data-i18n="settings.general.datetimeDesc">Opens the Windows date and time properties dialog</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-datetime" type="button">
+                                    <span data-ico="clock"></span>
+                                    <span data-i18n="settings.general.datetimeBtn">Open...</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.time.sectionSync">System Time Synchronization</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="check"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockAccuracy">Clock accuracy</span>
+                                    <small data-i18n="settings.general.clockAccuracyDesc">Checks the system clock against a time server and warns when it is off by more than a minute</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-clock-acc" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="stopwatch"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.clockDrift">Difference</span>
+                                    <!-- Dynamic status: app.js owns this text
+                                         (drift, last check or unreachable);
+                                         data-i18n would clobber it on language
+                                         changes. -->
+                                    <small id="s-clock-status">Never checked</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-clock-check" type="button">
+                                    <span data-ico="clock"></span>
+                                    <span data-i18n="settings.general.clockCheck">Check now</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
+                                    <small id="s-timesync-run-status" class="s-status-badge" style="display:none"></small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-sync-time" type="button">
+                                    <span data-ico="refresh"></span>
+                                    <span id="s-btn-sync-time-lbl" data-i18n="settings.general.timeSyncNow">Sync Windows clock now</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="shield"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncTitle">Unattended time synchronization</span>
+                                    <small data-i18n="settings.general.timeSyncDesc">Allows CyberClock to correct Windows time automatically. Clicking the "Authorize" button will prompt for Administrator permissions once</small>
+                                    <small id="s-timesync-task-status" class="s-status-badge">Pending authorization</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-timesync-task" type="button">
+                                    <span data-ico="shield"></span>
+                                    <span id="s-btn-timesync-task-lbl" data-i18n="settings.general.timeSyncBtnEnable">Authorize</span>
+                                </button>
+                            </div>
+                            <div class="s-row" id="s-row-clock-auto-sync">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.general.timeSyncAuto">Sync automatically if drift is detected at startup</span>
+                                    <small data-i18n="settings.general.timeSyncAutoDesc">Automatically synchronizes Windows clock in the background when drift exceeds 1 minute (requires authorization)</small>
+                                </div>
+                                <label class="s-tog"
+                                    ><input type="checkbox" id="s-clock-auto-sync" />
+                                    <div class="s-tog-tr">
+                                        <div class="s-tog-th"></div></div
+                                ></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alarms -->
+                    <div class="s-panel" id="stab-alarms">
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.alarms.volume">Alarm Volume</div>
+                            <div class="s-vol-row">
+                                <span class="s-row-ico" data-ico="volume-high"></span>
+                                <span style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-low"></span></span
+                                ><input
+                                    type="range"
+                                    id="s-avol"
+                                    min="0"
+                                    max="100"
+                                    value="75"
+                                /><span
+                                    style="font-size: 10px; color: var(--text-md)"
+                                    ><span data-ico="volume-high"></span></span
+                                ><span class="s-vol-val" id="s-avol-val"
+                                    >75%</span
+                                >
                             </div>
                         </div>
 

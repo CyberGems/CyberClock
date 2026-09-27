@@ -911,6 +911,13 @@
             avEl.value = v;
             document.getElementById("s-avol-val").textContent = v + "%";
         }
+        const cvEl = document.getElementById("s-cvol");
+        if (cvEl) {
+            const v = Math.round((s.chimeVolume ?? s.alarmVolume ?? 0.75) * 100);
+            cvEl.value = v;
+            const cvVal = document.getElementById("s-cvol-val");
+            if (cvVal) cvVal.textContent = v + "%";
+        }
         const rvEl = document.getElementById("s-rvol");
         if (rvEl) {
             const v = Math.round((s.relaxVolume || 0.8) * 100);
@@ -6930,12 +6937,13 @@
         .getElementById("s-half-test")
         .addEventListener("click", () => {
             const ah = cfg.alarmHalfHour || {};
+            const vol = cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75;
             if (ah.customPath) {
-                window.audioEngine.playFile(ah.customPath, { loop: false });
+                window.audioEngine.playFile(ah.customPath, { loop: false, volume: vol });
             } else {
                 window.audioEngine.chime(
                     document.getElementById("s-half-snd").value,
-                    cfg.alarmVolume || 0.75,
+                    vol,
                 );
             }
         });
@@ -6943,12 +6951,13 @@
         .getElementById("s-full-test")
         .addEventListener("click", () => {
             const af = cfg.alarmFullHour || {};
+            const vol = cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75;
             if (af.customPath) {
-                window.audioEngine.playFile(af.customPath, { loop: false });
+                window.audioEngine.playFile(af.customPath, { loop: false, volume: vol });
             } else {
                 window.audioEngine.chime(
                     document.getElementById("s-full-snd").value,
-                    cfg.alarmVolume || 0.75,
+                    vol,
                 );
             }
         });
@@ -6956,12 +6965,13 @@
         .getElementById("s-quart-test")
         .addEventListener("click", () => {
             const aq = cfg.alarmQuarterHour || {};
+            const vol = cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75;
             if (aq.customPath) {
-                window.audioEngine.playFile(aq.customPath, { loop: false });
+                window.audioEngine.playFile(aq.customPath, { loop: false, volume: vol });
             } else {
                 window.audioEngine.chime(
                     document.getElementById("s-quart-snd").value,
-                    cfg.alarmVolume || 0.75,
+                    vol,
                 );
             }
         });
@@ -7209,7 +7219,7 @@
     }
 
     // Volumes
-    document.getElementById("s-avol").addEventListener("input", (e) => {
+    document.getElementById("s-avol")?.addEventListener("input", (e) => {
         document.getElementById("s-avol-val").textContent =
             e.target.value + "%";
         clearTimeout(sDebounce.av);
@@ -7217,6 +7227,18 @@
             () =>
                 window.cc.saveSettings({
                     alarmVolume: e.target.value / 100,
+                }),
+            300,
+        );
+    });
+    document.getElementById("s-cvol")?.addEventListener("input", (e) => {
+        const valEl = document.getElementById("s-cvol-val");
+        if (valEl) valEl.textContent = e.target.value + "%";
+        clearTimeout(sDebounce.cv);
+        sDebounce.cv = setTimeout(
+            () =>
+                window.cc.saveSettings({
+                    chimeVolume: e.target.value / 100,
                 }),
             300,
         );
@@ -7942,11 +7964,12 @@
     });
 
     window.cc.onAlarmChime((p) => {
-        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false });
+        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
+        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
         else
             window.audioEngine.chime(
                 p.sound || "chime-digital",
-                cfg.alarmVolume || 0.75,
+                vol,
             );
     });
 

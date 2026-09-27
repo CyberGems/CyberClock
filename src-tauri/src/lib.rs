@@ -3201,7 +3201,7 @@ fn check_alarms(app: &AppHandle) {
                 "type": "quarter-hour",
                 "sound": settings.alarm_quarter_hour.sound,
                 "customPath": settings.alarm_quarter_hour.custom_path,
-                "volume": settings.alarm_volume
+                "volume": settings.chime_volume
             });
 
             emit_to_active(app, "alarm:chime", alarm_data);
@@ -3222,7 +3222,7 @@ fn check_alarms(app: &AppHandle) {
                 "type": "half-hour",
                 "sound": settings.alarm_half_hour.sound,
                 "customPath": settings.alarm_half_hour.custom_path,
-                "volume": settings.alarm_volume
+                "volume": settings.chime_volume
             });
 
             emit_to_active(app, "alarm:chime", alarm_data);
@@ -3240,7 +3240,7 @@ fn check_alarms(app: &AppHandle) {
                 "type": "full-hour",
                 "sound": settings.alarm_full_hour.sound,
                 "customPath": settings.alarm_full_hour.custom_path,
-                "volume": settings.alarm_volume
+                "volume": settings.chime_volume
             });
 
             emit_to_active(app, "alarm:chime", alarm_data);

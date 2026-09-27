@@ -505,7 +505,7 @@ class AudioEngine {
     }
   }
 
-  playFile(filePath, { id = null, fade = 0, loop = true } = {}) {
+  playFile(filePath, { id = null, fade = 0, loop = true, volume = null } = {}) {
     this.isPlaying = true;
     if (id) this.currentTrack = id;
     this.resume();
@@ -519,7 +519,7 @@ class AudioEngine {
     audio.crossOrigin = "anonymous";
     audio.src = resolvedPath;
     audio.loop  = false;
-    audio.volume = 1;            // level is governed by the voice bus + _master
+    audio.volume = Math.max(0, Math.min(1, volume != null ? volume : 1));
     const src  = this._ctx.createMediaElementSource(audio);
     src.connect(voice.bus);
     voice.audioEl = audio;
