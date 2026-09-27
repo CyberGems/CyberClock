@@ -1,4 +1,8 @@
 <p align="center">
+  English · <a href="./README.es.md">Español</a>
+</p>
+
+<p align="center">
   <a href="https://cybergems.org/apps/cyberclock/">
     <img src="https://cybergems.org/banners/cyberclock.png" alt="CyberClock — clock, calendar, timer, stopwatch, relaxation and floating time tools for Windows" />
   </a>
