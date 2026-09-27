@@ -909,13 +909,16 @@ fn show_about_window(app: &AppHandle) {
     let Some(win) = app.get_webview_window("about") else {
         return;
     };
-    // Center on the monitor of the first *visible* clock window; fall back
-    // to the primary monitor when both are hidden.
-    let reference = ["main", "mini"]
-        .iter()
-        .filter_map(|label| app.get_webview_window(label))
-        .find(|w| w.is_visible().unwrap_or(false))
-        .and_then(|w| w.current_monitor().ok().flatten())
+    // Center on the monitor of the first *visible* clock or widget window; fall back
+    // to the primary monitor when all are hidden.
+    let reference = app
+        .webview_windows()
+        .into_iter()
+        .find(|(lbl, w)| {
+            (lbl == "main" || lbl == "mini" || lbl.starts_with("float-"))
+                && w.is_visible().unwrap_or(false)
+        })
+        .and_then(|(_, w)| w.current_monitor().ok().flatten())
         .or_else(|| win.primary_monitor().ok().flatten());
 
     if let Some(m) = reference {
