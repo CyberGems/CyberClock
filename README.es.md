@@ -36,11 +36,11 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 | Necesidad | Solución |
 |---|---|
-| Medición elegante del tiempo | Reloj analógico renderizado en canvas + pantalla digital con 8 diseños de esfera seleccionables |
-| Mantente organizado | Calendario completo con agenda, notas por día, estadísticas y fase lunar |
-| Mide tu trabajo | Temporizador y cronómetro de precisión, incluyendo ventanas flotantes independientes |
+| Medición elegante del tiempo | Reloj analógico renderizado en canvas + pantalla digital con 10 diseños de esfera seleccionables |
+| Mantente organizado | Calendario completo con agenda, notas por día, estadísticas, fase lunar y calendario flotante |
+| Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
 | Relájate y concéntrate | 6 paisajes sonoros ambientales con síntesis de audio procedural |
-| Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 12 skins |
+| Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 15 skins únicas |
 | Hazlo tuyo | 8 tintes de acento, escala de tamaño de texto, líneas de exploración CRT, controles de transparencia, multi-monitor |
 
 ---
@@ -49,18 +49,22 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ### 🕐 Reloj y calendario
 - **Reloj analógico:** renderizado en canvas con animaciones suaves y acentos neón; puede ocultarse en el modo completo para dar todo el ancho al calendario
-- **Ocho diseños de esfera:** Clásica, Minimalista, Segmentos, HUD, Cuántica, Cronógrafo, Matriz Hex y la esfera multicolor Corona de Gemas
+- **Diez diseños de esfera:** Clásica, Minimalista, Segmentos, HUD, Cuántica, Cronógrafo, Matriz Hex, Núcleo Reactor, Circuito PCB y la esfera multicolor Corona de Gemas
 - **Pantalla digital:** fuente Space Grotesk con celdas de dígitos de ancho fijo (12H / 24H)
 - **Calendario completo:** vista mensual con agenda, notas por día y estadísticas
 - **Inteligencia de fechas:** día del año, semana ISO, días restantes, fase lunar
 - **Notas del día:** adjunta notas a fechas concretas con un editor en ventana
+- **Widget de calendario flotante:** calendario de escritorio compacto e independiente con 10 skins ciberpunk/neón, rotación automática diaria, ventana emergente de selección de fecha, vistas previas rápidas de notas, navegación multi-mes y menú contextual propio
+- **Widget de reloj analógico flotante:** reloj analógico de escritorio flotante con diseños de esfera personalizables, siempre visible y con visibilidad en la barra de tareas
 
 ### ⏱️ Temporizador y cronómetro
 - **Temporizador de cuenta regresiva:** pantalla digital grande con milisegundos, botones de preajuste, barra de progreso visual y estado de advertencia
 - **Cronómetro:** medición de precisión con registro de vueltas, delta frente al promedio, resaltado de la mejor/peor vuelta y exportación al portapapeles
-- **Temporizador y cronómetro flotantes:** abre ventanas compactas independientes desde la bandeja o el menú del Modo Mini; cada ventana mantiene su propio estado y hereda la skin, el tinte, el idioma y el zoom activos
-- **Preajustes del temporizador flotante:** suma 30s, 1m, 5m, 10m o 15m a la duración armada sin iniciar la cuenta regresiva
-- **Dígitos en reposo:** los dígitos a cero del temporizador/cronómetro permanecen atenuados hasta que se arma un tiempo o comienza la cuenta
+- **Widgets flotantes de escritorio:** abre ventanas compactas independientes de temporizador y cronómetro con soporte de varias ranuras; los widgets se recuerdan y se restauran entre reinicios de la app
+- **Skins independientes y renombrado:** elige skins distintas por tipo de widget (Reloj Mini, Temporizador, Cronómetro) y personaliza los títulos de los widgets
+- **Lanzamiento entre widgets:** crea fácilmente temporizadores, cronómetros, relojes analógicos o calendarios desde el menú contextual de cualquier widget activo
+- **Preajustes del temporizador flotante:** suma 30s, 1m, 5m, 10m o 15m a la duración armada sin iniciar la cuenta regresiva (se puede ocultar desde el menú contextual)
+- **Dígitos en reposo y pantalla ampliada:** dígitos de contador mejorados en todas las skins, con el estado a cero atenuado hasta que se arma un tiempo
 
 ### 🧘 Módulo de relajación
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
@@ -76,34 +80,36 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
 
 ### 📌 Modo Mini
-- **12 skins únicas:** diseños distintos para la barra de reloj compacta, cada uno con sus propias dimensiones y zoom opcional (0.5×–4×)
-- **Herramientas flotantes con skin:** las ventanas de temporizador y cronómetro reutilizan el diseño del Modo Mini con disposiciones dimensionadas para sus controles
+- **15 skins únicas:** diseños distintos para la barra de reloj compacta, cada uno con sus propias dimensiones y zoom opcional (0.5×–4×)
+- **Herramientas flotantes con skin:** las ventanas de temporizador y cronómetro reutilizan los diseños seleccionados con disposiciones dimensionadas para sus controles
 - **Controles de transparencia:** deslizadores de opacidad del fondo y del contenido
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas
-- **Bloqueo de posición:** evita el arrastre accidental
+- **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario)
+- **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
 - **Colapsar fecha:** muestra la fecha solo al pasar el cursor
 - **Líneas de exploración CRT:** efecto retro de superposición
 - **Click-through:** deja que los clics del ratón atraviesen el reloj mini (se alterna desde el menú de la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas
-- **Campanadas de cuarto de hora:** :00, :15, :30, :45
-- **Campanadas de media hora:** :00, :30
-- **Campanadas en punto:** :00
+- **Locutor de hora por voz (Reloj Parlante):** anuncia la hora verbalmente a intervalos (:15, :30, :00) con voces del sistema seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio y acceso directo para instalar voces de Windows
+- **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
+- **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
 - **6 sonidos integrados:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora, Caja de Música
 - **Sonido personalizado:** carga tu propio archivo de audio
-- **Ventana de horario:** reproduce las alarmas solo durante horas concretas
+- **Ventana de horario:** silencia las campanadas o reproduce las alarmas solo durante horas concretas
 - **3 alarmas personalizadas:** con repetición por día de la semana
 
 ### 🖥️ Integración con escritorio
 - **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows
+- **Cierre de ventana flexible:** comportamiento al cerrar configurable (minimizar a la bandeja, pasar a Modo Mini o salir) con diálogo de confirmación en el primer cierre, botón de cierre directo y descarte desde el fondo
 - **Atajo global:** muestra u oculta el reloj desde cualquier lugar (Alt+Shift+C por defecto; graba tu propia combinación o desactívala en Configuración)
 - **Monitor automático:** el modo completo se abre en el monitor donde está el ratón (estilo CyberLauncher), o fíjalo a una pantalla preferida
 - **Modo completo en el área de trabajo:** el modo completo llena el área de trabajo de la pantalla seleccionada y queda fijado allí: se respetan barras de tareas ancladas en cualquier borde, y el arrastre o el doble clic de maximizar/restaurar no pueden romper el diseño
 - **Guardián de precisión del reloj:** comprobación periódica de desfase NTP mostrada en Configuración, con notificación de Windows cuando la hora del sistema se desvía más de un minuto
 - **Soporte multi-monitor:** elige en qué pantalla aparece CyberClock; los cambios de pantalla se detectan y la ventana se reposiciona sola
 - **Inicio automático con Windows:** inicio basado en el registro, ofrecido como opción en el propio instalador y sincronizado con el interruptor de Configuración (la app reconcilia ambos en cada arranque)
-- **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases
+- **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
 - **Interfaz bilingüe:** interfaz completa en inglés y español
 - **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación y búsqueda de actualizaciones
 - **Bienvenida personalizada:** un nombre para mostrar opcional añade un saludo según la hora junto a la marca CyberClock cuando se abre el modo completo
