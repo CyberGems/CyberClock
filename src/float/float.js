@@ -434,6 +434,7 @@
 
     function applySettings(s) {
         cfg = s || {};
+        if (cfg.showWidgetHints === false) hideActionTicker();
         window.CCTint.apply(cfg.theme || "ice");
         window.ccI18n.setLang(cfg.language || "auto");
         const sh = shellEl();
@@ -469,7 +470,15 @@
     const tickerText = document.getElementById("ticker-text");
     let tickerTimer = null;
 
+    function isReset() {
+        if (KIND === "sw") return !swRunning && swElapsed <= 0;
+        const done = document.getElementById("float-done");
+        if (done && !done.hidden) return false;
+        return timerIdle();
+    }
+
     function showActionTicker(actionKey, iconHtml) {
+        if (cfg.showWidgetHints === false) return;
         if (isRunning()) return;
         const sh = shellEl();
         if (!sh || !tickerText) return;
@@ -511,6 +520,7 @@
             hideActionTicker();
         });
         btnStart.addEventListener("mouseenter", () => {
+            if (!isReset()) return;
             const st = getStartTickerState();
             showActionTicker(st.key, st.ico);
         });

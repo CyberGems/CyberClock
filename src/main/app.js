@@ -783,6 +783,8 @@
         if (suEl) suEl.checked = s.startWithWindows !== false;
         const tooltipsEl = document.getElementById("s-tooltips");
         if (tooltipsEl) tooltipsEl.checked = s.showTooltips !== false;
+        const widgetHintsEl = document.getElementById("s-widget-hints");
+        if (widgetHintsEl) widgetHintsEl.checked = s.showWidgetHints !== false;
         const suMiniRow = document.getElementById("s-startup-mini-row");
         if (suMiniRow) suMiniRow.style.display = (s.startWithWindows !== false) ? "flex" : "none";
         const suMiniEl = document.getElementById("s-startup-mini");
@@ -6369,6 +6371,12 @@
     if (sTooltips) {
         sTooltips.addEventListener("change", (e) => {
             window.cc.saveSettings({ showTooltips: e.target.checked });
+        });
+    }
+    const sWidgetHints = document.getElementById("s-widget-hints");
+    if (sWidgetHints) {
+        sWidgetHints.addEventListener("change", (e) => {
+            window.cc.saveSettings({ showWidgetHints: e.target.checked });
         });
     }
     document

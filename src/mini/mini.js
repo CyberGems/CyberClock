@@ -201,6 +201,7 @@
         lastZoom = s.miniZoom;
 
         cfg = s;
+        if (s.showWidgetHints === false && typeof hideActionTicker === "function") hideActionTicker();
         calNotes = s.calendarNotes || {};
         window.CCTint.apply(s.theme || "ice");
 
@@ -727,6 +728,7 @@
     const fullIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>`;
 
     function showActionTicker(actionKey, iconHtml) {
+        if (cfg.showWidgetHints === false) return;
         if (!shellEl || !tickerText) return;
         tickerText.textContent = window.ccI18n ? window.ccI18n.t(actionKey) : actionKey;
         if (tickerIco) tickerIco.innerHTML = iconHtml || "";

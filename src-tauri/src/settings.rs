@@ -314,6 +314,9 @@ pub struct AppSettings {
     // Hover hints. On until the user turns them off.
     #[serde(default = "default_true")]
     pub show_tooltips: bool,
+    // Labels drawn on a widget face when hovering its buttons.
+    #[serde(default = "default_true")]
+    pub show_widget_hints: bool,
 
     pub language: String,
     // Optional name used by the full-mode welcome greeting.
@@ -435,6 +438,7 @@ impl Default for AppSettings {
             relax_scheduler: RelaxSchedulerSettings::default(),
             voice_announcer: VoiceAnnouncerSettings::default(),
             show_tooltips: true,
+            show_widget_hints: true,
             language: "auto".to_string(),
             display_name: String::new(),
             breathe_pattern: "box".to_string(),
