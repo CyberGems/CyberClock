@@ -22,6 +22,7 @@
     const elapsedEl = document.getElementById("elapsed");
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
+    const btnShuffle = document.getElementById("btn-shuffle");
     const btnBreathe = document.getElementById("btn-breathe");
     const ring = document.getElementById("breathe-ring");
     const btnMenu = document.getElementById("btn-menu");
@@ -43,6 +44,10 @@
     let guideElapsed = 0;
     let phaseName = "";
     let showBreathe = true;
+    let shuffleOn = false;
+    let shuffleTimer = null;
+    let shuffleQueue = [];
+    const SHUFFLE_MS = 15 * 60 * 1000;
 
     const engine = window.audioEngine;
 
@@ -87,6 +92,7 @@
         btnPlay.setAttribute("data-tooltip", label);
         btnPlay.setAttribute("aria-label", label);
         btnPlay.classList.toggle("is-playing", playing && !paused);
+        if (btnShuffle) btnShuffle.classList.toggle("is-on", shuffleOn);
         btnBreathe.classList.toggle("is-paused", guideOn && guidePaused);
         phaseEl.classList.toggle("is-paused", guideOn && guidePaused);
     }
@@ -131,6 +137,39 @@
         paused = false;
         if (!sessionStart) sessionStart = performance.now();
         refreshLabels();
+        scheduleShuffle();
+    }
+
+    function nextShuffleIndex() {
+        if (shuffleQueue.length === 0) {
+            shuffleQueue = TRACKS.slice().sort(function () { return Math.random() - 0.5; });
+            const current = TRACKS[trackIndex];
+            if (current && shuffleQueue[0] === current && shuffleQueue.length > 1) {
+                const tmp = shuffleQueue[0];
+                shuffleQueue[0] = shuffleQueue[1];
+                shuffleQueue[1] = tmp;
+            }
+        }
+        const idx = TRACKS.indexOf(shuffleQueue.shift());
+        return idx < 0 ? 0 : idx;
+    }
+
+    function scheduleShuffle() {
+        clearTimeout(shuffleTimer);
+        shuffleTimer = null;
+        if (!shuffleOn || !playing || paused) return;
+        shuffleTimer = setTimeout(function () {
+            if (!shuffleOn || !playing || paused) return;
+            startTrack(nextShuffleIndex());
+        }, SHUFFLE_MS);
+    }
+
+    function toggleShuffle() {
+        shuffleOn = !shuffleOn;
+        shuffleQueue = [];
+        if (shuffleOn && !playing) startTrack(nextShuffleIndex());
+        else scheduleShuffle();
+        refreshLabels();
     }
 
     function togglePlay() {
@@ -150,6 +189,7 @@
             applyAudioPrefs();
         }
         refreshLabels();
+        scheduleShuffle();
     }
 
     function toggleGuide() {
@@ -274,8 +314,14 @@
     });
     btnNext.addEventListener("click", (e) => {
         e.stopPropagation();
-        startTrack(trackIndex + 1);
+        startTrack(shuffleOn ? nextShuffleIndex() : trackIndex + 1);
     });
+    if (btnShuffle) {
+        btnShuffle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleShuffle();
+        });
+    }
     btnBreathe.addEventListener("click", (e) => {
         e.stopPropagation();
         toggleGuide();

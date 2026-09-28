@@ -144,7 +144,7 @@
                     </div>
                     <div class="nav-item" data-view="stopwatch">
                         <span class="nav-icon"><span data-ico="stopwatch"></span></span>
-                        <span class="nav-lbl">Watch</span>
+                        <span class="nav-lbl" data-i18n="nav.watch">Watch</span>
                     </div>
                     <div class="nav-item" data-view="relax">
                         <span class="nav-icon"><span data-ico="lotus"></span></span>
@@ -446,6 +446,11 @@
                                         <span data-ico="play"></span> <span id="r-play-text" data-i18n="relax.play">Play</span>
                                     </button>
                                 </div>
+                                <div id="r-stop-wrap" data-tooltip-dir="left" data-tooltip="Stop playback and reset" data-i18n-attr="data-tooltip:relax.tooltip.stop">
+                                    <button class="abtn red" id="r-stop" aria-label="Stop playback">
+                                        <span data-ico="stop" data-ico-size="16"></span>
+                                    </button>
+                                </div>
                                 <div id="r-shuffle-wrap" data-tooltip-dir="left" data-tooltip="Play all tracks shuffled (Zen Flow)" data-i18n-attr="data-tooltip:relax.tooltip.shuffle">
                                     <button class="abtn ghost" id="r-shuffle" aria-label="Shuffle all tracks">
                                         <span data-ico="shuffle"></span>
@@ -457,11 +462,6 @@
                                             <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
                                             <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
                                         </svg>
-                                    </button>
-                                </div>
-                                <div id="r-stop-wrap" data-tooltip-dir="left" data-tooltip="Stop playback and reset" data-i18n-attr="data-tooltip:relax.tooltip.stop">
-                                    <button class="abtn red" id="r-stop" aria-label="Stop playback">
-                                        <span data-ico="stop" data-ico-size="16"></span>
                                     </button>
                                 </div>
                             </div>

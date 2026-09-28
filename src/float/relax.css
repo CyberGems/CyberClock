@@ -208,6 +208,11 @@ button {
     display: block;
 }
 
+#btn-shuffle.is-on {
+    color: var(--skin-accent, #c8dce8);
+    box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.55);
+}
+
 .elapsed {
     margin-left: auto;
     font-size: 12px;

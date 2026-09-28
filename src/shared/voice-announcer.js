@@ -163,11 +163,9 @@
             if (voice) {
                 utter.voice = voice;
             }
-            utter.volume = Math.max(0, Math.min(1, va.volume ?? 0.85));
-            // Windows WebView2 speaks the utterance twice when rate is
-            // assigned, and again when speak() follows cancel() while
-            // the queue is idle. Leave rate alone, and cancel only if
-            // something is already speaking.
+            // Windows WebView2 speaks the utterance twice when rate,
+            // pitch, or volume is assigned. Leave them at the defaults.
+            // The chime still follows the voice volume.
             liveUtterance = utter;
             const start = () => {
                 if (gen !== announceGen) return;
