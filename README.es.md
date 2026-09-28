@@ -41,7 +41,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
 | Relájate y concéntrate | 6 paisajes sonoros ambientales con síntesis de audio procedural |
 | Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 15 skins únicas |
-| Hazlo tuyo | 8 tintes de acento, escala de tamaño de texto, líneas de exploración CRT, controles de transparencia, multi-monitor |
+| Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, líneas de exploración CRT, controles de transparencia, multi-monitor |
 
 ---
 
@@ -175,7 +175,7 @@ CyberClock/
 │   ├── about/             Ventana Acerca de
 │   ├── shared/
 │   │   ├── themes.css     Tokens de diseño (base sobria única + capa de acento derivada)
-│   │   ├── tint.js        Motor de tinte de acento (8 presets, semillas normalizadas)
+│   │   ├── tint.js        Motor de tinte de acento (10 presets, semillas normalizadas)
 │   │   ├── base.css       Estilos base
 │   │   ├── i18n.js        Internacionalización
 │   │   ├── icons.js       Sistema de iconos SVG
@@ -239,7 +239,7 @@ El ejecutable compilado es `CyberClock.exe` y el instalador NSIS queda en `src-t
 
 ## 🎨 Temas y personalización
 
-### 8 tintes de acento
+### 10 tintes de acento
 Una paleta estructural sobria, con superficies de azul marino profundo y texto neutro, donde el color entra solo a través del acento: resplandores, bordes, resaltados y un sutil toque ambiental en los paneles. La interfaz nunca se inunda de color.
 
 - **Hielo** *(predeterminado)*: hielo pálido sobre azul marino profundo
@@ -247,7 +247,9 @@ Una paleta estructural sobria, con superficies de azul marino profundo y texto n
 - **Azul**: azul aciano apagado
 - **Menta**: verde hierbabuena suave
 - **Salvia**: verde salvia suave
+- **Oro**: oro suave a la luz de una vela
 - **Ámbar**: ámbar cálido y arenoso
+- **Coral**: coral apagado
 - **Rosa**: rosa empolvado
 - **Violeta**: lavanda empolvada
 

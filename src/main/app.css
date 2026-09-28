@@ -4063,11 +4063,10 @@
         margin-top: 3px;
     }
 
-    /* Accent tint swatches: compact color squares, 4 per row, with a
-       light ring on the active one (CyberViewer-style picker). */
+    /* Accent tint swatches: two rows of five. */
     .tint-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(5, 36px);
         gap: 12px;
         margin-top: 12px;
         padding: 4px 2px;

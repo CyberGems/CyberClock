@@ -20,7 +20,9 @@
         { id: "azure",  seed: "#6f9fe8" },
         { id: "mint",   seed: "#7fd0b8" },
         { id: "sage",   seed: "#a8c98f" },
+        { id: "gold",   seed: "#d4c06a" },
         { id: "amber",  seed: "#d9b48a" },
+        { id: "coral",  seed: "#e09888" },
         { id: "rose",   seed: "#d98fa8" },
         { id: "violet", seed: "#b39ddb" },
     ];

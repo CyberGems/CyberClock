@@ -41,7 +41,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
 | Save screen space | Mini mode — compact always-on-top clock bar with 15 unique skins |
-| Make it yours | 8 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
+| Make it yours | 10 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
 
 ---
 
@@ -175,7 +175,7 @@ CyberClock/
 │   ├── about/             About window
 │   ├── shared/
 │   │   ├── themes.css     Design tokens (single sober base + derived accent layer)
-│   │   ├── tint.js        Accent tint engine (8 presets, normalized seeds)
+│   │   ├── tint.js        Accent tint engine (10 presets, normalized seeds)
 │   │   ├── base.css       Base styles
 │   │   ├── i18n.js        Internationalization
 │   │   ├── icons.js       SVG icon system
@@ -239,7 +239,7 @@ The built executable is `CyberClock.exe` and the NSIS installer lands in `src-ta
 
 ## 🎨 Themes & Customization
 
-### 8 Accent Tints
+### 10 Accent Tints
 One sober structural palette — deep navy surfaces, neutral text — with color
 entering only through the accent: glows, borders, highlights and a subtle
 ambient kiss on the panels. The interface never floods with color.
@@ -249,7 +249,9 @@ ambient kiss on the panels. The interface never floods with color.
 - **Azure** — muted cornflower blue
 - **Mint** — soft spearmint green
 - **Sage** — gentle sage green
+- **Gold** — soft candlelight gold
 - **Amber** — warm sandy amber
+- **Coral** — muted coral
 - **Rose** — dusty pink
 - **Violet** — powdery lavender
 
