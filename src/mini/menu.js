@@ -466,8 +466,9 @@
                     if (analogLbl) analogLbl.textContent = window.ccI18n.t("float.newAnalog");
                     const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
                     if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
-                    const settingsLbl = document.querySelector('.ctx-item[data-action="settings"] .label');
-                    if (settingsLbl) settingsLbl.textContent = window.ccI18n.t("menu.settings");
+                    document.querySelectorAll('.ctx-item[data-action="settings"] .label').forEach(el => {
+                        el.textContent = window.ccI18n.t("menu.settings");
+                    });
                     document.querySelectorAll('.ctx-item[data-action="about"] .label').forEach(el => {
                         el.textContent = window.ccI18n.t("about.title");
                     });

@@ -112,6 +112,9 @@
         showAboutWindow: async () => {
             await invoke("tray_menu_action", { action: "about" });
         },
+        openSettings: async () => {
+            await invoke("tray_menu_action", { action: "settings" });
+        },
         startDragging: async () => {
             if (!HAS_TAURI) return;
             try {

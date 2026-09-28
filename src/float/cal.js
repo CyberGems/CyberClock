@@ -36,6 +36,7 @@
     const ctxNewTimer = document.getElementById("ctx-new-timer");
     const ctxNewSw = document.getElementById("ctx-new-sw");
     const ctxNewAnalog = document.getElementById("ctx-new-analog");
+    const ctxSettings = document.getElementById("ctx-settings");
     const ctxAbout = document.getElementById("ctx-about");
     const ctxClose = document.getElementById("ctx-close");
     const opChips = document.querySelectorAll(".cal-op-chip");
@@ -666,6 +667,15 @@
             closeContextMenu();
             if (window.cc && window.cc.spawnFloat) {
                 window.cc.spawnFloat("analog");
+            }
+        });
+    }
+
+    if (ctxSettings) {
+        ctxSettings.addEventListener("click", () => {
+            closeContextMenu();
+            if (window.cc && window.cc.openSettings) {
+                window.cc.openSettings();
             }
         });
     }
