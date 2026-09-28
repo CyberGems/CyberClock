@@ -3494,146 +3494,14 @@ fn custom_alarm_days_mask_for_chrono_weekday(wd: chrono::Weekday) -> u8 {
     }
 }
 
-fn alarm_schedule_kind(alarm: &CustomAlarm) -> &str {
-    match alarm.schedule.as_str() {
-        "once" | "hourly" | "daily" | "monthly" | "yearly" | "weekdays" => alarm.schedule.as_str(),
-        _ => "weekdays",
-    }
-}
-
-fn parse_alarm_date(alarm: &CustomAlarm) -> Option<chrono::NaiveDate> {
-    chrono::NaiveDate::parse_from_str(alarm.date.trim(), "%Y-%m-%d").ok()
-}
-
-fn alarm_wall_time(
-    date: chrono::NaiveDate,
-    alarm: &CustomAlarm,
-) -> Option<chrono::DateTime<Local>> {
-    let naive = date.and_hms_opt(alarm.hour.min(23), alarm.minute.min(59), 0)?;
-    Local.from_local_datetime(&naive).single()
-}
-
-fn custom_alarm_due(now: chrono::DateTime<Local>, alarm: &CustomAlarm) -> bool {
-    if !alarm.enabled {
-        return false;
-    }
-    let minute_ok = now.minute() == alarm.minute.min(59);
-    let hour_ok = now.hour() == alarm.hour.min(23);
-    match alarm_schedule_kind(alarm) {
-        "hourly" => minute_ok,
-        "once" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return false;
-            };
-            now.date_naive() == date && hour_ok && minute_ok
-        }
-        "daily" => hour_ok && minute_ok,
-        "monthly" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return false;
-            };
-            now.day() == date.day() && hour_ok && minute_ok
-        }
-        "yearly" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return false;
-            };
-            now.month() == date.month() && now.day() == date.day() && hour_ok && minute_ok
-        }
-        _ => {
-            hour_ok
-                && minute_ok
-                && (alarm.days_mask & custom_alarm_days_mask_for_chrono_weekday(now.weekday())) != 0
-        }
-    }
-}
-
 fn compute_next_custom_alarm_datetime(
     now: chrono::DateTime<Local>,
     alarm: &CustomAlarm,
 ) -> chrono::DateTime<Local> {
-    let far = now + chrono::Duration::days(365);
-    match alarm_schedule_kind(alarm) {
-        "hourly" => {
-            let minute = alarm.minute.min(59);
-            let today = now
-                .date_naive()
-                .and_hms_opt(now.hour(), minute, 0)
-                .and_then(|naive| Local.from_local_datetime(&naive).single());
-            if let Some(dt) = today {
-                if dt >= now {
-                    return dt;
-                }
-                return dt + chrono::Duration::hours(1);
-            }
-            return far;
-        }
-        "once" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return far;
-            };
-            return alarm_wall_time(date, alarm)
-                .filter(|dt| *dt >= now)
-                .unwrap_or(far);
-        }
-        "monthly" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return far;
-            };
-            let day = date.day();
-            let mut year = now.year();
-            let mut month = now.month();
-            for _ in 0..14 {
-                if let Some(d) = chrono::NaiveDate::from_ymd_opt(year, month, day) {
-                    if let Some(dt) = alarm_wall_time(d, alarm) {
-                        if dt >= now {
-                            return dt;
-                        }
-                    }
-                }
-                month += 1;
-                if month > 12 {
-                    month = 1;
-                    year += 1;
-                }
-            }
-            return far;
-        }
-        "yearly" => {
-            let Some(date) = parse_alarm_date(alarm) else {
-                return far;
-            };
-            for offset in 0..4 {
-                let Some(year) = now.year().checked_add(offset) else {
-                    break;
-                };
-                if let Some(d) = chrono::NaiveDate::from_ymd_opt(year, date.month(), date.day()) {
-                    if let Some(dt) = alarm_wall_time(d, alarm) {
-                        if dt >= now {
-                            return dt;
-                        }
-                    }
-                }
-            }
-            return far;
-        }
-        "daily" => {
-            return next_weekday_alarm(now, alarm, 127);
-        }
-        _ => {}
-    }
-    next_weekday_alarm(now, alarm, alarm.days_mask)
-}
-
-fn next_weekday_alarm(
-    now: chrono::DateTime<Local>,
-    alarm: &CustomAlarm,
-    days_mask: u8,
-) -> chrono::DateTime<Local> {
     // Find the next occurrence on enabled days at HH:MM local time.
     // We only schedule within the current+next-8-days window.
     // If days_mask is 0, treat it as "no days enabled" -> return now+365d.
-    if days_mask == 0 {
+    if alarm.days_mask == 0 {
         return now + chrono::Duration::days(365);
     }
 
@@ -3652,7 +3520,7 @@ fn next_weekday_alarm(
         .unwrap_or(now);
 
     if (today_dt >= now)
-        && ((days_mask & custom_alarm_days_mask_for_chrono_weekday(today_dt.weekday())) != 0)
+        && ((alarm.days_mask & custom_alarm_days_mask_for_chrono_weekday(today_dt.weekday())) != 0)
     {
         return today_dt;
     }
@@ -3670,7 +3538,7 @@ fn next_weekday_alarm(
             continue;
         };
         let mask = custom_alarm_days_mask_for_chrono_weekday(cand_dt.weekday());
-        if (days_mask & mask) != 0 {
+        if (alarm.days_mask & mask) != 0 {
             return cand_dt;
         }
     }
@@ -3679,43 +3547,11 @@ fn next_weekday_alarm(
     now + chrono::Duration::days(365)
 }
 
-fn alarm_fire_key(alarm: &CustomAlarm, idx: usize) -> String {
-    if alarm.id.is_empty() {
-        format!("slot-{idx}")
-    } else {
-        alarm.id.clone()
-    }
-}
-
-fn retire_custom_alarm(app: &AppHandle, idx: usize, delete_after: bool, once: bool) {
-    if !delete_after && !once {
-        return;
-    }
-    let settings = load_settings(app);
-    let mut alarms = settings.custom_alarms.clone();
-    if idx >= alarms.len() {
-        return;
-    }
-    if delete_after {
-        alarms.remove(idx);
-    } else {
-        alarms[idx].enabled = false;
-    }
-    match settings::patch_settings(
-        app,
-        serde_json::json!({ "customAlarms": alarms }),
-    ) {
-        Ok(updated) => {
-            let _ = app.emit("settings:updated", &updated);
-        }
-        Err(err) => warn!("retire custom alarm: {err}"),
-    }
-}
-
 fn custom_alarms_scheduler(app: AppHandle) {
-    // Last fired minute-key per alarm id, so a reschedule in the
-    // same minute cannot ring twice.
-    let mut last_fired: HashMap<String, i64> = HashMap::new();
+    // Keep a small "last fired" memory to avoid double emits
+    // across rapid rescheduling. We store the last fired unix
+    // timestamp per slot index.
+    let mut last_fired_by_idx: Vec<Option<i64>> = vec![None; 3];
 
     loop {
         let settings = load_settings(&app);
@@ -3727,66 +3563,76 @@ fn custom_alarms_scheduler(app: AppHandle) {
             if !alarm.enabled {
                 continue;
             }
+            if idx >= 3 {
+                break;
+            }
             let next_dt = compute_next_custom_alarm_datetime(now, alarm);
             nexts.push((next_dt, idx));
         }
 
+        // If no custom alarms enabled, sleep a bit and re-check
         if nexts.is_empty() {
             std::thread::sleep(std::time::Duration::from_secs(15));
             continue;
         }
 
+        // pick earliest next time
         nexts.sort_by_key(|(dt, _)| dt.timestamp());
         let (earliest, earliest_idx) = nexts[0];
 
         let delay = earliest.signed_duration_since(now);
         let delay_secs = delay.num_seconds();
 
+        // Sleep in chunks but don't go too long
         if delay_secs > 5 {
             let chunk = std::cmp::min(delay_secs.saturating_sub(2), 30);
             std::thread::sleep(std::time::Duration::from_secs(chunk as u64));
             continue;
         }
 
+        // Within trigger window: verify again and fire when the exact minute matches
         let now2 = Local::now();
         let idx = earliest_idx;
-        let fired = if let Some(alarm) = settings.custom_alarms.get(idx) {
-            if custom_alarm_due(now2, alarm) {
-                let minute_key = now2.timestamp() / 60;
-                let key = alarm_fire_key(alarm, idx);
-                let already = last_fired.get(&key).copied() == Some(minute_key);
-                if already || settings.audio_muted {
-                    None
-                } else {
-                    last_fired.insert(key, minute_key);
-                    let once = alarm_schedule_kind(alarm) == "once";
-                    let delete_after = alarm.delete_after;
-                    let volume = alarm.volume.unwrap_or(settings.alarm_volume);
-                    let payload = serde_json::json!({
-                        "type": "custom",
-                        "sound": alarm.sound,
-                        "customPath": alarm.custom_path,
-                        "volume": volume,
-                        "message": alarm.message,
-                        "repeatCount": alarm.repeat_count.max(1),
-                        "untilDismissed": alarm.until_dismissed,
-                        "pauseSecs": alarm.pause_secs,
-                        "id": alarm.id,
-                    });
-                    Some((payload, delete_after, once))
-                }
-            } else {
-                None
-            }
-        } else {
-            None
-        };
+        if let Some(alarm) = settings.custom_alarms.get(idx) {
+            if alarm.enabled {
+                let should_fire = now2.hour() == alarm.hour
+                    && now2.minute() == alarm.minute
+                    && (alarm.days_mask
+                        & custom_alarm_days_mask_for_chrono_weekday(now2.weekday()))
+                        != 0;
 
-        if let Some((payload, delete_after, once)) = fired {
-            emit_to_active(&app, "alarm:chime", payload);
-            retire_custom_alarm(&app, idx, delete_after, once);
+                if should_fire {
+                    let fired_ts = now2.timestamp();
+                    let already = last_fired_by_idx
+                        .get(idx)
+                        .and_then(|x| *x)
+                        .map(|t| t == fired_ts)
+                        .unwrap_or(false);
+
+                    if !already {
+                        if idx < last_fired_by_idx.len() {
+                            last_fired_by_idx[idx] = Some(fired_ts);
+                        }
+
+                        // Master audio mute: mark as fired but play nothing.
+                        if settings.audio_muted {
+                            continue;
+                        }
+
+                        let alarm_data = serde_json::json!({
+                            "type": "custom",
+                            "sound": alarm.sound,
+                            "customPath": alarm.custom_path,
+                            "volume": settings.alarm_volume
+                        });
+
+                        emit_to_active(&app, "alarm:chime", alarm_data);
+                    }
+                }
+            }
         }
 
+        // Wait a little before recalculating next occurrences to avoid tight loop
         std::thread::sleep(std::time::Duration::from_secs(10));
     }
 }

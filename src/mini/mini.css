@@ -135,21 +135,12 @@
     .mini-shell[data-layout="inline"][data-design] #mini-time {
         font-size: 13.5px;
         line-height: 1;
-        flex-shrink: 0;
     }
     .mini-shell[data-layout="inline"][data-design] #mini-date {
         font-size: 10px;
         line-height: 1;
         margin-top: 0;
         white-space: nowrap;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    /* Neon Circuit's 20px / 2px tracking overflows a one-row bar. */
-    .mini-shell[data-layout="inline"][data-design="5"] #mini-time {
-        font-size: 13px;
-        letter-spacing: 0.4px;
     }
     .mini-shell[data-layout="inline"] .controls {
         flex-direction: row;
@@ -2588,9 +2579,8 @@
        native zoom; #mini-tip is outside the shell and stays at
        scale 1 so notes remain readable at every zoom. */
     .mini-shell {
-        width: calc(100% / var(--mini-zoom, 1) - 4px) !important;
-        height: calc(100% / var(--mini-zoom, 1) - 4px) !important;
-        margin: 2px;
+        width: calc(100% / var(--mini-zoom, 1));
+        height: calc(100% / var(--mini-zoom, 1));
         transform: scale(var(--mini-zoom, 1));
         transform-origin: top left;
     }

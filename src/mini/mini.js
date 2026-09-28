@@ -117,8 +117,8 @@
         2:  { stacked: { w: 260, h: 48, cw: 260, ch: 38 }, inline: { w: 310, h: 34, cw: 195, ch: 34 } },
         3:  { stacked: { w: 260, h: 46, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
         4:  { stacked: { w: 260, h: 52, cw: 260, ch: 36 }, inline: { w: 310, h: 36, cw: 190, ch: 36 } },
-        5:  { stacked: { w: 280, h: 50, cw: 260, ch: 34 }, inline: { w: 430, h: 36, cw: 220, ch: 36 } },
-        6:  { stacked: { w: 260, h: 48, cw: 260, ch: 36 }, inline: { w: 420, h: 40, cw: 220, ch: 40 } },
+        5:  { stacked: { w: 260, h: 50, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
+        6:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
         7:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
         8:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
         9:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 200, ch: 34 } },
@@ -173,12 +173,7 @@
             baseHeight += (tipHeight + 16) / zoom;
         }
 
-        // 2px of transparent margin on every side, so a border or
-        // rounded corner is not antialiased away against the window edge.
-        return {
-            width: Math.round((baseWidth + 4) * zoom),
-            height: Math.round((baseHeight + 4) * zoom),
-        };
+        return { width: Math.round(baseWidth * zoom), height: Math.round(baseHeight * zoom) };
     }
 
     function syncWindowSize(force = false, recenter = false) {
@@ -710,7 +705,9 @@
     window.cc.onSettingsUpdated((s) => applySettings(s));
 
     window.cc.onAlarmChime((p) => {
-        if (window.cc.playAlarmNotice) window.cc.playAlarmNotice(p);
+        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
+        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
+        else window.audioEngine.chime(p.sound || "chime-digital", vol);
     });
 
     if (window.cc && window.cc.onVoiceAnnounceTime) {
