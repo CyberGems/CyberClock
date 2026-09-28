@@ -376,6 +376,59 @@
             return subscribe("main:close-requested", cb);
         },
 
+        playAlarmNotice: (p) => {
+            if (!p || !window.audioEngine) return;
+            const vol = p.volume != null ? p.volume : 0.75;
+            const playOnce = () => {
+                if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
+                else window.audioEngine.chime(p.sound || "chime-digital", vol);
+            };
+            const repeat = Math.max(1, parseInt(p.repeatCount, 10) || 1);
+            const until = p.untilDismissed === true;
+            const pauseMs = Math.max(250, ((parseInt(p.pauseSecs, 10) || 0) * 1000) || 250);
+            const message = (p.message || "").trim();
+            const needsCard = p.type === "custom" && (until || repeat > 1 || !!message);
+            if (!needsCard) {
+                playOnce();
+                return;
+            }
+            const old = document.getElementById("cc-alarm-card");
+            if (old && old._ccStop) old._ccStop();
+            const card = document.createElement("div");
+            card.id = "cc-alarm-card";
+            card.className = "cc-alarm-card";
+            const title = document.createElement("div");
+            title.className = "cc-alarm-card-title";
+            const fallback = window.ccI18n ? window.ccI18n.t("nav.alarm") : "Alarm";
+            title.textContent = message || fallback;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "cc-alarm-card-dismiss";
+            btn.textContent = window.ccI18n ? window.ccI18n.t("alarms.tab.dismiss") : "Dismiss";
+            card.appendChild(title);
+            card.appendChild(btn);
+            document.body.appendChild(card);
+            let n = 0;
+            let timer = null;
+            const stop = () => {
+                if (timer) clearTimeout(timer);
+                timer = null;
+                if (card.parentNode) card.remove();
+            };
+            card._ccStop = stop;
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                stop();
+            });
+            const step = () => {
+                if (!card.parentNode) return;
+                playOnce();
+                n += 1;
+                if (until || n < repeat) timer = setTimeout(step, pauseMs);
+            };
+            step();
+        },
+
         // ── Cleanup ───────────────────────────────────────────────
         off: async (channel) => {
             const set = listenerRegistry.get(channel);

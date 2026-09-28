@@ -150,10 +150,31 @@
                         <span class="nav-icon"><span data-ico="lotus"></span></span>
                         <span class="nav-lbl">Relax</span>
                     </div>
+                    <div class="nav-item" data-view="alarms">
+                        <span class="nav-icon"><span data-ico="bell"></span></span>
+                        <span class="nav-lbl" data-i18n="nav.alarm">Alarm</span>
+                    </div>
                 </nav>
 
                 <!-- VIEW CONTAINER -->
                 <div class="vc" id="vc">
+                    <div class="view" id="view-alarms">
+                        <div class="alarm-workspace">
+                            <div class="alarm-top">
+                                <div class="alarm-list-col">
+                                    <div class="alarm-list-head">
+                                        <span data-i18n="nav.alarm">Alarm</span>
+                                        <button type="button" class="abtn" id="alarm-add" data-tooltip="New alarm" data-i18n-attr="data-tooltip:alarms.tab.add" data-tooltip-dir="bottom">
+                                            <span data-i18n="alarms.tab.add">New alarm</span>
+                                        </button>
+                                    </div>
+                                    <div id="alarm-list"></div>
+                                </div>
+                                <div class="alarm-edit-col" id="alarm-editor"></div>
+                            </div>
+                            <div id="alarm-settings-host"></div>
+                        </div>
+                    </div>
                     <!-- HOME -->
                     <div class="view active" id="view-home">
                         <!-- Discrete side handle: collapse/expand the analog clock -->
@@ -791,8 +812,17 @@
 
                     <!-- Time -->
                     <div class="s-panel" id="stab-time">
+                        <div class="s-sec" id="s-chimes-moved-note">
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="bell"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="alarms.tab.moved">Alarms and chimes are in the Alarm tab.</span>
+                                </div>
+                                <button type="button" class="s-abtn" id="s-open-alarms-time" data-i18n="alarms.tab.open">Open the Alarm tab</button>
+                            </div>
+                        </div>
                         <!-- Hourly Chimes -->
-                        <div class="s-sec">
+                        <div class="s-sec" id="s-chimes-sec">
                             <div class="s-sec-t" data-i18n="settings.time.sectionChimes">Hourly Chimes</div>
 
                             <!-- Chimes Volume -->
@@ -1153,7 +1183,7 @@
 
                     <!-- Alarms -->
                     <div class="s-panel" id="stab-alarms">
-                        <div class="s-sec">
+                        <div class="s-sec" id="s-alarm-vol-sec">
                             <div class="s-sec-t" data-i18n="settings.alarms.volume">Alarm Volume</div>
                             <div class="s-vol-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
@@ -1174,191 +1204,14 @@
                             </div>
                         </div>
 
-                        <!-- Custom alarms (3 slots, day-of-week repetition) -->
-                        <div class="s-sec-t" style="margin: 22px 0 8px;"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="alarms.custom.title">Custom Alarms</span></div>
-                        <div class="s-alarm-blk" id="s-cust-blk-0">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot1">Alarm 1</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-cust-0-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.time">Time</span>
-                                <div class="sched-time" style="margin: 0 8px 0 0;">
-                                    <select class="sched-time-sel" id="s-cust-0-h" aria-label="Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-cust-0-m" aria-label="Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-cust-0-ap" aria-label="AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="alarms.tab.movedTitle">Alarms</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="bell"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="alarms.tab.moved">Alarms and chimes are in the Alarm tab.</span>
                                 </div>
-                                <button class="s-abtn" id="s-cust-0-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                            </div>
-                            <div class="s-alarm-row" style="align-items: flex-start;">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.days">Repeat on</span>
-                                <div class="s-cust-days" id="s-cust-0-days">
-                                    <button class="s-day-btn" data-day="1" data-i18n="alarms.custom.mon">Mon</button>
-                                    <button class="s-day-btn" data-day="2" data-i18n="alarms.custom.tue">Tue</button>
-                                    <button class="s-day-btn" data-day="4" data-i18n="alarms.custom.wed">Wed</button>
-                                    <button class="s-day-btn" data-day="8" data-i18n="alarms.custom.thu">Thu</button>
-                                    <button class="s-day-btn" data-day="16" data-i18n="alarms.custom.fri">Fri</button>
-                                    <button class="s-day-btn" data-day="32" data-i18n="alarms.custom.sat">Sat</button>
-                                    <button class="s-day-btn" data-day="64" data-i18n="alarms.custom.sun">Sun</button>
-                                    <button class="s-day-btn s-day-all" data-i18n="alarms.custom.everyDay">Every day</button>
-                                </div>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-cust-0-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
-                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-cust-0-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div class="s-flbl" id="s-cust-0-flbl" style="display: none">
-                                <span id="s-cust-0-fname"></span
-                                ><span class="s-fclr" id="s-cust-0-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
-                            </div>
-                        </div>
-
-                        <div class="s-alarm-blk" id="s-cust-blk-1">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot2">Alarm 2</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-cust-1-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.time">Time</span>
-                                <div class="sched-time" style="margin: 0 8px 0 0;">
-                                    <select class="sched-time-sel" id="s-cust-1-h" aria-label="Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-cust-1-m" aria-label="Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-cust-1-ap" aria-label="AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
-                                </div>
-                                <button class="s-abtn" id="s-cust-1-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                            </div>
-                            <div class="s-alarm-row" style="align-items: flex-start;">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.days">Repeat on</span>
-                                <div class="s-cust-days" id="s-cust-1-days">
-                                    <button class="s-day-btn" data-day="1" data-i18n="alarms.custom.mon">Mon</button>
-                                    <button class="s-day-btn" data-day="2" data-i18n="alarms.custom.tue">Tue</button>
-                                    <button class="s-day-btn" data-day="4" data-i18n="alarms.custom.wed">Wed</button>
-                                    <button class="s-day-btn" data-day="8" data-i18n="alarms.custom.thu">Thu</button>
-                                    <button class="s-day-btn" data-day="16" data-i18n="alarms.custom.fri">Fri</button>
-                                    <button class="s-day-btn" data-day="32" data-i18n="alarms.custom.sat">Sat</button>
-                                    <button class="s-day-btn" data-day="64" data-i18n="alarms.custom.sun">Sun</button>
-                                    <button class="s-day-btn s-day-all" data-i18n="alarms.custom.everyDay">Every day</button>
-                                </div>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-cust-1-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
-                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-cust-1-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div class="s-flbl" id="s-cust-1-flbl" style="display: none">
-                                <span id="s-cust-1-fname"></span
-                                ><span class="s-fclr" id="s-cust-1-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
-                            </div>
-                        </div>
-
-                        <div class="s-alarm-blk" id="s-cust-blk-2">
-                            <div class="s-alarm-t">
-                                <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot3">Alarm 3</span>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.enable">Enable</span
-                                ><label class="s-tog"
-                                    ><input type="checkbox" id="s-cust-2-en" />
-                                    <div class="s-tog-tr">
-                                        <div class="s-tog-th"></div></div
-                                ></label>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.time">Time</span>
-                                <div class="sched-time" style="margin: 0 8px 0 0;">
-                                    <select class="sched-time-sel" id="s-cust-2-h" aria-label="Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="s-cust-2-m" aria-label="Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="s-cust-2-ap" aria-label="AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
-                                </div>
-                                <button class="s-abtn" id="s-cust-2-test">
-                                    <span data-ico="play"></span> <span data-i18n="settings.alarms.test">Test</span>
-                                </button>
-                            </div>
-                            <div class="s-alarm-row" style="align-items: flex-start;">
-                                <span class="s-alarm-lbl" data-i18n="alarms.custom.days">Repeat on</span>
-                                <div class="s-cust-days" id="s-cust-2-days">
-                                    <button class="s-day-btn" data-day="1" data-i18n="alarms.custom.mon">Mon</button>
-                                    <button class="s-day-btn" data-day="2" data-i18n="alarms.custom.tue">Tue</button>
-                                    <button class="s-day-btn" data-day="4" data-i18n="alarms.custom.wed">Wed</button>
-                                    <button class="s-day-btn" data-day="8" data-i18n="alarms.custom.thu">Thu</button>
-                                    <button class="s-day-btn" data-day="16" data-i18n="alarms.custom.fri">Fri</button>
-                                    <button class="s-day-btn" data-day="32" data-i18n="alarms.custom.sat">Sat</button>
-                                    <button class="s-day-btn" data-day="64" data-i18n="alarms.custom.sun">Sun</button>
-                                    <button class="s-day-btn s-day-all" data-i18n="alarms.custom.everyDay">Every day</button>
-                                </div>
-                            </div>
-                            <div class="s-alarm-row">
-                                <span class="s-alarm-lbl" data-i18n="settings.alarms.sound">Sound</span>
-                                <select id="s-cust-2-snd">
-                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
-                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
-                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
-                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
-                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
-                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
-                                </select>
-                                <button class="s-abtn" id="s-cust-2-file">
-                                    <span data-ico="folder"></span> <span data-i18n="settings.alarms.custom">Custom…</span>
-                                </button>
-                            </div>
-                            <div class="s-flbl" id="s-cust-2-flbl" style="display: none">
-                                <span id="s-cust-2-fname"></span
-                                ><span class="s-fclr" id="s-cust-2-fclr"
-                                    ><span data-ico="x"></span></span
-                                >
+                                <button type="button" class="s-abtn" id="s-open-alarms" data-i18n="alarms.tab.open">Open the Alarm tab</button>
                             </div>
                         </div>
                     </div>

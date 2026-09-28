@@ -5,7 +5,7 @@
     let cfg = {};
     let curView = "home";
     let transitioning = false;
-    const VIEW_ORDER = ["home", "timer", "stopwatch", "relax"];
+    const VIEW_ORDER = ["home", "timer", "stopwatch", "relax", "alarms"];
     const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     const MONTHS_L = [
         "January",
@@ -869,20 +869,8 @@
         if (af.customPath) showCustomFile("full", af.customPath); else showCustomFile("full", null);
         if (aq.customPath) showCustomFile("quart", aq.customPath); else showCustomFile("quart", null);
 
-        // Custom alarms (3 slots with day-of-week repetition)
-        buildCustomAlarmTimeOptions();
-        (s.customAlarms || []).slice(0, 3).forEach((alarm, i) => {
-            const base = `s-cust-${i}`;
-            const enEl = document.getElementById(`${base}-en`);
-            if (enEl) enEl.checked = !!alarm.enabled;
-            setCustomAlarmTime(i, alarm.hour ?? 9, alarm.minute ?? 0);
-            document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((btn) => {
-                btn.classList.toggle("on", (alarm.daysMask & parseInt(btn.dataset.day)) !== 0);
-            });
-            const sndEl = document.getElementById(`${base}-snd`);
-            if (sndEl) sndEl.value = alarm.sound || "chime-digital";
-            showCustomFile(`cust-${i}`, alarm.customPath || null);
-        });
+        mountAlarmChrome();
+        renderAlarmWorkspace();
 
         // Apply alarm time restriction schedule controls
         buildAlarmSchedTimeOptions();
@@ -1043,131 +1031,455 @@
         }
     }
 
-    // ── Custom alarms (3 slots, day-of-week repetition) ──────
-    function buildCustomAlarmTimeOptions() {
-        const is12 = cfg.clockFormat === '12h';
-        for (let i = 0; i < 3; i++) {
-            const hSel = document.getElementById(`s-cust-${i}-h`);
-            const mSel = document.getElementById(`s-cust-${i}-m`);
-            const apSel = document.getElementById(`s-cust-${i}-ap`);
-            if (!hSel || !mSel || !apSel) continue;
-            hSel.innerHTML = '';
-            const hStart = is12 ? 1 : 0, hEnd = is12 ? 12 : 23;
-            for (let h = hStart; h <= hEnd; h++) {
-                const o = document.createElement('option');
-                o.value = String(h); o.textContent = pad(h);
-                hSel.appendChild(o);
-            }
-            if (!mSel.options.length) {
-                for (let m = 0; m <= 59; m++) {
-                    const o = document.createElement('option');
-                    o.value = String(m); o.textContent = pad(m);
-                    mSel.appendChild(o);
-                }
-            }
-            apSel.style.display = is12 ? '' : 'none';
-        }
+    // ── Alarm tab ──────────────────────────────────────────
+    const ALARM_SOUNDS = [
+        ["chime-crystal", "settings.alarms.sound.crystal"],
+        ["chime-digital", "settings.alarms.sound.digital"],
+        ["chime-neon", "settings.alarms.sound.neon"],
+        ["chime-zen", "settings.alarms.sound.zen"],
+        ["chime-cyber", "settings.alarms.sound.cyber"],
+        ["chime-music", "settings.alarms.sound.music"],
+    ];
+    const ALARM_DAYS = [
+        [1, "alarms.custom.mon"],
+        [2, "alarms.custom.tue"],
+        [4, "alarms.custom.wed"],
+        [8, "alarms.custom.thu"],
+        [16, "alarms.custom.fri"],
+        [32, "alarms.custom.sat"],
+        [64, "alarms.custom.sun"],
+    ];
+    const ALARM_SCHEDULES = ["once", "hourly", "daily", "weekdays", "monthly", "yearly"];
+    let alarmEditIndex = 0;
+    let alarmSnap = "";
+    let alarmChromeReady = false;
+
+    function alarmT(key) {
+        return window.ccI18n ? window.ccI18n.t(key) : key;
     }
-    function setCustomAlarmTime(i, H, M) {
-        const is12 = cfg.clockFormat === '12h';
-        const hSel = document.getElementById(`s-cust-${i}-h`);
-        const mSel = document.getElementById(`s-cust-${i}-m`);
-        const apSel = document.getElementById(`s-cust-${i}-ap`);
-        if (!hSel) return;
-        mSel.value = String(M);
-        if (is12) {
-            let h12 = H % 12; if (h12 === 0) h12 = 12;
-            hSel.value = String(h12);
-            apSel.value = H >= 12 ? 'PM' : 'AM';
-        } else {
-            hSel.value = String(H);
-        }
+
+    function isPristineAlarm(a) {
+        if (!a) return true;
+        return !a.enabled
+            && !(a.daysMask)
+            && !(a.message || "").trim()
+            && !a.customPath
+            && !a.deleteAfter
+            && !(a.date || "").trim()
+            && (a.hour == null || a.hour === 9)
+            && (a.minute == null || a.minute === 0)
+            && (!a.schedule || a.schedule === "weekdays");
     }
-    function getCustomAlarmTime(i) {
-        const is12 = cfg.clockFormat === '12h';
-        const hSel = document.getElementById(`s-cust-${i}-h`);
-        const mSel = document.getElementById(`s-cust-${i}-m`);
-        const apSel = document.getElementById(`s-cust-${i}-ap`);
-        if (!hSel) return { hour: 9, minute: 0 };
-        let H = parseInt(hSel.value, 10);
-        const M = parseInt(mSel.value, 10);
-        if (is12) {
-            if (apSel.value === 'AM') { if (H === 12) H = 0; }
-            else { if (H !== 12) H += 12; }
-        }
-        return { hour: H, minute: M };
+
+    function alarmRecords() {
+        return (cfg.customAlarms || []).filter((a) => !isPristineAlarm(a));
     }
-    function getCustomAlarmDaysMask(i) {
-        let mask = 0;
-        document.querySelectorAll(`#s-cust-${i}-days .s-day-btn[data-day]`).forEach((btn) => {
-            if (btn.classList.contains("on")) mask |= parseInt(btn.dataset.day);
+
+    function commitAlarms(list) {
+        cfg.customAlarms = list;
+        if (window.cc) window.cc.saveSettings({ customAlarms: list });
+        alarmSnap = "";
+        renderAlarmWorkspace();
+    }
+
+    function patchAlarm(index, patch) {
+        const list = alarmRecords();
+        if (!list[index]) return;
+        list[index] = Object.assign({}, list[index], patch);
+        commitAlarms(list);
+    }
+
+    function openAlarmTab() {
+        if (typeof closeSettings === "function") closeSettings();
+        navigate("alarms");
+    }
+
+    function mountAlarmChrome() {
+        const host = document.getElementById("alarm-settings-host");
+        const chimes = document.getElementById("s-chimes-sec");
+        const vol = document.getElementById("s-alarm-vol-sec");
+        if (host && chimes && chimes.parentNode !== host) host.appendChild(chimes);
+        if (host && vol && vol.parentNode !== host) host.appendChild(vol);
+        if (alarmChromeReady) return;
+        alarmChromeReady = true;
+        document.getElementById("alarm-add")?.addEventListener("click", () => {
+            const today = new Date();
+            const date = today.getFullYear() + "-"
+                + String(today.getMonth() + 1).padStart(2, "0") + "-"
+                + String(today.getDate()).padStart(2, "0");
+            const list = alarmRecords();
+            list.push({
+                id: "al-" + Date.now().toString(36),
+                enabled: true,
+                hour: 8,
+                minute: 0,
+                daysMask: 127,
+                sound: "chime-digital",
+                customPath: null,
+                schedule: "daily",
+                message: "",
+                deleteAfter: false,
+                repeatCount: 1,
+                untilDismissed: false,
+                pauseSecs: 1,
+                volume: null,
+                date: date,
+            });
+            alarmEditIndex = list.length - 1;
+            commitAlarms(list);
         });
-        return mask;
+        document.getElementById("s-open-alarms")?.addEventListener("click", openAlarmTab);
+        document.getElementById("s-open-alarms-time")?.addEventListener("click", openAlarmTab);
     }
-    function saveCustomAlarmField(i, patch) {
-        const current = cfg.customAlarms || [];
-        const list = [...current];
-        while (list.length < 3) list.push({ enabled: false, hour: 9, minute: 0, daysMask: 0, sound: "chime-digital", customPath: null });
-        list[i] = { ...list[i], ...patch };
-        window.cc.saveSettings({ customAlarms: list });
-    }
-    function wireCustomAlarms() {
-        for (let i = 0; i < 3; i++) {
-            const base = `s-cust-${i}`;
-            document.getElementById(`${base}-en`)?.addEventListener("change", (e) => {
-                const daysMask = getCustomAlarmDaysMask(i);
-                if (e.target.checked && daysMask === 0) {
-                    // No days picked: enable every day rather than a silent never-firing alarm
-                    document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((b) => b.classList.add("on"));
-                    saveCustomAlarmField(i, { enabled: true, daysMask: 127 });
-                } else {
-                    saveCustomAlarmField(i, { enabled: e.target.checked });
-                }
-            });
-            [`${base}-h`, `${base}-m`, `${base}-ap`].forEach((id) => {
-                document.getElementById(id)?.addEventListener("change", () => {
-                    const { hour, minute } = getCustomAlarmTime(i);
-                    saveCustomAlarmField(i, { hour, minute });
-                });
-            });
-            document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    btn.classList.toggle("on");
-                    saveCustomAlarmField(i, { daysMask: getCustomAlarmDaysMask(i) });
-                });
-            });
-            document.querySelector(`#${base}-days .s-day-all`)?.addEventListener("click", () => {
-                const allOn = document.querySelectorAll(`#${base}-days .s-day-btn[data-day].on`).length === 7;
-                document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((b) => {
-                    b.classList.toggle("on", !allOn);
-                });
-                saveCustomAlarmField(i, { daysMask: allOn ? 0 : 127 });
-            });
-            document.getElementById(`${base}-snd`)?.addEventListener("change", (e) => {
-                saveCustomAlarmField(i, { sound: e.target.value, customPath: null });
-            });
-            document.getElementById(`${base}-test`)?.addEventListener("click", () => {
-                const alarm = (cfg.customAlarms || [])[i] || {};
-                if (alarm.customPath) window.audioEngine.playFile(alarm.customPath, { loop: false });
-                else {
-                    const sndEl = document.getElementById(`${base}-snd`);
-                    window.audioEngine.chime(sndEl ? sndEl.value : "chime-digital", cfg.alarmVolume || 0.75);
-                }
-            });
-            document.getElementById(`${base}-file`)?.addEventListener("click", async () => {
-                const p = await window.cc.openFileDialog();
-                if (p) {
-                    saveCustomAlarmField(i, { customPath: p });
-                    showCustomFile(`cust-${i}`, p);
-                }
-            });
-            document.getElementById(`${base}-fclr`)?.addEventListener("click", () => {
-                saveCustomAlarmField(i, { customPath: null });
-                showCustomFile(`cust-${i}`, null);
-            });
+
+    function fillHourMinute(hSel, mSel, apSel, hour, minute) {
+        const is12 = cfg.clockFormat === "12h";
+        hSel.innerHTML = "";
+        const hStart = is12 ? 1 : 0;
+        const hEnd = is12 ? 12 : 23;
+        for (let h = hStart; h <= hEnd; h++) {
+            const o = document.createElement("option");
+            o.value = String(h);
+            o.textContent = pad(h);
+            hSel.appendChild(o);
+        }
+        mSel.innerHTML = "";
+        for (let m = 0; m <= 59; m++) {
+            const o = document.createElement("option");
+            o.value = String(m);
+            o.textContent = pad(m);
+            mSel.appendChild(o);
+        }
+        mSel.value = String(minute);
+        if (is12) {
+            let h12 = hour % 12;
+            if (h12 === 0) h12 = 12;
+            hSel.value = String(h12);
+            apSel.value = hour >= 12 ? "PM" : "AM";
+            apSel.hidden = false;
+        } else {
+            hSel.value = String(hour);
+            apSel.hidden = true;
         }
     }
-    wireCustomAlarms();
+
+    function readHourMinute(hSel, mSel, apSel) {
+        const is12 = cfg.clockFormat === "12h";
+        let hour = parseInt(hSel.value, 10) || 0;
+        const minute = parseInt(mSel.value, 10) || 0;
+        if (is12) {
+            if (apSel.value === "AM") { if (hour === 12) hour = 0; }
+            else if (hour !== 12) hour += 12;
+        }
+        return { hour, minute };
+    }
+
+    function alarmSummary(a) {
+        const hh = pad(a.hour ?? 0);
+        const mm = pad(a.minute ?? 0);
+        const when = a.schedule === "hourly" ? (":" + mm) : (hh + ":" + mm);
+        const kind = alarmT("alarms.tab." + (a.schedule || "weekdays"));
+        const msg = (a.message || "").trim();
+        return msg ? (when + "  " + msg) : (when + "  " + kind);
+    }
+
+    function renderAlarmWorkspace() {
+        mountAlarmChrome();
+        const listEl = document.getElementById("alarm-list");
+        const editor = document.getElementById("alarm-editor");
+        if (!listEl || !editor) return;
+        const list = alarmRecords();
+        const snap = (cfg.clockFormat || "") + "|" + (cfg.language || "") + "|" + alarmEditIndex + "|" + JSON.stringify(list);
+        if (snap === alarmSnap) return;
+        alarmSnap = snap;
+        if (alarmEditIndex >= list.length) alarmEditIndex = Math.max(0, list.length - 1);
+
+        listEl.replaceChildren();
+        if (!list.length) {
+            const empty = document.createElement("div");
+            empty.className = "alarm-empty";
+            empty.textContent = alarmT("alarms.tab.empty");
+            listEl.appendChild(empty);
+        }
+        list.forEach((a, i) => {
+            const row = document.createElement("button");
+            row.type = "button";
+            row.className = "alarm-row" + (i === alarmEditIndex ? " on" : "") + (a.enabled ? "" : " off");
+            const mark = document.createElement("span");
+            mark.className = "alarm-row-mark";
+            mark.textContent = a.enabled ? "●" : "○";
+            const label = document.createElement("span");
+            label.className = "alarm-row-label";
+            label.textContent = alarmSummary(a);
+            row.appendChild(mark);
+            row.appendChild(label);
+            row.addEventListener("click", () => {
+                alarmEditIndex = i;
+                alarmSnap = "";
+                renderAlarmWorkspace();
+            });
+            listEl.appendChild(row);
+        });
+
+        editor.replaceChildren();
+        const alarm = list[alarmEditIndex];
+        if (!alarm) return;
+
+        const card = document.createElement("div");
+        card.className = "alarm-card";
+
+        const head = document.createElement("div");
+        head.className = "alarm-card-head";
+        const enLab = document.createElement("label");
+        enLab.className = "s-tog";
+        const en = document.createElement("input");
+        en.type = "checkbox";
+        en.checked = !!alarm.enabled;
+        en.addEventListener("change", () => {
+            const patch = { enabled: en.checked };
+            if (en.checked && (alarm.schedule === "weekdays" || !alarm.schedule) && !alarm.daysMask) {
+                patch.daysMask = 127;
+            }
+            patchAlarm(alarmEditIndex, patch);
+        });
+        const track = document.createElement("div");
+        track.className = "s-tog-tr";
+        track.appendChild(Object.assign(document.createElement("div"), { className: "s-tog-th" }));
+        enLab.appendChild(en);
+        enLab.appendChild(track);
+        const enText = document.createElement("span");
+        enText.dataset.i18n = "settings.alarms.enable";
+        enText.textContent = alarmT("settings.alarms.enable");
+        head.appendChild(enText);
+        head.appendChild(enLab);
+        card.appendChild(head);
+
+        function field(labelKey, control) {
+            const row = document.createElement("div");
+            row.className = "alarm-field";
+            const lab = document.createElement("span");
+            lab.className = "alarm-field-lbl";
+            lab.textContent = alarmT(labelKey);
+            row.appendChild(lab);
+            row.appendChild(control);
+            card.appendChild(row);
+            return row;
+        }
+
+        const sched = document.createElement("select");
+        ALARM_SCHEDULES.forEach((id) => {
+            const o = document.createElement("option");
+            o.value = id;
+            o.textContent = alarmT("alarms.tab." + id);
+            sched.appendChild(o);
+        });
+        sched.value = ALARM_SCHEDULES.indexOf(alarm.schedule) >= 0 ? alarm.schedule : "weekdays";
+        sched.addEventListener("change", () => {
+            const patch = { schedule: sched.value };
+            if (sched.value === "weekdays" && !alarm.daysMask) patch.daysMask = 127;
+            if ((sched.value === "once" || sched.value === "monthly" || sched.value === "yearly") && !alarm.date) {
+                const today = new Date();
+                patch.date = today.getFullYear() + "-"
+                    + String(today.getMonth() + 1).padStart(2, "0") + "-"
+                    + String(today.getDate()).padStart(2, "0");
+            }
+            patchAlarm(alarmEditIndex, patch);
+        });
+        field("alarms.tab.schedule", sched);
+
+        const timeWrap = document.createElement("div");
+        timeWrap.className = "alarm-time";
+        const hSel = document.createElement("select");
+        const mSel = document.createElement("select");
+        const apSel = document.createElement("select");
+        ["AM", "PM"].forEach((v) => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = v;
+            apSel.appendChild(o);
+        });
+        fillHourMinute(hSel, mSel, apSel, alarm.hour ?? 8, alarm.minute ?? 0);
+        const onTime = () => patchAlarm(alarmEditIndex, readHourMinute(hSel, mSel, apSel));
+        hSel.addEventListener("change", onTime);
+        mSel.addEventListener("change", onTime);
+        apSel.addEventListener("change", onTime);
+        if (alarm.schedule === "hourly") hSel.hidden = true;
+        timeWrap.appendChild(hSel);
+        timeWrap.appendChild(mSel);
+        timeWrap.appendChild(apSel);
+        field("alarms.custom.time", timeWrap);
+
+        if (alarm.schedule === "once" || alarm.schedule === "monthly" || alarm.schedule === "yearly") {
+            const date = document.createElement("input");
+            date.type = "date";
+            date.value = alarm.date || "";
+            date.addEventListener("change", () => patchAlarm(alarmEditIndex, { date: date.value }));
+            field("alarms.tab.date", date);
+        }
+
+        if (!alarm.schedule || alarm.schedule === "weekdays") {
+            const days = document.createElement("div");
+            days.className = "alarm-days";
+            ALARM_DAYS.forEach(([bit, key]) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "s-day-btn" + ((alarm.daysMask & bit) ? " on" : "");
+                b.textContent = alarmT(key);
+                b.addEventListener("click", () => {
+                    const mask = (alarm.daysMask & bit) ? (alarm.daysMask & ~bit) : (alarm.daysMask | bit);
+                    patchAlarm(alarmEditIndex, { daysMask: mask });
+                });
+                days.appendChild(b);
+            });
+            const all = document.createElement("button");
+            all.type = "button";
+            all.className = "s-day-btn s-day-all";
+            all.textContent = alarmT("alarms.custom.everyDay");
+            all.addEventListener("click", () => {
+                patchAlarm(alarmEditIndex, { daysMask: alarm.daysMask === 127 ? 0 : 127 });
+            });
+            days.appendChild(all);
+            field("alarms.custom.days", days);
+        }
+
+        const msg = document.createElement("input");
+        msg.type = "text";
+        msg.maxLength = 80;
+        msg.value = alarm.message || "";
+        msg.addEventListener("change", () => patchAlarm(alarmEditIndex, { message: msg.value }));
+        field("alarms.tab.message", msg);
+
+        const sndWrap = document.createElement("div");
+        sndWrap.className = "alarm-time";
+        const snd = document.createElement("select");
+        ALARM_SOUNDS.forEach(([id, key]) => {
+            const o = document.createElement("option");
+            o.value = id;
+            o.textContent = alarmT(key);
+            snd.appendChild(o);
+        });
+        snd.value = alarm.sound || "chime-digital";
+        snd.addEventListener("change", () => patchAlarm(alarmEditIndex, { sound: snd.value, customPath: null }));
+        const fileBtn = document.createElement("button");
+        fileBtn.type = "button";
+        fileBtn.className = "s-abtn";
+        fileBtn.textContent = alarmT("settings.alarms.custom");
+        fileBtn.addEventListener("click", async () => {
+            if (!window.cc || !window.cc.openFileDialog) return;
+            const picked = await window.cc.openFileDialog();
+            if (picked) patchAlarm(alarmEditIndex, { customPath: picked });
+        });
+        const testBtn = document.createElement("button");
+        testBtn.type = "button";
+        testBtn.className = "s-abtn";
+        testBtn.textContent = alarmT("settings.alarms.test");
+        testBtn.addEventListener("click", () => {
+            const vol = alarm.volume == null ? (cfg.alarmVolume || 0.75) : alarm.volume;
+            if (window.cc && window.cc.playAlarmNotice) {
+                window.cc.playAlarmNotice({
+                    type: "custom",
+                    sound: alarm.sound,
+                    customPath: alarm.customPath,
+                    volume: vol,
+                    message: alarm.message,
+                    repeatCount: alarm.untilDismissed ? 1 : (alarm.repeatCount || 1),
+                    untilDismissed: false,
+                    pauseSecs: alarm.pauseSecs || 0,
+                });
+            }
+        });
+        sndWrap.appendChild(snd);
+        sndWrap.appendChild(fileBtn);
+        sndWrap.appendChild(testBtn);
+        field("settings.alarms.sound", sndWrap);
+        if (alarm.customPath) {
+            const fileName = document.createElement("div");
+            fileName.className = "alarm-file";
+            fileName.textContent = String(alarm.customPath).split(/[/\\]/).pop();
+            const clr = document.createElement("button");
+            clr.type = "button";
+            clr.className = "s-abtn";
+            clr.textContent = "×";
+            clr.addEventListener("click", () => patchAlarm(alarmEditIndex, { customPath: null }));
+            fileName.appendChild(clr);
+            card.appendChild(fileName);
+        }
+
+        const volWrap = document.createElement("div");
+        volWrap.className = "alarm-time";
+        const useGlobal = document.createElement("input");
+        useGlobal.type = "checkbox";
+        useGlobal.checked = alarm.volume == null;
+        const vol = document.createElement("input");
+        vol.type = "range";
+        vol.min = "0";
+        vol.max = "100";
+        vol.value = String(Math.round(((alarm.volume == null ? (cfg.alarmVolume || 0.75) : alarm.volume) * 100)));
+        vol.disabled = alarm.volume == null;
+        const volVal = document.createElement("span");
+        volVal.textContent = vol.value + "%";
+        useGlobal.addEventListener("change", () => {
+            patchAlarm(alarmEditIndex, { volume: useGlobal.checked ? null : (parseInt(vol.value, 10) / 100) });
+        });
+        vol.addEventListener("change", () => {
+            patchAlarm(alarmEditIndex, { volume: parseInt(vol.value, 10) / 100 });
+        });
+        const globalLab = document.createElement("span");
+        globalLab.textContent = alarmT("alarms.tab.useGlobal");
+        volWrap.appendChild(useGlobal);
+        volWrap.appendChild(globalLab);
+        volWrap.appendChild(vol);
+        volWrap.appendChild(volVal);
+        field("alarms.tab.volume", volWrap);
+
+        const rep = document.createElement("input");
+        rep.type = "number";
+        rep.min = "1";
+        rep.max = "20";
+        rep.value = String(alarm.repeatCount || 1);
+        rep.disabled = !!alarm.untilDismissed;
+        rep.addEventListener("change", () => {
+            const n = Math.max(1, Math.min(20, parseInt(rep.value, 10) || 1));
+            patchAlarm(alarmEditIndex, { repeatCount: n });
+        });
+        field("alarms.tab.repeat", rep);
+
+        const until = document.createElement("input");
+        until.type = "checkbox";
+        until.checked = !!alarm.untilDismissed;
+        until.addEventListener("change", () => patchAlarm(alarmEditIndex, { untilDismissed: until.checked }));
+        field("alarms.tab.untilDismissed", until);
+
+        const pause = document.createElement("input");
+        pause.type = "number";
+        pause.min = "0";
+        pause.max = "60";
+        pause.value = String(alarm.pauseSecs ?? 1);
+        pause.addEventListener("change", () => {
+            patchAlarm(alarmEditIndex, { pauseSecs: Math.max(0, Math.min(60, parseInt(pause.value, 10) || 0)) });
+        });
+        field("alarms.tab.pause", pause);
+
+        const delAfter = document.createElement("input");
+        delAfter.type = "checkbox";
+        delAfter.checked = !!alarm.deleteAfter;
+        delAfter.addEventListener("change", () => patchAlarm(alarmEditIndex, { deleteAfter: delAfter.checked }));
+        field("alarms.tab.deleteAfter", delAfter);
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "abtn red alarm-delete";
+        del.textContent = alarmT("alarms.tab.delete");
+        del.addEventListener("click", () => {
+            const next = alarmRecords().filter((_, i) => i !== alarmEditIndex);
+            alarmEditIndex = Math.max(0, alarmEditIndex - 1);
+            commitAlarms(next);
+        });
+        card.appendChild(del);
+        editor.appendChild(card);
+        if (window.ccIcons) window.ccIcons.replaceIcons(editor);
+    }
+
 
     // ══════════════════════════════════════════════════════════════
     // DIGITAL CLOCK
@@ -8157,13 +8469,7 @@
     });
 
     window.cc.onAlarmChime((p) => {
-        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
-        if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
-        else
-            window.audioEngine.chime(
-                p.sound || "chime-digital",
-                vol,
-            );
+        if (window.cc.playAlarmNotice) window.cc.playAlarmNotice(p);
     });
 
     if (window.cc && window.cc.onVoiceAnnounceTime) {

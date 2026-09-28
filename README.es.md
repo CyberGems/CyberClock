@@ -99,7 +99,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **6 sonidos integrados:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora, Caja de Música
 - **Sonido personalizado:** carga tu propio archivo de audio
 - **Ventana de horario:** silencia las campanadas o reproduce las alarmas solo durante horas concretas
-- **3 alarmas personalizadas:** con repetición por día de la semana
+- **Tab Alarma:** lista de alarmas con horario de una vez, cada hora, a diario, por días, mensual y anual, mensaje, sonido o archivo, repeticiones o hasta cerrar el aviso, pausa y volumen. Las campanadas de cuarto, media y hora en punto viven en el mismo tab
 
 ### 🖥️ Integración con escritorio
 - **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows

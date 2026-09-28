@@ -29,6 +29,18 @@ pub struct CustomAlarm {
     pub days_mask: u8,
     pub sound: String,
     pub custom_path: Option<String>,
+    /// weekdays | once | hourly | daily | monthly | yearly
+    pub schedule: String,
+    pub message: String,
+    pub delete_after: bool,
+    pub repeat_count: u32,
+    pub until_dismissed: bool,
+    pub pause_secs: u32,
+    /// None keeps the global alarm volume.
+    pub volume: Option<f64>,
+    /// YYYY-MM-DD. Used by once (full date), monthly (day) and yearly (month+day).
+    pub date: String,
+    pub id: String,
 }
 
 impl Default for CustomAlarm {
@@ -40,6 +52,15 @@ impl Default for CustomAlarm {
             days_mask: 0,
             sound: "chime-digital".to_string(),
             custom_path: None,
+            schedule: "weekdays".to_string(),
+            message: String::new(),
+            delete_after: false,
+            repeat_count: 1,
+            until_dismissed: false,
+            pause_secs: 1,
+            volume: None,
+            date: String::new(),
+            id: String::new(),
         }
     }
 }

@@ -99,7 +99,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **6 Built-In Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, Music Box
 - **Custom Sound Support** — Load your own audio file
 - **Schedule Window** — Silence chimes or play alarms only during specific hours
-- **3 Custom Alarms** — With day-of-week repetition
+- **Alarm tab** — A list of alarms with once, hourly, daily, weekday, monthly, and yearly schedules, a message, sound or audio file, repeat count or until dismissed, pause, and volume. Quarter, half, and hour chimes live on the same tab
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
