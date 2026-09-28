@@ -75,7 +75,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
 - **Pautas de respiración:** respiración en caja (4-4-4-4) y técnica 4-7-8
-- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, anillo de respiración y un espectro pequeño. El audio sigue sonando cuando el modo completo está oculto
+- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, anillo de respiración, un espectro pequeño y 10 diseños. El audio sigue sonando cuando el modo completo está oculto
 - **Tiempo de sesión:** con consejos de mindfulness y parada automática (15m, 30m, 1h, 2h)
 - **Programador automático:** programa horarios de reproducción automática
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado

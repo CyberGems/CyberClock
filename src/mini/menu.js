@@ -83,8 +83,51 @@
         });
     }
 
+    function relaxSkinId(cfg) {
+        const id = parseInt(cfg && cfg.floatRelaxDesign, 10);
+        return id >= 1 && id <= 10 ? id : 1;
+    }
+
+    function relaxSkinLabel(id) {
+        const key = "float.relaxSkin." + id;
+        if (window.ccI18n) {
+            const name = window.ccI18n.t(key);
+            if (name && name !== key) return name;
+        }
+        return String(id);
+    }
+
+    function ensureRelaxSkins() {
+        const grid = document.getElementById("relax-skin-pills");
+        if (!grid || grid.dataset.ready === "1") return;
+        grid.dataset.ready = "1";
+        for (let i = 1; i <= 10; i++) {
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "relax-skin-pill";
+            pill.dataset.skin = String(i);
+            pill.textContent = String(i);
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatRelaxDesign: i });
+                }
+                currentCfg = Object.assign({}, currentCfg, { floatRelaxDesign: i });
+                syncRelaxMenu(currentCfg);
+            });
+            grid.appendChild(pill);
+        }
+    }
+
     function syncRelaxMenu(cfg) {
         cfg = cfg || {};
+        ensureRelaxSkins();
+        const skin = relaxSkinId(cfg);
+        document.querySelectorAll("#relax-skin-pills .relax-skin-pill").forEach((pill) => {
+            pill.classList.toggle("active", parseInt(pill.dataset.skin, 10) === skin);
+        });
+        const badge = document.getElementById("ctx-relax-skin-badge");
+        if (badge) badge.textContent = relaxSkinLabel(skin);
         const lock = document.getElementById("toggle-relax-lock");
         if (lock) lock.classList.toggle("on", cfg.relaxPositionLocked === true);
         const breathe = document.getElementById("toggle-relax-breathe");

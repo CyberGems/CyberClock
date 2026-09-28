@@ -109,6 +109,8 @@
         }
         const op = typeof s.floatRelaxOpacity === "number" ? s.floatRelaxOpacity : 1;
         if (shell) shell.style.opacity = String(op);
+        const skin = parseInt(s.floatRelaxDesign, 10);
+        if (shell) shell.dataset.skin = String(skin >= 1 && skin <= 10 ? skin : 1);
         showBreathe = s.floatRelaxShowBreathe !== false;
         document.body.classList.toggle("breathe-off", !showBreathe);
         if (patternChanged && guideOn) {
@@ -207,9 +209,16 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, w, h);
 
+        const shellStyle = shell ? getComputedStyle(shell) : null;
         const bodyStyle = getComputedStyle(document.body);
-        const acc = bodyStyle.getPropertyValue("--accent-a").trim() || "#c8dce8";
-        const rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "200,220,232";
+        let acc = (shellStyle && shellStyle.getPropertyValue("--skin-accent").trim()) || "";
+        let rgb = (shellStyle && shellStyle.getPropertyValue("--skin-rgb").trim()) || "";
+        if (!acc || acc.indexOf("var(") >= 0) {
+            acc = bodyStyle.getPropertyValue("--accent-a").trim() || "#c8dce8";
+        }
+        if (!rgb || rgb.indexOf("var(") >= 0) {
+            rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "200,220,232";
+        }
         const data = active && engine ? engine.getAnalyserData() : null;
 
         if (data && data.length) {

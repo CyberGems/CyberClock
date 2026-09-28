@@ -75,7 +75,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
 - **Breathing Patterns** — Box breathing (4-4-4-4) and 4-7-8 technique
-- **Floating Relax Widget** — Compact desktop session with the track name, play and next, a breathing ring, and a small spectrum. Audio keeps playing when full mode is hidden
+- **Floating Relax Widget** — Compact desktop session with the track name, play and next, a breathing ring, a small spectrum, and 10 designs. Audio keeps playing when full mode is hidden
 - **Session Timer** — With mindfulness tips and auto-stop (15m, 30m, 1h, 2h)
 - **Auto Scheduler** — Schedule automatic playback times
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted

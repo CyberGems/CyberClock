@@ -26,10 +26,12 @@ body {
 .relax-shell {
     width: calc(100% - 4px);
     height: calc(100% - 4px);
+    --skin-accent: var(--accent-a, #c8dce8);
+    --skin-rgb: var(--rgb-accent, 200, 220, 232);
     background: linear-gradient(165deg, #14171f 0%, #08090c 100%);
     border-radius: 14px;
     box-shadow:
-        inset 0 0 0 1px rgba(var(--rgb-accent), 0.32),
+        inset 0 0 0 1px rgba(var(--skin-rgb), 0.38),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     clip-path: inset(0 round 14px);
     padding: 8px 10px 10px;
@@ -65,9 +67,9 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent-a, #c8dce8);
-    background: rgba(var(--rgb-accent), 0.12);
-    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.28);
+    color: var(--skin-accent, #c8dce8);
+    background: rgba(var(--skin-rgb), 0.12);
+    box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.28);
     flex-shrink: 0;
 }
 
@@ -114,7 +116,7 @@ button {
 }
 
 .relax-icon-btn:hover {
-    background: rgba(var(--rgb-accent), 0.16);
+    background: rgba(var(--skin-rgb), 0.16);
     color: #fff;
 }
 
@@ -146,8 +148,8 @@ button {
     height: 58px;
     border: none;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 42%, rgba(var(--rgb-accent), 0.16), rgba(0, 0, 0, 0.15) 70%);
-    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.28);
+    background: radial-gradient(circle at 50% 42%, rgba(var(--skin-rgb), 0.16), rgba(0, 0, 0, 0.15) 70%);
+    box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.28);
     position: relative;
     flex-shrink: 0;
     padding: 0;
@@ -157,10 +159,10 @@ button {
     position: absolute;
     inset: 9px;
     border-radius: 50%;
-    border: 1.5px solid rgba(var(--rgb-accent), 0.9);
+    border: 1.5px solid rgba(var(--skin-rgb), 0.9);
     box-shadow:
-        0 0 12px rgba(var(--rgb-accent), 0.4),
-        inset 0 0 8px rgba(var(--rgb-accent), 0.25);
+        0 0 12px rgba(var(--skin-rgb), 0.4),
+        inset 0 0 8px rgba(var(--skin-rgb), 0.25);
     transform: scale(var(--breath, 1));
     transition: transform 0.08s linear;
 }
@@ -191,7 +193,7 @@ button {
 }
 
 .transport-btn:hover {
-    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.45);
+    box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.45);
 }
 
 #btn-play .ico-pause {
@@ -218,7 +220,7 @@ button {
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--accent-a, #c8dce8);
+    color: var(--skin-accent, #c8dce8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -232,4 +234,91 @@ button {
 body.breathe-off .breathe,
 body.breathe-off .phase {
     display: none;
+}
+
+/* Ten designs. Skin 1 keeps the user accent. The stroke stays inset
+   so the transparent window does not pick up a light corner chip. */
+
+#relax-shell[data-skin="2"] {
+    --skin-accent: #38bdf8;
+    --skin-rgb: 56, 189, 248;
+    background: linear-gradient(165deg, #071529 0%, #020a14 100%);
+}
+#relax-shell[data-skin="2"] .relax-track {
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+#relax-shell[data-skin="3"] {
+    --skin-accent: #3dff8a;
+    --skin-rgb: 61, 255, 138;
+    background: linear-gradient(165deg, #06150a 0%, #020b04 100%);
+}
+#relax-shell[data-skin="3"] .relax-track,
+#relax-shell[data-skin="3"] .elapsed,
+#relax-shell[data-skin="3"] .phase {
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+}
+#relax-shell[data-skin="3"] .relax-track {
+    color: #b8ffd4;
+}
+
+#relax-shell[data-skin="4"] {
+    --skin-accent: #f4f7fb;
+    --skin-rgb: 244, 247, 251;
+    background: linear-gradient(165deg, #222836 0%, #10141c 100%);
+}
+
+#relax-shell[data-skin="5"] {
+    --skin-accent: #ff4d9a;
+    --skin-rgb: 255, 77, 154;
+    background: linear-gradient(165deg, #1a0820 0%, #09030f 100%);
+}
+#relax-shell[data-skin="5"] .elapsed {
+    color: rgba(0, 245, 255, 0.72);
+}
+
+#relax-shell[data-skin="6"] {
+    --skin-accent: #ffc14d;
+    --skin-rgb: 255, 193, 77;
+    background: linear-gradient(165deg, #1b160d 0%, #0c0905 100%);
+}
+#relax-shell[data-skin="6"] .relax-track {
+    color: #ffe7b0;
+}
+
+#relax-shell[data-skin="7"] {
+    --skin-accent: #ff8a6a;
+    --skin-rgb: 255, 138, 106;
+    background: linear-gradient(165deg, #241018 0%, #100814 100%);
+}
+#relax-shell[data-skin="7"] .elapsed {
+    color: rgba(192, 132, 252, 0.8);
+}
+
+#relax-shell[data-skin="8"] {
+    --skin-accent: #a5f3fc;
+    --skin-rgb: 165, 243, 252;
+    background: linear-gradient(165deg, #0b1c28 0%, #041018 100%);
+}
+
+#relax-shell[data-skin="9"] {
+    --skin-accent: #c084fc;
+    --skin-rgb: 192, 132, 252;
+    background: linear-gradient(165deg, #160b28 0%, #07030f 100%);
+}
+
+#relax-shell[data-skin="10"] {
+    --skin-accent: #5eead4;
+    --skin-rgb: 94, 234, 212;
+    background:
+        repeating-linear-gradient(
+            180deg,
+            rgba(94, 234, 212, 0.035) 0 1px,
+            transparent 1px 4px
+        ),
+        linear-gradient(165deg, #071614 0%, #030807 100%);
+}
+#relax-shell[data-skin="10"] .relax-track,
+#relax-shell[data-skin="10"] .elapsed {
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
 }
