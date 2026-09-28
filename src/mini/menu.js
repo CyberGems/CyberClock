@@ -461,8 +461,9 @@
                     if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.noAnimations");
                     const edgeLimitsLbl = document.querySelector("#ctx-edge-limits .switch-lbl");
                     if (edgeLimitsLbl) edgeLimitsLbl.textContent = window.ccI18n.t("settings.mini.edgeLimits");
-                    const fullLbl = document.querySelector('.ctx-item[data-action="full"] .label');
-                    if (fullLbl) fullLbl.textContent = window.ccI18n.t("tray.fullMode");
+                    document.querySelectorAll('.ctx-item[data-action="full"] .label').forEach((el) => {
+                        el.textContent = window.ccI18n.t("tray.fullMode");
+                    });
                     const timerLbl = document.querySelector('.ctx-item[data-action="new_timer"] .label');
                     if (timerLbl) timerLbl.textContent = window.ccI18n.t("float.newTimer");
                     const stopwatchLbl = document.querySelector('.ctx-item[data-action="new_stopwatch"] .label');
@@ -909,7 +910,14 @@
                 } catch (_) {}
             }
             if (window.cc && window.cc.menuAction) {
-                window.cc.menuAction(action);
+                let act = action;
+                if (action === "full") {
+                    const kind = activeCaller && activeCaller.kind;
+                    if (kind === "timer") act = "timer";
+                    else if (kind === "sw") act = "stopwatch";
+                    else act = "home";
+                }
+                window.cc.menuAction(act);
             }
         });
     });

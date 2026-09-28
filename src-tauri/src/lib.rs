@@ -2984,7 +2984,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             let _ = app.emit("settings:updated", load_settings(&app));
             true
         }
-        "timer" | "stopwatch" | "relax" | "settings" => {
+        "home" | "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);
@@ -3905,7 +3905,7 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         "new_analog" | "new_analog_tray" => {
             spawn_float_window(&app, "analog");
         }
-        "timer" | "stopwatch" | "relax" | "settings" => {
+        "home" | "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);

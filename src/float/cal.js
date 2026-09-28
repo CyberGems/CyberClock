@@ -731,7 +731,9 @@
     if (ctxFull) {
         ctxFull.addEventListener("click", () => {
             closeContextMenu();
-            if (window.cc && window.cc.goFull) {
+            if (window.cc && window.cc.menuAction) {
+                window.cc.menuAction("home");
+            } else if (window.cc && window.cc.goFull) {
                 window.cc.goFull();
             }
         });
