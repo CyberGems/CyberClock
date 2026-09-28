@@ -181,6 +181,52 @@ body.is-dragging * {
     animation: ctxFadeIn 0.12s ease-out;
 }
 
+.analog-ctx-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    padding: 2px;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.analog-ctx-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: #94a3b8;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.analog-ctx-tab:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.analog-ctx-tab.active {
+    background: rgba(var(--rgb-accent), 0.22);
+    color: var(--accent-a);
+}
+
+.analog-ctx-tab.active:hover {
+    background: rgba(var(--rgb-accent), 0.32);
+    color: var(--accent-a);
+}
+
+.analog-ctx-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5px;
+}
+
 .analog-ctx-menu::-webkit-scrollbar {
     width: 3px;
 }

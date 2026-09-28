@@ -122,6 +122,8 @@
         }
     }
 
+    let announceGen = 0;
+
     function announce(cfg, hour, minute) {
         if (!('speechSynthesis' in window)) return;
         const va = (cfg && cfg.voiceAnnouncer) || {};
@@ -134,16 +136,35 @@
         const lang = (cfg && cfg.language) || 'auto';
         const text = formatAnnouncementText(h, m, lang, va.style || 'natural');
         const voice = getBestVoice(lang, va.voiceGender || 'auto', va.voiceName);
+        const gen = ++announceGen;
 
         const doSpeak = () => {
+            if (gen !== announceGen) return;
+            const synth = window.speechSynthesis;
             try {
-                window.speechSynthesis.cancel();
-                const utter = new SpeechSynthesisUtterance(text);
-                if (voice) utter.voice = voice;
-                utter.volume = Math.max(0, Math.min(1, va.volume ?? 0.85));
-                utter.rate = 0.95;
-                window.speechSynthesis.speak(utter);
+                synth.cancel();
             } catch (_) {}
+            const utter = new SpeechSynthesisUtterance(text);
+            if (voice) {
+                utter.voice = voice;
+                if (voice.lang) utter.lang = voice.lang;
+            }
+            utter.volume = Math.max(0, Math.min(1, va.volume ?? 0.85));
+            // WebView2 speaks the utterance twice when rate is not 1,
+            // and again when speak() follows cancel() in the same turn.
+            utter.rate = 1;
+            let started = false;
+            utter.onstart = () => {
+                if (started || gen !== announceGen) {
+                    try { synth.cancel(); } catch (_) {}
+                    return;
+                }
+                started = true;
+            };
+            setTimeout(() => {
+                if (gen !== announceGen) return;
+                try { synth.speak(utter); } catch (_) {}
+            }, 60);
         };
 
         if (va.chimeBefore !== false && window.audioEngine) {

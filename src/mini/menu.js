@@ -103,6 +103,13 @@
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
+            document.querySelectorAll("#ctx-timer-tabs .ctx-tab").forEach((b) => {
+                b.classList.toggle("on", b.dataset.tab === "actions");
+            });
+            const timerActions = document.getElementById("timer-panel-actions");
+            const timerCustomize = document.getElementById("timer-panel-customize");
+            if (timerActions) timerActions.style.display = "flex";
+            if (timerCustomize) timerCustomize.style.display = "none";
 
             // Sound and loop only apply to timers
             const rowSound = document.getElementById("ctx-timer-sound");
@@ -250,7 +257,7 @@
         } else {
             if (timerView) timerView.style.display = "none";
             if (tabs) tabs.style.display = "flex";
-            const onTab = document.querySelector(".ctx-tab.on")?.dataset.tab || "actions";
+            const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "actions";
             if (actionsPanel) actionsPanel.style.display = onTab === "actions" ? "flex" : "none";
             if (customizePanel) customizePanel.style.display = onTab === "customize" ? "flex" : "none";
         }
@@ -418,7 +425,7 @@
         } else {
             if (timerView) timerView.style.display = "none";
             if (ctxTabs) ctxTabs.style.display = "flex";
-            const onTab = document.querySelector(".ctx-tab.on")?.dataset.tab || "customize";
+            const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "customize";
             if (panelCustomize) panelCustomize.style.display = onTab === "customize" ? "flex" : "none";
             if (panelActions) panelActions.style.display = onTab === "actions" ? "flex" : "none";
         }
@@ -849,15 +856,28 @@
     }
 
     // Tab switching (Actions vs Customize)
-    document.querySelectorAll(".ctx-tab").forEach((tabBtn) => {
+    document.querySelectorAll("#ctx-tabs .ctx-tab").forEach((tabBtn) => {
         tabBtn.addEventListener("click", () => {
             const target = tabBtn.dataset.tab;
-            document.querySelectorAll(".ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
-            document.querySelectorAll(".ctx-tab-panel").forEach((p) => {
+            document.querySelectorAll("#ctx-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
+            document.querySelectorAll("#tab-panel-actions, #tab-panel-customize").forEach((p) => {
                 const isTarget = p.id === `tab-panel-${target}`;
                 p.style.display = isTarget ? "flex" : "none";
                 p.classList.toggle("on", isTarget);
             });
+            reportMenuHeight();
+        });
+    });
+
+    document.querySelectorAll("#ctx-timer-tabs .ctx-tab").forEach((tabBtn) => {
+        tabBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const target = tabBtn.dataset.tab;
+            document.querySelectorAll("#ctx-timer-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === target));
+            const actions = document.getElementById("timer-panel-actions");
+            const customize = document.getElementById("timer-panel-customize");
+            if (actions) actions.style.display = target === "actions" ? "flex" : "none";
+            if (customize) customize.style.display = target === "customize" ? "flex" : "none";
             reportMenuHeight();
         });
     });

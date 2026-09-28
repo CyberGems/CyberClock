@@ -776,27 +776,79 @@
     // CONTEXT MENU
     // ═══════════════════════════════════════════════════════
     const shell = document.getElementById("shell");
+    let popupMenuOpen = false;
+    let blockMenuOpen = false;
+    let ignoreNextMenuClosed = false;
+    let menuPointerAt = 0;
+    let menuClosedAt = 0;
+
+    if (window.cc && window.cc.onMenuClosed) {
+        window.cc.onMenuClosed(() => {
+            popupMenuOpen = false;
+            menuClosedAt = Date.now();
+            if (ignoreNextMenuClosed) {
+                ignoreNextMenuClosed = false;
+                return;
+            }
+            if (Date.now() - menuPointerAt < 400) blockMenuOpen = true;
+        });
+    }
+
+    function armMenuToggle() {
+        menuPointerAt = Date.now();
+        if (popupMenuOpen || Date.now() - menuClosedAt < 80) blockMenuOpen = true;
+    }
+
+    async function openOrToggleMenu(point) {
+        if (!window.cc) return;
+        if (blockMenuOpen) {
+            blockMenuOpen = false;
+            popupMenuOpen = false;
+            ignoreNextMenuClosed = true;
+            setTimeout(() => { ignoreNextMenuClosed = false; }, 450);
+            if (window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
+            return;
+        }
+        if (!window.cc.openMiniContextMenu) return;
+        const opened = await window.cc.openMiniContextMenu(point);
+        popupMenuOpen = opened !== false;
+        blockMenuOpen = false;
+        if (!popupMenuOpen) menuClosedAt = Date.now();
+    }
+
     shell.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        window.cc.getWindowPosition().then(winPos => {
-            window.cc.openMiniContextMenu({
-                x: e.clientX, y: e.clientY,
-                screenX: winPos[0] + e.clientX, screenY: winPos[1] + e.clientY,
+        armMenuToggle();
+        const point = (winPos) => ({
+            x: e.clientX,
+            y: e.clientY,
+            screenX: (winPos ? winPos[0] : 0) + e.clientX,
+            screenY: (winPos ? winPos[1] : 0) + e.clientY,
+        });
+        if (window.cc && window.cc.getWindowPosition) {
+            window.cc.getWindowPosition().then((winPos) => openOrToggleMenu(point(winPos))).catch(() => {
+                openOrToggleMenu({
+                    x: e.clientX, y: e.clientY,
+                    screenX: e.screenX, screenY: e.screenY,
+                });
             });
-        }).catch(() => {
-            window.cc.openMiniContextMenu({
+        } else {
+            openOrToggleMenu({
                 x: e.clientX, y: e.clientY,
                 screenX: e.screenX, screenY: e.screenY,
             });
-        });
+        }
     });
 
     // ═══════════════════════════════════════════════════════
     // DRAG — native Tauri only
     // ═══════════════════════════════════════════════════════
     shell.addEventListener("mousedown", (e) => {
-        // Close context menu if open (it's a separate Tauri popup window)
+        if (e.button === 2) {
+            armMenuToggle();
+            return;
+        }
         window.cc.closeMenuPopup().catch(() => {});
         if (e.target.closest(".controls")) return;
         if (e.button !== 0) return;

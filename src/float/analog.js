@@ -28,6 +28,10 @@
     const btnNext = document.getElementById("btn-dial-next");
 
     const ctxMenu = document.getElementById("analog-ctx-menu");
+    const analogTabActions = document.getElementById("analog-tab-actions");
+    const analogTabStyle = document.getElementById("analog-tab-style");
+    const analogPanelActions = document.getElementById("analog-panel-actions");
+    const analogPanelStyle = document.getElementById("analog-panel-style");
     const ctxCurrentSkin = document.getElementById("ctx-current-skin");
     const skinGrid = document.getElementById("analog-skin-grid");
     const ctxAot = document.getElementById("ctx-aot");
@@ -179,6 +183,27 @@
             showBrand,
             brandText,
             date: new Date(),
+        });
+    }
+
+    function setAnalogTab(tabName) {
+        const style = tabName === "style";
+        if (analogTabActions) analogTabActions.classList.toggle("active", !style);
+        if (analogTabStyle) analogTabStyle.classList.toggle("active", style);
+        if (analogPanelActions) analogPanelActions.style.display = style ? "none" : "flex";
+        if (analogPanelStyle) analogPanelStyle.style.display = style ? "flex" : "none";
+    }
+
+    if (analogTabActions) {
+        analogTabActions.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setAnalogTab("actions");
+        });
+    }
+    if (analogTabStyle) {
+        analogTabStyle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setAnalogTab("style");
         });
     }
 

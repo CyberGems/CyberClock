@@ -8,6 +8,7 @@
     let cfg = {};
     let calNotes = {};
     let isAot = false;
+    let showWeeks = false;
 
     const now = new Date();
     let viewYear = now.getFullYear();
@@ -30,6 +31,8 @@
     const ctxAotCheck = document.getElementById("ctx-aot-check");
     const ctxLock = document.getElementById("ctx-lock");
     const ctxLockCheck = document.getElementById("ctx-lock-check");
+    const ctxWeeks = document.getElementById("ctx-weeks");
+    const ctxWeeksCheck = document.getElementById("ctx-weeks-check");
     const ctxToday = document.getElementById("ctx-today");
     const ctxPicker = document.getElementById("ctx-picker");
     const ctxFull = document.getElementById("ctx-full");
@@ -82,6 +85,22 @@
 
     function isoKey(y, m, d) {
         return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    }
+
+    function isoWeek(date) {
+        const t = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+        return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+    }
+
+    function rowHasToday(monday) {
+        const start = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate());
+        const end = new Date(start);
+        end.setDate(start.getDate() + 7);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return today >= start && today < end;
     }
 
     function currentOpacity() {
@@ -283,6 +302,8 @@
         }
 
         applyOpacity(currentOpacity());
+        showWeeks = cfg.floatCalShowWeeks === true;
+        if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
         renderCalendar();
     }
 
@@ -298,9 +319,16 @@
 
         // Weekdays Header
         if (weekdaysEl) {
-            weekdaysEl.innerHTML = days
-                .map((d, i) => `<span class="${i >= 5 ? 'cal-we' : ''}">${d}</span>`)
+            const labels = days
+                .map((d, i) => `<span class="${i >= 5 ? "cal-we" : ""}">${d}</span>`)
                 .join("");
+            if (showWeeks) {
+                const col = window.ccI18n ? window.ccI18n.t("float.weekCol") : "W";
+                const tip = window.ccI18n ? window.ccI18n.t("calendar.stat.week") : "Week";
+                weekdaysEl.innerHTML = `<span class="cal-week-hd" data-tooltip="${tip}" data-tooltip-dir="bottom" data-tooltip-align="left">${col}</span>${labels}`;
+            } else {
+                weekdaysEl.innerHTML = labels;
+            }
         }
 
         // Calendar Days Grid
@@ -394,6 +422,25 @@
             const key = isoKey(nextYear, nextMonth, next);
             gridEl.appendChild(createDayCell(next, key, true, isWeekend, false, rowIdx, colIdx));
         }
+
+        if (shell) shell.classList.toggle("show-weeks", showWeeks);
+        if (!showWeeks) return;
+
+        const rows = totalRows / 7;
+        for (let r = rows - 1; r >= 0; r--) {
+            const monday = new Date(viewYear, viewMonth, 1 + r * 7 - startOffset);
+            const week = isoWeek(monday);
+            const cell = document.createElement("div");
+            cell.className = "cal-week-num" + (rowHasToday(monday) ? " is-current" : "");
+            cell.textContent = String(week);
+            const tip = window.ccI18n
+                ? window.ccI18n.t("float.weekNumber", { n: week })
+                : `Week ${week}`;
+            cell.setAttribute("data-tooltip", tip);
+            cell.setAttribute("data-tooltip-dir", r === 0 ? "bottom" : "top");
+            cell.setAttribute("data-tooltip-align", "left");
+            gridEl.insertBefore(cell, gridEl.children[r * 7] || null);
+        }
     }
 
     // ── Quick Month & Year Picker ────────────────────────────────
@@ -444,9 +491,41 @@
         });
     }
 
+    let suppressTitleClick = false;
     if (titleEl) {
+        titleEl.addEventListener("mousedown", (e) => {
+            if (e.button !== 0 || cfg.calPositionLocked === true) return;
+            const startX = e.screenX;
+            const startY = e.screenY;
+            suppressTitleClick = false;
+            const onMove = (ev) => {
+                if (suppressTitleClick) return;
+                if (Math.abs(ev.screenX - startX) < 4 && Math.abs(ev.screenY - startY) < 4) return;
+                suppressTitleClick = true;
+                document.removeEventListener("mousemove", onMove);
+                closePicker();
+                document.body.classList.add("is-dragging");
+                if (window.cc && window.cc.startDragging) {
+                    window.cc.startDragging()
+                        .then(() => document.body.classList.remove("is-dragging"))
+                        .catch(() => document.body.classList.remove("is-dragging"));
+                } else {
+                    document.body.classList.remove("is-dragging");
+                }
+            };
+            const onUp = () => {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+            };
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+        });
         titleEl.addEventListener("click", (e) => {
             e.stopPropagation();
+            if (suppressTitleClick) {
+                suppressTitleClick = false;
+                return;
+            }
             togglePicker();
         });
     }
@@ -527,6 +606,7 @@
         }
 
         if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", Boolean(cfg.calPositionLocked));
+        if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
 
         // Sync opacity chips
         syncOpacityChips(currentOpacity());
@@ -577,7 +657,7 @@
         if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target) && (!btnMenu || !btnMenu.contains(e.target))) {
             closeContextMenu();
         }
-        if (popoverEl && !popoverEl.hidden && !popoverEl.contains(e.target) && e.target !== titleEl) {
+        if (popoverEl && !popoverEl.hidden && !popoverEl.contains(e.target) && !e.target.closest("#cal-title")) {
             closePicker();
         }
     }, { capture: true });
@@ -602,6 +682,19 @@
                 window.cc.saveSettings({ calPositionLocked: next });
             }
             if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", next);
+        });
+    }
+
+    if (ctxWeeks) {
+        ctxWeeks.addEventListener("click", () => {
+            closeContextMenu();
+            showWeeks = !showWeeks;
+            cfg.floatCalShowWeeks = showWeeks;
+            if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalShowWeeks: showWeeks });
+            }
+            renderCalendar();
         });
     }
 
@@ -824,10 +917,12 @@
             if (e.target.closest("#cal-context-menu, .cal-ctx-menu, #cal-picker-popover, .cal-picker-popover")) return;
 
             if (ctxMenu && !ctxMenu.hidden) {
+                if (e.target.closest("#btn-cal-menu")) return;
                 closeContextMenu();
                 return;
             }
             if (popoverEl && !popoverEl.hidden) {
+                if (e.target.closest("#cal-title")) return;
                 closePicker();
                 return;
             }

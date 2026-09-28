@@ -544,34 +544,77 @@
     }
 
     const btnMenu = document.getElementById("btn-menu");
+    let popupMenuOpen = false;
+    let blockMenuOpen = false;
+    let ignoreNextMenuClosed = false;
+    let menuPointerAt = 0;
+    let menuClosedAt = 0;
+
+    if (window.cc && window.cc.onMenuClosed) {
+        window.cc.onMenuClosed(() => {
+            popupMenuOpen = false;
+            menuClosedAt = Date.now();
+            if (ignoreNextMenuClosed) {
+                ignoreNextMenuClosed = false;
+                return;
+            }
+            if (Date.now() - menuPointerAt < 400) blockMenuOpen = true;
+        });
+    }
+
+    function armMenuToggle() {
+        menuPointerAt = Date.now();
+        if (popupMenuOpen || Date.now() - menuClosedAt < 80) blockMenuOpen = true;
+    }
+
+    function menuPointFromClient(clientX, clientY, winPos) {
+        const origin = winPos || [0, 0];
+        return {
+            x: clientX,
+            y: clientY,
+            screenX: origin[0] + clientX,
+            screenY: origin[1] + clientY,
+        };
+    }
+
+    async function openOrToggleMenu(point) {
+        if (!window.cc) return;
+        if (blockMenuOpen) {
+            blockMenuOpen = false;
+            popupMenuOpen = false;
+            ignoreNextMenuClosed = true;
+            setTimeout(() => { ignoreNextMenuClosed = false; }, 450);
+            if (window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
+            return;
+        }
+        if (!window.cc.openMiniContextMenu) return;
+        const opened = await window.cc.openMiniContextMenu(point);
+        popupMenuOpen = opened !== false;
+        blockMenuOpen = false;
+        if (!popupMenuOpen) menuClosedAt = Date.now();
+    }
+
+    function openMenuAt(clientX, clientY) {
+        if (window.cc && window.cc.getWindowPosition) {
+            window.cc.getWindowPosition().then((winPos) => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY, winPos));
+            }).catch(() => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY));
+            });
+        } else {
+            openOrToggleMenu(menuPointFromClient(clientX, clientY));
+        }
+    }
+
     if (btnMenu) {
+        btnMenu.addEventListener("pointerdown", () => armMenuToggle());
         btnMenu.addEventListener("click", (e) => {
             e.stopPropagation();
             btnMenu.blur();
             const rect = btnMenu.getBoundingClientRect();
             const clientX = Math.round(rect.left + rect.width / 2);
             const clientY = Math.round(rect.bottom + 4);
-
-            if (window.cc && window.cc.openMiniContextMenu) {
-                if (window.cc.getWindowPosition) {
-                    window.cc.getWindowPosition().then(winPos => {
-                        window.cc.openMiniContextMenu({
-                            x: clientX, y: clientY,
-                            screenX: winPos[0] + clientX, screenY: winPos[1] + clientY,
-                        });
-                    }).catch(() => {
-                        window.cc.openMiniContextMenu({
-                            x: clientX, y: clientY,
-                            screenX: clientX, screenY: clientY,
-                        });
-                    });
-                } else {
-                    window.cc.openMiniContextMenu({
-                        x: clientX, y: clientY,
-                        screenX: clientX, screenY: clientY,
-                    });
-                }
-            }
+            openMenuAt(clientX, clientY);
         });
         btnMenu.addEventListener("mouseenter", () => showActionTicker("float.menu", ICO_SETTINGS));
         btnMenu.addEventListener("mouseleave", hideActionTicker);
@@ -600,6 +643,7 @@
     for (const b of presets) b.addEventListener("click", () => tAdd(Number(b.dataset.s)));
 
     shellEl().addEventListener("mousedown", (e) => {
+        if (e.target.closest("#btn-menu")) return;
         if (window.cc && window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
         if (e.target.closest(".controls, .float-preset, #btn-dismiss")) return;
         if (e.button !== 0) return;
@@ -617,17 +661,8 @@
     document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        window.cc.getWindowPosition().then(winPos => {
-            window.cc.openMiniContextMenu({
-                x: e.clientX, y: e.clientY,
-                screenX: winPos[0] + e.clientX, screenY: winPos[1] + e.clientY,
-            });
-        }).catch(() => {
-            window.cc.openMiniContextMenu({
-                x: e.clientX, y: e.clientY,
-                screenX: e.screenX, screenY: e.screenY,
-            });
-        });
+        armMenuToggle();
+        openMenuAt(e.clientX, e.clientY);
     });
 
     window.addEventListener("keydown", (e) => {

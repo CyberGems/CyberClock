@@ -213,6 +213,9 @@
         font-weight: 700;
         box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.4);
     }
+    .ctx-tab.on:hover {
+        filter: brightness(1.12);
+    }
     .ctx-tab-panel {
         display: flex;
         flex-direction: column;

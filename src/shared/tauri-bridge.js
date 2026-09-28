@@ -89,13 +89,17 @@
             await invoke("set_window_size", args);
         },
         openMiniContextMenu: async (point) => {
-            // Use client coordinates which are more reliable across DPI scaling
-            await invoke("open_mini_context_menu", {
+            // Use client coordinates which are more reliable across DPI scaling.
+            // Returns false when the same caller toggled an open menu closed.
+            return await invoke("open_mini_context_menu", {
                 x: Math.round(point.x || 0),
                 y: Math.round(point.y || 0),
                 screenX: Math.round(point.screenX),
                 screenY: Math.round(point.screenY)
             });
+        },
+        onMenuClosed: (cb) => {
+            return subscribe("menu:closed", cb);
         },
         closeMiniContextMenu: async () => {
             await invoke("close_mini_context_menu");

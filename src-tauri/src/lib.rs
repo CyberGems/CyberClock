@@ -91,9 +91,14 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
             let _ = app.emit_to(label.as_str(), event, payload);
         }
         None => {
-            // No window visible: fall back to app-wide so a chime
-            // is never fully lost (all windows are hidden anyway).
-            let _ = app.emit(event, payload);
+            // Hidden webviews still play audio. An app-wide emit would
+            // make main and mini announce the same chime. One window is enough.
+            let label = if app.get_webview_window("main").is_some() {
+                "main"
+            } else {
+                "mini"
+            };
+            let _ = app.emit_to(label, event, payload);
         }
     }
 }
@@ -2793,7 +2798,7 @@ fn open_mini_context_menu(
     _y: i32,
     screen_x: i32,
     screen_y: i32,
-) {
+) -> bool {
     if let Some(menu) = app.get_webview_window("menu") {
         let (clock_x, clock_y, clock_w, clock_h) =
             match (window.outer_position(), window.outer_size()) {
@@ -2806,6 +2811,18 @@ fn open_mini_context_menu(
         }
 
         let caller_label = window.label().to_string();
+        let same_caller = CURRENT_MENU_CALLER
+            .lock()
+            .ok()
+            .and_then(|c| c.clone())
+            .as_deref()
+            == Some(caller_label.as_str());
+        if menu.is_visible().unwrap_or(false) && same_caller {
+            let _ = menu.hide();
+            let _ = app.emit("menu:closed", ());
+            return false;
+        }
+
         if let Ok(mut c) = CURRENT_MENU_CALLER.lock() {
             *c = Some(caller_label.clone());
         }
@@ -2831,7 +2848,9 @@ fn open_mini_context_menu(
         let _ = menu.show();
         let _ = menu.set_focus();
         refresh_taskbar_tab(&menu);
+        return true;
     }
+    false
 }
 
 #[tauri::command]
@@ -2875,7 +2894,11 @@ fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
 #[tauri::command]
 fn close_mini_context_menu(app: AppHandle) {
     if let Some(menu) = app.get_webview_window("menu") {
+        if !menu.is_visible().unwrap_or(false) {
+            return;
+        }
         let _ = menu.hide();
+        let _ = app.emit("menu:closed", ());
     }
 }
 
@@ -2886,7 +2909,10 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
     // Hide menu first (except for "aot" which needs a visual delay in the UI)
     if action != "aot" {
         if let Some(menu) = app.get_webview_window("menu") {
-            let _ = menu.hide();
+            if menu.is_visible().unwrap_or(false) {
+                let _ = menu.hide();
+                let _ = app.emit("menu:closed", ());
+            }
         }
     }
 
@@ -3990,6 +4016,12 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                             _ => (position.x.round() as i32, position.y.round() as i32),
                         }
                     };
+                    if let Some(win) = app.get_webview_window("tray_menu") {
+                        if win.is_visible().unwrap_or(false) {
+                            hide_tray_menu(app);
+                            return;
+                        }
+                    }
                     show_tray_menu_at(app, x, y);
                 }
                 _ => {}

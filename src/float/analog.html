@@ -54,53 +54,12 @@
 
         <!-- Custom Cyber Context Menu (outside shell so it is never clipped by the circular frame) -->
         <div class="analog-ctx-menu" id="analog-ctx-menu" hidden>
-            <div class="analog-ctx-header">
-                <span class="ctx-hdr-title" data-i18n="float.analogTitle">Analog Clock</span>
-            </div>
-            <div class="analog-ctx-sep"></div>
-
-            <div class="analog-ctx-section">
-                <span class="analog-ctx-section-title" data-i18n="float.skin">Design</span>
-                <div class="analog-skin-grid" id="analog-skin-grid">
-                    <!-- Skin buttons generated dynamically -->
-                </div>
+            <div class="analog-ctx-tabs">
+                <button type="button" class="analog-ctx-tab active" id="analog-tab-actions" data-tab="actions" data-i18n="float.tabActions">Actions</button>
+                <button type="button" class="analog-ctx-tab" id="analog-tab-style" data-tab="style" data-i18n="float.tabStyle">Customize</button>
             </div>
 
-            <div class="analog-ctx-sep"></div>
-
-            <button class="analog-ctx-item" id="ctx-aot">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="17" x2="12" y2="22"></line>
-                    <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
-                </svg>
-                <span class="ctx-label" data-i18n="float.alwaysOnTop">Always on Top</span>
-                <span class="ctx-check" id="ctx-aot-check">✓</span>
-            </button>
-
-            <button class="analog-ctx-item" id="ctx-lock">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-                <span class="ctx-label" data-i18n="settings.mini.lockPos">Position Lock</span>
-                <span class="ctx-check" id="ctx-lock-check" style="display:none">✓</span>
-            </button>
-
-            <div class="analog-ctx-sep"></div>
-
-            <div class="analog-ctx-section">
-                <span class="analog-ctx-section-title" data-i18n="float.opacity">Opacity</span>
-                <div class="analog-ctx-opacity-chips">
-                    <button class="analog-op-chip" data-op="1.0">100%</button>
-                    <button class="analog-op-chip" data-op="0.85">85%</button>
-                    <button class="analog-op-chip" data-op="0.70">70%</button>
-                    <button class="analog-op-chip" data-op="0.50">50%</button>
-                    <button class="analog-op-chip" data-op="0.40">40%</button>
-                </div>
-            </div>
-
-            <div class="analog-ctx-sep"></div>
-
+            <div class="analog-ctx-panel" id="analog-panel-actions">
             <button class="analog-ctx-item" id="ctx-full">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 3 21 3 21 9"></polyline>
@@ -134,9 +93,7 @@
                 </svg>
                 <span class="ctx-label" data-i18n="float.calTitle">Calendar</span>
             </button>
-
             <div class="analog-ctx-sep"></div>
-
             <button class="analog-ctx-item" id="ctx-settings">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3"></circle>
@@ -152,9 +109,7 @@
                 </svg>
                 <span class="ctx-label" data-i18n="about.title">About CyberClock</span>
             </button>
-
             <div class="analog-ctx-sep"></div>
-
             <button class="analog-ctx-item ctx-danger" id="ctx-close">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -162,6 +117,44 @@
                 </svg>
                 <span class="ctx-label" data-i18n="float.close">Close</span>
             </button>
+            </div>
+
+            <div class="analog-ctx-panel" id="analog-panel-style" style="display: none;">
+            <div class="analog-ctx-section">
+                <span class="analog-ctx-section-title" data-i18n="float.skin">Design</span>
+                <div class="analog-skin-grid" id="analog-skin-grid">
+                    <!-- Skin buttons generated dynamically -->
+                </div>
+            </div>
+            <div class="analog-ctx-sep"></div>
+            <button class="analog-ctx-item" id="ctx-aot">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="17" x2="12" y2="22"></line>
+                    <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                </svg>
+                <span class="ctx-label" data-i18n="float.alwaysOnTop">Always on Top</span>
+                <span class="ctx-check" id="ctx-aot-check">✓</span>
+            </button>
+            <button class="analog-ctx-item" id="ctx-lock">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span class="ctx-label" data-i18n="settings.mini.lockPos">Position Lock</span>
+                <span class="ctx-check" id="ctx-lock-check" style="display:none">✓</span>
+            </button>
+            <div class="analog-ctx-sep"></div>
+            <div class="analog-ctx-section">
+                <span class="analog-ctx-section-title" data-i18n="float.opacity">Opacity</span>
+                <div class="analog-ctx-opacity-chips">
+                    <button class="analog-op-chip" data-op="1.0">100%</button>
+                    <button class="analog-op-chip" data-op="0.85">85%</button>
+                    <button class="analog-op-chip" data-op="0.70">70%</button>
+                    <button class="analog-op-chip" data-op="0.50">50%</button>
+                    <button class="analog-op-chip" data-op="0.40">40%</button>
+                </div>
+            </div>
+            </div>
         </div>
         <script src="analog.js"></script>
     </body>

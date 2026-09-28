@@ -171,6 +171,9 @@ pub struct AppSettings {
     pub float_cal_design: Option<u32>,
     #[serde(default)]
     pub float_cal_auto_rotate: Option<bool>,
+    /// ISO week column on the floating calendar. Off until the user turns it on.
+    #[serde(default)]
+    pub float_cal_show_weeks: bool,
     #[serde(default)]
     pub float_analog_open: bool,
     #[serde(default)]
@@ -338,6 +341,7 @@ impl Default for AppSettings {
             float_cal_position: None,
             float_cal_design: Some(1),
             float_cal_auto_rotate: Some(false),
+            float_cal_show_weeks: false,
             float_analog_open: false,
             float_analog_position: None,
             float_analog_opacity: None,

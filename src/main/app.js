@@ -7562,11 +7562,11 @@
             e.stopPropagation();
             toggleTbarMoreMenu();
         });
-        document.addEventListener("click", (e) => {
-            if (!tbarMoreMenu.hidden && !tbarMoreMenu.contains(e.target) && e.target !== tbarBtnMore) {
-                hideTbarMoreMenu();
-            }
-        });
+        document.addEventListener("pointerdown", (e) => {
+            if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
+            if (e.target.closest("#tbar-more-menu, #tbar-btn-more")) return;
+            hideTbarMoreMenu();
+        }, true);
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape" && !tbarMoreMenu.hidden) {
                 hideTbarMoreMenu();

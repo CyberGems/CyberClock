@@ -45,7 +45,7 @@ body.is-dragging * {
     cursor: grabbing !important;
 }
 
-button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .cal-op-chip, .cal-ctx-item {
+button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .cal-ctx-item {
     cursor: pointer !important;
 }
 
@@ -147,6 +147,28 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
 
 .cal-weekdays .cal-we {
     color: #f59e0b;
+}
+
+.float-cal-shell.show-weeks .cal-weekdays,
+.float-cal-shell.show-weeks .cal-grid {
+    grid-template-columns: 20px repeat(7, 1fr);
+}
+
+.cal-week-hd,
+.cal-week-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono, "JetBrains Mono", monospace);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: rgba(143, 160, 181, 0.72);
+    user-select: none;
+}
+
+.cal-week-num.is-current {
+    color: var(--accent-a);
 }
 
 .cal-grid {
@@ -430,6 +452,11 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, #cal-title, .ca
     background: rgba(var(--rgb-accent), 0.22);
     color: var(--accent-a);
     box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+}
+
+.cal-ctx-tab.active:hover {
+    background: rgba(var(--rgb-accent), 0.32);
+    color: var(--accent-a);
 }
 
 .cal-ctx-panel {

@@ -55,6 +55,53 @@
 
                 <div class="ctx-sep"></div>
 
+                <div class="ctx-tabs" id="ctx-timer-tabs">
+                    <button type="button" class="ctx-tab on" data-tab="actions" data-i18n="menu.tabActions">Actions</button>
+                    <button type="button" class="ctx-tab" data-tab="customize" data-i18n="menu.tabCustomize">Customize</button>
+                </div>
+
+                <div id="timer-panel-actions" style="display: flex; flex-direction: column;">
+                <div class="ctx-item" id="ctx-action-new" data-action="new_timer">
+                    <span class="ico" id="ctx-action-new-ico" data-ico="timer"></span>
+                    <span class="label" id="ctx-action-new-lbl" data-i18n="float.newTimer">New Timer</span>
+                </div>
+                <div class="ctx-item" id="ctx-action-other-float" data-action="new_stopwatch">
+                    <span class="ico" id="ctx-action-other-float-ico" data-ico="stopwatch"></span>
+                    <span class="label" id="ctx-action-other-float-lbl" data-i18n="float.newStopwatch">New Stopwatch</span>
+                </div>
+                <div class="ctx-item" data-action="new_analog">
+                    <span class="ico" data-ico="clock"></span>
+                    <span class="label" data-i18n="float.analogTitle">Analog Clock</span>
+                </div>
+                <div class="ctx-item" data-action="new_calendar">
+                    <span class="ico" data-ico="calendar"></span>
+                    <span class="label" data-i18n="float.calTitle">Calendar</span>
+                </div>
+                <div class="ctx-item" data-action="full">
+                    <span class="ico" data-ico="expand"></span>
+                    <span class="label" data-i18n="tray.fullMode">Full Mode</span>
+                </div>
+                <div class="ctx-item" data-action="settings">
+                    <span class="ico" data-ico="gear"></span>
+                    <span class="label" data-i18n="menu.settings">Settings</span>
+                </div>
+                <div class="ctx-item" data-action="about">
+                    <span class="ico" data-ico="info"></span>
+                    <span class="label" data-i18n="about.title">About CyberClock</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item" id="ctx-action-close-others" data-action="close_other_timers">
+                    <span class="ico" data-ico="power"></span>
+                    <span class="label" id="ctx-action-close-others-lbl" data-i18n="float.closeOtherTimers">Close other timers</span>
+                </div>
+                <div class="ctx-sep"></div>
+                <div class="ctx-item danger" id="ctx-action-close-current" data-action="close_current_timer">
+                    <span class="ico" data-ico="x" style="color: #ff5470;"></span>
+                    <span class="label" id="ctx-action-close-current-lbl" data-i18n="float.closeThisTimer">Close this timer</span>
+                </div>
+                </div>
+
+                <div id="timer-panel-customize" style="display: none; flex-direction: column;">
                 <div class="ctx-section">
                     <div class="ctx-section-header">
                         <div class="ctx-section-title-wrap">
@@ -123,46 +170,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="ctx-sep"></div>
-
-                <div class="ctx-item" id="ctx-action-new" data-action="new_timer">
-                    <span class="ico" id="ctx-action-new-ico" data-ico="timer"></span>
-                    <span class="label" id="ctx-action-new-lbl" data-i18n="float.newTimer">New Timer</span>
-                </div>
-                <div class="ctx-item" id="ctx-action-other-float" data-action="new_stopwatch">
-                    <span class="ico" id="ctx-action-other-float-ico" data-ico="stopwatch"></span>
-                    <span class="label" id="ctx-action-other-float-lbl" data-i18n="float.newStopwatch">New Stopwatch</span>
-                </div>
-                <div class="ctx-item" data-action="new_analog">
-                    <span class="ico" data-ico="clock"></span>
-                    <span class="label" data-i18n="float.analogTitle">Analog Clock</span>
-                </div>
-                <div class="ctx-item" data-action="new_calendar">
-                    <span class="ico" data-ico="calendar"></span>
-                    <span class="label" data-i18n="float.calTitle">Calendar</span>
-                </div>
-                <div class="ctx-item" data-action="full">
-                    <span class="ico" data-ico="expand"></span>
-                    <span class="label" data-i18n="tray.fullMode">Full Mode</span>
-                </div>
-                <div class="ctx-item" data-action="settings">
-                    <span class="ico" data-ico="gear"></span>
-                    <span class="label" data-i18n="menu.settings">Settings</span>
-                </div>
-                <div class="ctx-item" data-action="about">
-                    <span class="ico" data-ico="info"></span>
-                    <span class="label" data-i18n="about.title">About CyberClock</span>
-                </div>
-                <div class="ctx-sep"></div>
-                <div class="ctx-item" id="ctx-action-close-others" data-action="close_other_timers">
-                    <span class="ico" data-ico="power"></span>
-                    <span class="label" id="ctx-action-close-others-lbl" data-i18n="float.closeOtherTimers">Close other timers</span>
-                </div>
-                <div class="ctx-sep"></div>
-                <div class="ctx-item danger" id="ctx-action-close-current" data-action="close_current_timer">
-                    <span class="ico" data-ico="x" style="color: #ff5470;"></span>
-                    <span class="label" id="ctx-action-close-current-lbl" data-i18n="float.closeThisTimer">Close this timer</span>
                 </div>
             </div>
 
