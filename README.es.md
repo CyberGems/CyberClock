@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://cybergems.org/apps/cyberclock/">
-    <img src="https://cybergems.org/banners/cyberclock.png" alt="CyberClock: reloj, calendario, temporizador, cronómetro, relajación y herramientas de tiempo flotantes para Windows" />
+    <img src="https://cybergems.org/banners/es/cyberclock.png" alt="CyberClock: reloj, calendario, temporizador, cronómetro, relajación y herramientas de tiempo flotantes para Windows" />
   </a>
 </p>
 
