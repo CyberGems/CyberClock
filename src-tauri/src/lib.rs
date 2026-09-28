@@ -345,6 +345,113 @@ fn reset_settings(app: AppHandle) -> AppSettings {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Backup & Data commands
+// ─────────────────────────────────────────────────────────────
+
+/// Export all current settings to a user-chosen JSON file.
+#[tauri::command]
+async fn export_backup(app: AppHandle, window: WebviewWindow) -> Result<bool, String> {
+    let settings = load_settings(&app);
+    let json = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("serialize: {}", e))?;
+
+    let (tx, rx) = std::sync::mpsc::channel();
+
+    let now = chrono::Local::now();
+    let default_name = format!("cyberclock-backup-{}.json", now.format("%Y%m%d-%H%M%S"));
+
+    window
+        .dialog()
+        .file()
+        .set_file_name(&default_name)
+        .add_filter("JSON", &["json"])
+        .save_file(move |path| {
+            let _ = tx.send(path);
+        });
+
+    let picked = rx.recv().map_err(|_| "dialog cancelled".to_string())?;
+    let Some(file_path) = picked else {
+        return Ok(false); // user cancelled
+    };
+    let path = file_path
+        .as_path()
+        .ok_or_else(|| "invalid path".to_string())?;
+
+    fs::write(path, &json).map_err(|e| format!("write: {}", e))?;
+    info!("Backup exported to {:?}", path);
+    Ok(true)
+}
+
+/// Import settings from a user-chosen JSON backup file.
+#[tauri::command]
+async fn import_backup(app: AppHandle, window: WebviewWindow) -> Result<Option<AppSettings>, String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+
+    window
+        .dialog()
+        .file()
+        .add_filter("JSON", &["json"])
+        .pick_file(move |path| {
+            let _ = tx.send(path);
+        });
+
+    let picked = rx.recv().map_err(|_| "dialog cancelled".to_string())?;
+    let Some(file_path) = picked else {
+        return Ok(None); // user cancelled
+    };
+    let path = file_path
+        .as_path()
+        .ok_or_else(|| "invalid path".to_string())?
+        .to_path_buf();
+
+    let content = fs::read_to_string(&path)
+        .map_err(|e| format!("read: {}", e))?;
+    let imported: AppSettings = serde_json::from_str(&content)
+        .map_err(|e| format!("invalid backup: {}", e))?;
+
+    // Apply the imported settings
+    set_auto_update(imported.auto_update);
+    EDGE_LIMITS_ENABLED.store(imported.mini_edge_limits, Ordering::Release);
+    let _ = persist(&app, &imported);
+
+    // Reset relax scheduler
+    let state = app.state::<AlarmState>();
+    *lock_or_recover(&state.relax_next_run) = None;
+
+    apply_always_on_top(&app, imported.always_on_top);
+    apply_mini_click_through(&app, imported.mini_click_through);
+
+    // Broadcast to all windows
+    let _ = app.emit("settings:updated", &imported);
+
+    info!("Backup imported from {:?}", path);
+    Ok(Some(imported))
+}
+
+/// Open the application data folder in the system file manager.
+#[tauri::command]
+fn open_data_folder(app: AppHandle) -> bool {
+    let dir = storage_dir(&app);
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+        Command::new("explorer")
+            .arg(dir.to_string_lossy().to_string())
+            .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+            .spawn()
+            .is_ok()
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = dir;
+        false
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
 // Window management commands
 // ─────────────────────────────────────────────────────────────
 
@@ -4275,7 +4382,10 @@ pub fn run() {
             set_hotkey,
             open_external_url,
             clamp_current_window_to_monitors,
-            center_open_widgets
+            center_open_widgets,
+            export_backup,
+            import_backup,
+            open_data_folder
         ]);
 
     // Build the app without starting the event loop, so the settings

@@ -154,6 +154,21 @@
             return res;
         },
 
+        // ── Backup & Data ─────────────────────────────────────────
+        exportBackup: async () => {
+            // Opens a save dialog and writes the full settings JSON.
+            return await invoke("export_backup");
+        },
+        importBackup: async () => {
+            // Opens a file picker and replaces settings with the backup.
+            return await invoke("import_backup");
+        },
+        openDataFolder: async () => {
+            // Opens the app's local storage directory in the file manager.
+            if (!HAS_TAURI) return false;
+            return await invoke("open_data_folder");
+        },
+
         // ── System ────────────────────────────────────────────────
         setStartup: async (on) => {
             await invoke("set_startup", { on });

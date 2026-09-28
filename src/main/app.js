@@ -6864,6 +6864,75 @@
         });
     }
 
+    // Backup & Data: Export
+    const sBtnExport = document.getElementById("s-btn-export-data");
+    if (sBtnExport) {
+        sBtnExport.addEventListener("click", async () => {
+            sBtnExport.disabled = true;
+            try {
+                const saved = await window.cc.exportBackup();
+                if (saved) {
+                    openCustomConfirm({
+                        title: window.ccI18n.t("settings.backup.exportSuccessTitle"),
+                        msg: window.ccI18n.t("settings.backup.exportSuccessMsg"),
+                        okText: "OK",
+                        onOk: () => {},
+                    });
+                }
+            } catch (err) {
+                console.error("Export failed:", err);
+            } finally {
+                sBtnExport.disabled = false;
+            }
+        });
+    }
+
+    // Backup & Data: Import
+    const sBtnImport = document.getElementById("s-btn-import-data");
+    if (sBtnImport) {
+        sBtnImport.addEventListener("click", () => {
+            openCustomConfirm({
+                title: window.ccI18n.t("settings.backup.importConfirmTitle"),
+                msg: window.ccI18n.t("settings.backup.importConfirmMsg"),
+                okText: window.ccI18n.t("settings.backup.importBtn"),
+                onOk: async () => {
+                    sBtnImport.disabled = true;
+                    try {
+                        const result = await window.cc.importBackup();
+                        if (result) {
+                            applySettings(result);
+                            renderCalendar();
+                            openCustomConfirm({
+                                title: window.ccI18n.t("settings.backup.importSuccessTitle"),
+                                msg: window.ccI18n.t("settings.backup.importSuccessMsg"),
+                                okText: "OK",
+                                onOk: () => {},
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Import failed:", err);
+                        openCustomConfirm({
+                            title: window.ccI18n.t("settings.backup.importErrorTitle"),
+                            msg: window.ccI18n.t("settings.backup.importErrorMsg"),
+                            okText: "OK",
+                            onOk: () => {},
+                        });
+                    } finally {
+                        sBtnImport.disabled = false;
+                    }
+                },
+            });
+        });
+    }
+
+    // Backup & Data: Open data folder
+    const sBtnOpenFolder = document.getElementById("s-btn-open-data-folder");
+    if (sBtnOpenFolder) {
+        sBtnOpenFolder.addEventListener("click", () => {
+            window.cc.openDataFolder();
+        });
+    }
+
     // Alarms
     document
         .getElementById("s-half-en")

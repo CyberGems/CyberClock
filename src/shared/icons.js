@@ -441,6 +441,21 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
   </symbol>
+  <symbol id="cc-i-upload" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 15V3"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m7 8 5-5 5 5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M4 20h16"/>
+  </symbol>
+  <symbol id="cc-i-database" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="5" rx="9" ry="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+      d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+  </symbol>
 </svg>
         `;
         document.body.appendChild(wrap);

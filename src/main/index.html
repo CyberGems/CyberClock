@@ -594,6 +594,10 @@
                                     <span class="s-nav-ico" data-ico="compact"></span>
                                     <span data-i18n="settings.tab.mini">Mini Mode</span>
                                 </button>
+                                <button type="button" class="s-nav-btn" data-stab="backup">
+                                    <span class="s-nav-ico" data-ico="database"></span>
+                                    <span data-i18n="settings.tab.backup">Backup & Data</span>
+                                </button>
                             </div>
                             <div class="s-nav-footer">
                                 <div class="s-autosave-pill is-hidden" id="s-autosave-pill">
@@ -1606,20 +1610,6 @@
                                 <span class="sched-status" id="sched-next">Next run: —</span>
                             </div>
                         </div>
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.general.reset">Factory Reset</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="rotate-ccw"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.general.reset">Factory Reset</span>
-                                    <small data-i18n="settings.general.resetDesc">Restore all settings to default values</small>
-                                </div>
-                                <button class="s-abtn danger" id="s-btn-reset" type="button">
-                                    <span data-ico="rotate-ccw"></span>
-                                    <span data-i18n="settings.general.resetBtn">Reset to Defaults</span>
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Display -->
@@ -1882,6 +1872,70 @@
                                 <label class="s-tog"><input type="checkbox" id="s-mini-scan" checked />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backup & Data -->
+                    <div class="s-panel" id="stab-backup">
+                        <!-- Backups (Export / Import) -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.backup.backupsTitle">Backups</div>
+                            <div class="s-sec-d" data-i18n="settings.backup.backupsDesc" style="margin-bottom: 14px;">Export or restore all your alarms, notes, timers and preferences in standard JSON format.</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="upload"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.exportTitle">Export backup</span>
+                                    <small data-i18n="settings.backup.exportDesc">Create a downloadable JSON file with all current configuration and notes.</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-export-data" type="button" data-tooltip="Export backup" data-i18n-attr="data-tooltip:settings.backup.exportTitle, aria-label:settings.backup.exportTitle">
+                                    <span data-ico="upload"></span>
+                                    <span data-i18n="settings.backup.exportBtn">Export</span>
+                                </button>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="download"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.importTitle">Import backup</span>
+                                    <small data-i18n="settings.backup.importDesc">Restore settings and notes from a previous JSON backup file.</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-import-data" type="button" data-tooltip="Import backup" data-i18n-attr="data-tooltip:settings.backup.importTitle, aria-label:settings.backup.importTitle">
+                                    <span data-ico="download"></span>
+                                    <span data-i18n="settings.backup.importBtn">Import</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Local Storage -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.backup.storageTitle">Local Storage</div>
+                            <div class="s-sec-d" data-i18n="settings.backup.storageDesc" style="margin-bottom: 14px;">CyberClock stores all your settings and custom sounds locally on your computer with no cloud syncing.</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="folder"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.openDataFolder">Application data folder</span>
+                                    <small data-i18n="settings.backup.openDataFolderDesc">Directly access local settings files, backups and custom sound assets.</small>
+                                </div>
+                                <button class="s-abtn" id="s-btn-open-data-folder" type="button" data-tooltip="Application data folder" data-i18n-attr="data-tooltip:settings.backup.openDataFolder, aria-label:settings.backup.openDataFolder">
+                                    <span data-ico="folder"></span>
+                                    <span data-i18n="settings.backup.openFolderBtn">Open folder</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Factory Reset -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.backup.resetTitle">Factory Reset</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="rotate-ccw"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.resetTitle">Factory Reset</span>
+                                    <small data-i18n="settings.backup.resetDesc">Restore all application settings, theme and preferences to default factory values.</small>
+                                </div>
+                                <button class="s-abtn danger" id="s-btn-reset" type="button" data-tooltip="Factory Reset" data-i18n-attr="data-tooltip:settings.backup.resetTitle, aria-label:settings.backup.resetTitle">
+                                    <span data-ico="rotate-ccw"></span>
+                                    <span data-i18n="settings.backup.resetBtn">Reset to Defaults</span>
+                                </button>
                             </div>
                         </div>
                     </div>
