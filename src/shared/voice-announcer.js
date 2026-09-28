@@ -123,8 +123,11 @@
     }
 
     let announceGen = 0;
+    let liveUtterance = null;
+    let lastAnnounceKey = "";
+    let lastAnnounceAt = 0;
 
-    function announce(cfg, hour, minute) {
+    function announce(cfg, hour, minute, opts) {
         if (!('speechSynthesis' in window)) return;
         const va = (cfg && cfg.voiceAnnouncer) || {};
         if (cfg && cfg.audioMuted) return;
@@ -136,35 +139,46 @@
         const lang = (cfg && cfg.language) || 'auto';
         const text = formatAnnouncementText(h, m, lang, va.style || 'natural');
         const voice = getBestVoice(lang, va.voiceGender || 'auto', va.voiceName);
+        const key = h + ":" + m + ":" + text;
+        const nowMs = Date.now();
+        const force = opts && opts.force === true;
+        // A second delivery of the same minute (another window, or the
+        // event arriving twice) queues the sentence again after the
+        // single chime, so the clock speaks twice in a row.
+        if (!force) {
+            if (key === lastAnnounceKey && nowMs - lastAnnounceAt < 20000) return;
+            try {
+                if (localStorage.getItem("cc_voice_claim") === key) return;
+                localStorage.setItem("cc_voice_claim", key);
+            } catch (_) {}
+        }
+        lastAnnounceKey = key;
+        lastAnnounceAt = nowMs;
         const gen = ++announceGen;
 
         const doSpeak = () => {
             if (gen !== announceGen) return;
             const synth = window.speechSynthesis;
-            try {
-                synth.cancel();
-            } catch (_) {}
             const utter = new SpeechSynthesisUtterance(text);
             if (voice) {
                 utter.voice = voice;
-                if (voice.lang) utter.lang = voice.lang;
             }
             utter.volume = Math.max(0, Math.min(1, va.volume ?? 0.85));
-            // WebView2 speaks the utterance twice when rate is not 1,
-            // and again when speak() follows cancel() in the same turn.
-            utter.rate = 1;
-            let started = false;
-            utter.onstart = () => {
-                if (started || gen !== announceGen) {
-                    try { synth.cancel(); } catch (_) {}
-                    return;
-                }
-                started = true;
-            };
-            setTimeout(() => {
+            // Windows WebView2 speaks the utterance twice when rate is
+            // assigned, and again when speak() follows cancel() while
+            // the queue is idle. Leave rate alone, and cancel only if
+            // something is already speaking.
+            liveUtterance = utter;
+            const start = () => {
                 if (gen !== announceGen) return;
                 try { synth.speak(utter); } catch (_) {}
-            }, 60);
+            };
+            if (synth.speaking || synth.pending) {
+                try { synth.cancel(); } catch (_) {}
+                setTimeout(start, 200);
+            } else {
+                start();
+            }
         };
 
         if (va.chimeBefore !== false && window.audioEngine) {
