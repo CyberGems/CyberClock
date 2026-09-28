@@ -1,6 +1,7 @@
     let cfg = {};
     let calNotes = {};
-    
+    let availableUpdateVersion = null; // declared early — used by hideTipNow guard
+
     function getDays() {
         const lang = window.ccI18n.getEffectiveLang();
         return lang === "es"
@@ -368,8 +369,15 @@
             btnDismiss.addEventListener("click", (e) => {
                 e.stopPropagation();
                 skipUpdate(availableUpdateVersion);
-                refreshTipContent();
-                updateBadgeVisibility();
+                availableUpdateVersion = null;
+                // Guard is now cleared — close the tip panel.
+                clearTimeout(tipTimer);
+                clearTimeout(tipHideTimer);
+                tipTimer = null;
+                tipHideTimer = null;
+                isTipVisible = false;
+                tipEl.classList.remove("show");
+                syncWindowSize();
             });
 
             updActions.appendChild(btnOpen);
@@ -488,6 +496,8 @@
     let isTipHovered = false;
 
     function hideTipNow() {
+        // Keep the tip visible while an undismissed update notice is shown.
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
         clearTimeout(tipTimer);
         clearTimeout(tipHideTimer);
         tipTimer = null;
@@ -866,7 +876,6 @@
     // ═══════════════════════════════════════════════════════
     // UPDATE NOTIFICATIONS
     // ═══════════════════════════════════════════════════════
-    let availableUpdateVersion = null;
 
     function isUpdateSkipped(ver) {
         if (!ver) return true;
@@ -886,39 +895,22 @@
         } catch (_) {}
     }
 
-    function updateBadgeVisibility() {
-        const btnMiniUpdate = document.getElementById("btn-mini-update");
-        if (!btnMiniUpdate) return;
-        const show = Boolean(availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion));
-        btnMiniUpdate.style.display = show ? "inline-flex" : "none";
-        if (show) {
-            const tipText = t("mini.tooltip.update", { v: availableUpdateVersion });
-            btnMiniUpdate.setAttribute("data-tooltip", tipText);
-        }
+    function showUpdateTip() {
+        // Automatically surface the tip panel when an update is available,
+        // without waiting for a hover. The panel stays visible until the
+        // user picks "Ver y actualizar" or "Descartar".
+        if (!tipEl || !shellEl) return;
+        refreshTipContent();
+        positionTip();
+        isTipVisible = true;
+        tipEl.classList.add("show");
+        syncWindowSize();
     }
 
     function setAvailableUpdate(ver) {
         if (!ver || isUpdateSkipped(ver)) return;
         availableUpdateVersion = ver;
-        updateBadgeVisibility();
-        refreshTipContent();
-    }
-
-    const btnMiniUpdate = document.getElementById("btn-mini-update");
-    if (btnMiniUpdate) {
-        btnMiniUpdate.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (window.cc && window.cc.goFull) {
-                window.cc.goFull();
-            }
-        });
-        btnMiniUpdate.addEventListener("mouseenter", (e) => {
-            e.stopPropagation();
-            showActionTicker("update", availableUpdateVersion ? `v${availableUpdateVersion}` : "Update");
-        });
-        btnMiniUpdate.addEventListener("mouseleave", () => {
-            hideActionTicker();
-        });
+        showUpdateTip();
     }
 
     if (window.cc && window.cc.getPendingUpdate) {
@@ -933,7 +925,6 @@
                 setAvailableUpdate(payload.version);
             } else if (payload && (payload.state === "idle" || payload.state === "not-found")) {
                 availableUpdateVersion = null;
-                updateBadgeVisibility();
                 refreshTipContent();
             }
         });

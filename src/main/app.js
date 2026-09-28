@@ -93,6 +93,7 @@
     let updateNoticeDismissed = false;
     let updateNoticeShownVersion = "";
     let updatePortable = false;
+    let updateCurrentVersion = ""; // installed version, populated by getAppVersion()
 
     function updateText(key, fallback, vars = {}) {
         let value = window.ccI18n ? window.ccI18n.t(key) : fallback;
@@ -193,9 +194,14 @@
                     })
                     : updatePortable
                         ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
-                        : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", {
-                            version: version ? (version.startsWith("v") ? version : "v" + version) : "",
-                        });
+                        : updateCurrentVersion
+                            ? updateText("updates.availableSummaryFrom", "Update from {current} to {version} is available.", {
+                                current: updateCurrentVersion.startsWith("v") ? updateCurrentVersion : "v" + updateCurrentVersion,
+                                version: version ? (version.startsWith("v") ? version : "v" + version) : "",
+                            })
+                            : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", {
+                                version: version ? (version.startsWith("v") ? version : "v" + version) : "",
+                            });
 
         progressEl.hidden = !isDownloading;
         if (isDownloading) {
@@ -6406,6 +6412,8 @@
 
     window.cc.getAppVersion().then((v) => {
         appVersion = v;
+        updateCurrentVersion = v; // feed into update notice summary
+
         renderBrandVersion();
     });
 
