@@ -42,13 +42,13 @@ New Backup & Data settings tab for export, import, and factory reset. About wind
 
 ### 🚀 Novedades de esta versión
 
-Nueva pestaña de Configuración de Respalado y Datos para exportar, importar y restablecer valores de fábrica. La ventana Acerca de muestra aplicaciones de la suite de forma aleatoria. Todos los menús contextuales incluyen una entrada Acerca de. Diálogo de cierre rediseñado con tarjetas verticales.
+Nueva pestaña de Configuración de Respaldo y Datos para exportar, importar y restablecer valores de fábrica. La ventana Acerca de muestra aplicaciones de la suite de forma aleatoria. Todos los menús contextuales incluyen una entrada Acerca de. Diálogo de cierre rediseñado con tarjetas verticales.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 💾 **Pestaña de configuración de Respalado y Datos**:
+- 💾 **Pestaña de configuración de Respaldo y Datos**:
   - Nueva pestaña dedicada para exportar alarmas, notas, temporizadores y preferencias como archivo JSON.
   - Importa copias de seguridad desde un archivo JSON previo para restaurar configuración y notas.
   - Abre directamente la carpeta de datos de la aplicación para acceder a configuraciones, sonidos personalizados y respaldos.
