@@ -41,6 +41,9 @@ pub struct AlarmState {
     pub last_full_hour: Mutex<Option<u32>>,           // hour
     pub last_voice_announcement: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
+    // Runtime-only snooze times keyed by alarm id. Snoozes intentionally
+    // reset when the app exits; the alarm definition itself remains intact.
+    pub snoozed_alarms: Mutex<HashMap<String, i64>>,
     // Live relax playback state, reported by the main window so the tray
     // can show what's playing without touching the audio engine itself.
     pub relax_playing: Mutex<Option<String>>, // track id, or None
@@ -323,6 +326,40 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
         }
     }
     Ok(merged)
+}
+
+#[tauri::command]
+fn snooze_alarm(app: AppHandle, alarm_id: String, minutes: u32) -> Result<(), String> {
+    let id = alarm_id.trim().to_string();
+    if id.is_empty() {
+        return Err("alarm id is required".to_string());
+    }
+    let duration = minutes.clamp(1, 120);
+    let until = (Local::now() + chrono::Duration::minutes(i64::from(duration))).timestamp();
+    let mut found = false;
+    update_settings(&app, |settings| {
+        for (index, alarm) in settings.custom_alarms.iter_mut().enumerate() {
+            let current_id = if alarm.id.trim().is_empty() {
+                format!("alarm-{}", index + 1)
+            } else {
+                alarm.id.clone()
+            };
+            if current_id == id {
+                alarm.enabled = true;
+                found = true;
+                break;
+            }
+        }
+        if found {
+            Ok(())
+        } else {
+            Err("alarm not found".to_string())
+        }
+    })?;
+    let state = app.state::<AlarmState>();
+    lock_or_recover(&state.snoozed_alarms).insert(id, until);
+    let _ = app.emit("settings:updated", load_settings(&app));
+    Ok(())
 }
 
 #[tauri::command]
@@ -3494,145 +3531,215 @@ fn custom_alarm_days_mask_for_chrono_weekday(wd: chrono::Weekday) -> u8 {
     }
 }
 
+fn alarm_repeat_mask(alarm: &CustomAlarm) -> u8 {
+    match alarm.repeat_mode.as_str() {
+        "daily" => 127,
+        "weekdays" => 31,
+        "weekends" => 96,
+        "once" => 0,
+        _ => alarm.days_mask,
+    }
+}
+
 fn compute_next_custom_alarm_datetime(
     now: chrono::DateTime<Local>,
     alarm: &CustomAlarm,
-) -> chrono::DateTime<Local> {
-    // Find the next occurrence on enabled days at HH:MM local time.
-    // We only schedule within the current+next-8-days window.
-    // If days_mask is 0, treat it as "no days enabled" -> return now+365d.
-    if alarm.days_mask == 0 {
-        return now + chrono::Duration::days(365);
-    }
-
-    // Candidate for today at alarm time. DST-safe: the spring-forward
-    // gap and the fall-back ambiguity both make `single()` return
-    // None, so fall back to `now` and let the day-by-day search below
-    // find the next valid occurrence instead of panicking.
-    let today_candidate = now
-        .date_naive()
-        .and_hms_opt(alarm.hour, alarm.minute, 0)
-        .unwrap_or_else(|| now.naive_local());
-
-    let today_dt = Local
-        .from_local_datetime(&today_candidate)
-        .single()
-        .unwrap_or(now);
-
-    if (today_dt >= now)
-        && ((alarm.days_mask & custom_alarm_days_mask_for_chrono_weekday(today_dt.weekday())) != 0)
-    {
-        return today_dt;
-    }
-
-    // Otherwise search forward day by day (8 days always covers a
-    // full week plus today's slot again).
-    for i in 1..=8 {
-        let d = now.date_naive() + chrono::Duration::days(i);
-        let cand_naive = d
-            .and_hms_opt(alarm.hour, alarm.minute, 0)
-            .unwrap_or_else(|| now.naive_local());
-        // DST-safe: skip days where the wall time is ambiguous or
-        // nonexistent instead of unwrapping.
-        let Some(cand_dt) = Local.from_local_datetime(&cand_naive).single() else {
-            continue;
-        };
-        let mask = custom_alarm_days_mask_for_chrono_weekday(cand_dt.weekday());
-        if (alarm.days_mask & mask) != 0 {
-            return cand_dt;
+    snoozed_until: Option<i64>,
+) -> Option<chrono::DateTime<Local>> {
+    if let Some(timestamp) = snoozed_until {
+        if timestamp > now.timestamp() {
+            return Local.timestamp_opt(timestamp, 0).single();
         }
     }
 
-    // Fallback (shouldn't happen)
-    now + chrono::Duration::days(365)
+    if alarm.repeat_mode == "once" || (alarm.repeat_mode.is_empty() && alarm.days_mask == 0) {
+        let date = alarm
+            .date
+            .as_deref()
+            .and_then(|value| chrono::NaiveDate::parse_from_str(value, "%Y-%m-%d").ok())
+            .unwrap_or_else(|| now.date_naive());
+        let candidate = date
+            .and_hms_opt(alarm.hour, alarm.minute, 0)
+            .and_then(|naive| Local.from_local_datetime(&naive).single())?;
+        return (candidate >= now).then_some(candidate);
+    }
+
+    let mask = alarm_repeat_mask(alarm);
+    if mask == 0 {
+        return None;
+    }
+
+    // Search today plus the following eight days. This covers every
+    // weekly pattern and lets DST gaps/ambiguities be skipped safely.
+    for offset in 0..=8 {
+        let date = now.date_naive() + chrono::Duration::days(offset);
+        let Some(candidate_naive) = date.and_hms_opt(alarm.hour, alarm.minute, 0) else {
+            continue;
+        };
+        let Some(candidate) = Local.from_local_datetime(&candidate_naive).single() else {
+            continue;
+        };
+        if candidate < now {
+            continue;
+        }
+        let weekday_mask = custom_alarm_days_mask_for_chrono_weekday(candidate.weekday());
+        if mask & weekday_mask != 0 {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn custom_alarm_matches_now(now: chrono::DateTime<Local>, alarm: &CustomAlarm) -> bool {
+    if now.hour() != alarm.hour || now.minute() != alarm.minute {
+        return false;
+    }
+    if alarm.repeat_mode == "once" || (alarm.repeat_mode.is_empty() && alarm.days_mask == 0) {
+        return alarm
+            .date
+            .as_deref()
+            .map(|date| date == now.date_naive().to_string())
+            .unwrap_or(true);
+    }
+    let mask = alarm_repeat_mask(alarm);
+    mask & custom_alarm_days_mask_for_chrono_weekday(now.weekday()) != 0
+}
+
+fn send_alarm_notification(app: &AppHandle, alarm: &CustomAlarm) {
+    use tauri_plugin_notification::NotificationExt;
+
+    let title = if alarm.label.trim().is_empty() {
+        "Alarm".to_string()
+    } else {
+        alarm.label.clone()
+    };
+    let body = if alarm.message.trim().is_empty() {
+        "CyberClock alarm".to_string()
+    } else {
+        alarm.message.clone()
+    };
+    if let Err(error) = app.notification().builder().title(title).body(body).show() {
+        warn!("alarm notification failed: {}", error);
+    }
 }
 
 fn custom_alarms_scheduler(app: AppHandle) {
-    // Keep a small "last fired" memory to avoid double emits
-    // across rapid rescheduling. We store the last fired unix
-    // timestamp per slot index.
-    let mut last_fired_by_idx: Vec<Option<i64>> = vec![None; 3];
+    // IDs make the scheduler independent of the old three-slot limit and
+    // keep snoozes stable when the user inserts or deletes an alarm.
+    let mut last_fired_by_id: HashMap<String, i64> = HashMap::new();
 
     loop {
         let settings = load_settings(&app);
         let now = Local::now();
+        let state = app.state::<AlarmState>();
+        let snoozed = lock_or_recover(&state.snoozed_alarms).clone();
 
-        let mut nexts: Vec<(chrono::DateTime<Local>, usize)> = Vec::new();
-
+        let mut nexts: Vec<(chrono::DateTime<Local>, usize, String)> = Vec::new();
         for (idx, alarm) in settings.custom_alarms.iter().enumerate() {
             if !alarm.enabled {
                 continue;
             }
-            if idx >= 3 {
-                break;
+            let id = if alarm.id.trim().is_empty() {
+                format!("alarm-{}", idx + 1)
+            } else {
+                alarm.id.clone()
+            };
+            if let Some(next_dt) =
+                compute_next_custom_alarm_datetime(now, alarm, snoozed.get(&id).copied())
+            {
+                nexts.push((next_dt, idx, id));
             }
-            let next_dt = compute_next_custom_alarm_datetime(now, alarm);
-            nexts.push((next_dt, idx));
         }
 
-        // If no custom alarms enabled, sleep a bit and re-check
         if nexts.is_empty() {
             std::thread::sleep(std::time::Duration::from_secs(15));
             continue;
         }
 
-        // pick earliest next time
-        nexts.sort_by_key(|(dt, _)| dt.timestamp());
-        let (earliest, earliest_idx) = nexts[0];
-
-        let delay = earliest.signed_duration_since(now);
-        let delay_secs = delay.num_seconds();
-
-        // Sleep in chunks but don't go too long
+        nexts.sort_by_key(|(dt, _, _)| dt.timestamp());
+        let (earliest, earliest_idx, earliest_id) = nexts[0].clone();
+        let delay_secs = earliest.signed_duration_since(now).num_seconds();
         if delay_secs > 5 {
             let chunk = std::cmp::min(delay_secs.saturating_sub(2), 30);
             std::thread::sleep(std::time::Duration::from_secs(chunk as u64));
             continue;
         }
 
-        // Within trigger window: verify again and fire when the exact minute matches
         let now2 = Local::now();
-        let idx = earliest_idx;
-        if let Some(alarm) = settings.custom_alarms.get(idx) {
+        let current_settings = load_settings(&app);
+        if let Some(alarm) = current_settings.custom_alarms.get(earliest_idx) {
             if alarm.enabled {
-                let should_fire = now2.hour() == alarm.hour
-                    && now2.minute() == alarm.minute
-                    && (alarm.days_mask
-                        & custom_alarm_days_mask_for_chrono_weekday(now2.weekday()))
-                        != 0;
+                let snooze_timestamp = lock_or_recover(&state.snoozed_alarms)
+                    .get(&earliest_id)
+                    .copied();
+                let is_snooze = snooze_timestamp
+                    .map(|timestamp| now2.timestamp() >= timestamp)
+                    .unwrap_or(false);
+                let should_fire = if is_snooze {
+                    true
+                } else {
+                    custom_alarm_matches_now(now2, alarm)
+                };
 
                 if should_fire {
                     let fired_ts = now2.timestamp();
-                    let already = last_fired_by_idx
-                        .get(idx)
-                        .and_then(|x| *x)
-                        .map(|t| t == fired_ts)
+                    let already = last_fired_by_id
+                        .get(&earliest_id)
+                        .copied()
+                        .map(|timestamp| timestamp == fired_ts)
                         .unwrap_or(false);
 
                     if !already {
-                        if idx < last_fired_by_idx.len() {
-                            last_fired_by_idx[idx] = Some(fired_ts);
-                        }
-
-                        // Master audio mute: mark as fired but play nothing.
-                        if settings.audio_muted {
-                            continue;
+                        last_fired_by_id.insert(earliest_id.clone(), fired_ts);
+                        if is_snooze {
+                            lock_or_recover(&state.snoozed_alarms).remove(&earliest_id);
                         }
 
                         let alarm_data = serde_json::json!({
                             "type": "custom",
+                            "alarmId": earliest_id,
+                            "label": alarm.label,
+                            "message": alarm.message,
+                            "repeatMode": alarm.repeat_mode,
+                            "snoozeMinutes": alarm.snooze_minutes,
                             "sound": alarm.sound,
                             "customPath": alarm.custom_path,
-                            "volume": settings.alarm_volume
+                            "volume": current_settings.alarm_volume,
+                            "audioMuted": current_settings.audio_muted
                         });
 
                         emit_to_active(&app, "alarm:chime", alarm_data);
+                        send_alarm_notification(&app, alarm);
+
+                        // A one-time alarm becomes inactive after firing.
+                        // Snooze re-enables it through the command above.
+                        if alarm.repeat_mode == "once" {
+                            let fired_id = earliest_id.clone();
+                            let fired_index = earliest_idx;
+                            let _ = update_settings(&app, |settings| {
+                                if let Some((_, item)) = settings
+                                    .custom_alarms
+                                    .iter_mut()
+                                    .enumerate()
+                                    .find(|(index, item)| {
+                                        item.id == fired_id
+                                            || (item.id.trim().is_empty() && *index == fired_index)
+                                    })
+                                {
+                                    item.enabled = false;
+                                }
+                                Ok(())
+                            });
+                            let _ = app.emit("settings:updated", load_settings(&app));
+                        }
                     }
                 }
             }
         }
 
-        // Wait a little before recalculating next occurrences to avoid tight loop
+        // Recalculate frequently so a newly-created alarm or a time change
+        // becomes live without restarting CyberClock.
         std::thread::sleep(std::time::Duration::from_secs(10));
     }
 }
@@ -4429,6 +4536,7 @@ pub fn run() {
             get_settings,
             save_settings,
             patch_settings,
+            snooze_alarm,
             reset_settings,
             close_window,
             minimize_window,

@@ -138,6 +138,10 @@
                         <span class="nav-icon"><span data-ico="clock"></span></span>
                         <span class="nav-lbl">Clock</span>
                     </div>
+                    <div class="nav-item" data-view="alarms">
+                        <span class="nav-icon"><span data-ico="bell"></span></span>
+                        <span class="nav-lbl" data-i18n="nav.alarms">Alarms</span>
+                    </div>
                     <div class="nav-item" data-view="timer">
                         <span class="nav-icon"><span data-ico="timer"></span></span>
                         <span class="nav-lbl">Timer</span>
@@ -237,6 +241,194 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- ALARMS -->
+                    <div class="view" id="view-alarms">
+                        <div class="alarms-shell">
+                            <div class="alarms-head">
+                                <div class="alarms-intro">
+                                    <div class="alarms-kicker"><span data-ico="bell"></span> <span data-i18n="alarms.kicker">PERSONAL SCHEDULE</span></div>
+                                    <h1 data-i18n="alarms.title">Alarms</h1>
+                                    <p data-i18n="alarms.subtitle">Wake up, focus, and move through your day on your terms.</p>
+                                </div>
+                                <button class="alarm-primary" id="alarms-add" type="button">
+                                    <span class="alarm-plus" aria-hidden="true">＋</span>
+                                    <span data-i18n="alarms.create">New alarm</span>
+                                </button>
+                            </div>
+
+                            <div class="alarms-overview" id="alarms-overview">
+                                <div class="alarms-overview-card">
+                                    <span class="alarms-overview-label" data-i18n="alarms.overview.next">NEXT ALARM</span>
+                                    <strong id="alarms-next-time">--:--</strong>
+                                    <span id="alarms-next-label" data-i18n="alarms.overview.none">No upcoming alarms</span>
+                                </div>
+                                <div class="alarms-overview-card">
+                                    <span class="alarms-overview-label" data-i18n="alarms.overview.active">ACTIVE</span>
+                                    <strong id="alarms-active-count">0</strong>
+                                    <span data-i18n="alarms.overview.activeHint">ready to keep you on track</span>
+                                </div>
+                                <div class="alarms-overview-card alarms-overview-signal">
+                                    <span class="alarms-overview-label" data-i18n="alarms.overview.chimes">HOURLY SIGNALS</span>
+                                    <strong><span data-ico="bell"></span> <span data-i18n="alarms.overview.separate">Separate</span></strong>
+                                    <span data-i18n="alarms.overview.chimesHint">Configure periodic chimes in Time</span>
+                                </div>
+                            </div>
+
+                            <div class="alarms-empty" id="alarms-empty">
+                                <div class="alarms-empty-orbit" aria-hidden="true">
+                                    <span class="alarms-empty-ring ring-one"></span>
+                                    <span class="alarms-empty-ring ring-two"></span>
+                                    <span class="alarms-empty-core"><span data-ico="bell"></span></span>
+                                </div>
+                                <div class="alarms-empty-copy">
+                                    <div class="alarms-empty-eyebrow" data-i18n="alarms.empty.eyebrow">YOUR TIME, YOUR SIGNAL</div>
+                                    <h2 data-i18n="alarms.empty.title">Nothing scheduled yet</h2>
+                                    <p data-i18n="alarms.empty.desc">Create an alarm for a moment that matters. It will stay ready even when CyberClock is in Mini Mode.</p>
+                                </div>
+                                <button class="alarm-empty-cta" id="alarms-empty-add" type="button">
+                                    <span class="alarm-plus" aria-hidden="true">＋</span>
+                                    <span data-i18n="alarms.empty.cta">Create my first alarm</span>
+                                </button>
+                                <div class="alarm-presets" id="alarm-presets">
+                                    <span class="alarm-presets-label" data-i18n="alarms.presets.label">START WITH A PRESET</span>
+                                    <div class="alarm-presets-grid">
+                                        <button type="button" class="alarm-preset" data-preset="wake">
+                                            <span class="alarm-preset-icon" data-ico="sun"></span>
+                                            <span data-i18n="alarms.preset.wake">Weekday wake-up</span>
+                                        </button>
+                                        <button type="button" class="alarm-preset" data-preset="focus">
+                                            <span class="alarm-preset-icon" data-ico="spark"></span>
+                                            <span data-i18n="alarms.preset.focus">Focus time</span>
+                                        </button>
+                                        <button type="button" class="alarm-preset" data-preset="pause">
+                                            <span class="alarm-preset-icon" data-ico="pause"></span>
+                                            <span data-i18n="alarms.preset.pause">Take a pause</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alarms-list" id="alarms-list" hidden></div>
+                        </div>
+
+                        <div class="alarm-editor-overlay" id="alarm-editor-overlay" hidden>
+                            <div class="alarm-editor" role="dialog" aria-modal="true" aria-labelledby="alarm-editor-title">
+                                <div class="alarm-editor-head">
+                                    <div>
+                                        <div class="alarms-kicker"><span data-ico="bell"></span> <span data-i18n="alarms.editor.kicker">ALARM DESIGNER</span></div>
+                                        <h2 id="alarm-editor-title" data-i18n="alarms.editor.newTitle">New alarm</h2>
+                                    </div>
+                                    <button class="alarm-icon-btn" id="alarm-editor-close" type="button" data-tooltip="Close editor" data-i18n-attr="data-tooltip:alarms.tooltip.close, aria-label:alarms.tooltip.close">
+                                        <span data-ico="x"></span>
+                                    </button>
+                                </div>
+                                <div class="alarm-editor-body">
+                                    <div class="alarm-form-hero">
+                                        <label class="alarm-field alarm-time-field">
+                                            <span data-i18n="alarms.editor.time">Time</span>
+                                            <div class="alarm-time-control">
+                                                <select id="alarm-edit-hour" data-i18n-attr="aria-label:alarms.editor.time"></select>
+                                                <span class="alarm-time-separator" aria-hidden="true">:</span>
+                                                <select id="alarm-edit-minute" data-i18n-attr="aria-label:alarms.editor.time"></select>
+                                                <select id="alarm-edit-period" data-i18n-attr="aria-label:alarms.editor.time">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                            <input id="alarm-edit-time" type="hidden" value="09:00" />
+                                        </label>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.label">Label</span>
+                                            <input id="alarm-edit-label" type="text" maxlength="48" placeholder="Morning focus" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
+                                        </label>
+                                    </div>
+                                    <div class="alarm-form-section">
+                                        <div class="alarm-form-section-title"><span data-ico="calendar"></span> <span data-i18n="alarms.editor.schedule">Schedule</span></div>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.repeat">Repeat</span>
+                                            <select id="alarm-edit-repeat" data-i18n-attr="aria-label:alarms.editor.repeat">
+                                                <option value="once" data-i18n="alarms.repeat.once">Once</option>
+                                                <option value="daily" data-i18n="alarms.repeat.daily">Every day</option>
+                                                <option value="weekdays" data-i18n="alarms.repeat.weekdays">Weekdays</option>
+                                                <option value="weekends" data-i18n="alarms.repeat.weekends">Weekends</option>
+                                                <option value="weekly" data-i18n="alarms.repeat.weekly">Selected days</option>
+                                            </select>
+                                        </label>
+                                        <label class="alarm-field alarm-date-field" id="alarm-edit-date-wrap">
+                                            <span data-i18n="alarms.editor.date">Date</span>
+                                            <input id="alarm-edit-date" type="date" data-i18n-attr="aria-label:alarms.editor.date" />
+                                        </label>
+                                        <div class="alarm-days-field" id="alarm-edit-days-wrap">
+                                            <span data-i18n="alarms.editor.days">Days</span>
+                                            <div class="alarm-days" id="alarm-edit-days">
+                                                <button type="button" class="alarm-day" data-day="1" data-i18n="alarms.days.mon" data-i18n-attr="aria-label:alarms.days.mon">M</button>
+                                                <button type="button" class="alarm-day" data-day="2" data-i18n="alarms.days.tue" data-i18n-attr="aria-label:alarms.days.tue">T</button>
+                                                <button type="button" class="alarm-day" data-day="4" data-i18n="alarms.days.wed" data-i18n-attr="aria-label:alarms.days.wed">W</button>
+                                                <button type="button" class="alarm-day" data-day="8" data-i18n="alarms.days.thu" data-i18n-attr="aria-label:alarms.days.thu">T</button>
+                                                <button type="button" class="alarm-day" data-day="16" data-i18n="alarms.days.fri" data-i18n-attr="aria-label:alarms.days.fri">F</button>
+                                                <button type="button" class="alarm-day" data-day="32" data-i18n="alarms.days.sat" data-i18n-attr="aria-label:alarms.days.sat">S</button>
+                                                <button type="button" class="alarm-day" data-day="64" data-i18n="alarms.days.sun" data-i18n-attr="aria-label:alarms.days.sun">S</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alarm-form-section alarm-alert-section">
+                                        <div class="alarm-form-section-title"><span data-ico="volume-high"></span> <span data-i18n="alarms.editor.alert">Alert</span></div>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.sound">Sound</span>
+                                            <div class="alarm-inline-control">
+                                                <select id="alarm-edit-sound" data-i18n-attr="aria-label:alarms.editor.sound">
+                                                    <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
+                                                    <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
+                                                    <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
+                                                    <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
+                                                    <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
+                                                    <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
+                                                </select>
+                                                <button class="alarm-secondary-btn" id="alarm-edit-test" type="button">
+                                                    <span data-ico="play"></span> <span data-i18n="alarms.editor.test">Test</span>
+                                                </button>
+                                            </div>
+                                        </label>
+                                        <div class="alarm-custom-file-row">
+                                            <button class="alarm-link-btn" id="alarm-edit-file" type="button">
+                                                <span data-ico="folder"></span> <span data-i18n="alarms.editor.customSound">Use a custom sound</span>
+                                            </button>
+                                            <span id="alarm-edit-file-label" class="alarm-file-label"></span>
+                                            <button class="alarm-file-clear" id="alarm-edit-file-clear" type="button" data-tooltip="Remove custom sound" data-i18n-attr="data-tooltip:alarms.tooltip.removeSound" hidden><span data-ico="x"></span></button>
+                                        </div>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.message">Message</span>
+                                            <textarea id="alarm-edit-message" rows="2" maxlength="180" placeholder="What should CyberClock remind you?" data-i18n-attr="placeholder:alarms.editor.messagePlaceholder, aria-label:alarms.editor.message"></textarea>
+                                        </label>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.snooze">Snooze duration</span>
+                                            <select id="alarm-edit-snooze" data-i18n-attr="aria-label:alarms.editor.snooze">
+                                                <option value="5" data-i18n="alarms.snooze.5">5 min</option>
+                                                <option value="10" selected data-i18n="alarms.snooze.10">10 min</option>
+                                                <option value="15" data-i18n="alarms.snooze.15">15 min</option>
+                                                <option value="30" data-i18n="alarms.snooze.30">30 min</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="alarm-editor-foot">
+                                    <button class="alarm-secondary-btn" id="alarm-editor-cancel" type="button"><span data-i18n="common.cancel">Cancel</span></button>
+                                    <button class="alarm-primary" id="alarm-editor-save" type="button"><span data-ico="check"></span> <span data-i18n="alarms.editor.save">Save alarm</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alarm-notice" id="alarm-notice" hidden>
+                            <div class="alarm-notice-icon"><span data-ico="bell"></span></div>
+                            <div class="alarm-notice-copy">
+                                <strong id="alarm-notice-title" data-i18n="alarms.notice.title">Alarm</strong>
+                                <span id="alarm-notice-message"></span>
+                            </div>
+                            <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
+                            <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss"><span data-ico="x"></span></button>
                         </div>
                     </div>
 
@@ -1174,9 +1366,20 @@
                             </div>
                         </div>
 
+                        <div class="s-alarm-manager-card">
+                            <div class="s-alarm-manager-icon"><span data-ico="bell"></span></div>
+                            <div class="s-lbl">
+                                <span data-i18n="settings.alarms.managerTitle">Manage your alarms</span>
+                                <small data-i18n="settings.alarms.managerDesc">Create schedules, messages and reminders from the dedicated Alarm view.</small>
+                            </div>
+                            <button class="s-abtn" id="s-open-alarms" type="button" data-tooltip="Open Alarm view" data-i18n-attr="data-tooltip:settings.alarms.managerTip">
+                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.managerBtn">Open Alarms</span>
+                            </button>
+                        </div>
+
                         <!-- Custom alarms (3 slots, day-of-week repetition) -->
-                        <div class="s-sec-t" style="margin: 22px 0 8px;"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="alarms.custom.title">Custom Alarms</span></div>
-                        <div class="s-alarm-blk" id="s-cust-blk-0">
+                        <div class="s-sec-t s-legacy-custom-alarms" style="margin: 22px 0 8px;"><span class="cal-t-ico" data-ico="bell"></span> <span data-i18n="alarms.custom.title">Custom Alarms</span></div>
+                        <div class="s-alarm-blk s-legacy-custom-alarms" id="s-cust-blk-0">
                             <div class="s-alarm-t">
                                 <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot1">Alarm 1</span>
                             </div>
@@ -1238,7 +1441,7 @@
                             </div>
                         </div>
 
-                        <div class="s-alarm-blk" id="s-cust-blk-1">
+                        <div class="s-alarm-blk s-legacy-custom-alarms" id="s-cust-blk-1">
                             <div class="s-alarm-t">
                                 <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot2">Alarm 2</span>
                             </div>
@@ -1300,7 +1503,7 @@
                             </div>
                         </div>
 
-                        <div class="s-alarm-blk" id="s-cust-blk-2">
+                        <div class="s-alarm-blk s-legacy-custom-alarms" id="s-cust-blk-2">
                             <div class="s-alarm-t">
                                 <span data-ico="bell"></span> <span data-i18n="alarms.custom.slot3">Alarm 3</span>
                             </div>

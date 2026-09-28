@@ -155,6 +155,13 @@
             await emit("settings:updated", res);
             return res;
         },
+        snoozeAlarm: async (alarmId, minutes) => {
+            if (!HAS_TAURI) return true;
+            return await invoke("snooze_alarm", {
+                alarmId: String(alarmId || ""),
+                minutes: Number(minutes) || 10,
+            });
+        },
         resetSettings: async () => {
             const res = await invokeOrFallback("reset_settings", undefined, (browserSettings = {}));
             await emit("settings:updated", res);

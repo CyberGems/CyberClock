@@ -22,24 +22,42 @@ pub struct AlarmSettings {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
 pub struct CustomAlarm {
+    #[serde(default)]
+    pub id: String,
+    #[serde(default)]
+    pub label: String,
+    #[serde(default)]
+    pub message: String,
     pub enabled: bool,
     pub hour: u32,   // 0-23
     pub minute: u32, // 0-59
     // Bitmask: Mon=1, Tue=2, Wed=4, Thu=8, Fri=16, Sat=32, Sun=64
     pub days_mask: u8,
+    #[serde(default)]
+    pub repeat_mode: String,
+    #[serde(default)]
+    pub date: Option<String>,
     pub sound: String,
     pub custom_path: Option<String>,
+    #[serde(default = "default_snooze_minutes")]
+    pub snooze_minutes: u32,
 }
 
 impl Default for CustomAlarm {
     fn default() -> Self {
         Self {
+            id: String::new(),
+            label: String::new(),
+            message: String::new(),
             enabled: false,
             hour: 9,
             minute: 0,
             days_mask: 0,
+            repeat_mode: String::new(),
+            date: None,
             sound: "chime-digital".to_string(),
             custom_path: None,
+            snooze_minutes: default_snooze_minutes(),
         }
     }
 }
@@ -62,6 +80,34 @@ fn default_auto_cycle_mode() -> String {
 
 fn default_alarm_volume() -> f64 {
     0.75
+}
+
+fn default_snooze_minutes() -> u32 {
+    10
+}
+
+/// Fill fields introduced by the standalone alarm experience while keeping
+/// old three-slot settings readable and stable. The index fallback is
+/// deterministic until the user edits or creates an alarm.
+pub fn normalize_custom_alarms(settings: &mut AppSettings) {
+    for (index, alarm) in settings.custom_alarms.iter_mut().enumerate() {
+        if alarm.id.trim().is_empty() {
+            alarm.id = format!("alarm-{}", index + 1);
+        }
+        if alarm.label.trim().is_empty() {
+            alarm.label = format!("Alarm {}", index + 1);
+        }
+        if alarm.repeat_mode.trim().is_empty() {
+            alarm.repeat_mode = if alarm.days_mask == 0 {
+                "once".to_string()
+            } else {
+                "weekly".to_string()
+            };
+        }
+        if alarm.snooze_minutes == 0 {
+            alarm.snooze_minutes = default_snooze_minutes();
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -433,11 +479,7 @@ impl Default for AppSettings {
             mini_auto_cycle: false,
             mini_auto_cycle_interval: 15,
             mini_auto_cycle_mode: "sequential".to_string(),
-            custom_alarms: vec![
-                CustomAlarm::default(),
-                CustomAlarm::default(),
-                CustomAlarm::default(),
-            ],
+            custom_alarms: Vec::new(),
             relax_scheduler: RelaxSchedulerSettings::default(),
             voice_announcer: VoiceAnnouncerSettings::default(),
             show_tooltips: true,
@@ -517,7 +559,8 @@ pub fn init_settings_store(app: &AppHandle) -> SettingsStore {
 fn read_settings_file(path: &std::path::Path) -> (AppSettings, &'static str) {
     match fs::read_to_string(path) {
         Ok(content) => {
-            if let Ok(s) = serde_json::from_str::<AppSettings>(&content) {
+            if let Ok(mut s) = serde_json::from_str::<AppSettings>(&content) {
+                normalize_custom_alarms(&mut s);
                 return (s, "ok");
             }
             error!("Settings: file {:?} is corrupt; trying backup", path);
@@ -533,13 +576,16 @@ fn read_settings_file(path: &std::path::Path) -> (AppSettings, &'static str) {
     // copy of the last known good settings.
     let bak = backup_path(path);
     if let Ok(content) = fs::read_to_string(&bak) {
-        if let Ok(s) = serde_json::from_str::<AppSettings>(&content) {
+        if let Ok(mut s) = serde_json::from_str::<AppSettings>(&content) {
+            normalize_custom_alarms(&mut s);
             warn!("Settings: recovered from backup {:?}", bak);
             return (s, "backup");
         }
     }
 
-    (AppSettings::default(), "defaults")
+    let mut defaults = AppSettings::default();
+    normalize_custom_alarms(&mut defaults);
+    (defaults, "defaults")
 }
 
 fn backup_path(path: &std::path::Path) -> PathBuf {
@@ -550,11 +596,14 @@ fn backup_path(path: &std::path::Path) -> PathBuf {
 /// in-memory state is the source of truth, the file only mirrors it.
 pub fn get_settings(app: &AppHandle) -> AppSettings {
     let store = app.state::<SettingsStore>();
-    store
+    let mut settings = store
         .state
         .read()
         .map(|s| s.clone())
         .unwrap_or_else(|_| AppSettings::default())
+    ;
+    normalize_custom_alarms(&mut settings);
+    settings
 }
 
 /// Write settings into the shared state and persist atomically:
@@ -582,6 +631,7 @@ pub fn update<F: FnOnce(&mut AppSettings) -> Result<(), String>>(
         .map_err(|e| format!("settings lock poisoned: {}", e))?;
 
     mutate(&mut guard)?;
+    normalize_custom_alarms(&mut guard);
 
     let content = serde_json::to_string_pretty(&*guard).map_err(|e| {
         error!("Settings: cannot serialize: {}", e);
@@ -644,8 +694,10 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
         merge_json(&mut target, patch.clone());
         let merged: AppSettings =
             serde_json::from_value(target).map_err(|e| format!("invalid settings patch: {}", e))?;
-        *current = merged.clone();
-        merged_out = Some(merged);
+        let mut normalized = merged;
+        normalize_custom_alarms(&mut normalized);
+        *current = normalized.clone();
+        merged_out = Some(normalized);
         Ok(())
     })?;
     merged_out.ok_or_else(|| "settings patch produced no result".to_string())

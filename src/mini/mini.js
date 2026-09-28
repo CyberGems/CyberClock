@@ -706,6 +706,7 @@
 
     window.cc.onAlarmChime((p) => {
         const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
+        if (window.audioEngine.muted) return;
         if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
         else window.audioEngine.chime(p.sound || "chime-digital", vol);
     });
