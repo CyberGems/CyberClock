@@ -392,6 +392,15 @@
         invoke("clamp_current_window_to_monitors").catch(() => {});
     }
 
+    function applyTooltipPref(cfg) {
+        const off = !!(cfg && cfg.showTooltips === false);
+        document.documentElement.classList.toggle("cc-tooltips-off", off);
+    }
+    if (HAS_TAURI) {
+        invoke("get_settings").then(applyTooltipPref).catch(() => {});
+        subscribe("settings:updated", applyTooltipPref);
+    }
+
     // Suppress native browser / WebView2 context menus across all windows
     if (typeof window !== "undefined") {
         window.addEventListener("contextmenu", (e) => {

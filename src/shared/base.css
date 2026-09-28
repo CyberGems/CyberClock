@@ -375,6 +375,14 @@ input[type=range]::-webkit-slider-thumb:hover { box-shadow: var(--glow-md); }
   animation: cc-tooltip-autohide 4s forwards;
   animation-delay: 0.35s;
 }
+html.cc-tooltips-off [data-tooltip]::after,
+html.cc-tooltips-off [data-tooltip]:hover::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+}
 [data-tooltip-dir="bottom"]::after {
   bottom: auto;
   top: calc(100% + 8px);

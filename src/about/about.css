@@ -814,3 +814,11 @@ body {
     text-align: center;
     line-height: 1.4;
 }
+html.cc-tooltips-off [data-tooltip]::after,
+html.cc-tooltips-off [data-tooltip]:hover::after {
+    content: none !important;
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+}

@@ -781,6 +781,8 @@
         if (aotEl) aotEl.checked = !!s.alwaysOnTop;
         const suEl = document.getElementById("s-startup");
         if (suEl) suEl.checked = s.startWithWindows !== false;
+        const tooltipsEl = document.getElementById("s-tooltips");
+        if (tooltipsEl) tooltipsEl.checked = s.showTooltips !== false;
         const suMiniRow = document.getElementById("s-startup-mini-row");
         if (suMiniRow) suMiniRow.style.display = (s.startWithWindows !== false) ? "flex" : "none";
         const suMiniEl = document.getElementById("s-startup-mini");
@@ -6357,6 +6359,12 @@
                 startWithWindows: checked,
             });
         });
+    const sTooltips = document.getElementById("s-tooltips");
+    if (sTooltips) {
+        sTooltips.addEventListener("change", (e) => {
+            window.cc.saveSettings({ showTooltips: e.target.checked });
+        });
+    }
     document
         .getElementById("s-startup-mini")
         .addEventListener("change", (e) => {
@@ -7274,7 +7282,7 @@
                         volume: vol ? (parseInt(vol.value, 10) / 100) : 0.85
                     }
                 };
-                window.VoiceAnnouncer.announce(testCfg, now.getHours(), now.getMinutes());
+                window.VoiceAnnouncer.announce(testCfg, now.getHours(), now.getMinutes(), { force: true });
             }
         });
     }

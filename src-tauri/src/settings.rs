@@ -301,6 +301,10 @@ pub struct AppSettings {
     #[serde(default)]
     pub voice_announcer: VoiceAnnouncerSettings,
 
+    // Hover hints. On until the user turns them off.
+    #[serde(default = "default_true")]
+    pub show_tooltips: bool,
+
     pub language: String,
     // Optional name used by the full-mode welcome greeting.
     pub display_name: String,
@@ -415,6 +419,7 @@ impl Default for AppSettings {
             ],
             relax_scheduler: RelaxSchedulerSettings::default(),
             voice_announcer: VoiceAnnouncerSettings::default(),
+            show_tooltips: true,
             language: "auto".to_string(),
             display_name: String::new(),
             breathe_pattern: "box".to_string(),
