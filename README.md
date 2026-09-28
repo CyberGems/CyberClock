@@ -62,7 +62,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
 - **Floating Desktop Widgets** — Open independent compact timer and stopwatch windows with multi-slot support; widgets are remembered and restored across application restarts
 - **Independent Skins & Renaming** — Choose distinct skins per widget type (Mini Clock, Timer, Stopwatch) and customize widget titles
-- **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, or calendars from any active widget's context menu
+- **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, calendars, or a relax session from any active widget's context menu
 - **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown (can be hidden via context menu)
 - **Resting Digits & Enlarged Display** — Enhanced counter digits across all skins, with resting all-zero state dimmed until armed
 
@@ -75,6 +75,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
 - **Breathing Patterns** — Box breathing (4-4-4-4) and 4-7-8 technique
+- **Floating Relax Widget** — Compact desktop session with the track name, play and next, a breathing ring, and a small spectrum. Audio keeps playing when full mode is hidden
 - **Session Timer** — With mindfulness tips and auto-stop (15m, 30m, 1h, 2h)
 - **Auto Scheduler** — Schedule automatic playback times
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
@@ -84,7 +85,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
-- **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar)
+- **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
 - **Collapse Date** — Show date only on hover
 - **CRT Scanlines** — Retro overlay effect

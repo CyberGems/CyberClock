@@ -40,6 +40,7 @@
     const ctxNewTimer = document.getElementById("ctx-new-timer");
     const ctxNewSw = document.getElementById("ctx-new-sw");
     const ctxNewCal = document.getElementById("ctx-new-cal");
+    const ctxNewRelax = document.getElementById("ctx-new-relax");
     const ctxSettings = document.getElementById("ctx-settings");
     const ctxAbout = document.getElementById("ctx-about");
     const ctxCloseItem = document.getElementById("ctx-close");
@@ -347,6 +348,15 @@
             closeContextMenu();
             if (window.cc && window.cc.spawnFloat) {
                 window.cc.spawnFloat("cal");
+            }
+        });
+    }
+
+    if (ctxNewRelax) {
+        ctxNewRelax.addEventListener("click", () => {
+            closeContextMenu();
+            if (window.cc && window.cc.spawnFloat) {
+                window.cc.spawnFloat("relax");
             }
         });
     }

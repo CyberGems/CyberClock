@@ -5709,6 +5709,12 @@
             .forEach((c) => c.classList.remove("on"));
         rSelected = null;
     });
+    const rFloatBtn = document.getElementById("r-float");
+    if (rFloatBtn) {
+        rFloatBtn.addEventListener("click", () => {
+            if (window.cc && window.cc.spawnFloat) window.cc.spawnFloat("relax");
+        });
+    }
 
     // Breathing circle click toggles pause/play (not full stop, so a
     // mid-session glance at the circle can't wipe the session timer).

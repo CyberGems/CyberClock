@@ -39,6 +39,7 @@
     const ctxNewTimer = document.getElementById("ctx-new-timer");
     const ctxNewSw = document.getElementById("ctx-new-sw");
     const ctxNewAnalog = document.getElementById("ctx-new-analog");
+    const ctxNewRelax = document.getElementById("ctx-new-relax");
     const ctxSettings = document.getElementById("ctx-settings");
     const ctxAbout = document.getElementById("ctx-about");
     const ctxClose = document.getElementById("ctx-close");
@@ -762,6 +763,15 @@
             closeContextMenu();
             if (window.cc && window.cc.spawnFloat) {
                 window.cc.spawnFloat("analog");
+            }
+        });
+    }
+
+    if (ctxNewRelax) {
+        ctxNewRelax.addEventListener("click", () => {
+            closeContextMenu();
+            if (window.cc && window.cc.spawnFloat) {
+                window.cc.spawnFloat("relax");
             }
         });
     }

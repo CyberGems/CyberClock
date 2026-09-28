@@ -1,0 +1,234 @@
+/* CyberClock — Floating Relax widget */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: var(--font-ui, "Outfit", sans-serif);
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.relax-shell {
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    background: linear-gradient(165deg, #14171f 0%, #08090c 100%);
+    border-radius: 14px;
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--rgb-accent), 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    clip-path: inset(0 round 14px);
+    padding: 8px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.relax-shell:active,
+body.is-dragging,
+body.is-dragging * {
+    cursor: grabbing !important;
+}
+
+button {
+    cursor: pointer !important;
+    font-family: inherit;
+}
+
+.relax-hdr {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+}
+
+.relax-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-a, #c8dce8);
+    background: rgba(var(--rgb-accent), 0.12);
+    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.28);
+    flex-shrink: 0;
+}
+
+.relax-titles {
+    min-width: 0;
+    flex: 1;
+}
+
+.relax-kicker {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+    line-height: 1.1;
+}
+
+.relax-track {
+    font-size: 13px;
+    font-weight: 560;
+    letter-spacing: 0.01em;
+    color: #f4f7fb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.relax-icon-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.relax-icon-btn:hover {
+    background: rgba(var(--rgb-accent), 0.16);
+    color: #fff;
+}
+
+.spectrum {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 18px;
+    margin: 8px 2px 8px;
+}
+
+.bar {
+    flex: 1;
+    height: 100%;
+    border-radius: 99px;
+    transform: scaleY(0.14);
+    transform-origin: center bottom;
+    background: linear-gradient(
+        180deg,
+        rgba(var(--rgb-accent), 0.95) 0%,
+        rgba(var(--rgb-accent), 0.28) 100%
+    );
+    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.28);
+    will-change: transform, opacity;
+}
+
+.relax-stage {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 0;
+    flex: 1;
+}
+
+.breathe {
+    width: 58px;
+    height: 58px;
+    border: none;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, rgba(var(--rgb-accent), 0.16), rgba(0, 0, 0, 0.15) 70%);
+    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.28);
+    position: relative;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.breathe-ring {
+    position: absolute;
+    inset: 9px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(var(--rgb-accent), 0.9);
+    box-shadow:
+        0 0 12px rgba(var(--rgb-accent), 0.4),
+        inset 0 0 8px rgba(var(--rgb-accent), 0.25);
+    transform: scale(var(--breath, 1));
+    transition: transform 0.08s linear;
+}
+
+.breathe.is-paused .breathe-ring {
+    opacity: 0.55;
+}
+
+.transport {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.transport-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.transport-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.transport-btn:hover {
+    box-shadow: inset 0 0 0 1px rgba(var(--rgb-accent), 0.45);
+}
+
+#btn-play .ico-pause {
+    display: none;
+}
+
+#btn-play.is-playing .ico-play {
+    display: none;
+}
+
+#btn-play.is-playing .ico-pause {
+    display: block;
+}
+
+.elapsed {
+    margin-left: auto;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.phase {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-a, #c8dce8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.breathe-off .breathe,
+body.breathe-off .phase {
+    display: none;
+}

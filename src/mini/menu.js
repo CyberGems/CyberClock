@@ -83,6 +83,20 @@
         });
     }
 
+    function syncRelaxMenu(cfg) {
+        cfg = cfg || {};
+        const lock = document.getElementById("toggle-relax-lock");
+        if (lock) lock.classList.toggle("on", cfg.relaxPositionLocked === true);
+        const breathe = document.getElementById("toggle-relax-breathe");
+        if (breathe) breathe.classList.toggle("on", cfg.floatRelaxShowBreathe !== false);
+        const aot = document.getElementById("toggle-relax-aot");
+        if (aot) aot.classList.toggle("on", !!cfg.alwaysOnTop);
+        const op = typeof cfg.floatRelaxOpacity === "number" ? cfg.floatRelaxOpacity : 1;
+        document.querySelectorAll(".relax-op-chip").forEach((chip) => {
+            chip.classList.toggle("on", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
+        });
+    }
+
     function setupMenuForCaller(info) {
         menuShownTime = Date.now();
         activeCaller = info || { caller: "mini", kind: "mini" };
@@ -91,14 +105,31 @@
         }
         const isTimer = activeCaller.kind === "timer";
         const isSw = activeCaller.kind === "sw";
+        const isRelax = activeCaller.kind === "relax";
         const isFloat = isTimer || isSw;
 
         const timerView = document.getElementById("ctx-timer-view");
+        const relaxView = document.getElementById("ctx-relax-view");
         const tabs = document.getElementById("ctx-tabs");
         const actionsPanel = document.getElementById("tab-panel-actions");
         const customizePanel = document.getElementById("tab-panel-customize");
 
-        if (isFloat) {
+        if (isRelax) {
+            if (timerView) timerView.style.display = "none";
+            if (tabs) tabs.style.display = "none";
+            if (actionsPanel) actionsPanel.style.display = "none";
+            if (customizePanel) customizePanel.style.display = "none";
+            if (relaxView) relaxView.style.display = "flex";
+            document.querySelectorAll("#ctx-relax-tabs .ctx-tab").forEach((b) => {
+                b.classList.toggle("on", b.dataset.tab === "actions");
+            });
+            const relaxActions = document.getElementById("relax-panel-actions");
+            const relaxCustomize = document.getElementById("relax-panel-customize");
+            if (relaxActions) relaxActions.style.display = "flex";
+            if (relaxCustomize) relaxCustomize.style.display = "none";
+            syncRelaxMenu(currentCfg);
+        } else if (isFloat) {
+            if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "flex";
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
@@ -255,6 +286,7 @@
                 tglTimerLock.classList.toggle("on", isLocked);
             }
         } else {
+            if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "none";
             if (tabs) tabs.style.display = "flex";
             const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "actions";
@@ -395,7 +427,9 @@
     function openGallery() {
         if (!galleryView) return;
         const timerView = document.getElementById("ctx-timer-view");
+        const relaxView = document.getElementById("ctx-relax-view");
         if (timerView) timerView.style.display = "none";
+        if (relaxView) relaxView.style.display = "none";
         if (ctxTabs) ctxTabs.style.display = "none";
         if (panelActions) panelActions.style.display = "none";
         if (panelCustomize) panelCustomize.style.display = "none";
@@ -415,14 +449,24 @@
         if (ctxMenu) ctxMenu.classList.remove("gallery-mode");
 
         const isFloat = activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw");
+        const isRelax = activeCaller && activeCaller.kind === "relax";
         const timerView = document.getElementById("ctx-timer-view");
+        const relaxView = document.getElementById("ctx-relax-view");
 
-        if (isFloat) {
+        if (isRelax) {
+            if (timerView) timerView.style.display = "none";
+            if (relaxView) relaxView.style.display = "flex";
+            if (ctxTabs) ctxTabs.style.display = "none";
+            if (panelActions) panelActions.style.display = "none";
+            if (panelCustomize) panelCustomize.style.display = "none";
+        } else if (isFloat) {
+            if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "flex";
             if (ctxTabs) ctxTabs.style.display = "none";
             if (panelActions) panelActions.style.display = "none";
             if (panelCustomize) panelCustomize.style.display = "none";
         } else {
+            if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "none";
             if (ctxTabs) ctxTabs.style.display = "flex";
             const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "customize";
@@ -472,6 +516,9 @@
                     if (calendarLbl) calendarLbl.textContent = window.ccI18n.t("float.newCalendar");
                     const analogLbl = document.querySelector('.ctx-item[data-action="new_analog"] .label');
                     if (analogLbl) analogLbl.textContent = window.ccI18n.t("float.newAnalog");
+                    document.querySelectorAll('.ctx-item[data-action="new_relax"] .label').forEach((el) => {
+                        el.textContent = window.ccI18n.t("float.newRelax");
+                    });
                     const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
                     if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
                     document.querySelectorAll('.ctx-item[data-action="settings"] .label').forEach(el => {
@@ -883,6 +930,19 @@
         });
     });
 
+    document.querySelectorAll("#ctx-relax-tabs .ctx-tab").forEach((tabBtn) => {
+        tabBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const target = tabBtn.dataset.tab;
+            document.querySelectorAll("#ctx-relax-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === target));
+            const actions = document.getElementById("relax-panel-actions");
+            const customize = document.getElementById("relax-panel-customize");
+            if (actions) actions.style.display = target === "actions" ? "flex" : "none";
+            if (customize) customize.style.display = target === "customize" ? "flex" : "none";
+            reportMenuHeight();
+        });
+    });
+
     // Menu action click handlers (full, timer, settings, etc.)
     document.querySelectorAll(".ctx-item[data-action]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -915,6 +975,7 @@
                     const kind = activeCaller && activeCaller.kind;
                     if (kind === "timer") act = "timer";
                     else if (kind === "sw") act = "stopwatch";
+                    else if (kind === "relax") act = "relax";
                     else act = "home";
                 }
                 window.cc.menuAction(act);
@@ -1006,6 +1067,42 @@
         });
     }
 
+    const tglRelaxAotRow = document.getElementById("ctx-relax-aot");
+    if (tglRelaxAotRow) {
+        tglRelaxAotRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-relax-aot");
+            if (tgl) tgl.classList.toggle("on");
+            if (window.cc && window.cc.menuAction) window.cc.menuAction("aot");
+        });
+    }
+    const tglRelaxLockRow = document.getElementById("ctx-relax-lock");
+    if (tglRelaxLockRow) {
+        tglRelaxLockRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-relax-lock");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ relaxPositionLocked: on });
+        });
+    }
+    const tglRelaxBreatheRow = document.getElementById("ctx-relax-breathe");
+    if (tglRelaxBreatheRow) {
+        tglRelaxBreatheRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-relax-breathe");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatRelaxShowBreathe: on });
+        });
+    }
+    document.querySelectorAll(".relax-op-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const op = parseFloat(chip.dataset.op);
+            if (!Number.isFinite(op)) return;
+            document.querySelectorAll(".relax-op-chip").forEach((c) => c.classList.toggle("on", c === chip));
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatRelaxOpacity: op });
+        });
+    });
+
     const tglTimerAotRow = document.getElementById("ctx-timer-aot");
     if (tglTimerAotRow) {
         tglTimerAotRow.addEventListener("click", () => {
@@ -1057,6 +1154,9 @@
         window.cc.onSettingsUpdated((cfg) => {
             if (cfg) {
                 currentCfg = Object.assign(currentCfg || {}, cfg);
+                if (activeCaller && activeCaller.kind === "relax") {
+                    syncRelaxMenu(cfg);
+                }
                 if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
                     const isTimer = activeCaller.kind === "timer";
                     let localD = null;

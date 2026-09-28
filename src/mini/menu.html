@@ -82,6 +82,10 @@
                     <span class="ico" data-ico="calendar"></span>
                     <span class="label" data-i18n="float.calTitle">Calendar</span>
                 </div>
+                <div class="ctx-item" data-action="new_relax">
+                    <span class="ico" data-ico="lotus"></span>
+                    <span class="label" data-i18n="float.newRelax">New Relax</span>
+                </div>
                 <div class="ctx-sep"></div>
                 <div class="ctx-item" data-action="settings">
                     <span class="ico" data-ico="gear"></span>
@@ -175,6 +179,82 @@
                 </div>
             </div>
 
+            <!-- VIEW: Floating Relax -->
+            <div class="ctx-timer-view" id="ctx-relax-view" style="display: none;">
+                <div class="ctx-tabs" id="ctx-relax-tabs">
+                    <button type="button" class="ctx-tab on" data-tab="actions" data-i18n="float.tabActions">Actions</button>
+                    <button type="button" class="ctx-tab" data-tab="customize" data-i18n="float.tabStyle">Customize</button>
+                </div>
+                <div id="relax-panel-actions" style="display: flex; flex-direction: column;">
+                    <div class="ctx-item" data-action="full">
+                        <span class="ico" data-ico="expand"></span>
+                        <span class="label" data-i18n="tray.fullMode">Full Mode</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="new_timer">
+                        <span class="ico" data-ico="timer"></span>
+                        <span class="label" data-i18n="float.newTimer">New Timer</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_stopwatch">
+                        <span class="ico" data-ico="stopwatch"></span>
+                        <span class="label" data-i18n="float.newStopwatch">New Stopwatch</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_analog">
+                        <span class="ico" data-ico="clock"></span>
+                        <span class="label" data-i18n="float.newAnalog">New Analog Clock</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_calendar">
+                        <span class="ico" data-ico="calendar"></span>
+                        <span class="label" data-i18n="float.newCalendar">New Calendar</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="settings">
+                        <span class="ico" data-ico="gear"></span>
+                        <span class="label" data-i18n="menu.settings">Settings</span>
+                    </div>
+                    <div class="ctx-item" data-action="about">
+                        <span class="ico" data-ico="info"></span>
+                        <span class="label" data-i18n="about.title">About CyberClock</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item danger" data-action="close_current_relax">
+                        <span class="ico" data-ico="power"></span>
+                        <span class="label" data-i18n="float.close">Close</span>
+                    </div>
+                </div>
+                <div id="relax-panel-customize" style="display: none; flex-direction: column;">
+                    <div class="switch-row" id="ctx-relax-aot">
+                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        <div class="toggle" id="toggle-relax-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-relax-lock">
+                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        <div class="toggle" id="toggle-relax-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-relax-breathe">
+                        <span class="switch-lbl" data-i18n="float.showBreathe">Breathing guide</span>
+                        <div class="toggle on" id="toggle-relax-breathe">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-section">
+                        <span class="ctx-section-title" data-i18n="float.opacity">Opacity</span>
+                        <div class="relax-op-chips">
+                            <button type="button" class="relax-op-chip on" data-op="1.0">100%</button>
+                            <button type="button" class="relax-op-chip" data-op="0.85">85%</button>
+                            <button type="button" class="relax-op-chip" data-op="0.70">70%</button>
+                            <button type="button" class="relax-op-chip" data-op="0.50">50%</button>
+                            <button type="button" class="relax-op-chip" data-op="0.40">40%</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB BAR -->
             <div class="ctx-tabs" id="ctx-tabs">
                 <button class="ctx-tab on" id="tab-btn-actions" data-tab="actions" data-i18n="menu.tabActions">Actions</button>
@@ -203,6 +283,10 @@
                 <div class="ctx-item" data-action="new_analog">
                     <span class="ico" data-ico="clock"></span>
                     <span class="label">Analog Clock</span>
+                </div>
+                <div class="ctx-item" data-action="new_relax">
+                    <span class="ico" data-ico="lotus"></span>
+                    <span class="label" data-i18n="float.newRelax">New Relax</span>
                 </div>
                 <div class="ctx-item" data-action="relax">
                     <span class="ico" data-ico="lotus"></span>

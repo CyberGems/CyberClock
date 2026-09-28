@@ -525,8 +525,17 @@ fn spawn_float_window_with_slot(
         "timer" => "timer",
         "cal" | "calendar" => "cal",
         "analog" => "analog",
+        "relax" => "relax",
         _ => "sw",
     };
+    if kind == "relax" {
+        if let Some(existing) = app.get_webview_window("float-relax-1") {
+            let _ = existing.unminimize();
+            let _ = existing.show();
+            let _ = existing.set_focus();
+            return Some(existing.label().to_string());
+        }
+    }
     if float_window_count(app) >= MAX_FLOAT_WINDOWS {
         warn!(
             "spawn_float: refusing, {} float windows alive",
@@ -566,6 +575,7 @@ fn spawn_float_window_with_slot(
         "timer" => ("Timer · CyberClock", 286.0, 92.0),
         "cal" => ("Calendar · CyberClock", 286.0, 268.0),
         "analog" => ("Analog Clock · CyberClock", 316.0, 316.0),
+        "relax" => ("Relax · CyberClock", 300.0, 176.0),
         _ => ("Stopwatch · CyberClock", 286.0, 52.0),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
@@ -573,6 +583,8 @@ fn spawn_float_window_with_slot(
         WebviewUrl::App("float/cal.html".into())
     } else if kind == "analog" {
         WebviewUrl::App("float/analog.html".into())
+    } else if kind == "relax" {
+        WebviewUrl::App("float/relax.html".into())
     } else {
         WebviewUrl::App("float/float.html".into())
     };
@@ -599,6 +611,12 @@ fn spawn_float_window_with_slot(
         }
     } else if kind == "analog" {
         if let Some((x, y)) = settings.float_analog_position {
+            pos_x = x as f64;
+            pos_y = y as f64;
+            custom_pos = true;
+        }
+    } else if kind == "relax" {
+        if let Some((x, y)) = settings.float_relax_position {
             pos_x = x as f64;
             pos_y = y as f64;
             custom_pos = true;
@@ -682,6 +700,12 @@ fn spawn_float_window_with_slot(
                     s.float_analog_open = true;
                     Ok(())
                 });
+            } else if kind == "relax" {
+                let app_handle = app.clone();
+                let _ = update_settings(&app_handle, |s| {
+                    s.float_relax_open = true;
+                    Ok(())
+                });
             } else if kind == "timer" || kind == "sw" {
                 let app_handle = app.clone();
                 let l = label.clone();
@@ -729,6 +753,11 @@ fn spawn_float_window_with_slot(
                             s.float_analog_position = Some((pos.x, pos.y));
                             Ok(())
                         });
+                    } else if kind_for_event == "relax" {
+                        let _ = update_settings(&app_for_event, |s| {
+                            s.float_relax_position = Some((pos.x, pos.y));
+                            Ok(())
+                        });
                     } else if kind_for_event == "timer" || kind_for_event == "sw" {
                         let _ = update_settings(&app_for_event, |s| {
                             if let Some(entry) = s
@@ -772,6 +801,18 @@ fn spawn_float_window_with_slot(
                             if analog_count == 0 {
                                 let _ = update_settings(&app_for_event, |s| {
                                     s.float_analog_open = false;
+                                    Ok(())
+                                });
+                            }
+                        } else if kind_for_event == "relax" {
+                            let relax_count = app_for_event
+                                .webview_windows()
+                                .keys()
+                                .filter(|l| l.starts_with("float-relax-"))
+                                .count();
+                            if relax_count == 0 {
+                                let _ = update_settings(&app_for_event, |s| {
+                                    s.float_relax_open = false;
                                     Ok(())
                                 });
                             }
@@ -1581,6 +1622,11 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
                 .outer_size()
                 .unwrap_or(tauri::PhysicalSize::new(316, 316));
             analogs.push((win, size.width as i32, size.height as i32));
+        } else if label.starts_with("float-relax") {
+            let size = win
+                .outer_size()
+                .unwrap_or(tauri::PhysicalSize::new(300, 176));
+            bars.push((win, size.width as i32, size.height as i32));
         } else if label.starts_with("float-timer") {
             let size = win
                 .outer_size()
@@ -1665,6 +1711,11 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
             } else if label.starts_with("float-analog") {
                 let _ = update_settings(app, |s| {
                     s.float_analog_position = Some((win_x, win_y));
+                    Ok(())
+                });
+            } else if label.starts_with("float-relax") {
+                let _ = update_settings(app, |s| {
+                    s.float_relax_position = Some((win_x, win_y));
                     Ok(())
                 });
             }
@@ -2834,6 +2885,8 @@ fn open_mini_context_menu(
             "timer"
         } else if caller_label.starts_with("float-sw-") {
             "sw"
+        } else if caller_label.starts_with("float-relax-") {
+            "relax"
         } else {
             "mini"
         };
@@ -2860,6 +2913,8 @@ fn get_menu_caller() -> Option<serde_json::Value> {
         "timer"
     } else if caller.starts_with("float-sw-") {
         "sw"
+    } else if caller.starts_with("float-relax-") {
+        "relax"
     } else {
         "mini"
     };
@@ -2925,6 +2980,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "new_analog" => spawn_float_window(&app, "analog").is_some(),
+        "new_relax" => spawn_float_window(&app, "relax").is_some(),
         "close_other_timers" => {
             let caller = CURRENT_MENU_CALLER
                 .lock()
@@ -2951,7 +3007,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             }
             true
         }
-        "close_current_timer" | "close_current_sw" => {
+        "close_current_timer" | "close_current_sw" | "close_current_relax" => {
             let caller = CURRENT_MENU_CALLER
                 .lock()
                 .ok()
@@ -3905,6 +3961,9 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         "new_analog" | "new_analog_tray" => {
             spawn_float_window(&app, "analog");
         }
+        "new_relax" | "new_relax_tray" => {
+            spawn_float_window(&app, "relax");
+        }
         "home" | "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
@@ -4144,6 +4203,9 @@ fn show_initial_window(app: &AppHandle) {
         }
         if settings.float_analog_open {
             spawn_float_window(app, "analog");
+        }
+        if settings.float_relax_open {
+            spawn_float_window(app, "relax");
         }
         let saved_widgets = settings.open_float_widgets.clone();
         for widget in saved_widgets {

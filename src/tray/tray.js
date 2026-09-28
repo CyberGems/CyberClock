@@ -102,6 +102,8 @@
         if (lblCal) lblCal.textContent = window.ccI18n ? window.ccI18n.t("float.newCalendar") : "New Calendar";
         const lblAnalog = document.getElementById("lbl-analog");
         if (lblAnalog) lblAnalog.textContent = window.ccI18n ? window.ccI18n.t("float.newAnalog") : "New Analog Clock";
+        const lblRelaxFloat = document.getElementById("lbl-relax-float");
+        if (lblRelaxFloat) lblRelaxFloat.textContent = window.ccI18n ? window.ccI18n.t("float.newRelax") : "New Relax";
         const lblRelax = document.getElementById("lbl-relax");
         if (lblRelax) lblRelax.textContent = window.ccI18n ? window.ccI18n.t("tray.relax") : "Relax";
 

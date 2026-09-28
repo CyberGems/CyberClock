@@ -2760,6 +2760,7 @@
         width: 100%;
     }
     #r-shuffle-wrap .abtn,
+    #r-float-wrap .abtn,
     #r-stop-wrap .abtn {
         min-width: 48px;
         padding: 13px 0;

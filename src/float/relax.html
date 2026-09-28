@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+        <title>CyberClock Relax</title>
+        <link rel="stylesheet" href="../shared/themes.css" />
+        <link rel="stylesheet" href="../shared/base.css" />
+        <script src="../shared/tauri-bridge.js"></script>
+        <script src="../shared/tint.js"></script>
+        <script src="../shared/i18n.js"></script>
+        <script src="../shared/audio-engine.js"></script>
+        <link rel="stylesheet" href="relax.css" />
+    </head>
+    <body data-tint="ice">
+        <div class="relax-shell" id="relax-shell">
+            <header class="relax-hdr">
+                <span class="relax-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 21c-4.5-3.2-7-6.4-7-9.6A3.6 3.6 0 0 1 12 9a3.6 3.6 0 0 1 7 2.4C19 14.6 16.5 17.8 12 21z"></path>
+                        <path d="M12 21V9"></path>
+                    </svg>
+                </span>
+                <div class="relax-titles">
+                    <div class="relax-kicker" data-i18n="float.relaxTitle">Relax</div>
+                    <div class="relax-track" id="track-name">Night</div>
+                </div>
+                <button type="button" class="relax-icon-btn" id="btn-menu" data-tooltip="Menu and settings" data-i18n-attr="data-tooltip:float.menuTooltip, aria-label:float.menuTooltip" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="Menu and settings">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="5" r="1.6"></circle>
+                        <circle cx="12" cy="12" r="1.6"></circle>
+                        <circle cx="12" cy="19" r="1.6"></circle>
+                    </svg>
+                </button>
+                <button type="button" class="relax-icon-btn" id="btn-close" data-tooltip="Close" data-i18n-attr="data-tooltip:float.close, aria-label:float.close" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="Close">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                    </svg>
+                </button>
+            </header>
+
+            <div class="spectrum" id="spectrum" aria-hidden="true">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+
+            <div class="relax-stage">
+                <button type="button" class="breathe" id="btn-breathe" data-tooltip="Start or pause the breathing guide" data-i18n-attr="data-tooltip:float.breatheTip, aria-label:float.breatheTip" aria-label="Start or pause the breathing guide">
+                    <span class="breathe-ring" id="breathe-ring"></span>
+                </button>
+                <div class="transport">
+                    <div class="transport-row">
+                        <button type="button" class="relax-icon-btn transport-btn" id="btn-play" data-tooltip="Play" aria-label="Play">
+                            <svg class="ico-play" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                <path d="M8 5.5v13l11-6.5-11-6.5z"></path>
+                            </svg>
+                            <svg class="ico-pause" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+                                <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+                            </svg>
+                        </button>
+                        <button type="button" class="relax-icon-btn transport-btn" id="btn-next" data-tooltip="Next track" data-i18n-attr="data-tooltip:float.nextTrack, aria-label:float.nextTrack" aria-label="Next track">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                <path d="M5 6.5v11l8.5-5.5L5 6.5z"></path>
+                                <rect x="16" y="6" width="2.4" height="12" rx="0.6"></rect>
+                            </svg>
+                        </button>
+                        <span class="elapsed" id="elapsed">00:00</span>
+                    </div>
+                    <div class="phase" id="phase">Ready</div>
+                </div>
+            </div>
+        </div>
+        <script src="relax.js"></script>
+    </body>
+</html>

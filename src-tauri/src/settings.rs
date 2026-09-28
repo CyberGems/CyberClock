@@ -183,6 +183,14 @@ pub struct AppSettings {
     #[serde(default)]
     pub float_analog_design: Option<u32>,
     #[serde(default)]
+    pub float_relax_open: bool,
+    #[serde(default)]
+    pub float_relax_position: Option<(i32, i32)>,
+    #[serde(default)]
+    pub float_relax_opacity: Option<f64>,
+    #[serde(default = "default_true")]
+    pub float_relax_show_breathe: bool,
+    #[serde(default)]
     pub float_timer_opacity: Option<f64>,
     #[serde(default)]
     pub float_sw_opacity: Option<f64>,
@@ -218,6 +226,8 @@ pub struct AppSettings {
     pub analog_position_locked: bool,
     #[serde(default)]
     pub cal_position_locked: bool,
+    #[serde(default)]
+    pub relax_position_locked: bool,
     pub preferred_display_id: Option<u32>,
     // When true, full mode opens on the monitor that currently holds
     // the mouse pointer (the "active" monitor) instead of the
@@ -350,6 +360,10 @@ impl Default for AppSettings {
             float_analog_position: None,
             float_analog_opacity: None,
             float_analog_design: None,
+            float_relax_open: false,
+            float_relax_position: None,
+            float_relax_opacity: None,
+            float_relax_show_breathe: true,
             float_timer_opacity: None,
             float_sw_opacity: None,
             timer_sound_enabled: true,
@@ -368,6 +382,7 @@ impl Default for AppSettings {
             sw_position_locked: false,
             analog_position_locked: false,
             cal_position_locked: false,
+            relax_position_locked: false,
             preferred_display_id: None,
             display_auto: true,
             hotkey_toggle: "Alt+Shift+C".to_string(),

@@ -62,7 +62,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Cronómetro:** medición de precisión con registro de vueltas, delta frente al promedio, resaltado de la mejor/peor vuelta y exportación al portapapeles
 - **Widgets flotantes de escritorio:** abre ventanas compactas independientes de temporizador y cronómetro con soporte de varias ranuras; los widgets se recuerdan y se restauran entre reinicios de la app
 - **Skins independientes y renombrado:** elige skins distintas por tipo de widget (Reloj Mini, Temporizador, Cronómetro) y personaliza los títulos de los widgets
-- **Lanzamiento entre widgets:** crea fácilmente temporizadores, cronómetros, relojes analógicos o calendarios desde el menú contextual de cualquier widget activo
+- **Lanzamiento entre widgets:** crea fácilmente temporizadores, cronómetros, relojes analógicos, calendarios o una sesión de relajación desde el menú contextual de cualquier widget activo
 - **Preajustes del temporizador flotante:** suma 30s, 1m, 5m, 10m o 15m a la duración armada sin iniciar la cuenta regresiva (se puede ocultar desde el menú contextual)
 - **Dígitos en reposo y pantalla ampliada:** dígitos de contador mejorados en todas las skins, con el estado a cero atenuado hasta que se arma un tiempo
 
@@ -75,6 +75,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
 - **Pautas de respiración:** respiración en caja (4-4-4-4) y técnica 4-7-8
+- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, anillo de respiración y un espectro pequeño. El audio sigue sonando cuando el modo completo está oculto
 - **Tiempo de sesión:** con consejos de mindfulness y parada automática (15m, 30m, 1h, 2h)
 - **Programador automático:** programa horarios de reproducción automática
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
@@ -84,7 +85,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Herramientas flotantes con skin:** las ventanas de temporizador y cronómetro reutilizan los diseños seleccionados con disposiciones dimensionadas para sus controles
 - **Controles de transparencia:** deslizadores de opacidad del fondo y del contenido
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas
-- **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario)
+- **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario, Relajación)
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
 - **Colapsar fecha:** muestra la fecha solo al pasar el cursor
 - **Líneas de exploración CRT:** efecto retro de superposición
