@@ -11,17 +11,13 @@
         <script src="../shared/tint.js"></script>
         <script src="../shared/i18n.js"></script>
         <script src="../shared/audio-engine.js"></script>
+        <script src="../shared/icons.js"></script>
         <link rel="stylesheet" href="relax.css" />
     </head>
     <body data-tint="ice">
         <div class="relax-shell" id="relax-shell">
             <header class="relax-hdr">
-                <span class="relax-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 21c-4.5-3.2-7-6.4-7-9.6A3.6 3.6 0 0 1 12 9a3.6 3.6 0 0 1 7 2.4C19 14.6 16.5 17.8 12 21z"></path>
-                        <path d="M12 21V9"></path>
-                    </svg>
-                </span>
+                <span class="relax-mark" data-ico="lotus" data-ico-size="14" aria-hidden="true"></span>
                 <div class="relax-titles">
                     <div class="relax-kicker" data-i18n="float.relaxTitle">Relax</div>
                     <div class="relax-track" id="track-name">Night</div>
@@ -41,14 +37,8 @@
                 </button>
             </header>
 
-            <div class="spectrum" id="spectrum" aria-hidden="true">
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
-            </div>
-
             <div class="relax-stage">
-                <button type="button" class="breathe" id="btn-breathe" data-tooltip="Start or pause the breathing guide" data-i18n-attr="data-tooltip:float.breatheTip, aria-label:float.breatheTip" aria-label="Start or pause the breathing guide">
+                <button type="button" class="breathe" id="btn-breathe" data-tooltip="Start or pause the breathing guide" data-i18n-attr="data-tooltip:float.breatheTip, aria-label:float.breatheTip" data-tooltip-align="left" aria-label="Start or pause the breathing guide">
                     <span class="breathe-ring" id="breathe-ring"></span>
                 </button>
                 <div class="transport">
@@ -73,6 +63,7 @@
                     <div class="phase" id="phase">Ready</div>
                 </div>
             </div>
+            <canvas class="spectrum" id="spectrum" aria-hidden="true"></canvas>
         </div>
         <script src="relax.js"></script>
     </body>

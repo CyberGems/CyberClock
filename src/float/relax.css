@@ -71,6 +71,10 @@ button {
     flex-shrink: 0;
 }
 
+.relax-mark .cc-ico {
+    display: block;
+}
+
 .relax-titles {
     min-width: 0;
     flex: 1;
@@ -115,26 +119,18 @@ button {
 }
 
 .spectrum {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 18px;
-    margin: 8px 2px 8px;
+    width: 100%;
+    height: 28px;
+    margin-top: 4px;
+    display: block;
+    flex-shrink: 0;
 }
 
-.bar {
-    flex: 1;
-    height: 100%;
-    border-radius: 99px;
-    transform: scaleY(0.14);
-    transform-origin: center bottom;
-    background: linear-gradient(
-        180deg,
-        rgba(var(--rgb-accent), 0.95) 0%,
-        rgba(var(--rgb-accent), 0.28) 100%
-    );
-    box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.28);
-    will-change: transform, opacity;
+#btn-menu.is-open::after,
+#btn-menu.is-open:hover::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
 }
 
 .relax-stage {
@@ -226,6 +222,11 @@ button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: opacity 0.35s ease;
+}
+
+.phase.is-paused {
+    opacity: 0.38;
 }
 
 body.breathe-off .breathe,

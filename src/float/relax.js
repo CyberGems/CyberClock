@@ -26,8 +26,10 @@
     const ring = document.getElementById("breathe-ring");
     const btnMenu = document.getElementById("btn-menu");
     const btnClose = document.getElementById("btn-close");
-    const bars = Array.from(document.querySelectorAll(".bar"));
-    const levels = bars.map(() => 0.14);
+    const spectrum = document.getElementById("spectrum");
+    const SPECTRUM_BARS = 48;
+    const levels = new Array(SPECTRUM_BARS).fill(0);
+    let spectrumCtx = null;
 
     let cfg = {};
     let trackIndex = 0;
@@ -86,6 +88,7 @@
         btnPlay.setAttribute("aria-label", label);
         btnPlay.classList.toggle("is-playing", playing && !paused);
         btnBreathe.classList.toggle("is-paused", guideOn && guidePaused);
+        phaseEl.classList.toggle("is-paused", guideOn && guidePaused);
     }
 
     function applyAudioPrefs() {
@@ -176,22 +179,7 @@
             ring.style.setProperty("--breath", "1");
         }
 
-        const live = playing && !paused && !cfg.audioMuted;
-        const data = live && engine ? engine.getAnalyserData() : null;
-        const bins = data ? data.length : 0;
-        for (let i = 0; i < bars.length; i++) {
-            let target = 0.14;
-            if (data) {
-                const pos = bars.length === 1 ? 0 : i / (bars.length - 1);
-                const idx = Math.min(bins - 1, Math.floor(Math.pow(pos, 1.55) * bins * 0.7));
-                target = 0.12 + (data[idx] / 255) * 0.88;
-            } else {
-                target = 0.12 + 0.06 * (0.5 + 0.5 * Math.sin(now / 700 + i * 0.55));
-            }
-            levels[i] += (target - levels[i]) * (data ? 0.32 : 0.08);
-            bars[i].style.transform = "scaleY(" + levels[i].toFixed(3) + ")";
-            bars[i].style.opacity = String(0.45 + Math.min(1, levels[i]) * 0.55);
-        }
+        drawSpectrum(now, playing && !cfg.audioMuted);
 
         if (playing && !paused && sessionStart) {
             elapsedEl.textContent = fmt(now - sessionStart);
@@ -199,6 +187,76 @@
             elapsedEl.textContent = fmt(sessionShown);
         }
         requestAnimationFrame(frame);
+    }
+
+    function drawSpectrum(now, active) {
+        if (!spectrum) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = spectrum.clientWidth;
+        const h = spectrum.clientHeight;
+        if (w < 2 || h < 2) return;
+        const bw = Math.floor(w * dpr);
+        const bh = Math.floor(h * dpr);
+        if (spectrum.width !== bw || spectrum.height !== bh) {
+            spectrum.width = bw;
+            spectrum.height = bh;
+            spectrumCtx = null;
+        }
+        if (!spectrumCtx) spectrumCtx = spectrum.getContext("2d");
+        const ctx = spectrumCtx;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        const bodyStyle = getComputedStyle(document.body);
+        const acc = bodyStyle.getPropertyValue("--accent-a").trim() || "#c8dce8";
+        const rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "200,220,232";
+        const data = active && engine ? engine.getAnalyserData() : null;
+
+        if (data && data.length) {
+            const gap = w / SPECTRUM_BARS;
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            gradient.addColorStop(0, acc);
+            gradient.addColorStop(1, "rgba(" + rgb + ",.18)");
+            const maxBin = Math.floor(data.length * 0.32);
+            for (let i = 0; i < SPECTRUM_BARS; i++) {
+                const percent = i / (SPECTRUM_BARS - 1);
+                const idx = Math.min(data.length - 1, Math.floor(Math.pow(percent, 1.8) * maxBin));
+                let v = (data[idx] || 0) / 255;
+                v = Math.min(1, v * (1 + percent * 0.8));
+                levels[i] += (v - levels[i]) * 0.34;
+                const barH = Math.max(1.5, levels[i] * h * 0.9);
+                const x = Math.floor(i * gap);
+                const nextX = Math.floor((i + 1) * gap);
+                const barW = Math.max(1, nextX - x - 1);
+                const y = h - barH;
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barW, barH);
+                ctx.fillStyle = acc;
+                ctx.fillRect(x, Math.max(0, y - 1.5), barW, 1.5);
+            }
+            return;
+        }
+
+        const time = now * 0.001;
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(" + rgb + ",0.1)";
+        ctx.beginPath();
+        ctx.moveTo(0, h / 2);
+        ctx.lineTo(w, h / 2);
+        ctx.stroke();
+        for (let wIdx = 0; wIdx < 3; wIdx++) {
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(" + rgb + "," + (0.12 + wIdx * 0.08) + ")";
+            const freq = 0.02 + wIdx * 0.008;
+            const amp = 2.2 + wIdx * 1.6;
+            const speed = 1.2 + wIdx * 0.5;
+            for (let x = 0; x < w; x += 2) {
+                const y = h / 2 + Math.sin(x * freq + time * speed) * amp * Math.cos(x * 0.004);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
     }
 
     btnPlay.addEventListener("click", (e) => {
@@ -227,9 +285,14 @@
     let menuPointerAt = 0;
     let menuClosedAt = 0;
 
+    function setMenuButtonOpen(open) {
+        if (btnMenu) btnMenu.classList.toggle("is-open", open);
+    }
+
     if (window.cc && window.cc.onMenuClosed) {
         window.cc.onMenuClosed(() => {
             popupMenuOpen = false;
+            setMenuButtonOpen(false);
             menuClosedAt = Date.now();
             if (ignoreNextMenuClosed) {
                 ignoreNextMenuClosed = false;
@@ -259,6 +322,7 @@
         if (blockMenuOpen) {
             blockMenuOpen = false;
             popupMenuOpen = false;
+            setMenuButtonOpen(false);
             ignoreNextMenuClosed = true;
             setTimeout(() => { ignoreNextMenuClosed = false; }, 450);
             if (window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
@@ -267,6 +331,7 @@
         if (!window.cc.openMiniContextMenu) return;
         const opened = await window.cc.openMiniContextMenu(point);
         popupMenuOpen = opened !== false;
+        setMenuButtonOpen(popupMenuOpen);
         blockMenuOpen = false;
         if (!popupMenuOpen) menuClosedAt = Date.now();
     }
@@ -281,7 +346,10 @@
     }
 
     if (btnMenu) {
-        btnMenu.addEventListener("pointerdown", () => armMenuToggle());
+        btnMenu.addEventListener("pointerdown", () => {
+            armMenuToggle();
+            setMenuButtonOpen(true);
+        });
         btnMenu.addEventListener("click", (e) => {
             e.stopPropagation();
             btnMenu.blur();
