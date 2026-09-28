@@ -111,7 +111,8 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Inicio automático con Windows:** inicio basado en el registro, ofrecido como opción en el propio instalador y sincronizado con el interruptor de Configuración (la app reconcilia ambos en cada arranque)
 - **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
 - **Interfaz bilingüe:** interfaz completa en inglés y español
-- **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación y búsqueda de actualizaciones
+- **Respalado y Datos:** exporta alarmas, notas, temporizadores y preferencias como JSON; importa copias de seguridad previas; abre la carpeta de datos local; o restablece a valores de fábrica, todo desde una pestaña de configuración dedicada
+- **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de CyberClock" en todos los menús contextuales de widgets flotantes y Modo Mini
 - **Bienvenida personalizada:** un nombre para mostrar opcional añade un saludo según la hora junto a la marca CyberClock cuando se abre el modo completo
 
 ---

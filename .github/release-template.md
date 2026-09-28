@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Dedicated chime volume controls and audio previews arrive in the Time tab alongside unified settings blocks for hourly chimes, flexible window closing options with Mini Mode, and streamlined modal escape navigation.
+New Backup & Data settings tab for export, import, and factory reset. About window now shows random suite apps. All widget context menus gain an About entry. Close confirmation modal redesigned with vertical action cards.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,50 +17,56 @@ Dedicated chime volume controls and audio previews arrive in the Time tab alongs
 
 ### ✨ Key Features & Highlights
 
-- 🔔 **Dedicated Hourly Chimes Volume & Audio Preview**:
-  - Independent volume slider for hourly chimes and interval alerts, preserving your master alarm volume.
-  - Dedicated sound preview test buttons next to each chime sound selector (:00, :30, :15) for immediate verification.
-
-- 🕒 **Streamlined Time & Chimes Configuration**:
-  - Hourly Chimes and Voice Time Announcer reorganized into clean, unified function cards inside the Time settings tab.
-  - Alarms tab is now decluttered and dedicated exclusively to scheduled alarms and timers.
-  - Refined quiet hours schedule labels for clear silence windows.
+- 💾 **Backup & Data Settings Tab**:
+  - New dedicated settings tab for exporting all alarms, notes, timers, and preferences as a JSON file.
+  - Import backups from a previous JSON file to restore settings and notes.
+  - Open the application data folder directly to access local settings, imported sounds, and backups.
+  - Factory reset option to restore all settings, theme, and preferences to defaults.
 
 - 🪟 **Enhanced Window Close Experience**:
-  - New "Switch to Mini Mode" option in the close confirmation dialog alongside minimize to tray and exit.
-  - Direct "X" close button in the dialog header, backdrop click dismissal, and `Esc` keyboard shortcut hints across all application modals.
+  - Close confirmation dialog redesigned as vertical action cards with "Switch to Mini Mode" emphasized first.
+  - Direct "X" close button in the dialog header, backdrop click dismissal, and `Esc` keyboard shortcut hints.
 
-- 🌐 **Bilingual Release Notes & Complete i18n Synchronization**:
-  - Update notifications in Mini Mode and Full Mode with collapsible bilingual release notes.
-  - Complete English and Spanish string parity across all new controls, tooltips, and settings.
+- ℹ️ **About Window Enhancements**:
+  - Shows 5 random CyberGems suite apps with inline "More" badge linking to the full suite listing.
+  - Concise app description within 3 lines.
+
+- 📍 **Suite Context Menus**:
+  - "About CyberClock" entry now available in all floating widget and mini mode context menus.
+
+- 🌐 **Bilingual Release Notes**:
+  - Complete Spanish README translation with language switcher.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Llegan controles de volumen dedicado y pruebas de audio para campanadas en la pestaña Hora, junto a bloques de configuración unificados, opciones flexibles de cierre de ventana con Modo Mini y atajos de teclado Esc en modales.
+Nueva pestaña de Configuración de Respalado y Datos para exportar, importar y restablecer valores de fábrica. La ventana Acerca de muestra aplicaciones de la suite de forma aleatoria. Todos los menús contextuales incluyen una entrada Acerca de. Diálogo de cierre rediseñado con tarjetas verticales.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🔔 **Volumen dedicado de campanadas y vista previa de audio**:
-  - Deslizador de volumen independiente para las campanadas horarias y alertas de intervalo, preservando el volumen maestro de alarmas.
-  - Botones de prueba de sonido junto a cada selector de campanada (:00, :30, :15) para verificación inmediata.
-
-- 🕒 **Configuración optimizada de Hora y Campanadas**:
-  - Campanadas Horarias y Locutor de Hora por Voz reorganizados en tarjetas de función limpias y unificadas dentro de la pestaña Hora.
-  - La pestaña Alarmas queda despejada y dedicada exclusivamente a alarmas y temporizadores programados.
-  - Etiquetas refinadas para el horario de silencio ("Silenciar en este horario").
+- 💾 **Pestaña de configuración de Respalado y Datos**:
+  - Nueva pestaña dedicada para exportar alarmas, notas, temporizadores y preferencias como archivo JSON.
+  - Importa copias de seguridad desde un archivo JSON previo para restaurar configuración y notas.
+  - Abre directamente la carpeta de datos de la aplicación para acceder a configuraciones, sonidos personalizados y respaldos.
+  - Opción de restablecimiento de fábrica para devolver configuración, tema y preferencias a sus valores predeterminados.
 
 - 🪟 **Experiencia de cierre de ventana mejorada**:
-  - Nueva opción "Pasar a Modo Mini" en el diálogo de confirmación de cierre, junto a minimizar a la bandeja y salir.
-  - Botón de cierre directo ("X") en la cabecera del diálogo, cierre al hacer clic fuera del modal y atajos de teclado `Esc` en todos los modales.
+  - Diálogo de confirmación de cierre rediseñado como tarjetas verticales con "Pasar a Modo Mini" resaltada en primer lugar.
+  - Botón de cierre directo ("X") en la cabecera, cierre al hacer clic fuera del modal y atajos de teclado `Esc`.
 
-- 🌐 **Notas de versión bilingües y sincronización i18n completa**:
-  - Notificaciones de actualización en Modo Mini y Modo Completo con notas de versión bilingües desplegables.
-  - Paridad total entre inglés y español en todos los nuevos controles, tooltips y opciones.
+- ℹ️ **Mejoras en la ventana Acerca de**:
+  - Muestra 5 aplicaciones aleatorias de la suite CyberGems con insignia "Más" en línea.
+  - Descripción de la aplicación concisa dentro de 3 líneas.
+
+- 📍 **Menús contextuales de la suite**:
+  - Entrada "Acerca de CyberClock" disponible ahora en todos los menús contextuales de widgets flotantes y Modo Mini.
+
+- 🌐 **Notas de versión bilingües**:
+  - Traducción completa del README en español con conmutador de idioma.
 
 </details>
 

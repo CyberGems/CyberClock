@@ -111,7 +111,8 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
 - **Auto-Updates** — Built-in Tauri updater with GitHub Releases and in-app bilingual release notes
 - **Bilingual UI** — Full English and Spanish interface
-- **Accessible About Window** — Suite-standard About with links, donate options and check-for-update
+- **Backup & Data** — Export all settings, alarms, notes, and timers as JSON; import previous backups; open the local data folder; or factory-reset to defaults, all from a dedicated settings tab
+- **Accessible About Window** — Suite-standard About with links, donate options, suite app showcase, check-for-update, and "About CyberClock" entry in all floating widget and mini mode context menus
 - **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
 
 ---
