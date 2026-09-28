@@ -63,12 +63,19 @@
         user-select: none;
         padding: 3px 6px;
         border-radius: 6px;
-        opacity: 0.65;
-        transition: opacity 0.2s ease, background 0.15s ease, transform 0.15s ease;
+        transition: background 0.15s ease, transform 0.15s ease;
     }
     .tbar-brand:hover {
-        opacity: 1;
         background: rgba(var(--rgb-accent), 0.12);
+    }
+    .tbar-logo,
+    .tbar-name-a {
+        opacity: 0.65;
+        transition: opacity 0.2s ease;
+    }
+    .tbar-brand:hover .tbar-logo,
+    .tbar-brand:hover .tbar-name-a {
+        opacity: 1;
     }
     /* Official logo + name, the same branding language as the tray
        menu header (Outfit) instead of the old neon display caps. */
@@ -117,10 +124,11 @@
         padding-left: 10px;
         transform: translateX(0);
     }
-    /* Two-tone wordmark, suite standard: "Cyber" keeps the neutral
-       text color, "Clock" carries the logo's teal. */
+    /* "Clock" matches the About wordmark: the active tint, not the
+       fixed logo teal. */
     .tbar-name-b {
-        color: var(--brand-name-accent);
+        color: var(--accent-a);
+        text-shadow: 0 0 16px rgba(var(--rgb-accent), 0.50);
     }
     /* Pulse LED now lives next to the clock time; keeps the accent
        glowing on the titlebar without competing with the brand. */
