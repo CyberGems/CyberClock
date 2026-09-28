@@ -116,6 +116,47 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ---
 
+## 🚀 Primeros pasos
+
+### Instalación (recomendada)
+
+1. Descarga el instalador más reciente desde [Releases](https://github.com/CyberGems/CyberClock/releases/latest)
+2. Ejecuta el instalador `.exe` y sigue el asistente (ofrece iniciar CyberClock con Windows)
+3. Inicia CyberClock. No necesitas ningún otro requisito: **no** necesitas Node.js, Rust ni ninguna herramienta de desarrollador
+
+### Versión portable
+
+- Descarga `CyberClock_<version>_x64-portable.zip` desde el [último release](https://github.com/CyberGems/CyberClock/releases/latest)
+- Extráelo a cualquier carpeta y ejecuta `CyberClock.exe`
+- La configuración y los sonidos de alarma importados se guardan en una carpeta `data/` junto al ejecutable; actualiza las copias portables descargando el siguiente ZIP desde la página del release
+
+### 🛡️ Windows SmartScreen
+
+Windows puede mostrar un aviso de SmartScreen la primera vez que ejecutas el instalador de CyberClock: esta es una app de hobby sin firmar, así que Windows aún no ha construido reputación para el archivo. Esto es esperado; el código fuente es público para que puedas inspeccionar exactamente qué hace.
+
+Para continuar:
+
+<details>
+<summary><strong>Cómo ejecutar el instalador (paso a paso)</strong></summary>
+
+Windows muestra este aviso para cualquier instalador sin un certificado de firma de código de pago; no significa que el archivo sea inseguro. No hagas clic en "No ejecutar":
+
+1. Ejecuta el instalador. Windows puede mostrar el diálogo azul "Windows protegió tu PC".
+
+![Aviso de Windows SmartScreen](https://cybergems.org/branding/smartscreen-warning.svg)
+
+2. Haz clic en el pequeño enlace **Más información**.
+
+![Diálogo de SmartScreen tras Más información](https://cybergems.org/branding/smartscreen-runanyway.svg)
+
+3. Haz clic en **Ejecutar de todos modos**. El instalador arranca con normalidad.
+
+Puedes verificar el archivo de forma independiente: compara el SHA con el release de GitHub, escanéalo en VirusTotal o compila desde el código fuente. Más detalles: [guía de SmartScreen en el sitio web](https://cybergems.org/download#smartscreen).
+
+</details>
+
+---
+
 ## 🛠️ Stack tecnológico y arquitectura
 
 - **Plataforma:** Windows 10 / 11
@@ -168,60 +209,30 @@ La app usa **5 ventanas fijas de Tauri**, más las ventanas flotantes de tempori
 
 La comunicación entre frontend y backend usa comandos de Tauri (`invoke()`) y eventos (`emit()`). Las actualizaciones de configuración se transmiten mediante el evento `settings:updated` en todas las ventanas.
 
----
+### Compilar desde el código fuente (desarrolladores)
 
-## 🚀 Primeros pasos
+Solo necesario si quieres modificar CyberClock o compilarlo tú mismo; los usuarios normales pueden omitir esta sección.
 
-### Requisitos previos
+#### Requisitos previos
 
 - [Node.js](https://nodejs.org/) (última LTS)
 - [Rust](https://www.rust-lang.org/) 1.77.2+
 - [Tauri CLI](https://v2.tauri.app/start/prerequisites/)
 
-### Desarrollo
+#### Desarrollo
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Compilación para producción
+#### Compilación para producción
 
 ```bash
 npm run build
 ```
 
 El ejecutable compilado es `CyberClock.exe` y el instalador NSIS queda en `src-tauri/target/release/bundle/nsis/`.
-
-Las versiones etiquetadas también incluyen `CyberClock_<version>_x64-portable.zip`. Extráelo
-a cualquier carpeta y ejecuta `CyberClock.exe`; la build portable guarda su configuración
-y los sonidos de alarma importados en una carpeta `data/` junto al ejecutable. Las copias
-portables se actualizan descargando el siguiente ZIP desde la página del release.
-
-### 🛡️ Windows SmartScreen
-
-Windows puede mostrar un aviso de SmartScreen la primera vez que ejecutas el instalador de CyberClock: esta es una app de hobby sin firmar, así que Windows aún no ha construido reputación para el archivo. Esto es esperado; el código fuente es público para que puedas inspeccionar exactamente qué hace.
-
-Para continuar:
-
-<details>
-<summary><strong>Cómo ejecutar el instalador (paso a paso)</strong></summary>
-
-Windows muestra este aviso para cualquier instalador sin un certificado de firma de código de pago; no significa que el archivo sea inseguro. No hagas clic en "No ejecutar":
-
-1. Ejecuta el instalador. Windows puede mostrar el diálogo azul "Windows protegió tu PC".
-
-![Aviso de Windows SmartScreen](https://cybergems.org/branding/smartscreen-warning.svg)
-
-2. Haz clic en el pequeño enlace **Más información**.
-
-![Diálogo de SmartScreen tras Más información](https://cybergems.org/branding/smartscreen-runanyway.svg)
-
-3. Haz clic en **Ejecutar de todos modos**. El instalador arranca con normalidad.
-
-Puedes verificar el archivo de forma independiente: compara el SHA con el release de GitHub, escanéalo en VirusTotal o compila desde el código fuente. Más detalles: [guía de SmartScreen en el sitio web](https://cybergems.org/download#smartscreen).
-
-</details>
 
 ---
 

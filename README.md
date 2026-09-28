@@ -116,6 +116,47 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ---
 
+## 🚀 Getting Started
+
+### Install (Recommended)
+
+1. Download the latest installer from [Releases](https://github.com/CyberGems/CyberClock/releases/latest)
+2. Run the `.exe` installer and follow the setup wizard (it offers to start CyberClock with Windows)
+3. Launch CyberClock. No other requirements needed: you do **not** need Node.js, Rust, or any developer tool
+
+### Portable Version
+
+- Download `CyberClock_<version>_x64-portable.zip` from the [latest release](https://github.com/CyberGems/CyberClock/releases/latest)
+- Extract it to any folder and run `CyberClock.exe`
+- Settings and imported alarm sounds are stored in a `data/` folder beside the executable; portable copies are updated by downloading the next ZIP from the release page
+
+### 🛡️ Windows SmartScreen
+
+Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
+
+To continue:
+
+<details>
+<summary><strong>See how to run the installer (step by step)</strong></summary>
+
+Windows shows this warning for any installer without a paid code-signing certificate; it does not mean the file is unsafe. Do <strong>not</strong> click "Don't run":
+
+1. Run the installer. Windows may show the blue "Windows protected your PC" dialog.
+
+![Windows SmartScreen warning](https://cybergems.org/branding/smartscreen-warning.svg)
+
+2. Click the small **More info** link.
+
+![SmartScreen dialog after More info](https://cybergems.org/branding/smartscreen-runanyway.svg)
+
+3. Click **Run anyway**. The installer starts normally.
+
+You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
+
+</details>
+
+---
+
 ## 🛠️ Tech Stack & Architecture
 
 - **Platform:** Windows 10 / 11
@@ -168,60 +209,30 @@ The app uses **5 fixed Tauri windows**, plus independently spawned floating time
 
 Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
 
----
+### Building from Source (Developers)
 
-## 🚀 Getting Started
+Only needed if you want to work on CyberClock or build it yourself; regular users can skip this section.
 
-### Prerequisites
+#### Prerequisites
 
 - [Node.js](https://nodejs.org/) (Latest LTS)
 - [Rust](https://www.rust-lang.org/) 1.77.2+
 - [Tauri CLI](https://v2.tauri.app/start/prerequisites/)
 
-### Development
+#### Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Build for Production
+#### Build for Production
 
 ```bash
 npm run build
 ```
 
 The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
-
-Tagged releases also include `CyberClock_<version>_x64-portable.zip`. Extract it
-to any folder and run `CyberClock.exe`; the portable build keeps its settings
-and imported alarm sounds in a `data/` folder beside the executable. Portable
-copies are updated by downloading the next ZIP from the release page.
-
-### 🛡️ Windows SmartScreen
-
-Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
-
-To continue:
-
-<details>
-<summary><strong>See how to run the installer (step by step)</strong></summary>
-
-Windows shows this warning for any installer without a paid code-signing certificate; it does not mean the file is unsafe. Do <strong>not</strong> click "Don't run":
-
-1. Run the installer. Windows may show the blue "Windows protected your PC" dialog.
-
-![Windows SmartScreen warning](https://cybergems.org/branding/smartscreen-warning.svg)
-
-2. Click the small **More info** link.
-
-![SmartScreen dialog after More info](https://cybergems.org/branding/smartscreen-runanyway.svg)
-
-3. Click **Run anyway**. The installer starts normally.
-
-You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
-
-</details>
 
 ---
 
