@@ -342,7 +342,7 @@
                                         </label>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.label">Label</span>
-                                            <input id="alarm-edit-label" type="text" maxlength="48" placeholder="Morning focus" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
+                                            <input id="alarm-edit-label" type="text" name="cc-alarm-label" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Morning focus" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
                                         </label>
                                     </div>
                                     <div class="alarm-form-section">
@@ -420,7 +420,7 @@
                                         </div>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.message">Message</span>
-                                            <textarea id="alarm-edit-message" rows="2" maxlength="180" placeholder="What should CyberClock remind you?" data-i18n-attr="placeholder:alarms.editor.messagePlaceholder, aria-label:alarms.editor.message"></textarea>
+                                            <textarea id="alarm-edit-message" name="cc-alarm-message" rows="2" maxlength="180" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="What should CyberClock remind you?" data-i18n-attr="placeholder:alarms.editor.messagePlaceholder, aria-label:alarms.editor.message"></textarea>
                                         </label>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.snooze">Snooze duration</span>

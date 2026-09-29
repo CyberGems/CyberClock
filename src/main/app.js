@@ -502,15 +502,22 @@
         return null;
     }
 
+    function alarmFriendlyDate(date) {
+        const es = window.ccI18n && window.ccI18n.getEffectiveLang() === "es";
+        const text = date.toLocaleDateString(es ? "es-ES" : "en-US", {
+            day: "numeric",
+            month: "long",
+        });
+        if (!es) return text;
+        return text.replace(/\p{L}+$/u, (month) => month.charAt(0).toLocaleUpperCase("es") + month.slice(1));
+    }
+
     function alarmRepeatLabel(alarm) {
         const mode = alarm.repeatMode || (alarm.daysMask ? "weekly" : "once");
         if (mode === "once") {
             if (!alarm.date) return alarmText("alarms.repeat.once", "Once");
             const date = new Date(`${alarm.date}T00:00:00`);
-            return `${alarmText("alarms.repeat.once", "Once")} · ${date.toLocaleDateString(
-                window.ccI18n && window.ccI18n.getEffectiveLang() === "es" ? "es" : "en",
-                { month: "short", day: "numeric" },
-            )}`;
+            return `${alarmText("alarms.repeat.once", "Once")} · ${alarmFriendlyDate(date)}`;
         }
         if (mode === "daily") return alarmText("alarms.repeat.daily", "Every day");
         if (mode === "weekdays") return alarmText("alarms.repeat.weekdays", "Weekdays");
@@ -579,10 +586,7 @@
             const status = enabled
                 ? alarmText("alarms.card.on", "ON")
                 : alarmText("alarms.card.off", "OFF");
-            const legacyLabelKey = `alarms.custom.slot${Math.min(index + 1, 3)}`;
-            const label = alarm.label && !/^Alarm \d+$/.test(alarm.label)
-                ? alarm.label
-                : alarmText(legacyLabelKey, alarm.label || alarmText("alarms.notice.title", "Alarm"));
+            const label = alarmDisplayLabel(alarm);
             const message = alarm.message || alarmText("alarms.card.noMessage", "No message");
             return `
                 <article class="alarm-card${enabled ? "" : " is-off"}" data-alarm-id="${alarmEscape(id)}">
@@ -610,6 +614,29 @@
             `;
         }).join("");
         if (window.ccIcons) window.ccIcons.replaceIcons(list);
+    }
+
+    function alarmDisplayLabel(alarm) {
+        const stored = (alarm.label || "").trim();
+        const base = alarmText("alarms.notice.title", "Alarm");
+        if (!stored) return base;
+        const legacy = stored.match(/^(?:Alarm|Alarma)\s+(\d+)$/i);
+        return legacy ? `${base} ${legacy[1]}` : stored;
+    }
+
+    function nextAlarmLabel(exceptId = null) {
+        const used = new Set();
+        (Array.isArray(cfg.customAlarms) ? cfg.customAlarms : []).forEach((alarm, index) => {
+            if (exceptId && alarmIdFor(alarm, index) === exceptId) return;
+            const name = alarmDisplayLabel(alarm).trim().toLowerCase();
+            if (name && name !== alarmText("alarms.notice.title", "Alarm").toLowerCase()) used.add(name);
+        });
+        const base = alarmText("alarms.notice.title", "Alarm");
+        for (let n = 1; n < 1000; n++) {
+            const candidate = `${base} ${n}`;
+            if (!used.has(candidate.toLowerCase())) return candidate;
+        }
+        return `${base} ${used.size + 1}`;
     }
 
     function newAlarmDraft(preset = null) {
@@ -980,7 +1007,8 @@
             : alarmText("alarms.editor.newTitle", "New alarm");
         if (time) time.value = `${String(alarmEditorDraft.hour).padStart(2, "0")}:${String(alarmEditorDraft.minute).padStart(2, "0")}`;
         syncAlarmTimeControls(time?.value);
-        if (label) label.value = alarmEditorDraft.label || "";
+        if (!alarmEditorDraft.label) alarmEditorDraft.label = nextAlarmLabel(alarmEditorId);
+        if (label) label.value = alarmEditorDraft.label;
         if (repeat) repeat.value = alarmEditorDraft.repeatMode || (alarmEditorDraft.daysMask ? "weekly" : "once");
         adpSetDate(alarmEditorDraft.date || alarmTodayIso());
         adpClose();
@@ -1025,7 +1053,7 @@
         }
         return {
             ...(alarmEditorDraft || newAlarmDraft()),
-            label: document.getElementById("alarm-edit-label")?.value.trim() || alarmText("alarms.notice.title", "Alarm"),
+            label: document.getElementById("alarm-edit-label")?.value.trim() || nextAlarmLabel(alarmEditorId),
             message: document.getElementById("alarm-edit-message")?.value.trim() || "",
             hour: Number.isFinite(hour) ? hour : 9,
             minute: Number.isFinite(minute) ? minute : 0,
@@ -1129,6 +1157,16 @@
             document.getElementById(id)?.addEventListener("change", syncAlarmTimeInput);
         });
         document.getElementById("alarm-edit-repeat")?.addEventListener("change", syncAlarmEditorSchedule);
+        // WebView2 shows the Windows "Saved info" popup on normal text fields.
+        // Keeping them readonly until focus stops that panel; typing still works.
+        ["alarm-edit-label", "alarm-edit-message"].forEach((id) => {
+            const field = document.getElementById(id);
+            if (!field) return;
+            field.addEventListener("focus", () => {
+                window.setTimeout(() => field.removeAttribute("readonly"), 0);
+            });
+            field.addEventListener("blur", () => field.setAttribute("readonly", "readonly"));
+        });
         document.querySelectorAll("#alarm-edit-days .alarm-day").forEach((day) => {
             day.addEventListener("click", () => day.classList.toggle("on"));
         });

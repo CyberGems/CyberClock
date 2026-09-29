@@ -3876,12 +3876,18 @@
     .alarm-form-hero {
         display: grid;
         min-width: 0;
-        grid-template-columns: 190px minmax(0, 1fr);
+        align-items: start;
+        grid-template-columns: minmax(210px, 240px) minmax(0, 1fr);
         gap: 14px;
         padding: 15px;
         background: rgba(var(--rgb-accent), 0.07);
         border: 1px solid rgba(var(--rgb-accent), 0.18);
         border-radius: 10px;
+    }
+    .alarm-form-hero > .alarm-field {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+        gap: 6px;
     }
     .alarm-form-section {
         display: grid;
