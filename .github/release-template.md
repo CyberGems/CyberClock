@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-New Backup & Data settings tab for export, import, and factory reset. About window now shows random suite apps. All widget context menus gain an About entry. Close confirmation modal redesigned with vertical action cards.
+A full alarm designer with twenty synthesized sounds, your own audio file, and a fullscreen notice that shows the snooze time. Floating widgets gain a Relax session, and click-through now covers the mini clock and every open widget.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,56 +17,64 @@ New Backup & Data settings tab for export, import, and factory reset. About wind
 
 ### ✨ Key Features & Highlights
 
-- 💾 **Backup & Data Settings Tab**:
-  - New dedicated settings tab for exporting all alarms, notes, timers, and preferences as a JSON file.
-  - Import backups from a previous JSON file to restore settings and notes.
-  - Open the application data folder directly to access local settings, imported sounds, and backups.
-  - Factory reset option to restore all settings, theme, and preferences to defaults.
+- 🔔 **Alarms**:
+  - Alarm view with quick presets, cards, and a designer. The alarm name is edited in the title.
+  - Time and date sit together. Repeat once, every day, on weekdays, on weekends, or on selected days.
+  - New alarms start on No sound. Twenty synthesized tones are available, and the last choice is remembered.
+  - Use your own MP3 or WAV. That file plays instead of the tone list.
+  - Repeat the sound a set number of times, or until the notice is dismissed, with a pause between plays.
+  - The snooze button shows its delay. The next-alarm card counts down to that time.
+  - A firing alarm takes over the full window, and Mini Mode shows its own notice.
 
-- 🪟 **Enhanced Window Close Experience**:
-  - Close confirmation dialog redesigned as vertical action cards with "Switch to Mini Mode" emphasized first.
-  - Direct "X" close button in the dialog header, backdrop click dismissal, and `Esc` keyboard shortcut hints.
+- 🧘 **Floating Relax**:
+  - Compact desktop session with the track name, play and next, a breathing ring, a small spectrum, and 10 designs.
+  - Audio keeps playing when full mode is hidden.
 
-- ℹ️ **About Window Enhancements**:
-  - Shows 5 random CyberGems suite apps with inline "More" badge linking to the full suite listing.
-  - Concise app description within 3 lines.
+- 🖱️ **Click-through**:
+  - One switch in Settings and the tray menu.
+  - Mouse clicks pass through the mini clock and every floating widget, including widgets opened later.
+  - Turn it off from the tray or from Settings. Those stay reachable while the windows ignore the mouse.
 
-- 📍 **Suite Context Menus**:
-  - "About CyberClock" entry now available in all floating widget and mini mode context menus.
-
-- 🌐 **Bilingual Release Notes**:
-  - Complete Spanish README translation with language switcher.
+- 🎨 **Also in this release**:
+  - Gold and Coral accent tints.
+  - Widget menus open Settings and the matching full-mode section.
+  - Optional on-screen button hints, and a global switch for tooltips.
+  - The voice announcer speaks the time once.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Nueva pestaña de Configuración de Respaldo y Datos para exportar, importar y restablecer valores de fábrica. La ventana Acerca de muestra aplicaciones de la suite de forma aleatoria. Todos los menús contextuales incluyen una entrada Acerca de. Diálogo de cierre rediseñado con tarjetas verticales.
+Diseñador de alarmas completo, con veinte sonidos sintetizados, un archivo de audio propio y un aviso a pantalla completa que muestra el tiempo de posponer. Los widgets flotantes suman una sesión de Relajación, y el click-through cubre el reloj mini y cada widget abierto.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 💾 **Pestaña de configuración de Respaldo y Datos**:
-  - Nueva pestaña dedicada para exportar alarmas, notas, temporizadores y preferencias como archivo JSON.
-  - Importa copias de seguridad desde un archivo JSON previo para restaurar configuración y notas.
-  - Abre directamente la carpeta de datos de la aplicación para acceder a configuraciones, sonidos personalizados y respaldos.
-  - Opción de restablecimiento de fábrica para devolver configuración, tema y preferencias a sus valores predeterminados.
+- 🔔 **Alarmas**:
+  - Vista de alarmas con preajustes, tarjetas y diseñador. El nombre se edita en el título.
+  - La hora y la fecha quedan juntas. Se repite una vez, todos los días, entre semana, en fines de semana o en días seleccionados.
+  - Las alarmas nuevas empiezan en Sin sonido. Hay veinte tonos sintetizados y se recuerda la última elección.
+  - Puedes usar tu propio MP3 o WAV. Ese archivo suena en lugar de la lista de tonos.
+  - El sonido se repite un número de veces, o hasta que se cierra el aviso, con una pausa entre reproducciones.
+  - El botón Posponer muestra su demora. La tarjeta de la próxima alarma cuenta hasta ese momento.
+  - Al sonar, la alarma ocupa la ventana completa, y el Modo Mini muestra su propio aviso.
 
-- 🪟 **Experiencia de cierre de ventana mejorada**:
-  - Diálogo de confirmación de cierre rediseñado como tarjetas verticales con "Pasar a Modo Mini" resaltada en primer lugar.
-  - Botón de cierre directo ("X") en la cabecera, cierre al hacer clic fuera del modal y atajos de teclado `Esc`.
+- 🧘 **Relajación flotante**:
+  - Sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, un anillo de respiración, un espectro pequeño y 10 diseños.
+  - El audio sigue cuando el modo completo está oculto.
 
-- ℹ️ **Mejoras en la ventana Acerca de**:
-  - Muestra 5 aplicaciones aleatorias de la suite CyberGems con insignia "Más" en línea.
-  - Descripción de la aplicación concisa dentro de 3 líneas.
+- 🖱️ **Click-through**:
+  - Un solo interruptor en Configuración y en el menú de la bandeja.
+  - Los clics atraviesan el reloj mini y cada widget flotante, también los que se abran después.
+  - Se desactiva desde la bandeja o desde Configuración. Esos controles siguen disponibles mientras las ventanas ignoran el ratón.
 
-- 📍 **Menús contextuales de la suite**:
-  - Entrada "Acerca de CyberClock" disponible ahora en todos los menús contextuales de widgets flotantes y Modo Mini.
-
-- 🌐 **Notas de versión bilingües**:
-  - Traducción completa del README en español con conmutador de idioma.
+- 🎨 **También en esta versión**:
+  - Tintes de acento Oro y Coral.
+  - Los menús de los widgets abren Configuración y la sección correspondiente del modo completo.
+  - Avisos opcionales en los botones, y un interruptor global para los tooltips.
+  - El locutor de la hora habla una sola vez.
 
 </details>
 
