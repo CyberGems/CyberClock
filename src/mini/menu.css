@@ -406,13 +406,19 @@
         font-weight: 700;
     }
     .layout-btn.is-locked {
-        opacity: 0.4;
         cursor: not-allowed;
+        background: rgba(0, 0, 0, 0.22);
+        border-color: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.35);
+        box-shadow: none;
+    }
+    .layout-btn.is-locked .layout-ico {
+        opacity: 0.5;
     }
     .layout-btn.is-locked:hover {
-        background: rgba(0, 0, 0, 0.35);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.7);
+        background: rgba(0, 0, 0, 0.22);
+        border-color: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.35);
         box-shadow: none;
     }
     /* The locked hint has to stay inside the narrow menu. */

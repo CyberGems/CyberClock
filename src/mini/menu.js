@@ -832,9 +832,6 @@
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniSolarReal: on });
             }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
-            }
         });
     }
 
@@ -898,9 +895,6 @@
                     window.cc.saveSettings({ miniPositionLocked: on });
                 }
             }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
-            }
         });
     }
 
@@ -921,9 +915,6 @@
             syncStackedLock(on);
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings(patch);
-            }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
             }
         });
     }
@@ -964,9 +955,6 @@
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniNoAnimations: on });
             }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
-            }
         });
     }
 
@@ -979,9 +967,6 @@
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniEdgeLimits: on });
-            }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
             }
         });
     }
@@ -996,9 +981,6 @@
             updateAotState(on);
             if (window.cc && window.cc.menuAction) {
                 window.cc.menuAction("aot");
-            }
-            if (window.cc && window.cc.closeMenuPopup) {
-                setTimeout(() => window.cc.closeMenuPopup(), 200);
             }
         });
     }

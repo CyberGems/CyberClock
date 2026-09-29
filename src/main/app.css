@@ -5971,12 +5971,13 @@
         box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.3);
     }
     .s-fmt.is-locked {
-        opacity: 0.4;
         cursor: not-allowed;
+        color: var(--text-lo);
+        border-color: var(--border);
     }
     .s-fmt.is-locked:hover {
         border-color: var(--border);
-        color: var(--text-md);
+        color: var(--text-lo);
         box-shadow: none;
     }
 
