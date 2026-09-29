@@ -5491,19 +5491,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        min-height: 31px;
-        padding: 7px 9px;
-        border: 1px solid rgba(var(--rgb-accent), 0.24);
-        border-radius: 4px;
-        background: rgba(var(--rgb-accent), 0.06);
-        color: var(--text-md);
+        gap: 6px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: var(--text-lo);
         font-family: "Space Grotesk", system-ui, sans-serif;
         font-size: calc(10px * var(--ui-scale));
-        font-weight: 700;
-        letter-spacing: 0.08em;
+        font-weight: 600;
+        letter-spacing: 0.12em;
         text-align: center;
         text-transform: uppercase;
+        pointer-events: none;
     }
     .s-autosave-pill.is-hidden {
         display: none;

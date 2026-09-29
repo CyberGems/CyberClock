@@ -561,16 +561,23 @@
                     const edgeLimitsLbl = document.querySelector("#ctx-edge-limits .switch-lbl");
                     if (edgeLimitsLbl) edgeLimitsLbl.textContent = window.ccI18n.t("settings.mini.edgeLimits");
                     document.querySelectorAll('.ctx-item[data-action="full"] .label').forEach((el) => {
-                        el.textContent = window.ccI18n.t("tray.fullMode");
+                        const key = el.closest("#relax-panel-actions") ? "float.openRelax" : "tray.fullMode";
+                        el.textContent = window.ccI18n.t(key);
                     });
-                    const timerLbl = document.querySelector('.ctx-item[data-action="new_timer"] .label');
-                    if (timerLbl) timerLbl.textContent = window.ccI18n.t("float.newTimer");
-                    const stopwatchLbl = document.querySelector('.ctx-item[data-action="new_stopwatch"] .label');
-                    if (stopwatchLbl) stopwatchLbl.textContent = window.ccI18n.t("float.newStopwatch");
-                    const calendarLbl = document.querySelector('.ctx-item[data-action="new_calendar"] .label');
-                    if (calendarLbl) calendarLbl.textContent = window.ccI18n.t("float.newCalendar");
-                    const analogLbl = document.querySelector('.ctx-item[data-action="new_analog"] .label');
-                    if (analogLbl) analogLbl.textContent = window.ccI18n.t("float.newAnalog");
+                    document.querySelectorAll('.ctx-item[data-action="new_timer"] .label').forEach((el) => {
+                        if (el.id === "ctx-action-new-lbl" || el.id === "ctx-action-other-float-lbl") return;
+                        el.textContent = window.ccI18n.t("float.newTimer");
+                    });
+                    document.querySelectorAll('.ctx-item[data-action="new_stopwatch"] .label').forEach((el) => {
+                        if (el.id === "ctx-action-new-lbl" || el.id === "ctx-action-other-float-lbl") return;
+                        el.textContent = window.ccI18n.t("float.newStopwatch");
+                    });
+                    document.querySelectorAll('.ctx-item[data-action="new_calendar"] .label').forEach((el) => {
+                        el.textContent = window.ccI18n.t("float.newCalendar");
+                    });
+                    document.querySelectorAll('.ctx-item[data-action="new_analog"] .label').forEach((el) => {
+                        el.textContent = window.ccI18n.t("float.newAnalog");
+                    });
                     document.querySelectorAll('.ctx-item[data-action="new_relax"] .label').forEach((el) => {
                         el.textContent = window.ccI18n.t("float.newRelax");
                     });
