@@ -326,7 +326,7 @@
                                     </button>
                                 </div>
                                 <div class="alarm-editor-body">
-                                    <div class="alarm-form-hero">
+                                    <div class="alarm-form-hero is-once">
                                         <div class="alarm-field alarm-time-field">
                                             <span data-i18n="alarms.editor.time">Time</span>
                                             <div class="alarm-time-control">
@@ -340,19 +340,6 @@
                                             </div>
                                             <input id="alarm-edit-time" type="hidden" value="09:00" />
                                         </div>
-                                    </div>
-                                    <div class="alarm-form-section">
-                                        <div class="alarm-form-section-title"><span data-ico="calendar"></span> <span data-i18n="alarms.editor.schedule">Schedule</span></div>
-                                        <label class="alarm-field">
-                                            <span data-i18n="alarms.editor.repeat">Repeat</span>
-                                            <select id="alarm-edit-repeat" data-i18n-attr="aria-label:alarms.editor.repeat">
-                                                <option value="once" data-i18n="alarms.repeat.once">Once</option>
-                                                <option value="daily" data-i18n="alarms.repeat.daily">Every day</option>
-                                                <option value="weekdays" data-i18n="alarms.repeat.weekdays">Weekdays</option>
-                                                <option value="weekends" data-i18n="alarms.repeat.weekends">Weekends</option>
-                                                <option value="weekly" data-i18n="alarms.repeat.weekly">Selected days</option>
-                                            </select>
-                                        </label>
                                         <div class="alarm-field alarm-date-field" id="alarm-edit-date-wrap">
                                             <span data-i18n="alarms.editor.date">Date</span>
                                             <div class="alarm-datepicker-wrap" id="alarm-datepicker-wrap">
@@ -376,16 +363,29 @@
                                             </div>
                                             <input id="alarm-edit-date" type="hidden" value="" />
                                         </div>
-                                        <div class="alarm-days-field" id="alarm-edit-days-wrap">
+                                    </div>
+                                    <div class="alarm-form-section alarm-schedule-section">
+                                        <div class="alarm-form-section-title"><span data-ico="calendar"></span> <span data-i18n="alarms.editor.schedule">Schedule</span></div>
+                                        <label class="alarm-field">
+                                            <span data-i18n="alarms.editor.repeat">Repeat</span>
+                                            <select id="alarm-edit-repeat" data-i18n-attr="aria-label:alarms.editor.repeat">
+                                                <option value="once" data-i18n="alarms.repeat.once">Once</option>
+                                                <option value="daily" data-i18n="alarms.repeat.daily">Every day</option>
+                                                <option value="weekdays" data-i18n="alarms.repeat.weekdays">Weekdays</option>
+                                                <option value="weekends" data-i18n="alarms.repeat.weekends">Weekends</option>
+                                                <option value="weekly" data-i18n="alarms.repeat.weekly">Selected days</option>
+                                            </select>
+                                        </label>
+                                        <div class="alarm-days-field" id="alarm-edit-days-wrap" hidden>
                                             <span data-i18n="alarms.editor.days">Days</span>
                                             <div class="alarm-days" id="alarm-edit-days">
-                                                <button type="button" class="alarm-day" data-day="1" data-i18n="alarms.days.mon" data-i18n-attr="aria-label:alarms.days.mon">M</button>
-                                                <button type="button" class="alarm-day" data-day="2" data-i18n="alarms.days.tue" data-i18n-attr="aria-label:alarms.days.tue">T</button>
-                                                <button type="button" class="alarm-day" data-day="4" data-i18n="alarms.days.wed" data-i18n-attr="aria-label:alarms.days.wed">W</button>
-                                                <button type="button" class="alarm-day" data-day="8" data-i18n="alarms.days.thu" data-i18n-attr="aria-label:alarms.days.thu">T</button>
-                                                <button type="button" class="alarm-day" data-day="16" data-i18n="alarms.days.fri" data-i18n-attr="aria-label:alarms.days.fri">F</button>
-                                                <button type="button" class="alarm-day" data-day="32" data-i18n="alarms.days.sat" data-i18n-attr="aria-label:alarms.days.sat">S</button>
-                                                <button type="button" class="alarm-day" data-day="64" data-i18n="alarms.days.sun" data-i18n-attr="aria-label:alarms.days.sun">S</button>
+                                                <button type="button" class="alarm-day" data-day="1" data-i18n="alarms.days.monShort" data-i18n-attr="aria-label:alarms.days.mon">M</button>
+                                                <button type="button" class="alarm-day" data-day="2" data-i18n="alarms.days.tueShort" data-i18n-attr="aria-label:alarms.days.tue">T</button>
+                                                <button type="button" class="alarm-day" data-day="4" data-i18n="alarms.days.wedShort" data-i18n-attr="aria-label:alarms.days.wed">W</button>
+                                                <button type="button" class="alarm-day" data-day="8" data-i18n="alarms.days.thuShort" data-i18n-attr="aria-label:alarms.days.thu">T</button>
+                                                <button type="button" class="alarm-day" data-day="16" data-i18n="alarms.days.friShort" data-i18n-attr="aria-label:alarms.days.fri">F</button>
+                                                <button type="button" class="alarm-day" data-day="32" data-i18n="alarms.days.satShort" data-i18n-attr="aria-label:alarms.days.sat">S</button>
+                                                <button type="button" class="alarm-day" data-day="64" data-i18n="alarms.days.sunShort" data-i18n-attr="aria-label:alarms.days.sun">S</button>
                                             </div>
                                         </div>
                                     </div>

@@ -1230,10 +1230,13 @@
 
     function syncAlarmEditorSchedule() {
         const repeat = document.getElementById("alarm-edit-repeat")?.value || "once";
+        const hero = document.querySelector("#alarm-editor-overlay .alarm-form-hero");
         const dateWrap = document.getElementById("alarm-edit-date-wrap");
         const daysWrap = document.getElementById("alarm-edit-days-wrap");
-        if (dateWrap) dateWrap.style.display = repeat === "once" ? "grid" : "none";
-        if (daysWrap) daysWrap.style.display = repeat === "weekly" ? "grid" : "none";
+        const showDate = repeat === "once";
+        if (hero) hero.classList.toggle("is-once", showDate);
+        if (dateWrap) dateWrap.hidden = !showDate;
+        if (daysWrap) daysWrap.hidden = repeat !== "weekly";
     }
 
     function openAlarmEditor(alarm = null, options = {}) {
