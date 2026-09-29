@@ -6267,6 +6267,12 @@
     [data-tooltip] {
         position: relative;
     }
+    /* Side grips stay pinned to the view edge; the generic tooltip
+       rule would otherwise turn them into in-flow boxes. */
+    .clock-grip[data-tooltip],
+    .cal-grip[data-tooltip] {
+        position: absolute;
+    }
     [data-tooltip]::after {
         content: attr(data-tooltip);
         position: absolute;
@@ -6355,6 +6361,20 @@
     }
     [data-tooltip-dir="bottom"][data-tooltip-align="left"]:not([data-tooltip=""]):hover::after {
         transform: translate(0, 0);
+    }
+
+    /* Right-directed tooltip: projects into the view from a left-edge control */
+    [data-tooltip-dir="right"]::after {
+        left: calc(100% + 8px);
+        right: auto;
+        bottom: auto;
+        top: 50%;
+        transform: translateY(-50%) translateX(-6px);
+    }
+    [data-tooltip-dir="right"]:not([data-tooltip=""]):hover::after {
+        transform: translateY(-50%) translateX(0);
+        transition-delay: 0.35s;
+        animation-delay: 0.35s;
     }
 
     /* Left-directed tooltip: projects cleanly to the left of the element */

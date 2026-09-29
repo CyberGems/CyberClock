@@ -1950,18 +1950,6 @@
         if (hideClockEl) hideClockEl.checked = hideClock;
         const hideCalEl = document.getElementById("s-hide-cal");
         if (hideCalEl) hideCalEl.checked = hideCalendar;
-        const gripEl = document.getElementById("clock-grip");
-        if (gripEl) {
-            gripEl.title = window.ccI18n.t(
-                hideClock ? "tooltip.showClock" : "tooltip.hideClock",
-            );
-        }
-        const calGripEl = document.getElementById("cal-grip");
-        if (calGripEl) {
-            calGripEl.title = window.ccI18n.t(
-                hideCalendar ? "tooltip.showCalendar" : "tooltip.hideCalendar",
-            );
-        }
         syncHomeClock();
         const aotEl = document.getElementById("s-aot");
         if (aotEl) aotEl.checked = !!s.alwaysOnTop;
@@ -2010,6 +1998,22 @@
         if (displayNameEl) displayNameEl.value = s.displayName || "";
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
+        const gripEl = document.getElementById("clock-grip");
+        if (gripEl) {
+            const gripKey = hideClock ? "tooltip.showClock" : "tooltip.hideClock";
+            const gripLabel = window.ccI18n.t(gripKey);
+            gripEl.setAttribute("data-tooltip", gripLabel);
+            gripEl.setAttribute("aria-label", gripLabel);
+            gripEl.removeAttribute("title");
+        }
+        const calGripEl = document.getElementById("cal-grip");
+        if (calGripEl) {
+            const calGripKey = hideCalendar ? "tooltip.showCalendar" : "tooltip.hideCalendar";
+            const calGripLabel = window.ccI18n.t(calGripKey);
+            calGripEl.setAttribute("data-tooltip", calGripLabel);
+            calGripEl.setAttribute("aria-label", calGripLabel);
+            calGripEl.removeAttribute("title");
+        }
         syncAlarmSoundTrigger();
         ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
             syncAlarmChoice(document.getElementById(id));

@@ -612,7 +612,6 @@
             linear-gradient(160deg, color-mix(in srgb, #040f1a 88%, var(--accent-a)) 0%, #061520 100%);
     }
     .mini-shell[data-design="5"] {
-        height: 50px;
         border: 1px solid rgba(0, 229, 255, 0.45);
         border-radius: 8px;
         padding: 0 14px;
@@ -2287,6 +2286,37 @@
     .mini-tip[data-design="4"] .mini-tip-stat b {
         color: color-mix(in srgb, var(--accent-b) 75%, #1c2e44);
     }
+    .mini-tip[data-design="4"] .mini-tip-update {
+        border-bottom-color: rgba(60, 90, 130, 0.22);
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-title {
+        color: #1c2e44;
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-ver {
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid color-mix(in srgb, var(--accent-b) 42%, #8aa0c0);
+        color: #1c2e44;
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-btn {
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid color-mix(in srgb, var(--accent-b) 48%, #8aa4c4);
+        color: #1c2e44;
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-btn.primary {
+        background: #1c2e44;
+        border-color: #1c2e44;
+        color: #f4f8ff;
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-btn:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 12px rgba(31, 42, 66, 0.16);
+    }
+    .mini-tip[data-design="4"] .mini-tip-update-btn.primary:hover {
+        background: #15263a;
+        border-color: #15263a;
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(28, 46, 68, 0.28);
+    }
 
     /* Skin 5: Neon Circuit */
     .mini-tip[data-design="5"] {
@@ -2554,21 +2584,25 @@
     }
     .mini-tip-update-header {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        gap: 6px;
+        gap: 8px;
     }
     .mini-tip-update-title {
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        min-width: 0;
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.4px;
+        line-height: 1.25;
         color: var(--accent-a, #00f0ff);
         text-transform: uppercase;
     }
     .mini-tip-update-ver {
+        flex-shrink: 0;
+        white-space: nowrap;
         font-size: 10px;
         font-weight: 700;
         padding: 1px 6px;
