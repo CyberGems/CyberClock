@@ -188,8 +188,7 @@
         setLbl("lbl-back-help", T("tray.back", "Back"));
         setLbl("lbl-back-suite", T("tray.back", "Back"));
         setLbl("lbl-help-title", T("tray.help", "Help"));
-        setLbl("lbl-suite-title", T("tray.suite", "More from CyberGems"));
-        setLbl("lbl-suite-all", T("tray.suiteAll", "View all at cybergems.org →"));
+        setLbl("lbl-suite-all", T("tray.suiteAll", "More details online..."));
         setLbl("lbl-pin-tip-title", T("tray.pinTip.title", "Keep CyberClock visible in the tray"));
         setLbl("lbl-pin-tip-got-it", T("tray.pinTip.gotIt", "Got it"));
         setLbl("lbl-pin-tip-open-settings", T("tray.pinTip.openSettings", "Open Windows Settings"));
@@ -203,6 +202,7 @@
         const showSuite = state.show_suite_recommendations !== false;
         const btnNavSuite = document.getElementById("btn-nav-suite");
         if (btnNavSuite) btnNavSuite.hidden = !showSuite;
+        if (suiteAppsCache) renderTraySuiteApps(suiteAppsCache);
 
         // Header version label and update LED
         if (state.version) {
@@ -442,9 +442,28 @@
         btnSuiteMore.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
+            openUrl("https://cybergems.org/#apps");
+            setTimeout(() => hideMenu(), 250);
+        });
+    }
+
+    const btnSuiteBrand = document.getElementById("btn-suite-brand");
+    if (btnSuiteBrand) {
+        btnSuiteBrand.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             openUrl("https://cybergems.org");
             setTimeout(() => hideMenu(), 250);
         });
+    }
+
+    let suiteAppsCache = null;
+
+    function suiteLocale() {
+        if (!window.ccI18n) return "en";
+        const raw = window.ccI18n.getLang();
+        const lang = raw === "auto" ? window.ccI18n.detectDefault() : raw;
+        return lang === "es" ? "es" : "en";
     }
 
     function loadSuiteTrayItems() {
@@ -466,25 +485,37 @@
     }
 
     function renderTraySuiteApps(apps) {
+        suiteAppsCache = apps;
         const suiteList = document.getElementById("tray-suite-list");
         if (!suiteList) return;
-        // Exclude CyberClock
+        const lang = suiteLocale();
         const sisters = apps.filter((a) => a && a.slug !== "cyberclock");
         suiteList.innerHTML = "";
 
         for (const app of sisters) {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "tray-item tray-sub-item";
+            btn.className = "tray-item tray-suite-item";
+            const ico = document.createElement("span");
+            ico.className = "tray-suite-ico";
             const img = document.createElement("img");
-            img.className = "tray-sub-item-img";
             img.src = `../assets/suite/${app.slug}.png`;
             img.alt = "";
-            const lbl = document.createElement("span");
-            lbl.className = "label";
-            lbl.textContent = app.name;
-            btn.appendChild(img);
-            btn.appendChild(lbl);
+            ico.appendChild(img);
+            const copy = document.createElement("span");
+            copy.className = "tray-suite-copy";
+            const name = document.createElement("span");
+            name.className = "tray-suite-name";
+            name.textContent = app.name;
+            const short = document.createElement("span");
+            short.className = "tray-suite-short";
+            const desc = app.short && (app.short[lang] || app.short.en);
+            short.textContent = desc || "";
+            short.hidden = !desc;
+            copy.appendChild(name);
+            copy.appendChild(short);
+            btn.appendChild(ico);
+            btn.appendChild(copy);
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();

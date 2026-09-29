@@ -417,14 +417,16 @@
     .tray-back-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        justify-content: center;
+        gap: 4px;
         background: rgba(var(--rgb-accent), 0.08);
         border: 1px solid rgba(var(--rgb-accent), 0.22);
         border-radius: 8px;
         color: var(--accent-a);
-        padding: 4px 10px;
+        padding: 4px 10px 4px 7px;
         font-size: 11.5px;
         font-weight: 600;
+        line-height: 1;
         cursor: pointer;
         font-family: inherit;
         transition: background 0.15s, transform 0.12s, color 0.15s, border-color 0.15s;
@@ -439,6 +441,54 @@
         width: 13px;
         height: 13px;
         display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 13px;
+    }
+    .tray-back-btn .ico .cc-ico {
+        width: 13px;
+        height: 13px;
+        display: block;
+        vertical-align: 0;
+    }
+    .tray-back-btn .label {
+        line-height: 1;
+        display: block;
+    }
+    .tray-brand-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 2px;
+        padding: 2px 2px 2px 4px;
+        border: none;
+        background: transparent;
+        color: var(--text-md);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        line-height: 1;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+    .tray-brand-link:hover {
+        color: var(--text-hi);
+    }
+    .tray-brand-mark {
+        width: 16px;
+        height: 16px;
+        display: block;
+        flex: 0 0 16px;
+        transform-origin: center;
+        transition: transform 0.18s ease;
+        filter: drop-shadow(0 0 3px rgba(0, 242, 255, 0.28));
+    }
+    .tray-brand-link:hover .tray-brand-mark {
+        transform: scale(1.08);
+    }
+    .tray-brand-name {
+        line-height: 1;
     }
     .tray-sub-title {
         font-size: 12px;
@@ -588,6 +638,60 @@
         margin-right: 4px;
         display: block;
     }
+    .tray-suite-item {
+        align-items: center;
+        min-height: 40px;
+        gap: 8px;
+    }
+    .tray-suite-ico {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        display: inline-flex;
+    }
+    .tray-suite-ico::before {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 6px;
+        background: rgba(var(--rgb-accent), 0.22);
+        filter: blur(3.5px);
+        z-index: 0;
+    }
+    .tray-suite-ico img {
+        position: relative;
+        z-index: 1;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        display: block;
+    }
+    .tray-suite-copy {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        gap: 1px;
+    }
+    .tray-suite-name {
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.15;
+        color: var(--text-hi);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .tray-suite-short {
+        font-size: 9.5px;
+        font-weight: 500;
+        line-height: 1.15;
+        color: var(--text-lo);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .tray-sub-sep {
         height: 1px;
         background: var(--border);
@@ -631,9 +735,22 @@
         font-size: 11px;
         color: var(--accent-a);
         justify-content: center;
+        gap: 8px;
         border: 1px solid rgba(var(--rgb-accent), 0.15);
         border-radius: 8px;
         background: rgba(var(--rgb-accent), 0.04);
+    }
+    .tray-suite-all-btn .label {
+        flex: 0 1 auto;
+    }
+    .tray-suite-all-btn .ico {
+        width: 13px;
+        height: 13px;
+    }
+    .tray-suite-all-btn .ico .cc-ico {
+        width: 13px;
+        height: 13px;
+        display: block;
     }
     .tray-suite-all-btn:hover {
         background: rgba(var(--rgb-accent), 0.14);

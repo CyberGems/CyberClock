@@ -1853,8 +1853,8 @@
         font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.8px;
-        color: var(--accent-a);
-        text-shadow: 0 0 10px rgba(var(--rgb-accent), 0.65);
+        color: var(--skin-ink, #fff);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--skin-ink, #fff) 55%, transparent);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1873,7 +1873,7 @@
         width: 100%;
         height: 100%;
         stroke: currentColor;
-        filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.7));
+        filter: drop-shadow(0 0 3px color-mix(in srgb, var(--skin-ink, #fff) 50%, transparent));
     }
 
     .ticker-text {
@@ -2823,21 +2823,23 @@
 
     /* Curated faces. A user choice sets --mini-time-font / --mini-date-font
        on the shell and wins over these. */
-    .mini-shell[data-design="1"]  { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 500; }
-    .mini-shell[data-design="2"]  { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="3"]  { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="4"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 500; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="5"]  { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="6"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="7"]  { --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 300; }
-    .mini-shell[data-design="8"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 400; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="9"]  { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="10"] { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="11"] { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 700; }
-    .mini-shell[data-design="12"] { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="13"] { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
-    .mini-shell[data-design="14"] { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 500; }
-    .mini-shell[data-design="15"] { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="1"]  { --skin-ink: #ffb700; --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 500; }
+    .mini-shell[data-design="2"]  { --skin-ink: #37e6ff; --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="3"]  { --skin-ink: #00ff88; --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="4"]  { --skin-ink: #1c2e44; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 500; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="5"]  { --skin-ink: #00e5ff; --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="6"]  { --skin-ink: #ffffff; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="7"]  { --skin-ink: #fff5ec; --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 300; }
+    .mini-shell[data-design="7"][data-solar="day"] { --skin-ink: #ffffff; }
+    .mini-shell[data-design="7"][data-solar="night"] { --skin-ink: #dfe8ff; }
+    .mini-shell[data-design="8"]  { --skin-ink: #1c3a5e; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 400; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="9"]  { --skin-ink: #ff2975; --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="10"] { --skin-ink: #e8d5c0; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="11"] { --skin-ink: #ff0080; --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 700; }
+    .mini-shell[data-design="12"] { --skin-ink: #00ff41; --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="13"] { --skin-ink: #ff9d00; --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="14"] { --skin-ink: #00f0ff; --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 500; }
+    .mini-shell[data-design="15"] { --skin-ink: #26ffd9; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
 
     /* Digital Matrix prompt and cursor sit beside the time, not inside it,
        so a wider face cannot run the glyphs through the numbers. */
