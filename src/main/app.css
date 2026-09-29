@@ -5970,6 +5970,15 @@
         border-color: var(--accent-a);
         box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.3);
     }
+    .s-fmt.is-locked {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    .s-fmt.is-locked:hover {
+        border-color: var(--border);
+        color: var(--text-md);
+        box-shadow: none;
+    }
 
     .s-tog {
         position: relative;

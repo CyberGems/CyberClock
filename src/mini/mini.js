@@ -232,7 +232,14 @@
         const shell = document.getElementById("shell");
         if (shell) {
             const activeDesign = Math.min(15, Math.max(1, parseInt(s.miniDesign, 10) || 1));
-            const activeLayout = s.miniLayout || (activeDesign <= 6 ? "stacked" : "inline");
+            let activeLayout = s.miniLayout || (activeDesign <= 6 ? "stacked" : "inline");
+            // Collapse Date hides the second row, so 2 rows is not a real choice.
+            if (s.miniCollapseDate === true && activeLayout === "stacked") {
+                activeLayout = "inline";
+                if (window.cc && window.cc.saveSettings && s.miniLayout !== "inline") {
+                    window.cc.saveSettings({ miniLayout: "inline" });
+                }
+            }
             shell.dataset.design = String(activeDesign);
             shell.dataset.layout = activeLayout;
             shell.classList.toggle("collapse-date", s.miniCollapseDate === true);

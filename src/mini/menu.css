@@ -405,6 +405,23 @@
         box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
         font-weight: 700;
     }
+    .layout-btn.is-locked {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    .layout-btn.is-locked:hover {
+        background: rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        box-shadow: none;
+    }
+    /* The locked hint has to stay inside the narrow menu. */
+    #btn-layout-stacked.is-locked::after {
+        white-space: normal;
+        width: 168px;
+        line-height: 1.35;
+        text-align: left;
+    }
 
     /* Section Title with Gallery Link */
     .section-title-row {

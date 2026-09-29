@@ -2151,11 +2151,21 @@
         }
         if (typeof applySchedUI === "function") applySchedUI(s);
 
-        // Mini mode layout
-        const miniLayout = s.miniLayout || "stacked";
+        // Mini mode layout. Collapse Date locks 2 rows: the date stays
+        // hidden, so that layout only changes the bar by a few pixels.
+        const collapseOn = s.miniCollapseDate === true;
+        const miniLayout = collapseOn ? "inline" : (s.miniLayout || "stacked");
         document.querySelectorAll('[data-mini-layout]').forEach((b) => {
             b.classList.toggle('on', b.dataset.miniLayout === miniLayout);
         });
+        const stackedLayoutBtn = document.getElementById('s-mini-layout-stacked');
+        if (stackedLayoutBtn) {
+            stackedLayoutBtn.classList.toggle('is-locked', collapseOn);
+            stackedLayoutBtn.setAttribute('aria-disabled', collapseOn ? 'true' : 'false');
+            const tipKey = collapseOn ? 'settings.mini.layoutStackedLocked' : 'settings.mini.layoutStacked';
+            stackedLayoutBtn.setAttribute('data-i18n-attr', 'data-tooltip:' + tipKey);
+            stackedLayoutBtn.setAttribute('data-tooltip', window.ccI18n.t(tipKey));
+        }
 
         // Mini mode controls
         const miniDesign = s.miniDesign || 1;
@@ -7384,6 +7394,7 @@
     // Mini layout controls
     document.querySelectorAll('[data-mini-layout]').forEach((btn) => {
         btn.addEventListener('click', () => {
+            if (btn.classList.contains('is-locked')) return;
             const layout = btn.dataset.miniLayout;
             document.querySelectorAll('[data-mini-layout]').forEach((b) => b.classList.remove('on'));
             btn.classList.add('on');
@@ -7506,7 +7517,13 @@
     const sMiniCollapse = document.getElementById('s-mini-collapse');
     if (sMiniCollapse) {
         sMiniCollapse.addEventListener('change', (e) => {
-            window.cc.saveSettings({ miniCollapseDate: e.target.checked });
+            const on = e.target.checked;
+            const patch = { miniCollapseDate: on };
+            const stackedBtn = document.getElementById('s-mini-layout-stacked');
+            if (on && stackedBtn && stackedBtn.classList.contains('on')) {
+                patch.miniLayout = 'inline';
+            }
+            window.cc.saveSettings(patch);
         });
     }
     const sMiniScan = document.getElementById('s-mini-scan');

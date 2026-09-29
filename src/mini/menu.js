@@ -389,6 +389,18 @@
         if (inlineBtn) inlineBtn.classList.toggle("active", layout === "inline");
     }
 
+    // 2 rows hides its second line while Collapse Date is on, so the
+    // control is locked and the clock stays on 1 row until it's off.
+    function syncStackedLock(collapsed) {
+        const btn = document.getElementById("btn-layout-stacked");
+        if (!btn) return;
+        btn.classList.toggle("is-locked", collapsed === true);
+        btn.setAttribute("aria-disabled", collapsed ? "true" : "false");
+        const key = collapsed ? "settings.mini.layoutStackedLocked" : "settings.mini.layoutStacked";
+        btn.setAttribute("data-i18n-attr", "data-tooltip:" + key);
+        btn.setAttribute("data-tooltip", window.ccI18n ? window.ccI18n.t(key) : btn.getAttribute("data-tooltip"));
+    }
+
     function selectSkin(mode) {
         currentDesign = mode;
         document.querySelectorAll(".design-btn").forEach((b) => {
@@ -581,8 +593,9 @@
                 }
                 
                 // Active Layout Form Factor
-                const activeLayout = cfg.miniLayout || "stacked";
+                const activeLayout = cfg.miniCollapseDate ? "inline" : (cfg.miniLayout || "stacked");
                 updateLayoutButtons(activeLayout);
+                syncStackedLock(cfg.miniCollapseDate === true);
 
                 // Active Design (1 to 15)
                 const activeDesign = cfg.miniDesign || 1;
@@ -701,6 +714,7 @@
     const btnLayoutStacked = document.getElementById("btn-layout-stacked");
     if (btnLayoutStacked) {
         btnLayoutStacked.addEventListener("click", () => {
+            if (btnLayoutStacked.classList.contains("is-locked")) return;
             updateLayoutButtons("stacked");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ miniLayout: "stacked" });
@@ -897,8 +911,16 @@
             const tgl = document.getElementById("toggle-collapse");
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
+            const patch = { miniCollapseDate: on };
+            if (on && (currentCfg.miniLayout || "stacked") === "stacked") {
+                patch.miniLayout = "inline";
+                currentCfg.miniLayout = "inline";
+                updateLayoutButtons("inline");
+            }
+            currentCfg.miniCollapseDate = on;
+            syncStackedLock(on);
             if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniCollapseDate: on });
+                window.cc.saveSettings(patch);
             }
             if (window.cc && window.cc.closeMenuPopup) {
                 setTimeout(() => window.cc.closeMenuPopup(), 200);
@@ -1232,6 +1254,11 @@
         window.cc.onSettingsUpdated((cfg) => {
             if (cfg) {
                 currentCfg = Object.assign(currentCfg || {}, cfg);
+                const collapseOn = cfg.miniCollapseDate === true;
+                updateLayoutButtons(collapseOn ? "inline" : (cfg.miniLayout || "stacked"));
+                syncStackedLock(collapseOn);
+                const toggleCollapseLive = document.getElementById("toggle-collapse");
+                if (toggleCollapseLive) toggleCollapseLive.classList.toggle("on", collapseOn);
                 if (activeCaller && activeCaller.kind === "relax") {
                     syncRelaxMenu(cfg);
                 }
