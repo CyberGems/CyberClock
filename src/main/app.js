@@ -686,6 +686,183 @@
         }
     }
 
+    // ─── Alarm Date Picker ────────────────────────────────────────────────────
+    const adp = {
+        viewYear: new Date().getFullYear(),
+        viewMonth: new Date().getMonth(), // 0-indexed
+        selectedIso: "",   // "YYYY-MM-DD"
+        open: false,
+    };
+
+    function adpIsoNow() {
+        const n = new Date();
+        return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
+    }
+
+    function adpFormatLabel(iso) {
+        if (!iso) return "—";
+        const [y, m, d] = iso.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        const lang = window.ccI18n?.getEffectiveLang() === "es" ? "es-ES" : "en-US";
+        const str = dt.toLocaleDateString(lang, { weekday: "short", day: "numeric", month: "long", year: "numeric" });
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function adpGetMonths() {
+        const lang = window.ccI18n?.getEffectiveLang();
+        return lang === "es"
+            ? ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+            : ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    }
+
+    function adpGetWeekdays() {
+        const lang = window.ccI18n?.getEffectiveLang();
+        // Mon-first order; weekends are index 5 (Sat) and 6 (Sun)
+        return lang === "es"
+            ? ["L","M","M","J","V","S","D"]
+            : ["M","T","W","T","F","S","S"];
+    }
+
+    function adpRender() {
+        const grid = document.getElementById("adp-grid");
+        const wds  = document.getElementById("adp-weekdays");
+        const monthLbl = document.getElementById("adp-month-label");
+        if (!grid || !wds || !monthLbl) return;
+
+        const months = adpGetMonths();
+        const weekdays = adpGetWeekdays();
+        monthLbl.textContent = `${months[adp.viewMonth]} ${adp.viewYear}`;
+
+        // Weekday headers
+        wds.replaceChildren();
+        weekdays.forEach((d, i) => {
+            const span = document.createElement("span");
+            span.textContent = d;
+            if (i === 5 || i === 6) span.className = "adp-we";
+            wds.appendChild(span);
+        });
+
+        // Build grid: Mon-first
+        grid.replaceChildren();
+        const firstDay = new Date(adp.viewYear, adp.viewMonth, 1);
+        // getDay(): 0=Sun…6=Sat. Mon-first offset:
+        let offset = (firstDay.getDay() + 6) % 7; // Mon=0
+        const daysInMonth = new Date(adp.viewYear, adp.viewMonth + 1, 0).getDate();
+        const daysInPrev  = new Date(adp.viewYear, adp.viewMonth, 0).getDate();
+
+        const todayIso = adpIsoNow();
+        const [todayY, todayM, todayD] = todayIso.split("-").map(Number);
+
+        // Prev-month trailing cells
+        for (let i = offset - 1; i >= 0; i--) {
+            const cell = document.createElement("div");
+            cell.className = "adp-cell adp-other";
+            cell.textContent = String(daysInPrev - i);
+            grid.appendChild(cell);
+        }
+        // Current month cells
+        for (let d = 1; d <= daysInMonth; d++) {
+            const cell = document.createElement("div");
+            const iso = `${adp.viewYear}-${String(adp.viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+            const dow = (new Date(adp.viewYear, adp.viewMonth, d).getDay() + 6) % 7; // 0=Mon
+            const classes = ["adp-cell"];
+            if (dow === 5 || dow === 6) classes.push("adp-weekend");
+            if (iso === todayIso) classes.push("adp-today");
+            if (iso === adp.selectedIso) classes.push("adp-selected");
+            // Past days: any date before today
+            if (adp.viewYear < todayY ||
+               (adp.viewYear === todayY && adp.viewMonth + 1 < todayM) ||
+               (adp.viewYear === todayY && adp.viewMonth + 1 === todayM && d < todayD)) {
+                classes.push("adp-past");
+            }
+            cell.className = classes.join(" ");
+            cell.textContent = String(d);
+            cell.addEventListener("click", () => adpSelectDate(iso));
+            grid.appendChild(cell);
+        }
+        // Next-month fill cells to complete the grid row
+        const total = offset + daysInMonth;
+        const remaining = (7 - (total % 7)) % 7;
+        for (let d = 1; d <= remaining; d++) {
+            const cell = document.createElement("div");
+            cell.className = "adp-cell adp-other";
+            cell.textContent = String(d);
+            grid.appendChild(cell);
+        }
+    }
+
+    function adpSelectDate(iso) {
+        adp.selectedIso = iso;
+        // Write to the hidden input (used by collectAlarmDraft)
+        const hidden = document.getElementById("alarm-edit-date");
+        if (hidden) hidden.value = iso;
+        // Update trigger label
+        const lbl = document.getElementById("alarm-datepicker-label");
+        if (lbl) lbl.textContent = adpFormatLabel(iso);
+        adpClose();
+    }
+
+    function adpOpen() {
+        const popover = document.getElementById("alarm-datepicker-popover");
+        const trigger = document.getElementById("alarm-datepicker-trigger");
+        if (!popover || !trigger) return;
+        adp.open = true;
+        popover.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        adpRender();
+    }
+
+    function adpClose() {
+        const popover = document.getElementById("alarm-datepicker-popover");
+        const trigger = document.getElementById("alarm-datepicker-trigger");
+        if (!popover || !trigger) return;
+        adp.open = false;
+        popover.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+    }
+
+    function adpSetDate(iso) {
+        // Called by openAlarmEditor to pre-seed the picker
+        adp.selectedIso = iso || adpIsoNow();
+        const [y, m] = adp.selectedIso.split("-").map(Number);
+        adp.viewYear  = y;
+        adp.viewMonth = m - 1;
+        const hidden = document.getElementById("alarm-edit-date");
+        if (hidden) hidden.value = adp.selectedIso;
+        const lbl = document.getElementById("alarm-datepicker-label");
+        if (lbl) lbl.textContent = adpFormatLabel(adp.selectedIso);
+        if (adp.open) adpRender();
+    }
+
+    // Wire up date picker controls
+    document.getElementById("alarm-datepicker-trigger")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        adp.open ? adpClose() : adpOpen();
+    });
+    document.getElementById("adp-prev")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        adp.viewMonth--;
+        if (adp.viewMonth < 0) { adp.viewMonth = 11; adp.viewYear--; }
+        adpRender();
+    });
+    document.getElementById("adp-next")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        adp.viewMonth++;
+        if (adp.viewMonth > 11) { adp.viewMonth = 0; adp.viewYear++; }
+        adpRender();
+    });
+    document.getElementById("adp-today")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        adpSelectDate(adpIsoNow());
+    });
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+        if (!adp.open) return;
+        const wrap = document.getElementById("alarm-datepicker-wrap");
+        if (wrap && !wrap.contains(e.target)) adpClose();
+    }, true);
+    // ─────────────────────────────────────────────────────────────────────────
+
     function syncAlarmTimeControls(value = "09:00") {
         ensureAlarmTimeControls();
         const [rawHour, rawMinute] = String(value).split(":").map(Number);
@@ -732,7 +909,6 @@
         const time = document.getElementById("alarm-edit-time");
         const label = document.getElementById("alarm-edit-label");
         const repeat = document.getElementById("alarm-edit-repeat");
-        const date = document.getElementById("alarm-edit-date");
         const message = document.getElementById("alarm-edit-message");
         const sound = document.getElementById("alarm-edit-sound");
         const snooze = document.getElementById("alarm-edit-snooze");
@@ -743,7 +919,8 @@
         syncAlarmTimeControls(time?.value);
         if (label) label.value = alarmEditorDraft.label || "";
         if (repeat) repeat.value = alarmEditorDraft.repeatMode || (alarmEditorDraft.daysMask ? "weekly" : "once");
-        if (date) date.value = alarmEditorDraft.date || alarmTodayIso();
+        adpSetDate(alarmEditorDraft.date || alarmTodayIso());
+        adpClose();
         if (message) message.value = alarmEditorDraft.message || "";
         if (sound) sound.value = alarmEditorDraft.sound || "chime-digital";
         if (snooze) snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);

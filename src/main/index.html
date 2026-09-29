@@ -359,7 +359,26 @@
                                         </label>
                                         <label class="alarm-field alarm-date-field" id="alarm-edit-date-wrap">
                                             <span data-i18n="alarms.editor.date">Date</span>
-                                            <input id="alarm-edit-date" type="date" data-i18n-attr="aria-label:alarms.editor.date" />
+                                            <div class="alarm-datepicker-wrap" id="alarm-datepicker-wrap">
+                                                <button type="button" class="alarm-datepicker-trigger" id="alarm-datepicker-trigger" aria-haspopup="true" aria-expanded="false" data-i18n-attr="aria-label:alarms.editor.date">
+                                                    <span data-ico="calendar" aria-hidden="true"></span>
+                                                    <span id="alarm-datepicker-label">—</span>
+                                                    <span class="alarm-datepicker-chevron" aria-hidden="true"></span>
+                                                </button>
+                                                <div class="alarm-datepicker-popover" id="alarm-datepicker-popover" hidden>
+                                                    <div class="adp-hdr">
+                                                        <button type="button" class="adp-nav-btn" id="adp-prev" aria-label="Previous month">&#8249;</button>
+                                                        <button type="button" class="adp-month-btn" id="adp-month-label" aria-label="Month">—</button>
+                                                        <button type="button" class="adp-nav-btn" id="adp-next" aria-label="Next month">&#8250;</button>
+                                                    </div>
+                                                    <div class="adp-weekdays" id="adp-weekdays"></div>
+                                                    <div class="adp-grid" id="adp-grid"></div>
+                                                    <div class="adp-footer">
+                                                        <button type="button" class="adp-today-btn" id="adp-today" data-i18n="alarms.editor.dateToday">Today</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input id="alarm-edit-date" type="hidden" value="" />
                                         </label>
                                         <div class="alarm-days-field" id="alarm-edit-days-wrap">
                                             <span data-i18n="alarms.editor.days">Days</span>
