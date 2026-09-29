@@ -2002,6 +2002,47 @@
         opacity: 0.98;
         transform: translate(-50%, 0);
     }
+    .mini-tip-alarm {
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    .mini-tip-alarm-title {
+        color: var(--accent-a);
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+    .mini-tip-alarm-msg {
+        margin: 4px 0 8px;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 11px;
+        line-height: 1.4;
+    }
+    .mini-tip-alarm-actions {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
+    .mini-tip-alarm-btn {
+        padding: 4px 10px;
+        color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.12);
+        border: 1px solid var(--accent-a);
+        border-radius: 6px;
+        font: inherit;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .mini-tip-alarm-btn:hover {
+        background: rgba(var(--rgb-accent), 0.22);
+    }
+    .mini-tip[data-design="4"] .mini-tip-alarm-title,
+    .mini-tip[data-design="4"] .mini-tip-alarm-msg,
+    .mini-tip[data-design="4"] .mini-tip-alarm-btn {
+        color: #1c2e44;
+        text-shadow: none;
+    }
     .mini-tip-date {
         font-size: 10px;
         font-weight: 600;

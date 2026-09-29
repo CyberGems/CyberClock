@@ -3679,7 +3679,7 @@
         gap: 14px;
         min-height: 168px;
         padding: 16px 18px 20px;
-        overflow: hidden;
+        overflow: visible;
         background: linear-gradient(145deg, rgba(var(--rgb-accent), 0.07), rgba(255, 255, 255, 0.018) 46%);
         border: 1px solid var(--border);
         border-radius: 13px;
@@ -3694,6 +3694,7 @@
         width: 3px;
         content: "";
         background: var(--accent-a);
+        border-radius: 12px 0 0 12px;
         box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.62);
     }
     .alarm-card:hover {
@@ -3864,6 +3865,50 @@
     .alarms-list[hidden],
     .alarm-notice[hidden] {
         display: none !important;
+    }
+    .alarm-editor.alarm-confirm {
+        width: min(440px, 100%);
+    }
+    .alarm-confirm-msg {
+        margin: 0;
+        color: var(--text-md);
+        font-family: var(--font-ui);
+        font-size: calc(14.5px * var(--ui-scale));
+        line-height: 1.55;
+    }
+    .alarm-sound-repeat {
+        display: grid;
+        gap: 8px;
+        margin: 2px 0 4px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .alarm-sound-choice,
+    .alarm-sound-pause {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-hi);
+        font-size: calc(13px * var(--ui-scale));
+    }
+    .alarm-sound-choice input[type="radio"] {
+        accent-color: var(--accent-a);
+    }
+    .alarm-sound-choice input[type="number"],
+    .alarm-sound-pause input[type="number"] {
+        width: 64px;
+        margin-left: auto;
+        padding: 4px 8px;
+        color: var(--text-hi);
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        font: inherit;
+    }
+    .alarm-sound-choice input[type="number"]:disabled {
+        opacity: 0.4;
     }
     .alarm-editor {
         width: min(650px, 100%);

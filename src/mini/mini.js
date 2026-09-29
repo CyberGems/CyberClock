@@ -1,6 +1,7 @@
     let cfg = {};
     let calNotes = {};
     let availableUpdateVersion = null; // declared early — used by hideTipNow guard
+    let activeAlarmNotice = null;
 
     function getDays() {
         const lang = window.ccI18n.getEffectiveLang();
@@ -330,6 +331,61 @@
         // Build with DOM nodes so user note text can never inject HTML.
         tipEl.replaceChildren();
 
+        if (activeAlarmNotice) {
+            const alarmBlock = document.createElement("div");
+            alarmBlock.className = "mini-tip-alarm";
+            alarmBlock.addEventListener("click", (event) => event.stopPropagation());
+
+            const alarmTitle = document.createElement("div");
+            alarmTitle.className = "mini-tip-alarm-title";
+            alarmTitle.textContent = activeAlarmNotice.label || t("alarms.notice.title");
+
+            const alarmMsg = document.createElement("div");
+            alarmMsg.className = "mini-tip-alarm-msg";
+            alarmMsg.textContent = activeAlarmNotice.message || t("alarms.notice.now");
+
+            const alarmActions = document.createElement("div");
+            alarmActions.className = "mini-tip-alarm-actions";
+
+            if (activeAlarmNotice.alarmId) {
+                const snoozeBtn = document.createElement("button");
+                snoozeBtn.type = "button";
+                snoozeBtn.className = "mini-tip-alarm-btn";
+                snoozeBtn.textContent = t("alarms.notice.snooze");
+                snoozeBtn.addEventListener("click", async (event) => {
+                    event.stopPropagation();
+                    if (window.cc && window.cc.snoozeAlarm) {
+                        try {
+                            await window.cc.snoozeAlarm(
+                                activeAlarmNotice.alarmId,
+                                Number(activeAlarmNotice.snoozeMinutes) || 10,
+                            );
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                    dismissMiniAlarm();
+                });
+                alarmActions.appendChild(snoozeBtn);
+            }
+
+            const dismissBtn = document.createElement("button");
+            dismissBtn.type = "button";
+            dismissBtn.className = "mini-tip-alarm-btn";
+            dismissBtn.textContent = t("alarms.notice.close");
+            dismissBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                dismissMiniAlarm();
+            });
+            alarmActions.appendChild(dismissBtn);
+
+            alarmBlock.appendChild(alarmTitle);
+            alarmBlock.appendChild(alarmMsg);
+            alarmBlock.appendChild(alarmActions);
+            tipEl.appendChild(alarmBlock);
+            tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
+        }
+
         if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
             const updBlock = document.createElement("div");
             updBlock.className = "mini-tip-update";
@@ -496,8 +552,30 @@
     let isTimeBlockHovered = false;
     let isTipHovered = false;
 
+    function dismissMiniAlarm() {
+        activeAlarmNotice = null;
+        if (window.audioEngine && window.audioEngine.stopAlarmAlert) {
+            window.audioEngine.stopAlarmAlert();
+        }
+        refreshTipContent();
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
+        hideTipNow();
+        syncWindowSize();
+    }
+
+    function showMiniAlarm(payload) {
+        activeAlarmNotice = payload || {};
+        if (!tipEl || !shellEl) return;
+        refreshTipContent();
+        positionTip();
+        isTipVisible = true;
+        tipEl.classList.add("show");
+        syncWindowSize();
+    }
+
     function hideTipNow() {
-        // Keep the tip visible while an undismissed update notice is shown.
+        // Keep the tip visible while an alarm or an update notice is pending.
+        if (activeAlarmNotice) return;
         if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
         clearTimeout(tipTimer);
         clearTimeout(tipHideTimer);
@@ -705,8 +783,15 @@
     window.cc.onSettingsUpdated((s) => applySettings(s));
 
     window.cc.onAlarmChime((p) => {
-        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
-        if (window.audioEngine.muted) return;
+        if (p.type === "custom") {
+            showMiniAlarm(p);
+            if (!p.silent && window.audioEngine && window.audioEngine.playAlarmAlert) {
+                window.audioEngine.playAlarmAlert(p);
+            }
+            return;
+        }
+        const vol = p.volume != null ? p.volume : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75);
+        if (window.audioEngine.muted || p.audioMuted) return;
         if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
         else window.audioEngine.chime(p.sound || "chime-digital", vol);
     });

@@ -607,10 +607,10 @@
                             <div class="alarm-card-message">${alarmEscape(message)}</div>
                         </div>
                         <div class="alarm-card-actions">
-                            <button class="alarm-icon-btn" type="button" data-action="edit" data-tooltip="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}" aria-label="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}">
+                            <button class="alarm-icon-btn" type="button" data-action="edit" data-tooltip="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}">
                                 <span data-ico="gear"></span>
                             </button>
-                            <button class="alarm-icon-btn danger" type="button" data-action="delete" data-tooltip="${alarmEscape(alarmText("alarms.card.delete", "Delete alarm"))}" aria-label="${alarmEscape(alarmText("alarms.card.delete", "Delete alarm"))}">
+                            <button class="alarm-icon-btn danger" type="button" data-action="delete" data-tooltip="${alarmEscape(alarmText("alarms.card.delete", "Delete alarm"))}" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="${alarmEscape(alarmText("alarms.card.delete", "Delete alarm"))}">
                                 <span data-ico="trash"></span>
                             </button>
                         </div>
@@ -665,6 +665,9 @@
             sound: "chime-digital",
             customPath: null,
             snoozeMinutes: 10,
+            soundRepeatCount: 1,
+            soundUntilDismiss: false,
+            soundPauseSecs: 1,
             ...(preset || {}),
         };
     }
@@ -1024,6 +1027,16 @@
         if (message) message.value = alarmEditorDraft.message || "";
         if (sound) sound.value = alarmEditorDraft.sound || "chime-digital";
         if (snooze) snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);
+        const untilDismiss = !!alarmEditorDraft.soundUntilDismiss;
+        const countRadio = document.getElementById("alarm-edit-repeat-count");
+        const untilRadio = document.getElementById("alarm-edit-repeat-until");
+        const countInput = document.getElementById("alarm-edit-sound-count");
+        const pauseInput = document.getElementById("alarm-edit-sound-pause");
+        if (countRadio) countRadio.checked = !untilDismiss;
+        if (untilRadio) untilRadio.checked = untilDismiss;
+        if (countInput) countInput.value = String(alarmEditorDraft.soundRepeatCount || 1);
+        if (pauseInput) pauseInput.value = String(alarmEditorDraft.soundPauseSecs ?? 1);
+        syncAlarmSoundRepeat();
         document.querySelectorAll("#alarm-edit-days .alarm-day").forEach((day) => {
             day.classList.toggle("on", (Number(alarmEditorDraft.daysMask) & Number(day.dataset.day)) !== 0);
         });
@@ -1071,6 +1084,9 @@
             daysMask,
             sound: document.getElementById("alarm-edit-sound")?.value || "chime-digital",
             snoozeMinutes: Number(document.getElementById("alarm-edit-snooze")?.value) || 10,
+            soundUntilDismiss: document.getElementById("alarm-edit-repeat-until")?.checked === true,
+            soundRepeatCount: Math.max(1, Math.min(20, Number(document.getElementById("alarm-edit-sound-count")?.value) || 1)),
+            soundPauseSecs: Math.max(0, Math.min(60, Number(document.getElementById("alarm-edit-sound-pause")?.value ?? 1))),
             enabled: alarmEditorDraft?.enabled !== false,
         };
     }
@@ -1114,21 +1130,54 @@
         const message = document.getElementById("alarm-notice-message");
         const snooze = document.getElementById("alarm-notice-snooze");
         if (title) title.textContent = payload.label || alarmText("alarms.notice.title", "Alarm");
-        if (message) message.textContent = payload.message || alarmText("alarms.notice.title", "Alarm");
+        if (message) message.textContent = payload.message || alarmText("alarms.notice.now", "It's time");
         if (snooze) snooze.hidden = !payload.alarmId;
         notice.hidden = false;
         clearTimeout(alarmNoticeTimer);
-        alarmNoticeTimer = setTimeout(() => {
-            notice.hidden = true;
-            alarmNoticeAlarm = null;
-        }, 30000);
+        alarmNoticeTimer = null;
+        // A real alarm stays until the user snoozes or dismisses it.
+        // Validation hints still fade on their own.
+        if (!payload.alarmId) {
+            alarmNoticeTimer = setTimeout(() => {
+                notice.hidden = true;
+                alarmNoticeAlarm = null;
+            }, 12000);
+        }
     }
 
     function hideAlarmNotice() {
         const notice = document.getElementById("alarm-notice");
+        if (alarmNoticeAlarm?.alarmId && window.audioEngine?.stopAlarmAlert) {
+            window.audioEngine.stopAlarmAlert();
+        }
         if (notice) notice.hidden = true;
         clearTimeout(alarmNoticeTimer);
         alarmNoticeAlarm = null;
+    }
+
+    function syncAlarmSoundRepeat() {
+        const until = document.getElementById("alarm-edit-repeat-until")?.checked === true;
+        const countInput = document.getElementById("alarm-edit-sound-count");
+        if (countInput) countInput.disabled = until;
+    }
+
+    let alarmConfirmCallback = null;
+
+    function openAlarmConfirm(onOk) {
+        alarmConfirmCallback = onOk;
+        const overlay = document.getElementById("alarm-confirm-overlay");
+        if (!overlay) return;
+        overlay.hidden = false;
+        requestAnimationFrame(() => overlay.classList.add("open"));
+    }
+
+    function closeAlarmConfirm() {
+        const overlay = document.getElementById("alarm-confirm-overlay");
+        if (overlay) {
+            overlay.classList.remove("open");
+            overlay.hidden = true;
+        }
+        alarmConfirmCallback = null;
     }
 
     function wireAlarmView() {
@@ -1158,14 +1207,7 @@
             if (!alarm) return;
             if (action === "toggle") updateAlarmById(id, { enabled: !alarm.enabled });
             if (action === "edit") openAlarmEditor({ ...alarm, id }, { isExisting: true });
-            if (action === "delete") {
-                openCustomConfirm({
-                    title: alarmText("alarms.delete.title", "Delete alarm?"),
-                    msg: alarmText("alarms.delete.message", "This alarm will be removed permanently."),
-                    okText: alarmText("alarms.delete.confirm", "Delete"),
-                    onOk: () => deleteAlarmById(id),
-                });
-            }
+            if (action === "delete") openAlarmConfirm(() => deleteAlarmById(id));
         });
 
         ensureAlarmTimeControls();
@@ -1189,9 +1231,8 @@
         document.getElementById("alarm-editor-save")?.addEventListener("click", saveAlarmFromEditor);
         document.getElementById("alarm-editor-cancel")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-editor-close")?.addEventListener("click", closeAlarmEditor);
-        document.getElementById("alarm-editor-overlay")?.addEventListener("click", (event) => {
-            if (event.target.id === "alarm-editor-overlay") closeAlarmEditor();
-        });
+        document.getElementById("alarm-edit-repeat-count")?.addEventListener("change", syncAlarmSoundRepeat);
+        document.getElementById("alarm-edit-repeat-until")?.addEventListener("change", syncAlarmSoundRepeat);
         document.getElementById("alarm-edit-file")?.addEventListener("click", async () => {
             const path = await window.cc.openFileDialog();
             if (path && alarmEditorDraft) {
@@ -1220,8 +1261,24 @@
             }
             hideAlarmNotice();
         });
+        document.getElementById("alarm-confirm-ok")?.addEventListener("click", async () => {
+            const cb = alarmConfirmCallback;
+            closeAlarmConfirm();
+            if (cb) await cb();
+        });
+        document.getElementById("alarm-confirm-cancel")?.addEventListener("click", closeAlarmConfirm);
+        document.getElementById("alarm-confirm-close")?.addEventListener("click", closeAlarmConfirm);
+        document.getElementById("alarm-confirm-overlay")?.addEventListener("click", (event) => {
+            if (event.target.id === "alarm-confirm-overlay") closeAlarmConfirm();
+        });
         document.addEventListener("keydown", (event) => {
-            if (event.key !== "Escape" || document.getElementById("alarm-editor-overlay")?.hidden) return;
+            if (event.key !== "Escape") return;
+            const confirm = document.getElementById("alarm-confirm-overlay");
+            if (confirm && !confirm.hidden) {
+                closeAlarmConfirm();
+                return;
+            }
+            if (document.getElementById("alarm-editor-overlay")?.hidden) return;
             if (adp.open) {
                 adpClose();
                 return;
@@ -8626,12 +8683,7 @@
         const entry = alarmFromCtx();
         hideAllContextMenus();
         if (!entry) return;
-        openCustomConfirm({
-            title: alarmText("alarms.delete.title", "Delete alarm?"),
-            msg: alarmText("alarms.delete.message", "This alarm will be removed permanently."),
-            okText: alarmText("alarms.delete.confirm", "Delete"),
-            onOk: () => deleteAlarmById(entry.id),
-        });
+        openAlarmConfirm(() => deleteAlarmById(entry.id));
     });
 
     // Wire text context menu actions
@@ -9042,16 +9094,16 @@
     });
 
     window.cc.onAlarmChime((p) => {
-        const vol = p.volume != null ? p.volume : (p.type === "custom" ? (cfg.alarmVolume || 0.75) : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75));
-        if (!window.audioEngine.muted) {
-            if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
-            else
-                window.audioEngine.chime(
-                    p.sound || "chime-digital",
-                    vol,
-                );
+        if (p.type === "custom") {
+            showAlarmNotice(p);
+            if (!p.silent && window.audioEngine?.playAlarmAlert) window.audioEngine.playAlarmAlert(p);
+            return;
         }
-        if (p.type === "custom") showAlarmNotice(p);
+        const vol = p.volume != null ? p.volume : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75);
+        if (!window.audioEngine.muted && !p.audioMuted) {
+            if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
+            else window.audioEngine.chime(p.sound || "chime-digital", vol);
+        }
     });
 
     if (window.cc && window.cc.onVoiceAnnounceTime) {

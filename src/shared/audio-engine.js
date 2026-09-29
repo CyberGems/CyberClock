@@ -576,6 +576,38 @@ class AudioEngine {
     this._commitVoice(voice, fade);
   }
 
+  // ── Alarm alert sequence ──────────────────────────────
+  // Repeats a chime or custom file. "Until dismissed" keeps going
+  // until stopAlarmAlert(); a count plays that many times.
+  playAlarmAlert(payload = {}) {
+    this.stopAlarmAlert();
+    if (this.muted || payload.audioMuted || payload.silent) return;
+    const until = !!payload.soundUntilDismiss;
+    const times = Math.max(1, Math.min(20, Number(payload.soundRepeatCount) || 1));
+    const pauseMs = Math.max(0, Math.min(60, Number(payload.soundPauseSecs ?? 1))) * 1000;
+    const gap = 2200 + pauseMs;
+    const token = (this._alarmToken = (this._alarmToken || 0) + 1);
+    let played = 0;
+    const tick = () => {
+      if (this._alarmToken !== token) return;
+      if (!until && played >= times) return;
+      played += 1;
+      const vol = payload.volume != null ? payload.volume : 0.75;
+      if (payload.customPath) this.playFile(payload.customPath, { loop: false, volume: vol, id: "alarm-alert" });
+      else this.chime(payload.sound || "chime-digital", vol);
+      if (until || played < times) {
+        this._alarmTimer = setTimeout(tick, gap);
+      }
+    };
+    tick();
+  }
+
+  stopAlarmAlert() {
+    this._alarmToken = (this._alarmToken || 0) + 1;
+    clearTimeout(this._alarmTimer);
+    this._alarmTimer = null;
+  }
+
   // ── Alarm Chimes (built-in) ───────────────────────────────
   chime(id, vol = 0.7) {
     // Chimes connect straight to the destination (not via _master), so the

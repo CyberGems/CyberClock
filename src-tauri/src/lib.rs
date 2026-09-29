@@ -88,6 +88,15 @@ fn active_event_target(app: &AppHandle) -> Option<String> {
     None
 }
 
+/// A due alarm stays reachable for this long after its minute starts.
+/// The scheduler sleeps in chunks, so requiring the exact second `:00`
+/// made every alarm miss its window.
+const ALARM_GRACE_SECS: i64 = 90;
+
+fn occurrence_is_pending(scheduled: chrono::DateTime<Local>, now: chrono::DateTime<Local>) -> bool {
+    now.signed_duration_since(scheduled).num_seconds() <= ALARM_GRACE_SECS
+}
+
 fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
     match active_event_target(app) {
         Some(label) => {
@@ -103,6 +112,26 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
             };
             let _ = app.emit_to(label, event, payload);
         }
+    }
+}
+
+/// The visible window plays the sound. The other window still shows the
+/// notice, marked silent, so opening it later does not replay the chime.
+fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
+    let active = active_event_target(app);
+    for label in ["main", "mini"] {
+        if app.get_webview_window(label).is_none() {
+            continue;
+        }
+        let mut data = payload.clone();
+        let plays_sound = match active.as_deref() {
+            Some(current) => current == label,
+            None => label == "main",
+        };
+        if !plays_sound {
+            data["silent"] = serde_json::Value::Bool(true);
+        }
+        let _ = app.emit_to(label, "alarm:chime", data);
     }
 }
 
@@ -3561,7 +3590,7 @@ fn compute_next_custom_alarm_datetime(
         let candidate = date
             .and_hms_opt(alarm.hour, alarm.minute, 0)
             .and_then(|naive| Local.from_local_datetime(&naive).single())?;
-        return (candidate >= now).then_some(candidate);
+        return occurrence_is_pending(candidate, now).then_some(candidate);
     }
 
     let mask = alarm_repeat_mask(alarm);
@@ -3579,7 +3608,7 @@ fn compute_next_custom_alarm_datetime(
         let Some(candidate) = Local.from_local_datetime(&candidate_naive).single() else {
             continue;
         };
-        if candidate < now {
+        if !occurrence_is_pending(candidate, now) {
             continue;
         }
         let weekday_mask = custom_alarm_days_mask_for_chrono_weekday(candidate.weekday());
@@ -3660,8 +3689,11 @@ fn custom_alarms_scheduler(app: AppHandle) {
         nexts.sort_by_key(|(dt, _, _)| dt.timestamp());
         let (earliest, earliest_idx, earliest_id) = nexts[0].clone();
         let delay_secs = earliest.signed_duration_since(now).num_seconds();
-        if delay_secs > 5 {
-            let chunk = std::cmp::min(delay_secs.saturating_sub(2), 30);
+        // Stay asleep until the minute is about to start. Waking a few
+        // seconds early used to fail the exact-minute check, then sleep
+        // past the alarm entirely.
+        if delay_secs > 1 {
+            let chunk = std::cmp::min(delay_secs.saturating_sub(1), 30).max(1);
             std::thread::sleep(std::time::Duration::from_secs(chunk as u64));
             continue;
         }
@@ -3670,47 +3702,50 @@ fn custom_alarms_scheduler(app: AppHandle) {
         let current_settings = load_settings(&app);
         if let Some(alarm) = current_settings.custom_alarms.get(earliest_idx) {
             if alarm.enabled {
+                let occurrence = earliest.timestamp();
+                let already = last_fired_by_id
+                    .get(&earliest_id)
+                    .copied()
+                    .map(|timestamp| timestamp == occurrence)
+                    .unwrap_or(false);
+
+                if already {
+                    std::thread::sleep(std::time::Duration::from_secs(15));
+                    continue;
+                }
+
                 let snooze_timestamp = lock_or_recover(&state.snoozed_alarms)
                     .get(&earliest_id)
                     .copied();
                 let is_snooze = snooze_timestamp
-                    .map(|timestamp| now2.timestamp() >= timestamp)
+                    .map(|timestamp| now2.timestamp() + 1 >= timestamp)
                     .unwrap_or(false);
-                let should_fire = if is_snooze {
-                    true
-                } else {
-                    custom_alarm_matches_now(now2, alarm)
-                };
+                let should_fire = is_snooze || custom_alarm_matches_now(now2, alarm) || delay_secs <= 1;
 
                 if should_fire {
-                    let fired_ts = now2.timestamp();
-                    let already = last_fired_by_id
-                        .get(&earliest_id)
-                        .copied()
-                        .map(|timestamp| timestamp == fired_ts)
-                        .unwrap_or(false);
+                    last_fired_by_id.insert(earliest_id.clone(), occurrence);
+                    if is_snooze {
+                        lock_or_recover(&state.snoozed_alarms).remove(&earliest_id);
+                    }
 
-                    if !already {
-                        last_fired_by_id.insert(earliest_id.clone(), fired_ts);
-                        if is_snooze {
-                            lock_or_recover(&state.snoozed_alarms).remove(&earliest_id);
-                        }
+                    let alarm_data = serde_json::json!({
+                        "type": "custom",
+                        "alarmId": earliest_id,
+                        "label": alarm.label,
+                        "message": alarm.message,
+                        "repeatMode": alarm.repeat_mode,
+                        "snoozeMinutes": alarm.snooze_minutes,
+                        "sound": alarm.sound,
+                        "customPath": alarm.custom_path,
+                        "soundRepeatCount": alarm.sound_repeat_count,
+                        "soundUntilDismiss": alarm.sound_until_dismiss,
+                        "soundPauseSecs": alarm.sound_pause_secs,
+                        "volume": current_settings.alarm_volume,
+                        "audioMuted": current_settings.audio_muted
+                    });
 
-                        let alarm_data = serde_json::json!({
-                            "type": "custom",
-                            "alarmId": earliest_id,
-                            "label": alarm.label,
-                            "message": alarm.message,
-                            "repeatMode": alarm.repeat_mode,
-                            "snoozeMinutes": alarm.snooze_minutes,
-                            "sound": alarm.sound,
-                            "customPath": alarm.custom_path,
-                            "volume": current_settings.alarm_volume,
-                            "audioMuted": current_settings.audio_muted
-                        });
-
-                        emit_to_active(&app, "alarm:chime", alarm_data);
-                        send_alarm_notification(&app, alarm);
+                    emit_alarm_chime(&app, alarm_data);
+                    send_alarm_notification(&app, alarm);
 
                         // A one-time alarm becomes inactive after firing.
                         // Snooze re-enables it through the command above.
@@ -3733,7 +3768,6 @@ fn custom_alarms_scheduler(app: AppHandle) {
                             });
                             let _ = app.emit("settings:updated", load_settings(&app));
                         }
-                    }
                 }
             }
         }
@@ -4599,4 +4633,21 @@ pub fn run() {
         .expect("error while building tauri application");
     app.manage(init_settings_store(app.handle()));
     app.run(|_, _| {});
+}
+
+#[cfg(test)]
+mod alarm_schedule_tests {
+    use super::occurrence_is_pending;
+    use chrono::{Local, TimeZone};
+
+    #[test]
+    fn a_due_alarm_stays_pending_through_the_grace_window() {
+        let now = Local.with_ymd_and_hms(2026, 9, 29, 12, 11, 20).single().unwrap();
+        let scheduled = Local.with_ymd_and_hms(2026, 9, 29, 12, 11, 0).single().unwrap();
+        let upcoming = Local.with_ymd_and_hms(2026, 9, 29, 12, 12, 0).single().unwrap();
+        let missed = Local.with_ymd_and_hms(2026, 9, 29, 12, 8, 0).single().unwrap();
+        assert!(occurrence_is_pending(scheduled, now));
+        assert!(occurrence_is_pending(upcoming, now));
+        assert!(!occurrence_is_pending(missed, now));
+    }
 }

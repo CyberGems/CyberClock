@@ -41,6 +41,15 @@ pub struct CustomAlarm {
     pub custom_path: Option<String>,
     #[serde(default = "default_snooze_minutes")]
     pub snooze_minutes: u32,
+    /// How many times the sound plays. Ignored when `sound_until_dismiss` is set.
+    #[serde(default = "default_sound_repeat_count")]
+    pub sound_repeat_count: u32,
+    /// Keep playing until the alarm notice is dismissed.
+    #[serde(default)]
+    pub sound_until_dismiss: bool,
+    /// Seconds of silence between repeats.
+    #[serde(default = "default_sound_pause_secs")]
+    pub sound_pause_secs: u32,
 }
 
 impl Default for CustomAlarm {
@@ -58,6 +67,9 @@ impl Default for CustomAlarm {
             sound: "chime-digital".to_string(),
             custom_path: None,
             snooze_minutes: default_snooze_minutes(),
+            sound_repeat_count: default_sound_repeat_count(),
+            sound_until_dismiss: false,
+            sound_pause_secs: default_sound_pause_secs(),
         }
     }
 }
@@ -86,6 +98,14 @@ fn default_snooze_minutes() -> u32 {
     10
 }
 
+fn default_sound_repeat_count() -> u32 {
+    1
+}
+
+fn default_sound_pause_secs() -> u32 {
+    1
+}
+
 /// Fill fields introduced by the standalone alarm experience while keeping
 /// old three-slot settings readable and stable. The index fallback is
 /// deterministic until the user edits or creates an alarm.
@@ -106,6 +126,9 @@ pub fn normalize_custom_alarms(settings: &mut AppSettings) {
         }
         if alarm.snooze_minutes == 0 {
             alarm.snooze_minutes = default_snooze_minutes();
+        }
+        if alarm.sound_repeat_count == 0 {
+            alarm.sound_repeat_count = default_sound_repeat_count();
         }
     }
 }

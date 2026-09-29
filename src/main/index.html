@@ -273,7 +273,7 @@
                                 <button type="button" class="alarms-overview-card alarms-overview-signal" id="alarms-overview-signal">
                                     <span class="alarms-overview-label" data-i18n="alarms.overview.chimes">HOURLY SIGNALS</span>
                                     <strong><span data-ico="bell"></span> <span data-i18n="alarms.overview.separate">Separate</span></strong>
-                                    <span id="alarms-chimes-hint">Hourly Chimes and Voice Time Announcer, in Time</span>
+                                    <span id="alarms-chimes-hint">Hourly Chimes and Voice Time Announcer</span>
                                 </button>
                             </div>
 
@@ -411,6 +411,22 @@
                                                 </button>
                                             </div>
                                         </label>
+                                        <div class="alarm-sound-repeat" id="alarm-sound-repeat">
+                                            <label class="alarm-sound-choice">
+                                                <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-count" value="count" checked />
+                                                <span data-i18n="alarms.editor.soundTimes">Times to repeat</span>
+                                                <input id="alarm-edit-sound-count" type="number" min="1" max="20" value="1" inputmode="numeric" />
+                                            </label>
+                                            <label class="alarm-sound-choice">
+                                                <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-until" value="until" />
+                                                <span data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
+                                            </label>
+                                            <label class="alarm-sound-pause">
+                                                <span data-i18n="alarms.editor.soundPause">Pause between sounds</span>
+                                                <input id="alarm-edit-sound-pause" type="number" min="0" max="60" value="1" inputmode="numeric" />
+                                                <span data-i18n="alarms.editor.soundSeconds">sec</span>
+                                            </label>
+                                        </div>
                                         <div class="alarm-custom-file-row">
                                             <button class="alarm-link-btn" id="alarm-edit-file" type="button">
                                                 <span data-ico="folder"></span> <span data-i18n="alarms.editor.customSound">Use a custom sound</span>
@@ -442,6 +458,30 @@
                                         <span data-i18n="common.save">Save</span>
                                         <kbd class="btn-kbd"><svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M20 4v7a3 3 0 0 1-3 3H4m0 0l5-5m-5 5l5 5"/></svg></kbd>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alarm-editor-overlay" id="alarm-confirm-overlay" hidden>
+                            <div class="alarm-editor alarm-confirm" role="dialog" aria-modal="true" aria-labelledby="alarm-confirm-title">
+                                <div class="alarm-editor-head">
+                                    <div>
+                                        <div class="alarms-kicker"><span data-ico="bell"></span> <span data-i18n="alarms.notice.title">Alarm</span></div>
+                                        <h2 id="alarm-confirm-title" data-i18n="alarms.delete.title">Delete alarm?</h2>
+                                    </div>
+                                    <button class="alarm-icon-btn" id="alarm-confirm-close" type="button" data-i18n-attr="aria-label:common.closeEsc">
+                                        <span data-ico="x"></span>
+                                    </button>
+                                </div>
+                                <div class="alarm-editor-body">
+                                    <p class="alarm-confirm-msg" id="alarm-confirm-msg" data-i18n="alarms.delete.message">This alarm will be removed permanently.</p>
+                                </div>
+                                <div class="alarm-editor-foot">
+                                    <button class="note-btn secondary" id="alarm-confirm-cancel" type="button">
+                                        <span data-i18n="common.cancel">Cancel</span>
+                                        <kbd class="btn-kbd">Esc</kbd>
+                                    </button>
+                                    <button class="note-btn danger" id="alarm-confirm-ok" type="button" data-i18n="alarms.delete.confirm">Delete</button>
                                 </div>
                             </div>
                         </div>
