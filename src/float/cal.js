@@ -268,6 +268,7 @@
     function applySettings(s) {
         if (!s) return;
         cfg = s;
+        document.body.classList.toggle("click-through", cfg.miniClickThrough === true);
         calNotes = cfg.calendarNotes || {};
 
         if (cfg.theme && window.CCTint) {

@@ -47,6 +47,9 @@ body {
     overflow: hidden;
     cursor: grab;
 }
+body.click-through .float-cal-shell {
+    opacity: calc(var(--cal-opacity, 1) * 0.88);
+}
 
 .float-cal-shell:active,
 body.is-dragging,

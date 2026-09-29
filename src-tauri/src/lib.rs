@@ -243,13 +243,31 @@ fn apply_always_on_top(app: &AppHandle, aot: bool) {
     }
 }
 
-/// Pass mouse events through the mini clock. Applied from the settings
-/// commands (like AOT) and re-applied every time the mini window is
-/// shown, since Windows can drop the flag across hide/show cycles.
-fn apply_mini_click_through(app: &AppHandle, on: bool) {
+fn is_click_through_window(label: &str) -> bool {
+    label == "mini" || label.starts_with("float-")
+}
+
+/// Pass mouse events through the mini clock and every floating widget.
+/// One setting covers all of them. Applied when it changes, when a
+/// widget is created, and every time one of those windows is shown,
+/// because Windows can drop the flag across hide/show cycles.
+fn apply_click_through(app: &AppHandle, on: bool) {
     if let Some(mini) = app.get_webview_window("mini") {
         let _ = mini.set_ignore_cursor_events(on);
     }
+    for (label, win) in app.webview_windows() {
+        if label.starts_with("float-") {
+            let _ = win.set_ignore_cursor_events(on);
+        }
+    }
+}
+
+fn reapply_click_through(app: &AppHandle, window: &WebviewWindow) {
+    if !is_click_through_window(window.label()) {
+        return;
+    }
+    let on = load_settings(app).mini_click_through;
+    let _ = window.set_ignore_cursor_events(on);
 }
 
 /// main or mini currently visible and not minimized.
@@ -293,8 +311,7 @@ fn show_clock_window(app: &AppHandle) {
         refresh_taskbar_tab(&win);
         let _ = win.set_focus();
         if target_win == "mini" {
-            // Re-apply click-through: hide/show cycles can drop the flag.
-            let _ = win.set_ignore_cursor_events(settings.mini_click_through);
+            reapply_click_through(app, &win);
         }
         broadcast_active_window(app, target_win);
     }
@@ -320,7 +337,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, settings.always_on_top);
-    apply_mini_click_through(&app, settings.mini_click_through);
+    apply_click_through(&app, settings.mini_click_through);
     Ok(settings)
 }
 
@@ -338,7 +355,7 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, merged.always_on_top);
-    apply_mini_click_through(&app, merged.mini_click_through);
+    apply_click_through(&app, merged.mini_click_through);
     if merged.mini_edge_limits {
         if let Some(mini) = app.get_webview_window("mini") {
             clamp_window_to_monitors(&mini);
@@ -411,7 +428,7 @@ fn reset_settings(app: AppHandle) -> AppSettings {
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, default_settings.always_on_top);
-    apply_mini_click_through(&app, default_settings.mini_click_through);
+    apply_click_through(&app, default_settings.mini_click_through);
     for (label, win) in app.webview_windows() {
         if label.starts_with("float-") {
             let _ = win.set_skip_taskbar(true);
@@ -498,7 +515,7 @@ async fn import_backup(app: AppHandle, window: WebviewWindow) -> Result<Option<A
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, imported.always_on_top);
-    apply_mini_click_through(&app, imported.mini_click_through);
+    apply_click_through(&app, imported.mini_click_through);
 
     // Broadcast to all windows
     let _ = app.emit("settings:updated", &imported);
@@ -606,6 +623,7 @@ fn spawn_float_window_with_slot(
         if let Some(existing) = app.get_webview_window("float-relax-1") {
             let _ = existing.unminimize();
             let _ = existing.show();
+            reapply_click_through(app, &existing);
             let _ = existing.set_focus();
             return Some(existing.label().to_string());
         }
@@ -901,6 +919,7 @@ fn spawn_float_window_with_slot(
                 _ => {}
             });
             info!("spawn_float: {} opened ({})", label, kind);
+            reapply_click_through(app, &win);
             let _ = win.set_focus();
             Some(label)
         }
@@ -1122,6 +1141,7 @@ fn open_external_url(url: String) -> bool {
 fn open_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.show();
+        reapply_click_through(&app, &window);
         let _ = window.set_focus();
         refresh_taskbar_tab(&window);
         return true;
@@ -1768,6 +1788,7 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
             )));
             let _ = win.unminimize();
             let _ = win.show();
+            reapply_click_through(app, &win);
             clamp_window_to_monitors(&win);
 
             let label = win.label().to_string();
@@ -2724,9 +2745,7 @@ fn switch_to_mini_mode(app: AppHandle) {
         clamp_window_to_monitors(&mini);
         let _ = mini.show();
         let _ = mini.set_focus();
-        // Hide/show can drop the ignore-cursor flag on Windows — re-apply
-        // the persisted click-through preference every time mini is shown.
-        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
+        reapply_click_through(&app, &mini);
         refresh_taskbar_tab(&mini);
     }
 
@@ -4043,6 +4062,7 @@ fn focus_clock_for_tray_menu(app: &AppHandle) {
     }
 
     let _ = clock.show();
+    reapply_click_through(app, &clock);
     let _ = clock.set_focus();
 }
 
@@ -4353,8 +4373,7 @@ fn show_initial_window(app: &AppHandle) {
         // performs at creation is silently lost (the mini then keeps a
         // permanent taskbar button).
         refresh_taskbar_tab(&mini);
-        // Re-apply click-through on startup (hide/show can drop the flag).
-        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
+        reapply_click_through(app, &mini);
     }
 
     broadcast_active_window(app, if is_mini { "mini" } else { "main" });
@@ -4398,6 +4417,7 @@ pub fn run() {
             } else if let Some(mini) = app.get_webview_window("mini") {
                 let _ = mini.unminimize();
                 let _ = mini.show();
+                reapply_click_through(app, &mini);
                 refresh_taskbar_tab(&mini);
                 let _ = mini.set_focus();
             }

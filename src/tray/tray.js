@@ -162,7 +162,7 @@
             ? T("tray.soundOff", "Sound off")
             : T("tray.soundOn", "Sound on");
 
-        // Click-through toggle (mini window ignores the mouse while on)
+        // Click-through toggle (mini clock and floating widgets ignore the mouse while on)
         const ctpBtn = document.getElementById("btn-clickthrough");
         const ctpIco = document.getElementById("ico-clickthrough");
         const ctpLbl = document.getElementById("lbl-clickthrough");
@@ -280,8 +280,8 @@
     }
 
     // Click-through toggle: backend applies set_ignore_cursor_events in
-    // the same patch; the tray is one of the two places that can turn it
-    // OFF (the mini window itself ignores the mouse while ON).
+    // the same patch. The tray and Settings are the two places that can
+    // turn it off, because the mini clock and widgets ignore the mouse while on.
     const ctpBtn = document.getElementById("btn-clickthrough");
     if (ctpBtn) {
         ctpBtn.addEventListener("click", (e) => {

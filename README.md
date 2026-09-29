@@ -89,7 +89,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
 - **Collapse Date** — Show date only on hover
 - **CRT Scanlines** — Retro overlay effect
-- **Click-Through** — Let mouse events pass through the mini clock (toggled from the tray menu or Settings)
+- **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from the tray menu or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes

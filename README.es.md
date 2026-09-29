@@ -89,7 +89,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
 - **Colapsar fecha:** muestra la fecha solo al pasar el cursor
 - **Líneas de exploración CRT:** efecto retro de superposición
-- **Click-through:** deja que los clics del ratón atraviesen el reloj mini (se alterna desde el menú de la bandeja o desde Configuración)
+- **Click-through:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde el menú de la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas

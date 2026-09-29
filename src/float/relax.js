@@ -114,7 +114,8 @@
             window.ccI18n.apply(document);
         }
         const op = typeof s.floatRelaxOpacity === "number" ? s.floatRelaxOpacity : 1;
-        if (shell) shell.style.opacity = String(op);
+        document.body.classList.toggle("click-through", s.miniClickThrough === true);
+        if (shell) shell.style.opacity = String(s.miniClickThrough === true ? op * 0.88 : op);
         const skin = parseInt(s.floatRelaxDesign, 10);
         if (shell) shell.dataset.skin = String(skin >= 1 && skin <= 10 ? skin : 1);
         showBreathe = s.floatRelaxShowBreathe !== false;
