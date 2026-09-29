@@ -270,11 +270,11 @@
                                     <strong id="alarms-active-count">0</strong>
                                     <span data-i18n="alarms.overview.activeHint">ready to keep you on track</span>
                                 </div>
-                                <div class="alarms-overview-card alarms-overview-signal">
+                                <button type="button" class="alarms-overview-card alarms-overview-signal" id="alarms-overview-signal">
                                     <span class="alarms-overview-label" data-i18n="alarms.overview.chimes">HOURLY SIGNALS</span>
                                     <strong><span data-ico="bell"></span> <span data-i18n="alarms.overview.separate">Separate</span></strong>
-                                    <span data-i18n="alarms.overview.chimesHint">Configure periodic chimes in Time</span>
-                                </div>
+                                    <span id="alarms-chimes-hint">Hourly Chimes and Voice Time Announcer, in Time</span>
+                                </button>
                             </div>
 
                             <div class="alarms-empty" id="alarms-empty">
@@ -446,15 +446,6 @@
                             </div>
                         </div>
 
-                        <div class="alarm-notice" id="alarm-notice" hidden>
-                            <div class="alarm-notice-icon"><span data-ico="bell"></span></div>
-                            <div class="alarm-notice-copy">
-                                <strong id="alarm-notice-title" data-i18n="alarms.notice.title">Alarm</strong>
-                                <span id="alarm-notice-message"></span>
-                            </div>
-                            <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
-                            <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss"><span data-ico="x"></span></button>
-                        </div>
                     </div>
 
                     <!-- TIMER -->
@@ -1009,7 +1000,7 @@
                     <!-- Time -->
                     <div class="s-panel" id="stab-time">
                         <!-- Hourly Chimes -->
-                        <div class="s-sec">
+                        <div class="s-sec" id="s-sec-chimes">
                             <div class="s-sec-t" data-i18n="settings.time.sectionChimes">Hourly Chimes</div>
 
                             <!-- Chimes Volume -->
@@ -2487,6 +2478,16 @@
                     </label>
                 </div>
             </div>
+        </div>
+
+        <div class="alarm-notice" id="alarm-notice" role="alert" aria-live="assertive" hidden>
+            <div class="alarm-notice-icon"><span data-ico="bell"></span></div>
+            <div class="alarm-notice-copy">
+                <strong id="alarm-notice-title" data-i18n="alarms.notice.title">Alarm</strong>
+                <span id="alarm-notice-message"></span>
+            </div>
+            <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
+            <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss"><span data-ico="x"></span></button>
         </div>
 
         <script src="../shared/audio-engine.js"></script>

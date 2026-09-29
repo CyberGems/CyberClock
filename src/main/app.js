@@ -562,6 +562,15 @@
             .filter(({ at }) => at)
             .sort((a, b) => a.at - b.at)[0];
 
+        const chimesHint = document.getElementById("alarms-chimes-hint");
+        if (chimesHint && window.ccI18n) {
+            chimesHint.textContent = window.ccI18n.t("alarms.overview.chimesHint", {
+                chimes: window.ccI18n.t("settings.time.sectionChimes"),
+                voice: window.ccI18n.t("voice.sectionTitle"),
+                tab: window.ccI18n.t("settings.tab.time"),
+            });
+        }
+
         const activeCount = document.getElementById("alarms-active-count");
         const nextTime = document.getElementById("alarms-next-time");
         const nextLabel = document.getElementById("alarms-next-label");
@@ -569,7 +578,7 @@
         if (nextTime) nextTime.textContent = next ? alarmTimeString(next.at.getHours(), next.at.getMinutes()) : "--:--";
         if (nextLabel) {
             nextLabel.textContent = next
-                ? `${alarmText("alarms.card.next", "Next")} · ${next.alarm.label || alarmText("alarms.notice.title", "Alarm")}`
+                ? `${alarmText("alarms.card.next", "Next")} · ${alarmDisplayLabel(next.alarm)}`
                 : alarmText("alarms.overview.none", "No upcoming alarms");
         }
 
@@ -1112,7 +1121,7 @@
         alarmNoticeTimer = setTimeout(() => {
             notice.hidden = true;
             alarmNoticeAlarm = null;
-        }, 12000);
+        }, 30000);
     }
 
     function hideAlarmNotice() {
@@ -1123,6 +1132,13 @@
     }
 
     function wireAlarmView() {
+        document.getElementById("alarms-overview-signal")?.addEventListener("click", () => {
+            openSettings("time");
+            requestAnimationFrame(() => {
+                document.getElementById("s-sec-chimes")?.scrollIntoView({ block: "start" });
+            });
+        });
+
         const add = document.getElementById("alarms-add");
         const emptyAdd = document.getElementById("alarms-empty-add");
         add?.addEventListener("click", () => openAlarmEditor());
