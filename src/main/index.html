@@ -317,11 +317,11 @@
                         <div class="alarm-editor-overlay" id="alarm-editor-overlay" hidden>
                             <div class="alarm-editor" role="dialog" aria-modal="true" aria-labelledby="alarm-editor-title">
                                 <div class="alarm-editor-head">
-                                    <div>
+                                    <div class="alarm-editor-title-wrap">
                                         <div class="alarms-kicker"><span data-ico="bell"></span> <span data-i18n="alarms.editor.kicker">ALARM DESIGNER</span></div>
-                                        <h2 id="alarm-editor-title" data-i18n="alarms.editor.newTitle">New alarm</h2>
+                                        <input id="alarm-editor-title" class="alarm-editor-name" type="text" name="cc-alarm-title" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Alarm 1" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
                                     </div>
-                                    <button class="alarm-icon-btn" id="alarm-editor-close" type="button" data-tooltip="Close editor" data-i18n-attr="data-tooltip:alarms.tooltip.close, aria-label:alarms.tooltip.close">
+                                    <button class="alarm-icon-btn" id="alarm-editor-close" type="button" data-tooltip="Cancel" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.cancel, aria-label:common.cancel">
                                         <span data-ico="x"></span>
                                     </button>
                                 </div>
@@ -340,10 +340,6 @@
                                             </div>
                                             <input id="alarm-edit-time" type="hidden" value="09:00" />
                                         </div>
-                                        <label class="alarm-field">
-                                            <span data-i18n="alarms.editor.label">Label</span>
-                                            <input id="alarm-edit-label" type="text" name="cc-alarm-label" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Morning focus" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
-                                        </label>
                                     </div>
                                     <div class="alarm-form-section">
                                         <div class="alarm-form-section-title"><span data-ico="calendar"></span> <span data-i18n="alarms.editor.schedule">Schedule</span></div>

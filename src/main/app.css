@@ -3968,11 +3968,32 @@
         padding: 18px 20px;
         border-bottom: 1px solid var(--border);
     }
-    .alarm-editor-head h2 {
+    .alarm-editor-title-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+    .alarm-editor-name {
+        display: block;
+        width: 100%;
         margin: 5px 0 0;
+        padding: 2px 6px;
         color: var(--text-hi);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        outline: none;
         font-family: "Space Grotesk", var(--font-ui), sans-serif;
         font-size: calc(22px * var(--ui-scale));
+        font-weight: 600;
+    }
+    .alarm-editor-name::placeholder {
+        color: var(--text-lo);
+    }
+    .alarm-editor-name:hover,
+    .alarm-editor-name:focus {
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-editor-body {
         display: grid;
@@ -3987,7 +4008,8 @@
         display: grid;
         min-width: 0;
         align-items: start;
-        grid-template-columns: minmax(210px, 240px) minmax(0, 1fr);
+        grid-template-columns: minmax(220px, 320px);
+        justify-content: start;
         gap: 14px;
         padding: 15px;
         background: rgba(var(--rgb-accent), 0.07);
@@ -4109,8 +4131,9 @@
     }
     .alarm-choice-trigger:hover,
     .alarm-choice-trigger[aria-expanded="true"] {
-        border-color: var(--accent-a);
-        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.13);
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-sound-menu.is-compact .alarm-sound-option {
         text-align: center;
@@ -4144,11 +4167,14 @@
         min-height: 58px;
         resize: vertical;
     }
+    .alarm-field input:hover,
+    .alarm-field textarea:hover,
     .alarm-field input:focus,
     .alarm-field select:focus,
     .alarm-field textarea:focus {
-        border-color: var(--accent-a);
-        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.13);
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-field input::placeholder,
     .alarm-field textarea::placeholder {
@@ -4206,8 +4232,9 @@
     }
     .alarm-sound-trigger:hover,
     .alarm-sound-trigger[aria-expanded="true"] {
-        border-color: var(--accent-a);
-        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.13);
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-sound-caret {
         width: 0;
@@ -4268,6 +4295,12 @@
         border-style: solid;
         border-color: var(--border-bright);
         background: rgba(var(--rgb-accent), 0.08);
+    }
+    .alarm-file-card:hover {
+        border-style: solid;
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-file-pick {
         display: flex;
@@ -4422,9 +4455,9 @@
     }
     .alarm-datepicker-trigger:hover,
     .alarm-datepicker-trigger[aria-expanded="true"] {
-        border-color: var(--accent-a);
-        background: rgba(var(--rgb-accent), 0.07);
-        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.13);
+        border-color: rgba(var(--rgb-accent), 0.7);
+        background: rgba(var(--rgb-accent), 0.06);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
     .alarm-datepicker-trigger .cc-ico {
         width: 14px;
@@ -4982,7 +5015,7 @@
         .alarm-editor-foot {
             padding: 12px 16px;
         }
-        .alarm-editor-head h2 {
+        .alarm-editor-name {
             font-size: calc(20px * var(--ui-scale));
         }
         .alarm-editor-body {

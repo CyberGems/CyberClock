@@ -1245,18 +1245,14 @@
 
         const title = document.getElementById("alarm-editor-title");
         const time = document.getElementById("alarm-edit-time");
-        const label = document.getElementById("alarm-edit-label");
         const repeat = document.getElementById("alarm-edit-repeat");
         const message = document.getElementById("alarm-edit-message");
         const sound = document.getElementById("alarm-edit-sound");
         const snooze = document.getElementById("alarm-edit-snooze");
-        if (title) title.textContent = alarm && isExisting
-            ? alarmText("alarms.editor.editTitle", "Edit alarm")
-            : alarmText("alarms.editor.newTitle", "New alarm");
         if (time) time.value = `${String(alarmEditorDraft.hour).padStart(2, "0")}:${String(alarmEditorDraft.minute).padStart(2, "0")}`;
         syncAlarmTimeControls(time?.value);
         if (!alarmEditorDraft.label) alarmEditorDraft.label = nextAlarmLabel(alarmEditorId);
-        if (label) label.value = alarmEditorDraft.label;
+        if (title) title.value = alarmEditorDraft.label;
         if (repeat) {
             repeat.value = alarmEditorDraft.repeatMode || (alarmEditorDraft.daysMask ? "weekly" : "once");
             syncAlarmChoice(repeat);
@@ -1322,7 +1318,7 @@
         }
         return {
             ...(alarmEditorDraft || newAlarmDraft()),
-            label: document.getElementById("alarm-edit-label")?.value.trim() || nextAlarmLabel(alarmEditorId),
+            label: document.getElementById("alarm-editor-title")?.value.trim() || nextAlarmLabel(alarmEditorId),
             message: document.getElementById("alarm-edit-message")?.value.trim() || "",
             hour: Number.isFinite(hour) ? hour : 9,
             minute: Number.isFinite(minute) ? minute : 0,
@@ -1487,7 +1483,7 @@
         document.getElementById("alarm-edit-repeat")?.addEventListener("change", syncAlarmEditorSchedule);
         // WebView2 shows the Windows "Saved info" popup on normal text fields.
         // Keeping them readonly until focus stops that panel; typing still works.
-        ["alarm-edit-label", "alarm-edit-message"].forEach((id) => {
+        ["alarm-editor-title", "alarm-edit-message"].forEach((id) => {
             const field = document.getElementById(id);
             if (!field) return;
             field.addEventListener("focus", () => {
