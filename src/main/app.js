@@ -450,6 +450,71 @@
         return alarm.id || `alarm-${index + 1}`;
     }
 
+    function alarmLeadText(at, now = new Date()) {
+        const ms = Math.max(0, at.getTime() - now.getTime());
+        if (ms < 45000) return alarmText("alarms.overview.inUnderMinute", "in less than a minute");
+        const mins = Math.round(ms / 60000);
+        if (mins < 60) {
+            return mins <= 1
+                ? alarmText("alarms.overview.inOneMinute", "in 1 minute")
+                : alarmText("alarms.overview.inMinutes", "in {n} minutes", { n: mins });
+        }
+        const hours = Math.floor(mins / 60);
+        const rem = mins % 60;
+        if (hours < 24) {
+            if (rem === 0) {
+                return hours === 1
+                    ? alarmText("alarms.overview.inOneHour", "in 1 hour")
+                    : alarmText("alarms.overview.inHours", "in {n} hours", { n: hours });
+            }
+            if (hours === 1) {
+                return rem === 1
+                    ? alarmText("alarms.overview.inOneHourOneMinute", "in 1 hour and 1 minute")
+                    : alarmText("alarms.overview.inOneHourMinutes", "in 1 hour and {n} minutes", { n: rem });
+            }
+            return rem === 1
+                ? alarmText("alarms.overview.inHoursOneMinute", "in {h} hours and 1 minute", { h: hours })
+                : alarmText("alarms.overview.inHoursMinutes", "in {h} hours and {m} minutes", { h: hours, m: rem });
+        }
+        const days = Math.max(1, Math.round(ms / 86400000));
+        return days === 1
+            ? alarmText("alarms.overview.inOneDay", "in 1 day")
+            : alarmText("alarms.overview.inDays", "in {n} days", { n: days });
+    }
+
+    function nextUpcomingAlarm(now = new Date()) {
+        return visibleAlarms()
+            .filter(({ alarm }) => alarm.enabled)
+            .map(({ alarm }) => ({ alarm, at: alarmNextOccurrence(alarm, now) }))
+            .filter(({ at }) => at)
+            .sort((a, b) => a.at - b.at)[0] || null;
+    }
+
+    function nextAlarmLeadLine(next, now = new Date()) {
+        if (!next) return alarmText("alarms.overview.none", "No upcoming alarms");
+        return `${alarmDisplayLabel(next.alarm)} · ${alarmLeadText(next.at, now)}`;
+    }
+
+    function refreshAlarmOverviewLead() {
+        const nextLabel = document.getElementById("alarms-next-label");
+        const view = document.getElementById("view-alarms");
+        if (!nextLabel || !view || !view.classList.contains("active")) return;
+        const line = nextAlarmLeadLine(nextUpcomingAlarm());
+        if (nextLabel.textContent !== line) nextLabel.textContent = line;
+    }
+
+    function refreshAlarmStageClock() {
+        const notice = document.getElementById("alarm-notice");
+        const clock = document.getElementById("alarm-notice-clock");
+        if (!notice || notice.hidden || !notice.classList.contains("is-takeover") || !clock) return;
+        const now = new Date();
+        const text = now.toLocaleTimeString(
+            window.ccI18n && window.ccI18n.getEffectiveLang() === "es" ? "es" : "en",
+            { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: cfg.clockFormat === "12h" },
+        );
+        if (clock.textContent !== text) clock.textContent = text;
+    }
+
     function alarmTimeString(hour, minute) {
         const date = new Date(2000, 0, 1, Number(hour) || 0, Number(minute) || 0);
         return date.toLocaleTimeString(
@@ -576,11 +641,7 @@
         const nextLabel = document.getElementById("alarms-next-label");
         if (activeCount) activeCount.textContent = String(active.length);
         if (nextTime) nextTime.textContent = next ? alarmTimeString(next.at.getHours(), next.at.getMinutes()) : "--:--";
-        if (nextLabel) {
-            nextLabel.textContent = next
-                ? `${alarmText("alarms.card.next", "Next")} · ${alarmDisplayLabel(next.alarm)}`
-                : alarmText("alarms.overview.none", "No upcoming alarms");
-        }
+        if (nextLabel) nextLabel.textContent = nextAlarmLeadLine(next);
 
         empty.hidden = entries.length > 0;
         list.hidden = entries.length === 0;
@@ -1129,10 +1190,23 @@
         const title = document.getElementById("alarm-notice-title");
         const message = document.getElementById("alarm-notice-message");
         const snooze = document.getElementById("alarm-notice-snooze");
+        const takeover = !!payload.alarmId;
+        notice.classList.toggle("is-takeover", takeover);
         if (title) title.textContent = payload.label || alarmText("alarms.notice.title", "Alarm");
-        if (message) message.textContent = payload.message || alarmText("alarms.notice.now", "It's time");
-        if (snooze) snooze.hidden = !payload.alarmId;
+        if (message) {
+            const text = (payload.message || "").trim();
+            message.textContent = text || (takeover ? "" : alarmText("alarms.notice.now", "It's time"));
+            message.hidden = takeover && !text;
+        }
+        if (snooze) snooze.hidden = !takeover;
+        const dismiss = document.getElementById("alarm-notice-dismiss");
+        if (dismiss) {
+            if (takeover) dismiss.removeAttribute("data-tooltip");
+            else dismiss.setAttribute("data-tooltip", alarmText("alarms.notice.dismiss", "Dismiss alarm"));
+        }
         notice.hidden = false;
+        refreshAlarmStageClock();
+        if (takeover) requestAnimationFrame(() => dismiss?.focus());
         clearTimeout(alarmNoticeTimer);
         alarmNoticeTimer = null;
         // A real alarm stays until the user snoozes or dismisses it.
@@ -1150,7 +1224,10 @@
         if (alarmNoticeAlarm?.alarmId && window.audioEngine?.stopAlarmAlert) {
             window.audioEngine.stopAlarmAlert();
         }
-        if (notice) notice.hidden = true;
+        if (notice) {
+            notice.hidden = true;
+            notice.classList.remove("is-takeover");
+        }
         clearTimeout(alarmNoticeTimer);
         alarmNoticeAlarm = null;
     }
@@ -1273,6 +1350,11 @@
         });
         document.addEventListener("keydown", (event) => {
             if (event.key !== "Escape") return;
+            const notice = document.getElementById("alarm-notice");
+            if (alarmNoticeAlarm?.alarmId && notice && !notice.hidden) {
+                hideAlarmNotice();
+                return;
+            }
             const confirm = document.getElementById("alarm-confirm-overlay");
             if (confirm && !confirm.hidden) {
                 closeAlarmConfirm();
@@ -2207,6 +2289,8 @@
         const months = getMonths();
         document.getElementById("dig-date").textContent =
             `${days[now.getDay()]}·${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        refreshAlarmOverviewLead();
+        refreshAlarmStageClock();
     }
 
     // ══════════════════════════════════════════════════════════════

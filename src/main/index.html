@@ -2521,13 +2521,23 @@
         </div>
 
         <div class="alarm-notice" id="alarm-notice" role="alert" aria-live="assertive" hidden>
-            <div class="alarm-notice-icon"><span data-ico="bell"></span></div>
-            <div class="alarm-notice-copy">
-                <strong id="alarm-notice-title" data-i18n="alarms.notice.title">Alarm</strong>
-                <span id="alarm-notice-message"></span>
+            <div class="alarm-stage-veil" aria-hidden="true"></div>
+            <div class="alarm-stage-panel">
+                <div class="alarm-notice-icon"><span data-ico="bell"></span></div>
+                <p class="alarm-stage-kicker" id="alarm-notice-kicker" data-i18n="alarms.notice.now">It's time</p>
+                <time class="alarm-stage-clock" id="alarm-notice-clock"></time>
+                <div class="alarm-notice-copy">
+                    <strong id="alarm-notice-title" data-i18n="alarms.notice.title">Alarm</strong>
+                    <span id="alarm-notice-message"></span>
+                </div>
+                <div class="alarm-stage-actions">
+                    <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
+                    <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss">
+                        <span class="alarm-notice-dismiss-x" data-ico="x"></span>
+                        <span class="alarm-notice-dismiss-label" data-i18n="alarms.notice.dismissAction">Dismiss</span>
+                    </button>
+                </div>
             </div>
-            <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
-            <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss"><span data-ico="x"></span></button>
         </div>
 
         <script src="../shared/audio-engine.js"></script>
