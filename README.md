@@ -96,10 +96,10 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Voice Time Announcer (Talking Clock)** — Verbally announces the time at intervals (:15, :30, :00) with selectable system voices, customizable style (Natural, Cyber/Tactical, Concise), optional soft pre-chime, quiet hours, and direct shortcut to install Windows voices
 - **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
 - **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
-- **6 Built-In Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, Music Box
-- **Custom Sound Support** — Load your own audio file
-- **Schedule Window** — Silence chimes or play alarms only during specific hours
-- **Alarms** — A first-class Alarm view with an expressive empty state, quick presets, scalable alarm cards, one-time/daily/weekday schedules, labels, messages, sound previews, custom sounds, snooze, and notifications
+- **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
+- **Custom Chime Support** — Load your own audio file for an hourly chime interval
+- **Schedule Window** — Silence chimes during specific hours
+- **Alarms** — An Alarms view with presets, cards, and a designer. Schedules are once, every day, weekdays, weekends, or selected days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm takes over the window
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog

@@ -96,10 +96,10 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Locutor de hora por voz (Reloj Parlante):** anuncia la hora verbalmente a intervalos (:15, :30, :00) con voces del sistema seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio y acceso directo para instalar voces de Windows
 - **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
 - **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
-- **6 sonidos integrados:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora, Caja de Música
-- **Sonido personalizado:** carga tu propio archivo de audio
-- **Ventana de horario:** silencia las campanadas o reproduce las alarmas solo durante horas concretas
-- **Alarmas:** vista principal de Alarmas con estado vacío visual, presets rápidos, tarjetas escalables, horarios de una vez/diarios/entre semana, etiquetas, mensajes, previsualización de sonidos, sonidos personalizados, posponer y notificaciones
+- **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias
+- **Campanada personalizada:** carga tu propio archivo de audio para un intervalo de campanada
+- **Ventana de horario:** silencia las campanadas durante horas concretas
+- **Alarmas:** vista de Alarmas con preajustes, tarjetas y diseñador. La programación es una vez, todos los días, entre semana, fines de semana o días seleccionados. Las alarmas nuevas empiezan en Sin sonido, con veinte tonos sintetizados o tu propio MP3 o WAV. Posponer muestra su demora, y al sonar la alarma ocupa la ventana
 
 ### 🖥️ Integración con escritorio
 - **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows
