@@ -3451,18 +3451,13 @@
         off.height = H;
         const ctx = off.getContext("2d");
 
-        // 1. Deep Vacuum Chamber Background
-        const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.02);
-        bgGrad.addColorStop(0, `rgba(${c.rgb},.16)`);
-        bgGrad.addColorStop(0.35, `rgba(${c.rgb},.06)`);
-        bgGrad.addColorStop(0.75, "rgba(10,12,18,.92)");
-        bgGrad.addColorStop(1, "rgba(6,8,12,.98)");
+        // Near-black stage. A milky radial wash read as cloud and
+        // sat on top of the plasma lines.
         ctx.beginPath();
         ctx.arc(cx, cy, R * 0.98, 0, Math.PI * 2);
-        ctx.fillStyle = bgGrad;
+        ctx.fillStyle = "#07090d";
         ctx.fill();
 
-        // 2. Heavy Industrial Containment Ring (Bezel)
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, R * 0.94, 0, Math.PI * 2);
@@ -3472,14 +3467,13 @@
         ctx.shadowBlur = 10;
         ctx.stroke();
 
-        // Inner containment rim
+        ctx.shadowBlur = 0;
         ctx.beginPath();
         ctx.arc(cx, cy, R * 0.88, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
+        ctx.strokeStyle = `rgba(${c.rgb},.22)`;
         ctx.lineWidth = 1.2;
         ctx.stroke();
 
-        // 3. 60 Peripheral Thermal Exhaust Slots
         for (let i = 0; i < 60; i++) {
             const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
             const isHour = i % 5 === 0;
@@ -3498,7 +3492,6 @@
             ctx.stroke();
         }
 
-        // 4. Primary Magnetic Stabilizers / Clamps at 12, 3, 6, 9
         const cardAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
         for (let k = 0; k < 4; k++) {
             const ca = cardAngles[k];
@@ -3514,7 +3507,6 @@
             ctx.lineWidth = 1.6;
             ctx.shadowBlur = 6;
             ctx.stroke();
-            // Warning status LED
             ctx.beginPath();
             ctx.arc(0, 0, R * 0.010, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
@@ -3522,32 +3514,59 @@
             ctx.restore();
         }
 
-        // 5. Magnetic Plasma Confinement Guide Rings
-        [0.72, 0.56, 0.38].forEach((cr, idx) => {
-            ctx.beginPath();
-            ctx.arc(cx, cy, R * cr, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(${c.rgb},${0.16 + idx * 0.07})`;
-            ctx.lineWidth = 1.2;
-            ctx.setLineDash(idx === 1 ? [4, 6] : [8, 4]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        });
+        // Wordmark lane. The name is painted later, centered at 0.44R,
+        // and can be as wide as the longest custom label.
+        const laneTop = R * 0.345;
+        const laneBot = R * 0.545;
+        const laneHalf = R * 0.70;
+        const rotOf = (ang) => ang + Math.PI / 2;
+        const inLane = (r, ang, halfW) => {
+            const rot = rotOf(ang);
+            const c0 = Math.cos(rot);
+            const s0 = Math.sin(rot);
+            for (const lx of [-halfW, 0, halfW]) {
+                const x = lx * c0 - (-r) * s0;
+                const y = lx * s0 + (-r) * c0;
+                if (y > laneTop && y < laneBot && Math.abs(x) < laneHalf) return true;
+            }
+            return false;
+        };
 
-        // 6. 12 Radial Tokamak Injector Coils / Stator Blocks
         for (let i = 0; i < 12; i++) {
             const hNum = i === 0 ? 12 : i;
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
             const cosA = Math.cos(a), sinA = Math.sin(a);
 
-            // Magnetic Injector Coil Body (trapezoid from R*0.38 to R*0.65)
+            const wIn = 0.022;
+            const wOut = 0.042;
+            const segments = [];
+            const collect = (from, to) => {
+                let segStart = null;
+                const steps = Math.round((to - from) / 0.01);
+                for (let step = 0; step <= steps; step++) {
+                    const r = +(from + step * 0.01).toFixed(2);
+                    const w = wIn + (wOut - wIn) * ((Math.min(r, 0.65) - 0.38) / 0.27);
+                    const blocked = inLane(R * r, a, R * w);
+                    if (!blocked && segStart == null) segStart = r;
+                    if ((blocked || step === steps) && segStart != null) {
+                        const segEnd = blocked ? +(r - 0.01).toFixed(2) : r;
+                        if (segEnd - segStart >= 0.05) segments.push([segStart, segEnd]);
+                        segStart = null;
+                    }
+                }
+            };
+            collect(0.38, 0.65);
+            if (segments.length === 0) collect(0.66, 0.72);
+
+            segments.forEach(([rIn, rOut]) => {
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(a + Math.PI / 2);
 
-            const wInner = R * 0.022;
-            const wOuter = R * 0.042;
-            const yInner = -R * 0.38;
-            const yOuter = -R * 0.65;
+            const wInner = R * wIn;
+            const wOuter = R * wOut;
+            const yInner = -R * rIn;
+            const yOuter = -R * rOut;
 
             ctx.beginPath();
             ctx.moveTo(-wInner, yInner);
@@ -3561,7 +3580,6 @@
             ctx.lineWidth = 1.2;
             ctx.stroke();
 
-            // Magnetic coil winding ribs (3 cross lines)
             for (let rib = 1; rib <= 3; rib++) {
                 const ry = yInner + (yOuter - yInner) * (rib / 4);
                 const rw = wInner + (wOuter - wInner) * (rib / 4);
@@ -3573,16 +3591,14 @@
                 ctx.stroke();
             }
 
-            // High-voltage node cap at outer end
             ctx.beginPath();
             ctx.arc(0, yOuter - R * 0.013, R * 0.014, 0, Math.PI * 2);
             ctx.fillStyle = c.accent;
             ctx.shadowBlur = 8;
             ctx.fill();
-
             ctx.restore();
+            });
 
-            // Hour Numeral inside outer track (at R * 0.80) with ample buffer
             const numR = R * 0.80;
             const nx = cx + cosA * numR;
             const ny = cy + sinA * numR;
@@ -3595,7 +3611,6 @@
             ctx.fillText(hNum < 10 ? `0${hNum}` : `${hNum}`, nx, ny);
         }
 
-        // 7. Central Core Tokamak Chamber
         const coreR = R * 0.28;
         ctx.beginPath();
         ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
@@ -3606,18 +3621,16 @@
         ctx.shadowBlur = 10;
         ctx.stroke();
 
-        // High-tech concentric containment rings inside chamber (uncluttered center)
+        ctx.shadowBlur = 0;
         ctx.beginPath();
         ctx.arc(cx, cy, coreR * 0.70, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${c.rgb},.32)`;
+        ctx.strokeStyle = `rgba(${c.rgb},.16)`;
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 4]);
         ctx.stroke();
-        ctx.setLineDash([]);
 
         ctx.beginPath();
         ctx.arc(cx, cy, coreR * 0.40, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${c.rgb},.22)`;
+        ctx.strokeStyle = `rgba(${c.rgb},.10)`;
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -4335,19 +4348,17 @@
         if (design === 8) {
             const plasmaRot = ((Date.now() / 4200) % (Math.PI * 2));
             ctx.save();
-            ctx.strokeStyle = `rgba(${c.rgb},.35)`;
-            ctx.lineWidth = 1.4;
+            ctx.strokeStyle = `rgba(${c.rgb},.75)`;
+            ctx.lineWidth = 1.6;
             ctx.shadowColor = c.accent;
-            ctx.shadowBlur = 8;
-            // Inner plasma vortex arcs
+            ctx.shadowBlur = 6;
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.23, plasmaRot, plasmaRot + Math.PI * 0.6);
             ctx.stroke();
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.23, plasmaRot + Math.PI, plasmaRot + Math.PI * 1.6);
             ctx.stroke();
-            // Core breathing energy glow
-            const pulse = 0.10 + 0.08 * (1 + Math.sin(Date.now() / 500));
+            const pulse = 0.03 + 0.03 * (1 + Math.sin(Date.now() / 500));
             ctx.fillStyle = `rgba(${c.rgb},${pulse})`;
             ctx.beginPath();
             ctx.arc(cx, cy, R * 0.14, 0, Math.PI * 2);
