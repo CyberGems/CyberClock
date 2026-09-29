@@ -587,10 +587,11 @@
             return `
                 <article class="alarm-card${enabled ? "" : " is-off"}" data-alarm-id="${alarmEscape(id)}">
                     <div class="alarm-card-top">
-                        <div>
+                        <div class="alarm-card-copy">
                             <div class="alarm-card-time">${alarmEscape(alarmTimeString(alarm.hour, alarm.minute))}</div>
                             <div class="alarm-card-label">${alarmEscape(label)}</div>
                             <div class="alarm-card-repeat">${alarmEscape(alarmRepeatLabel(alarm))}</div>
+                            <div class="alarm-card-message">${alarmEscape(message)}</div>
                         </div>
                         <div class="alarm-card-actions">
                             <button class="alarm-icon-btn" type="button" data-action="edit" data-tooltip="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}" aria-label="${alarmEscape(alarmText("alarms.card.edit", "Edit alarm"))}">
@@ -601,12 +602,9 @@
                             </button>
                         </div>
                     </div>
-                    <div class="alarm-card-message">${alarmEscape(message)}</div>
                     <div class="alarm-card-bottom">
-                        <div>
-                            <span class="alarm-card-status${enabled ? " on" : ""}">${alarmEscape(status)}</span>
-                        </div>
-                        <button class="alarm-toggle${enabled ? " on" : ""}" type="button" data-action="toggle" aria-pressed="${enabled}" data-tooltip="${alarmEscape(status)}" aria-label="${alarmEscape(status)}"></button>
+                        <span class="alarm-card-status${enabled ? " on" : ""}">${alarmEscape(status)}</span>
+                        <button class="alarm-toggle${enabled ? " on" : ""}" type="button" data-action="toggle" aria-pressed="${enabled}" aria-label="${alarmEscape(status)}"></button>
                     </div>
                 </article>
             `;
@@ -762,7 +760,8 @@
         }
         // Current month cells
         for (let d = 1; d <= daysInMonth; d++) {
-            const cell = document.createElement("div");
+            const cell = document.createElement("button");
+            cell.type = "button";
             const iso = `${adp.viewYear}-${String(adp.viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
             const dow = (new Date(adp.viewYear, adp.viewMonth, d).getDay() + 6) % 7; // 0=Mon
             const classes = ["adp-cell"];
@@ -777,7 +776,10 @@
             }
             cell.className = classes.join(" ");
             cell.textContent = String(d);
-            cell.addEventListener("click", () => adpSelectDate(iso));
+            cell.addEventListener("click", (e) => {
+                e.stopPropagation();
+                adpSelectDate(iso);
+            });
             grid.appendChild(cell);
         }
         // Next-month fill cells to complete the grid row
@@ -789,6 +791,7 @@
             cell.textContent = String(d);
             grid.appendChild(cell);
         }
+        if (adp.open) adpPlace();
     }
 
     function adpSelectDate(iso) {
@@ -807,7 +810,6 @@
         const trigger = document.getElementById("alarm-datepicker-trigger");
         if (!popover || !trigger) return;
         adp.open = true;
-        popover.hidden = false;
         trigger.setAttribute("aria-expanded", "true");
         adpRender();
     }
@@ -815,10 +817,63 @@
     function adpClose() {
         const popover = document.getElementById("alarm-datepicker-popover");
         const trigger = document.getElementById("alarm-datepicker-trigger");
+        const wrap = document.getElementById("alarm-datepicker-wrap");
         if (!popover || !trigger) return;
         adp.open = false;
         popover.hidden = true;
+        popover.classList.remove("is-floating");
+        popover.style.top = "";
+        popover.style.left = "";
+        popover.style.visibility = "";
         trigger.setAttribute("aria-expanded", "false");
+        if (wrap && popover.parentElement !== wrap) wrap.appendChild(popover);
+    }
+
+    // The editor body clips overflow, so the open calendar is parked on the
+    // overlay and positioned against the trigger. It flips upward when the
+    // space below the trigger is shorter than the calendar.
+    function adpPlace() {
+        const popover = document.getElementById("alarm-datepicker-popover");
+        const trigger = document.getElementById("alarm-datepicker-trigger");
+        const overlay = document.getElementById("alarm-editor-overlay");
+        if (!popover || !trigger || !overlay || !adp.open) return;
+
+        if (popover.parentElement !== overlay) overlay.appendChild(popover);
+        popover.classList.add("is-floating");
+        if (popover.hidden) {
+            popover.style.visibility = "hidden";
+            popover.hidden = false;
+        }
+
+        const popW = popover.offsetWidth;
+        const popH = popover.offsetHeight;
+        const rect = trigger.getBoundingClientRect();
+        const bounds = overlay.getBoundingClientRect();
+
+        const probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none;";
+        overlay.appendChild(probe);
+        const origin = probe.getBoundingClientRect();
+        probe.remove();
+
+        const margin = 8;
+        const gap = 6;
+        const spaceBelow = bounds.bottom - rect.bottom - gap;
+        const spaceAbove = rect.top - bounds.top - gap;
+        const openUp = popH > spaceBelow && spaceAbove > spaceBelow;
+
+        let viewTop = openUp ? rect.top - gap - popH : rect.bottom + gap;
+        let viewLeft = rect.left;
+        const minLeft = bounds.left + margin;
+        const maxLeft = Math.max(minLeft, bounds.right - margin - popW);
+        const minTop = bounds.top + margin;
+        const maxTop = Math.max(minTop, bounds.bottom - margin - popH);
+        viewLeft = Math.min(Math.max(viewLeft, minLeft), maxLeft);
+        viewTop = Math.min(Math.max(viewTop, minTop), maxTop);
+
+        popover.style.top = `${Math.round(viewTop - origin.top)}px`;
+        popover.style.left = `${Math.round(viewLeft - origin.left)}px`;
+        popover.style.visibility = "";
     }
 
     function adpSetDate(iso) {
@@ -855,11 +910,19 @@
         e.stopPropagation();
         adpSelectDate(adpIsoNow());
     });
-    // Close on outside click
+    const adpReposition = () => { if (adp.open) adpPlace(); };
+    document.getElementById("alarm-editor-body")?.addEventListener("scroll", adpReposition, { passive: true });
+    document.getElementById("alarm-editor-overlay")?.addEventListener("scroll", adpReposition, { passive: true });
+    window.addEventListener("resize", adpReposition);
+    // Close on outside click. The popover is moved onto the overlay while open,
+    // so it is not a descendant of the trigger wrap.
     document.addEventListener("click", (e) => {
         if (!adp.open) return;
         const wrap = document.getElementById("alarm-datepicker-wrap");
-        if (wrap && !wrap.contains(e.target)) adpClose();
+        const popover = document.getElementById("alarm-datepicker-popover");
+        if (wrap && wrap.contains(e.target)) return;
+        if (popover && popover.contains(e.target)) return;
+        adpClose();
     }, true);
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -937,6 +1000,7 @@
     function closeAlarmEditor() {
         const overlay = document.getElementById("alarm-editor-overlay");
         if (!overlay) return;
+        adpClose();
         overlay.classList.remove("open");
         overlay.hidden = true;
         alarmEditorId = null;
@@ -1103,9 +1167,12 @@
             hideAlarmNotice();
         });
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && !document.getElementById("alarm-editor-overlay")?.hidden) {
-                closeAlarmEditor();
+            if (event.key !== "Escape" || document.getElementById("alarm-editor-overlay")?.hidden) return;
+            if (adp.open) {
+                adpClose();
+                return;
             }
+            closeAlarmEditor();
         });
     }
 
@@ -8343,7 +8410,9 @@
     // ══════════════════════════════════════════════════════════════
     const fullCtxMenu = document.getElementById("full-ctx-menu");
     const textCtxMenu = document.getElementById("text-ctx-menu");
+    const alarmCtxMenu = document.getElementById("alarm-ctx-menu");
     let activeTextTarget = null;
+    let alarmCtxId = null;
 
     function positionCtxMenu(menuEl, x, y) {
         menuEl.style.display = "block";
@@ -8388,13 +8457,41 @@
     function hideAllContextMenus() {
         if (fullCtxMenu) fullCtxMenu.style.display = "none";
         if (textCtxMenu) textCtxMenu.style.display = "none";
+        if (alarmCtxMenu) alarmCtxMenu.style.display = "none";
+        alarmCtxId = null;
+    }
+
+    function showAlarmContextMenu(x, y, id) {
+        hideAllContextMenus();
+        if (!alarmCtxMenu) return;
+        const index = (cfg.customAlarms || []).findIndex((alarm, i) => alarmIdFor(alarm, i) === id);
+        const alarm = index >= 0 ? cfg.customAlarms[index] : null;
+        if (!alarm) return;
+        alarmCtxId = id;
+        const toggleLabel = alarmCtxMenu.querySelector("#alarm-ctx-toggle .label");
+        const toggleKey = alarm.enabled ? "alarms.card.disable" : "alarms.card.enable";
+        if (toggleLabel) {
+            toggleLabel.dataset.i18n = toggleKey;
+            toggleLabel.textContent = alarmText(
+                toggleKey,
+                alarm.enabled ? "Disable alarm" : "Enable alarm",
+            );
+        }
+        positionCtxMenu(alarmCtxMenu, x, y);
     }
 
     document.addEventListener("contextmenu", (e) => {
+        if (e.target.closest(".ctx-menu")) {
+            e.preventDefault();
+            return;
+        }
         const textTarget = e.target.closest("input[type='text'], input[type='number'], input[type='search'], input:not([type]), textarea");
+        const alarmCard = e.target.closest(".alarm-card");
         e.preventDefault();
         if (textTarget) {
             showTextContextMenu(e.clientX, e.clientY, textTarget);
+        } else if (alarmCard?.dataset.alarmId) {
+            showAlarmContextMenu(e.clientX, e.clientY, alarmCard.dataset.alarmId);
         } else {
             showFullContextMenu(e.clientX, e.clientY);
         }
@@ -8451,6 +8548,36 @@
     document.getElementById("ctx-btn-close").addEventListener("click", () => {
         hideAllContextMenus();
         window.cc.hideWindow("main");
+    });
+
+    function alarmFromCtx() {
+        const id = alarmCtxId;
+        const index = (cfg.customAlarms || []).findIndex((alarm, i) => alarmIdFor(alarm, i) === id);
+        const alarm = index >= 0 ? cfg.customAlarms[index] : null;
+        return alarm ? { id, alarm } : null;
+    }
+    document.getElementById("alarm-ctx-edit")?.addEventListener("click", () => {
+        const entry = alarmFromCtx();
+        hideAllContextMenus();
+        if (!entry) return;
+        openAlarmEditor({ ...entry.alarm, id: entry.id }, { isExisting: true });
+    });
+    document.getElementById("alarm-ctx-toggle")?.addEventListener("click", () => {
+        const entry = alarmFromCtx();
+        hideAllContextMenus();
+        if (!entry) return;
+        updateAlarmById(entry.id, { enabled: !entry.alarm.enabled });
+    });
+    document.getElementById("alarm-ctx-delete")?.addEventListener("click", () => {
+        const entry = alarmFromCtx();
+        hideAllContextMenus();
+        if (!entry) return;
+        openCustomConfirm({
+            title: alarmText("alarms.delete.title", "Delete alarm?"),
+            msg: alarmText("alarms.delete.message", "This alarm will be removed permanently."),
+            okText: alarmText("alarms.delete.confirm", "Delete"),
+            onOk: () => deleteAlarmById(entry.id),
+        });
     });
 
     // Wire text context menu actions

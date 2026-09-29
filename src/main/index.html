@@ -357,7 +357,7 @@
                                                 <option value="weekly" data-i18n="alarms.repeat.weekly">Selected days</option>
                                             </select>
                                         </label>
-                                        <label class="alarm-field alarm-date-field" id="alarm-edit-date-wrap">
+                                        <div class="alarm-field alarm-date-field" id="alarm-edit-date-wrap">
                                             <span data-i18n="alarms.editor.date">Date</span>
                                             <div class="alarm-datepicker-wrap" id="alarm-datepicker-wrap">
                                                 <button type="button" class="alarm-datepicker-trigger" id="alarm-datepicker-trigger" aria-haspopup="true" aria-expanded="false" data-i18n-attr="aria-label:alarms.editor.date">
@@ -379,7 +379,7 @@
                                                 </div>
                                             </div>
                                             <input id="alarm-edit-date" type="hidden" value="" />
-                                        </label>
+                                        </div>
                                         <div class="alarm-days-field" id="alarm-edit-days-wrap">
                                             <span data-i18n="alarms.editor.days">Days</span>
                                             <div class="alarm-days" id="alarm-edit-days">
@@ -2393,6 +2393,22 @@
             <div class="ctx-item" id="ctx-btn-close">
                 <span class="ico"><span data-ico="tray"></span></span>
                 <span class="label" data-i18n="menu.minimizeToTray">Minimizar a la bandeja</span>
+            </div>
+        </div>
+        <!-- ═══ ALARM CARD CONTEXT MENU ════════════════════════════════ -->
+        <div class="ctx-menu" id="alarm-ctx-menu">
+            <div class="ctx-item" id="alarm-ctx-edit">
+                <span class="ico"><span data-ico="gear"></span></span>
+                <span class="label" data-i18n="alarms.card.edit">Edit alarm</span>
+            </div>
+            <div class="ctx-item" id="alarm-ctx-toggle">
+                <span class="ico"><span data-ico="power"></span></span>
+                <span class="label" data-i18n="alarms.card.disable">Disable alarm</span>
+            </div>
+            <div class="ctx-sep"></div>
+            <div class="ctx-item danger" id="alarm-ctx-delete">
+                <span class="ico"><span data-ico="trash"></span></span>
+                <span class="label" data-i18n="alarms.card.delete">Delete alarm</span>
             </div>
         </div>
         <!-- ═══ TEXT CONTEXT MENU (Inputs & Textareas) ═════════════════ -->

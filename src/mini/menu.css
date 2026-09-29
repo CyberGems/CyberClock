@@ -750,8 +750,8 @@
     .toggle {
         position: relative;
         display: inline-block;
-        width: 36px;
-        height: 20px;
+        width: 44px;
+        height: 24px;
         flex-shrink: 0;
         cursor: pointer;
         vertical-align: middle;
@@ -768,31 +768,43 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: #5e6672;
         border-radius: 20px;
         transition: background-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .toggle-track:hover {
-        background-color: rgba(255, 255, 255, 0.25);
-    }
     .toggle-thumb {
         position: absolute;
-        height: 16px;
-        width: 16px;
-        left: 2px;
+        height: 18px;
+        width: 18px;
+        left: 3px;
         top: 50%;
         transform: translateY(-50%);
-        background-color: #ffffff;
+        background-color: #12161e;
         border-radius: 50%;
-        transition: left 0.2s ease;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        transition: left 0.2s ease, background-color 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+    .toggle-thumb::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        width: 12px;
+        height: 12px;
+        margin: auto;
+        background: var(--cc-tog-check) center / 12px 12px no-repeat;
+        opacity: 0;
+        transition: opacity 0.15s ease;
     }
     .toggle.on .toggle-track {
-        background-color: var(--accent-a, #00d4ff);
-        box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+        background-color: var(--accent-a);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
     }
     .toggle.on .toggle-thumb {
-        left: 18px;
+        left: 23px;
+        background-color: #ffffff;
+    }
+    .toggle.on .toggle-thumb::after {
+        opacity: 1;
     }
 
     .relax-skin-pills {
