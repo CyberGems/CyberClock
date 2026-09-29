@@ -29,8 +29,8 @@
 
     function extractLanguageSection(markdown) {
         if (!markdown) return "";
-        const lang = (window.ccI18n && typeof window.ccI18n.getLanguage === "function")
-            ? window.ccI18n.getLanguage()
+        const lang = (window.ccI18n && typeof window.ccI18n.getEffectiveLang === "function")
+            ? window.ccI18n.getEffectiveLang()
             : "en";
 
         // 1. Check for explicit comment tags: <!-- lang:es --> ... <!-- /lang:es -->
