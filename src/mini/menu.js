@@ -574,8 +574,6 @@
                     document.querySelectorAll('.ctx-item[data-action="new_relax"] .label').forEach((el) => {
                         el.textContent = window.ccI18n.t("float.newRelax");
                     });
-                    const relaxLbl = document.querySelector('.ctx-item[data-action="relax"] .label');
-                    if (relaxLbl) relaxLbl.textContent = window.ccI18n.t("menu.relax");
                     document.querySelectorAll('.ctx-item[data-action="settings"] .label').forEach(el => {
                         el.textContent = window.ccI18n.t("menu.settings");
                     });
