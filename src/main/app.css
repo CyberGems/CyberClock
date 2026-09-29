@@ -1816,6 +1816,11 @@
         border-color: rgba(var(--rgb-accent), 0.45);
         color: var(--accent-a);
     }
+    .note-btn.danger .btn-kbd {
+        background: rgba(255, 68, 68, 0.16);
+        border-color: rgba(255, 102, 136, 0.45);
+        color: #ff8aa2;
+    }
 
     /* ════════════════════════════════════════════════════
    TIMER VIEW
@@ -4644,6 +4649,7 @@
         font-weight: 700;
     }
     .alarm-notice.is-takeover .alarm-notice-btn {
+        min-width: 188px;
         color: var(--text-hi);
         background: transparent;
         border: 1px solid var(--border-bright);

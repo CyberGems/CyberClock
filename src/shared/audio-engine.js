@@ -8,6 +8,89 @@
  * outgoing and incoming voices instead of hard-cutting.
  */
 
+// Extra alarm tones. Each note: at (s), f (Hz), dur, type, gain, optional to/lp/attack.
+const ALARM_VOICES = {
+  'alarm-pulse': [
+    { at: 0, f: 880, dur: 0.11, type: 'square', gain: 0.16, lp: 2800 },
+    { at: 0.18, f: 880, dur: 0.11, type: 'square', gain: 0.16, lp: 2800 },
+    { at: 0.36, f: 880, dur: 0.11, type: 'square', gain: 0.16, lp: 2800 },
+    { at: 0.62, f: 1175, dur: 0.26, type: 'square', gain: 0.14, lp: 3200 },
+  ],
+  'alarm-beacon': [
+    { at: 0, f: 740, dur: 0.2, type: 'triangle', gain: 0.42 },
+    { at: 0.26, f: 494, dur: 0.2, type: 'triangle', gain: 0.4 },
+    { at: 0.56, f: 740, dur: 0.2, type: 'triangle', gain: 0.42 },
+    { at: 0.82, f: 494, dur: 0.34, type: 'triangle', gain: 0.38 },
+  ],
+  'alarm-glass': [
+    { at: 0, f: 1568, dur: 0.7, type: 'sine', gain: 0.26 },
+    { at: 0.06, f: 2093, dur: 0.5, type: 'sine', gain: 0.14 },
+    { at: 0.4, f: 1319, dur: 0.75, type: 'sine', gain: 0.2 },
+  ],
+  'alarm-marimba': [
+    { at: 0, f: 523, dur: 0.26, type: 'sine', gain: 0.46, attack: 0.006 },
+    { at: 0.16, f: 659, dur: 0.26, type: 'sine', gain: 0.4, attack: 0.006 },
+    { at: 0.32, f: 784, dur: 0.26, type: 'sine', gain: 0.4, attack: 0.006 },
+    { at: 0.48, f: 1047, dur: 0.42, type: 'sine', gain: 0.36, attack: 0.006 },
+  ],
+  'alarm-chapel': [
+    { at: 0, f: 392, dur: 1.05, type: 'sine', gain: 0.34 },
+    { at: 0.02, f: 494, dur: 0.95, type: 'sine', gain: 0.16 },
+    { at: 0.5, f: 330, dur: 0.95, type: 'sine', gain: 0.28 },
+  ],
+  'alarm-rise': [
+    { at: 0, f: 220, to: 880, dur: 0.85, type: 'sawtooth', gain: 0.1, lp: 1600 },
+    { at: 0.12, f: 330, to: 1320, dur: 0.75, type: 'triangle', gain: 0.18 },
+  ],
+  'alarm-radar': [
+    { at: 0, f: 1047, dur: 0.06, type: 'sine', gain: 0.46 },
+    { at: 0.16, f: 1047, dur: 0.06, type: 'sine', gain: 0.32 },
+    { at: 0.32, f: 1047, dur: 0.06, type: 'sine', gain: 0.2 },
+    { at: 0.68, f: 784, dur: 0.07, type: 'sine', gain: 0.4 },
+    { at: 0.84, f: 784, dur: 0.07, type: 'sine', gain: 0.26 },
+  ],
+  'alarm-spark': [
+    { at: 0, f: 1760, dur: 0.08, type: 'sine', gain: 0.22 },
+    { at: 0.05, f: 2349, dur: 0.1, type: 'sine', gain: 0.16 },
+    { at: 0.18, f: 1568, dur: 0.12, type: 'sine', gain: 0.2 },
+    { at: 0.32, f: 2637, dur: 0.16, type: 'sine', gain: 0.14 },
+  ],
+  'alarm-horn': [
+    { at: 0, f: 196, dur: 0.55, type: 'sawtooth', gain: 0.12, lp: 820 },
+    { at: 0, f: 247, dur: 0.55, type: 'sawtooth', gain: 0.08, lp: 820 },
+    { at: 0.62, f: 262, dur: 0.4, type: 'sawtooth', gain: 0.11, lp: 980 },
+  ],
+  'alarm-temple': [
+    { at: 0, f: 220, dur: 1.2, type: 'sine', gain: 0.38 },
+    { at: 0.32, f: 330, dur: 0.95, type: 'sine', gain: 0.2 },
+    { at: 0.64, f: 440, dur: 0.7, type: 'sine', gain: 0.14 },
+  ],
+  'alarm-cascade': [
+    { at: 0, f: 988, dur: 0.2, type: 'triangle', gain: 0.34 },
+    { at: 0.14, f: 880, dur: 0.2, type: 'triangle', gain: 0.3 },
+    { at: 0.28, f: 784, dur: 0.2, type: 'triangle', gain: 0.28 },
+    { at: 0.42, f: 659, dur: 0.2, type: 'triangle', gain: 0.26 },
+    { at: 0.56, f: 523, dur: 0.38, type: 'triangle', gain: 0.3 },
+  ],
+  'alarm-echo': [
+    { at: 0, f: 659, dur: 0.42, type: 'sine', gain: 0.38 },
+    { at: 0.22, f: 988, dur: 0.36, type: 'sine', gain: 0.14 },
+    { at: 0.28, f: 659, dur: 0.48, type: 'sine', gain: 0.2 },
+    { at: 0.56, f: 659, dur: 0.5, type: 'sine', gain: 0.09 },
+  ],
+  'alarm-dawn': [
+    { at: 0, f: 262, dur: 1.25, type: 'sine', gain: 0.2 },
+    { at: 0.1, f: 330, dur: 1.15, type: 'sine', gain: 0.16 },
+    { at: 0.22, f: 392, dur: 1.05, type: 'sine', gain: 0.14 },
+    { at: 0.36, f: 523, dur: 0.9, type: 'triangle', gain: 0.1 },
+  ],
+  'alarm-signal': [
+    { at: 0, f: 587, dur: 0.15, type: 'square', gain: 0.11, lp: 2200 },
+    { at: 0.2, f: 784, dur: 0.15, type: 'square', gain: 0.11, lp: 2200 },
+    { at: 0.4, f: 988, dur: 0.32, type: 'square', gain: 0.13, lp: 2400 },
+  ],
+};
+
 class AudioEngine {
   constructor() {
     this._ctx        = null;
@@ -609,6 +692,38 @@ class AudioEngine {
   }
 
   // ── Alarm Chimes (built-in) ───────────────────────────────
+  // Fourteen extra alarm voices, played as short oscillator recipes.
+  // Hourly chimes stay on the original six ids.
+  _playVoice(vol, notes) {
+    const t0 = this._ctx.currentTime;
+    notes.forEach((n) => {
+      const t = t0 + (n.at || 0);
+      const dur = Math.max(0.05, n.dur || 0.4);
+      const o = this._ctx.createOscillator();
+      const g = this._ctx.createGain();
+      o.type = n.type || 'sine';
+      o.frequency.setValueAtTime(Math.max(1, n.f), t);
+      if (n.to) o.frequency.exponentialRampToValueAtTime(Math.max(1, n.to), t + dur);
+      let out = o;
+      if (n.lp) {
+        const filter = this._ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(n.lp, t);
+        o.connect(filter);
+        out = filter;
+      }
+      const peak = Math.max(0.0002, vol * (n.gain ?? 0.3));
+      const attack = Math.min(n.attack || 0.012, dur * 0.4);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      out.connect(g);
+      g.connect(this._ctx.destination);
+      o.start(t);
+      o.stop(t + dur + 0.06);
+    });
+  }
+
   chime(id, vol = 0.7) {
     // Chimes connect straight to the destination (not via _master), so the
     // master mute gates them here. The Rust scheduler also never emits
@@ -617,6 +732,11 @@ class AudioEngine {
     if (this.muted) return;
     this._ensureCtx();
     this.resume();
+    const voice = ALARM_VOICES[id];
+    if (voice) {
+      this._playVoice(vol, voice);
+      return;
+    }
     switch (id) {
       case 'chime-crystal': this._chimeCrystal(vol);  break;
       case 'chime-digital': this._chimeDigital(vol);  break;

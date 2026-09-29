@@ -343,6 +343,9 @@
         onAlarmChime: (cb) => {
             return subscribe("alarm:chime", cb);
         },
+        onAlarmSnoozed: (cb) => {
+            return subscribe("alarm:snoozed", cb);
+        },
         onVoiceAnnounceTime: (cb) => {
             return subscribe("voice:announce-time", cb);
         },

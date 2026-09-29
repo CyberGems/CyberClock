@@ -351,7 +351,8 @@
                 const snoozeBtn = document.createElement("button");
                 snoozeBtn.type = "button";
                 snoozeBtn.className = "mini-tip-alarm-btn";
-                snoozeBtn.textContent = t("alarms.notice.snooze");
+                const snoozeMinutes = Number(activeAlarmNotice.snoozeMinutes) || 10;
+                snoozeBtn.textContent = t("alarms.notice.snoozeFor", { n: snoozeMinutes });
                 snoozeBtn.addEventListener("click", async (event) => {
                     event.stopPropagation();
                     if (window.cc && window.cc.snoozeAlarm) {

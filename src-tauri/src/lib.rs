@@ -386,8 +386,16 @@ fn snooze_alarm(app: AppHandle, alarm_id: String, minutes: u32) -> Result<(), St
         }
     })?;
     let state = app.state::<AlarmState>();
-    lock_or_recover(&state.snoozed_alarms).insert(id, until);
+    lock_or_recover(&state.snoozed_alarms).insert(id.clone(), until);
     let _ = app.emit("settings:updated", load_settings(&app));
+    let _ = app.emit(
+        "alarm:snoozed",
+        serde_json::json!({
+            "alarmId": id,
+            "until": until,
+            "minutes": duration,
+        }),
+    );
     Ok(())
 }
 

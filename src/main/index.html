@@ -405,6 +405,20 @@
                                                     <option value="chime-zen" data-i18n="settings.alarms.sound.zen">Zen Gong</option>
                                                     <option value="chime-cyber" data-i18n="settings.alarms.sound.cyber">Aurora</option>
                                                     <option value="chime-music" data-i18n="settings.alarms.sound.music">Music Box</option>
+                                                    <option value="alarm-pulse" data-i18n="settings.alarms.sound.pulse">Pulse</option>
+                                                    <option value="alarm-beacon" data-i18n="settings.alarms.sound.beacon">Beacon</option>
+                                                    <option value="alarm-glass" data-i18n="settings.alarms.sound.glass">Glass</option>
+                                                    <option value="alarm-marimba" data-i18n="settings.alarms.sound.marimba">Marimba</option>
+                                                    <option value="alarm-chapel" data-i18n="settings.alarms.sound.chapel">Chapel</option>
+                                                    <option value="alarm-rise" data-i18n="settings.alarms.sound.rise">Rise</option>
+                                                    <option value="alarm-radar" data-i18n="settings.alarms.sound.radar">Radar</option>
+                                                    <option value="alarm-spark" data-i18n="settings.alarms.sound.spark">Spark</option>
+                                                    <option value="alarm-horn" data-i18n="settings.alarms.sound.horn">Soft Horn</option>
+                                                    <option value="alarm-temple" data-i18n="settings.alarms.sound.temple">Temple</option>
+                                                    <option value="alarm-cascade" data-i18n="settings.alarms.sound.cascade">Cascade</option>
+                                                    <option value="alarm-echo" data-i18n="settings.alarms.sound.echo">Echo</option>
+                                                    <option value="alarm-dawn" data-i18n="settings.alarms.sound.dawn">Dawn</option>
+                                                    <option value="alarm-signal" data-i18n="settings.alarms.sound.signal">Signal</option>
                                                 </select>
                                                 <button class="alarm-secondary-btn" id="alarm-edit-test" type="button">
                                                     <span data-ico="play"></span> <span data-i18n="alarms.editor.test">Test</span>
@@ -481,7 +495,10 @@
                                         <span data-i18n="common.cancel">Cancel</span>
                                         <kbd class="btn-kbd">Esc</kbd>
                                     </button>
-                                    <button class="note-btn danger" id="alarm-confirm-ok" type="button" data-i18n="alarms.delete.confirm">Delete</button>
+                                    <button class="note-btn danger" id="alarm-confirm-ok" type="button">
+                                        <span data-i18n="alarms.delete.confirm">Delete</span>
+                                        <kbd class="btn-kbd">Enter</kbd>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -2531,7 +2548,7 @@
                     <span id="alarm-notice-message"></span>
                 </div>
                 <div class="alarm-stage-actions">
-                    <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span data-i18n="alarms.notice.snooze">Snooze</span></button>
+                    <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span id="alarm-notice-snooze-label">Snooze 10 min</span></button>
                     <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss">
                         <span class="alarm-notice-dismiss-x" data-ico="x"></span>
                         <span class="alarm-notice-dismiss-label" data-i18n="alarms.notice.dismissAction">Dismiss</span>

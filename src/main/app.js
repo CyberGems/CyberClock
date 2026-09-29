@@ -543,8 +543,17 @@
         return currentMask || 0;
     }
 
+    const snoozedAlarmUntil = new Map();
+
+    function alarmSnoozeLabel(minutes) {
+        const n = Math.max(1, Number(minutes) || 10);
+        return alarmText("alarms.notice.snoozeFor", "Snooze {n} min", { n });
+    }
+
     function alarmNextOccurrence(alarm, now = new Date()) {
         if (!alarm || !alarm.enabled) return null;
+        const until = alarm.id && snoozedAlarmUntil.get(alarm.id);
+        if (until && until * 1000 > now.getTime()) return new Date(until * 1000);
         const mode = alarm.repeatMode || (alarm.daysMask ? "weekly" : "once");
         if (mode === "once") {
             const date = alarm.date ? new Date(`${alarm.date}T00:00:00`) : new Date(now);
@@ -1198,7 +1207,11 @@
             message.textContent = text || (takeover ? "" : alarmText("alarms.notice.now", "It's time"));
             message.hidden = takeover && !text;
         }
-        if (snooze) snooze.hidden = !takeover;
+        if (snooze) {
+            snooze.hidden = !takeover;
+            const label = snooze.querySelector("span");
+            if (label) label.textContent = alarmSnoozeLabel(payload.snoozeMinutes);
+        }
         const dismiss = document.getElementById("alarm-notice-dismiss");
         if (dismiss) {
             if (takeover) dismiss.removeAttribute("data-tooltip");
@@ -1245,7 +1258,10 @@
         const overlay = document.getElementById("alarm-confirm-overlay");
         if (!overlay) return;
         overlay.hidden = false;
-        requestAnimationFrame(() => overlay.classList.add("open"));
+        requestAnimationFrame(() => {
+            overlay.classList.add("open");
+            document.getElementById("alarm-confirm-ok")?.focus();
+        });
     }
 
     function closeAlarmConfirm() {
@@ -1349,14 +1365,24 @@
             if (event.target.id === "alarm-confirm-overlay") closeAlarmConfirm();
         });
         document.addEventListener("keydown", (event) => {
+            const confirm = document.getElementById("alarm-confirm-overlay");
+            const confirmOpen = confirm && !confirm.hidden;
+            if (event.key === "Enter" && confirmOpen) {
+                event.preventDefault();
+                event.stopPropagation();
+                const canceling = event.target?.id === "alarm-confirm-cancel"
+                    || event.target?.id === "alarm-confirm-close";
+                if (canceling) closeAlarmConfirm();
+                else document.getElementById("alarm-confirm-ok")?.click();
+                return;
+            }
             if (event.key !== "Escape") return;
             const notice = document.getElementById("alarm-notice");
             if (alarmNoticeAlarm?.alarmId && notice && !notice.hidden) {
                 hideAlarmNotice();
                 return;
             }
-            const confirm = document.getElementById("alarm-confirm-overlay");
-            if (confirm && !confirm.hidden) {
+            if (confirmOpen) {
                 closeAlarmConfirm();
                 return;
             }
@@ -9176,6 +9202,14 @@
             navigate(action);
         }
     });
+
+    if (window.cc.onAlarmSnoozed) {
+        window.cc.onAlarmSnoozed((p) => {
+            if (!p || !p.alarmId || !p.until) return;
+            snoozedAlarmUntil.set(p.alarmId, Number(p.until));
+            renderAlarmsView();
+        });
+    }
 
     window.cc.onAlarmChime((p) => {
         if (p.type === "custom") {
