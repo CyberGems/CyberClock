@@ -333,6 +333,14 @@ pub struct AppSettings {
     pub mini_font_bold: Option<bool>,
     #[serde(default)]
     pub mini_font_italic: Option<bool>,
+    // Date face is independent of the time face. None / "default" keeps
+    // the skin's curated date font; bold and italic follow the same rule.
+    #[serde(default)]
+    pub mini_date_font: Option<String>,
+    #[serde(default)]
+    pub mini_date_font_bold: Option<bool>,
+    #[serde(default)]
+    pub mini_date_font_italic: Option<bool>,
     // Mouse events pass through the mini clock (toggle lives outside the
     // mini window — tray menu and Settings — because the window stops
     // responding to clicks while this is on).
@@ -485,6 +493,9 @@ impl Default for AppSettings {
             mini_custom_font: None,
             mini_font_bold: None,
             mini_font_italic: None,
+            mini_date_font: None,
+            mini_date_font_bold: None,
+            mini_date_font_italic: None,
             mini_click_through: false,
             mini_no_animations: false,
             mini_edge_limits: true,

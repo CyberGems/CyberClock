@@ -589,19 +589,20 @@
                 selectSkin(activeDesign);
                 buildGalleryGrid(activeDesign);
 
-                // Typography Studio
+                // Typography Studio: time and date are independent.
+                // Bold/italic light up only when the user has forced them.
                 const fontSelect = document.getElementById("font-family-select");
-                if (fontSelect) {
-                    fontSelect.value = cfg.miniCustomFont || "default";
-                }
+                if (fontSelect) fontSelect.value = cfg.miniCustomFont || "default";
+                const dateSelect = document.getElementById("font-date-select");
+                if (dateSelect) dateSelect.value = cfg.miniDateFont || "default";
                 const btnBold = document.getElementById("btn-font-bold");
-                if (btnBold) {
-                    btnBold.classList.toggle("active", Boolean(cfg.miniFontBold));
-                }
+                if (btnBold) btnBold.classList.toggle("active", cfg.miniFontBold === true);
                 const btnItalic = document.getElementById("btn-font-italic");
-                if (btnItalic) {
-                    btnItalic.classList.toggle("active", Boolean(cfg.miniFontItalic));
-                }
+                if (btnItalic) btnItalic.classList.toggle("active", cfg.miniFontItalic === true);
+                const btnDateBold = document.getElementById("btn-date-bold");
+                if (btnDateBold) btnDateBold.classList.toggle("active", cfg.miniDateFontBold === true);
+                const btnDateItalic = document.getElementById("btn-date-italic");
+                if (btnDateItalic) btnDateItalic.classList.toggle("active", cfg.miniDateFontItalic === true);
 
                 // Real Sun Cycle (design 7 only)
                 const toggleSolar = document.getElementById("toggle-solar");
@@ -750,16 +751,50 @@
     }
 
     const btnFontResetEl = document.getElementById("btn-font-reset");
+    const dateSelectEl = document.getElementById("font-date-select");
+    const btnDateBoldEl = document.getElementById("btn-date-bold");
+    const btnDateItalicEl = document.getElementById("btn-date-italic");
+    if (dateSelectEl) {
+        dateSelectEl.addEventListener("change", (e) => {
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniDateFont: e.target.value });
+            }
+        });
+    }
+    if (btnDateBoldEl) {
+        btnDateBoldEl.addEventListener("click", () => {
+            const next = !btnDateBoldEl.classList.contains("active");
+            btnDateBoldEl.classList.toggle("active", next);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniDateFontBold: next });
+            }
+        });
+    }
+    if (btnDateItalicEl) {
+        btnDateItalicEl.addEventListener("click", () => {
+            const next = !btnDateItalicEl.classList.contains("active");
+            btnDateItalicEl.classList.toggle("active", next);
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniDateFontItalic: next });
+            }
+        });
+    }
     if (btnFontResetEl) {
         btnFontResetEl.addEventListener("click", () => {
             if (fontSelectEl) fontSelectEl.value = "default";
+            if (dateSelectEl) dateSelectEl.value = "default";
             if (btnFontBoldEl) btnFontBoldEl.classList.remove("active");
             if (btnFontItalicEl) btnFontItalicEl.classList.remove("active");
+            if (btnDateBoldEl) btnDateBoldEl.classList.remove("active");
+            if (btnDateItalicEl) btnDateItalicEl.classList.remove("active");
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({
                     miniCustomFont: "default",
-                    miniFontBold: false,
-                    miniFontItalic: false
+                    miniFontBold: null,
+                    miniFontItalic: null,
+                    miniDateFont: "default",
+                    miniDateFontBold: null,
+                    miniDateFontItalic: null
                 });
             }
         });

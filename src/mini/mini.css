@@ -151,13 +151,6 @@
         display: none !important;
     }
 
-    /* ── CUSTOM SKIN HEIGHT OVERRIDES ── */
-    .mini-shell[data-layout="stacked"][data-design="3"] { height: 46px; }
-    .mini-shell[data-layout="stacked"][data-design="4"] { height: 52px; }
-    .mini-shell[data-layout="inline"][data-design="4"]  { height: 36px; }
-    .mini-shell[data-layout="stacked"][data-design="5"] { height: 50px; }
-    .mini-shell[data-layout="inline"][data-design="10"] { height: 32px; }
-
     /* ── TYPOGRAPHY CUSTOMIZATION HOOKS ── */
     .mini-shell #mini-time {
         font-family: var(--mini-custom-font, inherit);
@@ -406,7 +399,6 @@
         background: #0a0a0f;
     }
     .mini-shell[data-design="3"] {
-        height: 46px;
         border: 1px solid #1a1a2e;
         border-radius: 6px;
         padding: 0 12px;
@@ -421,16 +413,6 @@
         letter-spacing: 1px;
         text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
         white-space: nowrap;
-    }
-    .mini-shell[data-design="3"] #mini-time::before {
-        content: '> ';
-        color: #ff6b35;
-        text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
-    }
-    .mini-shell[data-design="3"] #mini-time::after {
-        content: '_';
-        color: #00ff88;
-        animation: blink-cursor 1s step-end infinite;
     }
     @keyframes blink-cursor {
         0%, 100% { opacity: 1; }
@@ -479,7 +461,6 @@
         backdrop-filter: blur(24px) saturate(1.6);
     }
     .mini-shell[data-design="4"] {
-        height: 52px;
         border: 1px solid color-mix(in srgb, var(--accent-a) 55%, rgba(120, 140, 175, 0.45));
         border-radius: 26px;
         padding: 0 18px;
@@ -1778,7 +1759,7 @@
     /* ── Universal Date Collapsing by Form Factor ── */
     /* Stacked (2-row) collapse: collapses vertically */
     .mini-shell[data-layout="stacked"].collapse-date:not(.is-expanded) {
-        height: 34px;
+        height: var(--bar-h, 36px);
         gap: 8px;
         padding-top: 0;
         padding-bottom: 0;
@@ -2646,16 +2627,11 @@
     }
 
     /* ── Zoom (50/100/200/400%) ─────────────────────────────
-       The shell renders at its natural skin size and the zoom
-       multiplies it via transform. The window itself is resized
-       to (base × zoom) by mini.js, and the shell counter-shrinks
-       its own box (100%/zoom) so it exactly fills that window
-       once scaled. Borders, glows and fonts scale together like
-       native zoom; #mini-tip is outside the shell and stays at
+       The shell keeps its content size. Zoom only scales that
+       box from the top-left, and mini.js sizes the window to
+       content × zoom. #mini-tip stays outside the shell at
        scale 1 so notes remain readable at every zoom. */
     .mini-shell {
-        width: calc(100% / var(--mini-zoom, 1));
-        height: calc(100% / var(--mini-zoom, 1));
         transform: scale(var(--mini-zoom, 1));
         transform-origin: top left;
     }
@@ -2778,4 +2754,116 @@
        a slight dim tells the user why it no longer responds. */
     body.click-through .mini-shell {
         opacity: 0.88;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FRAME + TYPE CONTRACT
+       Skins paint (color, chrome, glow, curated faces).
+       This block owns the box and the type size, and it is
+       last so a skin cannot pin a height or a font-size.
+       Width is the content's width: a wider face grows the bar.
+       ═══════════════════════════════════════════════════════ */
+    .mini-shell[data-layout="inline"] {
+        --bar-h: 36px;
+        --time-size: 15px;
+        --date-size: 11px;
+    }
+    .mini-shell[data-layout="stacked"] {
+        --bar-h: 52px;
+        --time-size: 22px;
+        --date-size: 11px;
+    }
+    .mini-shell[data-layout="stacked"].collapse-date:not(.is-expanded) {
+        --bar-h: 36px;
+        --time-size: 16px;
+    }
+    .mini-shell[data-layout="inline"][data-design],
+    .mini-shell[data-layout="stacked"][data-design] {
+        width: max-content;
+        height: var(--bar-h);
+        min-height: var(--bar-h);
+        max-height: var(--bar-h);
+    }
+    .mini-shell[data-layout="inline"] .time-block,
+    .mini-shell[data-layout="stacked"] .time-block {
+        flex: 0 0 auto;
+        min-width: max-content;
+        overflow: visible;
+    }
+    .mini-shell[data-layout] > .status-dot,
+    .mini-shell[data-layout] > .sep,
+    .mini-shell[data-layout] > .controls,
+    .mini-shell[data-layout] > .time-block {
+        flex-shrink: 0;
+    }
+    .time-row {
+        display: inline-flex;
+        align-items: baseline;
+        flex: 0 0 auto;
+        min-width: max-content;
+        white-space: nowrap;
+    }
+    .mini-shell[data-layout][data-design] #mini-time {
+        font-family: var(--mini-time-font, var(--skin-time-font, "Share Tech Mono", monospace));
+        font-weight: var(--mini-time-weight, var(--skin-time-weight, 700));
+        font-style: var(--mini-time-style, normal);
+        font-size: var(--time-size);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .mini-shell[data-layout][data-design] #mini-date {
+        font-family: var(--mini-date-font, var(--skin-date-font, "Share Tech Mono", monospace));
+        font-weight: var(--mini-date-weight, var(--skin-date-weight, 400));
+        font-style: var(--mini-date-style, normal);
+        font-size: var(--date-size);
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    /* Curated faces. A user choice sets --mini-time-font / --mini-date-font
+       on the shell and wins over these. */
+    .mini-shell[data-design="1"]  { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 500; }
+    .mini-shell[data-design="2"]  { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="3"]  { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="4"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 500; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="5"]  { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="6"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="7"]  { --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 300; }
+    .mini-shell[data-design="8"]  { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 400; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="9"]  { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="10"] { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 300; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="11"] { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 700; }
+    .mini-shell[data-design="12"] { --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="13"] { --skin-time-font: "Share Tech Mono", monospace; --skin-time-weight: 700; --skin-date-font: "Share Tech Mono", monospace; --skin-date-weight: 400; }
+    .mini-shell[data-design="14"] { --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Orbitron", sans-serif; --skin-date-weight: 500; }
+    .mini-shell[data-design="15"] { --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+
+    /* Digital Matrix prompt and cursor sit beside the time, not inside it,
+       so a wider face cannot run the glyphs through the numbers. */
+    .skin-prompt,
+    .skin-cursor {
+        display: none;
+        flex-shrink: 0;
+        font-family: var(--mini-time-font, var(--skin-time-font, inherit));
+        font-weight: var(--mini-time-weight, var(--skin-time-weight, 700));
+        font-size: var(--time-size);
+        line-height: 1;
+    }
+    .mini-shell[data-design="3"] .skin-prompt,
+    .mini-shell[data-design="3"] .skin-cursor {
+        display: inline-block;
+    }
+    .mini-shell[data-design="3"] .skin-prompt::before {
+        content: ">";
+        color: #ff6b35;
+        margin-right: 0.35em;
+        text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+    }
+    .mini-shell[data-design="3"] .skin-cursor::before {
+        content: "_";
+        color: #00ff88;
+        margin-left: 0.12em;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        animation: blink-cursor 1s step-end infinite;
     }

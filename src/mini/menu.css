@@ -500,6 +500,27 @@
     }
 
     /* Typography Studio */
+    .typo-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .typo-line {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 3px;
+        margin-top: 8px;
+    }
+    .typo-k {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+    }
     .typo-row {
         display: flex;
         align-items: center;

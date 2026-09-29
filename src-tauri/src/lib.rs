@@ -961,7 +961,9 @@ fn move_window(window: WebviewWindow, x: i32, y: i32) {
 #[tauri::command]
 fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Option<bool>) {
     // Reject invalid values.
-    if width <= 0 || height <= 0 || width > 2000 || height > 2000 {
+    // Wide display faces (Orbitron bold, seconds, AM/PM) grow the mini
+    // bar past the old 2000px cap once zoom is applied.
+    if width <= 0 || height <= 0 || width > 4096 || height > 4096 {
         return;
     }
 

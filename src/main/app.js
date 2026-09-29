@@ -2167,9 +2167,15 @@
         const miniFont = document.getElementById('s-mini-font');
         if (miniFont) miniFont.value = s.miniCustomFont || 'default';
         const miniFontBold = document.getElementById('s-mini-font-bold');
-        if (miniFontBold) miniFontBold.checked = Boolean(s.miniFontBold);
+        if (miniFontBold) miniFontBold.checked = s.miniFontBold === true;
         const miniFontItalic = document.getElementById('s-mini-font-italic');
-        if (miniFontItalic) miniFontItalic.checked = Boolean(s.miniFontItalic);
+        if (miniFontItalic) miniFontItalic.checked = s.miniFontItalic === true;
+        const miniDateFont = document.getElementById('s-mini-date-font');
+        if (miniDateFont) miniDateFont.value = s.miniDateFont || 'default';
+        const miniDateBold = document.getElementById('s-mini-date-font-bold');
+        if (miniDateBold) miniDateBold.checked = s.miniDateFontBold === true;
+        const miniDateItalic = document.getElementById('s-mini-date-font-italic');
+        if (miniDateItalic) miniDateItalic.checked = s.miniDateFontItalic === true;
         // Mini zoom — discrete stops, slider index → factor (100% default)
         const ZOOM_STEPS = [0.5, 1, 2, 4];
         const miniZoom = document.getElementById('s-mini-zoom');
@@ -7416,6 +7422,25 @@
     if (sMiniFontItalic) {
         sMiniFontItalic.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniFontItalic: e.target.checked });
+        });
+    }
+
+    const sMiniDateFont = document.getElementById('s-mini-date-font');
+    if (sMiniDateFont) {
+        sMiniDateFont.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniDateFont: e.target.value });
+        });
+    }
+    const sMiniDateBold = document.getElementById('s-mini-date-font-bold');
+    if (sMiniDateBold) {
+        sMiniDateBold.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniDateFontBold: e.target.checked });
+        });
+    }
+    const sMiniDateItalic = document.getElementById('s-mini-date-font-italic');
+    if (sMiniDateItalic) {
+        sMiniDateItalic.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniDateFontItalic: e.target.checked });
         });
     }
 

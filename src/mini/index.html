@@ -15,12 +15,16 @@
         <link rel="stylesheet" href="mini.css" />
     </head>
     <body data-tint="ice">
-        <div class="mini-shell" id="shell" data-design="1">
+        <div class="mini-shell" id="shell" data-design="1" data-layout="stacked">
             <div class="mini-bg"></div>
             <div class="scanlines"></div>
             <div class="status-dot"></div>
             <div class="time-block">
-                <div id="mini-time">00:00:00</div>
+                <div class="time-row">
+                    <span class="skin-prompt" aria-hidden="true"></span>
+                    <div id="mini-time">00:00:00</div>
+                    <span class="skin-cursor" aria-hidden="true"></span>
+                </div>
                 <div id="mini-date">SAT · 01 JAN 2026</div>
                 <div class="mini-action-ticker" id="mini-action-ticker" aria-hidden="true">
                     <div class="ticker-badge">

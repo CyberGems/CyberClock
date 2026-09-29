@@ -105,31 +105,11 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // WINDOW SIZING — Each skin has its own dimensions, then the
-    // zoom factor (miniZoom) multiplies them. The shell renders at
-    // the natural skin size and is scaled via CSS transform (see
-    // mini.css), so these are the window dimensions, in logical px.
+    // WINDOW SIZING — The bar is as wide as its text. Zoom
+    // scales that box; the window follows content × zoom.
+    // Height stays on the layout (inline / stacked), so a
+    // face change grows the width and leaves the silhouette.
     // ═══════════════════════════════════════════════════════
-
-    // Each skin defines base dimensions (w, h) and collapsed dimensions (cw, ch)
-    // for both "stacked" (2-row compact) and "inline" (1-row slim bar) form factors.
-    const DESIGN_SIZES = {
-        1:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
-        2:  { stacked: { w: 260, h: 48, cw: 260, ch: 38 }, inline: { w: 310, h: 34, cw: 195, ch: 34 } },
-        3:  { stacked: { w: 260, h: 46, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
-        4:  { stacked: { w: 260, h: 52, cw: 260, ch: 36 }, inline: { w: 310, h: 36, cw: 190, ch: 36 } },
-        5:  { stacked: { w: 260, h: 50, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
-        6:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 185, ch: 34 } },
-        7:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
-        8:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 188, ch: 34 } },
-        9:  { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 200, ch: 34 } },
-        10: { stacked: { w: 260, h: 48, cw: 260, ch: 32 }, inline: { w: 300, h: 32, cw: 180, ch: 32 } },
-        11: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 175, ch: 34 } },
-        12: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 300, h: 34, cw: 170, ch: 34 } },
-        13: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
-        14: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } },
-        15: { stacked: { w: 260, h: 48, cw: 260, ch: 34 }, inline: { w: 310, h: 34, cw: 190, ch: 34 } }
-    };
 
     function getEffectiveLayout() {
         if (cfg.miniLayout === "stacked" || cfg.miniLayout === "inline") {
@@ -147,44 +127,84 @@
         return Number.isFinite(z) && z > 0 ? z : 1;
     }
 
+    // "default" / empty keeps the skin's curated face. An explicit bold
+    // or italic forces that style; leaving them unset keeps the skin's.
+    function applyFace(shell, slot, family, bold, italic) {
+        const fontVar = slot === "date" ? "--mini-date-font" : "--mini-time-font";
+        const weightVar = slot === "date" ? "--mini-date-weight" : "--mini-time-weight";
+        const styleVar = slot === "date" ? "--mini-date-style" : "--mini-time-style";
+        if (family && family !== "default") {
+            shell.style.setProperty(fontVar, `"${family}", sans-serif`);
+        } else {
+            shell.style.removeProperty(fontVar);
+        }
+        if (bold === true) shell.style.setProperty(weightVar, "700");
+        else if (bold === false) shell.style.setProperty(weightVar, "400");
+        else shell.style.removeProperty(weightVar);
+        if (italic === true) shell.style.setProperty(styleVar, "italic");
+        else if (italic === false) shell.style.setProperty(styleVar, "normal");
+        else shell.style.removeProperty(styleVar);
+    }
+
     let isHovered = false;
     let isTipVisible = false;
     let lastAppliedWidth = 0;
     let lastAppliedHeight = 0;
 
-    function getCurrentTargetSize() {
-        const design = Math.min(15, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
-        const layout = getEffectiveLayout();
-        const isCollapsible = cfg.miniCollapseDate === true;
+    function measureBaseSize() {
+        const shell = document.getElementById("shell");
+        if (!shell) return { w: 280, h: 36 };
         const zoom = zoomFactor();
+        const rect = shell.getBoundingClientRect();
+        // rect is post-transform; the window wants the unscaled box.
+        const w = Math.ceil(rect.width / zoom);
+        const h = Math.ceil(rect.height / zoom);
+        if (w < 40 || h < 20) return { w: 280, h: 36 };
+        return { w, h };
+    }
 
-        const skinSizes = DESIGN_SIZES[design] || DESIGN_SIZES[1];
-        const layoutSizes = skinSizes[layout] || skinSizes.stacked;
-
-        let baseWidth = layoutSizes.w;
-        let baseHeight = layoutSizes.h;
-
-        if (isCollapsible && !isHovered) {
-            baseWidth = layoutSizes.cw || baseWidth;
-            baseHeight = layoutSizes.ch || baseHeight;
-        }
+    function getCurrentTargetSize() {
+        const zoom = zoomFactor();
+        const base = measureBaseSize();
+        let baseHeight = base.h;
 
         if (isTipVisible) {
             const tipHeight = tipEl.offsetHeight || 80;
             baseHeight += (tipHeight + 16) / zoom;
         }
 
-        return { width: Math.round(baseWidth * zoom), height: Math.round(baseHeight * zoom) };
+        return { width: Math.round(base.w * zoom), height: Math.round(baseHeight * zoom) };
     }
 
     function syncWindowSize(force = false, recenter = false) {
         const target = getCurrentTargetSize();
-        if (force || recenter || target.width !== lastAppliedWidth || target.height !== lastAppliedHeight) {
+        const widthDelta = Math.abs(target.width - lastAppliedWidth);
+        const heightDelta = Math.abs(target.height - lastAppliedHeight);
+        if (force || recenter || widthDelta > 1 || heightDelta > 1) {
             lastAppliedWidth = target.width;
             lastAppliedHeight = target.height;
             target.recenter = recenter;
-            window.cc.setWindowSize(target);
+            if (window.cc && window.cc.setWindowSize) window.cc.setWindowSize(target);
         }
+    }
+
+    // Content width changes (face, seconds, AM/PM, collapsed date) without
+    // a settings round-trip. Measuring after the frame avoids a 0px box.
+    const shellForMeasure = document.getElementById("shell");
+    if (shellForMeasure && typeof ResizeObserver !== "undefined") {
+        let measureQueued = false;
+        const observer = new ResizeObserver(() => {
+            if (measureQueued) return;
+            measureQueued = true;
+            requestAnimationFrame(() => {
+                measureQueued = false;
+                syncWindowSize();
+            });
+        });
+        observer.observe(shellForMeasure);
+    }
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => syncWindowSize());
     }
 
     let lastDesign = null;
@@ -220,24 +240,8 @@
             shell.style.setProperty("--fg-op", s.miniOpacity ?? 1.0);
             shell.style.setProperty("--mini-zoom", String(zoomFactor()));
 
-            // Typography Studio: Custom font, weight & style
-            if (s.miniCustomFont && s.miniCustomFont !== "default") {
-                shell.style.setProperty("--mini-custom-font", `"${s.miniCustomFont}", sans-serif`);
-            } else {
-                shell.style.removeProperty("--mini-custom-font");
-            }
-
-            if (s.miniFontBold !== undefined && s.miniFontBold !== null) {
-                shell.style.setProperty("--mini-custom-weight", s.miniFontBold ? "700" : "400");
-            } else {
-                shell.style.removeProperty("--mini-custom-weight");
-            }
-
-            if (s.miniFontItalic !== undefined && s.miniFontItalic !== null) {
-                shell.style.setProperty("--mini-custom-style", s.miniFontItalic ? "italic" : "normal");
-            } else {
-                shell.style.removeProperty("--mini-custom-style");
-            }
+            applyFace(shell, "time", s.miniCustomFont, s.miniFontBold, s.miniFontItalic);
+            applyFace(shell, "date", s.miniDateFont, s.miniDateFontBold, s.miniDateFontItalic);
         }
         const tipEl = document.getElementById("mini-tip");
         if (tipEl) {

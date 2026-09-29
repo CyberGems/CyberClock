@@ -5702,6 +5702,11 @@
     .s-row:last-child {
         border-bottom: none;
     }
+    .mini-face-k {
+        flex: 0 0 58px;
+        font-size: 12px;
+        color: var(--text-lo);
+    }
     /* CyberLauncher-style leading icon tile for setting rows */
     .s-row-ico {
         flex: 0 0 auto;
