@@ -3813,6 +3813,7 @@
         z-index: 60;
     }
     .alarm-editor-overlay[hidden],
+    .alarms-empty[hidden],
     .alarms-list[hidden],
     .alarm-notice[hidden] {
         display: none !important;
