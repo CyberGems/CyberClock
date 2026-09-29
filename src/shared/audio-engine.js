@@ -678,7 +678,7 @@ class AudioEngine {
       if (!until && played >= times) return;
       played += 1;
       const vol = payload.volume != null ? payload.volume : 0.75;
-      if (payload.customPath) this.playFile(payload.customPath, { loop: false, volume: vol, id: "alarm-alert" });
+      if (payload.customPath) this.playAlarmFile(payload.customPath, vol);
       else this.chime(soundId, vol);
       if (until || played < times) {
         this._alarmTimer = setTimeout(tick, gap);
@@ -687,10 +687,39 @@ class AudioEngine {
     tick();
   }
 
+  stopAlarmFile() {
+    const audio = this._alarmFile;
+    this._alarmFile = null;
+    if (!audio) return;
+    audio.pause();
+    audio.src = "";
+  }
+
+  // Alarm files play straight to the speakers. The ambient voice path
+  // would follow the relax volume and can fail quietly on a local path.
+  playAlarmFile(filePath, volume = 0.75) {
+    this.stopAlarmFile();
+    if (this.muted || !filePath) return;
+    this._ensureCtx();
+    this.resume();
+    let src = String(filePath);
+    const convert = window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.convertFileSrc;
+    if (convert && (/^[A-Za-z]:[\\/]/.test(src) || src.startsWith("/") || src.startsWith("\\"))) {
+      src = convert(src);
+    }
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.src = src;
+    audio.volume = Math.max(0, Math.min(1, volume));
+    this._alarmFile = audio;
+    audio.play().catch((err) => console.warn("[AudioEngine] Alarm file:", err));
+  }
+
   stopAlarmAlert() {
     this._alarmToken = (this._alarmToken || 0) + 1;
     clearTimeout(this._alarmTimer);
     this._alarmTimer = null;
+    this.stopAlarmFile();
   }
 
   // ── Alarm Chimes (built-in) ───────────────────────────────

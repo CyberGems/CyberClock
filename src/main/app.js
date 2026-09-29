@@ -780,9 +780,14 @@
         try { localStorage.setItem(ALARM_SOUND_PREF, value); } catch (_) {}
     }
 
+    function alarmCustomPath() {
+        const fromCard = document.getElementById("alarm-file-card")?.dataset.path || "";
+        return fromCard || alarmEditorDraft?.customPath || "";
+    }
+
     function alarmCanTestSound() {
         const sound = document.getElementById("alarm-edit-sound")?.value || "none";
-        return sound !== "none" || !!alarmEditorDraft?.customPath;
+        return sound !== "none" || !!alarmCustomPath();
     }
 
     function syncAlarmTestButton() {
@@ -799,15 +804,19 @@
         syncAlarmTestButton();
     }
 
+    let alarmChoiceTrigger = null;
+
     function closeAlarmSoundMenu() {
         const menu = document.getElementById("alarm-sound-menu");
-        const trigger = document.getElementById("alarm-sound-trigger");
-        if (menu) menu.hidden = true;
-        if (trigger) trigger.setAttribute("aria-expanded", "false");
+        if (alarmChoiceTrigger) alarmChoiceTrigger.setAttribute("aria-expanded", "false");
+        alarmChoiceTrigger = null;
+        if (menu) {
+            menu.hidden = true;
+            menu.classList.remove("is-compact");
+        }
     }
 
-    function placeAlarmSoundMenu() {
-        const trigger = document.getElementById("alarm-sound-trigger");
+    function placeAlarmSoundMenu(trigger) {
         const menu = document.getElementById("alarm-sound-menu");
         if (!trigger || !menu || menu.hidden) return;
         const rect = trigger.getBoundingClientRect();
@@ -824,35 +833,75 @@
         }
     }
 
-    function openAlarmSoundMenu() {
-        const select = document.getElementById("alarm-edit-sound");
+    function syncAlarmChoice(select) {
+        const trigger = select?.previousElementSibling;
+        const label = trigger?.querySelector(".alarm-choice-label");
+        if (!label) return;
+        const option = [...select.options].find((item) => item.value === select.value) || select.options[0];
+        label.textContent = option ? option.textContent.trim() : "";
+    }
+
+    function openAlarmChoiceMenu(select, trigger, onPick) {
         const menu = document.getElementById("alarm-sound-menu");
-        const trigger = document.getElementById("alarm-sound-trigger");
-        if (!select || !menu || !trigger) return;
+        if (!select || !menu || !trigger || trigger.disabled) return;
+        if (alarmChoiceTrigger === trigger && !menu.hidden) {
+            closeAlarmSoundMenu();
+            return;
+        }
+        closeAlarmSoundMenu();
         menu.replaceChildren();
+        menu.classList.toggle("is-compact", trigger.classList.contains("is-compact"));
         [...select.options].forEach((option) => {
             const item = document.createElement("button");
             item.type = "button";
             item.className = "alarm-sound-option";
             item.setAttribute("role", "option");
-            item.dataset.value = option.value;
             item.textContent = option.textContent.trim();
             const current = option.value === select.value;
             item.setAttribute("aria-selected", current ? "true" : "false");
             if (current) item.classList.add("is-current");
             item.addEventListener("click", () => {
                 select.value = option.value;
-                rememberAlarmSound(option.value);
-                syncAlarmSoundTrigger();
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+                syncAlarmChoice(select);
+                if (onPick) onPick(option.value);
                 closeAlarmSoundMenu();
             });
             menu.appendChild(item);
         });
         document.body.appendChild(menu);
         menu.hidden = false;
+        alarmChoiceTrigger = trigger;
         trigger.setAttribute("aria-expanded", "true");
-        placeAlarmSoundMenu();
+        placeAlarmSoundMenu(trigger);
         menu.querySelector(".is-current")?.scrollIntoView({ block: "nearest" });
+    }
+
+    function mountAlarmChoice(select, compact) {
+        if (!select || select.dataset.choiceMounted) return;
+        select.dataset.choiceMounted = "1";
+        select.classList.add("alarm-sound-native");
+        const trigger = document.createElement("button");
+        trigger.type = "button";
+        trigger.className = `alarm-choice-trigger${compact ? " is-compact" : ""}`;
+        trigger.setAttribute("aria-haspopup", "listbox");
+        trigger.setAttribute("aria-expanded", "false");
+        const named = select.getAttribute("aria-label");
+        if (named) trigger.setAttribute("aria-label", named);
+        trigger.innerHTML = '<span class="alarm-choice-label"></span><span class="alarm-sound-caret" aria-hidden="true"></span>';
+        select.before(trigger);
+        select.addEventListener("change", () => syncAlarmChoice(select));
+        trigger.addEventListener("click", () => openAlarmChoiceMenu(select, trigger));
+        syncAlarmChoice(select);
+    }
+
+    function mountAlarmChoices() {
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period"].forEach((id) => {
+            mountAlarmChoice(document.getElementById(id), true);
+        });
+        ["alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
+            mountAlarmChoice(document.getElementById(id), false);
+        });
     }
 
     function setAlarmEditorFileLabel(path) {
@@ -861,7 +910,19 @@
         const hints = document.querySelectorAll("#alarm-file-card .alarm-file-hint");
         const clear = document.getElementById("alarm-edit-file-clear");
         const name = path ? String(path).split(/[/\\]/).pop() : "";
-        if (card) card.classList.toggle("has-file", !!path);
+        if (card) {
+            card.classList.toggle("has-file", !!path);
+            if (path) card.dataset.path = path;
+            else delete card.dataset.path;
+        }
+        const soundTrigger = document.getElementById("alarm-sound-trigger");
+        const soundPicker = document.querySelector(".alarm-sound-picker");
+        if (soundPicker) soundPicker.classList.toggle("is-locked", !!path);
+        if (soundTrigger) {
+            soundTrigger.disabled = !!path;
+            if (path) soundTrigger.setAttribute("aria-expanded", "false");
+        }
+        if (path) closeAlarmSoundMenu();
         if (label) {
             if (path) {
                 label.removeAttribute("data-i18n");
@@ -1151,6 +1212,8 @@
         if (hour) hour.value = String(hour12).padStart(2, "0");
         if (minute) minute.value = String(minuteValue).padStart(2, "0");
         if (periodControl) periodControl.value = period;
+        mountAlarmChoices();
+        [hour, minute, periodControl].forEach((select) => syncAlarmChoice(select));
         syncAlarmTimeInput();
     }
 
@@ -1194,7 +1257,10 @@
         syncAlarmTimeControls(time?.value);
         if (!alarmEditorDraft.label) alarmEditorDraft.label = nextAlarmLabel(alarmEditorId);
         if (label) label.value = alarmEditorDraft.label;
-        if (repeat) repeat.value = alarmEditorDraft.repeatMode || (alarmEditorDraft.daysMask ? "weekly" : "once");
+        if (repeat) {
+            repeat.value = alarmEditorDraft.repeatMode || (alarmEditorDraft.daysMask ? "weekly" : "once");
+            syncAlarmChoice(repeat);
+        }
         adpSetDate(alarmEditorDraft.date || alarmTodayIso());
         adpClose();
         if (message) message.value = alarmEditorDraft.message || "";
@@ -1203,7 +1269,10 @@
             sound.value = [...sound.options].some((option) => option.value === chosen) ? chosen : "none";
         }
         syncAlarmSoundTrigger();
-        if (snooze) snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);
+        if (snooze) {
+            snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);
+            syncAlarmChoice(snooze);
+        }
         const untilDismiss = !!alarmEditorDraft.soundUntilDismiss;
         const countRadio = document.getElementById("alarm-edit-repeat-count");
         const untilRadio = document.getElementById("alarm-edit-repeat-until");
@@ -1434,15 +1503,19 @@
         document.getElementById("alarm-editor-close")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-edit-repeat-count")?.addEventListener("change", syncAlarmSoundRepeat);
         document.getElementById("alarm-edit-repeat-until")?.addEventListener("change", syncAlarmSoundRepeat);
+        mountAlarmChoices();
         document.getElementById("alarm-sound-trigger")?.addEventListener("click", () => {
-            const menu = document.getElementById("alarm-sound-menu");
-            if (menu && !menu.hidden) closeAlarmSoundMenu();
-            else openAlarmSoundMenu();
+            const trigger = document.getElementById("alarm-sound-trigger");
+            const select = document.getElementById("alarm-edit-sound");
+            openAlarmChoiceMenu(select, trigger, (value) => {
+                rememberAlarmSound(value);
+                syncAlarmSoundTrigger();
+            });
         });
         document.addEventListener("pointerdown", (event) => {
             const menu = document.getElementById("alarm-sound-menu");
             if (!menu || menu.hidden) return;
-            if (event.target.closest("#alarm-sound-menu, #alarm-sound-trigger")) return;
+            if (event.target.closest("#alarm-sound-menu, #alarm-sound-trigger, .alarm-choice-trigger")) return;
             closeAlarmSoundMenu();
         });
         document.getElementById("alarm-editor-body")?.addEventListener("scroll", closeAlarmSoundMenu);
@@ -1460,10 +1533,12 @@
             setAlarmEditorFileLabel(null);
         });
         document.getElementById("alarm-edit-test")?.addEventListener("click", () => {
-            if (!alarmCanTestSound()) return;
+            if (!alarmCanTestSound() || !window.audioEngine) return;
+            const path = alarmCustomPath();
             const sound = document.getElementById("alarm-edit-sound")?.value || "none";
             const volume = cfg.alarmVolume || 0.75;
-            if (alarmEditorDraft?.customPath) window.audioEngine.playFile(alarmEditorDraft.customPath, { loop: false, volume });
+            window.audioEngine.stopAlarmFile?.();
+            if (path) window.audioEngine.playAlarmFile(path, volume);
             else window.audioEngine.chime(sound, volume);
         });
         document.getElementById("alarm-notice-dismiss")?.addEventListener("click", hideAlarmNotice);
@@ -1937,6 +2012,9 @@
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
         syncAlarmSoundTrigger();
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
+            syncAlarmChoice(document.getElementById(id));
+        });
         renderAlarmsView();
         updateGreeting();
         if (typeof renderBrandVersion === "function") renderBrandVersion();

@@ -327,7 +327,7 @@
                                 </div>
                                 <div class="alarm-editor-body">
                                     <div class="alarm-form-hero">
-                                        <label class="alarm-field alarm-time-field">
+                                        <div class="alarm-field alarm-time-field">
                                             <span data-i18n="alarms.editor.time">Time</span>
                                             <div class="alarm-time-control">
                                                 <select id="alarm-edit-hour" data-i18n-attr="aria-label:alarms.editor.time"></select>
@@ -339,7 +339,7 @@
                                                 </select>
                                             </div>
                                             <input id="alarm-edit-time" type="hidden" value="09:00" />
-                                        </label>
+                                        </div>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.label">Label</span>
                                             <input id="alarm-edit-label" type="text" name="cc-alarm-label" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Morning focus" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
@@ -395,7 +395,7 @@
                                     </div>
                                     <div class="alarm-form-section alarm-alert-section">
                                         <div class="alarm-form-section-title"><span data-ico="volume-high"></span> <span data-i18n="alarms.editor.alert">Alert</span></div>
-                                        <label class="alarm-field">
+                                        <div class="alarm-field">
                                             <span data-i18n="alarms.editor.sound">Sound</span>
                                             <div class="alarm-sound-stack">
                                             <div class="alarm-inline-control">
@@ -445,21 +445,25 @@
                                                 <button class="alarm-file-clear" id="alarm-edit-file-clear" type="button" data-tooltip="Remove custom sound" data-i18n-attr="data-tooltip:alarms.tooltip.removeSound, aria-label:alarms.tooltip.removeSound" hidden><span data-ico="x"></span></button>
                                             </div>
                                             </div>
-                                        </label>
+                                        </div>
                                         <div class="alarm-sound-repeat" id="alarm-sound-repeat">
-                                            <label class="alarm-sound-choice">
-                                                <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-count" value="count" checked />
-                                                <span data-i18n="alarms.editor.soundTimes">Times to repeat</span>
-                                                <input id="alarm-edit-sound-count" type="number" min="1" max="20" value="1" inputmode="numeric" />
-                                            </label>
-                                            <label class="alarm-sound-choice">
-                                                <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-until" value="until" />
-                                                <span data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
-                                            </label>
-                                            <label class="alarm-sound-pause">
+                                            <div class="alarm-repeat-modes">
+                                                <label class="alarm-repeat-mode">
+                                                    <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-count" value="count" checked />
+                                                    <span data-i18n="alarms.editor.soundTimes">Times to repeat</span>
+                                                    <input id="alarm-edit-sound-count" type="number" min="1" max="20" value="1" inputmode="numeric" />
+                                                </label>
+                                                <label class="alarm-repeat-mode">
+                                                    <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-until" value="until" />
+                                                    <span data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
+                                                </label>
+                                            </div>
+                                            <label class="alarm-repeat-pause">
                                                 <span data-i18n="alarms.editor.soundPause">Pause between sounds</span>
-                                                <input id="alarm-edit-sound-pause" type="number" min="0" max="60" value="1" inputmode="numeric" />
-                                                <span data-i18n="alarms.editor.soundSeconds">sec</span>
+                                                <span class="alarm-repeat-pause-value">
+                                                    <input id="alarm-edit-sound-pause" type="number" min="0" max="60" value="1" inputmode="numeric" />
+                                                    <span data-i18n="alarms.editor.soundSeconds">sec</span>
+                                                </span>
                                             </label>
                                         </div>
                                         <label class="alarm-field">
