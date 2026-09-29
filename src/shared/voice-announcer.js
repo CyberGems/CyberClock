@@ -1,6 +1,9 @@
 /**
  * CyberClock - Voice Time Announcer (Talking Clock)
- * Uses native Web Speech API (speechSynthesis) to speak the time offline.
+ * Builds the sentence in the page. Windows speaks it once through
+ * the OS synthesizer. Web Speech only supplies the voice list, and
+ * a last-resort fallback that must not select a voice: WebView2
+ * reads the sentence twice as soon as one is assigned.
  * Supports natural and cyber/tactical styles in English and Spanish,
  * gender selection (male/female/system), pre-chimes, and volume control.
  */
@@ -158,25 +161,26 @@
 
         const doSpeak = () => {
             if (gen !== announceGen) return;
-            const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(text);
-            if (voice) {
-                utter.voice = voice;
-            }
-            // Windows WebView2 speaks the utterance twice when rate,
-            // pitch, or volume is assigned. Leave them at the defaults.
-            // The chime still follows the voice volume.
-            liveUtterance = utter;
-            const start = () => {
+            const volume = Math.max(0, Math.min(1, Number(va.volume ?? 0.85)));
+            const voiceName = voice && voice.name ? voice.name : "";
+            // WebView2 speaks the sentence twice as soon as an utterance
+            // is given a voice. The native synthesizer says it once.
+            // The web fallback must not select a voice either.
+            const fallback = () => {
                 if (gen !== announceGen) return;
+                const synth = window.speechSynthesis;
+                const utter = new SpeechSynthesisUtterance(text);
+                if (voice && voice.lang) utter.lang = voice.lang;
+                liveUtterance = utter;
                 try { synth.speak(utter); } catch (_) {}
             };
-            if (synth.speaking || synth.pending) {
-                try { synth.cancel(); } catch (_) {}
-                setTimeout(start, 200);
-            } else {
-                start();
+            if (window.cc && window.cc.speakAnnouncement) {
+                window.cc.speakAnnouncement({ text, voiceName, volume }).then((ok) => {
+                    if (!ok) fallback();
+                }).catch(fallback);
+                return;
             }
+            fallback();
         };
 
         if (va.chimeBefore !== false && window.audioEngine) {

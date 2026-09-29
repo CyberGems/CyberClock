@@ -58,6 +58,9 @@ windows-sys = { version = "0.61", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Shell",
 ] }
+# One Windows voice. WebView2's speechSynthesis speaks the same
+# sentence twice whenever a voice is selected.
+tts = "0.26"
 
 [profile.release]
 strip = true

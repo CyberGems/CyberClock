@@ -351,6 +351,22 @@
         onVoiceAnnounceTime: (cb) => {
             return subscribe("voice:announce-time", cb);
         },
+        // Windows voice. Returns false when the native synthesizer is
+        // unavailable so the page can fall back without selecting a
+        // WebView2 voice (that path speaks twice).
+        speakAnnouncement: async ({ text, voiceName, volume }) => {
+            if (!HAS_TAURI) return false;
+            try {
+                return await invoke("speak_announcement", {
+                    text,
+                    voiceName: voiceName || "",
+                    volume: volume ?? 0.85,
+                }) === true;
+            } catch (e) {
+                console.error("speak_announcement failed:", e);
+                return false;
+            }
+        },
         onRelaxTrigger: (cb) => {
             return subscribe("relax:trigger", cb);
         },

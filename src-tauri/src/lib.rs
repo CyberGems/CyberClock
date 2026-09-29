@@ -14,6 +14,8 @@ use tauri_plugin_dialog::DialogExt;
 use log::{info, warn};
 
 mod settings;
+#[cfg(windows)]
+mod speech;
 mod time_sync;
 mod updater;
 
@@ -324,6 +326,21 @@ fn show_clock_window(app: &AppHandle) {
 #[tauri::command]
 fn get_settings(app: AppHandle) -> AppSettings {
     load_settings(&app)
+}
+
+/// Say one sentence with the Windows voice. WebView2 is not used:
+/// selecting a voice there makes Windows read the sentence twice.
+#[tauri::command]
+fn speak_announcement(text: String, voice_name: String, volume: f64) -> bool {
+    #[cfg(windows)]
+    {
+        speech::enqueue(text, voice_name, volume as f32)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (text, voice_name, volume);
+        false
+    }
 }
 
 #[tauri::command]
@@ -4612,6 +4629,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_settings,
+            speak_announcement,
             save_settings,
             patch_settings,
             snooze_alarm,
