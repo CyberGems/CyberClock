@@ -397,8 +397,17 @@
                                         <div class="alarm-form-section-title"><span data-ico="volume-high"></span> <span data-i18n="alarms.editor.alert">Alert</span></div>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.sound">Sound</span>
+                                            <div class="alarm-sound-stack">
                                             <div class="alarm-inline-control">
-                                                <select id="alarm-edit-sound" data-i18n-attr="aria-label:alarms.editor.sound">
+                                                <div class="alarm-sound-picker">
+                                                    <button class="alarm-sound-trigger" id="alarm-sound-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" data-i18n-attr="aria-label:alarms.editor.sound">
+                                                        <span id="alarm-sound-trigger-label">No sound</span>
+                                                        <span class="alarm-sound-caret" aria-hidden="true"></span>
+                                                    </button>
+                                                    <div class="alarm-sound-menu" id="alarm-sound-menu" role="listbox" hidden></div>
+                                                </div>
+                                                <select id="alarm-edit-sound" class="alarm-sound-native" tabindex="-1" aria-hidden="true">
+                                                    <option value="none" selected data-i18n="settings.alarms.sound.none">No sound</option>
                                                     <option value="chime-crystal" data-i18n="settings.alarms.sound.crystal">Crystal Bell</option>
                                                     <option value="chime-digital" data-i18n="settings.alarms.sound.digital">Soft Chime</option>
                                                     <option value="chime-neon" data-i18n="settings.alarms.sound.neon">Neon Arp</option>
@@ -420,9 +429,21 @@
                                                     <option value="alarm-dawn" data-i18n="settings.alarms.sound.dawn">Dawn</option>
                                                     <option value="alarm-signal" data-i18n="settings.alarms.sound.signal">Signal</option>
                                                 </select>
-                                                <button class="alarm-secondary-btn" id="alarm-edit-test" type="button">
+                                                <button class="alarm-secondary-btn" id="alarm-edit-test" type="button" disabled>
                                                     <span data-ico="play"></span> <span data-i18n="alarms.editor.test">Test</span>
                                                 </button>
+                                            </div>
+                                            <div class="alarm-file-card" id="alarm-file-card">
+                                                <button class="alarm-file-pick" id="alarm-edit-file" type="button">
+                                                    <span data-ico="folder"></span>
+                                                    <span class="alarm-file-copy">
+                                                        <span class="alarm-file-title" id="alarm-edit-file-label" data-i18n="alarms.editor.customSound">Use your own sound</span>
+                                                        <span class="alarm-file-hint" data-i18n="alarms.editor.customSoundHint">MP3 or WAV</span>
+                                                        <span class="alarm-file-hint is-active" data-i18n="alarms.editor.customSoundActive" hidden>This file plays</span>
+                                                    </span>
+                                                </button>
+                                                <button class="alarm-file-clear" id="alarm-edit-file-clear" type="button" data-tooltip="Remove custom sound" data-i18n-attr="data-tooltip:alarms.tooltip.removeSound, aria-label:alarms.tooltip.removeSound" hidden><span data-ico="x"></span></button>
+                                            </div>
                                             </div>
                                         </label>
                                         <div class="alarm-sound-repeat" id="alarm-sound-repeat">
@@ -440,13 +461,6 @@
                                                 <input id="alarm-edit-sound-pause" type="number" min="0" max="60" value="1" inputmode="numeric" />
                                                 <span data-i18n="alarms.editor.soundSeconds">sec</span>
                                             </label>
-                                        </div>
-                                        <div class="alarm-custom-file-row">
-                                            <button class="alarm-link-btn" id="alarm-edit-file" type="button">
-                                                <span data-ico="folder"></span> <span data-i18n="alarms.editor.customSound">Use a custom sound</span>
-                                            </button>
-                                            <span id="alarm-edit-file-label" class="alarm-file-label"></span>
-                                            <button class="alarm-file-clear" id="alarm-edit-file-clear" type="button" data-tooltip="Remove custom sound" data-i18n-attr="data-tooltip:alarms.tooltip.removeSound" hidden><span data-ico="x"></span></button>
                                         </div>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.message">Message</span>

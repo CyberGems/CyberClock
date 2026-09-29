@@ -665,6 +665,8 @@ class AudioEngine {
   playAlarmAlert(payload = {}) {
     this.stopAlarmAlert();
     if (this.muted || payload.audioMuted || payload.silent) return;
+    const soundId = payload.sound || "none";
+    if (!payload.customPath && (soundId === "none" || soundId === "")) return;
     const until = !!payload.soundUntilDismiss;
     const times = Math.max(1, Math.min(20, Number(payload.soundRepeatCount) || 1));
     const pauseMs = Math.max(0, Math.min(60, Number(payload.soundPauseSecs ?? 1))) * 1000;
@@ -677,7 +679,7 @@ class AudioEngine {
       played += 1;
       const vol = payload.volume != null ? payload.volume : 0.75;
       if (payload.customPath) this.playFile(payload.customPath, { loop: false, volume: vol, id: "alarm-alert" });
-      else this.chime(payload.sound || "chime-digital", vol);
+      else this.chime(soundId, vol);
       if (until || played < times) {
         this._alarmTimer = setTimeout(tick, gap);
       }
@@ -729,7 +731,7 @@ class AudioEngine {
     // master mute gates them here. The Rust scheduler also never emits
     // chime events while muted — this is the in-page safety net (test
     // buttons, manual plays).
-    if (this.muted) return;
+    if (this.muted || !id || id === "none") return;
     this._ensureCtx();
     this.resume();
     const voice = ALARM_VOICES[id];

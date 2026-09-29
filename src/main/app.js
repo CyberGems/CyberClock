@@ -732,7 +732,7 @@
             daysMask: 0,
             repeatMode: "once",
             date: alarmTodayIso(now),
-            sound: "chime-digital",
+            sound: rememberedAlarmSound(),
             customPath: null,
             snoozeMinutes: 10,
             soundRepeatCount: 1,
@@ -765,14 +765,117 @@
         });
     }
 
-    function setAlarmEditorFileLabel(path) {
-        const label = document.getElementById("alarm-edit-file-label");
-        const clear = document.getElementById("alarm-edit-file-clear");
-        if (label) {
-            label.textContent = path ? path.split(/[/\\]/).pop() : "";
-            label.hidden = !path;
+    const ALARM_SOUND_PREF = "cc.alarm.lastSound";
+
+    function rememberedAlarmSound() {
+        let stored = "";
+        try { stored = localStorage.getItem(ALARM_SOUND_PREF) || ""; } catch (_) { stored = ""; }
+        const select = document.getElementById("alarm-edit-sound");
+        if (!stored || !select) return "none";
+        return [...select.options].some((option) => option.value === stored) ? stored : "none";
+    }
+
+    function rememberAlarmSound(value) {
+        if (!value) return;
+        try { localStorage.setItem(ALARM_SOUND_PREF, value); } catch (_) {}
+    }
+
+    function alarmCanTestSound() {
+        const sound = document.getElementById("alarm-edit-sound")?.value || "none";
+        return sound !== "none" || !!alarmEditorDraft?.customPath;
+    }
+
+    function syncAlarmTestButton() {
+        const test = document.getElementById("alarm-edit-test");
+        if (test) test.disabled = !alarmCanTestSound();
+    }
+
+    function syncAlarmSoundTrigger() {
+        const select = document.getElementById("alarm-edit-sound");
+        const label = document.getElementById("alarm-sound-trigger-label");
+        if (!select || !label) return;
+        const option = [...select.options].find((item) => item.value === select.value) || select.options[0];
+        label.textContent = option ? option.textContent.trim() : "";
+        syncAlarmTestButton();
+    }
+
+    function closeAlarmSoundMenu() {
+        const menu = document.getElementById("alarm-sound-menu");
+        const trigger = document.getElementById("alarm-sound-trigger");
+        if (menu) menu.hidden = true;
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+    }
+
+    function placeAlarmSoundMenu() {
+        const trigger = document.getElementById("alarm-sound-trigger");
+        const menu = document.getElementById("alarm-sound-menu");
+        if (!trigger || !menu || menu.hidden) return;
+        const rect = trigger.getBoundingClientRect();
+        const below = window.innerHeight - rect.bottom;
+        const openUp = below < 220 && rect.top > below;
+        menu.style.left = `${Math.round(rect.left)}px`;
+        menu.style.width = `${Math.round(rect.width)}px`;
+        if (openUp) {
+            menu.style.top = "auto";
+            menu.style.bottom = `${Math.round(window.innerHeight - rect.top + 4)}px`;
+        } else {
+            menu.style.bottom = "auto";
+            menu.style.top = `${Math.round(rect.bottom + 4)}px`;
         }
+    }
+
+    function openAlarmSoundMenu() {
+        const select = document.getElementById("alarm-edit-sound");
+        const menu = document.getElementById("alarm-sound-menu");
+        const trigger = document.getElementById("alarm-sound-trigger");
+        if (!select || !menu || !trigger) return;
+        menu.replaceChildren();
+        [...select.options].forEach((option) => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "alarm-sound-option";
+            item.setAttribute("role", "option");
+            item.dataset.value = option.value;
+            item.textContent = option.textContent.trim();
+            const current = option.value === select.value;
+            item.setAttribute("aria-selected", current ? "true" : "false");
+            if (current) item.classList.add("is-current");
+            item.addEventListener("click", () => {
+                select.value = option.value;
+                rememberAlarmSound(option.value);
+                syncAlarmSoundTrigger();
+                closeAlarmSoundMenu();
+            });
+            menu.appendChild(item);
+        });
+        document.body.appendChild(menu);
+        menu.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        placeAlarmSoundMenu();
+        menu.querySelector(".is-current")?.scrollIntoView({ block: "nearest" });
+    }
+
+    function setAlarmEditorFileLabel(path) {
+        const card = document.getElementById("alarm-file-card");
+        const label = document.getElementById("alarm-edit-file-label");
+        const hints = document.querySelectorAll("#alarm-file-card .alarm-file-hint");
+        const clear = document.getElementById("alarm-edit-file-clear");
+        const name = path ? String(path).split(/[/\\]/).pop() : "";
+        if (card) card.classList.toggle("has-file", !!path);
+        if (label) {
+            if (path) {
+                label.removeAttribute("data-i18n");
+                label.textContent = name;
+            } else {
+                label.setAttribute("data-i18n", "alarms.editor.customSound");
+                label.textContent = alarmText("alarms.editor.customSound", "Use your own sound");
+            }
+        }
+        hints.forEach((hint) => {
+            hint.hidden = path ? !hint.classList.contains("is-active") : hint.classList.contains("is-active");
+        });
         if (clear) clear.hidden = !path;
+        syncAlarmTestButton();
     }
 
     function ensureAlarmTimeControls() {
@@ -1095,7 +1198,11 @@
         adpSetDate(alarmEditorDraft.date || alarmTodayIso());
         adpClose();
         if (message) message.value = alarmEditorDraft.message || "";
-        if (sound) sound.value = alarmEditorDraft.sound || "chime-digital";
+        if (sound) {
+            const chosen = alarmEditorDraft.sound || "none";
+            sound.value = [...sound.options].some((option) => option.value === chosen) ? chosen : "none";
+        }
+        syncAlarmSoundTrigger();
         if (snooze) snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);
         const untilDismiss = !!alarmEditorDraft.soundUntilDismiss;
         const countRadio = document.getElementById("alarm-edit-repeat-count");
@@ -1121,6 +1228,7 @@
         const overlay = document.getElementById("alarm-editor-overlay");
         if (!overlay) return;
         adpClose();
+        closeAlarmSoundMenu();
         overlay.classList.remove("open");
         overlay.hidden = true;
         alarmEditorId = null;
@@ -1152,7 +1260,7 @@
             repeatMode,
             date: document.getElementById("alarm-edit-date")?.value || alarmTodayIso(),
             daysMask,
-            sound: document.getElementById("alarm-edit-sound")?.value || "chime-digital",
+            sound: document.getElementById("alarm-edit-sound")?.value || "none",
             snoozeMinutes: Number(document.getElementById("alarm-edit-snooze")?.value) || 10,
             soundUntilDismiss: document.getElementById("alarm-edit-repeat-until")?.checked === true,
             soundRepeatCount: Math.max(1, Math.min(20, Number(document.getElementById("alarm-edit-sound-count")?.value) || 1)),
@@ -1326,20 +1434,34 @@
         document.getElementById("alarm-editor-close")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-edit-repeat-count")?.addEventListener("change", syncAlarmSoundRepeat);
         document.getElementById("alarm-edit-repeat-until")?.addEventListener("change", syncAlarmSoundRepeat);
+        document.getElementById("alarm-sound-trigger")?.addEventListener("click", () => {
+            const menu = document.getElementById("alarm-sound-menu");
+            if (menu && !menu.hidden) closeAlarmSoundMenu();
+            else openAlarmSoundMenu();
+        });
+        document.addEventListener("pointerdown", (event) => {
+            const menu = document.getElementById("alarm-sound-menu");
+            if (!menu || menu.hidden) return;
+            if (event.target.closest("#alarm-sound-menu, #alarm-sound-trigger")) return;
+            closeAlarmSoundMenu();
+        });
+        document.getElementById("alarm-editor-body")?.addEventListener("scroll", closeAlarmSoundMenu);
         document.getElementById("alarm-edit-file")?.addEventListener("click", async () => {
-            const path = await window.cc.openFileDialog();
+            const path = await window.cc.openFileDialog(["mp3", "wav"]);
             if (path && alarmEditorDraft) {
                 alarmEditorDraft.customPath = path;
                 setAlarmEditorFileLabel(path);
             }
         });
-        document.getElementById("alarm-edit-file-clear")?.addEventListener("click", () => {
+        document.getElementById("alarm-edit-file-clear")?.addEventListener("click", (event) => {
+            event.stopPropagation();
             if (!alarmEditorDraft) return;
             alarmEditorDraft.customPath = null;
             setAlarmEditorFileLabel(null);
         });
         document.getElementById("alarm-edit-test")?.addEventListener("click", () => {
-            const sound = document.getElementById("alarm-edit-sound")?.value || "chime-digital";
+            if (!alarmCanTestSound()) return;
+            const sound = document.getElementById("alarm-edit-sound")?.value || "none";
             const volume = cfg.alarmVolume || 0.75;
             if (alarmEditorDraft?.customPath) window.audioEngine.playFile(alarmEditorDraft.customPath, { loop: false, volume });
             else window.audioEngine.chime(sound, volume);
@@ -1387,6 +1509,11 @@
                 return;
             }
             if (document.getElementById("alarm-editor-overlay")?.hidden) return;
+            const soundMenu = document.getElementById("alarm-sound-menu");
+            if (soundMenu && !soundMenu.hidden) {
+                closeAlarmSoundMenu();
+                return;
+            }
             if (adp.open) {
                 adpClose();
                 return;
@@ -1809,6 +1936,7 @@
         if (displayNameEl) displayNameEl.value = s.displayName || "";
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
+        syncAlarmSoundTrigger();
         renderAlarmsView();
         updateGreeting();
         if (typeof renderBrandVersion === "function") renderBrandVersion();

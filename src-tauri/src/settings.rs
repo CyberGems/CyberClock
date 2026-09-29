@@ -64,7 +64,7 @@ impl Default for CustomAlarm {
             days_mask: 0,
             repeat_mode: String::new(),
             date: None,
-            sound: "chime-digital".to_string(),
+            sound: "none".to_string(),
             custom_path: None,
             snooze_minutes: default_snooze_minutes(),
             sound_repeat_count: default_sound_repeat_count(),

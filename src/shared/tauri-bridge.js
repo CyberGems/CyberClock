@@ -187,8 +187,10 @@
         setStartup: async (on) => {
             await invoke("set_startup", { on });
         },
-        openFileDialog: async () => {
-            return await invoke("open_file_dialog");
+        openFileDialog: async (extensions) => {
+            return await invoke("open_file_dialog", {
+                extensions: Array.isArray(extensions) ? extensions : null,
+            });
         },
         getScreens: async () => {
             return await invokeOrFallback("get_screens", undefined, []);

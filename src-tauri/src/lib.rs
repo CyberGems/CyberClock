@@ -3328,12 +3328,26 @@ fn import_alarm_sound(app: &AppHandle, src: &Path) -> Result<String, String> {
 }
 
 #[tauri::command]
-async fn open_file_dialog(app: AppHandle, window: WebviewWindow) -> Option<String> {
+async fn open_file_dialog(
+    app: AppHandle,
+    window: WebviewWindow,
+    extensions: Option<Vec<String>>,
+) -> Option<String> {
+    let requested = extensions.unwrap_or_default();
+    let mut filters: Vec<String> = requested
+        .iter()
+        .map(|ext| ext.trim().trim_start_matches('.').to_ascii_lowercase())
+        .filter(|ext| AUDIO_EXTENSIONS.contains(&ext.as_str()))
+        .collect();
+    if filters.is_empty() {
+        filters = AUDIO_EXTENSIONS.iter().map(|ext| (*ext).to_string()).collect();
+    }
+    let filter_refs: Vec<&str> = filters.iter().map(String::as_str).collect();
     let (tx, rx) = std::sync::mpsc::channel();
     window
         .dialog()
         .file()
-        .add_filter("Audio", &["mp3", "wav", "ogg", "m4a", "flac", "aac"])
+        .add_filter("Audio", &filter_refs)
         .pick_file(move |file_path| {
             let _ = tx.send(file_path);
         });

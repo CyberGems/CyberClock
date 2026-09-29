@@ -3805,6 +3805,9 @@
         width: 14px;
         height: 14px;
     }
+    .alarm-file-clear[hidden] {
+        display: none !important;
+    }
     .alarm-toggle {
         position: relative;
         display: inline-flex;
@@ -3985,6 +3988,12 @@
     .alarm-alert-section .alarm-field {
         grid-template-columns: 96px minmax(0, 1fr);
     }
+    .alarm-alert-section .alarm-field:has(.alarm-sound-stack) {
+        align-items: start;
+    }
+    .alarm-alert-section .alarm-field:has(.alarm-sound-stack) > span {
+        padding-top: 9px;
+    }
     .alarm-alert-section .alarm-custom-file-row {
         grid-column: 1;
         min-width: 0;
@@ -4095,6 +4104,140 @@
         min-width: 0;
         flex: 1;
     }
+    .alarm-sound-stack {
+        display: grid;
+        min-width: 0;
+        gap: 8px;
+    }
+    .alarm-sound-picker {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+    }
+    .alarm-sound-native {
+        display: none;
+    }
+    .alarm-sound-trigger {
+        display: flex;
+        width: 100%;
+        min-height: 34px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 7px 9px;
+        color: var(--text-hi);
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        text-align: left;
+    }
+    .alarm-sound-trigger:hover,
+    .alarm-sound-trigger[aria-expanded="true"] {
+        border-color: var(--accent-a);
+        box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.13);
+    }
+    .alarm-sound-caret {
+        width: 0;
+        height: 0;
+        flex: 0 0 auto;
+        border-right: 4px solid transparent;
+        border-left: 4px solid transparent;
+        border-top: 5px solid var(--text-md);
+    }
+    .alarm-sound-menu {
+        position: fixed;
+        z-index: 200;
+        max-height: 240px;
+        overflow: auto;
+        padding: 4px;
+        background: #101820;
+        border: 1px solid var(--border-bright);
+        border-radius: 8px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+    .alarm-sound-menu[hidden] {
+        display: none !important;
+    }
+    .alarm-sound-option {
+        display: block;
+        width: 100%;
+        padding: 7px 10px;
+        color: var(--text-hi);
+        background: transparent;
+        border: 0;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale));
+        text-align: left;
+    }
+    .alarm-sound-option.is-current {
+        color: var(--accent-a);
+    }
+    .alarm-sound-option:hover,
+    .alarm-sound-option:focus-visible {
+        color: var(--bg-00);
+        background: var(--accent-a);
+        outline: none;
+    }
+    .alarm-file-card {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 6px 8px 6px 10px;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px dashed rgba(var(--rgb-accent), 0.38);
+        border-radius: 8px;
+    }
+    .alarm-file-card.has-file {
+        border-style: solid;
+        border-color: var(--border-bright);
+        background: rgba(var(--rgb-accent), 0.08);
+    }
+    .alarm-file-pick {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        color: var(--text-hi);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        text-align: left;
+    }
+    .alarm-file-pick .cc-ico {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+        color: var(--accent-a);
+    }
+    .alarm-file-copy {
+        display: grid;
+        min-width: 0;
+        gap: 1px;
+    }
+    .alarm-file-title {
+        overflow: hidden;
+        color: var(--text-hi);
+        font-size: calc(11px * var(--ui-scale));
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .alarm-file-hint {
+        color: var(--text-lo);
+        font-size: calc(9px * var(--ui-scale));
+    }
+    .alarm-file-card.has-file .alarm-file-hint.is-active {
+        color: var(--accent-a);
+    }
     .alarm-days-field {
         align-items: start;
     }
@@ -4147,6 +4290,11 @@
         color: var(--text-hi);
         background: rgba(var(--rgb-accent), 0.1);
         border-color: var(--border-bright);
+    }
+    .alarm-secondary-btn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        pointer-events: none;
     }
     .alarm-custom-file-row {
         display: flex;
