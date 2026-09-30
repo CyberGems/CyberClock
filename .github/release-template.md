@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-The mini clock sizes itself to each face and splits time from date. Reactor Core and Circuit PCB stay clear of the brand, the suite tray matches the rest of the family, and the voice announcer speaks the time once.
+The mini bar can show how far the day has gone, and it shortens when the date is hidden. Alarms can be saved as templates, copied, or removed after they ring. The analog clock accepts clicks only on the dial, and its rim no longer shows a white arc.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -18,65 +18,65 @@ The mini clock sizes itself to each face and splits time from date. Reactor Core
 ### ✨ Key Features & Highlights
 
 - 🕐 **Mini clock**:
-  - The window sizes itself to the clock type, and time and date use separate faces.
-  - Compact (2 Rows) is unavailable while Collapse Date is on. Its tooltip stays solid.
-  - Switches leave the menu open. Settings, Full Mode, and quit still close it.
+  - An optional Day Progress line sits on the bottom edge. Hover shows the percentage of the day that has passed.
+  - Turning Show Date off hides the date and shortens the bar. Both return on hover.
+  - The note banner under the clock keeps its full shadow.
 
-- 🎛️ **Analog dials**:
-  - Reactor Core replaces the coil shapes with an open ring of markers, so the brand stays readable.
-  - Circuit PCB keeps the blinking lights and drops the traces that crossed the brand.
+- 🔔 **Alarms**:
+  - Templates save a setup without scheduling it.
+  - Clone copies an alarm. Delete after the alarm removes it when the notice is dismissed. Snooze keeps it.
+  - New Alarm is in the tray and in every widget menu.
+  - Old unnamed slots no longer ring after the list has hidden them.
+
+- 🎛️ **Analog clock**:
+  - Clicks and drags land on the visible dial, not the empty square around it.
+  - The rim no longer shows a white arc along the top.
+  - The drag cursor is the system move cursor, and it shows only while a widget is being moved.
 
 - 🧭 **Menus**:
-  - The suite tray uses the CyberGems mark, a short line under each app, and a link for more details.
-  - Widget actions share one set of labels: New Timer, New Stopwatch, and Open Relax.
-  - The full-mode Relax entry is gone from the mini menu and the tray. The Relax widget opens full Relax.
-  - Tray zoom sits in its own group, apart from click-through.
-  - More options leads with Donate, adds Check for Update, and Exit uses the same close dialog as the window button.
-
-- 🔊 **Voice**:
-  - The announcer speaks the time once, through Windows speech.
+  - Each widget menu opens with that widget's name.
+  - On the calendar and Relax widgets, the menu button appears only while the pointer is over the widget.
+  - A left click on the tray icon brings the clock forward and does not hide it.
 
 - 🎨 **Also in this release**:
-  - On-screen button hints take their color from the active mini skin.
-  - The Saved status in Settings is a status line.
-  - The info icon shows its dot.
-  - The Glass Orb update card is restyled, and Neon Circuit no longer clips it.
+  - On-screen hints for floating widget buttons take their color from the active skin.
+  - Widget frames that were clipped square now keep a soft inner edge.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-El reloj mini se ajusta a cada esfera y separa la hora de la fecha. Núcleo Reactor y Circuito PCB dejan libre la marca, el menú de la suite en la bandeja coincide con el resto de la familia, y el locutor dice la hora una sola vez.
+La barra del Modo Mini puede mostrar el Avance del Día, y se acorta cuando la fecha está oculta. Las alarmas se pueden guardar como plantillas, copiar, o quitar al descartarlas. El reloj analógico solo recibe clics dentro de la esfera, y su borde ya no muestra un arco blanco.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🕐 **Reloj mini**:
-  - La ventana se ajusta al tipo de reloj, y la hora y la fecha usan esferas distintas.
-  - Compacto (2 Filas) no está disponible con Colapsar Fecha. Su tooltip se mantiene sólido.
-  - Los interruptores dejan el menú abierto. Configuración, Modo Completo y salir sí lo cierran.
+- 🕐 **Modo Mini**:
+  - Una línea opcional, Avance del Día, queda en el borde inferior. Al pasar el cursor muestra el porcentaje del día que ha pasado.
+  - Con Mostrar Fecha apagado, la fecha se oculta y la barra se acorta. Ambas vuelven al pasar el cursor.
+  - El banner de notas bajo el reloj conserva la sombra completa.
 
-- 🎛️ **Esferas analógicas**:
-  - Núcleo Reactor cambia las formas de bobina por un anillo abierto de marcas, para que la marca se lea bien.
-  - Circuito PCB conserva las luces que parpadean y quita los trazos que cruzaban la marca.
+- 🔔 **Alarmas**:
+  - Las plantillas guardan una configuración sin programarla.
+  - Clonar copia una alarma. Eliminar después de la alarma la quita al cerrar el aviso. Posponer la conserva.
+  - Nueva Alarma está en la bandeja y en el menú de cada widget.
+  - Los huecos viejos sin nombre ya no suenan cuando la lista los ha ocultado.
+
+- 🎛️ **Reloj analógico**:
+  - Los clics y el arrastre caen en la esfera visible, no en el cuadrado vacío de alrededor.
+  - El borde ya no muestra un arco blanco en la parte superior.
+  - El cursor de arrastre es el de mover del sistema, y aparece solo mientras se mueve un widget.
 
 - 🧭 **Menús**:
-  - La bandeja de la suite usa el isotipo de CyberGems, una línea breve bajo cada app y un enlace para más detalles.
-  - Las acciones de los widgets comparten las mismas etiquetas: Nuevo Temporizador, Nuevo Cronómetro y Abrir Relajación.
-  - La entrada de Relajación en Modo Completo sale del menú mini y de la bandeja. El widget de Relajación abre la Relajación completa.
-  - El zoom de la bandeja queda en su propio grupo, aparte del click-through.
-  - Más opciones empieza con Donar, suma Buscar actualizaciones y Salir usa el mismo diálogo que el botón de cerrar.
-
-- 🔊 **Voz**:
-  - El locutor dice la hora una sola vez, con la voz de Windows.
+  - Cada menú de widget se abre con el nombre de ese widget.
+  - En el calendario y en Relajación, el botón de menú aparece solo con el puntero sobre el widget.
+  - Un clic izquierdo en el icono de la bandeja trae el reloj al frente y no lo oculta.
 
 - 🎨 **También en esta versión**:
-  - Los avisos en pantalla de los botones toman el color del diseño mini activo.
-  - El estado Guardado en Configuración es una línea de estado.
-  - El icono de info muestra su punto.
-  - La tarjeta de actualización de Glass Orb se rediseñó, y Neon Circuit ya no la recorta.
+  - Los avisos en pantalla de los botones de los widgets flotantes toman el color del diseño activo.
+  - Los marcos de widget que se recortaban en seco conservan un borde interior suave.
 
 </details>
 
