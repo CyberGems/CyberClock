@@ -894,19 +894,6 @@
         ctx.fill();
 
         ctx.save();
-        ctx.fillStyle = `rgba(${c.rgb},.06)`;
-        const step = R * 0.12;
-        for (let gx = cx - R * 0.9; gx <= cx + R * 0.9; gx += step) {
-            for (let gy = cy - R * 0.9; gy <= cy + R * 0.9; gy += step) {
-                const dist = Math.hypot(gx - cx, gy - cy);
-                if (dist < R * 0.88 && dist > R * 0.32) {
-                    ctx.fillRect(gx - 1, gy - 1, 2, 2);
-                }
-            }
-        }
-        ctx.restore();
-
-        ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, R * 0.93, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(${c.rgb},.35)`;
@@ -922,18 +909,14 @@
         for (let i = 0; i < 60; i++) {
             const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
             const isHour = i % 5 === 0;
-            const vr = R * 0.91;
-            const vx = cx + Math.cos(a) * vr;
-            const vy = cy + Math.sin(a) * vr;
-
+            const r1 = isHour ? R * 0.895 : R * 0.905;
+            const r2 = R * 0.93;
             ctx.beginPath();
-            ctx.arc(vx, vy, isHour ? R * 0.015 : R * 0.008, 0, Math.PI * 2);
-            ctx.fillStyle = isHour ? c.accent : `rgba(${c.rgb},.40)`;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(vx, vy, isHour ? R * 0.006 : R * 0.0035, 0, Math.PI * 2);
-            ctx.fillStyle = "#0c1017";
-            ctx.fill();
+            ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+            ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+            ctx.strokeStyle = isHour ? c.accent : `rgba(${c.rgb},.28)`;
+            ctx.lineWidth = isHour ? 1.6 : 1;
+            ctx.stroke();
         }
 
         const chipSz = R * 0.22;
@@ -955,8 +938,8 @@
         ctx.fillStyle = c.accent;
         ctx.fill();
 
-        const pins = 6;
-        const pinSpan = (chipSz * 1.6) / (pins - 1);
+        const pins = 4;
+        const pinSpan = (chipSz * 1.35) / (pins - 1);
         ctx.lineWidth = 1.2;
         ctx.strokeStyle = `rgba(${c.rgb},.45)`;
         for (let p = 0; p < pins; p++) {
@@ -966,12 +949,6 @@
             ctx.beginPath(); ctx.moveTo(-chipSz, offset); ctx.lineTo(-chipSz - R * 0.035, offset); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(chipSz, offset); ctx.lineTo(chipSz + R * 0.035, offset); ctx.stroke();
         }
-
-        ctx.beginPath();
-        ctx.rect(-chipSz * 0.38, -chipSz * 0.38, chipSz * 0.76, chipSz * 0.76);
-        ctx.strokeStyle = `rgba(${c.rgb},.25)`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
 
         ctx.font = `bold ${Math.round(R * 0.034)}px "Space Grotesk", monospace`;
         ctx.textAlign = "center";
@@ -990,94 +967,44 @@
             const cosA = Math.cos(a), sinA = Math.sin(a);
             const isCardinal = i % 3 === 0;
 
-            const rStart = R * 0.26;
-            const rEnd = R * 0.67;
+            // Straight runs in the outer band, clear of the wordmark.
+            const rStart = R * 0.62;
+            const rEnd = R * 0.74;
+            const x0 = cx + cosA * rStart;
+            const y0 = cy + sinA * rStart;
+            const x2 = cx + cosA * rEnd;
+            const y2 = cy + sinA * rEnd;
 
-            if (isCardinal) {
-                const x0 = cx + cosA * rStart;
-                const y0 = cy + sinA * rStart;
-                const x2 = cx + cosA * rEnd;
-                const y2 = cy + sinA * rEnd;
-
-                ctx.beginPath();
-                ctx.moveTo(x0, y0);
-                ctx.lineTo(x2, y2);
-                ctx.strokeStyle = `rgba(${c.rgb},.38)`;
-                ctx.lineWidth = 1.6;
-                ctx.stroke();
-
-                const smdDist = R * 0.52;
-                ctx.save();
-                ctx.translate(cx + cosA * smdDist, cy + sinA * smdDist);
-                ctx.rotate(a + Math.PI / 2);
-                const pw = R * 0.038, ph = R * 0.018;
-                ctx.beginPath();
-                ctx.rect(-pw, -ph, pw * 2, ph * 2);
-                ctx.fillStyle = "#1e222a";
-                ctx.fill();
-                ctx.strokeStyle = `rgba(${c.rgb},.55)`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.fillStyle = c.accent;
-                ctx.fillRect(-pw, -ph, pw * 0.40, ph * 2);
-                ctx.fillRect(pw - pw * 0.40, -ph, pw * 0.40, ph * 2);
-                ctx.restore();
-            } else {
-                const x0 = cx + cosA * rStart;
-                const y0 = cy + sinA * rStart;
-
-                const elbowOffset = (i % 2 === 0 ? 0.16 : -0.16);
-                const elbowA = a + elbowOffset;
-                const x1 = cx + Math.cos(elbowA) * (R * 0.45);
-                const y1 = cy + Math.sin(elbowA) * (R * 0.45);
-
-                const x2 = cx + cosA * rEnd;
-                const y2 = cy + sinA * rEnd;
-
-                ctx.beginPath();
-                ctx.moveTo(x0, y0);
-                ctx.lineTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.strokeStyle = `rgba(${c.rgb},.38)`;
-                ctx.lineWidth = 1.6;
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(x1, y1, R * 0.010, 0, Math.PI * 2);
-                ctx.fillStyle = c.accent;
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(x1, y1, R * 0.004, 0, Math.PI * 2);
-                ctx.fillStyle = "#0c1017";
-                ctx.fill();
-
-                const smdDist = R * 0.58;
-                ctx.save();
-                ctx.translate(cx + cosA * smdDist, cy + sinA * smdDist);
-                ctx.rotate(a + Math.PI / 2);
-                const pw = R * 0.034, ph = R * 0.016;
-                ctx.beginPath();
-                ctx.rect(-pw, -ph, pw * 2, ph * 2);
-                ctx.fillStyle = "#1e222a";
-                ctx.fill();
-                ctx.strokeStyle = `rgba(${c.rgb},.50)`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.fillStyle = c.accent;
-                ctx.fillRect(-pw, -ph, pw * 0.38, ph * 2);
-                ctx.fillRect(pw - pw * 0.38, -ph, pw * 0.38, ph * 2);
-                ctx.restore();
-            }
-
-            const tx = cx + cosA * rEnd;
-            const ty = cy + sinA * rEnd;
             ctx.beginPath();
-            ctx.arc(tx, ty, R * 0.011, 0, Math.PI * 2);
-            ctx.fillStyle = c.accent;
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = `rgba(${c.rgb},.40)`;
+            ctx.lineWidth = isCardinal ? 1.5 : 1.1;
+            ctx.stroke();
+
+            const padR = R * 0.68;
+            ctx.save();
+            ctx.translate(cx + cosA * padR, cy + sinA * padR);
+            ctx.rotate(a + Math.PI / 2);
+            const pw = R * 0.020;
+            const ph = R * 0.009;
+            ctx.beginPath();
+            ctx.rect(-pw, -ph, pw * 2, ph * 2);
+            ctx.fillStyle = "#1a1e28";
             ctx.fill();
+            ctx.strokeStyle = `rgba(${c.rgb},.45)`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+
             ctx.beginPath();
-            ctx.arc(tx, ty, R * 0.004, 0, Math.PI * 2);
-            ctx.fillStyle = "#0c1017";
+            ctx.arc(x2, y2, isCardinal ? R * 0.013 : R * 0.008, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${c.rgb},.55)`;
+            ctx.lineWidth = 1.1;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x2, y2, isCardinal ? R * 0.004 : R * 0.0025, 0, Math.PI * 2);
+            ctx.fillStyle = c.accent;
             ctx.fill();
 
             const numR = R * 0.80;
@@ -2130,8 +2057,8 @@
             const pulseStep = Math.floor((Date.now() / 400) % 4);
             const cardAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
             const a = cardAngles[pulseStep];
-            const px = cx + Math.cos(a) * (R * 0.67);
-            const py = cy + Math.sin(a) * (R * 0.67);
+            const px = cx + Math.cos(a) * (R * 0.74);
+            const py = cy + Math.sin(a) * (R * 0.74);
             ctx.save();
             ctx.fillStyle = c.accent;
             ctx.shadowColor = c.accent;
