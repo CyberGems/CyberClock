@@ -56,10 +56,6 @@
                     <div id="dig-date">SUN · 01 JAN 2026</div>
                 </div>
                 <div class="tbar-right">
-                    <button class="btn-mini-pill" id="btn-mini" type="button" data-tooltip="Switch to Mini Mode" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom">
-                        <span class="mini-ico"><span data-ico="compact"></span></span>
-                        <span class="mini-lbl">Mini</span>
-                    </button>
                     <button class="wmbtn" id="tbar-btn-settings" type="button" data-tooltip="Settings" data-i18n-attr="data-tooltip:tooltip.settings, aria-label:tooltip.settings" data-tooltip-dir="bottom">
                         <span data-ico="gear"></span>
                     </button>
@@ -101,6 +97,13 @@
                             </button>
                         </div>
                     </div>
+                    <span class="tbar-sep" aria-hidden="true"></span>
+                    <button class="wmbtn" id="btn-mini" type="button" data-tooltip="Switch to Mini Mode" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom">
+                        <svg class="cc-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                            <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                        </svg>
+                    </button>
                     <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom" data-tooltip-align="right">
                         <span data-ico="x"></span>
                     </button>
@@ -487,6 +490,10 @@
                                     </div>
                                 </div>
                                 <div class="alarm-editor-foot">
+                                    <p class="alarm-template-status" id="alarm-template-status" hidden>
+                                        <span data-ico="check"></span>
+                                        <span id="alarm-template-status-text">Template saved</span>
+                                    </p>
                                     <div class="alarm-editor-foot-start">
                                         <button class="note-btn secondary" id="alarm-editor-template" type="button">
                                             <span data-i18n="alarms.editor.saveTemplate">Save as template</span>
@@ -648,6 +655,12 @@
                             <button class="abtn red" id="t-reset" disabled>
                                 <span data-ico="stop"></span> <span data-i18n="timer.reset">RESET</span>
                             </button>
+                            <button class="abtn ghost t-float-btn" id="t-float" type="button" data-tooltip="Floating timer" data-i18n-attr="data-tooltip:tooltip.floatingTimer, aria-label:tooltip.floatingTimer">
+                                <svg class="cc-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                                    <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                                </svg>
+                            </button>
                         </div>
                         <div class="t-hint" id="t-hint">
                             <span class="cal-t-ico" data-ico="timer"></span> <span data-i18n="timer.hint">Pick a preset or set a custom time to start</span>
@@ -695,6 +708,12 @@
                                     disabled
                                 >
                                     <span data-ico="flag"></span> <span data-i18n="stopwatch.lap">LAP</span>
+                                </button>
+                                <button class="abtn ghost t-float-btn" id="sw-float" type="button" data-tooltip="Floating stopwatch" data-i18n-attr="data-tooltip:tooltip.floatingStopwatch, aria-label:tooltip.floatingStopwatch">
+                                    <svg class="cc-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                                        <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>

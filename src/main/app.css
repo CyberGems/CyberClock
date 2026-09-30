@@ -220,6 +220,13 @@
         -webkit-app-region: no-drag;
         flex-shrink: 0;
     }
+    .tbar-sep {
+        width: 1px;
+        height: 16px;
+        margin: 0 4px;
+        background: rgba(255, 255, 255, 0.16);
+        flex: 0 0 auto;
+    }
     .wmbtn {
         background: transparent;
         border: 1px solid transparent;
@@ -2198,6 +2205,17 @@
         display: flex;
         gap: 14px;
     }
+    .t-float-btn {
+        min-width: 48px;
+        padding: 13px 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .t-float-btn .cc-ico {
+        width: 16px;
+        height: 16px;
+    }
     .abtn {
         font-family: var(--font-ui);
         font-size: calc(11.5px * var(--ui-scale));
@@ -3721,8 +3739,14 @@
         border-color: var(--border-bright);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 32px rgba(0, 0, 0, 0.28);
     }
-    .alarm-card.is-off {
+    .alarm-card.is-off .alarm-card-copy,
+    .alarm-card.is-off .alarm-card-actions,
+    .alarm-card.is-off .alarm-card-bottom {
         opacity: 0.55;
+    }
+    .alarm-card.is-fresh {
+        border-color: var(--accent-a);
+        box-shadow: 0 0 0 1px var(--accent-a), 0 0 22px rgba(var(--rgb-accent), 0.35);
     }
     .alarm-card-top,
     .alarm-card-bottom {
@@ -4736,8 +4760,29 @@
 
     .alarm-editor-foot {
         justify-content: flex-end;
+        flex-wrap: wrap;
         border-top: 1px solid var(--border);
         border-bottom: 0;
+    }
+    .alarm-template-status {
+        display: flex;
+        flex: 1 0 100%;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 4px;
+        color: var(--accent-a);
+        font-family: var(--font-ui);
+        font-size: calc(12px * var(--ui-scale));
+        font-weight: 700;
+    }
+    .alarm-template-status .cc-ico {
+        width: 14px;
+        height: 14px;
+    }
+    #alarm-editor-clone[hidden],
+    .alarm-template-status[hidden],
+    .alarm-templates[hidden] {
+        display: none !important;
     }
     .alarm-editor-foot-start {
         display: flex;
@@ -4774,18 +4819,29 @@
     }
     .alarm-templates {
         display: flex;
+        flex: 0 0 auto;
         flex-direction: column;
+        align-items: flex-start;
         gap: 8px;
+        margin: 0 0 12px;
+    }
+    .alarm-templates .alarm-presets-label {
+        justify-content: flex-start;
+        width: auto;
+        margin-bottom: 0;
     }
     .alarm-templates-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 8px;
+        width: 100%;
     }
     .alarm-template {
         display: flex;
+        flex: 0 1 240px;
         align-items: stretch;
         min-width: 0;
+        max-width: 100%;
         background: rgba(255, 255, 255, 0.025);
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -4846,7 +4902,7 @@
     .alarm-editor-body,
     .alarms-list {
         scrollbar-width: thin;
-        scrollbar-color: rgba(var(--rgb-accent), 0.46) transparent;
+        scrollbar-color: rgba(var(--rgb-accent), 0.72) transparent;
     }
     #view-alarms::-webkit-scrollbar,
     .alarm-editor-overlay::-webkit-scrollbar,
@@ -4859,15 +4915,15 @@
     .alarm-editor-overlay::-webkit-scrollbar-track,
     .alarm-editor-body::-webkit-scrollbar-track,
     .alarms-list::-webkit-scrollbar-track {
-        background: rgba(4, 8, 14, 0.7);
+        background: transparent;
         border-radius: 3px;
     }
     #view-alarms::-webkit-scrollbar-thumb,
     .alarm-editor-overlay::-webkit-scrollbar-thumb,
     .alarm-editor-body::-webkit-scrollbar-thumb,
     .alarms-list::-webkit-scrollbar-thumb {
-        background: rgba(var(--rgb-accent), 0.46);
-        border: 1px solid rgba(var(--rgb-accent), 0.14);
+        background: rgba(var(--rgb-accent), 0.72);
+        border: 0;
         border-radius: 3px;
     }
     #view-alarms::-webkit-scrollbar-thumb:hover,

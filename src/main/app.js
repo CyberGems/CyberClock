@@ -1287,6 +1287,8 @@
         if (deleteAfter) deleteAfter.checked = !!alarmEditorDraft.deleteAfter;
         const cloneBtn = document.getElementById("alarm-editor-clone");
         if (cloneBtn) cloneBtn.hidden = !alarmEditorId;
+        const templateStatus = document.getElementById("alarm-template-status");
+        if (templateStatus) templateStatus.hidden = true;
         syncAlarmSoundRepeat();
         document.querySelectorAll("#alarm-edit-days .alarm-day").forEach((day) => {
             day.classList.toggle("on", (Number(alarmEditorDraft.daysMask) & Number(day.dataset.day)) !== 0);
@@ -1402,9 +1404,16 @@
         };
         const list = [...(Array.isArray(cfg.customAlarms) ? cfg.customAlarms : []), copy];
         cfg.customAlarms = list;
+        closeAlarmEditor();
         renderAlarmsView();
         window.cc.saveSettings({ customAlarms: list }).catch(console.error);
-        openAlarmEditor(copy, { isExisting: true });
+        requestAnimationFrame(() => {
+            const card = document.querySelector(`[data-alarm-id="${CSS.escape(copy.id)}"]`);
+            if (!card) return;
+            card.classList.add("is-fresh");
+            card.scrollIntoView({ block: "nearest" });
+            window.setTimeout(() => card.classList.remove("is-fresh"), 1600);
+        });
     }
 
     function cloneAlarmFromEditor() {
@@ -1432,16 +1441,10 @@
         cfg.alarmTemplates = capped;
         renderAlarmTemplates();
         window.cc.saveSettings({ alarmTemplates: capped }).catch(console.error);
-        const templateLabel = document.querySelector("#alarm-editor-template span");
-        if (templateLabel) {
-            const saved = alarmText("alarms.templates.saved", "Template saved");
-            templateLabel.textContent = saved;
-            window.setTimeout(() => {
-                if (templateLabel.textContent === saved) {
-                    templateLabel.textContent = alarmText("alarms.editor.saveTemplate", "Save as template");
-                }
-            }, 1600);
-        }
+        const templateStatus = document.getElementById("alarm-template-status");
+        const templateStatusText = document.getElementById("alarm-template-status-text");
+        if (templateStatusText) templateStatusText.textContent = alarmText("alarms.templates.saved", "Template saved");
+        if (templateStatus) templateStatus.hidden = false;
     }
 
     function openAlarmFromTemplate(template) {
@@ -5431,6 +5434,12 @@
                 }
             });
         }
+        document.getElementById("t-float")?.addEventListener("click", () => {
+            if (window.cc && window.cc.spawnFloat) window.cc.spawnFloat("timer");
+        });
+        document.getElementById("sw-float")?.addEventListener("click", () => {
+            if (window.cc && window.cc.spawnFloat) window.cc.spawnFloat("sw");
+        });
         const clockFloatBtn = document.getElementById("clock-float-btn");
         if (clockFloatBtn) {
             clockFloatBtn.addEventListener("click", () => {

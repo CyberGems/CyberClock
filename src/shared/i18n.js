@@ -1025,6 +1025,8 @@
             "tooltip.floatingCalendar": "Floating calendar",
             "tooltip.floatingClock": "Floating analog clock",
             "tooltip.floatingRelax": "Floating relax",
+            "tooltip.floatingTimer": "Floating timer",
+            "tooltip.floatingStopwatch": "Floating stopwatch",
             "tray.updateBadgeTooltip": "New update available — click to view",
             "about.updateAvailableKicker": "New version ready",
             "about.updateSkipped": "Update {version} skipped"
@@ -2049,6 +2051,8 @@
             "tooltip.floatingCalendar": "Calendario flotante",
             "tooltip.floatingClock": "Reloj análogo flotante",
             "tooltip.floatingRelax": "Relajación flotante",
+            "tooltip.floatingTimer": "Temporizador flotante",
+            "tooltip.floatingStopwatch": "Cronómetro flotante",
             "tray.updateBadgeTooltip": "Nueva actualización disponible — clic para ver",
             "about.updateAvailableKicker": "Nueva versión lista",
             "about.updateSkipped": "Actualización {version} omitida"
