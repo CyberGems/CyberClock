@@ -377,7 +377,9 @@
 
             const alarmTitle = document.createElement("div");
             alarmTitle.className = "mini-tip-alarm-title";
-            alarmTitle.textContent = activeAlarmNotice.label || t("alarms.notice.title");
+            alarmTitle.textContent = window.ccI18n.displayAlarmLabel
+                ? window.ccI18n.displayAlarmLabel(activeAlarmNotice.label)
+                : (activeAlarmNotice.label || t("alarms.notice.title"));
 
             const alarmMsg = document.createElement("div");
             alarmMsg.className = "mini-tip-alarm-msg";

@@ -135,6 +135,34 @@ pub fn normalize_custom_alarms(settings: &mut AppSettings) {
             alarm.sound_repeat_count = default_sound_repeat_count();
         }
     }
+    // The old three-slot editor stored unnamed defaults as "Alarm 1/2/3".
+    // The alarm list hides those once they are off, but the scheduler
+    // still rings them. Drop only that leftover shape. A renamed slot,
+    // or one with a message, date, weekday, or custom sound, stays.
+    settings
+        .custom_alarms
+        .retain(|alarm| !is_unnamed_legacy_slot(alarm));
+}
+
+fn is_unnamed_legacy_slot(alarm: &CustomAlarm) -> bool {
+    let id_ok = matches!(alarm.id.as_str(), "alarm-1" | "alarm-2" | "alarm-3");
+    let label_ok = matches!(alarm.label.trim(), "Alarm 1" | "Alarm 2" | "Alarm 3");
+    let date_empty = alarm
+        .date
+        .as_ref()
+        .map(|value| value.trim().is_empty())
+        .unwrap_or(true);
+    let path_empty = alarm
+        .custom_path
+        .as_ref()
+        .map(|value| value.trim().is_empty())
+        .unwrap_or(true);
+    id_ok
+        && label_ok
+        && alarm.message.trim().is_empty()
+        && alarm.days_mask == 0
+        && date_empty
+        && path_empty
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

@@ -697,11 +697,29 @@
     }
 
     function alarmDisplayLabel(alarm) {
+        if (window.ccI18n && window.ccI18n.displayAlarmLabel) {
+            return window.ccI18n.displayAlarmLabel(alarm && alarm.label);
+        }
         const stored = (alarm.label || "").trim();
         const base = alarmText("alarms.notice.title", "Alarm");
         if (!stored) return base;
         const legacy = stored.match(/^(?:Alarm|Alarma)\s+(\d+)$/i);
         return legacy ? `${base} ${legacy[1]}` : stored;
+    }
+
+    // Unnamed leftovers of the old three-slot editor. The list hides them,
+    // so the user cannot delete them, but they still ring.
+    function isUnnamedLegacyAlarm(alarm) {
+        if (!alarm) return false;
+        const id = String(alarm.id || "");
+        if (!/^alarm-[123]$/.test(id)) return false;
+        const label = String(alarm.label || "").trim();
+        if (!/^Alarm [123]$/.test(label)) return false;
+        if (String(alarm.message || "").trim()) return false;
+        if (alarm.daysMask) return false;
+        if (alarm.date) return false;
+        if (alarm.customPath) return false;
+        return true;
     }
 
     function nextAlarmLabel(exceptId = null) {
@@ -1507,7 +1525,7 @@
         const snooze = document.getElementById("alarm-notice-snooze");
         const takeover = !!payload.alarmId;
         notice.classList.toggle("is-takeover", takeover);
-        if (title) title.textContent = payload.label || alarmText("alarms.notice.title", "Alarm");
+        if (title) title.textContent = alarmDisplayLabel({ label: payload.label });
         if (message) {
             const text = (payload.message || "").trim();
             message.textContent = text || (takeover ? "" : alarmText("alarms.notice.now", "It's time"));
@@ -2025,6 +2043,13 @@
 
     function applySettings(s) {
         cfg = s;
+        if (Array.isArray(cfg.customAlarms)) {
+            const kept = cfg.customAlarms.filter((alarm) => !isUnnamedLegacyAlarm(alarm));
+            if (kept.length !== cfg.customAlarms.length) {
+                cfg.customAlarms = kept;
+                window.cc?.saveSettings?.({ customAlarms: kept }).catch(console.error);
+            }
+        }
         // Scanlines are mini-mode only — full mode never has them
         applyTint(s.theme || "ice");
         // Text size tier: labels, body copy and values. Display digits

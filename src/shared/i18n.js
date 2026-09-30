@@ -2098,6 +2098,19 @@
         getLang: () => currentLang,
         
         getEffectiveLang,
+
+        // Stored default names from the old slots are English ("Alarm 1").
+        // Show them in the active language. A name the user typed stays as stored.
+        displayAlarmLabel: (label) => {
+            const stored = String(label || "").trim();
+            const lang = getEffectiveLang();
+            const base = LOCALES[lang]?.["alarms.notice.title"]
+                ?? LOCALES.en["alarms.notice.title"]
+                ?? "Alarm";
+            if (!stored) return base;
+            const legacy = stored.match(/^(?:Alarm|Alarma)\s+(\d+)$/i);
+            return legacy ? `${base} ${legacy[1]}` : stored;
+        },
         
         t: (key, vars = {}) => {
             const lang = getEffectiveLang();
