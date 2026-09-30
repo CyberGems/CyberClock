@@ -157,8 +157,13 @@ static ANALOG_HIT_ROOTS: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 static ANALOG_MENU_CAPTURE: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 /// CSS size of `.float-analog-shell` (border-box). Kept in sync with analog.css.
 const ANALOG_DIAL_CSS_PX: f64 = 266.0;
-/// Extra CSS pixels outside the rim so the border stays grabbable.
-const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 2.0;
+/// Kept at 0. Pixels outside the opaque dial are transparent, and a window
+/// region paints them white (a bright arc along the top of the circle).
+const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 0.0;
+/// True while Windows is inside a widget drag loop. The page cursor only
+/// lasts until that loop starts and replaces it with the arrow.
+#[cfg(windows)]
+static WIDGET_DRAG_CURSOR: AtomicBool = AtomicBool::new(false);
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
@@ -1766,6 +1771,11 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
             redraw: i32,
         ) -> i32;
         fn GetWindowRect(hwnd: windows_sys::Win32::Foundation::HWND, lprect: *mut RECT) -> i32;
+        fn GetClientRect(hwnd: windows_sys::Win32::Foundation::HWND, lprect: *mut RECT) -> i32;
+        fn ClientToScreen(
+            hwnd: windows_sys::Win32::Foundation::HWND,
+            lppoint: *mut windows_sys::Win32::Foundation::POINT,
+        ) -> i32;
     }
     #[link(name = "gdi32")]
     extern "system" {
@@ -1792,12 +1802,30 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         if w <= 1 || h <= 1 {
             return;
         }
+        let mut client = RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        let mut origin = windows_sys::Win32::Foundation::POINT { x: 0, y: 0 };
+        if GetClientRect(hwnd, &mut client) == 0 || ClientToScreen(hwnd, &mut origin) == 0 {
+            return;
+        }
+        let cw = client.right - client.left;
+        let ch = client.bottom - client.top;
+        if cw <= 1 || ch <= 1 {
+            return;
+        }
         let dpi = GetDpiForWindow(hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let mut d = ((ANALOG_DIAL_CSS_PX + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0) * scale).round() as i32;
-        d = d.min(w).min(h).max(1);
-        let left = (w - d) / 2;
-        let top = (h - d) / 2;
+        let mut d =
+            ((ANALOG_DIAL_CSS_PX + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0) * scale).round() as i32;
+        d = d.min(cw).min(ch).max(1);
+        // Region coordinates are window-relative. The dial is centered in
+        // the client area, which is not always the window rectangle.
+        let left = (origin.x - rc.left) + (cw - d) / 2;
+        let top = (origin.y - rc.top) + (ch - d) / 2;
         let rgn = CreateEllipticRgn(left, top, left + d, top + d);
         if rgn.is_null() {
             return;
@@ -1808,8 +1836,8 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
     }
 }
 
-/// The top-level window and the WebView2 host (same size) both get the
-/// ellipse. Smaller internal windows are left alone.
+/// Only the top-level window is clipped. A region on the WebView2 host
+/// paints that host's white background along the top of the dial.
 #[cfg(windows)]
 fn apply_analog_hit_tree(root: windows_sys::Win32::Foundation::HWND, full: bool) {
     use windows_sys::Win32::UI::WindowsAndMessaging::EnumChildWindows;
@@ -1851,9 +1879,25 @@ unsafe extern "system" fn analog_region_child_cb(
     let cw = child_rc.right - child_rc.left;
     let ch = child_rc.bottom - child_rc.top;
     if (cw - rw).abs() <= 8 && (ch - rh).abs() <= 8 {
-        apply_analog_window_region(hwnd, lparam != 0);
+        clear_window_region(hwnd);
     }
+    let _ = lparam;
     1
+}
+
+#[cfg(windows)]
+fn clear_window_region(hwnd: windows_sys::Win32::Foundation::HWND) {
+    #[link(name = "user32")]
+    extern "system" {
+        fn SetWindowRgn(
+            hwnd: windows_sys::Win32::Foundation::HWND,
+            hrgn: *mut core::ffi::c_void,
+            redraw: i32,
+        ) -> i32;
+    }
+    unsafe {
+        SetWindowRgn(hwnd, std::ptr::null_mut(), 1);
+    }
 }
 
 #[cfg(windows)]
@@ -1869,6 +1913,194 @@ fn sync_analog_hit_region(window: &WebviewWindow) {
     apply_analog_hit_tree(hwnd.0 as _, full);
 }
 
+/// Closed-hand cursor kept up for the whole native drag. The page sets
+/// `cursor: grabbing` only until `startDragging` enters the system move
+/// loop, which then forces the arrow.
+#[cfg(windows)]
+fn show_widget_drag_cursor() {
+    #[link(name = "user32")]
+    extern "system" {
+        fn SetCursor(hcursor: *mut core::ffi::c_void) -> *mut core::ffi::c_void;
+    }
+    let cursor = grabbing_cursor();
+    if !cursor.is_null() {
+        unsafe {
+            SetCursor(cursor);
+        }
+    }
+}
+
+#[cfg(windows)]
+fn grabbing_cursor() -> *mut core::ffi::c_void {
+    static CURSOR: OnceLock<isize> = OnceLock::new();
+    let raw = CURSOR.get_or_init(|| unsafe { create_grabbing_cursor() as isize });
+    *raw as *mut core::ffi::c_void
+}
+
+#[cfg(windows)]
+unsafe fn create_grabbing_cursor() -> *mut core::ffi::c_void {
+    #[link(name = "user32")]
+    extern "system" {
+        fn GetDC(hwnd: *mut core::ffi::c_void) -> *mut core::ffi::c_void;
+        fn ReleaseDC(hwnd: *mut core::ffi::c_void, hdc: *mut core::ffi::c_void) -> i32;
+        fn CreateIconIndirect(info: *const GrabIconInfo) -> *mut core::ffi::c_void;
+        fn LoadCursorW(
+            instance: *mut core::ffi::c_void,
+            name: *const u16,
+        ) -> *mut core::ffi::c_void;
+    }
+    #[link(name = "gdi32")]
+    extern "system" {
+        fn CreateDIBSection(
+            hdc: *mut core::ffi::c_void,
+            pbmi: *const GrabBitmapInfo,
+            usage: u32,
+            bits: *mut *mut u8,
+            section: *mut core::ffi::c_void,
+            offset: u32,
+        ) -> *mut core::ffi::c_void;
+        fn CreateBitmap(
+            width: i32,
+            height: i32,
+            planes: u32,
+            bit_count: u32,
+            bits: *const u8,
+        ) -> *mut core::ffi::c_void;
+        fn DeleteObject(obj: *mut core::ffi::c_void) -> i32;
+    }
+
+    #[repr(C)]
+    struct GrabIconInfo {
+        f_icon: i32,
+        x_hotspot: u32,
+        y_hotspot: u32,
+        hbm_mask: *mut core::ffi::c_void,
+        hbm_color: *mut core::ffi::c_void,
+    }
+    #[repr(C)]
+    struct GrabBitmapHeader {
+        size: u32,
+        width: i32,
+        height: i32,
+        planes: u16,
+        bit_count: u16,
+        compression: u32,
+        size_image: u32,
+        x_pels: i32,
+        y_pels: i32,
+        clr_used: u32,
+        clr_important: u32,
+    }
+    #[repr(C)]
+    struct GrabBitmapInfo {
+        header: GrabBitmapHeader,
+        colors: u32,
+    }
+
+    // 32×32 closed hand. `o` outline, `s` fill, `.` transparent.
+    // Hotspot sits in the palm so the hand stays where the click began.
+    const HAND: [&str; 32] = [
+        "................................",
+        "................................",
+        "..........oo..oo..oo............",
+        ".........osssoosssoossso........",
+        "........ossssssssssssssso.......",
+        ".......ossssssssssssssssso......",
+        "......ossssssssssssssssssso.....",
+        ".....ossssssssssssssssssssso....",
+        "....oossssssssssssssssssssso....",
+        "...oosssssssssssssssssssssso....",
+        "..oossssssssssssssssssssssso....",
+        "..osssssssssssssssssssssssso....",
+        "..osssssssssssssssssssssssso....",
+        "...ossssssssssssssssssssssso....",
+        "...ossssssssssssssssssssssso....",
+        "....osssssssssssssssssssssso....",
+        "....osssssssssssssssssssssso....",
+        ".....ossssssssssssssssssssso....",
+        ".....ossssssssssssssssssssso....",
+        "......osssssssssssssssssssso....",
+        "......oossssssssssssssssssso....",
+        ".......ossssssssssssssssssso....",
+        ".......oosssssssssssssssssso....",
+        "........osssssssssssssssssso....",
+        "........oossssssssssssssso......",
+        ".........ooooooooooooooooo......",
+        "................................",
+        "................................",
+        "................................",
+        "................................",
+        "................................",
+        "................................",
+    ];
+
+    const SIZE: i32 = 32;
+    let info = GrabBitmapInfo {
+        header: GrabBitmapHeader {
+            size: std::mem::size_of::<GrabBitmapHeader>() as u32,
+            width: SIZE,
+            height: -SIZE,
+            planes: 1,
+            bit_count: 32,
+            compression: 0,
+            size_image: 0,
+            x_pels: 0,
+            y_pels: 0,
+            clr_used: 0,
+            clr_important: 0,
+        },
+        colors: 0,
+    };
+    let hdc = GetDC(std::ptr::null_mut());
+    let mut bits: *mut u8 = std::ptr::null_mut();
+    let color = CreateDIBSection(hdc, &info, 0, &mut bits, std::ptr::null_mut(), 0);
+    ReleaseDC(std::ptr::null_mut(), hdc);
+    if color.is_null() || bits.is_null() {
+        return LoadCursorW(std::ptr::null_mut(), 32649usize as *const u16);
+    }
+
+    let pixels = std::slice::from_raw_parts_mut(bits, (SIZE * SIZE * 4) as usize);
+    let mut mask = [0xffu8; (32 * 4) as usize];
+    for y in 0..32 {
+        let row = HAND[y].as_bytes();
+        for x in 0..32 {
+            let px = (y * 32 + x) * 4;
+            let (b, g, r, a) = match row[x] {
+                b'o' => (255u8, 255, 255, 255),
+                b's' => (36u8, 36, 40, 255),
+                _ => (0u8, 0, 0, 0),
+            };
+            pixels[px] = b;
+            pixels[px + 1] = g;
+            pixels[px + 2] = r;
+            pixels[px + 3] = a;
+            if a != 0 {
+                let byte = y * 4 + x / 8;
+                mask[byte] &= !(0x80u8 >> (x % 8));
+            }
+        }
+    }
+
+    let mono = CreateBitmap(SIZE, SIZE, 1, 1, mask.as_ptr());
+    let icon = GrabIconInfo {
+        f_icon: 0,
+        x_hotspot: 14,
+        y_hotspot: 12,
+        hbm_mask: mono,
+        hbm_color: color,
+    };
+    let cursor = CreateIconIndirect(&icon);
+    if !mono.is_null() {
+        DeleteObject(mono);
+    }
+    DeleteObject(color);
+    if cursor.is_null() {
+        LoadCursorW(std::ptr::null_mut(), 32649usize as *const u16)
+    } else {
+        cursor
+    }
+}
+
 #[cfg(windows)]
 unsafe extern "system" fn window_drag_subclass_proc(
     hwnd: windows_sys::Win32::Foundation::HWND,
@@ -1880,7 +2112,8 @@ unsafe extern "system" fn window_drag_subclass_proc(
 ) -> windows_sys::Win32::Foundation::LRESULT {
     use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        WM_CREATE, WM_MOVING, WM_NCDESTROY, WM_NCHITTEST, WM_PARENTNOTIFY,
+        WM_CREATE, WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_MOVING, WM_NCDESTROY, WM_NCHITTEST,
+        WM_PARENTNOTIFY, WM_SETCURSOR,
     };
 
     // The analog window is a square larger than the dial. Clicks in that
@@ -1908,7 +2141,24 @@ unsafe extern "system" fn window_drag_subclass_proc(
         }
     }
 
+    // The system move loop replaces the page's grabbing cursor with the
+    // arrow on the first move. Put the closed hand back and keep it
+    // there until the drag ends.
+    if msg == WM_ENTERSIZEMOVE {
+        WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
+        show_widget_drag_cursor();
+    }
+    if msg == WM_EXITSIZEMOVE {
+        WIDGET_DRAG_CURSOR.store(false, Ordering::Release);
+    }
+    if msg == WM_SETCURSOR && WIDGET_DRAG_CURSOR.load(Ordering::Acquire) {
+        show_widget_drag_cursor();
+        return 1;
+    }
+
     if msg == WM_MOVING {
+        WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
+        show_widget_drag_cursor();
         if EDGE_LIMITS_ENABLED.load(Ordering::Acquire) {
             let rect = &mut *(lparam as *mut windows_sys::Win32::Foundation::RECT);
             let work_areas = get_all_work_areas();
