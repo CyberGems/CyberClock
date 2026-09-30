@@ -157,8 +157,8 @@ static ANALOG_HIT_ROOTS: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 static ANALOG_MENU_CAPTURE: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 /// CSS size of `.float-analog-shell` (border-box). Kept in sync with analog.css.
 const ANALOG_DIAL_CSS_PX: f64 = 266.0;
-/// Extra CSS pixels so the rim stays grabbable. Not the drop shadow.
-const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 3.0;
+/// Extra CSS pixels outside the rim so the border stays grabbable.
+const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 2.0;
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
@@ -909,6 +909,10 @@ fn spawn_float_window_with_slot(
             win.on_window_event(move |event| match event {
                 WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                     restore_target_size(&float_for_resize);
+                    #[cfg(windows)]
+                    if kind_for_event == "analog" {
+                        sync_analog_hit_region(&float_for_resize);
+                    }
                 }
                 WindowEvent::Moved(pos) => {
                     if kind_for_event == "cal" {
@@ -1740,7 +1744,129 @@ fn note_analog_hit_window(window: &WebviewWindow) {
         let raw = hwnd.0 as isize;
         lock_or_recover(analog_hit_roots()).insert(raw);
         subclass_analog_descendants(hwnd.0 as _);
+        apply_analog_hit_tree(hwnd.0 as _, false);
     }
+}
+
+/// Clip the analog window to the dial. Hit-testing the square in
+/// WM_NCHITTEST does not reach WebView2's child, so the transparent
+/// margin still stole clicks. The window region does: pixels outside
+/// the ellipse belong to whatever is behind. The menu clears the
+/// region while it is open, because it is drawn in that margin.
+#[cfg(windows)]
+fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: bool) {
+    use windows_sys::Win32::Foundation::RECT;
+    use windows_sys::Win32::UI::HiDpi::GetDpiForWindow;
+
+    #[link(name = "user32")]
+    extern "system" {
+        fn SetWindowRgn(
+            hwnd: windows_sys::Win32::Foundation::HWND,
+            hrgn: *mut core::ffi::c_void,
+            redraw: i32,
+        ) -> i32;
+        fn GetWindowRect(hwnd: windows_sys::Win32::Foundation::HWND, lprect: *mut RECT) -> i32;
+    }
+    #[link(name = "gdi32")]
+    extern "system" {
+        fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
+        fn DeleteObject(ho: *mut core::ffi::c_void) -> i32;
+    }
+
+    unsafe {
+        if full {
+            SetWindowRgn(hwnd, std::ptr::null_mut(), 1);
+            return;
+        }
+        let mut rc = RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        if GetWindowRect(hwnd, &mut rc) == 0 {
+            return;
+        }
+        let w = rc.right - rc.left;
+        let h = rc.bottom - rc.top;
+        if w <= 1 || h <= 1 {
+            return;
+        }
+        let dpi = GetDpiForWindow(hwnd);
+        let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
+        let mut d = ((ANALOG_DIAL_CSS_PX + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0) * scale).round() as i32;
+        d = d.min(w).min(h).max(1);
+        let left = (w - d) / 2;
+        let top = (h - d) / 2;
+        let rgn = CreateEllipticRgn(left, top, left + d, top + d);
+        if rgn.is_null() {
+            return;
+        }
+        if SetWindowRgn(hwnd, rgn, 1) == 0 {
+            DeleteObject(rgn);
+        }
+    }
+}
+
+/// The top-level window and the WebView2 host (same size) both get the
+/// ellipse. Smaller internal windows are left alone.
+#[cfg(windows)]
+fn apply_analog_hit_tree(root: windows_sys::Win32::Foundation::HWND, full: bool) {
+    use windows_sys::Win32::UI::WindowsAndMessaging::EnumChildWindows;
+    apply_analog_window_region(root, full);
+    unsafe {
+        EnumChildWindows(root, Some(analog_region_child_cb), if full { 1 } else { 0 });
+    }
+}
+
+#[cfg(windows)]
+unsafe extern "system" fn analog_region_child_cb(
+    hwnd: windows_sys::Win32::Foundation::HWND,
+    lparam: windows_sys::Win32::Foundation::LPARAM,
+) -> i32 {
+    use windows_sys::Win32::Foundation::RECT;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{GetAncestor, GA_ROOT};
+
+    #[link(name = "user32")]
+    extern "system" {
+        fn GetWindowRect(hwnd: windows_sys::Win32::Foundation::HWND, lprect: *mut RECT) -> i32;
+    }
+
+    let root = GetAncestor(hwnd, GA_ROOT);
+    if root.is_null() {
+        return 1;
+    }
+    let mut root_rc = RECT {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+    };
+    let mut child_rc = root_rc;
+    if GetWindowRect(root, &mut root_rc) == 0 || GetWindowRect(hwnd, &mut child_rc) == 0 {
+        return 1;
+    }
+    let rw = root_rc.right - root_rc.left;
+    let rh = root_rc.bottom - root_rc.top;
+    let cw = child_rc.right - child_rc.left;
+    let ch = child_rc.bottom - child_rc.top;
+    if (cw - rw).abs() <= 8 && (ch - rh).abs() <= 8 {
+        apply_analog_window_region(hwnd, lparam != 0);
+    }
+    1
+}
+
+#[cfg(windows)]
+fn sync_analog_hit_region(window: &WebviewWindow) {
+    if !window.label().starts_with("float-analog") {
+        return;
+    }
+    let Ok(hwnd) = window.hwnd() else {
+        return;
+    };
+    let raw = hwnd.0 as isize;
+    let full = lock_or_recover(analog_menu_capture()).contains(&raw);
+    apply_analog_hit_tree(hwnd.0 as _, full);
 }
 
 #[cfg(windows)]
@@ -1844,6 +1970,7 @@ fn set_analog_menu_capture(window: WebviewWindow, capture: bool) {
                 lock_or_recover(analog_menu_capture()).remove(&raw);
             }
             subclass_analog_descendants(hwnd.0 as _);
+            apply_analog_hit_tree(hwnd.0 as _, capture);
         }
     }
     #[cfg(not(windows))]
