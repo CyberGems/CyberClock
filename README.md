@@ -87,13 +87,13 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Always on Top** — Keep the clock visible over other windows
 - **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
-- **Collapse Date** — Show date only on hover
+- **Collapse Date** — Show the date only on hover. Compact (2 Rows) stays unavailable while this is on, and the bar grows to fit the time and date.
 - **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from the tray menu or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes
-- **Voice Time Announcer (Talking Clock)** — Verbally announces the time at intervals (:15, :30, :00) with selectable system voices, customizable style (Natural, Cyber/Tactical, Concise), optional soft pre-chime, quiet hours, and direct shortcut to install Windows voices
+- **Voice Time Announcer (Talking Clock)** — Speaks the time once at :15, :30, or :00, with selectable Windows voices, a customizable style (Natural, Cyber/Tactical, Concise), an optional soft pre-chime, quiet hours, and a shortcut to install Windows voices
 - **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
 - **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
 - **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes

@@ -87,13 +87,13 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas
 - **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario, Relajación)
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
-- **Colapsar fecha:** muestra la fecha solo al pasar el cursor
+- **Colapsar Fecha:** muestra la fecha solo al pasar el cursor. Compacto (2 Filas) no está disponible mientras esto está activo, y la barra crece para caber la hora y la fecha.
 - **Líneas de exploración CRT:** efecto retro de superposición
 - **Click-through:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde el menú de la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas
-- **Locutor de hora por voz (Reloj Parlante):** anuncia la hora verbalmente a intervalos (:15, :30, :00) con voces del sistema seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio y acceso directo para instalar voces de Windows
+- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez a las :15, :30 o :00, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio y acceso directo para instalar voces de Windows
 - **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
 - **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
 - **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias
