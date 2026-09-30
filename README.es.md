@@ -87,7 +87,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas
 - **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario, Relajación)
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
-- **Mostrar Fecha:** activado por defecto. Apagado, la fecha aparece solo al pasar el cursor. Compacto (2 Filas) no está disponible mientras Mostrar Fecha está apagado, y la barra crece para caber la hora y la fecha.
+- **Mostrar Fecha:** activado por defecto. Apagado, oculta la fecha y acorta la barra; ambas vuelven al pasar el cursor. Compacto (2 Filas) no está disponible mientras Mostrar Fecha está apagado.
 - **Líneas de exploración CRT:** efecto retro de superposición
 - **Click-through:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde el menú de la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol

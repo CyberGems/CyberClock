@@ -664,7 +664,7 @@
             isTipVisible = true;
             tipEl.classList.add("show");
             syncWindowSize();
-        }, 1500);
+        }, 900);
     });
 
     timeBlock.addEventListener("mouseleave", () => {

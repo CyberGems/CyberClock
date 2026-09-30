@@ -1778,15 +1778,11 @@
         pointer-events: none;
     }
 
-    /* Inline (1-row) collapse: collapses horizontally */
+    /* Inline (1-row) collapse: leave the flex row entirely.
+       min-width: max-content on #mini-date would ignore max-width: 0
+       and keep the empty slot the bar is supposed to give back. */
     .mini-shell[data-layout="inline"].collapse-date:not(.is-expanded) #mini-date {
-        max-width: 0;
-        opacity: 0;
-        transform: scaleX(0.8);
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden;
-        pointer-events: none;
+        display: none;
     }
 
     .time-block {
