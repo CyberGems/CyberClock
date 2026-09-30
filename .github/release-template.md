@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-A full alarm designer with twenty synthesized sounds, your own audio file, and a fullscreen notice that shows the snooze time. Floating widgets gain a Relax session, and click-through now covers the mini clock and every open widget.
+The mini clock sizes itself to each face and splits time from date. Reactor Core and Circuit PCB stay clear of the brand, the suite tray matches the rest of the family, and the voice announcer speaks the time once.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,64 +17,66 @@ A full alarm designer with twenty synthesized sounds, your own audio file, and a
 
 ### ✨ Key Features & Highlights
 
-- 🔔 **Alarms**:
-  - Alarm view with quick presets, cards, and a designer. The alarm name is edited in the title.
-  - Time and date sit together. Repeat once, every day, on weekdays, on weekends, or on selected days.
-  - New alarms start on No sound. Twenty synthesized tones are available, and the last choice is remembered.
-  - Use your own MP3 or WAV. That file plays instead of the tone list.
-  - Repeat the sound a set number of times, or until the notice is dismissed, with a pause between plays.
-  - The snooze button shows its delay. The next-alarm card counts down to that time.
-  - A firing alarm takes over the full window, and Mini Mode shows its own notice.
+- 🕐 **Mini clock**:
+  - The window sizes itself to the clock type, and time and date use separate faces.
+  - Compact (2 Rows) is unavailable while Collapse Date is on. Its tooltip stays solid.
+  - Switches leave the menu open. Settings, Full Mode, and quit still close it.
 
-- 🧘 **Floating Relax**:
-  - Compact desktop session with the track name, play and next, a breathing ring, a small spectrum, and 10 designs.
-  - Audio keeps playing when full mode is hidden.
+- 🎛️ **Analog dials**:
+  - Reactor Core replaces the coil shapes with an open ring of markers, so the brand stays readable.
+  - Circuit PCB keeps the blinking lights and drops the traces that crossed the brand.
 
-- 🖱️ **Click-through**:
-  - One switch in Settings and the tray menu.
-  - Mouse clicks pass through the mini clock and every floating widget, including widgets opened later.
-  - Turn it off from the tray or from Settings. Those stay reachable while the windows ignore the mouse.
+- 🧭 **Menus**:
+  - The suite tray uses the CyberGems mark, a short line under each app, and a link for more details.
+  - Widget actions share one set of labels: New Timer, New Stopwatch, and Open Relax.
+  - The full-mode Relax entry is gone from the mini menu and the tray. The Relax widget opens full Relax.
+  - Tray zoom sits in its own group, apart from click-through.
+  - More options leads with Donate, adds Check for Update, and Exit uses the same close dialog as the window button.
+
+- 🔊 **Voice**:
+  - The announcer speaks the time once, through Windows speech.
 
 - 🎨 **Also in this release**:
-  - Gold and Coral accent tints.
-  - Widget menus open Settings and the matching full-mode section.
-  - Optional on-screen button hints, and a global switch for tooltips.
-  - The voice announcer speaks the time once.
+  - On-screen button hints take their color from the active mini skin.
+  - The Saved status in Settings is a status line.
+  - The info icon shows its dot.
+  - The Glass Orb update card is restyled, and Neon Circuit no longer clips it.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Diseñador de alarmas completo, con veinte sonidos sintetizados, un archivo de audio propio y un aviso a pantalla completa que muestra el tiempo de posponer. Los widgets flotantes suman una sesión de Relajación, y el click-through cubre el reloj mini y cada widget abierto.
+El reloj mini se ajusta a cada esfera y separa la hora de la fecha. Núcleo Reactor y Circuito PCB dejan libre la marca, el menú de la suite en la bandeja coincide con el resto de la familia, y el locutor dice la hora una sola vez.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🔔 **Alarmas**:
-  - Vista de alarmas con preajustes, tarjetas y diseñador. El nombre se edita en el título.
-  - La hora y la fecha quedan juntas. Se repite una vez, todos los días, entre semana, en fines de semana o en días seleccionados.
-  - Las alarmas nuevas empiezan en Sin sonido. Hay veinte tonos sintetizados y se recuerda la última elección.
-  - Puedes usar tu propio MP3 o WAV. Ese archivo suena en lugar de la lista de tonos.
-  - El sonido se repite un número de veces, o hasta que se cierra el aviso, con una pausa entre reproducciones.
-  - El botón Posponer muestra su demora. La tarjeta de la próxima alarma cuenta hasta ese momento.
-  - Al sonar, la alarma ocupa la ventana completa, y el Modo Mini muestra su propio aviso.
+- 🕐 **Reloj mini**:
+  - La ventana se ajusta al tipo de reloj, y la hora y la fecha usan esferas distintas.
+  - Compacto (2 Filas) no está disponible con Colapsar Fecha. Su tooltip se mantiene sólido.
+  - Los interruptores dejan el menú abierto. Configuración, Modo Completo y salir sí lo cierran.
 
-- 🧘 **Relajación flotante**:
-  - Sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, un anillo de respiración, un espectro pequeño y 10 diseños.
-  - El audio sigue cuando el modo completo está oculto.
+- 🎛️ **Esferas analógicas**:
+  - Núcleo Reactor cambia las formas de bobina por un anillo abierto de marcas, para que la marca se lea bien.
+  - Circuito PCB conserva las luces que parpadean y quita los trazos que cruzaban la marca.
 
-- 🖱️ **Click-through**:
-  - Un solo interruptor en Configuración y en el menú de la bandeja.
-  - Los clics atraviesan el reloj mini y cada widget flotante, también los que se abran después.
-  - Se desactiva desde la bandeja o desde Configuración. Esos controles siguen disponibles mientras las ventanas ignoran el ratón.
+- 🧭 **Menús**:
+  - La bandeja de la suite usa el isotipo de CyberGems, una línea breve bajo cada app y un enlace para más detalles.
+  - Las acciones de los widgets comparten las mismas etiquetas: Nuevo Temporizador, Nuevo Cronómetro y Abrir Relajación.
+  - La entrada de Relajación en Modo Completo sale del menú mini y de la bandeja. El widget de Relajación abre la Relajación completa.
+  - El zoom de la bandeja queda en su propio grupo, aparte del click-through.
+  - Más opciones empieza con Donar, suma Buscar actualizaciones y Salir usa el mismo diálogo que el botón de cerrar.
+
+- 🔊 **Voz**:
+  - El locutor dice la hora una sola vez, con la voz de Windows.
 
 - 🎨 **También en esta versión**:
-  - Tintes de acento Oro y Coral.
-  - Los menús de los widgets abren Configuración y la sección correspondiente del modo completo.
-  - Avisos opcionales en los botones, y un interruptor global para los tooltips.
-  - El locutor de la hora habla una sola vez.
+  - Los avisos en pantalla de los botones toman el color del diseño mini activo.
+  - El estado Guardado en Configuración es una línea de estado.
+  - El icono de info muestra su punto.
+  - La tarjeta de actualización de Glass Orb se rediseñó, y Neon Circuit ya no la recorta.
 
 </details>
 
