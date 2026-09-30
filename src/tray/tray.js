@@ -63,34 +63,50 @@
             verEl.textContent = "v" + state.version;
         }
 
-        // Visibility Item
+        // Status is information. The two mode rows stay visible, and
+        // the marked one is the mode the clock is actually in.
+        const T = (k, fb) => (window.ccI18n ? window.ccI18n.t(k) : fb);
+        const isVis = !!state.is_visible;
+        const isFull = state.window_mode === "full";
+        const modeName = T(isFull ? "tray.fullMode" : "tray.miniMode", isFull ? "Full Mode" : "Mini Mode");
+        const statusEl = document.getElementById("tray-clock-status");
+        const statusLbl = document.getElementById("lbl-clock-status");
+        if (statusEl) statusEl.classList.toggle("is-hidden", !isVis);
+        if (statusLbl) {
+            const key = isVis ? "tray.statusVisible" : "tray.statusHidden";
+            const fallback = (isVis ? "On screen · " : "Hidden · ") + modeName;
+            statusLbl.textContent = window.ccI18n ? window.ccI18n.t(key, { mode: modeName }) : fallback;
+        }
+        const markMode = (id, on) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.classList.toggle("is-current", on);
+            btn.setAttribute("aria-checked", on ? "true" : "false");
+            const mark = btn.querySelector(".mode-mark");
+            if (mark) mark.hidden = !on;
+        };
+        markMode("btn-mode-full", isFull);
+        markMode("btn-mode-mini", !isFull);
+        const lblFull = document.getElementById("lbl-mode-full");
+        if (lblFull) lblFull.textContent = T("tray.fullMode", "Full Mode");
+        const lblMini = document.getElementById("lbl-mode-mini");
+        if (lblMini) lblMini.textContent = T("tray.miniMode", "Mini Mode");
+
         const lblVis = document.getElementById("lbl-visibility");
         const icoVis = document.getElementById("ico-visibility");
         const hintVis = document.getElementById("hint-visibility");
-        const isVis = state.is_visible;
+        const btnVis = document.getElementById("btn-visibility");
+        if (btnVis) btnVis.dataset.action = isVis ? "hide" : "show";
         if (lblVis) {
-            lblVis.textContent = window.ccI18n ? window.ccI18n.t(isVis ? "tray.hide" : "tray.show") : (isVis ? "Hide Clock" : "Show Clock");
+            lblVis.textContent = T(isVis ? "tray.hide" : "tray.show", isVis ? "Hide Clock" : "Show Clock");
         }
         if (icoVis) {
             icoVis.setAttribute("data-ico", isVis ? "eye-off" : "eye");
         }
-        // Shortcut hint of the global show/hide hotkey; hidden when the
-        // user disabled the shortcut in Settings.
         if (hintVis) {
             const hotkey = state.hotkey || "";
             hintVis.textContent = hotkey;
             hintVis.hidden = !hotkey;
-        }
-
-        // Mode Item
-        const isFull = state.window_mode === "full";
-        const lblMode = document.getElementById("lbl-mode");
-        const icoMode = document.getElementById("ico-mode");
-        if (lblMode) {
-            lblMode.textContent = window.ccI18n ? window.ccI18n.t(isFull ? "tray.miniMode" : "tray.fullMode") : (isFull ? "Mini Mode" : "Full Mode");
-        }
-        if (icoMode) {
-            icoMode.setAttribute("data-ico", isFull ? "compact" : "expand");
         }
 
         // Features
@@ -140,7 +156,6 @@
         }
 
         // Help section labels
-        const T = (k, fb) => (window.ccI18n ? window.ccI18n.t(k) : fb);
         const setLbl = (id, val) => {
             const el = document.getElementById(id);
             if (el) el.textContent = val;
@@ -592,9 +607,10 @@
                 runAction("about");
                 return;
             }
-            if (action === "toggle_mode") {
-                const targetMode = currentMenuState && currentMenuState.window_mode === "full" ? "mini" : "full";
-                runAction(targetMode);
+            if (action === "mode-full" || action === "mode-mini") {
+                const want = action === "mode-full" ? "full" : "mini";
+                const current = currentMenuState && currentMenuState.window_mode === "full" ? "full" : "mini";
+                runAction(want === current ? "reveal" : want);
             } else {
                 runAction(action);
             }

@@ -778,6 +778,17 @@
     // window is on screen (WebView2 keeps reporting hidden windows as
     // focused — see the main window's cc:active-window notes).
     let activeBackendLabel = null;
+    if (window.cc.onMiniLocate) {
+        window.cc.onMiniLocate(() => {
+            const shell = document.getElementById("shell");
+            if (!shell) return;
+            shell.classList.remove("locate-flash");
+            void shell.offsetWidth;
+            shell.classList.add("locate-flash");
+            setTimeout(() => shell.classList.remove("locate-flash"), 1200);
+        });
+    }
+
     window.cc.onActiveWindow((label) => {
         activeBackendLabel = label;
         syncMiniMotion();

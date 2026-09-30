@@ -2759,6 +2759,17 @@
         opacity: 0.88;
     }
 
+    /* Tray "find me": a short rim pulse. Position lock keeps the
+       clock where it is, so the pulse is how it gets noticed. */
+    .mini-shell.locate-flash {
+        animation: mini-locate 1.1s ease;
+    }
+    @keyframes mini-locate {
+        0% { outline: 2px solid transparent; outline-offset: 2px; }
+        35% { outline: 2px solid var(--accent-a, #00f0ff); outline-offset: 3px; }
+        100% { outline: 2px solid transparent; outline-offset: 2px; }
+    }
+
     /* ═══════════════════════════════════════════════════════
        FRAME + TYPE CONTRACT
        Skins paint (color, chrome, glow, curated faces).

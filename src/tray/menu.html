@@ -29,17 +29,27 @@
 
                         <div class="tray-divider"></div>
 
-                        <!-- Primary Controls -->
+                        <!-- Clock state is information. Mode is a marked choice.
+                             Hide stays a separate, deliberate action. -->
                         <div class="tray-group">
-                            <button type="button" class="tray-item" data-action="toggle_visibility" id="btn-visibility">
+                            <div class="tray-status" id="tray-clock-status" role="status">
+                                <span class="tray-status-dot" id="tray-status-dot" aria-hidden="true"></span>
+                                <span class="tray-status-text" id="lbl-clock-status">On screen · Mini Mode</span>
+                            </div>
+                            <button type="button" class="tray-item tray-mode" data-action="mode-full" id="btn-mode-full" role="menuitemradio" aria-checked="false">
+                                <span class="ico" data-ico="expand"></span>
+                                <span class="label" id="lbl-mode-full">Full Mode</span>
+                                <span class="mode-mark" data-ico="check" hidden></span>
+                            </button>
+                            <button type="button" class="tray-item tray-mode" data-action="mode-mini" id="btn-mode-mini" role="menuitemradio" aria-checked="true">
+                                <span class="ico" data-ico="compact"></span>
+                                <span class="label" id="lbl-mode-mini">Mini Mode</span>
+                                <span class="mode-mark" data-ico="check" hidden></span>
+                            </button>
+                            <button type="button" class="tray-item" data-action="show" id="btn-visibility">
                                 <span class="ico" data-ico="eye" id="ico-visibility"></span>
                                 <span class="label" id="lbl-visibility">Show Clock</span>
                                 <span class="hotkey-hint" id="hint-visibility" hidden>Alt+Shift+C</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="toggle_mode" id="btn-mode">
-                                <span class="ico" data-ico="expand" id="ico-mode"></span>
-                                <span class="label" id="lbl-mode">Switch to Full Mode</span>
                             </button>
                         </div>
 

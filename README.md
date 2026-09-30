@@ -102,7 +102,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Alarms** — An Alarms view with presets, cards, and a designer. Schedules are once, every day, weekdays, weekends, or selected days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm takes over the window
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog
+- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked
 - **Flexible Window Close** — Configurable close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
 - **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
 - **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display

@@ -2587,8 +2587,119 @@ fn normalize_hotkey(input: &str) -> Option<String> {
     Some(out)
 }
 
-/// Tray-left-click behavior: hide the clock if it is on screen,
-/// otherwise bring it back in its current mode.
+/// Place the mini clock in the corner of the click's monitor that
+/// sits nearest the tray icon, and return the new physical origin.
+#[cfg(windows)]
+fn move_mini_near_anchor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_y: i32) -> Option<(i32, i32)> {
+    let (left, top, right, bottom) = work_area_containing(anchor_x, anchor_y)?;
+    let size = mini
+        .outer_size()
+        .unwrap_or(tauri::PhysicalSize::new(260, 48));
+    let w = size.width as i32;
+    let h = size.height as i32;
+    let margin = 12;
+    let max_x = (right - w - margin).max(left);
+    let max_y = (bottom - h - margin).max(top);
+    let x = if (anchor_x - left) <= (right - anchor_x) {
+        left + margin
+    } else {
+        max_x
+    };
+    let y = if (anchor_y - top) <= (bottom - anchor_y) {
+        top + margin
+    } else {
+        max_y
+    };
+    let x = x.clamp(left, max_x);
+    let y = y.clamp(top, max_y);
+    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+    Some((x, y))
+}
+
+#[cfg(not(windows))]
+fn move_mini_near_anchor(
+    _mini: &tauri::WebviewWindow,
+    _anchor_x: i32,
+    _anchor_y: i32,
+) -> Option<(i32, i32)> {
+    None
+}
+
+/// True when the mini window's center and the tray click share a work area.
+#[cfg(windows)]
+fn mini_is_on_anchor_monitor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_y: i32) -> bool {
+    let Ok(pos) = mini.outer_position() else {
+        return false;
+    };
+    let Ok(size) = mini.outer_size() else {
+        return false;
+    };
+    let cx = pos.x + (size.width as i32) / 2;
+    let cy = pos.y + (size.height as i32) / 2;
+    match (
+        work_area_containing(anchor_x, anchor_y),
+        work_area_containing(cx, cy),
+    ) {
+        (Some(click_area), Some(clock_area)) => click_area == clock_area,
+        _ => false,
+    }
+}
+
+#[cfg(not(windows))]
+fn mini_is_on_anchor_monitor(
+    _mini: &tauri::WebviewWindow,
+    _anchor_x: i32,
+    _anchor_y: i32,
+) -> bool {
+    true
+}
+
+/// Left click on the tray icon. Shows the clock in its current mode
+/// and brings it forward. Never hides it. An unlocked mini that is
+/// on another monitor moves next to that tray. A locked mini stays
+/// put and flashes so it can be spotted.
+fn reveal_clock_at(app: &AppHandle, anchor_x: i32, anchor_y: i32) {
+    let settings = load_settings(app);
+    if settings.window_mode == "full" {
+        if let Some(main) = app.get_webview_window("main") {
+            let hidden =
+                !main.is_visible().unwrap_or(false) || main.is_minimized().unwrap_or(false);
+            if hidden {
+                place_full_clock(&main, &settings);
+            }
+            let _ = main.unminimize();
+            let _ = main.show();
+            let _ = main.set_focus();
+            refresh_taskbar_tab(&main);
+            broadcast_active_window(app, "main");
+        }
+        return;
+    }
+
+    let Some(mini) = app.get_webview_window("mini") else {
+        return;
+    };
+    let same_monitor = mini_is_on_anchor_monitor(&mini, anchor_x, anchor_y);
+    let _ = mini.unminimize();
+    let _ = mini.show();
+    refresh_taskbar_tab(&mini);
+    reapply_click_through(app, &mini);
+    if !settings.mini_position_locked && !same_monitor {
+        if let Some((x, y)) = move_mini_near_anchor(&mini, anchor_x, anchor_y) {
+            let mut settings = settings;
+            settings.mini_position = Some((x, y));
+            let _ = persist(app, &settings);
+            let _ = app.emit("settings:updated", &settings);
+        }
+    }
+    let _ = mini.set_focus();
+    let _ = mini.emit("mini:locate", ());
+    broadcast_active_window(app, "mini");
+}
+
+/// Global hotkey behavior: hide the clock if it is on screen,
+/// otherwise bring it back in its current mode. The tray icon does
+/// not use this. A left click only reveals the clock.
 fn toggle_clock_visibility(app: &AppHandle) {
     if is_any_clock_window_visible(app) {
         hide_all_clock_windows(app);
@@ -4125,9 +4236,11 @@ async fn tray_menu_action(app: AppHandle, action: String) {
 
     match action.as_str() {
         "toggle_visibility" => {
+            toggle_clock_visibility(&app);
+        }
+        "reveal" => {
             if is_any_clock_window_visible(&app) {
-                hide_all_clock_windows(&app);
-                broadcast_active_window(&app, "none");
+                focus_clock_for_tray_menu(&app);
             } else {
                 show_clock_window(&app);
             }
@@ -4244,16 +4357,22 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                 TrayIconEvent::Click {
                     button: MouseButton::Left,
                     button_state: MouseButtonState::Up,
+                    position,
+                    rect,
                     ..
                 } => {
                     let app = tray.app_handle();
                     hide_tray_menu(app.clone());
-                    if is_any_clock_window_visible(app) {
-                        hide_all_clock_windows(app);
-                        broadcast_active_window(app, "none");
-                    } else {
-                        show_clock_window(app);
-                    }
+                    let (x, y) = {
+                        use tauri::{Position, Size};
+                        match (rect.position, rect.size) {
+                            (Position::Physical(p), Size::Physical(s)) => {
+                                (p.x + (s.width as i32) / 2, p.y + (s.height as i32) / 2)
+                            }
+                            _ => (position.x.round() as i32, position.y.round() as i32),
+                        }
+                    };
+                    reveal_clock_at(app, x, y);
                 }
                 TrayIconEvent::Click {
                     button: MouseButton::Right,

@@ -102,7 +102,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Alarmas:** vista de Alarmas con preajustes, tarjetas y diseñador. La programación es una vez, todos los días, entre semana, fines de semana o días seleccionados. Las alarmas nuevas empiezan en Sin sonido, con veinte tonos sintetizados o tu propio MP3 o WAV. Posponer muestra su demora, y al sonar la alarma ocupa la ventana
 
 ### 🖥️ Integración con escritorio
-- **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows
+- **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows. Un clic izquierdo trae el reloj delante y no lo oculta. El menú dice si está en pantalla, y lista Modo Completo y Modo Mini juntos, con el actual marcado
 - **Cierre de ventana flexible:** comportamiento al cerrar configurable (minimizar a la bandeja, pasar a Modo Mini o salir) con diálogo de confirmación en el primer cierre, botón de cierre directo y descarte desde el fondo
 - **Atajo global:** muestra u oculta el reloj desde cualquier lugar (Alt+Shift+C por defecto; graba tu propia combinación o desactívala en Configuración)
 - **Monitor automático:** el modo completo se abre en el monitor donde está el ratón (estilo CyberLauncher), o fíjalo a una pantalla preferida

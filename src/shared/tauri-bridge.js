@@ -388,6 +388,9 @@
         onActiveWindow: (cb) => {
             return subscribe("cc:active-window", cb);
         },
+        onMiniLocate: (cb) => {
+            return subscribe("mini:locate", cb);
+        },
         onTrayMenuState: (cb) => {
             return subscribe("tray-menu-state", cb);
         },
