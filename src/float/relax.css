@@ -39,10 +39,9 @@ body {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    cursor: grab;
+    cursor: default;
 }
 
-.relax-shell:active,
 body.is-dragging,
 body.is-dragging * {
     cursor: grabbing !important;

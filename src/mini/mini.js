@@ -1062,13 +1062,16 @@
         if (cfg.miniPositionLocked === true) return;
         e.preventDefault();
         isDragging = true;
+        document.body.classList.add("is-dragging");
         window.cc.startDragging()
             .then(() => {
                 isDragging = false;
+                document.body.classList.remove("is-dragging");
                 window.cc.saveMiniPosition().catch(() => {});
             })
             .catch(() => {
                 isDragging = false;
+                document.body.classList.remove("is-dragging");
             });
     });
 

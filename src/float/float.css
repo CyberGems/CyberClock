@@ -320,10 +320,7 @@
     border-radius: inherit;
     background: rgba(8, 10, 14, 0.96);
     box-shadow: inset 0 0 0 1px var(--border-bright);
-    cursor: grab;
-}
-.float-done:active {
-    cursor: grabbing;
+    cursor: default;
 }
 .float-done[hidden] { display: none; }
 

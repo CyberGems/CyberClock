@@ -664,7 +664,14 @@
             : (KIND === "timer" ? cfg.timerPositionLocked === true : cfg.swPositionLocked === true);
         if (isLocked) return;
         e.preventDefault();
-        if (window.cc && window.cc.startDragging) window.cc.startDragging().catch(() => {});
+        document.body.classList.add("is-dragging");
+        if (window.cc && window.cc.startDragging) {
+            window.cc.startDragging()
+                .then(() => document.body.classList.remove("is-dragging"))
+                .catch(() => document.body.classList.remove("is-dragging"));
+        } else {
+            document.body.classList.remove("is-dragging");
+        }
     });
 
     // Reuse the mini-style context menu. The backend anchors it to the

@@ -45,13 +45,12 @@ body {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    cursor: grab;
+    cursor: default;
 }
 body.click-through .float-cal-shell {
     opacity: calc(var(--cal-opacity, 1) * 0.88);
 }
 
-.float-cal-shell:active,
 body.is-dragging,
 body.is-dragging * {
     cursor: grabbing !important;

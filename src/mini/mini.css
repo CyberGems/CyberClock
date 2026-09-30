@@ -31,13 +31,14 @@
         overflow: hidden;
         box-sizing: border-box;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: grab;
+        cursor: default;
         position: relative;
         outline: none;
         box-shadow: none !important;
     }
     .mini-shell:focus, .mini-shell:focus-visible { outline: none; }
-    .mini-shell:active { cursor: grabbing; }
+    body.is-dragging,
+    body.is-dragging * { cursor: grabbing !important; }
 
     /* Scanlines overlay (global) */
     .scanlines {
