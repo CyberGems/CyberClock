@@ -675,8 +675,7 @@ pub fn get_settings(app: &AppHandle) -> AppSettings {
         .state
         .read()
         .map(|s| s.clone())
-        .unwrap_or_else(|_| AppSettings::default())
-    ;
+        .unwrap_or_else(|_| AppSettings::default());
     normalize_custom_alarms(&mut settings);
     settings
 }

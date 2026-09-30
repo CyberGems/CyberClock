@@ -536,8 +536,7 @@ fn reset_settings(app: AppHandle) -> AppSettings {
 #[tauri::command]
 async fn export_backup(app: AppHandle, window: WebviewWindow) -> Result<bool, String> {
     let settings = load_settings(&app);
-    let json = serde_json::to_string_pretty(&settings)
-        .map_err(|e| format!("serialize: {}", e))?;
+    let json = serde_json::to_string_pretty(&settings).map_err(|e| format!("serialize: {}", e))?;
 
     let (tx, rx) = std::sync::mpsc::channel();
 
@@ -568,7 +567,10 @@ async fn export_backup(app: AppHandle, window: WebviewWindow) -> Result<bool, St
 
 /// Import settings from a user-chosen JSON backup file.
 #[tauri::command]
-async fn import_backup(app: AppHandle, window: WebviewWindow) -> Result<Option<AppSettings>, String> {
+async fn import_backup(
+    app: AppHandle,
+    window: WebviewWindow,
+) -> Result<Option<AppSettings>, String> {
     let (tx, rx) = std::sync::mpsc::channel();
 
     window
@@ -588,10 +590,9 @@ async fn import_backup(app: AppHandle, window: WebviewWindow) -> Result<Option<A
         .ok_or_else(|| "invalid path".to_string())?
         .to_path_buf();
 
-    let content = fs::read_to_string(&path)
-        .map_err(|e| format!("read: {}", e))?;
-    let imported: AppSettings = serde_json::from_str(&content)
-        .map_err(|e| format!("invalid backup: {}", e))?;
+    let content = fs::read_to_string(&path).map_err(|e| format!("read: {}", e))?;
+    let imported: AppSettings =
+        serde_json::from_str(&content).map_err(|e| format!("invalid backup: {}", e))?;
 
     // Apply the imported settings
     set_auto_update(imported.auto_update);
@@ -1930,7 +1931,10 @@ fn sync_analog_hit_region(window: &WebviewWindow) {
 fn show_widget_drag_cursor() {
     #[link(name = "user32")]
     extern "system" {
-        fn LoadCursorW(instance: *mut core::ffi::c_void, name: *const u16) -> *mut core::ffi::c_void;
+        fn LoadCursorW(
+            instance: *mut core::ffi::c_void,
+            name: *const u16,
+        ) -> *mut core::ffi::c_void;
         fn SetCursor(hcursor: *mut core::ffi::c_void) -> *mut core::ffi::c_void;
     }
     // IDC_SIZEALL
@@ -3031,7 +3035,11 @@ fn normalize_hotkey(input: &str) -> Option<String> {
 /// Place the mini clock in the corner of the click's monitor that
 /// sits nearest the tray icon, and return the new physical origin.
 #[cfg(windows)]
-fn move_mini_near_anchor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_y: i32) -> Option<(i32, i32)> {
+fn move_mini_near_anchor(
+    mini: &tauri::WebviewWindow,
+    anchor_x: i32,
+    anchor_y: i32,
+) -> Option<(i32, i32)> {
     let (left, top, right, bottom) = work_area_containing(anchor_x, anchor_y)?;
     let size = mini
         .outer_size()
@@ -3053,7 +3061,9 @@ fn move_mini_near_anchor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_y: i
     };
     let x = x.clamp(left, max_x);
     let y = y.clamp(top, max_y);
-    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(x, y)));
+    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+        x, y,
+    )));
     Some((x, y))
 }
 
@@ -3087,11 +3097,7 @@ fn mini_is_on_anchor_monitor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_
 }
 
 #[cfg(not(windows))]
-fn mini_is_on_anchor_monitor(
-    _mini: &tauri::WebviewWindow,
-    _anchor_x: i32,
-    _anchor_y: i32,
-) -> bool {
+fn mini_is_on_anchor_monitor(_mini: &tauri::WebviewWindow, _anchor_x: i32, _anchor_y: i32) -> bool {
     true
 }
 
@@ -3937,7 +3943,10 @@ async fn open_file_dialog(
         .filter(|ext| AUDIO_EXTENSIONS.contains(&ext.as_str()))
         .collect();
     if filters.is_empty() {
-        filters = AUDIO_EXTENSIONS.iter().map(|ext| (*ext).to_string()).collect();
+        filters = AUDIO_EXTENSIONS
+            .iter()
+            .map(|ext| (*ext).to_string())
+            .collect();
     }
     let filter_refs: Vec<&str> = filters.iter().map(String::as_str).collect();
     let (tx, rx) = std::sync::mpsc::channel();
@@ -4339,7 +4348,8 @@ fn custom_alarms_scheduler(app: AppHandle) {
                 let is_snooze = snooze_timestamp
                     .map(|timestamp| now2.timestamp() + 1 >= timestamp)
                     .unwrap_or(false);
-                let should_fire = is_snooze || custom_alarm_matches_now(now2, alarm) || delay_secs <= 1;
+                let should_fire =
+                    is_snooze || custom_alarm_matches_now(now2, alarm) || delay_secs <= 1;
 
                 if should_fire {
                     last_fired_by_id.insert(earliest_id.clone(), occurrence);
@@ -4367,27 +4377,26 @@ fn custom_alarms_scheduler(app: AppHandle) {
                     emit_alarm_chime(&app, alarm_data);
                     send_alarm_notification(&app, alarm);
 
-                        // A one-time alarm becomes inactive after firing.
-                        // Snooze re-enables it through the command above.
-                        if alarm.repeat_mode == "once" {
-                            let fired_id = earliest_id.clone();
-                            let fired_index = earliest_idx;
-                            let _ = update_settings(&app, |settings| {
-                                if let Some((_, item)) = settings
-                                    .custom_alarms
-                                    .iter_mut()
-                                    .enumerate()
-                                    .find(|(index, item)| {
+                    // A one-time alarm becomes inactive after firing.
+                    // Snooze re-enables it through the command above.
+                    if alarm.repeat_mode == "once" {
+                        let fired_id = earliest_id.clone();
+                        let fired_index = earliest_idx;
+                        let _ = update_settings(&app, |settings| {
+                            if let Some((_, item)) =
+                                settings.custom_alarms.iter_mut().enumerate().find(
+                                    |(index, item)| {
                                         item.id == fired_id
                                             || (item.id.trim().is_empty() && *index == fired_index)
-                                    })
-                                {
-                                    item.enabled = false;
-                                }
-                                Ok(())
-                            });
-                            let _ = app.emit("settings:updated", load_settings(&app));
-                        }
+                                    },
+                                )
+                            {
+                                item.enabled = false;
+                            }
+                            Ok(())
+                        });
+                        let _ = app.emit("settings:updated", load_settings(&app));
+                    }
                 }
             }
         }
@@ -5280,10 +5289,22 @@ mod alarm_schedule_tests {
 
     #[test]
     fn a_due_alarm_stays_pending_through_the_grace_window() {
-        let now = Local.with_ymd_and_hms(2026, 9, 29, 12, 11, 20).single().unwrap();
-        let scheduled = Local.with_ymd_and_hms(2026, 9, 29, 12, 11, 0).single().unwrap();
-        let upcoming = Local.with_ymd_and_hms(2026, 9, 29, 12, 12, 0).single().unwrap();
-        let missed = Local.with_ymd_and_hms(2026, 9, 29, 12, 8, 0).single().unwrap();
+        let now = Local
+            .with_ymd_and_hms(2026, 9, 29, 12, 11, 20)
+            .single()
+            .unwrap();
+        let scheduled = Local
+            .with_ymd_and_hms(2026, 9, 29, 12, 11, 0)
+            .single()
+            .unwrap();
+        let upcoming = Local
+            .with_ymd_and_hms(2026, 9, 29, 12, 12, 0)
+            .single()
+            .unwrap();
+        let missed = Local
+            .with_ymd_and_hms(2026, 9, 29, 12, 8, 0)
+            .single()
+            .unwrap();
         assert!(occurrence_is_pending(scheduled, now));
         assert!(occurrence_is_pending(upcoming, now));
         assert!(!occurrence_is_pending(missed, now));
