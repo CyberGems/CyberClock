@@ -1881,9 +1881,9 @@
        than the stroke so the percentage tip is easy to reach. */
     .day-progress {
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 4px;
+        left: 10px;
+        right: 10px;
+        bottom: 3px;
         height: 8px;
         z-index: 110;
         display: flex;
@@ -1925,6 +1925,9 @@
     }
     .day-progress:hover .day-progress-track {
         background: rgba(255, 255, 255, 0.42);
+    }
+    .mini-shell > .controls {
+        z-index: 120;
     }
     .controls {
         display: flex;

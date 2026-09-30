@@ -692,7 +692,8 @@
         }, 900);
     });
 
-    timeBlock.addEventListener("mouseleave", () => {
+    timeBlock.addEventListener("mouseleave", (e) => {
+        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest("#day-progress")) return;
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
