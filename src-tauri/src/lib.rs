@@ -1,6 +1,6 @@
 use chrono::{Datelike, TimeZone};
 use chrono::{Local, Timelike};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
@@ -148,11 +148,30 @@ static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
 static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
 static APP_EXITING: AtomicBool = AtomicBool::new(false);
 static EDGE_LIMITS_ENABLED: AtomicBool = AtomicBool::new(true);
+/// Top-level HWNDs of floating analog clocks. Their window is a square so the
+/// context menu and drop shadow can paint, but clicks outside the dial should
+/// reach whatever sits behind the widget.
+static ANALOG_HIT_ROOTS: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
+/// Analog windows whose context menu is open. While set, the whole square
+/// stays clickable so menu items outside the circle still work.
+static ANALOG_MENU_CAPTURE: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
+/// CSS size of `.float-analog-shell` (border-box). Kept in sync with analog.css.
+const ANALOG_DIAL_CSS_PX: f64 = 266.0;
+/// Extra CSS pixels so the rim stays grabbable. Not the drop shadow.
+const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 3.0;
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
 fn float_target_sizes() -> &'static Mutex<HashMap<String, (u32, u32)>> {
     FLOAT_TARGET_SIZES.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn analog_hit_roots() -> &'static Mutex<HashSet<isize>> {
+    ANALOG_HIT_ROOTS.get_or_init(|| Mutex::new(HashSet::new()))
+}
+
+fn analog_menu_capture() -> &'static Mutex<HashSet<isize>> {
+    ANALOG_MENU_CAPTURE.get_or_init(|| Mutex::new(HashSet::new()))
 }
 
 fn remember_window_target(window: &WebviewWindow, width: u32, height: u32) {
@@ -1620,6 +1639,111 @@ fn get_all_work_areas() -> Vec<WinRect> {
 }
 
 #[cfg(windows)]
+fn analog_hit_root(hwnd: windows_sys::Win32::Foundation::HWND) -> Option<isize> {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{GetAncestor, GetParent, GA_ROOT};
+    let roots = lock_or_recover(analog_hit_roots());
+    let self_key = hwnd as isize;
+    if roots.contains(&self_key) {
+        return Some(self_key);
+    }
+    unsafe {
+        let root = GetAncestor(hwnd, GA_ROOT);
+        let root_key = root as isize;
+        if !root.is_null() && roots.contains(&root_key) {
+            return Some(root_key);
+        }
+        let mut cur = hwnd;
+        for _ in 0..8 {
+            let parent = GetParent(cur);
+            if parent.is_null() {
+                break;
+            }
+            let key = parent as isize;
+            if roots.contains(&key) {
+                return Some(key);
+            }
+            cur = parent;
+        }
+    }
+    None
+}
+
+/// True when the cursor is on the visible dial. The dial is a fixed CSS
+/// circle centered in the window; zoom only grows the transparent margin.
+#[cfg(windows)]
+fn analog_cursor_on_dial(root: isize) -> bool {
+    use windows_sys::Win32::Foundation::{POINT, RECT};
+    use windows_sys::Win32::UI::HiDpi::GetDpiForWindow;
+    use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
+
+    // These two live in user32. windows-sys 0.61 does not export them from
+    // the features this crate already enables.
+    #[link(name = "user32")]
+    extern "system" {
+        fn ScreenToClient(hwnd: windows_sys::Win32::Foundation::HWND, lppoint: *mut POINT) -> i32;
+        fn GetClientRect(hwnd: windows_sys::Win32::Foundation::HWND, lprect: *mut RECT) -> i32;
+    }
+
+    let root_hwnd = root as windows_sys::Win32::Foundation::HWND;
+    let mut pt = POINT { x: 0, y: 0 };
+    unsafe {
+        if GetCursorPos(&mut pt) == 0 || ScreenToClient(root_hwnd, &mut pt) == 0 {
+            return true;
+        }
+        let mut rc = RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        if GetClientRect(root_hwnd, &mut rc) == 0 {
+            return true;
+        }
+        let w = (rc.right - rc.left) as f64;
+        let h = (rc.bottom - rc.top) as f64;
+        if w <= 1.0 || h <= 1.0 {
+            return true;
+        }
+        let dpi = GetDpiForWindow(root_hwnd);
+        let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
+        let radius = (ANALOG_DIAL_CSS_PX / 2.0 + ANALOG_DIAL_HIT_SLACK_CSS_PX) * scale;
+        let dx = pt.x as f64 - w / 2.0;
+        let dy = pt.y as f64 - h / 2.0;
+        dx * dx + dy * dy <= radius * radius
+    }
+}
+
+#[cfg(windows)]
+fn subclass_analog_descendants(root: windows_sys::Win32::Foundation::HWND) {
+    use windows_sys::Win32::UI::WindowsAndMessaging::EnumChildWindows;
+    unsafe {
+        EnumChildWindows(root, Some(subclass_analog_child_cb), 0);
+    }
+}
+
+#[cfg(windows)]
+unsafe extern "system" fn subclass_analog_child_cb(
+    hwnd: windows_sys::Win32::Foundation::HWND,
+    _lparam: windows_sys::Win32::Foundation::LPARAM,
+) -> i32 {
+    use windows_sys::Win32::UI::Shell::SetWindowSubclass;
+    SetWindowSubclass(hwnd, Some(window_drag_subclass_proc), 0xCC02, 0);
+    1
+}
+
+#[cfg(windows)]
+fn note_analog_hit_window(window: &WebviewWindow) {
+    if !window.label().starts_with("float-analog") {
+        return;
+    }
+    if let Ok(hwnd) = window.hwnd() {
+        let raw = hwnd.0 as isize;
+        lock_or_recover(analog_hit_roots()).insert(raw);
+        subclass_analog_descendants(hwnd.0 as _);
+    }
+}
+
+#[cfg(windows)]
 unsafe extern "system" fn window_drag_subclass_proc(
     hwnd: windows_sys::Win32::Foundation::HWND,
     msg: u32,
@@ -1628,8 +1752,35 @@ unsafe extern "system" fn window_drag_subclass_proc(
     uid_subclass: usize,
     _ref_data: usize,
 ) -> windows_sys::Win32::Foundation::LRESULT {
-    use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass};
-    use windows_sys::Win32::UI::WindowsAndMessaging::{WM_MOVING, WM_NCDESTROY};
+    use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        WM_CREATE, WM_MOVING, WM_NCDESTROY, WM_NCHITTEST, WM_PARENTNOTIFY,
+    };
+
+    // The analog window is a square larger than the dial. Clicks in that
+    // margin (and in the square's corners outside the circle) pass through
+    // to whatever is behind. The menu opens inside the same window, so while
+    // it is up the full square stays live.
+    if msg == WM_NCHITTEST {
+        if let Some(root) = analog_hit_root(hwnd) {
+            let menu_open = lock_or_recover(analog_menu_capture()).contains(&root);
+            if !menu_open && !analog_cursor_on_dial(root) {
+                return windows_sys::Win32::UI::WindowsAndMessaging::HTTRANSPARENT as _;
+            }
+        }
+    }
+
+    // WebView2 creates its input child after the page loads. Subclass it so
+    // the same hit test runs on the window that actually receives the cursor.
+    if msg == WM_PARENTNOTIFY {
+        let event = (wparam & 0xFFFF) as u32;
+        if event == WM_CREATE && analog_hit_root(hwnd).is_some() {
+            let child = lparam as windows_sys::Win32::Foundation::HWND;
+            if !child.is_null() {
+                SetWindowSubclass(child, Some(window_drag_subclass_proc), 0xCC02, 0);
+            }
+        }
+    }
 
     if msg == WM_MOVING {
         if EDGE_LIMITS_ENABLED.load(Ordering::Acquire) {
@@ -1655,6 +1806,9 @@ unsafe extern "system" fn window_drag_subclass_proc(
     }
 
     if msg == WM_NCDESTROY {
+        let key = hwnd as isize;
+        lock_or_recover(analog_hit_roots()).remove(&key);
+        lock_or_recover(analog_menu_capture()).remove(&key);
         RemoveWindowSubclass(hwnd, Some(window_drag_subclass_proc), uid_subclass);
     }
     DefSubclassProc(hwnd, msg, wparam, lparam)
@@ -1664,9 +1818,37 @@ unsafe extern "system" fn window_drag_subclass_proc(
 fn attach_window_drag_subclass(window: &WebviewWindow) {
     if let Ok(hwnd) = window.hwnd() {
         use windows_sys::Win32::UI::Shell::SetWindowSubclass;
+        note_analog_hit_window(window);
         unsafe {
             SetWindowSubclass(hwnd.0 as _, Some(window_drag_subclass_proc), 0xCC01, 0);
         }
+    }
+}
+
+/// While the analog context menu is open, clicks anywhere in its window
+/// count. Otherwise only the visible dial does. Also subclasses WebView2
+/// children, which may not exist yet at window creation.
+#[tauri::command]
+fn set_analog_menu_capture(window: WebviewWindow, capture: bool) {
+    #[cfg(windows)]
+    {
+        if !window.label().starts_with("float-analog") {
+            return;
+        }
+        if let Ok(hwnd) = window.hwnd() {
+            let raw = hwnd.0 as isize;
+            lock_or_recover(analog_hit_roots()).insert(raw);
+            if capture {
+                lock_or_recover(analog_menu_capture()).insert(raw);
+            } else {
+                lock_or_recover(analog_menu_capture()).remove(&raw);
+            }
+            subclass_analog_descendants(hwnd.0 as _);
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (window, capture);
     }
 }
 
@@ -4854,6 +5036,7 @@ pub fn run() {
             set_hotkey,
             open_external_url,
             clamp_current_window_to_monitors,
+            set_analog_menu_capture,
             center_open_widgets,
             export_backup,
             import_backup,

@@ -225,6 +225,7 @@
 
         ctxMenu.style.left = `${x}px`;
         ctxMenu.style.top = `${y}px`;
+        setAnalogMenuCapture(true);
 
         if (btnMenu) {
             btnMenu.classList.add("menu-open");
@@ -247,6 +248,15 @@
     function closeContextMenu() {
         if (ctxMenu) ctxMenu.hidden = true;
         if (btnMenu) btnMenu.classList.remove("menu-open");
+        setAnalogMenuCapture(false);
+    }
+
+    // The native window is a square around the dial. Tell the backend to
+    // accept clicks only on the circle, and on the whole square while this
+    // menu is open (it sits outside the circular frame).
+    function setAnalogMenuCapture(open) {
+        if (!window.cc || !window.cc.setAnalogMenuCapture) return;
+        window.cc.setAnalogMenuCapture(!!open).catch(() => {});
     }
 
     if (btnMenu) {
@@ -519,5 +529,8 @@
 
     buildSkinGrid();
     updateDesignUI();
+    setAnalogMenuCapture(false);
+    // WebView2's input child can appear just after the page is ready.
+    setTimeout(() => setAnalogMenuCapture(ctxMenu ? !ctxMenu.hidden : false), 400);
     rafId = requestAnimationFrame(tick);
 })();

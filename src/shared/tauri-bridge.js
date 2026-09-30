@@ -77,6 +77,9 @@
         moveWindow: async (pos) => {
             await invoke("move_window", { x: Math.round(pos.x), y: Math.round(pos.y) });
         },
+        setAnalogMenuCapture: async (open) => {
+            await invoke("set_analog_menu_capture", { capture: !!open });
+        },
         setWindowSize: async (size) => {
             const args = {
                 width: Math.round(size.width),
