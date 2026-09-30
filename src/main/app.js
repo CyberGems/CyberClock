@@ -8724,35 +8724,22 @@
                 e.stopPropagation();
                 hideTbarMoreMenu();
                 const action = btn.dataset.action;
-                if (action === "toggle_pin") {
-                    const on = await window.cc.toggleAlwaysOnTop();
-                    btnAot?.classList.toggle("on", on);
+                if (action === "donate") {
+                    window.cc.openExternalUrl("https://ko-fi.com/cybergems");
+                } else if (action === "check_updates") {
+                    if (window.cc && window.cc.trayMenuAction) {
+                        window.cc.trayMenuAction("check-updates");
+                    }
                 } else if (action === "mini_mode") {
                     window.cc.goMini();
-                } else if (action === "time_sync") {
-                    try {
-                        const res = await window.cc.syncSystemClock();
-                        if (res && res.drift_ms != null) {
-                            cfg.clockDriftMs = res.drift_ms;
-                            cfg.clockCheckedAt = res.checked_at;
-                            renderClockAccuracy(cfg);
-                            updateClockDriftBanner(cfg);
-                        }
-                    } catch (err) {
-                        console.error("Time sync from more menu failed:", err);
-                    }
                 } else if (action === "docs") {
                     window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
                 } else if (action === "website") {
                     window.cc.openExternalUrl("https://cybergems.org");
-                } else if (action === "donate") {
-                    window.cc.openExternalUrl("https://ko-fi.com/cybergems");
                 } else if (action === "about") {
                     window.cc.showAboutWindow();
                 } else if (action === "exit") {
-                    if (window.cc && window.cc.trayMenuAction) {
-                        window.cc.trayMenuAction("quit");
-                    }
+                    requestWindowClose();
                 }
             });
         });
