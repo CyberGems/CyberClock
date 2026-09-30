@@ -3514,90 +3514,52 @@
             ctx.restore();
         }
 
-        // Wordmark lane. The name is painted later, centered at 0.44R,
-        // and can be as wide as the longest custom label.
-        const laneTop = R * 0.345;
-        const laneBot = R * 0.545;
-        const laneHalf = R * 0.70;
-        const rotOf = (ang) => ang + Math.PI / 2;
-        const inLane = (r, ang, halfW) => {
-            const rot = rotOf(ang);
-            const c0 = Math.cos(rot);
-            const s0 = Math.sin(rot);
-            for (const lx of [-halfW, 0, halfW]) {
-                const x = lx * c0 - (-r) * s0;
-                const y = lx * s0 + (-r) * c0;
-                if (y > laneTop && y < laneBot && Math.abs(x) < laneHalf) return true;
-            }
-            return false;
-        };
+        // Small nodes on an open orbit. The old coils read as solar
+        // panels and ran into the wordmark. These stay outside it.
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 0.68, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${c.rgb},.14)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
         for (let i = 0; i < 12; i++) {
             const hNum = i === 0 ? 12 : i;
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
             const cosA = Math.cos(a), sinA = Math.sin(a);
+            const mx = cx + cosA * R * 0.68;
+            const my = cy + sinA * R * 0.68;
+            const cardinal = i % 3 === 0;
 
-            const wIn = 0.022;
-            const wOut = 0.042;
-            const segments = [];
-            const collect = (from, to) => {
-                let segStart = null;
-                const steps = Math.round((to - from) / 0.01);
-                for (let step = 0; step <= steps; step++) {
-                    const r = +(from + step * 0.01).toFixed(2);
-                    const w = wIn + (wOut - wIn) * ((Math.min(r, 0.65) - 0.38) / 0.27);
-                    const blocked = inLane(R * r, a, R * w);
-                    if (!blocked && segStart == null) segStart = r;
-                    if ((blocked || step === steps) && segStart != null) {
-                        const segEnd = blocked ? +(r - 0.01).toFixed(2) : r;
-                        if (segEnd - segStart >= 0.05) segments.push([segStart, segEnd]);
-                        segStart = null;
-                    }
-                }
-            };
-            collect(0.38, 0.65);
-            if (segments.length === 0) collect(0.66, 0.72);
-
-            segments.forEach(([rIn, rOut]) => {
             ctx.save();
-            ctx.translate(cx, cy);
+            ctx.translate(mx, my);
             ctx.rotate(a + Math.PI / 2);
-
-            const wInner = R * wIn;
-            const wOuter = R * wOut;
-            const yInner = -R * rIn;
-            const yOuter = -R * rOut;
-
-            ctx.beginPath();
-            ctx.moveTo(-wInner, yInner);
-            ctx.lineTo(-wOuter, yOuter);
-            ctx.lineTo(wOuter, yOuter);
-            ctx.lineTo(wInner, yInner);
-            ctx.closePath();
-            ctx.fillStyle = "rgba(18, 22, 32, 0.75)";
-            ctx.fill();
-            ctx.strokeStyle = `rgba(${c.rgb},.40)`;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-
-            for (let rib = 1; rib <= 3; rib++) {
-                const ry = yInner + (yOuter - yInner) * (rib / 4);
-                const rw = wInner + (wOuter - wInner) * (rib / 4);
+            ctx.shadowColor = c.accent;
+            ctx.shadowBlur = cardinal ? 8 : 4;
+            if (cardinal) {
+                const d = R * 0.028;
                 ctx.beginPath();
-                ctx.moveTo(-rw, ry);
-                ctx.lineTo(rw, ry);
-                ctx.strokeStyle = `rgba(${c.rgb},.28)`;
-                ctx.lineWidth = 1;
+                ctx.moveTo(0, -d);
+                ctx.lineTo(d * 0.72, 0);
+                ctx.lineTo(0, d);
+                ctx.lineTo(-d * 0.72, 0);
+                ctx.closePath();
+                ctx.strokeStyle = c.accent;
+                ctx.lineWidth = 1.4;
+                ctx.fillStyle = `rgba(${c.rgb},.16)`;
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.arc(0, 0, R * 0.016, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${c.rgb},.55)`;
+                ctx.lineWidth = 1.2;
                 ctx.stroke();
             }
-
             ctx.beginPath();
-            ctx.arc(0, yOuter - R * 0.013, R * 0.014, 0, Math.PI * 2);
-            ctx.fillStyle = c.accent;
-            ctx.shadowBlur = 8;
+            ctx.arc(0, 0, cardinal ? R * 0.006 : R * 0.005, 0, Math.PI * 2);
+            ctx.fillStyle = cardinal ? "#ffffff" : c.accent;
             ctx.fill();
             ctx.restore();
-            });
 
             const numR = R * 0.80;
             const nx = cx + cosA * numR;

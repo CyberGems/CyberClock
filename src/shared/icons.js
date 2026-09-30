@@ -392,10 +392,9 @@
   <symbol id="cc-i-info" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 11v5"/>
-    <path fill="currentColor" stroke="none">
-      <circle cx="12" cy="8" r="1.1"/>
-    </path>
+      d="M12 11v5.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round"
+      d="M12 7.25h.01"/>
   </symbol>
   <symbol id="cc-i-scissors" viewBox="0 0 24 24">
     <circle cx="6" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
