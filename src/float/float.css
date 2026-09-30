@@ -9,13 +9,16 @@
    The design-specific height in mini.css is for the mini clock, not
    for these mode-specific float variants. */
 .float-shell {
-    width: calc(100% / var(--mini-zoom, 1));
-    height: calc(100% / var(--mini-zoom, 1));
+    /* One pixel of air on every side. The shell is scaled from the
+       top-left, and a frame that sits on the window edge gets clipped. */
+    width: calc((100% - 2px) / var(--mini-zoom, 1));
+    height: calc((100% - 2px) / var(--mini-zoom, 1));
+    margin: calc(1px / var(--mini-zoom, 1));
     min-width: 0;
     box-sizing: border-box;
 }
 .mini-shell.float-shell[data-design] {
-    height: calc(100% / var(--mini-zoom, 1));
+    height: calc((100% - 2px) / var(--mini-zoom, 1));
 }
 
 /* The stopwatch has room for its precision display and functional controls. */

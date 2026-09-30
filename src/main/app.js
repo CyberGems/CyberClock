@@ -2310,8 +2310,8 @@
         }
         if (typeof applySchedUI === "function") applySchedUI(s);
 
-        // Mini mode layout. Collapse Date locks 2 rows: the date stays
-        // hidden, so that layout only changes the bar by a few pixels.
+        // Mini mode layout. Show Date off hides the date and locks 2 rows,
+        // so that layout only changes the bar by a few pixels.
         const collapseOn = s.miniCollapseDate === true;
         const miniLayout = collapseOn ? "inline" : (s.miniLayout || "stacked");
         document.querySelectorAll('[data-mini-layout]').forEach((b) => {
@@ -2369,7 +2369,7 @@
         const miniLock = document.getElementById('s-mini-lock');
         if (miniLock) miniLock.checked = s.miniPositionLocked || false;
         const miniCollapse = document.getElementById('s-mini-collapse');
-        if (miniCollapse) miniCollapse.checked = s.miniCollapseDate || false;
+        if (miniCollapse) miniCollapse.checked = s.miniCollapseDate !== true;
         const miniScan = document.getElementById('s-mini-scan');
         if (miniScan) miniScan.checked = s.miniScanlines !== false;
         // Real Sun Cycle row — visible only for the Sunset Pulse skin (7)
@@ -7563,10 +7563,11 @@
     const sMiniCollapse = document.getElementById('s-mini-collapse');
     if (sMiniCollapse) {
         sMiniCollapse.addEventListener('change', (e) => {
-            const on = e.target.checked;
-            const patch = { miniCollapseDate: on };
+            const show = e.target.checked;
+            const collapse = !show;
+            const patch = { miniCollapseDate: collapse };
             const stackedBtn = document.getElementById('s-mini-layout-stacked');
-            if (on && stackedBtn && stackedBtn.classList.contains('on')) {
+            if (collapse && stackedBtn && stackedBtn.classList.contains('on')) {
                 patch.miniLayout = 'inline';
             }
             window.cc.saveSettings(patch);

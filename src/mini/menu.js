@@ -581,6 +581,9 @@
                     document.querySelectorAll('.ctx-item[data-action="new_relax"] .label').forEach((el) => {
                         el.textContent = window.ccI18n.t("float.newRelax");
                     });
+                    document.querySelectorAll('.ctx-item[data-action="new_alarm"] .label').forEach((el) => {
+                        el.textContent = window.ccI18n.t("tray.newAlarm");
+                    });
                     document.querySelectorAll('.ctx-item[data-action="settings"] .label').forEach(el => {
                         el.textContent = window.ccI18n.t("menu.settings");
                     });
@@ -666,7 +669,7 @@
 
                 // Collapse Date
                 const toggleCollapse = document.getElementById("toggle-collapse");
-                if (toggleCollapse) toggleCollapse.classList.toggle("on", cfg.miniCollapseDate || false);
+                if (toggleCollapse) toggleCollapse.classList.toggle("on", cfg.miniCollapseDate !== true);
 
                 // Disable Animations
                 const toggleAnim = document.getElementById("toggle-anim");
@@ -909,15 +912,16 @@
         collapseRow.addEventListener("click", () => {
             const tgl = document.getElementById("toggle-collapse");
             if (!tgl) return;
-            const on = tgl.classList.toggle("on");
-            const patch = { miniCollapseDate: on };
-            if (on && (currentCfg.miniLayout || "stacked") === "stacked") {
+            const show = tgl.classList.toggle("on");
+            const collapse = !show;
+            const patch = { miniCollapseDate: collapse };
+            if (collapse && (currentCfg.miniLayout || "stacked") === "stacked") {
                 patch.miniLayout = "inline";
                 currentCfg.miniLayout = "inline";
                 updateLayoutButtons("inline");
             }
-            currentCfg.miniCollapseDate = on;
-            syncStackedLock(on);
+            currentCfg.miniCollapseDate = collapse;
+            syncStackedLock(collapse);
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings(patch);
             }
@@ -1245,7 +1249,7 @@
                 updateLayoutButtons(collapseOn ? "inline" : (cfg.miniLayout || "stacked"));
                 syncStackedLock(collapseOn);
                 const toggleCollapseLive = document.getElementById("toggle-collapse");
-                if (toggleCollapseLive) toggleCollapseLive.classList.toggle("on", collapseOn);
+                if (toggleCollapseLive) toggleCollapseLive.classList.toggle("on", cfg.miniCollapseDate !== true);
                 if (activeCaller && activeCaller.kind === "relax") {
                     syncRelaxMenu(cfg);
                 }

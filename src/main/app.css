@@ -2205,6 +2205,10 @@
         display: flex;
         gap: 14px;
     }
+    .t-float-wrap {
+        display: inline-flex;
+        flex: 0 0 auto;
+    }
     .t-float-btn {
         min-width: 48px;
         padding: 13px 0;
@@ -2213,8 +2217,12 @@
         justify-content: center;
     }
     .t-float-btn .cc-ico {
-        width: 16px;
-        height: 16px;
+        width: 12px;
+        height: 12px;
+    }
+    #cal-float-btn .cc-ico {
+        width: 10px;
+        height: 10px;
     }
     .abtn {
         font-family: var(--font-ui);

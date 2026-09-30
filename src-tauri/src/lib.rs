@@ -3244,6 +3244,13 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "new_analog" => spawn_float_window(&app, "analog").is_some(),
         "new_relax" => spawn_float_window(&app, "relax").is_some(),
+        "new_alarm" => {
+            switch_to_full_mode(app.clone());
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.emit("mini:menu-action", "new-alarm");
+            }
+            true
+        }
         "close_other_timers" => {
             let caller = CURRENT_MENU_CALLER
                 .lock()

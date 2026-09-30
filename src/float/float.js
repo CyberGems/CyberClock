@@ -164,7 +164,7 @@
         );
         const showPresets = KIND === "timer" && cfg.timerShowPresets !== false;
         const height = (KIND === "timer" && showPresets) ? 96 : baseHeight;
-        const w = Math.round(width * zoom), h = Math.round(height * zoom);
+        const w = Math.round(width * zoom) + 2, h = Math.round(height * zoom) + 2;
         if (force || w !== lastW || h !== lastH) {
             lastW = w; lastH = h;
             if (window.cc && window.cc.setWindowSize) {

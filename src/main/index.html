@@ -655,12 +655,14 @@
                             <button class="abtn red" id="t-reset" disabled>
                                 <span data-ico="stop"></span> <span data-i18n="timer.reset">RESET</span>
                             </button>
-                            <button class="abtn ghost t-float-btn" id="t-float" type="button" data-tooltip="Floating timer" data-i18n-attr="data-tooltip:tooltip.floatingTimer, aria-label:tooltip.floatingTimer">
-                                <svg class="cc-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
-                                    <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
-                                </svg>
-                            </button>
+                            <div class="t-float-wrap" data-tooltip="Floating timer" data-tooltip-dir="bottom" data-i18n-attr="data-tooltip:tooltip.floatingTimer">
+                                <button class="abtn ghost t-float-btn" id="t-float" type="button" aria-label="Floating timer" data-i18n-attr="aria-label:tooltip.floatingTimer">
+                                    <svg class="cc-ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                                        <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="t-hint" id="t-hint">
                             <span class="cal-t-ico" data-ico="timer"></span> <span data-i18n="timer.hint">Pick a preset or set a custom time to start</span>
@@ -709,12 +711,14 @@
                                 >
                                     <span data-ico="flag"></span> <span data-i18n="stopwatch.lap">LAP</span>
                                 </button>
-                                <button class="abtn ghost t-float-btn" id="sw-float" type="button" data-tooltip="Floating stopwatch" data-i18n-attr="data-tooltip:tooltip.floatingStopwatch, aria-label:tooltip.floatingStopwatch">
-                                    <svg class="cc-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
-                                        <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
-                                    </svg>
-                                </button>
+                                <div class="t-float-wrap" data-tooltip="Floating stopwatch" data-tooltip-dir="bottom" data-i18n-attr="data-tooltip:tooltip.floatingStopwatch">
+                                    <button class="abtn ghost t-float-btn" id="sw-float" type="button" aria-label="Floating stopwatch" data-i18n-attr="aria-label:tooltip.floatingStopwatch">
+                                        <svg class="cc-ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                                            <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="sw-lower">
@@ -2179,10 +2183,10 @@
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="eye"></span>
                                 <div class="s-lbl">
-                                    <span data-i18n="settings.mini.collapseDate">Collapse Date</span>
-                                    <small data-i18n="settings.mini.collapseDateDesc">Show date only on hover</small>
+                                    <span data-i18n="settings.mini.collapseDate">Show Date</span>
+                                    <small data-i18n="settings.mini.collapseDateDesc">Off shows the date only on hover</small>
                                 </div>
-                                <label class="s-tog"><input type="checkbox" id="s-mini-collapse" />
+                                <label class="s-tog"><input type="checkbox" id="s-mini-collapse" checked />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>
