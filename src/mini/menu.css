@@ -178,6 +178,38 @@
         box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.35);
     }
 
+    .ctx-brand {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 6px;
+        padding: 5px 8px 7px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid rgba(var(--rgb-accent), 0.32);
+        background: linear-gradient(180deg, rgba(var(--rgb-accent), 0.16), transparent);
+        border-radius: 6px 6px 0 0;
+        white-space: nowrap;
+    }
+    .ctx-brand-widget {
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: var(--accent-a, #00d4ff);
+    }
+    .ctx-brand-sep {
+        color: rgba(255, 255, 255, 0.38);
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .ctx-brand-mark {
+        font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
     .ctx-tabs {
         display: flex;
         gap: 3px;

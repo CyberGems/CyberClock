@@ -54,6 +54,11 @@
 
         <!-- Custom Cyber Context Menu (outside shell so it is never clipped by the circular frame) -->
         <div class="analog-ctx-menu" id="analog-ctx-menu" hidden>
+            <div class="ctx-brand">
+                <span class="ctx-brand-widget" data-i18n="float.analogTitle">Analog Clock</span>
+                <span class="ctx-brand-sep" aria-hidden="true">·</span>
+                <span class="ctx-brand-mark">CyberClock</span>
+            </div>
             <div class="analog-ctx-tabs">
                 <button type="button" class="analog-ctx-tab active" id="analog-tab-actions" data-tab="actions" data-i18n="float.tabActions">Actions</button>
                 <button type="button" class="analog-ctx-tab" id="analog-tab-style" data-tab="style" data-i18n="float.tabStyle">Customize</button>
@@ -121,7 +126,7 @@
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                <span class="ctx-label" data-i18n="about.title">About CyberClock</span>
+                <span class="ctx-label" data-i18n="tray.about">About...</span>
             </button>
             <div class="analog-ctx-sep"></div>
             <button class="analog-ctx-item ctx-danger" id="ctx-close">

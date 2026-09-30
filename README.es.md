@@ -114,7 +114,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
 - **Interfaz bilingüe:** interfaz completa en inglés y español
 - **Respaldo y Datos:** exporta alarmas, notas, temporizadores y preferencias como JSON; importa copias de seguridad previas; abre la carpeta de datos local; o restablece a valores de fábrica, todo desde una pestaña de configuración dedicada
-- **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de CyberClock" en todos los menús contextuales de widgets flotantes y Modo Mini
+- **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de..." en todos los menús contextuales de widgets flotantes y Modo Mini. Cada uno de esos menús abre con el nombre del widget y CyberClock
 - **Bienvenida personalizada:** un nombre para mostrar opcional añade un saludo según la hora junto a la marca CyberClock cuando se abre el modo completo
 
 ---

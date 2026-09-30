@@ -397,7 +397,7 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     border-radius: 9px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 18px rgba(var(--rgb-accent), 0.25);
     padding: 5px;
-    width: 190px;
+    width: 228px;
     max-height: calc(100vh - 12px);
     overflow-y: auto;
     overflow-x: hidden;
@@ -430,6 +430,37 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
 }
 
 /* Tabs: Acciones vs Personalizar */
+.ctx-brand {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 6px 6px;
+    margin: -1px -1px 4px;
+    border-bottom: 1px solid rgba(var(--rgb-accent), 0.32);
+    background: linear-gradient(180deg, rgba(var(--rgb-accent), 0.16), transparent);
+    border-radius: 6px 6px 0 0;
+    white-space: nowrap;
+}
+.ctx-brand-widget {
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--accent-a, #00d4ff);
+}
+.ctx-brand-sep {
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 12px;
+}
+.ctx-brand-mark {
+    font-family: var(--font-ui, "Outfit", sans-serif);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.35px;
+    color: rgba(255, 255, 255, 0.72);
+}
+
 .cal-ctx-tabs {
     display: flex;
     background: rgba(0, 0, 0, 0.45);

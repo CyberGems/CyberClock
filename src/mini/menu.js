@@ -140,6 +140,19 @@
         });
     }
 
+    function widgetBrandKey() {
+        if (activeCaller && activeCaller.kind === "relax") return "float.relaxTitle";
+        if (activeCaller && activeCaller.kind === "timer") return "menu.timer";
+        if (activeCaller && activeCaller.kind === "sw") return "menu.stopwatch";
+        return "menu.miniMode";
+    }
+
+    function updateMenuBrand() {
+        const brand = document.getElementById("ctx-brand-widget");
+        if (!brand || !window.ccI18n) return;
+        brand.textContent = window.ccI18n.t(widgetBrandKey());
+    }
+
     function setupMenuForCaller(info) {
         menuShownTime = Date.now();
         activeCaller = info || { caller: "mini", kind: "mini" };
@@ -150,6 +163,7 @@
         const isSw = activeCaller.kind === "sw";
         const isRelax = activeCaller.kind === "relax";
         const isFloat = isTimer || isSw;
+        updateMenuBrand();
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
@@ -588,8 +602,9 @@
                         el.textContent = window.ccI18n.t("menu.settings");
                     });
                     document.querySelectorAll('.ctx-item[data-action="about"] .label').forEach(el => {
-                        el.textContent = window.ccI18n.t("about.title");
+                        el.textContent = window.ccI18n.t("tray.about");
                     });
+                    updateMenuBrand();
                     const closeLbl = document.querySelector('.ctx-item[data-action="close"] .label');
                     if (closeLbl) closeLbl.textContent = window.ccI18n.t("tray.quit");
                     const tabActions = document.getElementById("tab-btn-actions");
