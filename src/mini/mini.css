@@ -1929,6 +1929,27 @@
     .mini-shell > .controls {
         z-index: 120;
     }
+    /* Glass Orb and Frost Crystal use dark ink. Mixing that ink toward
+       white turns the line gray. These two stay in their own glass blue. */
+    .mini-shell[data-design="4"] .day-progress-track,
+    .mini-shell[data-design="8"] .day-progress-track {
+        background: rgba(120, 168, 214, 0.38);
+        box-shadow: inset 0 0 0 1px rgba(90, 145, 198, 0.45);
+    }
+    .mini-shell[data-design="4"] .day-progress-fill,
+    .mini-shell[data-design="8"] .day-progress-fill {
+        background: #6aafdf;
+        box-shadow: 0 0 6px rgba(110, 176, 224, 0.85);
+    }
+    .mini-shell[data-design="4"] .day-progress-track::after,
+    .mini-shell[data-design="8"] .day-progress-track::after {
+        background: #e7f4ff;
+        box-shadow: 0 0 5px rgba(150, 198, 236, 0.95);
+    }
+    .mini-shell[data-design="4"] .day-progress:hover .day-progress-track,
+    .mini-shell[data-design="8"] .day-progress:hover .day-progress-track {
+        background: rgba(140, 186, 226, 0.55);
+    }
     .controls {
         display: flex;
         flex-direction: column;
