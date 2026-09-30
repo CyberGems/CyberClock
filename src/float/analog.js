@@ -69,7 +69,9 @@
     }
 
     function applyOpacity(op) {
-        if (shell) shell.style.setProperty("--analog-opacity", op);
+        const plate = document.getElementById("analog-plate");
+        const target = plate || shell;
+        if (target) target.style.setProperty("--analog-opacity", op);
         syncOpacityChips(op);
     }
 
@@ -498,7 +500,10 @@
         }
     }
 
-    if (shell) {
+    const plate = document.getElementById("analog-plate");
+    if (plate) {
+        plate.addEventListener("mousedown", handleDragStart);
+    } else if (shell) {
         shell.addEventListener("mousedown", handleDragStart);
     }
     document.body.addEventListener("mousedown", (e) => {

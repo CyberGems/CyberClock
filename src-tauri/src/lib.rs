@@ -157,8 +157,15 @@ static ANALOG_HIT_ROOTS: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 static ANALOG_MENU_CAPTURE: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 /// CSS size of `.float-analog-shell` (border-box). Kept in sync with analog.css.
 const ANALOG_DIAL_CSS_PX: f64 = 266.0;
-/// Kept at 0. Pixels outside the opaque dial are transparent, and a window
-/// region paints them white (a bright arc along the top of the circle).
+/// Opaque plate behind the dial (`.analog-plate`). 4px larger than the
+/// shell on every side.
+const ANALOG_PLATE_CSS_PX: f64 = ANALOG_DIAL_CSS_PX + 8.0;
+/// The mask is smaller than the plate so it cuts solid color. The plate's
+/// antialiased rim stays outside the mask. Pixels inside a region that are
+/// still transparent get painted white, which is the bright arc on top.
+const ANALOG_REGION_INSET_CSS_PX: f64 = 2.0;
+/// Kept at 0. Extra radius would include transparent pixels, and those
+/// paint white.
 const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 0.0;
 /// True while Windows is inside a widget drag loop. The page cursor only
 /// lasts until that loop starts and replaces it with the arrow.
@@ -1715,7 +1722,9 @@ fn analog_cursor_on_dial(root: isize) -> bool {
         }
         let dpi = GetDpiForWindow(root_hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let radius = (ANALOG_DIAL_CSS_PX / 2.0 + ANALOG_DIAL_HIT_SLACK_CSS_PX) * scale;
+        let radius = (ANALOG_PLATE_CSS_PX / 2.0 - ANALOG_REGION_INSET_CSS_PX
+            + ANALOG_DIAL_HIT_SLACK_CSS_PX)
+            * scale;
         let dx = pt.x as f64 - w / 2.0;
         let dy = pt.y as f64 - h / 2.0;
         dx * dx + dy * dy <= radius * radius
@@ -1779,6 +1788,7 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
     }
     #[link(name = "gdi32")]
     extern "system" {
+        fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
         fn DeleteObject(ho: *mut core::ffi::c_void) -> i32;
     }
 
@@ -1818,57 +1828,21 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         }
         let dpi = GetDpiForWindow(hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let mut d =
-            ((ANALOG_DIAL_CSS_PX + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0) * scale).round() as i32;
+        let mut d = ((ANALOG_PLATE_CSS_PX - ANALOG_REGION_INSET_CSS_PX * 2.0
+            + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0)
+            * scale)
+            .round() as i32;
         d = d.min(cw).min(ch).max(1);
         // Region coordinates are window-relative. The dial is centered in
         // the client area, which is not always the window rectangle.
         let left = (origin.x - rc.left) + (cw - d) / 2;
         let top = (origin.y - rc.top) + (ch - d) / 2;
-        // GDI's ellipse is flat along the top, so that arc looked cut next
-        // to the smooth bottom. A real circle keeps both edges the same.
-        let rgn = rounded_dial_region(left, top, d);
+        let rgn = CreateEllipticRgn(left, top, left + d, top + d);
         if rgn.is_null() {
             return;
         }
         if SetWindowRgn(hwnd, rgn, 1) == 0 {
             DeleteObject(rgn);
-        }
-    }
-}
-
-/// Circle region for the dial. `CreateEllipticRgn` flattens the top scanline.
-#[cfg(windows)]
-fn rounded_dial_region(left: i32, top: i32, d: i32) -> *mut core::ffi::c_void {
-    #[repr(C)]
-    #[derive(Clone, Copy)]
-    struct WinPoint {
-        x: i32,
-        y: i32,
-    }
-    #[link(name = "gdi32")]
-    extern "system" {
-        fn CreatePolygonRgn(pts: *const WinPoint, count: i32, mode: i32) -> *mut core::ffi::c_void;
-        fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
-    }
-    const STEPS: usize = 180;
-    let mut pts = [WinPoint { x: 0, y: 0 }; STEPS];
-    let cx = left as f64 + d as f64 / 2.0;
-    let cy = top as f64 + d as f64 / 2.0;
-    let radius = d as f64 / 2.0;
-    for i in 0..STEPS {
-        let angle = (i as f64) * std::f64::consts::TAU / STEPS as f64;
-        pts[i] = WinPoint {
-            x: (cx + radius * angle.cos()).round() as i32,
-            y: (cy + radius * angle.sin()).round() as i32,
-        };
-    }
-    unsafe {
-        let rgn = CreatePolygonRgn(pts.as_ptr(), STEPS as i32, 2);
-        if !rgn.is_null() {
-            rgn
-        } else {
-            CreateEllipticRgn(left, top, left + d, top + d)
         }
     }
 }
@@ -1950,194 +1924,22 @@ fn sync_analog_hit_region(window: &WebviewWindow) {
     apply_analog_hit_tree(hwnd.0 as _, full);
 }
 
-/// Closed-hand cursor kept up for the whole native drag. The page sets
-/// `cursor: grabbing` only until `startDragging` enters the system move
-/// loop, which then forces the arrow.
+/// System move cursor (the four-arrow plus). The page cursor only lasts
+/// until `startDragging` enters the system move loop.
 #[cfg(windows)]
 fn show_widget_drag_cursor() {
     #[link(name = "user32")]
     extern "system" {
+        fn LoadCursorW(instance: *mut core::ffi::c_void, name: *const u16) -> *mut core::ffi::c_void;
         fn SetCursor(hcursor: *mut core::ffi::c_void) -> *mut core::ffi::c_void;
     }
-    let cursor = grabbing_cursor();
-    if !cursor.is_null() {
-        unsafe {
+    // IDC_SIZEALL
+    const IDC_SIZEALL: usize = 32646;
+    unsafe {
+        let cursor = LoadCursorW(std::ptr::null_mut(), IDC_SIZEALL as *const u16);
+        if !cursor.is_null() {
             SetCursor(cursor);
         }
-    }
-}
-
-#[cfg(windows)]
-fn grabbing_cursor() -> *mut core::ffi::c_void {
-    static CURSOR: OnceLock<isize> = OnceLock::new();
-    let raw = CURSOR.get_or_init(|| unsafe { create_grabbing_cursor() as isize });
-    *raw as *mut core::ffi::c_void
-}
-
-#[cfg(windows)]
-unsafe fn create_grabbing_cursor() -> *mut core::ffi::c_void {
-    #[link(name = "user32")]
-    extern "system" {
-        fn GetDC(hwnd: *mut core::ffi::c_void) -> *mut core::ffi::c_void;
-        fn ReleaseDC(hwnd: *mut core::ffi::c_void, hdc: *mut core::ffi::c_void) -> i32;
-        fn CreateIconIndirect(info: *const GrabIconInfo) -> *mut core::ffi::c_void;
-        fn LoadCursorW(
-            instance: *mut core::ffi::c_void,
-            name: *const u16,
-        ) -> *mut core::ffi::c_void;
-    }
-    #[link(name = "gdi32")]
-    extern "system" {
-        fn CreateDIBSection(
-            hdc: *mut core::ffi::c_void,
-            pbmi: *const GrabBitmapInfo,
-            usage: u32,
-            bits: *mut *mut u8,
-            section: *mut core::ffi::c_void,
-            offset: u32,
-        ) -> *mut core::ffi::c_void;
-        fn CreateBitmap(
-            width: i32,
-            height: i32,
-            planes: u32,
-            bit_count: u32,
-            bits: *const u8,
-        ) -> *mut core::ffi::c_void;
-        fn DeleteObject(obj: *mut core::ffi::c_void) -> i32;
-    }
-
-    #[repr(C)]
-    struct GrabIconInfo {
-        f_icon: i32,
-        x_hotspot: u32,
-        y_hotspot: u32,
-        hbm_mask: *mut core::ffi::c_void,
-        hbm_color: *mut core::ffi::c_void,
-    }
-    #[repr(C)]
-    struct GrabBitmapHeader {
-        size: u32,
-        width: i32,
-        height: i32,
-        planes: u16,
-        bit_count: u16,
-        compression: u32,
-        size_image: u32,
-        x_pels: i32,
-        y_pels: i32,
-        clr_used: u32,
-        clr_important: u32,
-    }
-    #[repr(C)]
-    struct GrabBitmapInfo {
-        header: GrabBitmapHeader,
-        colors: u32,
-    }
-
-    // 32×32 closed hand, same idea as the page cursor: white fill,
-    // black outline, knuckles on top and a thumb on the lower left.
-    // `k` outline, `w` fill, `.` transparent.
-    const HAND: [&str; 32] = [
-        "................................",
-        "................................",
-        ".............kk.kk.kk...........",
-        "............kwwkwwkwwk..........",
-        "...........kwwwwwwwwwwk.........",
-        "..........kwwwwwwwwwwwwk........",
-        ".........kwwwwwwwwwwwwwwk.......",
-        "........kwwwwwwwwwwwwwwwwk......",
-        ".......kwwwwwwwwwwwwwwwwwwk.....",
-        "......kwwwwwwwwwwwwwwwwwwwwk....",
-        ".....kwwwwwwwwwwwwwwwwwwwwwwk...",
-        "....kwwwwwwwwwwwwwwwwwwwwwwwwk..",
-        "...kwwwwwwwwwwwwwwwwwwwwwwwwwwk.",
-        "...kwwwwwwwwwwwwwwwwwwwwwwwwwwk.",
-        "..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..",
-        "..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..",
-        ".kwwwkwwwwwwwwwwwwwwwwwwwwwwk...",
-        "..kwwwwwwwwwwwwwwwwwwwwwwwwk....",
-        "...kwwwwwwwwwwwwwwwwwwwwwwwwk...",
-        "....kwwwwwwwwwwwwwwwwwwwwwwk....",
-        ".....kwwwwwwwwwwwwwwwwwwwwwwk...",
-        "......kwwwwwwwwwwwwwwwwwwwwk....",
-        ".......kwwwwwwwwwwwwwwwwwwk.....",
-        "........kwwwwwwwwwwwwwwwwk......",
-        ".........kwwwwwwwwwwwwwwk.......",
-        "..........kkkkkkkkkkkkkk........",
-        "................................",
-        "................................",
-        "................................",
-        "................................",
-        "................................",
-        "................................",
-    ];
-
-    const SIZE: i32 = 32;
-    let info = GrabBitmapInfo {
-        header: GrabBitmapHeader {
-            size: std::mem::size_of::<GrabBitmapHeader>() as u32,
-            width: SIZE,
-            height: -SIZE,
-            planes: 1,
-            bit_count: 32,
-            compression: 0,
-            size_image: 0,
-            x_pels: 0,
-            y_pels: 0,
-            clr_used: 0,
-            clr_important: 0,
-        },
-        colors: 0,
-    };
-    let hdc = GetDC(std::ptr::null_mut());
-    let mut bits: *mut u8 = std::ptr::null_mut();
-    let color = CreateDIBSection(hdc, &info, 0, &mut bits, std::ptr::null_mut(), 0);
-    ReleaseDC(std::ptr::null_mut(), hdc);
-    if color.is_null() || bits.is_null() {
-        return LoadCursorW(std::ptr::null_mut(), 32649usize as *const u16);
-    }
-
-    let pixels = std::slice::from_raw_parts_mut(bits, (SIZE * SIZE * 4) as usize);
-    let mut mask = [0xffu8; (32 * 4) as usize];
-    for y in 0..32 {
-        let row = HAND[y].as_bytes();
-        for x in 0..32 {
-            let px = (y * 32 + x) * 4;
-            // Classic AND/XOR cursor: mask 0 paints the color, mask 1
-            // leaves the screen alone. Alpha made the fill a black blob.
-            let (paint, b, g, r) = match row[x] {
-                b'k' => (true, 0u8, 0, 0),
-                b'w' => (true, 255u8, 255, 255),
-                _ => (false, 0u8, 0, 0),
-            };
-            pixels[px] = b;
-            pixels[px + 1] = g;
-            pixels[px + 2] = r;
-            pixels[px + 3] = 0;
-            if paint {
-                let byte = y * 4 + x / 8;
-                mask[byte] &= !(0x80u8 >> (x % 8));
-            }
-        }
-    }
-
-    let mono = CreateBitmap(SIZE, SIZE, 1, 1, mask.as_ptr());
-    let icon = GrabIconInfo {
-        f_icon: 0,
-        x_hotspot: 16,
-        y_hotspot: 14,
-        hbm_mask: mono,
-        hbm_color: color,
-    };
-    let cursor = CreateIconIndirect(&icon);
-    if !mono.is_null() {
-        DeleteObject(mono);
-    }
-    DeleteObject(color);
-    if cursor.is_null() {
-        LoadCursorW(std::ptr::null_mut(), 32649usize as *const u16)
-    } else {
-        cursor
     }
 }
 
