@@ -651,6 +651,7 @@
         if (activeCount) activeCount.textContent = String(active.length);
         if (nextTime) nextTime.textContent = next ? alarmTimeString(next.at.getHours(), next.at.getMinutes()) : "--:--";
         if (nextLabel) nextLabel.textContent = nextAlarmLeadLine(next);
+        renderAlarmTemplates();
 
         empty.hidden = entries.length > 0;
         list.hidden = entries.length === 0;
@@ -738,6 +739,7 @@
             soundRepeatCount: 1,
             soundUntilDismiss: false,
             soundPauseSecs: 1,
+            deleteAfter: false,
             ...(preset || {}),
         };
     }
@@ -1281,6 +1283,10 @@
         if (untilRadio) untilRadio.checked = untilDismiss;
         if (countInput) countInput.value = String(alarmEditorDraft.soundRepeatCount || 1);
         if (pauseInput) pauseInput.value = String(alarmEditorDraft.soundPauseSecs ?? 1);
+        const deleteAfter = document.getElementById("alarm-edit-delete-after");
+        if (deleteAfter) deleteAfter.checked = !!alarmEditorDraft.deleteAfter;
+        const cloneBtn = document.getElementById("alarm-editor-clone");
+        if (cloneBtn) cloneBtn.hidden = !alarmEditorId;
         syncAlarmSoundRepeat();
         document.querySelectorAll("#alarm-edit-days .alarm-day").forEach((day) => {
             day.classList.toggle("on", (Number(alarmEditorDraft.daysMask) & Number(day.dataset.day)) !== 0);
@@ -1333,6 +1339,7 @@
             soundUntilDismiss: document.getElementById("alarm-edit-repeat-until")?.checked === true,
             soundRepeatCount: Math.max(1, Math.min(20, Number(document.getElementById("alarm-edit-sound-count")?.value) || 1)),
             soundPauseSecs: Math.max(0, Math.min(60, Number(document.getElementById("alarm-edit-sound-pause")?.value ?? 1))),
+            deleteAfter: document.getElementById("alarm-edit-delete-after")?.checked === true,
             enabled: alarmEditorDraft?.enabled !== false,
         };
     }
@@ -1366,6 +1373,126 @@
         cfg.customAlarms = list;
         renderAlarmsView();
         window.cc.saveSettings({ customAlarms: list }).catch(console.error);
+    }
+
+    function cloneLabel(label) {
+        const suffix = alarmText("alarms.clone.suffix", "copy");
+        const mark = ` (${suffix})`;
+        const raw = (label || "").trim() || alarmText("alarms.notice.title", "Alarm");
+        const stem = raw.toLowerCase().endsWith(mark.toLowerCase())
+            ? raw.slice(0, raw.length - mark.length).trim()
+            : raw;
+        const used = new Set(
+            (Array.isArray(cfg.customAlarms) ? cfg.customAlarms : [])
+                .map((alarm) => alarmDisplayLabel(alarm).trim().toLowerCase()),
+        );
+        for (let n = 1; n < 100; n++) {
+            const candidate = (n === 1 ? `${stem}${mark}` : `${stem}${mark} ${n}`).slice(0, 48);
+            if (!used.has(candidate.toLowerCase())) return candidate;
+        }
+        return `${stem}${mark}`.slice(0, 48);
+    }
+
+    function insertClonedAlarm(source) {
+        const copy = {
+            ...source,
+            id: `alarm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            label: cloneLabel(alarmDisplayLabel(source)),
+            enabled: source.enabled !== false,
+        };
+        const list = [...(Array.isArray(cfg.customAlarms) ? cfg.customAlarms : []), copy];
+        cfg.customAlarms = list;
+        renderAlarmsView();
+        window.cc.saveSettings({ customAlarms: list }).catch(console.error);
+        openAlarmEditor(copy, { isExisting: true });
+    }
+
+    function cloneAlarmFromEditor() {
+        const draft = collectAlarmDraft();
+        if (!draft) return;
+        insertClonedAlarm(draft);
+    }
+
+    function saveTemplateFromEditor() {
+        const draft = collectAlarmDraft();
+        if (!draft) return;
+        const templates = Array.isArray(cfg.alarmTemplates) ? [...cfg.alarmTemplates] : [];
+        const labelKey = (draft.label || "").trim().toLowerCase();
+        const existing = templates.findIndex((item) => (item.label || "").trim().toLowerCase() === labelKey);
+        const stored = {
+            ...draft,
+            id: existing >= 0 && templates[existing].id
+                ? templates[existing].id
+                : `tpl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            enabled: false,
+        };
+        if (existing >= 0) templates[existing] = stored;
+        else templates.unshift(stored);
+        const capped = templates.slice(0, 24);
+        cfg.alarmTemplates = capped;
+        renderAlarmTemplates();
+        window.cc.saveSettings({ alarmTemplates: capped }).catch(console.error);
+        const templateLabel = document.querySelector("#alarm-editor-template span");
+        if (templateLabel) {
+            const saved = alarmText("alarms.templates.saved", "Template saved");
+            templateLabel.textContent = saved;
+            window.setTimeout(() => {
+                if (templateLabel.textContent === saved) {
+                    templateLabel.textContent = alarmText("alarms.editor.saveTemplate", "Save as template");
+                }
+            }, 1600);
+        }
+    }
+
+    function openAlarmFromTemplate(template) {
+        if (!template) return;
+        const { id, ...rest } = template;
+        openAlarmEditor(newAlarmDraft({ ...rest, enabled: true }), { isExisting: false });
+    }
+
+    function deleteAlarmTemplate(id) {
+        const templates = (Array.isArray(cfg.alarmTemplates) ? cfg.alarmTemplates : [])
+            .filter((item) => item.id !== id);
+        cfg.alarmTemplates = templates;
+        renderAlarmTemplates();
+        window.cc.saveSettings({ alarmTemplates: templates }).catch(console.error);
+    }
+
+    function renderAlarmTemplates() {
+        const wrap = document.getElementById("alarm-templates");
+        const list = document.getElementById("alarm-templates-list");
+        if (!wrap || !list) return;
+        const templates = Array.isArray(cfg.alarmTemplates) ? cfg.alarmTemplates : [];
+        wrap.hidden = templates.length === 0;
+        list.replaceChildren();
+        templates.forEach((template) => {
+            const row = document.createElement("div");
+            row.className = "alarm-template";
+
+            const use = document.createElement("button");
+            use.type = "button";
+            use.className = "alarm-template-use";
+            use.dataset.templateId = template.id || "";
+
+            const name = document.createElement("strong");
+            name.textContent = (template.label || "").trim() || alarmText("alarms.notice.title", "Alarm");
+            const meta = document.createElement("span");
+            meta.textContent = `${alarmTimeString(template.hour, template.minute)} · ${alarmRepeatLabel(template)}`;
+            use.append(name, meta);
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "alarm-template-remove";
+            remove.dataset.templateRemove = template.id || "";
+            remove.setAttribute("aria-label", alarmText("alarms.templates.remove", "Remove template"));
+            const icon = document.createElement("span");
+            icon.setAttribute("data-ico", "x");
+            remove.append(icon);
+
+            row.append(use, remove);
+            list.append(row);
+        });
+        if (window.ccIcons) window.ccIcons.replaceIcons(list);
     }
 
     function showAlarmNotice(payload = {}) {
@@ -1419,6 +1546,19 @@
         }
         clearTimeout(alarmNoticeTimer);
         alarmNoticeAlarm = null;
+    }
+
+    async function dismissAlarmNotice() {
+        const payload = alarmNoticeAlarm;
+        const id = payload?.alarmId;
+        hideAlarmNotice();
+        if (!id || !window.cc?.dismissAlarm) return;
+        try {
+            await window.cc.dismissAlarm(id);
+        } catch (err) {
+            console.error(err);
+            if (payload.deleteAfter) deleteAlarmById(id);
+        }
     }
 
     function syncAlarmSoundRepeat() {
@@ -1498,6 +1638,19 @@
             day.addEventListener("click", () => day.classList.toggle("on"));
         });
         document.getElementById("alarm-editor-save")?.addEventListener("click", saveAlarmFromEditor);
+        document.getElementById("alarm-editor-clone")?.addEventListener("click", cloneAlarmFromEditor);
+        document.getElementById("alarm-editor-template")?.addEventListener("click", saveTemplateFromEditor);
+        document.getElementById("alarm-templates-list")?.addEventListener("click", (event) => {
+            const remove = event.target.closest("[data-template-remove]");
+            if (remove) {
+                deleteAlarmTemplate(remove.dataset.templateRemove);
+                return;
+            }
+            const use = event.target.closest("[data-template-id]");
+            if (!use) return;
+            const template = (cfg.alarmTemplates || []).find((item) => item.id === use.dataset.templateId);
+            openAlarmFromTemplate(template);
+        });
         document.getElementById("alarm-editor-cancel")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-editor-close")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-edit-repeat-count")?.addEventListener("change", syncAlarmSoundRepeat);
@@ -1540,7 +1693,10 @@
             if (path) window.audioEngine.playAlarmFile(path, volume);
             else window.audioEngine.chime(sound, volume);
         });
-        document.getElementById("alarm-notice-dismiss")?.addEventListener("click", hideAlarmNotice);
+        document.getElementById("alarm-notice-dismiss")?.addEventListener("click", () => {
+            if (alarmNoticeAlarm?.alarmId) dismissAlarmNotice();
+            else hideAlarmNotice();
+        });
         document.getElementById("alarm-notice-snooze")?.addEventListener("click", async () => {
             if (alarmNoticeAlarm?.alarmId && window.cc.snoozeAlarm) {
                 await window.cc.snoozeAlarm(
@@ -1575,7 +1731,7 @@
             if (event.key !== "Escape") return;
             const notice = document.getElementById("alarm-notice");
             if (alarmNoticeAlarm?.alarmId && notice && !notice.hidden) {
-                hideAlarmNotice();
+                dismissAlarmNotice();
                 return;
             }
             if (confirmOpen) {
@@ -8902,6 +9058,12 @@
         if (!entry) return;
         openAlarmEditor({ ...entry.alarm, id: entry.id }, { isExisting: true });
     });
+    document.getElementById("alarm-ctx-clone")?.addEventListener("click", () => {
+        const entry = alarmFromCtx();
+        hideAllContextMenus();
+        if (!entry) return;
+        insertClonedAlarm({ ...entry.alarm, id: entry.id });
+    });
     document.getElementById("alarm-ctx-toggle")?.addEventListener("click", () => {
         const entry = alarmFromCtx();
         hideAllContextMenus();
@@ -9317,6 +9479,9 @@
             selDate = dateStr;
             renderCalendar();
             openNoteModal(y, m0, d);
+        } else if (action === "new-alarm") {
+            navigate("alarms");
+            openAlarmEditor();
         } else if (VIEW_ORDER.includes(action)) {
             navigate(action);
         }
@@ -9326,7 +9491,14 @@
         window.cc.onAlarmSnoozed((p) => {
             if (!p || !p.alarmId || !p.until) return;
             snoozedAlarmUntil.set(p.alarmId, Number(p.until));
+            if (alarmNoticeAlarm?.alarmId === p.alarmId) hideAlarmNotice();
             renderAlarmsView();
+        });
+    }
+
+    if (window.cc.onAlarmDismissed) {
+        window.cc.onAlarmDismissed((p) => {
+            if (p?.alarmId && alarmNoticeAlarm?.alarmId === p.alarmId) hideAlarmNotice();
         });
     }
 

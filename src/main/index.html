@@ -274,6 +274,11 @@
                                 </button>
                             </div>
 
+                            <div class="alarm-templates" id="alarm-templates" hidden>
+                                <span class="alarm-presets-label" data-i18n="alarms.templates.label">TEMPLATES</span>
+                                <div class="alarm-templates-grid" id="alarm-templates-list"></div>
+                            </div>
+
                             <div class="alarms-empty" id="alarms-empty">
                                 <div class="alarms-empty-orbit" aria-hidden="true">
                                     <span class="alarms-empty-ring ring-one"></span>
@@ -472,9 +477,24 @@
                                                 <option value="30" data-i18n="alarms.snooze.30">30 min</option>
                                             </select>
                                         </label>
+                                        <label class="alarm-check">
+                                            <input type="checkbox" id="alarm-edit-delete-after" />
+                                            <span class="alarm-check-copy">
+                                                <span data-i18n="alarms.editor.deleteAfter">Delete after the alarm</span>
+                                                <small data-i18n="alarms.editor.deleteAfterHint">Removed when you dismiss it. Snooze keeps it.</small>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="alarm-editor-foot">
+                                    <div class="alarm-editor-foot-start">
+                                        <button class="note-btn secondary" id="alarm-editor-template" type="button">
+                                            <span data-i18n="alarms.editor.saveTemplate">Save as template</span>
+                                        </button>
+                                        <button class="note-btn secondary" id="alarm-editor-clone" type="button" hidden>
+                                            <span data-i18n="alarms.editor.clone">Clone</span>
+                                        </button>
+                                    </div>
                                     <button class="note-btn secondary" id="alarm-editor-cancel" type="button">
                                         <span data-i18n="common.cancel">Cancel</span>
                                         <kbd class="btn-kbd">Esc</kbd>
@@ -2481,6 +2501,10 @@
             <div class="ctx-item" id="alarm-ctx-edit">
                 <span class="ico"><span data-ico="gear"></span></span>
                 <span class="label" data-i18n="alarms.card.edit">Edit alarm</span>
+            </div>
+            <div class="ctx-item" id="alarm-ctx-clone">
+                <span class="ico"><span data-ico="copy"></span></span>
+                <span class="label" data-i18n="alarms.card.clone">Clone</span>
             </div>
             <div class="ctx-item" id="alarm-ctx-toggle">
                 <span class="ico"><span data-ico="power"></span></span>

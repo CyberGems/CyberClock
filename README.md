@@ -99,10 +99,10 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
 - **Custom Chime Support** — Load your own audio file for an hourly chime interval
 - **Schedule Window** — Silence chimes during specific hours
-- **Alarms** — An Alarms view with presets, cards, and a designer. Schedules are once, every day, weekdays, weekends, or selected days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm takes over the window
+- **Alarms** — An Alarms view with presets, cards, and a designer. Schedules are once, every day, weekdays, weekends, or selected days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm takes over the window. Delete after the alarm removes it when you dismiss the notice. Clone copies an alarm, and templates save a setup without scheduling it
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked
+- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked. New Alarm opens the designer in Full Mode
 - **Flexible Window Close** — Configurable close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
 - **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
 - **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display

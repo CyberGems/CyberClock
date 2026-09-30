@@ -433,6 +433,46 @@ fn snooze_alarm(app: AppHandle, alarm_id: String, minutes: u32) -> Result<(), St
     Ok(())
 }
 
+/// The notice was dismissed. When the alarm is marked delete-after, it
+/// leaves the schedule. Snooze does not call this.
+#[tauri::command]
+fn dismiss_alarm(app: AppHandle, alarm_id: String) -> Result<(), String> {
+    let id = alarm_id.trim().to_string();
+    if id.is_empty() {
+        return Ok(());
+    }
+    let mut deleted = false;
+    update_settings(&app, |settings| {
+        let index = settings
+            .custom_alarms
+            .iter()
+            .enumerate()
+            .position(|(index, alarm)| {
+                let current_id = if alarm.id.trim().is_empty() {
+                    format!("alarm-{}", index + 1)
+                } else {
+                    alarm.id.clone()
+                };
+                current_id == id
+            });
+        if let Some(index) = index {
+            if settings.custom_alarms[index].delete_after {
+                settings.custom_alarms.remove(index);
+                deleted = true;
+            }
+        }
+        Ok(())
+    })?;
+    if deleted {
+        let _ = app.emit("settings:updated", load_settings(&app));
+    }
+    let _ = app.emit(
+        "alarm:dismissed",
+        serde_json::json!({ "alarmId": id, "deleted": deleted }),
+    );
+    Ok(())
+}
+
 #[tauri::command]
 fn reset_settings(app: AppHandle) -> AppSettings {
     let default_settings = AppSettings::default();
@@ -3911,6 +3951,7 @@ fn custom_alarms_scheduler(app: AppHandle) {
                         "soundRepeatCount": alarm.sound_repeat_count,
                         "soundUntilDismiss": alarm.sound_until_dismiss,
                         "soundPauseSecs": alarm.sound_pause_secs,
+                        "deleteAfter": alarm.delete_after,
                         "volume": current_settings.alarm_volume,
                         "audioMuted": current_settings.audio_muted
                     });
@@ -3981,7 +4022,7 @@ const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
 // Collapsed help section baseline; the tray window re-reports its real
 // size via tray_menu_ready once rendered (help expands the menu, the
 // About modal resizes it further).
-const TRAY_MENU_EST_HEIGHT: f64 = 560.0;
+const TRAY_MENU_EST_HEIGHT: f64 = 600.0;
 
 /// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
 /// region that EXCLUDES the taskbar. Clamping the tray menu to the full
@@ -4278,6 +4319,12 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         }
         "new_relax" | "new_relax_tray" => {
             spawn_float_window(&app, "relax");
+        }
+        "new_alarm" => {
+            switch_to_full_mode(app.clone());
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.emit("mini:menu-action", "new-alarm");
+            }
         }
         "home" | "timer" | "stopwatch" | "relax" | "settings" => {
             switch_to_full_mode(app.clone());
@@ -4752,6 +4799,7 @@ pub fn run() {
             save_settings,
             patch_settings,
             snooze_alarm,
+            dismiss_alarm,
             reset_settings,
             close_window,
             minimize_window,

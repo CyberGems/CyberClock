@@ -162,6 +162,12 @@
                 minutes: Number(minutes) || 10,
             });
         },
+        dismissAlarm: async (alarmId) => {
+            if (!HAS_TAURI) return true;
+            return await invoke("dismiss_alarm", {
+                alarmId: String(alarmId || ""),
+            });
+        },
         resetSettings: async () => {
             const res = await invokeOrFallback("reset_settings", undefined, (browserSettings = {}));
             await emit("settings:updated", res);
@@ -347,6 +353,9 @@
         },
         onAlarmSnoozed: (cb) => {
             return subscribe("alarm:snoozed", cb);
+        },
+        onAlarmDismissed: (cb) => {
+            return subscribe("alarm:dismissed", cb);
         },
         onVoiceAnnounceTime: (cb) => {
             return subscribe("voice:announce-time", cb);

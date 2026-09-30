@@ -50,6 +50,9 @@ pub struct CustomAlarm {
     /// Seconds of silence between repeats.
     #[serde(default = "default_sound_pause_secs")]
     pub sound_pause_secs: u32,
+    /// Remove the alarm when the notice is dismissed. Snooze keeps it.
+    #[serde(default)]
+    pub delete_after: bool,
 }
 
 impl Default for CustomAlarm {
@@ -70,6 +73,7 @@ impl Default for CustomAlarm {
             sound_repeat_count: default_sound_repeat_count(),
             sound_until_dismiss: false,
             sound_pause_secs: default_sound_pause_secs(),
+            delete_after: false,
         }
     }
 }
@@ -385,6 +389,10 @@ pub struct AppSettings {
 
     // Custom alarm times (HH:MM) with day-of-week repetition.
     pub custom_alarms: Vec<CustomAlarm>,
+    /// Saved alarm setups. They are not scheduled until the user creates
+    /// an alarm from one.
+    #[serde(default)]
+    pub alarm_templates: Vec<CustomAlarm>,
 
     pub relax_scheduler: RelaxSchedulerSettings,
     #[serde(default)]
@@ -514,6 +522,7 @@ impl Default for AppSettings {
             mini_auto_cycle_interval: 15,
             mini_auto_cycle_mode: "sequential".to_string(),
             custom_alarms: Vec::new(),
+            alarm_templates: Vec::new(),
             relax_scheduler: RelaxSchedulerSettings::default(),
             voice_announcer: VoiceAnnouncerSettings::default(),
             show_tooltips: true,

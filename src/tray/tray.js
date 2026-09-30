@@ -120,6 +120,8 @@
         if (lblAnalog) lblAnalog.textContent = window.ccI18n ? window.ccI18n.t("float.newAnalog") : "New Analog Clock";
         const lblRelaxFloat = document.getElementById("lbl-relax-float");
         if (lblRelaxFloat) lblRelaxFloat.textContent = window.ccI18n ? window.ccI18n.t("float.newRelax") : "New Relax";
+        const lblAlarm = document.getElementById("lbl-alarm");
+        if (lblAlarm) lblAlarm.textContent = window.ccI18n ? window.ccI18n.t("tray.newAlarm") : "New Alarm";
 
         // Relax quick toggle: reflects live playback (track id comes from
         // the main window's reports). Hidden when nothing is loaded.

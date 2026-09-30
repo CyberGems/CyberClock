@@ -379,7 +379,7 @@
                             console.error(err);
                         }
                     }
-                    dismissMiniAlarm();
+                    clearMiniAlarmNotice();
                 });
                 alarmActions.appendChild(snoozeBtn);
             }
@@ -567,7 +567,7 @@
     let isTimeBlockHovered = false;
     let isTipHovered = false;
 
-    function dismissMiniAlarm() {
+    function clearMiniAlarmNotice() {
         activeAlarmNotice = null;
         if (window.audioEngine && window.audioEngine.stopAlarmAlert) {
             window.audioEngine.stopAlarmAlert();
@@ -576,6 +576,17 @@
         if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
         hideTipNow();
         syncWindowSize();
+    }
+
+    async function dismissMiniAlarm() {
+        const id = activeAlarmNotice?.alarmId;
+        clearMiniAlarmNotice();
+        if (!id || !window.cc?.dismissAlarm) return;
+        try {
+            await window.cc.dismissAlarm(id);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     function showMiniAlarm(payload) {
@@ -821,6 +832,17 @@
         if (p.customPath) window.audioEngine.playFile(p.customPath, { loop: false, volume: vol });
         else window.audioEngine.chime(p.sound || "chime-digital", vol);
     });
+
+    if (window.cc.onAlarmDismissed) {
+        window.cc.onAlarmDismissed((p) => {
+            if (p?.alarmId && activeAlarmNotice?.alarmId === p.alarmId) clearMiniAlarmNotice();
+        });
+    }
+    if (window.cc.onAlarmSnoozed) {
+        window.cc.onAlarmSnoozed((p) => {
+            if (p?.alarmId && activeAlarmNotice?.alarmId === p.alarmId) clearMiniAlarmNotice();
+        });
+    }
 
     if (window.cc && window.cc.onVoiceAnnounceTime) {
         window.cc.onVoiceAnnounceTime((p) => {

@@ -4739,6 +4739,108 @@
         border-top: 1px solid var(--border);
         border-bottom: 0;
     }
+    .alarm-editor-foot-start {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-right: auto;
+    }
+    .alarm-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 2px 0 0;
+        color: var(--text-hi);
+        cursor: pointer;
+        font-size: calc(12.5px * var(--ui-scale));
+    }
+    .alarm-check input {
+        width: 16px;
+        height: 16px;
+        margin: 2px 0 0;
+        accent-color: var(--accent-a, #3dff9a);
+        flex: 0 0 auto;
+    }
+    .alarm-check-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .alarm-check-copy small {
+        color: var(--text-lo);
+        font-size: calc(10.5px * var(--ui-scale));
+        line-height: 1.35;
+    }
+    .alarm-templates {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .alarm-templates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 8px;
+    }
+    .alarm-template {
+        display: flex;
+        align-items: stretch;
+        min-width: 0;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .alarm-template-use {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-width: 0;
+        padding: 8px 10px;
+        color: var(--text-hi);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        text-align: left;
+    }
+    .alarm-template-use strong {
+        max-width: 100%;
+        overflow: hidden;
+        font-size: calc(12px * var(--ui-scale));
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .alarm-template-use span {
+        max-width: 100%;
+        overflow: hidden;
+        color: var(--text-lo);
+        font-size: calc(10px * var(--ui-scale));
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .alarm-template-use:hover {
+        color: var(--text-hi);
+        background: rgba(var(--rgb-accent), 0.08);
+    }
+    .alarm-template-remove {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        color: var(--text-lo);
+        background: transparent;
+        border: 0;
+        border-left: 1px solid var(--border);
+        cursor: pointer;
+    }
+    .alarm-template-remove:hover {
+        color: var(--text-hi);
+        background: rgba(255, 80, 80, 0.12);
+    }
     #view-alarms,
     .alarm-editor-overlay,
     .alarm-editor-body,
