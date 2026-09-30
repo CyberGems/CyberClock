@@ -198,7 +198,12 @@
 
         if (isTipVisible) {
             const tipHeight = tipEl.offsetHeight || 80;
-            baseHeight += (tipHeight + 16) / zoom;
+            // 8px sits between the clock and the card. The rest is room
+            // for the card's drop shadow, which the window edge was
+            // cutting flat.
+            const tipGap = 8;
+            const tipShadowBleed = 44;
+            baseHeight += (tipHeight + tipGap + tipShadowBleed) / zoom;
         }
 
         return { width: Math.round(base.w * zoom), height: Math.round(baseHeight * zoom) };
