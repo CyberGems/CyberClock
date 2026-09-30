@@ -108,6 +108,20 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     background: rgba(255, 77, 109, 0.16);
 }
 
+#btn-cal-menu {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.92);
+    transition: opacity 0.16s ease, transform 0.16s ease, color 0.15s ease, background 0.15s ease;
+}
+.float-cal-shell:hover #btn-cal-menu,
+.float-cal-shell:focus-within #btn-cal-menu,
+#btn-cal-menu:focus-visible,
+#btn-cal-menu.menu-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+}
 #btn-cal-menu.menu-open::after {
     display: none !important;
     opacity: 0 !important;

@@ -119,6 +119,21 @@ button {
     color: #fff;
 }
 
+#btn-menu {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.92);
+    transition: opacity 0.16s ease, transform 0.16s ease, background 0.15s ease, color 0.15s ease;
+}
+.relax-shell:hover #btn-menu,
+.relax-shell:focus-within #btn-menu,
+#btn-menu:focus-visible,
+#btn-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+}
+
 .spectrum {
     width: 100%;
     height: 28px;
