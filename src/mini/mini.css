@@ -2582,8 +2582,11 @@
         text-transform: uppercase;
     }
     .mini-tip-update-ver {
-        flex-shrink: 0;
+        flex: 0 0 auto;
+        min-width: max-content;
         white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
         font-size: 10px;
         font-weight: 700;
         padding: 1px 6px;
@@ -2813,12 +2816,16 @@
         white-space: nowrap;
     }
     .mini-shell[data-layout][data-design] #mini-date {
+        flex: 0 0 auto;
+        min-width: max-content;
         font-family: var(--mini-date-font, var(--skin-date-font, "Share Tech Mono", monospace));
         font-weight: var(--mini-date-weight, var(--skin-date-weight, 400));
         font-style: var(--mini-date-style, normal);
         font-size: var(--date-size);
         line-height: 1;
         white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
     }
 
     /* Curated faces. A user choice sets --mini-time-font / --mini-date-font

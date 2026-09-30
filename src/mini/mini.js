@@ -156,9 +156,12 @@
         if (!shell) return { w: 280, h: 36 };
         const zoom = zoomFactor();
         const rect = shell.getBoundingClientRect();
-        // rect is post-transform; the window wants the unscaled box.
-        const w = Math.ceil(rect.width / zoom);
-        const h = Math.ceil(rect.height / zoom);
+        // rect is post-transform. scrollWidth is the unscaled content,
+        // including a date the window is still too narrow to show.
+        const borderX = shell.offsetWidth - shell.clientWidth;
+        const borderY = shell.offsetHeight - shell.clientHeight;
+        const w = Math.ceil(Math.max(shell.scrollWidth + borderX, rect.width / zoom));
+        const h = Math.ceil(Math.max(shell.scrollHeight + borderY, rect.height / zoom));
         if (w < 40 || h < 20) return { w: 280, h: 36 };
         return { w, h };
     }
