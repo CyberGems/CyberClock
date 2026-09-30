@@ -1877,6 +1877,55 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    /* Day progress: a 2px groove on the bottom edge. The box is taller
+       than the stroke so the percentage tip is easy to reach. */
+    .day-progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 4px;
+        height: 8px;
+        z-index: 110;
+        display: flex;
+        align-items: flex-end;
+        cursor: default;
+        --day-pct: 0;
+    }
+    .day-progress[hidden] {
+        display: none !important;
+    }
+    .day-progress-track {
+        position: relative;
+        width: 100%;
+        height: 2px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.28);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+    .day-progress-fill {
+        height: 100%;
+        width: max(2px, calc(var(--day-pct) * 1%));
+        max-width: 100%;
+        border-radius: inherit;
+        background: color-mix(in srgb, var(--skin-ink, #fff) 62%, white);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--skin-ink, #fff) 75%, white);
+    }
+    .day-progress-track::after {
+        content: "";
+        position: absolute;
+        left: calc(var(--day-pct) * 1%);
+        top: 50%;
+        width: 3px;
+        height: 5px;
+        transform: translate(-50%, -50%);
+        border-radius: 1px;
+        background: #fff;
+        box-shadow: 0 0 5px #fff;
+        pointer-events: none;
+    }
+    .day-progress:hover .day-progress-track {
+        background: rgba(255, 255, 255, 0.42);
+    }
     .controls {
         display: flex;
         flex-direction: column;

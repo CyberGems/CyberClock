@@ -2370,6 +2370,8 @@
         if (miniLock) miniLock.checked = s.miniPositionLocked || false;
         const miniCollapse = document.getElementById('s-mini-collapse');
         if (miniCollapse) miniCollapse.checked = s.miniCollapseDate !== true;
+        const miniDayProgress = document.getElementById('s-mini-day-progress');
+        if (miniDayProgress) miniDayProgress.checked = s.miniDayProgress === true;
         const miniScan = document.getElementById('s-mini-scan');
         if (miniScan) miniScan.checked = s.miniScanlines !== false;
         // Real Sun Cycle row — visible only for the Sunset Pulse skin (7)
@@ -7571,6 +7573,12 @@
                 patch.miniLayout = 'inline';
             }
             window.cc.saveSettings(patch);
+        });
+    }
+    const sMiniDayProgress = document.getElementById('s-mini-day-progress');
+    if (sMiniDayProgress) {
+        sMiniDayProgress.addEventListener('change', (e) => {
+            window.cc.saveSettings({ miniDayProgress: e.target.checked });
         });
     }
     const sMiniScan = document.getElementById('s-mini-scan');

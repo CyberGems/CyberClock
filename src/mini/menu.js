@@ -670,6 +670,8 @@
                 // Collapse Date
                 const toggleCollapse = document.getElementById("toggle-collapse");
                 if (toggleCollapse) toggleCollapse.classList.toggle("on", cfg.miniCollapseDate !== true);
+                const toggleDay = document.getElementById("toggle-day-progress");
+                if (toggleDay) toggleDay.classList.toggle("on", cfg.miniDayProgress === true);
 
                 // Disable Animations
                 const toggleAnim = document.getElementById("toggle-anim");
@@ -907,6 +909,18 @@
     }
 
     // Collapse Date toggle handler
+    const dayProgressRow = document.getElementById("ctx-day-progress");
+    if (dayProgressRow) {
+        dayProgressRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-day-progress");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniDayProgress: on });
+            }
+        });
+    }
+
     const collapseRow = document.getElementById("ctx-collapse");
     if (collapseRow) {
         collapseRow.addEventListener("click", () => {
@@ -1250,6 +1264,8 @@
                 syncStackedLock(collapseOn);
                 const toggleCollapseLive = document.getElementById("toggle-collapse");
                 if (toggleCollapseLive) toggleCollapseLive.classList.toggle("on", cfg.miniCollapseDate !== true);
+                const toggleDayLive = document.getElementById("toggle-day-progress");
+                if (toggleDayLive) toggleDayLive.classList.toggle("on", cfg.miniDayProgress === true);
                 if (activeCaller && activeCaller.kind === "relax") {
                     syncRelaxMenu(cfg);
                 }

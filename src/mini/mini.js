@@ -56,6 +56,8 @@
         document.getElementById("mini-date").textContent =
             `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
 
+        paintDayProgress(now);
+
         // Keep the real-sun phase in sync across phase boundaries (the
         // dataset attribute is a no-op write when the phase hasn't changed).
         const shellForSolar = document.getElementById("shell");
@@ -97,6 +99,29 @@
     // local hour only (no geolocation), computed once per tick, and only
     // applied when the user enabled it — see applySettings. Phases:
     // dawn 5-8h, day 8-16h, sunset 16-19h, night 19-5h.
+    function dayPercent(now) {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const pct = Math.round(((now.getTime() - start) / 86400000) * 100);
+        return Math.min(100, Math.max(0, pct));
+    }
+
+    function paintDayProgress(now) {
+        const bar = document.getElementById("day-progress");
+        if (!bar) return;
+        if (cfg.miniDayProgress !== true) {
+            bar.hidden = true;
+            return;
+        }
+        const pct = dayPercent(now);
+        bar.hidden = false;
+        bar.style.setProperty("--day-pct", String(pct));
+        bar.setAttribute("aria-valuenow", String(pct));
+        const label = window.ccI18n
+            ? window.ccI18n.t("mini.dayProgress.tip", { pct })
+            : pct + "%";
+        bar.setAttribute("aria-label", label);
+    }
+
     function solarPhaseFor(hour) {
         if (hour >= 5 && hour < 8) return "dawn";
         if (hour >= 8 && hour < 16) return "day";
@@ -878,6 +903,44 @@
         clearTimeout(tickerTimer);
         if (!shellEl) return;
         shellEl.classList.remove("has-action-ticker");
+    }
+
+    const dayIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+    const dayBar = document.getElementById("day-progress");
+    if (dayBar) {
+        dayBar.addEventListener("mouseenter", () => {
+            clearTimeout(tipTimer);
+            tipTimer = null;
+            hideTipNow();
+            if (cfg.showWidgetHints === false || cfg.miniDayProgress !== true) return;
+            if (!shellEl || !tickerText) return;
+            const pct = dayPercent(new Date());
+            tickerText.textContent = window.ccI18n
+                ? window.ccI18n.t("mini.dayProgress.tip", { pct })
+                : pct + "%";
+            if (tickerIco) tickerIco.innerHTML = dayIcoSvg;
+            shellEl.classList.add("has-action-ticker");
+            clearTimeout(tickerTimer);
+            tickerTimer = null;
+        });
+        dayBar.addEventListener("mouseleave", (e) => {
+            hideActionTicker();
+            if (!timeBlock || !e.relatedTarget || !timeBlock.contains(e.relatedTarget)) return;
+            if (document.body.classList.contains("click-through")) return;
+            isTimeBlockHovered = true;
+            clearTimeout(tipHideTimer);
+            tipHideTimer = null;
+            expandDate();
+            refreshTipContent();
+            positionTip();
+            tipTimer = setTimeout(() => {
+                if (isDragging) return;
+                positionTip();
+                isTipVisible = true;
+                tipEl.classList.add("show");
+                syncWindowSize();
+            }, 900);
+        });
     }
 
     // ═══════════════════════════════════════════════════════

@@ -328,6 +328,9 @@ pub struct AppSettings {
     pub mini_scanlines: bool,
     pub mini_collapse_date: bool,
     pub mini_solar_real: bool,
+    /// Optional 2px day-progress line on the mini clock. Off until the user asks for it.
+    #[serde(default)]
+    pub mini_day_progress: bool,
     pub mini_zoom: f64,
     #[serde(default)]
     pub mini_layout: Option<String>,
@@ -496,6 +499,7 @@ impl Default for AppSettings {
             mini_scanlines: true,
             mini_collapse_date: false,
             mini_solar_real: false,
+            mini_day_progress: false,
             mini_zoom: 1.0,
             mini_layout: None,
             mini_custom_font: None,

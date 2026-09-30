@@ -88,6 +88,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
 - **Show Date** — On by default. Off hides the date and shortens the bar; both return on hover. Compact (2 Rows) stays unavailable while Show Date is off.
+- **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage.
 - **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from the tray menu or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
