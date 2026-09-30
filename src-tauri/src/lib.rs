@@ -1779,7 +1779,6 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
     }
     #[link(name = "gdi32")]
     extern "system" {
-        fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
         fn DeleteObject(ho: *mut core::ffi::c_void) -> i32;
     }
 
@@ -1826,12 +1825,50 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         // the client area, which is not always the window rectangle.
         let left = (origin.x - rc.left) + (cw - d) / 2;
         let top = (origin.y - rc.top) + (ch - d) / 2;
-        let rgn = CreateEllipticRgn(left, top, left + d, top + d);
+        // GDI's ellipse is flat along the top, so that arc looked cut next
+        // to the smooth bottom. A real circle keeps both edges the same.
+        let rgn = rounded_dial_region(left, top, d);
         if rgn.is_null() {
             return;
         }
         if SetWindowRgn(hwnd, rgn, 1) == 0 {
             DeleteObject(rgn);
+        }
+    }
+}
+
+/// Circle region for the dial. `CreateEllipticRgn` flattens the top scanline.
+#[cfg(windows)]
+fn rounded_dial_region(left: i32, top: i32, d: i32) -> *mut core::ffi::c_void {
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    struct WinPoint {
+        x: i32,
+        y: i32,
+    }
+    #[link(name = "gdi32")]
+    extern "system" {
+        fn CreatePolygonRgn(pts: *const WinPoint, count: i32, mode: i32) -> *mut core::ffi::c_void;
+        fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
+    }
+    const STEPS: usize = 180;
+    let mut pts = [WinPoint { x: 0, y: 0 }; STEPS];
+    let cx = left as f64 + d as f64 / 2.0;
+    let cy = top as f64 + d as f64 / 2.0;
+    let radius = d as f64 / 2.0;
+    for i in 0..STEPS {
+        let angle = (i as f64) * std::f64::consts::TAU / STEPS as f64;
+        pts[i] = WinPoint {
+            x: (cx + radius * angle.cos()).round() as i32,
+            y: (cy + radius * angle.sin()).round() as i32,
+        };
+    }
+    unsafe {
+        let rgn = CreatePolygonRgn(pts.as_ptr(), STEPS as i32, 2);
+        if !rgn.is_null() {
+            rgn
+        } else {
+            CreateEllipticRgn(left, top, left + d, top + d)
         }
     }
 }
@@ -1997,35 +2034,36 @@ unsafe fn create_grabbing_cursor() -> *mut core::ffi::c_void {
         colors: u32,
     }
 
-    // 32×32 closed hand. `o` outline, `s` fill, `.` transparent.
-    // Hotspot sits in the palm so the hand stays where the click began.
+    // 32×32 closed hand, same idea as the page cursor: white fill,
+    // black outline, knuckles on top and a thumb on the lower left.
+    // `k` outline, `w` fill, `.` transparent.
     const HAND: [&str; 32] = [
         "................................",
         "................................",
-        "..........oo..oo..oo............",
-        ".........osssoosssoossso........",
-        "........ossssssssssssssso.......",
-        ".......ossssssssssssssssso......",
-        "......ossssssssssssssssssso.....",
-        ".....ossssssssssssssssssssso....",
-        "....oossssssssssssssssssssso....",
-        "...oosssssssssssssssssssssso....",
-        "..oossssssssssssssssssssssso....",
-        "..osssssssssssssssssssssssso....",
-        "..osssssssssssssssssssssssso....",
-        "...ossssssssssssssssssssssso....",
-        "...ossssssssssssssssssssssso....",
-        "....osssssssssssssssssssssso....",
-        "....osssssssssssssssssssssso....",
-        ".....ossssssssssssssssssssso....",
-        ".....ossssssssssssssssssssso....",
-        "......osssssssssssssssssssso....",
-        "......oossssssssssssssssssso....",
-        ".......ossssssssssssssssssso....",
-        ".......oosssssssssssssssssso....",
-        "........osssssssssssssssssso....",
-        "........oossssssssssssssso......",
-        ".........ooooooooooooooooo......",
+        ".............kk.kk.kk...........",
+        "............kwwkwwkwwk..........",
+        "...........kwwwwwwwwwwk.........",
+        "..........kwwwwwwwwwwwwk........",
+        ".........kwwwwwwwwwwwwwwk.......",
+        "........kwwwwwwwwwwwwwwwwk......",
+        ".......kwwwwwwwwwwwwwwwwwwk.....",
+        "......kwwwwwwwwwwwwwwwwwwwwk....",
+        ".....kwwwwwwwwwwwwwwwwwwwwwwk...",
+        "....kwwwwwwwwwwwwwwwwwwwwwwwwk..",
+        "...kwwwwwwwwwwwwwwwwwwwwwwwwwwk.",
+        "...kwwwwwwwwwwwwwwwwwwwwwwwwwwk.",
+        "..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..",
+        "..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..",
+        ".kwwwkwwwwwwwwwwwwwwwwwwwwwwk...",
+        "..kwwwwwwwwwwwwwwwwwwwwwwwwk....",
+        "...kwwwwwwwwwwwwwwwwwwwwwwwwk...",
+        "....kwwwwwwwwwwwwwwwwwwwwwwk....",
+        ".....kwwwwwwwwwwwwwwwwwwwwwwk...",
+        "......kwwwwwwwwwwwwwwwwwwwwk....",
+        ".......kwwwwwwwwwwwwwwwwwwk.....",
+        "........kwwwwwwwwwwwwwwwwk......",
+        ".........kwwwwwwwwwwwwwwk.......",
+        "..........kkkkkkkkkkkkkk........",
         "................................",
         "................................",
         "................................",
@@ -2065,16 +2103,18 @@ unsafe fn create_grabbing_cursor() -> *mut core::ffi::c_void {
         let row = HAND[y].as_bytes();
         for x in 0..32 {
             let px = (y * 32 + x) * 4;
-            let (b, g, r, a) = match row[x] {
-                b'o' => (255u8, 255, 255, 255),
-                b's' => (36u8, 36, 40, 255),
-                _ => (0u8, 0, 0, 0),
+            // Classic AND/XOR cursor: mask 0 paints the color, mask 1
+            // leaves the screen alone. Alpha made the fill a black blob.
+            let (paint, b, g, r) = match row[x] {
+                b'k' => (true, 0u8, 0, 0),
+                b'w' => (true, 255u8, 255, 255),
+                _ => (false, 0u8, 0, 0),
             };
             pixels[px] = b;
             pixels[px + 1] = g;
             pixels[px + 2] = r;
-            pixels[px + 3] = a;
-            if a != 0 {
+            pixels[px + 3] = 0;
+            if paint {
                 let byte = y * 4 + x / 8;
                 mask[byte] &= !(0x80u8 >> (x % 8));
             }
@@ -2084,8 +2124,8 @@ unsafe fn create_grabbing_cursor() -> *mut core::ffi::c_void {
     let mono = CreateBitmap(SIZE, SIZE, 1, 1, mask.as_ptr());
     let icon = GrabIconInfo {
         f_icon: 0,
-        x_hotspot: 14,
-        y_hotspot: 12,
+        x_hotspot: 16,
+        y_hotspot: 14,
         hbm_mask: mono,
         hbm_color: color,
     };
