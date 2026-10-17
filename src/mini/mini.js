@@ -783,6 +783,10 @@
             isTipVisible = true;
             tipEl.classList.add("show");
             syncWindowSize();
+            const dp = document.getElementById("day-progress");
+            if (dp && isElementHovered(dp)) {
+                showDayProgressTicker();
+            }
         }, 800);
     }
 
@@ -814,6 +818,7 @@
             showDayProgressTicker();
         });
         dayProgressEl.addEventListener("mouseleave", (e) => {
+            if (isElementHovered(dayProgressEl)) return;
             hideActionTicker();
             onClockAreaLeave(e);
         });

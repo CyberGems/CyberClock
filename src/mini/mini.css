@@ -33,6 +33,7 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: default;
         position: relative;
+        z-index: 1000;
         outline: none;
         box-shadow: none !important;
     }
