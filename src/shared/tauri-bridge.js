@@ -158,6 +158,7 @@
         startDragging: async () => {
             if (!HAS_TAURI) return;
             try {
+                invoke("hide_mini_tip").catch(() => {});
                 const currentWindow = window.__TAURI__.window.getCurrentWindow();
                 await currentWindow.startDragging();
                 await invoke("clamp_current_window_to_monitors");

@@ -231,8 +231,8 @@
         // Notify backend of measured dimensions after render
         requestAnimationFrame(() => {
             const rect = tipEl.getBoundingClientRect();
-            const w = Math.ceil(rect.width + 20);
-            const h = Math.ceil(rect.height + 18);
+            const w = Math.ceil(rect.width + 32);
+            const h = Math.ceil(rect.height + 28);
             if (window.cc?.miniTipReady) {
                 window.cc.miniTipReady(w, h);
             }
@@ -285,7 +285,8 @@
             upcoming: 0,
             design: "1",
             theme: "ice",
-            language: lang
+            language: lang,
+            placement: document.body.dataset.placement || "below"
         };
     }
 

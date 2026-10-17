@@ -3687,7 +3687,7 @@ fn position_mini_tip(
         .unwrap_or_else(|| tip.scale_factor().unwrap_or(1.0));
     let tip_width = (logical_w * scale).round() as i32;
     let tip_height = (logical_h * scale).round() as i32;
-    let gap = (2.0 * scale).round() as i32;
+    let offset = (4.0 * scale).round() as i32;
 
     let mut placement_str = "below".to_string();
 
@@ -3698,8 +3698,8 @@ fn position_mini_tip(
         let mon_right = mon_left + work_area.size.width as i32;
         let mon_bottom = mon_top + work_area.size.height as i32;
 
-        let room_below = clock_y + clock_h + gap + tip_height <= mon_bottom;
-        let room_above = clock_y - gap - tip_height >= mon_top;
+        let room_below = clock_y + clock_h - offset + tip_height <= mon_bottom;
+        let room_above = clock_y - tip_height + offset >= mon_top;
 
         let clock_center_y = clock_y + clock_h / 2;
         let mon_mid_y = mon_top + (mon_bottom - mon_top) / 2;
@@ -3710,9 +3710,9 @@ fn position_mini_tip(
         };
 
         let pos_y = if place_above {
-            clock_y - tip_height - gap
+            clock_y - tip_height + offset
         } else {
-            clock_y + clock_h + gap
+            clock_y + clock_h - offset
         };
 
         let mut pos_x = clock_x + (clock_w - tip_width) / 2;
@@ -3734,6 +3734,12 @@ fn position_mini_tip(
         if let Ok(mut pl) = MINI_TIP_LAST_PLACEMENT.lock() {
             *pl = placement_str.clone();
         }
+        let _ = tip.emit(
+            "tip:placement",
+            serde_json::json!({
+                "placement": &placement_str
+            }),
+        );
         let _ = tip.app_handle().emit(
             "tip:placement",
             serde_json::json!({
@@ -3780,6 +3786,7 @@ fn open_mini_tip(
             if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
                 *p = Some(data.clone());
             }
+            let _ = tip.emit("tip:payload", &data);
             let _ = app.emit("tip:payload", data);
         }
 
@@ -5344,6 +5351,9 @@ pub fn run() {
                     {
                         api.prevent_close();
                         exit_app(&app_for_resize);
+                    }
+                    WindowEvent::Moved(_) => {
+                        hide_mini_tip(app_for_resize.clone());
                     }
                     WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
                         restore_target_size(&mini_for_resize);

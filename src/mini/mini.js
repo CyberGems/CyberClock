@@ -414,6 +414,9 @@
             updateVer = availableUpdateVersion;
         }
 
+        const isBottomHalf = (window.screenY || 0) > ((window.screen && window.screen.availHeight) || 1080) / 2;
+        const initialPlacement = isBottomHalf ? "above" : "below";
+
         return {
             dateStr,
             note,
@@ -423,7 +426,8 @@
             updateVersion: updateVer,
             design: cfg ? (cfg.miniDesign || cfg.dialDesign || "1") : "1",
             theme: cfg ? cfg.theme : "ice",
-            language: cfg ? cfg.language : "auto"
+            language: cfg ? cfg.language : "auto",
+            placement: initialPlacement
         };
     }
 
@@ -506,14 +510,7 @@
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
             if (!isTipVisible) return;
-            const dayProg = document.getElementById("day-progress");
-            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
-            if (clockHovered || isTipHovered) {
-                isTimeBlockHovered = clockHovered;
-                return;
-            }
-            isTimeBlockHovered = false;
-            isTipHovered = false;
+            if (isTimeBlockHovered || isTipHovered) return;
             hideTipNow();
             collapseDate();
         }, delay);
@@ -983,7 +980,11 @@
         tipTimer = null;
         clearTimeout(tipHideTimer);
         tipHideTimer = null;
-        hideTipNow();
+        isTimeBlockHovered = false;
+        isTipVisible = false;
+        if (window.cc && window.cc.hideMiniTip) {
+            window.cc.hideMiniTip().catch(() => {});
+        }
         hideActionTicker();
         collapseDate();
         syncWindowSize();
