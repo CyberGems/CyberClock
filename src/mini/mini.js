@@ -53,8 +53,11 @@
         const d = now;
         const days = getDays();
         const months = getMonths();
-        document.getElementById("mini-date").textContent =
-            `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        const dateStr = `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        const dateEl = document.getElementById("mini-date");
+        if (dateEl && dateEl.textContent !== dateStr) {
+            dateEl.textContent = dateStr;
+        }
 
         paintDayProgress(now);
 
@@ -62,7 +65,10 @@
         // dataset attribute is a no-op write when the phase hasn't changed).
         const shellForSolar = document.getElementById("shell");
         if ((cfg.miniDesign || 1) == 7 && cfg.miniSolarReal === true) {
-            shellForSolar.dataset.solar = solarPhaseFor(now.getHours());
+            const phase = solarPhaseFor(now.getHours());
+            if (shellForSolar.dataset.solar !== phase) {
+                shellForSolar.dataset.solar = phase;
+            }
         } else if (shellForSolar.dataset.solar) {
             delete shellForSolar.dataset.solar;
         }
@@ -73,10 +79,33 @@
     // so "1" is much narrower than "0" and the layout wobbles each tick).
     // Each digit gets its own equal-width box (1ch = the advance width of
     // "0" in the active font), centered; the blinking colons sit in their
-    // own cells. Skips DOM work entirely when the string is unchanged.
+    // own cells. Skips DOM work entirely when the string is unchanged, and
+    // mutates text in-place across second ticks to avoid tearing down DOM nodes.
     function setDigits(el, val) {
-        if (el.dataset.digitsValue === val) return;
+        if (!el || el.dataset.digitsValue === val) return;
         el.dataset.digitsValue = val;
+
+        const children = el.childNodes;
+        if (children.length === val.length) {
+            let canReuse = true;
+            for (let i = 0; i < val.length; i++) {
+                const ch = val[i];
+                const node = children[i];
+                if (ch === ":" && node.className !== "t-colon") { canReuse = false; break; }
+                if (/\d/.test(ch) && node.className !== "digit") { canReuse = false; break; }
+            }
+            if (canReuse) {
+                for (let i = 0; i < val.length; i++) {
+                    const ch = val[i];
+                    const node = children[i];
+                    if (node.textContent !== ch) {
+                        node.textContent = ch;
+                    }
+                }
+                return;
+            }
+        }
+
         el.replaceChildren();
         for (const ch of val) {
             if (ch === ":") {
@@ -109,17 +138,20 @@
         const bar = document.getElementById("day-progress");
         if (!bar) return;
         if (cfg.miniDayProgress !== true) {
-            bar.hidden = true;
+            if (!bar.hidden) bar.hidden = true;
             return;
         }
         const pct = dayPercent(now);
-        bar.hidden = false;
-        bar.style.setProperty("--day-pct", String(pct));
-        bar.setAttribute("aria-valuenow", String(pct));
-        const label = window.ccI18n
-            ? window.ccI18n.t("mini.dayProgress.tip", { pct })
-            : pct + "%";
-        bar.setAttribute("aria-label", label);
+        if (bar.hidden) bar.hidden = false;
+        if (bar.dataset.lastPct !== String(pct)) {
+            bar.dataset.lastPct = String(pct);
+            bar.style.setProperty("--day-pct", String(pct));
+            bar.setAttribute("aria-valuenow", String(pct));
+            const label = window.ccI18n
+                ? window.ccI18n.t("mini.dayProgress.tip", { pct })
+                : pct + "%";
+            bar.setAttribute("aria-label", label);
+        }
     }
 
     function solarPhaseFor(hour) {
