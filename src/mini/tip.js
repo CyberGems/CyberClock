@@ -272,10 +272,36 @@
         });
     }
 
+    function defaultPayload() {
+        const now = new Date();
+        const lang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "es";
+        const locale = lang === "es" ? "es-ES" : "en-US";
+        let dateStr = now.toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+        dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        return {
+            dateStr,
+            note: "",
+            upcoming: 0,
+            design: "1",
+            theme: "ice",
+            language: lang
+        };
+    }
+
+    // Render immediately on load so the card is never blank
+    renderTip(defaultPayload());
+
     // Also query initial/persisted payload
     if (window.cc?.getMiniTipPayload) {
         window.cc.getMiniTipPayload().then((data) => {
             if (data) renderTip(data);
+        }).catch(() => {});
+    }
+
+    // Also query initial placement
+    if (window.cc?.getMiniTipPlacement) {
+        window.cc.getMiniTipPlacement().then((p) => {
+            if (p) document.body.dataset.placement = p;
         }).catch(() => {});
     }
 })();

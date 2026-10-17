@@ -3654,6 +3654,8 @@ static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> = std::sy
 static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((280.0, 110.0));
 static MINI_TIP_LAST_PAYLOAD: std::sync::Mutex<Option<serde_json::Value>> =
     std::sync::Mutex::new(None);
+static MINI_TIP_LAST_PLACEMENT: std::sync::Mutex<String> =
+    std::sync::Mutex::new(String::new());
 
 fn position_mini_tip(
     tip: &WebviewWindow,
@@ -3718,15 +3720,27 @@ fn position_mini_tip(
             let _ = tip.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
                 pos_x, pos_y,
             )));
-
+            let placement_str = if place_above { "above" } else { "below" };
+            if let Ok(mut pl) = MINI_TIP_LAST_PLACEMENT.lock() {
+                *pl = placement_str.to_string();
+            }
             let _ = tip.app_handle().emit(
                 "tip:placement",
                 serde_json::json!({
-                    "placement": if place_above { "above" } else { "below" }
+                    "placement": placement_str
                 }),
             );
         }
     }
+}
+
+#[tauri::command]
+fn get_mini_tip_placement() -> String {
+    MINI_TIP_LAST_PLACEMENT
+        .lock()
+        .ok()
+        .map(|s| s.clone())
+        .unwrap_or_else(|| "below".to_string())
 }
 
 #[tauri::command]
@@ -3756,7 +3770,23 @@ fn open_mini_tip(
         let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((280.0, 110.0));
         position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
 
-        let _ = tip.show();
+        #[cfg(target_os = "windows")]
+        {
+            if let Ok(hwnd) = tip.hwnd() {
+                unsafe {
+                    windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                        hwnd.0 as windows_sys::Win32::Foundation::HWND,
+                        windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNOACTIVATE,
+                    );
+                }
+            } else {
+                let _ = tip.show();
+            }
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            let _ = tip.show();
+        }
         refresh_taskbar_tab(&tip);
         return true;
     }
@@ -5422,6 +5452,7 @@ pub fn run() {
             mini_menu_ready,
             open_mini_tip,
             get_mini_tip_payload,
+            get_mini_tip_placement,
             mini_tip_ready,
             hide_mini_tip,
             set_mini_tip_hovered,

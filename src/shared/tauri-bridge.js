@@ -122,6 +122,9 @@
         getMiniTipPayload: async () => {
             return await invoke("get_mini_tip_payload");
         },
+        getMiniTipPlacement: async () => {
+            return await invoke("get_mini_tip_placement");
+        },
         hideMiniTip: async () => {
             await invoke("hide_mini_tip");
         },

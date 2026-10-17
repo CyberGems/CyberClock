@@ -421,7 +421,7 @@
             driftMs: drift,
             alarm: alarmData,
             updateVersion: updateVer,
-            design: cfg ? cfg.dialDesign : "1",
+            design: cfg ? (cfg.miniDesign || cfg.dialDesign || "1") : "1",
             theme: cfg ? cfg.theme : "ice",
             language: cfg ? cfg.language : "auto"
         };
@@ -669,15 +669,15 @@
         }
     });
     window.addEventListener("blur", () => {
-        isTimeBlockHovered = false;
-        isTipHovered = false;
-        clearTimeout(tipTimer);
-        tipTimer = null;
         miniHovered = false;
-        hideTipNow();
-        hideActionTicker();
-        collapseDate();
         syncMiniMotion();
+        if (!isTimeBlockHovered && !isTipHovered) {
+            clearTimeout(tipTimer);
+            tipTimer = null;
+            hideTipNow();
+            hideActionTicker();
+            collapseDate();
+        }
     });
 
     shellEl.addEventListener("mouseenter", () => {
