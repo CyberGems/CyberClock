@@ -2020,12 +2020,12 @@
         border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
         border-radius: 12px;
         padding: 12px 14px;
-        width: 240px;
+        width: 252px;
         text-align: center;
         white-space: normal;
         z-index: 999;
         font-family: "Outfit", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 11px;
+        font-size: 12px;
         color: rgba(255, 255, 255, 0.88);
         line-height: 1.5;
         word-break: break-word;
@@ -2070,14 +2070,14 @@
     }
     .mini-tip-alarm-title {
         color: var(--accent-a);
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 700;
         line-height: 1.3;
     }
     .mini-tip-alarm-msg {
         margin: 4px 0 8px;
         color: rgba(255, 255, 255, 0.88);
-        font-size: 11px;
+        font-size: 12px;
         line-height: 1.4;
     }
     .mini-tip-alarm-actions {
@@ -2086,13 +2086,13 @@
         gap: 6px;
     }
     .mini-tip-alarm-btn {
-        padding: 4px 10px;
+        padding: 5px 12px;
         color: var(--accent-a);
         background: rgba(var(--rgb-accent), 0.12);
         border: 1px solid var(--accent-a);
         border-radius: 6px;
         font: inherit;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         cursor: pointer;
     }
@@ -2106,10 +2106,10 @@
         text-shadow: none;
     }
     .mini-tip-date {
-        font-size: 10px;
+        font-size: 11.5px;
         font-weight: 600;
         color: var(--accent-a);
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
         text-transform: uppercase;
         margin-bottom: 6px;
         text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
@@ -2123,7 +2123,7 @@
         color: #ffffff;
         font-weight: 500;
         margin-bottom: 6px;
-        font-size: 11px;
+        font-size: 12.5px;
     }
     .mini-tip-note.empty {
         color: rgba(255, 255, 255, 0.45);
@@ -2134,12 +2134,12 @@
     .mini-tip-action-btn {
         display: inline-block;
         margin: 4px auto 10px auto;
-        padding: 4px 12px;
+        padding: 5px 14px;
         background: rgba(var(--rgb-accent), 0.12);
         border: 1px solid var(--accent-a);
         color: var(--accent-a);
         border-radius: 4px;
-        font-size: 9px;
+        font-size: 10.5px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -2153,7 +2153,7 @@
         transform: scale(1.04);
     }
     .mini-tip-stat {
-        font-size: 9.5px;
+        font-size: 11px;
         color: rgba(255, 255, 255, 0.5);
         letter-spacing: 0.5px;
     }
@@ -2171,7 +2171,7 @@
         text-align: center;
     }
     .mini-tip-drift-head {
-        font-size: 10.5px;
+        font-size: 11.5px;
         font-weight: 700;
         color: #fbbf24;
         letter-spacing: 0.4px;
@@ -2179,7 +2179,7 @@
         margin-bottom: 3px;
     }
     .mini-tip-drift-msg {
-        font-size: 10px;
+        font-size: 11px;
         color: rgba(255, 255, 255, 0.9);
         margin-bottom: 6px;
     }
@@ -2188,7 +2188,7 @@
         width: 100%;
         box-sizing: border-box;
         padding: 5px 8px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.5px;
         text-transform: uppercase;
@@ -2656,7 +2656,7 @@
         align-items: center;
         gap: 5px;
         min-width: 0;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.4px;
         line-height: 1.25;
@@ -2669,7 +2669,7 @@
         white-space: nowrap;
         word-break: normal;
         overflow-wrap: normal;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         padding: 1px 6px;
         border-radius: 999px;
@@ -2687,7 +2687,7 @@
         padding: 5px 8px;
         border-radius: 6px;
         font-family: inherit;
-        font-size: 10.5px;
+        font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         outline: none;

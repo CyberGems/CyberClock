@@ -28,7 +28,7 @@ body.tip-window-body .mini-tip {
 /* Caret pointing DOWN when tip window is placed ABOVE the clock */
 body.tip-window-body[data-placement="above"] .mini-tip::after {
     top: auto !important;
-    bottom: -8px !important;
+    bottom: -7px !important;
     border-style: solid !important;
     border-width: 0 1px 1px 0 !important;
 }
