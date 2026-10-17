@@ -359,6 +359,21 @@ fn get_settings(app: AppHandle) -> AppSettings {
     load_settings(&app)
 }
 
+#[tauri::command]
+fn get_active_window(app: AppHandle) -> String {
+    if let Some(main) = app.get_webview_window("main") {
+        if main.is_visible().unwrap_or(false) && !main.is_minimized().unwrap_or(false) {
+            return "main".to_string();
+        }
+    }
+    if let Some(mini) = app.get_webview_window("mini") {
+        if mini.is_visible().unwrap_or(false) && !mini.is_minimized().unwrap_or(false) {
+            return "mini".to_string();
+        }
+    }
+    "none".to_string()
+}
+
 /// Say one sentence with the Windows voice. WebView2 is not used:
 /// selecting a voice there makes Windows read the sentence twice.
 #[tauri::command]
@@ -5212,6 +5227,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_settings,
+            get_active_window,
             speak_announcement,
             save_settings,
             patch_settings,

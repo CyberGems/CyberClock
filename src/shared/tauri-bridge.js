@@ -397,6 +397,9 @@
         onTrayRelaxToggle: (cb) => {
             return subscribe("tray:relax-toggle", cb);
         },
+        getActiveWindow: async () => {
+            return await invokeOrFallback("get_active_window", {}, null);
+        },
         onActiveWindow: (cb) => {
             return subscribe("cc:active-window", cb);
         },

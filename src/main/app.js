@@ -2595,7 +2595,7 @@
     // (see broadcast_active_window). The heavy canvas loop runs only
     // while the main window is the active one and resumes instantly
     // (with the correct time) when it is shown again.
-    let mainActive = true;
+    let mainActive = false;
     function escapeHtml(s) {
         return String(s || "")
             .replace(/&/g, "&amp;")
@@ -2666,9 +2666,12 @@
         if (nv) {
             setupClock();
             setupClockAutoCycle();
-        } else if (clockAutoCycleTimer) {
-            clearInterval(clockAutoCycleTimer);
-            clockAutoCycleTimer = null;
+        } else {
+            if (clockAutoCycleTimer) {
+                clearInterval(clockAutoCycleTimer);
+                clockAutoCycleTimer = null;
+            }
+            stopClockAnim();
         }
         syncHomeClock();
         syncDigitalClock();
@@ -2685,11 +2688,17 @@
                 stopClockTimer = null;
             }
             startClockAnim();
+        } else if (!isMainActive()) {
+            if (stopClockTimer) {
+                clearTimeout(stopClockTimer);
+                stopClockTimer = null;
+            }
+            stopClockAnim();
         } else {
             // Keep drawing during the CSS collapse transition so the clock slides away fluidly
             if (stopClockTimer) clearTimeout(stopClockTimer);
             stopClockTimer = setTimeout(() => {
-                if (document.getElementById("view-home")?.classList.contains("no-clock") || curView !== "home") {
+                if (document.getElementById("view-home")?.classList.contains("no-clock") || curView !== "home" || !isMainActive()) {
                     stopClockAnim();
                 }
             }, 460);
@@ -2697,7 +2706,7 @@
     }
 
     document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) setupClock();
+        if (!document.hidden && isMainActive()) setupClock();
         syncHomeClock();
         syncDigitalClock();
     });
@@ -9419,11 +9428,22 @@
         window.cc.onUpdateStatus(handleUpdateStatus);
     }
 
-    window.cc.onInit((s) => {
+    window.cc.onInit(async (s) => {
         applySettings(s);
         const startPromptEl = document.getElementById("r-tip");
         if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
-        setMainActive(true);
+        let isActive = s && s.windowMode === "full";
+        if (window.cc && window.cc.getActiveWindow) {
+            try {
+                const activeWin = await window.cc.getActiveWindow();
+                if (activeWin) {
+                    isActive = activeWin === "main";
+                }
+            } catch (e) {
+                console.error("getActiveWindow failed:", e);
+            }
+        }
+        setMainActive(isActive);
         syncDigitalClock();
         calNotes = s.calendarNotes || {};
         const now = new Date();
@@ -9431,10 +9451,14 @@
         calMonth = now.getMonth();
         renderCalendar();
         requestAnimationFrame(() => {
-            setupClock();
-            syncHomeClock();
-            if (typeof drawClock === "function" && isMainActive() && curView === "home") {
-                drawClock();
+            if (isMainActive()) {
+                setupClock();
+                syncHomeClock();
+                if (typeof drawClock === "function" && curView === "home") {
+                    drawClock();
+                }
+            } else {
+                stopClockAnim();
             }
         });
         // Clicking the analog clock opens Settings on Appearance with the

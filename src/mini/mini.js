@@ -842,8 +842,18 @@
     window.addEventListener("focus", syncMiniMotion);
     window.addEventListener("blur", syncMiniMotion);
 
-    window.cc.onInit((s) => {
+    window.cc.onInit(async (s) => {
         applySettings(s);
+        if (window.cc && window.cc.getActiveWindow) {
+            try {
+                const activeWin = await window.cc.getActiveWindow();
+                if (activeWin) {
+                    activeBackendLabel = activeWin;
+                }
+            } catch (e) {
+                console.error("getActiveWindow failed in mini:", e);
+            }
+        }
         syncMiniMotion();
         requestAnimationFrame(() => {
             setInterval(updateClock, 1000);
