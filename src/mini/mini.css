@@ -2035,6 +2035,17 @@
         border-color: rgba(var(--rgb-accent), 0.5);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 16px rgba(var(--rgb-accent), 0.25);
     }
+    /* Hover bridge: spans the 8px transparent gap between clock shell and tip */
+    .mini-tip::before {
+        content: "";
+        position: absolute;
+        top: -14px;
+        left: -12px;
+        right: -12px;
+        height: 14px;
+        background: transparent;
+        pointer-events: auto;
+    }
     .mini-tip::after {
         content: "";
         position: absolute;

@@ -44,8 +44,6 @@
         overflow-x: hidden;
         overflow-y: auto;
         position: relative;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(var(--rgb-accent), 0.45) transparent;
         box-shadow:
             0 4px 16px rgba(0, 0, 0, 0.38),
             0 2px 6px rgba(0, 0, 0, 0.22),
@@ -54,14 +52,19 @@
         animation: tray-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tray-card::-webkit-scrollbar {
-        width: 5px;
+        width: 4px;
+    }
+    .tray-card::-webkit-scrollbar-button {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     .tray-card::-webkit-scrollbar-track {
         background: transparent;
-        margin: 8px 0;
+        margin: 14px 0;
     }
     .tray-card::-webkit-scrollbar-thumb {
-        background: rgba(var(--rgb-accent), 0.45);
+        background: rgba(var(--rgb-accent), 0.4);
         border-radius: 4px;
     }
     .tray-card::-webkit-scrollbar-thumb:hover {

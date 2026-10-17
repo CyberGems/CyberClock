@@ -14,13 +14,14 @@
         align-items: flex-start;
         justify-content: center;
         box-sizing: border-box;
-        padding: 6px 18px 20px 18px;
+        padding: 6px 18px 24px 18px;
     }
     .ctx-menu {
         background: #181920;
         border: 1px solid rgba(255, 255, 255, 0.09);
-        padding: 6px;
+        padding: 6px 6px 16px 6px;
         width: 256px;
+        max-height: calc(100vh - 30px);
         border-radius: 10px;
         box-sizing: border-box;
         overflow-y: auto;
@@ -251,6 +252,7 @@
     .ctx-tab-panel {
         display: flex;
         flex-direction: column;
+        padding-bottom: 12px;
         animation: ctx-fade-in 0.14s ease-out;
     }
     .ctx-item {

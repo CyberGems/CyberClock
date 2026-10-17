@@ -389,7 +389,8 @@
                 }
                 return;
             }
-            const h = Math.max(el.scrollHeight, el.offsetHeight) + 32;
+            const borderY = el.offsetHeight - el.clientHeight;
+            const h = Math.max(el.scrollHeight, el.offsetHeight) + borderY + 44;
             if (window.cc && window.cc.miniMenuReady) {
                 window.cc.miniMenuReady(292, h);
             }

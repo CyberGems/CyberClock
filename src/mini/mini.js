@@ -684,12 +684,12 @@
         }
     }
 
-    function scheduleTipHide(delay = 180) {
+    function scheduleTipHide(delay = 260) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
             const dayProg = document.getElementById("day-progress");
-            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg)) && !isElementHovered(controlsEl);
+            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
             const tipHovered = isElementHovered(tipEl);
             if (clockHovered || tipHovered) {
                 isTimeBlockHovered = clockHovered;
@@ -754,7 +754,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide();
+        scheduleTipHide(260);
     });
 
     const dayProgressEl = document.getElementById("day-progress");
@@ -764,7 +764,7 @@
             isTimeBlockHovered = false;
             clearTimeout(tipTimer);
             tipTimer = null;
-            scheduleTipHide();
+            scheduleTipHide(260);
         });
     }
 
@@ -780,7 +780,7 @@
     tipEl.addEventListener("mouseleave", (e) => {
         if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest("#day-progress"))) return;
         isTipHovered = false;
-        scheduleTipHide();
+        scheduleTipHide(260);
     });
 
     // Status dot also triggers date expand
@@ -827,15 +827,29 @@
     });
     window.addEventListener("blur", onPointerExitedWindow);
 
+    function isPointerInCorridor(e) {
+        if (!shellEl || !tipEl || !isTipVisible) return false;
+        const sr = shellEl.getBoundingClientRect();
+        const tr = tipEl.getBoundingClientRect();
+        const minX = Math.min(sr.left, tr.left) - 16;
+        const maxX = Math.max(sr.right, tr.right) + 16;
+        const minY = sr.top - 8;
+        const maxY = tr.bottom + 16;
+        return e.clientX >= minX && e.clientX <= maxX && e.clientY >= minY && e.clientY <= maxY;
+    }
+
     // Watchdog: If the flyout is visible and mouse moves into empty/transparent window padding
     document.addEventListener("pointermove", (e) => {
         if (!isTipVisible) return;
-        const target = e.target;
-        if (!target || !(target instanceof Element)) return;
-        if (target.closest(".time-block") || target.closest(".mini-tip") || target.closest("#day-progress")) {
+        if (isPointerInCorridor(e)) {
+            // Inside corridor or over clock/tip: cancel pending hide
+            if (isElementHovered(timeBlock) || isElementHovered(tipEl)) {
+                clearTimeout(tipHideTimer);
+                tipHideTimer = null;
+            }
             return;
         }
-        scheduleTipHide(target.closest(".controls") ? 0 : 80);
+        scheduleTipHide(e.target && e.target.closest && e.target.closest(".controls") ? 0 : 120);
     }, { passive: true });
 
     shellEl.addEventListener("mouseenter", () => {
@@ -850,7 +864,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide();
+        scheduleTipHide(260);
     });
 
     tipEl.addEventListener("click", () => {

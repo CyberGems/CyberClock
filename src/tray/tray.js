@@ -21,7 +21,8 @@
     function reportSize() {
         if (!rootEl) return;
         const card = rootEl.querySelector(".tray-card");
-        const h = card ? Math.ceil(card.scrollHeight + 40) : Math.ceil(rootEl.getBoundingClientRect().height);
+        const borderY = card ? (card.offsetHeight - card.clientHeight) : 2;
+        const h = card ? Math.ceil(card.scrollHeight + borderY + 44) : Math.ceil(rootEl.getBoundingClientRect().height);
         const w = card ? Math.ceil(card.offsetWidth + 40) : 290;
         if (w < 10 || h < 10) return;
         if (window.cc && window.cc.trayMenuReady) {

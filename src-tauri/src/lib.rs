@@ -3502,14 +3502,17 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
                 (x, clock_y)
             };
 
+            let max_mon_h = (mon_bottom - mon_top).max(200);
+            let final_menu_h = menu_height.min(max_mon_h);
+
             if pos_x + menu_width > mon_right {
                 pos_x = mon_right - menu_width;
             }
             if pos_x < mon_left {
                 pos_x = mon_left;
             }
-            if pos_y + menu_height > mon_bottom {
-                pos_y = mon_bottom - menu_height;
+            if pos_y + final_menu_h > mon_bottom {
+                pos_y = mon_bottom - final_menu_h;
             }
             if pos_y < mon_top {
                 pos_y = mon_top;
@@ -3517,7 +3520,7 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
 
             let _ = menu.set_size(tauri::Size::Physical(tauri::PhysicalSize {
                 width: menu_width as u32,
-                height: menu_height as u32,
+                height: final_menu_h as u32,
             }));
             let _ = menu.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
                 pos_x, pos_y,
