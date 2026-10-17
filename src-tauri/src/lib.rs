@@ -3665,73 +3665,83 @@ fn position_mini_tip(
     clock_h: i32,
     logical_w: f64,
     logical_h: f64,
-) {
-    let scale = tip.scale_factor().unwrap_or(1.0);
+) -> String {
+    let monitor = tip
+        .app_handle()
+        .get_webview_window("mini")
+        .and_then(|w| w.current_monitor().ok().flatten())
+        .or_else(|| {
+            let clock_center_x = clock_x + clock_w / 2;
+            let clock_center_y = clock_y + clock_h / 2;
+            tip.available_monitors().ok().and_then(|monitors| {
+                monitors
+                    .into_iter()
+                    .find(|m| is_position_in_monitor(clock_center_x, clock_center_y, &m))
+            })
+        })
+        .or_else(|| tip.current_monitor().ok().flatten());
+
+    let scale = monitor
+        .as_ref()
+        .map(|m| m.scale_factor())
+        .unwrap_or_else(|| tip.scale_factor().unwrap_or(1.0));
     let tip_width = (logical_w * scale).round() as i32;
     let tip_height = (logical_h * scale).round() as i32;
     let gap = (2.0 * scale).round() as i32;
 
-    if let Ok(monitors) = tip.available_monitors() {
-        let clock_center_x = clock_x + clock_w / 2;
+    let mut placement_str = "below".to_string();
+
+    if let Some(ref found_monitor) = monitor {
+        let work_area = found_monitor.work_area();
+        let mon_left = work_area.position.x;
+        let mon_top = work_area.position.y;
+        let mon_right = mon_left + work_area.size.width as i32;
+        let mon_bottom = mon_top + work_area.size.height as i32;
+
+        let room_below = clock_y + clock_h + gap + tip_height <= mon_bottom;
+        let room_above = clock_y - gap - tip_height >= mon_top;
+
         let clock_center_y = clock_y + clock_h / 2;
-        let found_monitor = monitors
-            .iter()
-            .find(|m| is_position_in_monitor(clock_center_x, clock_center_y, m))
-            .or_else(|| monitors.first());
+        let mon_mid_y = mon_top + (mon_bottom - mon_top) / 2;
+        let place_above = if clock_center_y > mon_mid_y {
+            room_above || !room_below
+        } else {
+            !room_below && room_above
+        };
 
-        if let Some(found_monitor) = found_monitor {
-            let work_area = found_monitor.work_area();
-            let monitor_pos = work_area.position;
-            let monitor_size = work_area.size;
+        let pos_y = if place_above {
+            clock_y - tip_height - gap
+        } else {
+            clock_y + clock_h + gap
+        };
 
-            let mon_left = monitor_pos.x;
-            let mon_top = monitor_pos.y;
-            let mon_right = monitor_pos.x + monitor_size.width as i32;
-            let mon_bottom = monitor_pos.y + monitor_size.height as i32;
-
-            let room_below = clock_y + clock_h + gap + tip_height <= mon_bottom;
-            let room_above = clock_y - gap - tip_height >= mon_top;
-
-            let mon_mid_y = mon_top + (mon_bottom - mon_top) / 2;
-            let place_above = if clock_center_y > mon_mid_y {
-                room_above || !room_below
-            } else {
-                !room_below && room_above
-            };
-
-            let pos_y = if place_above {
-                clock_y - tip_height - gap
-            } else {
-                clock_y + clock_h + gap
-            };
-
-            let mut pos_x = clock_x + (clock_w - tip_width) / 2;
-            if pos_x + tip_width > mon_right {
-                pos_x = mon_right - tip_width;
-            }
-            if pos_x < mon_left {
-                pos_x = mon_left;
-            }
-
-            let _ = tip.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-                width: tip_width as u32,
-                height: tip_height as u32,
-            }));
-            let _ = tip.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                pos_x, pos_y,
-            )));
-            let placement_str = if place_above { "above" } else { "below" };
-            if let Ok(mut pl) = MINI_TIP_LAST_PLACEMENT.lock() {
-                *pl = placement_str.to_string();
-            }
-            let _ = tip.app_handle().emit(
-                "tip:placement",
-                serde_json::json!({
-                    "placement": placement_str
-                }),
-            );
+        let mut pos_x = clock_x + (clock_w - tip_width) / 2;
+        if pos_x + tip_width > mon_right {
+            pos_x = mon_right - tip_width;
         }
+        if pos_x < mon_left {
+            pos_x = mon_left;
+        }
+
+        let _ = tip.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+            width: tip_width as u32,
+            height: tip_height as u32,
+        }));
+        let _ = tip.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+            pos_x, pos_y,
+        )));
+        placement_str = (if place_above { "above" } else { "below" }).to_string();
+        if let Ok(mut pl) = MINI_TIP_LAST_PLACEMENT.lock() {
+            *pl = placement_str.clone();
+        }
+        let _ = tip.app_handle().emit(
+            "tip:placement",
+            serde_json::json!({
+                "placement": placement_str
+            }),
+        );
     }
+    placement_str
 }
 
 #[tauri::command]
@@ -3760,15 +3770,18 @@ fn open_mini_tip(
             *g = Some((clock_x, clock_y, clock_w, clock_h));
         }
 
-        if let Some(data) = payload {
+        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((280.0, 110.0));
+        let placement = position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
+
+        if let Some(mut data) = payload {
+            if let Some(obj) = data.as_object_mut() {
+                obj.insert("placement".to_string(), serde_json::Value::String(placement));
+            }
             if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
                 *p = Some(data.clone());
             }
             let _ = app.emit("tip:payload", data);
         }
-
-        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((280.0, 110.0));
-        position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
 
         #[cfg(target_os = "windows")]
         {

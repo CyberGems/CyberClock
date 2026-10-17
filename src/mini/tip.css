@@ -43,20 +43,16 @@ body.tip-window-body[data-placement="above"] .mini-tip {
 body.tip-window-body[data-placement="above"] .mini-tip::after {
     top: auto !important;
     bottom: -6px !important;
-    border-left: none !important;
-    border-top: none !important;
-    border-right: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
-    border-bottom: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
+    border-style: solid !important;
+    border-width: 0 1px 1px 0 !important;
 }
 
 /* Caret pointing UP when tip window is placed BELOW the clock */
 body.tip-window-body[data-placement="below"] .mini-tip::after {
     top: -6px !important;
     bottom: auto !important;
-    border-left: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
-    border-top: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
-    border-right: none !important;
-    border-bottom: none !important;
+    border-style: solid !important;
+    border-width: 1px 0 0 1px !important;
 }
 
 /* In separate window, the invisible corridor bridge pseudo is not needed */

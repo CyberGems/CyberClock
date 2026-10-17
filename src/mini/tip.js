@@ -16,6 +16,7 @@
         tipDesign = data.design || "1";
         tipEl.dataset.design = tipDesign;
 
+        if (data.placement) document.body.dataset.placement = data.placement;
         if (window.CCTint && data.theme) window.CCTint.apply(data.theme);
         if (window.ccI18n && data.language) window.ccI18n.setLang(data.language);
 
