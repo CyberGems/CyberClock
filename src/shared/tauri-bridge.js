@@ -116,6 +116,33 @@
                 height: Number(height) || 315
             });
         },
+        openMiniTip: async (payload) => {
+            return await invoke("open_mini_tip", { payload });
+        },
+        hideMiniTip: async () => {
+            await invoke("hide_mini_tip");
+        },
+        miniTipReady: async (width, height) => {
+            await invoke("mini_tip_ready", {
+                width: Number(width) || 260,
+                height: Number(height) || 160
+            });
+        },
+        setMiniTipHovered: async (hovered) => {
+            await invoke("set_mini_tip_hovered", { hovered: Boolean(hovered) });
+        },
+        scheduleHideMiniTip: async () => {
+            await invoke("schedule_hide_mini_tip");
+        },
+        onTipPlacement: (cb) => {
+            return subscribe("tip:placement", cb);
+        },
+        onTipPayload: (cb) => {
+            return subscribe("tip:payload", cb);
+        },
+        onTipHovered: (cb) => {
+            return subscribe("tip:hovered", cb);
+        },
         showAboutWindow: async () => {
             await invoke("tray_menu_action", { action: "about" });
         },

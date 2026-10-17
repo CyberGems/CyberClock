@@ -86,6 +86,21 @@
                                     "center":  true,
                                     "skipTaskbar":  true,
                                     "url":  "about/index.html"
+                                },
+                                {
+                                    "label":  "mini_tip",
+                                    "title":  "CyberClock Mini Tip",
+                                    "width":  280,
+                                    "height":  180,
+                                    "resizable":  false,
+                                    "fullscreen":  false,
+                                    "decorations":  false,
+                                    "transparent":  true,
+                                    "shadow":  false,
+                                    "visible":  false,
+                                    "alwaysOnTop":  true,
+                                    "skipTaskbar":  true,
+                                    "url":  "mini/tip.html"
                                 }
                             ],
                 "security":  {

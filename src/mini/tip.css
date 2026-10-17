@@ -1,0 +1,50 @@
+html, body.tip-window-body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body.tip-window-body .mini-tip {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+/* Caret pointing DOWN when tip window is placed ABOVE the clock */
+body.tip-window-body[data-placement="above"] .mini-tip::after {
+    top: auto !important;
+    bottom: -6px !important;
+    border-left: none !important;
+    border-top: none !important;
+    border-right: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
+    border-bottom: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
+}
+
+/* Caret pointing UP when tip window is placed BELOW the clock */
+body.tip-window-body[data-placement="below"] .mini-tip::after {
+    top: -6px !important;
+    bottom: auto !important;
+    border-left: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
+    border-top: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15)) !important;
+    border-right: none !important;
+    border-bottom: none !important;
+}
+
+/* In separate window, the invisible corridor bridge pseudo is not needed */
+body.tip-window-body .mini-tip::before {
+    display: none !important;
+}

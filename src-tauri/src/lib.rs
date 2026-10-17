@@ -262,7 +262,7 @@ fn center_mini_on_monitor(monitor: &tauri::Monitor) -> (i32, i32) {
 fn apply_always_on_top(app: &AppHandle, aot: bool) {
     for (label, window) in app.webview_windows() {
         match label.as_str() {
-            "mini" | "menu" | "tray_menu" => {
+            "mini" | "menu" | "tray_menu" | "mini_tip" => {
                 let _ = window.set_always_on_top(aot);
             }
             "main" => {
@@ -1347,7 +1347,7 @@ fn refresh_taskbar_tab(win: &WebviewWindow) {
 fn spawn_taskbar_tab_poll(app: AppHandle) {
     std::thread::spawn(move || loop {
         std::thread::sleep(std::time::Duration::from_secs(2));
-        for label in ["main", "mini", "menu", "tray_menu", "about"] {
+        for label in ["main", "mini", "menu", "tray_menu", "about", "mini_tip"] {
             if let Some(win) = app.get_webview_window(label) {
                 if win.is_visible().unwrap_or(false) {
                     refresh_taskbar_tab(&win);
@@ -3645,6 +3645,163 @@ fn close_mini_context_menu(app: AppHandle) {
     }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Mini Tip Window (floating popover window)
+// ─────────────────────────────────────────────────────────────
+
+static MINI_TIP_HOVERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> = std::sync::Mutex::new(None);
+static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((260.0, 160.0));
+
+fn position_mini_tip(
+    tip: &WebviewWindow,
+    clock_x: i32,
+    clock_y: i32,
+    clock_w: i32,
+    clock_h: i32,
+    logical_w: f64,
+    logical_h: f64,
+) {
+    let scale = tip.scale_factor().unwrap_or(1.0);
+    let tip_width = (logical_w * scale).round() as i32;
+    let tip_height = (logical_h * scale).round() as i32;
+    let gap = (6.0 * scale).round() as i32;
+
+    if let Ok(monitors) = tip.available_monitors() {
+        let clock_center_x = clock_x + clock_w / 2;
+        let clock_center_y = clock_y + clock_h / 2;
+        let found_monitor = monitors
+            .iter()
+            .find(|m| is_position_in_monitor(clock_center_x, clock_center_y, m))
+            .or_else(|| monitors.first());
+
+        if let Some(found_monitor) = found_monitor {
+            let work_area = found_monitor.work_area();
+            let monitor_pos = work_area.position;
+            let monitor_size = work_area.size;
+
+            let mon_left = monitor_pos.x;
+            let mon_top = monitor_pos.y;
+            let mon_right = monitor_pos.x + monitor_size.width as i32;
+            let mon_bottom = monitor_pos.y + monitor_size.height as i32;
+
+            let room_below = clock_y + clock_h + gap + tip_height <= mon_bottom;
+            let room_above = clock_y - gap - tip_height >= mon_top;
+
+            let mon_mid_y = mon_top + (mon_bottom - mon_top) / 2;
+            let place_above = if clock_center_y > mon_mid_y {
+                room_above || !room_below
+            } else {
+                !room_below && room_above
+            };
+
+            let pos_y = if place_above {
+                clock_y - tip_height - gap
+            } else {
+                clock_y + clock_h + gap
+            };
+
+            let mut pos_x = clock_x + (clock_w - tip_width) / 2;
+            if pos_x + tip_width > mon_right {
+                pos_x = mon_right - tip_width;
+            }
+            if pos_x < mon_left {
+                pos_x = mon_left;
+            }
+
+            let _ = tip.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+                width: tip_width as u32,
+                height: tip_height as u32,
+            }));
+            let _ = tip.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                pos_x, pos_y,
+            )));
+
+            let _ = tip.emit(
+                "tip:placement",
+                serde_json::json!({
+                    "placement": if place_above { "above" } else { "below" }
+                }),
+            );
+        }
+    }
+}
+
+#[tauri::command]
+fn open_mini_tip(
+    app: AppHandle,
+    window: WebviewWindow,
+    payload: Option<serde_json::Value>,
+) -> bool {
+    if let Some(tip) = app.get_webview_window("mini_tip") {
+        let (clock_x, clock_y, clock_w, clock_h) =
+            match (window.outer_position(), window.outer_size()) {
+                (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
+                _ => return false,
+            };
+
+        if let Ok(mut g) = MINI_TIP_ANCHOR.lock() {
+            *g = Some((clock_x, clock_y, clock_w, clock_h));
+        }
+
+        if let Some(data) = payload {
+            let _ = tip.emit("tip:payload", data);
+        }
+
+        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((260.0, 160.0));
+        position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
+
+        let _ = tip.show();
+        refresh_taskbar_tab(&tip);
+        return true;
+    }
+    false
+}
+
+#[tauri::command]
+fn mini_tip_ready(app: AppHandle, width: f64, height: f64) {
+    if let Ok(mut s) = MINI_TIP_LAST_SIZE.lock() {
+        *s = (width, height);
+    }
+    if let Some(tip) = app.get_webview_window("mini_tip") {
+        if let Ok(anchor) = MINI_TIP_ANCHOR.lock() {
+            if let Some((cx, cy, cw, ch)) = *anchor {
+                position_mini_tip(&tip, cx, cy, cw, ch, width, height);
+            }
+        }
+    }
+}
+
+#[tauri::command]
+fn hide_mini_tip(app: AppHandle) {
+    MINI_TIP_HOVERED.store(false, std::sync::atomic::Ordering::SeqCst);
+    if let Some(tip) = app.get_webview_window("mini_tip") {
+        if tip.is_visible().unwrap_or(false) {
+            let _ = tip.hide();
+        }
+    }
+}
+
+#[tauri::command]
+fn set_mini_tip_hovered(hovered: bool) {
+    MINI_TIP_HOVERED.store(hovered, std::sync::atomic::Ordering::SeqCst);
+}
+
+#[tauri::command]
+fn schedule_hide_mini_tip(app: AppHandle) {
+    let app_clone = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(220));
+        if !MINI_TIP_HOVERED.load(std::sync::atomic::Ordering::SeqCst) {
+            if let Some(tip) = app_clone.get_webview_window("mini_tip") {
+                if tip.is_visible().unwrap_or(false) {
+                    let _ = tip.hide();
+                }
+            }
+        }
+    });
+}
+
 // Must be async: see the note above spawn_float. This command spawns
 // float windows for both the tray menu and the mini context menu.
 #[tauri::command]
@@ -5252,6 +5409,11 @@ pub fn run() {
             open_mini_context_menu,
             close_mini_context_menu,
             mini_menu_ready,
+            open_mini_tip,
+            mini_tip_ready,
+            hide_mini_tip,
+            set_mini_tip_hovered,
+            schedule_hide_mini_tip,
             menu_action,
             get_menu_caller,
             get_open_float_labels,

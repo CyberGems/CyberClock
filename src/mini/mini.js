@@ -233,18 +233,9 @@
     function getCurrentTargetSize() {
         const zoom = zoomFactor();
         const base = measureBaseSize();
-        let baseHeight = base.h;
-
-        if (isTipVisible) {
-            const tipHeight = Math.max(tipEl.scrollHeight || 100, 95);
-            const tipGap = 8;
-            const tipShadowBleed = 44;
-            baseHeight += (tipHeight + tipGap + tipShadowBleed) / zoom;
-        }
-
         return {
             width: Math.round(base.w * zoom),
-            height: Math.round(baseHeight * zoom)
+            height: Math.round(base.h * zoom)
         };
     }
 
@@ -322,10 +313,6 @@
             applyFace(shell, "time", s.miniCustomFont, s.miniFontBold, s.miniFontItalic);
             applyFace(shell, "date", s.miniDateFont, s.miniDateFontBold, s.miniDateFontItalic);
         }
-        const tipEl = document.getElementById("mini-tip");
-        if (tipEl) {
-            tipEl.dataset.design = s.miniDesign || "1";
-        }
 
         if (s.miniScanlines === false)
             document.body.classList.add("no-scanlines");
@@ -371,12 +358,14 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // HOVER TOOLTIP — today's note + upcoming count
+    // HOVER TOOLTIP — today's note + upcoming count (Separate Native Window)
     // ═══════════════════════════════════════════════════════
     const timeBlock = document.querySelector(".time-block");
-    const tipEl = document.getElementById("mini-tip");
     const shellEl = document.getElementById("shell");
     let tipTimer = null;
+    let tipHideTimer = null;
+    let isTimeBlockHovered = false;
+    let isTipHovered = false;
 
     function updateDriftIndicator() {
         const shell = document.getElementById("shell");
@@ -393,260 +382,90 @@
                 cfg.clockDriftMs = payload.driftMs;
                 cfg.clockCheckedAt = payload.checkedAt;
                 updateDriftIndicator();
-                if (typeof isTipVisible !== "undefined" && isTipVisible) refreshTipContent();
+                if (isTipVisible) openTip();
             }
         });
     }
 
-    function refreshTipContent() {
+    function buildTipPayload() {
         const now = new Date();
-        const lang = window.ccI18n.getEffectiveLang();
-        const t = (key, vars) => window.ccI18n.t(key, vars);
-
+        const lang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
         const locale = lang === "es" ? "es-ES" : "en-US";
-        let dateStr = now.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        let dateStr = now.toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
         dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
         const todayKey = isoNow();
         const note = (calNotes[todayKey] || "").trim();
         const upcoming = countUpcoming();
-
-        // Build with DOM nodes so user note text can never inject HTML.
-        tipEl.replaceChildren();
-
-        if (activeAlarmNotice) {
-            const alarmBlock = document.createElement("div");
-            alarmBlock.className = "mini-tip-alarm";
-            alarmBlock.addEventListener("click", (event) => event.stopPropagation());
-
-            const alarmTitle = document.createElement("div");
-            alarmTitle.className = "mini-tip-alarm-title";
-            alarmTitle.textContent = window.ccI18n.displayAlarmLabel
-                ? window.ccI18n.displayAlarmLabel(activeAlarmNotice.label)
-                : (activeAlarmNotice.label || t("alarms.notice.title"));
-
-            const alarmMsg = document.createElement("div");
-            alarmMsg.className = "mini-tip-alarm-msg";
-            alarmMsg.textContent = activeAlarmNotice.message || t("alarms.notice.now");
-
-            const alarmActions = document.createElement("div");
-            alarmActions.className = "mini-tip-alarm-actions";
-
-            if (activeAlarmNotice.alarmId) {
-                const snoozeBtn = document.createElement("button");
-                snoozeBtn.type = "button";
-                snoozeBtn.className = "mini-tip-alarm-btn";
-                const snoozeMinutes = Number(activeAlarmNotice.snoozeMinutes) || 10;
-                snoozeBtn.textContent = t("alarms.notice.snoozeFor", { n: snoozeMinutes });
-                snoozeBtn.addEventListener("click", async (event) => {
-                    event.stopPropagation();
-                    if (window.cc && window.cc.snoozeAlarm) {
-                        try {
-                            await window.cc.snoozeAlarm(
-                                activeAlarmNotice.alarmId,
-                                Number(activeAlarmNotice.snoozeMinutes) || 10,
-                            );
-                        } catch (err) {
-                            console.error(err);
-                        }
-                    }
-                    clearMiniAlarmNotice();
-                });
-                alarmActions.appendChild(snoozeBtn);
-            }
-
-            const dismissBtn = document.createElement("button");
-            dismissBtn.type = "button";
-            dismissBtn.className = "mini-tip-alarm-btn";
-            dismissBtn.textContent = t("alarms.notice.close");
-            dismissBtn.addEventListener("click", (event) => {
-                event.stopPropagation();
-                dismissMiniAlarm();
-            });
-            alarmActions.appendChild(dismissBtn);
-
-            alarmBlock.appendChild(alarmTitle);
-            alarmBlock.appendChild(alarmMsg);
-            alarmBlock.appendChild(alarmActions);
-            tipEl.appendChild(alarmBlock);
-            tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
-        }
-
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
-            const updBlock = document.createElement("div");
-            updBlock.className = "mini-tip-update";
-
-            const updHeader = document.createElement("div");
-            updHeader.className = "mini-tip-update-header";
-
-            const updTitle = document.createElement("span");
-            updTitle.className = "mini-tip-update-title";
-            updTitle.textContent = `🚀 ${t("mini.update.available")}`;
-
-            const updVer = document.createElement("span");
-            updVer.className = "mini-tip-update-ver";
-            updVer.textContent = `v${availableUpdateVersion}`;
-
-            updHeader.appendChild(updTitle);
-            updHeader.appendChild(updVer);
-            updBlock.appendChild(updHeader);
-
-            const updActions = document.createElement("div");
-            updActions.className = "mini-tip-update-actions";
-
-            const btnOpen = document.createElement("button");
-            btnOpen.type = "button";
-            btnOpen.className = "mini-tip-update-btn primary";
-            btnOpen.textContent = t("mini.update.view");
-            btnOpen.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (window.cc && window.cc.goFull) {
-                    window.cc.goFull();
-                }
-            });
-
-            const btnDismiss = document.createElement("button");
-            btnDismiss.type = "button";
-            btnDismiss.className = "mini-tip-update-btn";
-            btnDismiss.textContent = t("mini.update.dismiss");
-            btnDismiss.addEventListener("click", (e) => {
-                e.stopPropagation();
-                skipUpdate(availableUpdateVersion);
-                availableUpdateVersion = null;
-                // Guard is now cleared — close the tip panel.
-                clearTimeout(tipTimer);
-                clearTimeout(tipHideTimer);
-                tipTimer = null;
-                tipHideTimer = null;
-                isTipVisible = false;
-                tipEl.classList.remove("show");
-                syncWindowSize();
-            });
-
-            updActions.appendChild(btnOpen);
-            updActions.appendChild(btnDismiss);
-            updBlock.appendChild(updActions);
-
-            tipEl.appendChild(updBlock);
-        }
-
-        const dateDiv = document.createElement("div");
-        dateDiv.className = "mini-tip-date";
-        dateDiv.textContent = dateStr;
-        tipEl.appendChild(dateDiv);
-        tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
-
         const drift = cfg ? cfg.clockDriftMs : null;
-        if (drift != null && Math.abs(drift) > 60000) {
-            const abs = Math.abs(drift);
-            const driftTxt = abs < 60000 ? (abs / 1000).toFixed(1) + " s"
-                : abs < 3600000 ? Math.round(abs / 60000) + " min"
-                : abs < 86400000 ? Math.round(abs / 3600000) + " h"
-                : Math.round(abs / 86400000) + " d";
-            const sign = drift >= 0 ? "+" : "-";
-            const driftStr = sign + driftTxt;
 
-            const driftBlock = document.createElement("div");
-            driftBlock.className = "mini-tip-drift-block";
-
-            const driftHead = document.createElement("div");
-            driftHead.className = "mini-tip-drift-head";
-            driftHead.textContent = `⚠️ ${t("mini.tip.clockDriftTitle")}`;
-            driftBlock.appendChild(driftHead);
-
-            const driftMsg = document.createElement("div");
-            driftMsg.className = "mini-tip-drift-msg";
-            driftMsg.textContent = t("mini.tip.clockDriftMsg", { drift: driftStr });
-            driftBlock.appendChild(driftMsg);
-
-            const syncBtn = document.createElement("button");
-            syncBtn.type = "button";
-            syncBtn.className = "mini-tip-sync-btn";
-            syncBtn.textContent = t("mini.tip.syncNow");
-            syncBtn.addEventListener("click", async (e) => {
-                e.stopPropagation();
-                syncBtn.disabled = true;
-                syncBtn.textContent = t("settings.general.timeSyncing");
-                try {
-                    const res = await window.cc.syncSystemClock();
-                    if (res && res.drift_ms != null) {
-                        cfg.clockDriftMs = res.drift_ms;
-                        cfg.clockCheckedAt = res.checked_at;
-                        updateDriftIndicator();
-                        refreshTipContent();
-                    }
-                } catch (err) {
-                    console.error("Sync error:", err);
-                    syncBtn.textContent = t("settings.general.timeSyncError");
-                }
-            });
-            driftBlock.appendChild(syncBtn);
-            tipEl.appendChild(driftBlock);
-            tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
+        let alarmData = null;
+        if (activeAlarmNotice) {
+            alarmData = {
+                alarmId: activeAlarmNotice.alarmId,
+                label: activeAlarmNotice.label,
+                message: activeAlarmNotice.message,
+                snoozeMinutes: activeAlarmNotice.snoozeMinutes || 10,
+            };
         }
 
-        if (note) {
-            const noteDiv = document.createElement("div");
-            noteDiv.className = "mini-tip-note";
-            noteDiv.textContent = `📝 ${note.split("\n")[0].trim()}`;
-            tipEl.appendChild(noteDiv);
-        } else {
-            const emptyDiv = document.createElement("div");
-            emptyDiv.className = "mini-tip-note empty";
-            emptyDiv.textContent = `🌸 ${t("mini.tip.noNotes")}`;
-            tipEl.appendChild(emptyDiv);
-
-            const btnDiv = document.createElement("div");
-            btnDiv.className = "mini-tip-action-btn";
-            btnDiv.textContent = t("mini.tip.createNote");
-            tipEl.appendChild(btnDiv);
+        let updateVer = null;
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
+            updateVer = availableUpdateVersion;
         }
 
-        let statText;
-        if (upcoming === 0) {
-            statText = t("mini.tip.scheduleClear");
-        } else if (upcoming === 1) {
-            statText = t("mini.tip.oneUpcoming");
-        } else {
-            statText = t("mini.tip.nUpcoming", { n: upcoming });
-        }
-
-        const statDiv = document.createElement("div");
-        statDiv.className = "mini-tip-stat";
-        if (upcoming > 1) {
-            // "{n} upcoming events" with the count highlighted
-            const parts = t("mini.tip.nUpcoming", { n: "\u0000" }).split("\u0000");
-            statDiv.appendChild(document.createTextNode(parts[0] || ""));
-            const countEl = document.createElement("b");
-            countEl.textContent = String(upcoming);
-            statDiv.appendChild(countEl);
-            statDiv.appendChild(document.createTextNode(parts[1] || ""));
-        } else {
-            statDiv.textContent = statText;
-        }
-        tipEl.appendChild(statDiv);
+        return {
+            dateStr,
+            note,
+            upcoming,
+            driftMs: drift,
+            alarm: alarmData,
+            updateVersion: updateVer,
+            design: cfg ? cfg.dialDesign : "1",
+            theme: cfg ? cfg.theme : "ice",
+            language: cfg ? cfg.language : "auto"
+        };
     }
 
-    function positionTip() {
-        const r = shellEl.getBoundingClientRect();
-        tipEl.style.left = r.left + r.width / 2 + "px";
-        tipEl.style.top = r.bottom + 8 + "px";
+    async function openTip() {
+        if (isDragging || isPointerDown) return;
+        if (document.body.classList.contains("click-through")) return;
+        const payload = buildTipPayload();
+        isTipVisible = true;
+        if (window.cc && window.cc.openMiniTip) {
+            try {
+                await window.cc.openMiniTip(payload);
+            } catch (err) {
+                console.error("Failed to open mini tip:", err);
+            }
+        }
     }
 
-    const controlsEl = document.querySelector(".controls");
-    let tipHideTimer = null;
-    let isTimeBlockHovered = false;
-    let isTipHovered = false;
+    function hideTipNow() {
+        // Keep the tip visible while an alarm or an update notice is pending.
+        if (activeAlarmNotice) return;
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
+        clearTimeout(tipTimer);
+        clearTimeout(tipHideTimer);
+        tipTimer = null;
+        tipHideTimer = null;
+        if (!isTipVisible) return;
+        isTipVisible = false;
+        if (window.cc && window.cc.hideMiniTip) {
+            window.cc.hideMiniTip().catch(() => {});
+        }
+    }
 
     function clearMiniAlarmNotice() {
         activeAlarmNotice = null;
         if (window.audioEngine && window.audioEngine.stopAlarmAlert) {
             window.audioEngine.stopAlarmAlert();
         }
-        refreshTipContent();
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
+        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
+            openTip();
+            return;
+        }
         hideTipNow();
-        syncWindowSize();
     }
 
     async function dismissMiniAlarm() {
@@ -662,27 +481,10 @@
 
     async function showMiniAlarm(payload) {
         activeAlarmNotice = payload || {};
-        if (!tipEl || !shellEl) return;
-        refreshTipContent();
-        positionTip();
-        isTipVisible = true;
-        tipEl.classList.add("show");
-        syncWindowSize();
+        openTip();
     }
 
-    function hideTipNow() {
-        // Keep the tip visible while an alarm or an update notice is pending.
-        if (activeAlarmNotice) return;
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
-        clearTimeout(tipTimer);
-        clearTimeout(tipHideTimer);
-        tipTimer = null;
-        tipHideTimer = null;
-        if (!isTipVisible) return;
-        isTipVisible = false;
-        tipEl.classList.remove("show");
-        syncWindowSize();
-    }
+    const controlsEl = document.querySelector(".controls");
 
     function isElementHovered(el) {
         if (!el || !(el instanceof Element)) return false;
@@ -699,37 +501,41 @@
         return !!(el.closest(".time-block") || el.closest("#day-progress") || el.closest(".mini-shell"));
     }
 
-    function isTipElement(el) {
-        if (!el || !(el instanceof Element)) return false;
-        return !!el.closest(".mini-tip");
-    }
-
-    function scheduleTipHide(delay = 200) {
+    function scheduleTipHide(delay = 250) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
             if (!isTipVisible) return;
             const dayProg = document.getElementById("day-progress");
             const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
-            const tipHovered = isElementHovered(tipEl);
-            if (clockHovered || tipHovered) {
+            if (clockHovered || isTipHovered) {
                 isTimeBlockHovered = clockHovered;
-                isTipHovered = tipHovered;
                 return;
             }
             isTimeBlockHovered = false;
             isTipHovered = false;
             hideTipNow();
             collapseDate();
-            syncWindowSize();
         }, delay);
+    }
+
+    if (window.cc && window.cc.onTipHovered) {
+        window.cc.onTipHovered((hovered) => {
+            isTipHovered = !!hovered;
+            if (isTipHovered) {
+                clearTimeout(tipHideTimer);
+                tipHideTimer = null;
+            } else if (!isTimeBlockHovered) {
+                scheduleTipHide(250);
+            }
+        });
     }
 
     function expandDate() {
         if (isHovered) return;
         isHovered = true;
         shellEl.classList.add("is-expanded");
-        if (cfg.miniCollapseDate) {
+        if (cfg && cfg.miniCollapseDate) {
             syncWindowSize();
         }
     }
@@ -738,7 +544,7 @@
         if (!isHovered) return;
         isHovered = false;
         shellEl.classList.remove("is-expanded");
-        if (cfg.miniCollapseDate) {
+        if (cfg && cfg.miniCollapseDate) {
             syncWindowSize();
         }
     }
@@ -773,25 +579,20 @@
         clearTimeout(tipHideTimer);
         tipHideTimer = null;
         expandDate();
-        refreshTipContent();
-        positionTip();
-        
+
         clearTimeout(tipTimer);
         tipTimer = setTimeout(() => {
             if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
-            positionTip();
-            isTipVisible = true;
-            tipEl.classList.add("show");
-            syncWindowSize();
+            openTip();
             const dp = document.getElementById("day-progress");
             if (dp && isElementHovered(dp)) {
                 showDayProgressTicker();
             }
-        }, 800);
+        }, 750);
     }
 
     function onClockAreaLeave(e) {
-        if (e && e.relatedTarget && (isClockAreaElement(e.relatedTarget) || isTipElement(e.relatedTarget))) {
+        if (e && e.relatedTarget && isClockAreaElement(e.relatedTarget)) {
             return;
         }
         isTimeBlockHovered = false;
@@ -799,9 +600,8 @@
         tipTimer = null;
         if (!isTipVisible) {
             collapseDate();
-            syncWindowSize();
         } else {
-            scheduleTipHide(200);
+            scheduleTipHide(250);
         }
     }
 
@@ -824,23 +624,6 @@
         });
     }
 
-    // The tooltip lives outside the shell; its ::before bridge keeps it
-    // active while the pointer crosses the gap between the clock and the card.
-    tipEl.addEventListener("mouseenter", () => {
-        isTipHovered = true;
-        clearTimeout(tipHideTimer);
-        tipHideTimer = null;
-        positionTip();
-    });
-
-    tipEl.addEventListener("mouseleave", (e) => {
-        if (e && e.relatedTarget && isClockAreaElement(e.relatedTarget)) {
-            return;
-        }
-        isTipHovered = false;
-        scheduleTipHide(200);
-    });
-
     // Status dot also triggers date expand
     const statusDot = document.querySelector(".status-dot");
     if (statusDot) {
@@ -856,7 +639,6 @@
             isTipHovered = false;
             hideTipNow();
             collapseDate();
-            syncWindowSize();
         });
         controlsEl.addEventListener("mouseleave", () => {
             hideActionTicker();
@@ -868,16 +650,14 @@
             return;
         }
         isTimeBlockHovered = false;
-        isTipHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
         miniHovered = false;
         syncMiniMotion();
         if (!isTipVisible) {
             collapseDate();
-            syncWindowSize();
         } else {
-            scheduleTipHide(80);
+            scheduleTipHide(250);
         }
     }
 
@@ -898,7 +678,6 @@
         hideActionTicker();
         collapseDate();
         syncMiniMotion();
-        syncWindowSize();
     });
 
     shellEl.addEventListener("mouseenter", () => {
@@ -914,16 +693,9 @@
 
     document.addEventListener("click", (e) => {
         if (!isTipVisible) return;
-        if (e.target && (e.target.closest(".mini-tip") || e.target.closest(".mini-shell"))) return;
+        if (e.target && e.target.closest(".mini-shell")) return;
         hideTipNow();
         collapseDate();
-        syncWindowSize();
-    });
-
-    tipEl.addEventListener("click", () => {
-        const todayKey = isoNow();
-        window.cc.goFull();
-        window.cc.menuAction("open-note:" + todayKey);
     });
 
     // ═══════════════════════════════════════════════════════
