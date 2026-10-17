@@ -453,7 +453,6 @@
         clearTimeout(tipHideTimer);
         tipTimer = null;
         tipHideTimer = null;
-        if (!isTipVisible) return;
         isTipVisible = false;
         if (window.cc && window.cc.hideMiniTip) {
             window.cc.hideMiniTip().catch(() => {});
@@ -598,7 +597,7 @@
         if (!isTipVisible) {
             collapseDate();
         } else {
-            scheduleTipHide(350);
+            scheduleTipHide(250);
         }
     }
 

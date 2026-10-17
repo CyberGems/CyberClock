@@ -2008,6 +2008,15 @@ unsafe extern "system" fn window_drag_subclass_proc(
     if msg == WM_ENTERSIZEMOVE {
         WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
         show_widget_drag_cursor();
+        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
+        if tip_hwnd != 0 {
+            unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
+                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
+                );
+            }
+        }
     }
     if msg == WM_EXITSIZEMOVE {
         WIDGET_DRAG_CURSOR.store(false, Ordering::Release);
@@ -2020,6 +2029,15 @@ unsafe extern "system" fn window_drag_subclass_proc(
     if msg == WM_MOVING {
         WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
         show_widget_drag_cursor();
+        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
+        if tip_hwnd != 0 {
+            unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
+                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
+                );
+            }
+        }
         if EDGE_LIMITS_ENABLED.load(Ordering::Acquire) {
             let rect = &mut *(lparam as *mut windows_sys::Win32::Foundation::RECT);
             let work_areas = get_all_work_areas();
@@ -3650,6 +3668,7 @@ fn close_mini_context_menu(app: AppHandle) {
 // ─────────────────────────────────────────────────────────────
 
 static MINI_TIP_HOVERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static MINI_TIP_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
 static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> = std::sync::Mutex::new(None);
 static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((280.0, 110.0));
 static MINI_TIP_LAST_PAYLOAD: std::sync::Mutex<Option<serde_json::Value>> =
@@ -3793,6 +3812,7 @@ fn open_mini_tip(
         #[cfg(target_os = "windows")]
         {
             if let Ok(hwnd) = tip.hwnd() {
+                MINI_TIP_HWND.store(hwnd.0 as isize, Ordering::Release);
                 unsafe {
                     windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
                         hwnd.0 as windows_sys::Win32::Foundation::HWND,
@@ -3835,10 +3855,31 @@ fn mini_tip_ready(app: AppHandle, width: f64, height: f64) {
 #[tauri::command]
 fn hide_mini_tip(app: AppHandle) {
     MINI_TIP_HOVERED.store(false, std::sync::atomic::Ordering::SeqCst);
-    if let Some(tip) = app.get_webview_window("mini_tip") {
-        if tip.is_visible().unwrap_or(false) {
-            let _ = tip.hide();
+    #[cfg(target_os = "windows")]
+    {
+        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
+        if tip_hwnd != 0 {
+            unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
+                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
+                );
+            }
         }
+    }
+    if let Some(tip) = app.get_webview_window("mini_tip") {
+        #[cfg(target_os = "windows")]
+        {
+            if let Ok(hwnd) = tip.hwnd() {
+                unsafe {
+                    windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                        hwnd.0 as windows_sys::Win32::Foundation::HWND,
+                        windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
+                    );
+                }
+            }
+        }
+        let _ = tip.hide();
     }
 }
 
@@ -3854,11 +3895,7 @@ fn schedule_hide_mini_tip(app: AppHandle) {
     std::thread::spawn(move || {
         std::thread::sleep(std::time::Duration::from_millis(350));
         if !MINI_TIP_HOVERED.load(std::sync::atomic::Ordering::SeqCst) {
-            if let Some(tip) = app_clone.get_webview_window("mini_tip") {
-                if tip.is_visible().unwrap_or(false) {
-                    let _ = tip.hide();
-                }
-            }
+            hide_mini_tip(app_clone);
         }
     });
 }
