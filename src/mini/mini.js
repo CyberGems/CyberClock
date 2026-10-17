@@ -686,37 +686,22 @@
         }
     }
 
-    function isPointerInCorridor(x, y) {
-        if (!shellEl || !tipEl || !isTipVisible) return false;
-        const sr = shellEl.getBoundingClientRect();
-        const tr = tipEl.getBoundingClientRect();
-        const minX = Math.min(sr.left, tr.left) - 18;
-        const maxX = Math.max(sr.right, tr.right) + 18;
-        const minY = sr.top - 6;
-        const maxY = tr.bottom + 14;
-        return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    function isClockAreaElement(el) {
+        if (!el || !(el instanceof Element)) return false;
+        if (el.closest(".controls")) return false;
+        return !!(el.closest(".time-block") || el.closest("#day-progress") || el.closest(".mini-shell"));
     }
 
-    let lastPointer = { x: 0, y: 0 };
-    document.addEventListener("pointermove", (e) => {
-        lastPointer = { x: e.clientX, y: e.clientY };
-        if (!isTipVisible) return;
-        if (isPointerInCorridor(e.clientX, e.clientY)) {
-            clearTimeout(tipHideTimer);
-            tipHideTimer = null;
-            return;
-        }
-        scheduleTipHide(e.target && e.target.closest && e.target.closest(".controls") ? 0 : 120);
-    }, { passive: true });
+    function isTipElement(el) {
+        if (!el || !(el instanceof Element)) return false;
+        return !!el.closest(".mini-tip");
+    }
 
-    function scheduleTipHide(delay = 260) {
+    function scheduleTipHide(delay = 200) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
             if (!isTipVisible) return;
-            if (lastPointer && isPointerInCorridor(lastPointer.x, lastPointer.y)) {
-                return;
-            }
             const dayProg = document.getElementById("day-progress");
             const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
             const tipHovered = isElementHovered(tipEl);
@@ -771,11 +756,12 @@
         }
     });
 
-    function onClockAreaEnter() {
+    function onClockAreaEnter(e) {
         if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
         // Click-through mode: the OS never delivers mouse events, so skip
         // the tooltip pipeline (no timers, no resize churn) entirely.
         if (document.body.classList.contains("click-through")) return;
+        if (e && e.target && e.target.closest && e.target.closest(".controls")) return;
         isTimeBlockHovered = true;
         clearTimeout(tipHideTimer);
         tipHideTimer = null;
@@ -790,33 +776,35 @@
             isTipVisible = true;
             tipEl.classList.add("show");
             syncWindowSize();
-        }, 900);
+        }, 800);
     }
 
-    timeBlock.addEventListener("mouseenter", onClockAreaEnter);
-
-    timeBlock.addEventListener("mouseleave", (e) => {
-        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".mini-tip") || e.relatedTarget.closest("#day-progress"))) return;
+    function onClockAreaLeave(e) {
+        if (e && e.relatedTarget && (isClockAreaElement(e.relatedTarget) || isTipElement(e.relatedTarget))) {
+            return;
+        }
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide(260);
-    });
+        if (!isTipVisible) {
+            collapseDate();
+            syncWindowSize();
+        } else {
+            scheduleTipHide(200);
+        }
+    }
+
+    timeBlock.addEventListener("mouseenter", onClockAreaEnter);
+    timeBlock.addEventListener("mouseleave", onClockAreaLeave);
 
     const dayProgressEl = document.getElementById("day-progress");
     if (dayProgressEl) {
         dayProgressEl.addEventListener("mouseenter", onClockAreaEnter);
-        dayProgressEl.addEventListener("mouseleave", (e) => {
-            if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest(".mini-tip"))) return;
-            isTimeBlockHovered = false;
-            clearTimeout(tipTimer);
-            tipTimer = null;
-            scheduleTipHide(260);
-        });
+        dayProgressEl.addEventListener("mouseleave", onClockAreaLeave);
     }
 
-    // The tooltip lives outside the shell, so keep it alive while the
-    // pointer crosses the small gap between the clock and the card.
+    // The tooltip lives outside the shell; its ::before bridge keeps it
+    // active while the pointer crosses the gap between the clock and the card.
     tipEl.addEventListener("mouseenter", () => {
         isTipHovered = true;
         clearTimeout(tipHideTimer);
@@ -825,9 +813,11 @@
     });
 
     tipEl.addEventListener("mouseleave", (e) => {
-        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest("#day-progress") || e.relatedTarget.closest(".mini-shell"))) return;
+        if (e && e.relatedTarget && isClockAreaElement(e.relatedTarget)) {
+            return;
+        }
         isTipHovered = false;
-        scheduleTipHide(260);
+        scheduleTipHide(200);
     });
 
     // Status dot also triggers date expand
@@ -853,20 +843,21 @@
     }
 
     function onPointerExitedWindow(e) {
-        if (e && typeof e.clientX === "number" && isPointerInCorridor(e.clientX, e.clientY)) {
-            scheduleTipHide(260);
+        if (e && e.relatedTarget && document.contains(e.relatedTarget)) {
             return;
         }
         isTimeBlockHovered = false;
         isTipHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        hideTipNow();
-        hideActionTicker();
         miniHovered = false;
-        collapseDate();
         syncMiniMotion();
-        syncWindowSize();
+        if (!isTipVisible) {
+            collapseDate();
+            syncWindowSize();
+        } else {
+            scheduleTipHide(80);
+        }
     }
 
     document.body.addEventListener("mouseleave", onPointerExitedWindow);
@@ -876,7 +867,18 @@
             onPointerExitedWindow(e);
         }
     });
-    window.addEventListener("blur", onPointerExitedWindow);
+    window.addEventListener("blur", () => {
+        isTimeBlockHovered = false;
+        isTipHovered = false;
+        clearTimeout(tipTimer);
+        tipTimer = null;
+        miniHovered = false;
+        hideTipNow();
+        hideActionTicker();
+        collapseDate();
+        syncMiniMotion();
+        syncWindowSize();
+    });
 
     shellEl.addEventListener("mouseenter", () => {
         miniHovered = true;
@@ -886,11 +888,15 @@
     shellEl.addEventListener("mouseleave", (e) => {
         miniHovered = false;
         syncMiniMotion();
-        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mini-tip")) return;
-        isTimeBlockHovered = false;
-        clearTimeout(tipTimer);
-        tipTimer = null;
-        scheduleTipHide(260);
+        onClockAreaLeave(e);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!isTipVisible) return;
+        if (e.target && (e.target.closest(".mini-tip") || e.target.closest(".mini-shell"))) return;
+        hideTipNow();
+        collapseDate();
+        syncWindowSize();
     });
 
     tipEl.addEventListener("click", () => {
@@ -1051,43 +1057,7 @@
         shellEl.classList.remove("has-action-ticker");
     }
 
-    const dayIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
-    const dayBar = document.getElementById("day-progress");
-    if (dayBar) {
-        dayBar.addEventListener("mouseenter", () => {
-            clearTimeout(tipTimer);
-            tipTimer = null;
-            hideTipNow();
-            if (cfg.showWidgetHints === false || cfg.miniDayProgress !== true) return;
-            if (!shellEl || !tickerText) return;
-            const pct = dayPercent(new Date());
-            tickerText.textContent = window.ccI18n
-                ? window.ccI18n.t("mini.dayProgress.tip", { pct })
-                : pct + "%";
-            if (tickerIco) tickerIco.innerHTML = dayIcoSvg;
-            shellEl.classList.add("has-action-ticker");
-            clearTimeout(tickerTimer);
-            tickerTimer = null;
-        });
-        dayBar.addEventListener("mouseleave", (e) => {
-            hideActionTicker();
-            if (!timeBlock || !e.relatedTarget || !timeBlock.contains(e.relatedTarget)) return;
-            if (document.body.classList.contains("click-through")) return;
-            isTimeBlockHovered = true;
-            clearTimeout(tipHideTimer);
-            tipHideTimer = null;
-            expandDate();
-            refreshTipContent();
-            positionTip();
-            tipTimer = setTimeout(() => {
-                if (isDragging) return;
-                positionTip();
-                isTipVisible = true;
-                tipEl.classList.add("show");
-                syncWindowSize();
-            }, 900);
-        });
-    }
+
 
     // ═══════════════════════════════════════════════════════
     // BUTTON HANDLERS
