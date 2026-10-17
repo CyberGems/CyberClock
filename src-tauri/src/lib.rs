@@ -3651,7 +3651,9 @@ fn close_mini_context_menu(app: AppHandle) {
 
 static MINI_TIP_HOVERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> = std::sync::Mutex::new(None);
-static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((260.0, 160.0));
+static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((280.0, 110.0));
+static MINI_TIP_LAST_PAYLOAD: std::sync::Mutex<Option<serde_json::Value>> =
+    std::sync::Mutex::new(None);
 
 fn position_mini_tip(
     tip: &WebviewWindow,
@@ -3665,7 +3667,7 @@ fn position_mini_tip(
     let scale = tip.scale_factor().unwrap_or(1.0);
     let tip_width = (logical_w * scale).round() as i32;
     let tip_height = (logical_h * scale).round() as i32;
-    let gap = (6.0 * scale).round() as i32;
+    let gap = (2.0 * scale).round() as i32;
 
     if let Ok(monitors) = tip.available_monitors() {
         let clock_center_x = clock_x + clock_w / 2;
@@ -3717,7 +3719,7 @@ fn position_mini_tip(
                 pos_x, pos_y,
             )));
 
-            let _ = tip.emit(
+            let _ = tip.app_handle().emit(
                 "tip:placement",
                 serde_json::json!({
                     "placement": if place_above { "above" } else { "below" }
@@ -3745,10 +3747,13 @@ fn open_mini_tip(
         }
 
         if let Some(data) = payload {
-            let _ = tip.emit("tip:payload", data);
+            if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
+                *p = Some(data.clone());
+            }
+            let _ = app.emit("tip:payload", data);
         }
 
-        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((260.0, 160.0));
+        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((280.0, 110.0));
         position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
 
         let _ = tip.show();
@@ -3756,6 +3761,11 @@ fn open_mini_tip(
         return true;
     }
     false
+}
+
+#[tauri::command]
+fn get_mini_tip_payload() -> Option<serde_json::Value> {
+    MINI_TIP_LAST_PAYLOAD.lock().ok().and_then(|p| p.clone())
 }
 
 #[tauri::command]
@@ -3783,15 +3793,16 @@ fn hide_mini_tip(app: AppHandle) {
 }
 
 #[tauri::command]
-fn set_mini_tip_hovered(hovered: bool) {
+fn set_mini_tip_hovered(app: AppHandle, hovered: bool) {
     MINI_TIP_HOVERED.store(hovered, std::sync::atomic::Ordering::SeqCst);
+    let _ = app.emit("tip:hovered", hovered);
 }
 
 #[tauri::command]
 fn schedule_hide_mini_tip(app: AppHandle) {
     let app_clone = app.clone();
     std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_millis(220));
+        std::thread::sleep(std::time::Duration::from_millis(350));
         if !MINI_TIP_HOVERED.load(std::sync::atomic::Ordering::SeqCst) {
             if let Some(tip) = app_clone.get_webview_window("mini_tip") {
                 if tip.is_visible().unwrap_or(false) {
@@ -5410,6 +5421,7 @@ pub fn run() {
             close_mini_context_menu,
             mini_menu_ready,
             open_mini_tip,
+            get_mini_tip_payload,
             mini_tip_ready,
             hide_mini_tip,
             set_mini_tip_hovered,

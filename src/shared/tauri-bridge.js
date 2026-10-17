@@ -119,6 +119,9 @@
         openMiniTip: async (payload) => {
             return await invoke("open_mini_tip", { payload });
         },
+        getMiniTipPayload: async () => {
+            return await invoke("get_mini_tip_payload");
+        },
         hideMiniTip: async () => {
             await invoke("hide_mini_tip");
         },

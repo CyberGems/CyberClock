@@ -501,7 +501,7 @@
         return !!(el.closest(".time-block") || el.closest("#day-progress") || el.closest(".mini-shell"));
     }
 
-    function scheduleTipHide(delay = 250) {
+    function scheduleTipHide(delay = 350) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
@@ -526,7 +526,7 @@
                 clearTimeout(tipHideTimer);
                 tipHideTimer = null;
             } else if (!isTimeBlockHovered) {
-                scheduleTipHide(250);
+                scheduleTipHide(350);
             }
         });
     }
@@ -601,7 +601,7 @@
         if (!isTipVisible) {
             collapseDate();
         } else {
-            scheduleTipHide(250);
+            scheduleTipHide(350);
         }
     }
 
@@ -657,7 +657,7 @@
         if (!isTipVisible) {
             collapseDate();
         } else {
-            scheduleTipHide(250);
+            scheduleTipHide(350);
         }
     }
 

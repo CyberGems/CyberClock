@@ -230,8 +230,8 @@
         // Notify backend of measured dimensions after render
         requestAnimationFrame(() => {
             const rect = tipEl.getBoundingClientRect();
-            const w = Math.ceil(rect.width + 16);
-            const h = Math.ceil(rect.height + 16);
+            const w = Math.ceil(rect.width + 20);
+            const h = Math.ceil(rect.height + 18);
             if (window.cc?.miniTipReady) {
                 window.cc.miniTipReady(w, h);
             }
@@ -249,16 +249,10 @@
     // Hover lifecycle
     document.body.addEventListener("mouseenter", () => {
         if (window.cc?.setMiniTipHovered) window.cc.setMiniTipHovered(true);
-        if (window.__TAURI__?.event?.emit) {
-            window.__TAURI__.event.emit("tip:hovered", true);
-        }
     });
 
     document.body.addEventListener("mouseleave", () => {
         if (window.cc?.setMiniTipHovered) window.cc.setMiniTipHovered(false);
-        if (window.__TAURI__?.event?.emit) {
-            window.__TAURI__.event.emit("tip:hovered", false);
-        }
         if (window.cc?.scheduleHideMiniTip) window.cc.scheduleHideMiniTip();
     });
 
@@ -276,5 +270,12 @@
         window.cc.onTipPayload((data) => {
             renderTip(data);
         });
+    }
+
+    // Also query initial/persisted payload
+    if (window.cc?.getMiniTipPayload) {
+        window.cc.getMiniTipPayload().then((data) => {
+            if (data) renderTip(data);
+        }).catch(() => {});
     }
 })();

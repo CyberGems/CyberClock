@@ -6,10 +6,18 @@ html, body.tip-window-body {
     overflow: hidden;
     background: transparent !important;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     user-select: none;
     -webkit-user-select: none;
+}
+
+body.tip-window-body[data-placement="below"] {
+    justify-content: flex-start;
+}
+
+body.tip-window-body[data-placement="above"] {
+    justify-content: flex-end;
 }
 
 body.tip-window-body .mini-tip {
@@ -17,11 +25,18 @@ body.tip-window-body .mini-tip {
     top: auto !important;
     left: auto !important;
     transform: none !important;
-    margin: 0 !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     cursor: pointer;
     box-sizing: border-box;
+}
+
+body.tip-window-body[data-placement="below"] .mini-tip {
+    margin: 7px 10px 10px 10px !important;
+}
+
+body.tip-window-body[data-placement="above"] .mini-tip {
+    margin: 10px 10px 7px 10px !important;
 }
 
 /* Caret pointing DOWN when tip window is placed ABOVE the clock */
