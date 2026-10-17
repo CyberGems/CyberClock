@@ -1123,13 +1123,18 @@ fn set_window_size(
             )));
         }
     } else if anchor_bottom.unwrap_or(false) {
-        // Upward expansion: keep bottom edge pinned by moving Y up by delta height
-        if let (Ok(pos), Ok(old_size)) = (window.outer_position(), window.outer_size()) {
-            let delta_h = new_phys_height - old_size.height as i32;
-            let new_y = pos.y - delta_h;
-            let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                pos.x, new_y,
-            )));
+        // Upward expansion / collapse: keep bottom edge pinned by moving Y by delta height
+        if let Some((_, prev_h)) = target_size_for(&window) {
+            let prev_phys_h = (prev_h as f64 * scale).round() as i32;
+            let delta_h = new_phys_height - prev_phys_h;
+            if delta_h != 0 {
+                if let Ok(pos) = window.outer_position() {
+                    let new_y = pos.y - delta_h;
+                    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
+                        pos.x, new_y,
+                    )));
+                }
+            }
         }
     }
 
@@ -1142,6 +1147,8 @@ fn set_window_size(
         width as f64,
         height as f64,
     )));
+
+    clamp_window_to_monitors(&window);
 }
 
 #[tauri::command]

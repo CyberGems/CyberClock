@@ -225,7 +225,7 @@
 
     let currentTipDirection = "down";
 
-    function getCurrentTargetSize() {
+    function getCurrentTargetSize(anchorBottom = false) {
         const zoom = zoomFactor();
         const base = measureBaseSize();
         let baseHeight = base.h;
@@ -238,12 +238,13 @@
         return {
             width: Math.round(base.w * zoom),
             height: Math.round(baseHeight * zoom),
-            anchorBottom: currentTipDirection === "up"
+            anchorBottom: !!anchorBottom
         };
     }
 
-    function syncWindowSize(force = false, recenter = false) {
-        const target = getCurrentTargetSize();
+    function syncWindowSize(force = false, recenter = false, anchorBottom = false) {
+        const isUp = anchorBottom || (isTipVisible && currentTipDirection === "up");
+        const target = getCurrentTargetSize(isUp);
         const widthDelta = Math.abs(target.width - lastAppliedWidth);
         const heightDelta = Math.abs(target.height - lastAppliedHeight);
         if (force || recenter || widthDelta > 1 || heightDelta > 1) {
@@ -670,7 +671,7 @@
         isTipVisible = true;
         document.body.classList.add("tip-open");
         tipEl.classList.add("show");
-        syncWindowSize();
+        syncWindowSize(false, false, dir === "up");
     }
 
     function hideTipNow() {
@@ -685,7 +686,11 @@
         isTipVisible = false;
         tipEl.classList.remove("show");
         document.body.classList.remove("tip-open");
-        syncWindowSize();
+        const wasUp = currentTipDirection === "up";
+        syncWindowSize(false, false, wasUp);
+        currentTipDirection = "down";
+        document.body.classList.remove("deploy-up");
+        document.body.classList.remove("deploy-down");
     }
 
     function isElementHovered(el) {
@@ -779,7 +784,7 @@
             isTipVisible = true;
             document.body.classList.add("tip-open");
             tipEl.classList.add("show");
-            syncWindowSize();
+            syncWindowSize(false, false, dir === "up");
         }, 900);
     });
 
@@ -1323,3 +1328,8 @@
         });
     }
 
+    // Safety clamp: ensure mini window starts safely within monitor work area
+    if (window.cc && window.cc.clampToMonitors) {
+        window.cc.clampToMonitors().catch(() => {});
+    }
+})();
