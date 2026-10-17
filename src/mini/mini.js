@@ -151,6 +151,13 @@
                 ? window.ccI18n.t("mini.dayProgress.tip", { pct })
                 : pct + "%";
             bar.setAttribute("aria-label", label);
+            if (typeof isElementHovered === "function" && isElementHovered(bar)) {
+                const tickerTextEl = document.getElementById("ticker-text");
+                const shell = document.getElementById("shell");
+                if (tickerTextEl && shell && shell.classList.contains("has-action-ticker")) {
+                    tickerTextEl.textContent = label;
+                }
+            }
         }
     }
 
@@ -794,13 +801,22 @@
         }
     }
 
-    timeBlock.addEventListener("mouseenter", onClockAreaEnter);
+    timeBlock.addEventListener("mouseenter", (e) => {
+        hideActionTicker();
+        onClockAreaEnter(e);
+    });
     timeBlock.addEventListener("mouseleave", onClockAreaLeave);
 
     const dayProgressEl = document.getElementById("day-progress");
     if (dayProgressEl) {
-        dayProgressEl.addEventListener("mouseenter", onClockAreaEnter);
-        dayProgressEl.addEventListener("mouseleave", onClockAreaLeave);
+        dayProgressEl.addEventListener("mouseenter", (e) => {
+            onClockAreaEnter(e);
+            showDayProgressTicker();
+        });
+        dayProgressEl.addEventListener("mouseleave", (e) => {
+            hideActionTicker();
+            onClockAreaLeave(e);
+        });
     }
 
     // The tooltip lives outside the shell; its ::before bridge keeps it
@@ -1055,6 +1071,21 @@
         clearTimeout(tickerTimer);
         if (!shellEl) return;
         shellEl.classList.remove("has-action-ticker");
+    }
+
+    const dayIcoSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+
+    function showDayProgressTicker() {
+        if (cfg.showWidgetHints === false || cfg.miniDayProgress !== true) return;
+        if (!shellEl || !tickerText) return;
+        const pct = dayPercent(new Date());
+        tickerText.textContent = window.ccI18n
+            ? window.ccI18n.t("mini.dayProgress.tip", { pct })
+            : pct + "%";
+        if (tickerIco) tickerIco.innerHTML = dayIcoSvg;
+        shellEl.classList.add("has-action-ticker");
+        clearTimeout(tickerTimer);
+        tickerTimer = null;
     }
 
 
