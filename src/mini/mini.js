@@ -771,7 +771,7 @@
         }
     });
 
-    timeBlock.addEventListener("mouseenter", () => {
+    function onClockAreaEnter() {
         if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
         // Click-through mode: the OS never delivers mouse events, so skip
         // the tooltip pipeline (no timers, no resize churn) entirely.
@@ -783,6 +783,7 @@
         refreshTipContent();
         positionTip();
         
+        clearTimeout(tipTimer);
         tipTimer = setTimeout(() => {
             if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
             positionTip();
@@ -790,7 +791,9 @@
             tipEl.classList.add("show");
             syncWindowSize();
         }, 900);
-    });
+    }
+
+    timeBlock.addEventListener("mouseenter", onClockAreaEnter);
 
     timeBlock.addEventListener("mouseleave", (e) => {
         if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".mini-tip") || e.relatedTarget.closest("#day-progress"))) return;
@@ -802,6 +805,7 @@
 
     const dayProgressEl = document.getElementById("day-progress");
     if (dayProgressEl) {
+        dayProgressEl.addEventListener("mouseenter", onClockAreaEnter);
         dayProgressEl.addEventListener("mouseleave", (e) => {
             if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest(".mini-tip"))) return;
             isTimeBlockHovered = false;
