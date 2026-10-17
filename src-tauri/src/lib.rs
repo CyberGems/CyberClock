@@ -1067,23 +1067,13 @@ fn move_window(window: WebviewWindow, x: i32, y: i32) {
 }
 
 #[tauri::command]
-fn set_window_size(
-    window: WebviewWindow,
-    width: i32,
-    height: i32,
-    recenter: Option<bool>,
-    anchor_bottom: Option<bool>,
-) {
+fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Option<bool>) {
     // Reject invalid values.
     // Wide display faces (Orbitron bold, seconds, AM/PM) grow the mini
     // bar past the old 2000px cap once zoom is applied.
     if width <= 0 || height <= 0 || width > 4096 || height > 4096 {
         return;
     }
-
-    let scale = window.scale_factor().unwrap_or(1.0);
-    let new_phys_width = (width as f64 * scale).round() as i32;
-    let new_phys_height = (height as f64 * scale).round() as i32;
 
     // Zoom-style resizes grow the window around its visual center so the
     // clock stays where the user placed it; the final position is clamped
@@ -1092,6 +1082,11 @@ fn set_window_size(
     // the top-left anchor.
     if recenter.unwrap_or(false) {
         if let (Ok(pos), Ok(old_size)) = (window.outer_position(), window.outer_size()) {
+            let new_phys_width =
+                (width as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+            let new_phys_height =
+                (height as f64 * window.scale_factor().unwrap_or(1.0)).round() as i32;
+
             // Keep the old center fixed under the new size.
             let mut new_x = pos.x + (old_size.width as i32 - new_phys_width) / 2;
             let mut new_y = pos.y + (old_size.height as i32 - new_phys_height) / 2;
@@ -1122,20 +1117,6 @@ fn set_window_size(
                 new_x, new_y,
             )));
         }
-    } else if anchor_bottom.unwrap_or(false) {
-        // Upward expansion / collapse: keep bottom edge pinned by moving Y by delta height
-        if let Some((_, prev_h)) = target_size_for(&window) {
-            let prev_phys_h = (prev_h as f64 * scale).round() as i32;
-            let delta_h = new_phys_height - prev_phys_h;
-            if delta_h != 0 {
-                if let Ok(pos) = window.outer_position() {
-                    let new_y = pos.y - delta_h;
-                    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                        pos.x, new_y,
-                    )));
-                }
-            }
-        }
     }
 
     // Store the target size so the matching window's resize handler can
@@ -1147,31 +1128,6 @@ fn set_window_size(
         width as f64,
         height as f64,
     )));
-
-    clamp_window_to_monitors(&window);
-}
-
-#[tauri::command]
-fn check_mini_tip_direction(window: WebviewWindow, needed_height: f64) -> String {
-    let Ok(pos) = window.outer_position() else {
-        return "down".to_string();
-    };
-    let Ok(size) = window.outer_size() else {
-        return "down".to_string();
-    };
-    let scale = window.scale_factor().unwrap_or(1.0);
-    let needed_phys_h = (needed_height * scale).round() as i32;
-
-    if let Ok(Some(monitor)) = window.current_monitor() {
-        let wa = monitor.work_area();
-        let wa_bottom = wa.position.y + wa.size.height as i32;
-        let window_bottom = pos.y + size.height as i32;
-        // If expanding downwards exceeds or comes within 10px of the monitor work area bottom, deploy UP!
-        if window_bottom + needed_phys_h > wa_bottom - 10 {
-            return "up".to_string();
-        }
-    }
-    "down".to_string()
 }
 
 #[tauri::command]
@@ -5286,7 +5242,6 @@ pub fn run() {
             get_window_position,
             move_window,
             set_window_size,
-            check_mini_tip_direction,
             toggle_always_on_top,
             open_window,
             hide_window,

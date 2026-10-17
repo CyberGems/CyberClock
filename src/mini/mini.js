@@ -223,28 +223,26 @@
         return { w, h };
     }
 
-    let currentTipDirection = "down";
-
-    function getCurrentTargetSize(anchorBottom = false) {
+    function getCurrentTargetSize() {
         const zoom = zoomFactor();
         const base = measureBaseSize();
         let baseHeight = base.h;
 
         if (isTipVisible) {
             const tipHeight = Math.max(tipEl.scrollHeight || 100, 95);
-            baseHeight += tipHeight / zoom;
+            const tipGap = 8;
+            const tipShadowBleed = 44;
+            baseHeight += (tipHeight + tipGap + tipShadowBleed) / zoom;
         }
 
         return {
             width: Math.round(base.w * zoom),
-            height: Math.round(baseHeight * zoom),
-            anchorBottom: !!anchorBottom
+            height: Math.round(baseHeight * zoom)
         };
     }
 
-    function syncWindowSize(force = false, recenter = false, anchorBottom = false) {
-        const isUp = anchorBottom || (isTipVisible && currentTipDirection === "up");
-        const target = getCurrentTargetSize(isUp);
+    function syncWindowSize(force = false, recenter = false) {
+        const target = getCurrentTargetSize();
         const widthDelta = Math.abs(target.width - lastAppliedWidth);
         const heightDelta = Math.abs(target.height - lastAppliedHeight);
         if (force || recenter || widthDelta > 1 || heightDelta > 1) {
@@ -623,9 +621,9 @@
     }
 
     function positionTip() {
-        // Curtain is attached flush to the shell via flexbox
-        tipEl.style.left = "";
-        tipEl.style.top = "";
+        const r = shellEl.getBoundingClientRect();
+        tipEl.style.left = r.left + r.width / 2 + "px";
+        tipEl.style.top = r.bottom + 8 + "px";
     }
 
     const controlsEl = document.querySelector(".controls");
@@ -659,19 +657,10 @@
         activeAlarmNotice = payload || {};
         if (!tipEl || !shellEl) return;
         refreshTipContent();
-
-        let dir = "down";
-        if (window.cc && window.cc.checkMiniTipDirection) {
-            dir = await window.cc.checkMiniTipDirection(115);
-        }
-        currentTipDirection = dir;
-        document.body.classList.toggle("deploy-up", dir === "up");
-        document.body.classList.toggle("deploy-down", dir !== "up");
-
+        positionTip();
         isTipVisible = true;
-        document.body.classList.add("tip-open");
         tipEl.classList.add("show");
-        syncWindowSize(false, false, dir === "up");
+        syncWindowSize();
     }
 
     function hideTipNow() {
@@ -685,12 +674,7 @@
         if (!isTipVisible) return;
         isTipVisible = false;
         tipEl.classList.remove("show");
-        document.body.classList.remove("tip-open");
-        const wasUp = currentTipDirection === "up";
-        syncWindowSize(false, false, wasUp);
-        currentTipDirection = "down";
-        document.body.classList.remove("deploy-up");
-        document.body.classList.remove("deploy-down");
+        syncWindowSize();
     }
 
     function isElementHovered(el) {
@@ -702,11 +686,39 @@
         }
     }
 
-    function scheduleTipHide(delay = 240) {
+    function isPointerInCorridor(x, y) {
+        if (!shellEl || !tipEl || !isTipVisible) return false;
+        const sr = shellEl.getBoundingClientRect();
+        const tr = tipEl.getBoundingClientRect();
+        const minX = Math.min(sr.left, tr.left) - 18;
+        const maxX = Math.max(sr.right, tr.right) + 18;
+        const minY = sr.top - 6;
+        const maxY = tr.bottom + 14;
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
+    }
+
+    let lastPointer = { x: 0, y: 0 };
+    document.addEventListener("pointermove", (e) => {
+        lastPointer = { x: e.clientX, y: e.clientY };
+        if (!isTipVisible) return;
+        if (isPointerInCorridor(e.clientX, e.clientY)) {
+            clearTimeout(tipHideTimer);
+            tipHideTimer = null;
+            return;
+        }
+        scheduleTipHide(e.target && e.target.closest && e.target.closest(".controls") ? 0 : 120);
+    }, { passive: true });
+
+    function scheduleTipHide(delay = 260) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
-            const clockHovered = isElementHovered(shellEl) && !isElementHovered(controlsEl);
+            if (!isTipVisible) return;
+            if (lastPointer && isPointerInCorridor(lastPointer.x, lastPointer.y)) {
+                return;
+            }
+            const dayProg = document.getElementById("day-progress");
+            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
             const tipHovered = isElementHovered(tipEl);
             if (clockHovered || tipHovered) {
                 isTimeBlockHovered = clockHovered;
@@ -769,22 +781,14 @@
         tipHideTimer = null;
         expandDate();
         refreshTipContent();
+        positionTip();
         
-        tipTimer = setTimeout(async () => {
+        tipTimer = setTimeout(() => {
             if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
-            
-            let dir = "down";
-            if (window.cc && window.cc.checkMiniTipDirection) {
-                dir = await window.cc.checkMiniTipDirection(115);
-            }
-            currentTipDirection = dir;
-            document.body.classList.toggle("deploy-up", dir === "up");
-            document.body.classList.toggle("deploy-down", dir !== "up");
-
+            positionTip();
             isTipVisible = true;
-            document.body.classList.add("tip-open");
             tipEl.classList.add("show");
-            syncWindowSize(false, false, dir === "up");
+            syncWindowSize();
         }, 900);
     });
 
@@ -793,7 +797,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide(240);
+        scheduleTipHide(260);
     });
 
     const dayProgressEl = document.getElementById("day-progress");
@@ -803,21 +807,23 @@
             isTimeBlockHovered = false;
             clearTimeout(tipTimer);
             tipTimer = null;
-            scheduleTipHide(240);
+            scheduleTipHide(260);
         });
     }
 
-    // The tooltip is attached to the shell, so keep it alive while hovering
+    // The tooltip lives outside the shell, so keep it alive while the
+    // pointer crosses the small gap between the clock and the card.
     tipEl.addEventListener("mouseenter", () => {
         isTipHovered = true;
         clearTimeout(tipHideTimer);
         tipHideTimer = null;
+        positionTip();
     });
 
     tipEl.addEventListener("mouseleave", (e) => {
-        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mini-shell")) return;
+        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest("#day-progress") || e.relatedTarget.closest(".mini-shell"))) return;
         isTipHovered = false;
-        scheduleTipHide(240);
+        scheduleTipHide(260);
     });
 
     // Status dot also triggers date expand
@@ -842,7 +848,11 @@
         });
     }
 
-    function onPointerExitedWindow() {
+    function onPointerExitedWindow(e) {
+        if (e && typeof e.clientX === "number" && isPointerInCorridor(e.clientX, e.clientY)) {
+            scheduleTipHide(260);
+            return;
+        }
         isTimeBlockHovered = false;
         isTipHovered = false;
         clearTimeout(tipTimer);
@@ -859,7 +869,7 @@
     document.addEventListener("mouseleave", onPointerExitedWindow);
     window.addEventListener("mouseout", (e) => {
         if (!e.relatedTarget && !e.toElement) {
-            onPointerExitedWindow();
+            onPointerExitedWindow(e);
         }
     });
     window.addEventListener("blur", onPointerExitedWindow);
@@ -876,7 +886,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide(240);
+        scheduleTipHide(260);
     });
 
     tipEl.addEventListener("click", () => {
