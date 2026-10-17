@@ -18,6 +18,17 @@
         -webkit-user-select: none;
         outline: none;
     }
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    body.deploy-up {
+        flex-direction: column-reverse;
+        justify-content: flex-start;
+    }
     body:focus, body:focus-visible { outline: none; }
 
     /* ═══════════════════════════════════════════════════════
@@ -27,14 +38,23 @@
         display: flex;
         align-items: center;
         width: 100%;
-        height: 100%;
+        flex-shrink: 0;
         overflow: hidden;
         box-sizing: border-box;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: default;
         position: relative;
         outline: none;
         box-shadow: none !important;
+    }
+    body.deploy-down.tip-open .mini-shell,
+    body.tip-open:not(.deploy-up) .mini-shell {
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+    body.deploy-up.tip-open .mini-shell {
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
     }
     .mini-shell:focus, .mini-shell:focus-visible { outline: none; }
     body.is-dragging,
@@ -2007,61 +2027,72 @@
         filter: drop-shadow(0 0 7px rgba(var(--rgb-accent), 0.85));
     }
 
-    /* ── Day-note tooltip (child of <body>, outside shell) ── */
+    /* ── Day-note / Alarm curtain banner (attached directly to shell) ── */
     .mini-tip {
-        position: fixed;
+        position: relative;
         pointer-events: auto;
         cursor: pointer;
         opacity: 0;
-        transition: opacity 0.22s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
-        transform: translate(-50%, 4px);
-        background: var(--bg-02, #18181c);
-        border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
-        border-radius: 12px;
-        padding: 12px 14px;
-        width: 240px;
+        max-height: 0;
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
         text-align: center;
         white-space: normal;
-        z-index: 999;
+        z-index: 99;
         font-family: "Outfit", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
         font-size: 11px;
         color: rgba(255, 255, 255, 0.88);
         line-height: 1.5;
         word-break: break-word;
         overflow-wrap: anywhere;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 15px rgba(var(--rgb-accent), 0.1);
+        padding: 0 14px;
+        background: var(--bg-02, #18181c);
+        border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 14px rgba(var(--rgb-accent), 0.12);
+        transform-origin: top center;
+        transform: scaleY(0.3);
+        transition: max-height 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.2s ease,
+                    transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                    padding 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s, box-shadow 0.2s;
     }
+
+    body.deploy-down .mini-tip,
+    body:not(.deploy-up) .mini-tip {
+        border-top: 1px dashed rgba(255, 255, 255, 0.12);
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        transform-origin: top center;
+    }
+
+    body.deploy-up .mini-tip {
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        transform-origin: bottom center;
+    }
+
+    .mini-tip.show {
+        max-height: 220px;
+        opacity: 0.98;
+        transform: scaleY(1);
+        padding: 10px 14px 12px 14px;
+    }
+
     .mini-tip:hover {
         border-color: rgba(var(--rgb-accent), 0.5);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 16px rgba(var(--rgb-accent), 0.25);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55), 0 0 18px rgba(var(--rgb-accent), 0.25);
     }
-    /* Hover bridge: spans the 8px transparent gap between clock shell and tip */
+
+    .mini-tip::after,
     .mini-tip::before {
-        content: "";
-        position: absolute;
-        top: -14px;
-        left: -12px;
-        right: -12px;
-        height: 14px;
-        background: transparent;
-        pointer-events: auto;
-    }
-    .mini-tip::after {
-        content: "";
-        position: absolute;
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 10px;
-        height: 10px;
-        background: var(--bg-02, #18181c);
-        border-left: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
-        border-top: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
-        rotate: 45deg;
-    }
-    .mini-tip.show {
-        opacity: 0.98;
-        transform: translate(-50%, 0);
+        display: none !important;
     }
     .mini-tip-alarm {
         margin-bottom: 8px;

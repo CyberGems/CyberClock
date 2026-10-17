@@ -80,6 +80,13 @@
         setAnalogMenuCapture: async (open) => {
             await invoke("set_analog_menu_capture", { capture: !!open });
         },
+        checkMiniTipDirection: async (neededHeight) => {
+            try {
+                return await invoke("check_mini_tip_direction", { neededHeight: Number(neededHeight) || 120 });
+            } catch (_) {
+                return "down";
+            }
+        },
         setWindowSize: async (size) => {
             const args = {
                 width: Math.round(size.width),
@@ -89,6 +96,7 @@
             // visual center instead of the top-left anchor (see
             // set_window_size in lib.rs).
             if (size.recenter) args.recenter = true;
+            if (size.anchorBottom) args.anchorBottom = true;
             await invoke("set_window_size", args);
         },
         openMiniContextMenu: async (point) => {

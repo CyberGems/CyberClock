@@ -223,22 +223,23 @@
         return { w, h };
     }
 
+    let currentTipDirection = "down";
+
     function getCurrentTargetSize() {
         const zoom = zoomFactor();
         const base = measureBaseSize();
         let baseHeight = base.h;
 
         if (isTipVisible) {
-            const tipHeight = tipEl.offsetHeight || 80;
-            // 8px sits between the clock and the card. The rest is room
-            // for the card's drop shadow, which the window edge was
-            // cutting flat.
-            const tipGap = 8;
-            const tipShadowBleed = 44;
-            baseHeight += (tipHeight + tipGap + tipShadowBleed) / zoom;
+            const tipHeight = Math.max(tipEl.scrollHeight || 100, 95);
+            baseHeight += tipHeight / zoom;
         }
 
-        return { width: Math.round(base.w * zoom), height: Math.round(baseHeight * zoom) };
+        return {
+            width: Math.round(base.w * zoom),
+            height: Math.round(baseHeight * zoom),
+            anchorBottom: currentTipDirection === "up"
+        };
     }
 
     function syncWindowSize(force = false, recenter = false) {
@@ -621,9 +622,9 @@
     }
 
     function positionTip() {
-        const r = shellEl.getBoundingClientRect();
-        tipEl.style.left = r.left + r.width / 2 + "px";
-        tipEl.style.top = r.bottom + 8 + "px";
+        // Curtain is attached flush to the shell via flexbox
+        tipEl.style.left = "";
+        tipEl.style.top = "";
     }
 
     const controlsEl = document.querySelector(".controls");
@@ -653,12 +654,21 @@
         }
     }
 
-    function showMiniAlarm(payload) {
+    async function showMiniAlarm(payload) {
         activeAlarmNotice = payload || {};
         if (!tipEl || !shellEl) return;
         refreshTipContent();
-        positionTip();
+
+        let dir = "down";
+        if (window.cc && window.cc.checkMiniTipDirection) {
+            dir = await window.cc.checkMiniTipDirection(115);
+        }
+        currentTipDirection = dir;
+        document.body.classList.toggle("deploy-up", dir === "up");
+        document.body.classList.toggle("deploy-down", dir !== "up");
+
         isTipVisible = true;
+        document.body.classList.add("tip-open");
         tipEl.classList.add("show");
         syncWindowSize();
     }
@@ -671,8 +681,11 @@
         clearTimeout(tipHideTimer);
         tipTimer = null;
         tipHideTimer = null;
+        if (!isTipVisible) return;
         isTipVisible = false;
         tipEl.classList.remove("show");
+        document.body.classList.remove("tip-open");
+        syncWindowSize();
     }
 
     function isElementHovered(el) {
@@ -684,12 +697,11 @@
         }
     }
 
-    function scheduleTipHide(delay = 260) {
+    function scheduleTipHide(delay = 240) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
-            const dayProg = document.getElementById("day-progress");
-            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg) || isElementHovered(shellEl)) && !isElementHovered(controlsEl);
+            const clockHovered = isElementHovered(shellEl) && !isElementHovered(controlsEl);
             const tipHovered = isElementHovered(tipEl);
             if (clockHovered || tipHovered) {
                 isTimeBlockHovered = clockHovered;
@@ -723,13 +735,27 @@
     }
 
     let isDragging = false;
+    let isPointerDown = false;
+    let lastDragEndTime = 0;
+
+    window.addEventListener("mousedown", (e) => {
+        if (e.button === 0) {
+            isPointerDown = true;
+            clearTimeout(tipTimer);
+            tipTimer = null;
+        }
+    });
 
     window.addEventListener("mouseup", () => {
-        isDragging = false;
+        isPointerDown = false;
+        if (isDragging) {
+            isDragging = false;
+            lastDragEndTime = Date.now();
+        }
     });
 
     timeBlock.addEventListener("mouseenter", () => {
-        if (isDragging) return;
+        if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
         // Click-through mode: the OS never delivers mouse events, so skip
         // the tooltip pipeline (no timers, no resize churn) entirely.
         if (document.body.classList.contains("click-through")) return;
@@ -738,12 +764,20 @@
         tipHideTimer = null;
         expandDate();
         refreshTipContent();
-        positionTip();
         
-        tipTimer = setTimeout(() => {
-            if (isDragging) return;
-            positionTip();
+        tipTimer = setTimeout(async () => {
+            if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
+            
+            let dir = "down";
+            if (window.cc && window.cc.checkMiniTipDirection) {
+                dir = await window.cc.checkMiniTipDirection(115);
+            }
+            currentTipDirection = dir;
+            document.body.classList.toggle("deploy-up", dir === "up");
+            document.body.classList.toggle("deploy-down", dir !== "up");
+
             isTipVisible = true;
+            document.body.classList.add("tip-open");
             tipEl.classList.add("show");
             syncWindowSize();
         }, 900);
@@ -754,7 +788,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide(260);
+        scheduleTipHide(240);
     });
 
     const dayProgressEl = document.getElementById("day-progress");
@@ -764,23 +798,21 @@
             isTimeBlockHovered = false;
             clearTimeout(tipTimer);
             tipTimer = null;
-            scheduleTipHide(260);
+            scheduleTipHide(240);
         });
     }
 
-    // The tooltip lives outside the shell, so keep it alive while the
-    // pointer crosses the small gap between the clock and the card.
+    // The tooltip is attached to the shell, so keep it alive while hovering
     tipEl.addEventListener("mouseenter", () => {
         isTipHovered = true;
         clearTimeout(tipHideTimer);
         tipHideTimer = null;
-        positionTip();
     });
 
     tipEl.addEventListener("mouseleave", (e) => {
-        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest("#day-progress"))) return;
+        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mini-shell")) return;
         isTipHovered = false;
-        scheduleTipHide(260);
+        scheduleTipHide(240);
     });
 
     // Status dot also triggers date expand
@@ -827,31 +859,6 @@
     });
     window.addEventListener("blur", onPointerExitedWindow);
 
-    function isPointerInCorridor(e) {
-        if (!shellEl || !tipEl || !isTipVisible) return false;
-        const sr = shellEl.getBoundingClientRect();
-        const tr = tipEl.getBoundingClientRect();
-        const minX = Math.min(sr.left, tr.left) - 16;
-        const maxX = Math.max(sr.right, tr.right) + 16;
-        const minY = sr.top - 8;
-        const maxY = tr.bottom + 16;
-        return e.clientX >= minX && e.clientX <= maxX && e.clientY >= minY && e.clientY <= maxY;
-    }
-
-    // Watchdog: If the flyout is visible and mouse moves into empty/transparent window padding
-    document.addEventListener("pointermove", (e) => {
-        if (!isTipVisible) return;
-        if (isPointerInCorridor(e)) {
-            // Inside corridor or over clock/tip: cancel pending hide
-            if (isElementHovered(timeBlock) || isElementHovered(tipEl)) {
-                clearTimeout(tipHideTimer);
-                tipHideTimer = null;
-            }
-            return;
-        }
-        scheduleTipHide(e.target && e.target.closest && e.target.closest(".controls") ? 0 : 120);
-    }, { passive: true });
-
     shellEl.addEventListener("mouseenter", () => {
         miniHovered = true;
         syncMiniMotion();
@@ -864,7 +871,7 @@
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
-        scheduleTipHide(260);
+        scheduleTipHide(240);
     });
 
     tipEl.addEventListener("click", () => {
@@ -1173,23 +1180,35 @@
         if (e.button !== 0) return;
 
         // Immediately cancel and dismiss the hover popup if visible/pending.
+        isPointerDown = true;
+        isDragging = true;
+        clearTimeout(tipTimer);
+        tipTimer = null;
+        clearTimeout(tipHideTimer);
+        tipHideTimer = null;
         hideTipNow();
         hideActionTicker();
         collapseDate();
         syncWindowSize();
 
-        if (cfg.miniPositionLocked === true) return;
+        if (cfg.miniPositionLocked === true) {
+            isDragging = false;
+            return;
+        }
         e.preventDefault();
-        isDragging = true;
         document.body.classList.add("is-dragging");
         window.cc.startDragging()
             .then(() => {
                 isDragging = false;
+                isPointerDown = false;
+                lastDragEndTime = Date.now();
                 document.body.classList.remove("is-dragging");
                 window.cc.saveMiniPosition().catch(() => {});
             })
             .catch(() => {
                 isDragging = false;
+                isPointerDown = false;
+                lastDragEndTime = Date.now();
                 document.body.classList.remove("is-dragging");
             });
     });
