@@ -1332,4 +1332,3 @@
     if (window.cc && window.cc.clampToMonitors) {
         window.cc.clampToMonitors().catch(() => {});
     }
-})();
