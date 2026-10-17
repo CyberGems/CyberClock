@@ -2407,7 +2407,7 @@
         const miniClickThrough = document.getElementById('s-mini-clickthrough');
         if (miniClickThrough) miniClickThrough.checked = s.miniClickThrough === true;
         const miniAnim = document.getElementById('s-mini-anim');
-        if (miniAnim) miniAnim.checked = s.miniNoAnimations === true;
+        if (miniAnim) miniAnim.checked = s.miniNoAnimations !== true;
         const miniEdgeLimits = document.getElementById('s-mini-edge-limits');
         if (miniEdgeLimits) miniEdgeLimits.checked = s.miniEdgeLimits !== false;
         const miniAutoFade = document.getElementById('s-mini-auto-fade');
@@ -7636,7 +7636,7 @@
     const sMiniAnim = document.getElementById('s-mini-anim');
     if (sMiniAnim) {
         sMiniAnim.addEventListener('change', (e) => {
-            window.cc.saveSettings({ miniNoAnimations: e.target.checked });
+            window.cc.saveSettings({ miniNoAnimations: !e.target.checked });
         });
     }
     const sMiniEdgeLimits = document.getElementById('s-mini-edge-limits');

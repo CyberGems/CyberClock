@@ -675,11 +675,29 @@
         tipEl.classList.remove("show");
     }
 
+    function isElementHovered(el) {
+        if (!el || !(el instanceof Element)) return false;
+        try {
+            return el.matches(":hover");
+        } catch (_) {
+            return false;
+        }
+    }
+
     function scheduleTipHide(delay = 180) {
         clearTimeout(tipHideTimer);
         tipHideTimer = setTimeout(() => {
             tipHideTimer = null;
-            if (isTimeBlockHovered || isTipHovered) return;
+            const dayProg = document.getElementById("day-progress");
+            const clockHovered = (isElementHovered(timeBlock) || isElementHovered(dayProg)) && !isElementHovered(controlsEl);
+            const tipHovered = isElementHovered(tipEl);
+            if (clockHovered || tipHovered) {
+                isTimeBlockHovered = clockHovered;
+                isTipHovered = tipHovered;
+                return;
+            }
+            isTimeBlockHovered = false;
+            isTipHovered = false;
             hideTipNow();
             collapseDate();
             syncWindowSize();
@@ -732,12 +750,23 @@
     });
 
     timeBlock.addEventListener("mouseleave", (e) => {
-        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest("#day-progress")) return;
+        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".mini-tip") || e.relatedTarget.closest("#day-progress"))) return;
         isTimeBlockHovered = false;
         clearTimeout(tipTimer);
         tipTimer = null;
         scheduleTipHide();
     });
+
+    const dayProgressEl = document.getElementById("day-progress");
+    if (dayProgressEl) {
+        dayProgressEl.addEventListener("mouseleave", (e) => {
+            if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest(".mini-tip"))) return;
+            isTimeBlockHovered = false;
+            clearTimeout(tipTimer);
+            tipTimer = null;
+            scheduleTipHide();
+        });
+    }
 
     // The tooltip lives outside the shell, so keep it alive while the
     // pointer crosses the small gap between the clock and the card.
@@ -748,7 +777,8 @@
         positionTip();
     });
 
-    tipEl.addEventListener("mouseleave", () => {
+    tipEl.addEventListener("mouseleave", (e) => {
+        if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest(".time-block") || e.relatedTarget.closest("#day-progress"))) return;
         isTipHovered = false;
         scheduleTipHide();
     });
@@ -775,26 +805,52 @@
         });
     }
 
-    document.body.addEventListener("mouseleave", () => {
+    function onPointerExitedWindow() {
         isTimeBlockHovered = false;
         isTipHovered = false;
+        clearTimeout(tipTimer);
+        tipTimer = null;
         hideTipNow();
         hideActionTicker();
         miniHovered = false;
         collapseDate();
         syncMiniMotion();
         syncWindowSize();
+    }
+
+    document.body.addEventListener("mouseleave", onPointerExitedWindow);
+    document.addEventListener("mouseleave", onPointerExitedWindow);
+    window.addEventListener("mouseout", (e) => {
+        if (!e.relatedTarget && !e.toElement) {
+            onPointerExitedWindow();
+        }
     });
+    window.addEventListener("blur", onPointerExitedWindow);
+
+    // Watchdog: If the flyout is visible and mouse moves into empty/transparent window padding
+    document.addEventListener("pointermove", (e) => {
+        if (!isTipVisible) return;
+        const target = e.target;
+        if (!target || !(target instanceof Element)) return;
+        if (target.closest(".time-block") || target.closest(".mini-tip") || target.closest("#day-progress")) {
+            return;
+        }
+        scheduleTipHide(target.closest(".controls") ? 0 : 80);
+    }, { passive: true });
 
     shellEl.addEventListener("mouseenter", () => {
         miniHovered = true;
         syncMiniMotion();
     });
 
-    shellEl.addEventListener("mouseleave", () => {
+    shellEl.addEventListener("mouseleave", (e) => {
         miniHovered = false;
         syncMiniMotion();
-        if (!isTimeBlockHovered && !isTipHovered) scheduleTipHide();
+        if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mini-tip")) return;
+        isTimeBlockHovered = false;
+        clearTimeout(tipTimer);
+        tipTimer = null;
+        scheduleTipHide();
     });
 
     tipEl.addEventListener("click", () => {

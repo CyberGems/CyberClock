@@ -19,16 +19,23 @@
 
     /* Outer root includes shadow bleed — measured for window size */
     .tray-root {
-        display: inline-block;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
         background: transparent;
         padding: 20px;
         box-sizing: border-box;
+        max-height: 100vh;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
     }
 
     .tray-card {
         width: 250px;
         box-sizing: border-box;
-        max-height: 100%;
+        max-height: calc(100vh - 40px);
         background: rgba(10, 14, 25, 0.96);
         backdrop-filter: blur(28px) saturate(1.8);
         -webkit-backdrop-filter: blur(28px) saturate(1.8);
@@ -37,18 +44,28 @@
         overflow-x: hidden;
         overflow-y: auto;
         position: relative;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(var(--rgb-accent), 0.45) transparent;
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.55),
-            0 0 20px rgba(var(--rgb-accent), 0.12),
+            0 4px 16px rgba(0, 0, 0, 0.38),
+            0 2px 6px rgba(0, 0, 0, 0.22),
+            0 0 12px rgba(var(--rgb-accent), 0.10),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
         animation: tray-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tray-card::-webkit-scrollbar {
-        width: 4px;
+        width: 5px;
+    }
+    .tray-card::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 8px 0;
     }
     .tray-card::-webkit-scrollbar-thumb {
-        background: rgba(var(--rgb-accent), 0.3);
-        border-radius: 2px;
+        background: rgba(var(--rgb-accent), 0.45);
+        border-radius: 4px;
+    }
+    .tray-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--rgb-accent), 0.75);
     }
 
     @keyframes tray-fade-in {

@@ -564,6 +564,8 @@
 
                     const collapseLbl = document.querySelector("#ctx-collapse .switch-lbl");
                     if (collapseLbl) collapseLbl.textContent = window.ccI18n.t("menu.collapseDate");
+                    const secondsLbl = document.querySelector("#ctx-seconds .switch-lbl");
+                    if (secondsLbl) secondsLbl.textContent = window.ccI18n.t("settings.appearance.showSeconds");
                     const lockLbl = document.querySelector("#ctx-lock .switch-lbl");
                     if (lockLbl) lockLbl.textContent = window.ccI18n.t("settings.mini.lockPos");
                     const aotLbl = document.querySelector("#ctx-aot .switch-lbl");
@@ -571,7 +573,7 @@
                     const solarLbl = document.querySelector("#ctx-solar .switch-lbl");
                     if (solarLbl) solarLbl.textContent = window.ccI18n.t("settings.mini.solarReal");
                     const animLbl = document.querySelector("#ctx-anim .switch-lbl");
-                    if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.noAnimations");
+                    if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.animations");
                     const edgeLimitsLbl = document.querySelector("#ctx-edge-limits .switch-lbl");
                     if (edgeLimitsLbl) edgeLimitsLbl.textContent = window.ccI18n.t("settings.mini.edgeLimits");
                     document.querySelectorAll('.ctx-item[data-action="full"] .label').forEach((el) => {
@@ -685,12 +687,14 @@
                 // Collapse Date
                 const toggleCollapse = document.getElementById("toggle-collapse");
                 if (toggleCollapse) toggleCollapse.classList.toggle("on", cfg.miniCollapseDate !== true);
+                const toggleSeconds = document.getElementById("toggle-seconds");
+                if (toggleSeconds) toggleSeconds.classList.toggle("on", cfg.showSeconds !== false);
                 const toggleDay = document.getElementById("toggle-day-progress");
                 if (toggleDay) toggleDay.classList.toggle("on", cfg.miniDayProgress === true);
 
-                // Disable Animations
+                // Enable Animations (default ON, stored as miniNoAnimations !== true)
                 const toggleAnim = document.getElementById("toggle-anim");
-                if (toggleAnim) toggleAnim.classList.toggle("on", cfg.miniNoAnimations || false);
+                if (toggleAnim) toggleAnim.classList.toggle("on", cfg.miniNoAnimations !== true);
 
                 // Edge Boundaries
                 const toggleEdgeLimits = document.getElementById("toggle-edge-limits");
@@ -983,7 +987,20 @@
         });
     }
 
-    // Disable Animations toggle handler
+    // Show Seconds toggle handler
+    const secondsRow = document.getElementById("ctx-seconds");
+    if (secondsRow) {
+        secondsRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-seconds");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ showSeconds: on });
+            }
+        });
+    }
+
+    // Enable Animations toggle handler (toggle on -> miniNoAnimations: false)
     const animRow = document.getElementById("ctx-anim");
     if (animRow) {
         animRow.addEventListener("click", () => {
@@ -991,7 +1008,7 @@
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniNoAnimations: on });
+                window.cc.saveSettings({ miniNoAnimations: !on });
             }
         });
     }
