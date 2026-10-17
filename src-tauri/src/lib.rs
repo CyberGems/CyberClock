@@ -3706,7 +3706,7 @@ fn position_mini_tip(
         .unwrap_or_else(|| tip.scale_factor().unwrap_or(1.0));
     let tip_width = (logical_w * scale).round() as i32;
     let tip_height = (logical_h * scale).round() as i32;
-    let offset = (4.0 * scale).round() as i32;
+    let offset = (5.0 * scale).round() as i32;
 
     let mut placement_str = "below".to_string();
 
