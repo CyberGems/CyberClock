@@ -4,6 +4,7 @@
     const tipEl = document.getElementById("mini-tip");
     let currentPayload = null;
     let tipDesign = "1";
+    let isEditingNote = false;
 
     function isoNow() {
         const d = new Date();
@@ -135,10 +136,18 @@
             tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
         }
 
-        // 3. Date header
+        // 3. Date header (clicking opens the full calendar)
         const dateDiv = document.createElement("div");
         dateDiv.className = "mini-tip-date";
         dateDiv.textContent = data.dateStr || "";
+        dateDiv.title = t("mini.tip.openCalendar");
+        dateDiv.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const todayKey = isoNow();
+            if (window.cc?.goFull) window.cc.goFull();
+            if (window.cc?.menuAction) window.cc.menuAction("open-note:" + todayKey);
+            if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
+        });
         tipEl.appendChild(dateDiv);
         tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
 
@@ -185,22 +194,121 @@
             tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";
         }
 
-        // 5. Note or empty note button
-        if (data.note) {
-            const noteDiv = document.createElement("div");
-            noteDiv.className = "mini-tip-note";
-            noteDiv.textContent = `📝 ${data.note.split("\n")[0].trim()}`;
-            tipEl.appendChild(noteDiv);
-        } else {
-            const emptyDiv = document.createElement("div");
-            emptyDiv.className = "mini-tip-note empty";
-            emptyDiv.textContent = `🌸 ${t("mini.tip.noNotes")}`;
-            tipEl.appendChild(emptyDiv);
+        // 5. Note, inline editor, or empty note button
+        if (isEditingNote) {
+            const editorDiv = document.createElement("div");
+            editorDiv.className = "mini-tip-editor";
+            editorDiv.addEventListener("click", (e) => e.stopPropagation());
 
-            const btnDiv = document.createElement("div");
-            btnDiv.className = "mini-tip-action-btn";
-            btnDiv.textContent = t("mini.tip.createNote");
-            tipEl.appendChild(btnDiv);
+            const textarea = document.createElement("textarea");
+            textarea.className = "mini-tip-textarea";
+            textarea.rows = 2;
+            textarea.maxLength = 300;
+            textarea.placeholder = t("mini.tip.placeholder");
+            textarea.value = data.note || "";
+
+            const actionsDiv = document.createElement("div");
+            actionsDiv.className = "mini-tip-edit-actions";
+
+            const saveBtn = document.createElement("button");
+            saveBtn.type = "button";
+            saveBtn.className = "mini-tip-edit-btn save";
+            saveBtn.textContent = t("mini.tip.save");
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.type = "button";
+            cancelBtn.className = "mini-tip-edit-btn cancel";
+            cancelBtn.textContent = t("mini.tip.cancel");
+
+            const doSave = async () => {
+                const text = textarea.value.trim();
+                await saveNote(text);
+            };
+
+            const doCancel = () => {
+                isEditingNote = false;
+                renderTip(currentPayload);
+            };
+
+            saveBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                await doSave();
+            });
+
+            cancelBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                doCancel();
+            });
+
+            actionsDiv.appendChild(saveBtn);
+            actionsDiv.appendChild(cancelBtn);
+
+            if (data.note) {
+                const delBtn = document.createElement("button");
+                delBtn.type = "button";
+                delBtn.className = "mini-tip-edit-btn delete";
+                delBtn.textContent = t("mini.tip.delete");
+                delBtn.title = t("mini.tip.delete");
+                delBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    await saveNote("");
+                });
+                actionsDiv.appendChild(delBtn);
+            }
+
+            textarea.addEventListener("keydown", (e) => {
+                e.stopPropagation();
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    doSave();
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    doCancel();
+                }
+            });
+
+            editorDiv.appendChild(textarea);
+            editorDiv.appendChild(actionsDiv);
+            tipEl.appendChild(editorDiv);
+
+            setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            }, 30);
+        } else {
+            if (data.note) {
+                const noteDiv = document.createElement("div");
+                noteDiv.className = "mini-tip-note";
+                noteDiv.title = t("mini.tip.editNote");
+                noteDiv.textContent = `📝 ${data.note.split("\n")[0].trim()}`;
+                noteDiv.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    isEditingNote = true;
+                    renderTip(currentPayload);
+                });
+                tipEl.appendChild(noteDiv);
+            } else {
+                const emptyDiv = document.createElement("div");
+                emptyDiv.className = "mini-tip-note empty";
+                emptyDiv.textContent = `🌸 ${t("mini.tip.noNotes")}`;
+                emptyDiv.title = t("mini.tip.createNote");
+                emptyDiv.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    isEditingNote = true;
+                    renderTip(currentPayload);
+                });
+                tipEl.appendChild(emptyDiv);
+
+                const btnDiv = document.createElement("div");
+                btnDiv.className = "mini-tip-action-btn";
+                btnDiv.textContent = t("mini.tip.createNote");
+                btnDiv.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    isEditingNote = true;
+                    renderTip(currentPayload);
+                });
+                tipEl.appendChild(btnDiv);
+            }
         }
 
         // 6. Upcoming events stat
@@ -239,12 +347,32 @@
         });
     }
 
-    // Click on tip card: open note
-    tipEl.addEventListener("click", () => {
+    async function saveNote(text) {
         const todayKey = isoNow();
-        if (window.cc?.goFull) window.cc.goFull();
-        if (window.cc?.menuAction) window.cc.menuAction("open-note:" + todayKey);
-        if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
+        try {
+            const settings = await window.cc?.getSettings();
+            const calNotes = Object.assign({}, settings?.calendarNotes || {});
+            if (text) {
+                calNotes[todayKey] = text;
+            } else {
+                delete calNotes[todayKey];
+            }
+            await window.cc?.saveSettings({ calendarNotes: calNotes });
+            if (currentPayload) {
+                currentPayload.note = text;
+            }
+        } catch (err) {
+            console.error("Failed to save note inline:", err);
+        }
+        isEditingNote = false;
+        renderTip(currentPayload);
+    }
+
+    // Click on tip card: open inline note editor if not already editing
+    tipEl.addEventListener("click", () => {
+        if (isEditingNote) return;
+        isEditingNote = true;
+        renderTip(currentPayload);
     });
 
     // Hover lifecycle
@@ -253,8 +381,18 @@
     });
 
     document.body.addEventListener("mouseleave", () => {
+        if (isEditingNote) return;
         if (window.cc?.setMiniTipHovered) window.cc.setMiniTipHovered(false);
         if (window.cc?.scheduleHideMiniTip) window.cc.scheduleHideMiniTip();
+    });
+
+    window.addEventListener("blur", () => {
+        if (isEditingNote) {
+            isEditingNote = false;
+            renderTip(currentPayload);
+        }
+        if (window.cc?.setMiniTipHovered) window.cc.setMiniTipHovered(false);
+        if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
     });
 
     // Listen for placement changes (above vs below clock)
@@ -269,7 +407,10 @@
     // Listen for data payload
     if (window.cc?.onTipPayload) {
         window.cc.onTipPayload((data) => {
-            renderTip(data);
+            currentPayload = data;
+            if (!isEditingNote) {
+                renderTip(data);
+            }
         });
     }
 

@@ -2113,6 +2113,13 @@
         text-transform: uppercase;
         margin-bottom: 6px;
         text-shadow: 0 0 8px rgba(var(--rgb-accent), 0.3);
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+    }
+    .mini-tip-date:hover {
+        opacity: 0.85;
+        text-decoration: underline;
+        text-underline-offset: 3px;
     }
     .mini-tip-divider {
         height: 1px;
@@ -2124,12 +2131,24 @@
         font-weight: 500;
         margin-bottom: 6px;
         font-size: 12.5px;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+    .mini-tip-note:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--accent-a, #00e5ff);
     }
     .mini-tip-note.empty {
         color: rgba(255, 255, 255, 0.45);
         font-style: italic;
         font-weight: 400;
         margin-bottom: 8px;
+        cursor: pointer;
+    }
+    .mini-tip-note.empty:hover {
+        color: rgba(255, 255, 255, 0.75);
     }
     .mini-tip-action-btn {
         display: inline-block;
@@ -2151,6 +2170,101 @@
         background: rgba(var(--rgb-accent), 0.25);
         box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.35);
         transform: scale(1.04);
+    }
+    .mini-tip-editor {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 4px 0 8px 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .mini-tip-textarea {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.2));
+        border-radius: 6px;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1.4;
+        padding: 6px 8px;
+        resize: none;
+        outline: none;
+        min-height: 48px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .mini-tip-textarea:focus {
+        border-color: var(--accent-a, #00e5ff);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.25);
+    }
+    .mini-tip-edit-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .mini-tip-edit-btn {
+        padding: 4px 12px;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border: 1px solid transparent;
+    }
+    .mini-tip-edit-btn.save {
+        background: rgba(var(--rgb-accent), 0.25);
+        border-color: var(--accent-a, #00e5ff);
+        color: var(--accent-a, #00e5ff);
+        text-shadow: 0 0 6px rgba(var(--rgb-accent), 0.4);
+    }
+    .mini-tip-edit-btn.save:hover {
+        background: rgba(var(--rgb-accent), 0.4);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
+        transform: translateY(-1px);
+    }
+    .mini-tip-edit-btn.cancel {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.18);
+        color: rgba(255, 255, 255, 0.75);
+    }
+    .mini-tip-edit-btn.cancel:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+    }
+    .mini-tip-edit-btn.delete {
+        padding: 4px 8px;
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.35);
+        color: #f87171;
+        font-size: 11px;
+    }
+    .mini-tip-edit-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.3);
+        border-color: #ef4444;
+    }
+    .mini-tip[data-design="4"] .mini-tip-textarea {
+        background: rgba(255, 255, 255, 0.6);
+        color: #1c2e44;
+        border-color: rgba(60, 90, 130, 0.35);
+    }
+    .mini-tip[data-design="4"] .mini-tip-textarea:focus {
+        border-color: var(--accent-a);
+        box-shadow: 0 0 10px rgba(60, 90, 130, 0.25);
+    }
+    .mini-tip[data-design="4"] .mini-tip-edit-btn.save {
+        color: #1c2e44;
+        border-color: color-mix(in srgb, var(--accent-a) 60%, #2c5282);
+    }
+    .mini-tip[data-design="4"] .mini-tip-edit-btn.cancel {
+        background: rgba(0, 0, 0, 0.06);
+        border-color: rgba(0, 0, 0, 0.15);
+        color: #1c2e44;
     }
     .mini-tip-stat {
         font-size: 11px;
