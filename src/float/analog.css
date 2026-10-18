@@ -225,42 +225,45 @@ body.is-dragging * {
 
 .analog-ctx-tabs {
     display: flex;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 5px;
-    padding: 2px;
-    gap: 2px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+    margin-bottom: 6px;
 }
 
 .analog-ctx-tab {
     flex: 1;
     background: transparent;
     border: none;
-    border-radius: 3px;
-    color: #94a3b8;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.65);
     font-family: var(--font-ui, "Outfit", sans-serif);
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 3px 5px;
+    letter-spacing: 0.3px;
+    padding: 6px 10px;
     cursor: pointer;
     text-align: center;
-    transition: background 0.14s ease, color 0.14s ease;
+    transition: all 0.15s ease;
+    outline: none;
 }
 
 .analog-ctx-tab:hover {
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .analog-ctx-tab.active {
-    background: rgba(var(--rgb-accent), 0.22);
-    color: var(--accent-a);
+    background: var(--accent-a);
+    color: #080a0f;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.38);
 }
 
 .analog-ctx-tab.active:hover {
-    background: rgba(var(--rgb-accent), 0.32);
-    color: var(--accent-a);
+    filter: brightness(1.12);
 }
 
 .analog-ctx-panel {
