@@ -2020,7 +2020,7 @@
         border: 1px solid var(--border-bright, rgba(255, 255, 255, 0.15));
         border-radius: 12px;
         padding: 12px 14px;
-        width: 252px;
+        width: 270px;
         text-align: center;
         white-space: normal;
         z-index: 999;
@@ -2206,7 +2206,7 @@
         gap: 6px;
     }
     .mini-tip-edit-btn {
-        padding: 4px 12px;
+        padding: 4px 10px;
         font-family: inherit;
         font-size: 10px;
         font-weight: 700;
@@ -2216,6 +2216,12 @@
         cursor: pointer;
         transition: all 0.15s ease;
         border: 1px solid transparent;
+        white-space: nowrap !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        box-sizing: border-box;
     }
     .mini-tip-edit-btn.save {
         background: rgba(var(--rgb-accent), 0.25);
@@ -2242,7 +2248,7 @@
         background: rgba(239, 68, 68, 0.15);
         border-color: rgba(239, 68, 68, 0.35);
         color: #f87171;
-        font-size: 11px;
+        font-size: 12px;
     }
     .mini-tip-edit-btn.delete:hover {
         background: rgba(239, 68, 68, 0.3);

@@ -140,7 +140,6 @@
         const dateDiv = document.createElement("div");
         dateDiv.className = "mini-tip-date";
         dateDiv.textContent = data.dateStr || "";
-        dateDiv.title = t("mini.tip.openCalendar");
         dateDiv.addEventListener("click", (e) => {
             e.stopPropagation();
             const todayKey = isoNow();
@@ -213,12 +212,12 @@
             const saveBtn = document.createElement("button");
             saveBtn.type = "button";
             saveBtn.className = "mini-tip-edit-btn save";
-            saveBtn.textContent = t("mini.tip.save");
+            saveBtn.textContent = `✓ ${t("mini.tip.save")}`;
 
             const cancelBtn = document.createElement("button");
             cancelBtn.type = "button";
             cancelBtn.className = "mini-tip-edit-btn cancel";
-            cancelBtn.textContent = t("mini.tip.cancel");
+            cancelBtn.textContent = `✕ ${t("mini.tip.cancel")}`;
 
             const doSave = async () => {
                 const text = textarea.value.trim();
@@ -247,8 +246,9 @@
                 const delBtn = document.createElement("button");
                 delBtn.type = "button";
                 delBtn.className = "mini-tip-edit-btn delete";
-                delBtn.textContent = t("mini.tip.delete");
-                delBtn.title = t("mini.tip.delete");
+                delBtn.textContent = "🗑️";
+                delBtn.setAttribute("data-tooltip", t("mini.tip.delete"));
+                delBtn.setAttribute("aria-label", t("mini.tip.delete"));
                 delBtn.addEventListener("click", async (e) => {
                     e.stopPropagation();
                     await saveNote("");
@@ -279,7 +279,6 @@
             if (data.note) {
                 const noteDiv = document.createElement("div");
                 noteDiv.className = "mini-tip-note";
-                noteDiv.title = t("mini.tip.editNote");
                 noteDiv.textContent = `📝 ${data.note.split("\n")[0].trim()}`;
                 noteDiv.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -291,7 +290,6 @@
                 const emptyDiv = document.createElement("div");
                 emptyDiv.className = "mini-tip-note empty";
                 emptyDiv.textContent = `🌸 ${t("mini.tip.noNotes")}`;
-                emptyDiv.title = t("mini.tip.createNote");
                 emptyDiv.addEventListener("click", (e) => {
                     e.stopPropagation();
                     isEditingNote = true;
@@ -349,6 +347,7 @@
 
     async function saveNote(text) {
         const todayKey = isoNow();
+        const hadNote = !!(currentPayload && currentPayload.note);
         try {
             const settings = await window.cc?.getSettings();
             const calNotes = Object.assign({}, settings?.calendarNotes || {});
@@ -360,6 +359,11 @@
             await window.cc?.saveSettings({ calendarNotes: calNotes });
             if (currentPayload) {
                 currentPayload.note = text;
+                if (text && !hadNote) {
+                    currentPayload.upcoming = (currentPayload.upcoming || 0) + 1;
+                } else if (!text && hadNote) {
+                    currentPayload.upcoming = Math.max(0, (currentPayload.upcoming || 1) - 1);
+                }
             }
         } catch (err) {
             console.error("Failed to save note inline:", err);

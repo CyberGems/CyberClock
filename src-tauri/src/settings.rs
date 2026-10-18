@@ -770,6 +770,7 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
             serde_json::from_value(target).map_err(|e| format!("invalid settings patch: {}", e))?;
         let mut normalized = merged;
         normalize_custom_alarms(&mut normalized);
+        normalized.calendar_notes.retain(|_, v| !v.trim().is_empty());
         *current = normalized.clone();
         merged_out = Some(normalized);
         Ok(())
@@ -783,14 +784,20 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
 /// used, so a nested object in a patch only replaces its own
 /// subtree — e.g. `{ "alarmHalfHour": { "enabled": true } }`
 /// keeps the existing `sound` and `customPath`.
+/// Dynamic dictionaries such as `calendarNotes` are replaced wholesale
+/// so that deleted entries are properly purged.
 fn merge_json(base: &mut serde_json::Value, patch: serde_json::Value) {
     match (base, patch) {
         (serde_json::Value::Object(base_map), serde_json::Value::Object(patch_map)) => {
             for (k, v) in patch_map {
-                match base_map.get_mut(&k) {
-                    Some(slot) => merge_json(slot, v),
-                    None => {
-                        base_map.insert(k, v);
+                if k == "calendarNotes" || k == "calendar_notes" {
+                    base_map.insert(k, v);
+                } else {
+                    match base_map.get_mut(&k) {
+                        Some(slot) => merge_json(slot, v),
+                        None => {
+                            base_map.insert(k, v);
+                        }
                     }
                 }
             }
@@ -845,4 +852,18 @@ mod tests {
         assert_eq!(base["b"], 2);
         assert_eq!(base["a"], 1);
     }
+
+    #[test]
+    fn merge_replaces_calendar_notes_wholesale() {
+        let mut base = serde_json::json!({
+            "calendarNotes": { "2026-10-17": "Buy milk", "2026-10-18": "Dentist" }
+        });
+        merge_json(
+            &mut base,
+            serde_json::json!({ "calendarNotes": { "2026-10-18": "Dentist" } }),
+        );
+        assert_eq!(base["calendarNotes"].get("2026-10-17"), None);
+        assert_eq!(base["calendarNotes"]["2026-10-18"], "Dentist");
+    }
 }
+
