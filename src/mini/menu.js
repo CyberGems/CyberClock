@@ -165,6 +165,7 @@
         const isFloat = isTimer || isSw;
         updateMenuBrand();
         updateAudioUi(currentCfg.audioMuted);
+        updateClickThroughUi(currentCfg.miniClickThrough);
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
@@ -574,6 +575,29 @@
         }
     }
 
+    function updateClickThroughUi(on) {
+        const isCtp = on === true;
+        const icoName = isCtp ? "eye-off" : "eye";
+        const textKey = "settings.mini.clickThrough";
+        const text = window.ccI18n ? window.ccI18n.t(textKey) : "Click-through";
+
+        document.querySelectorAll('.ctx-item[data-action="toggle_click_through"]').forEach((el) => {
+            el.classList.toggle("ctp-active", isCtp);
+            el.setAttribute("aria-pressed", String(isCtp));
+            const ico = el.querySelector(".ico");
+            if (ico) {
+                ico.innerHTML = "";
+                ico.setAttribute("data-ico", icoName);
+            }
+            const lbl = el.querySelector(".label");
+            if (lbl) lbl.textContent = text;
+        });
+
+        if (window.ccIcons && window.ccIcons.inject) {
+            window.ccIcons.inject(document);
+        }
+    }
+
     // Sync menu options with saved configurations
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
@@ -642,6 +666,7 @@
                     if (taskbarLbl) taskbarLbl.textContent = window.ccI18n.t("float.showInTaskbar");
                 }
                 updateAudioUi(cfg.audioMuted);
+                updateClickThroughUi(cfg.miniClickThrough);
                 
                 // Active Layout Form Factor
                 const activeLayout = cfg.miniCollapseDate ? "inline" : (cfg.miniLayout || "stacked");
@@ -1119,6 +1144,15 @@
                 }
                 return;
             }
+            if (action === "toggle_click_through") {
+                const nextCtp = currentCfg.miniClickThrough !== true;
+                currentCfg.miniClickThrough = nextCtp;
+                updateClickThroughUi(nextCtp);
+                if (window.cc && window.cc.menuAction) {
+                    window.cc.menuAction("toggle_click_through");
+                }
+                return;
+            }
             if (action === "close_current_timer" || action === "close_current_sw") {
                 if (activeCaller && activeCaller.caller) {
                     localStorage.removeItem("cc_name_" + activeCaller.caller);
@@ -1347,6 +1381,9 @@
                 }
                 if (typeof cfg.audioMuted === "boolean") {
                     updateAudioUi(cfg.audioMuted);
+                }
+                if (typeof cfg.miniClickThrough === "boolean") {
+                    updateClickThroughUi(cfg.miniClickThrough);
                 }
             }
         });

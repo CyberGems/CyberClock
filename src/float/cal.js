@@ -324,6 +324,23 @@
         if (audioLbl) {
             audioLbl.textContent = window.ccI18n ? window.ccI18n.t(isAudioMuted ? "tray.soundOff" : "tray.soundOn") : (isAudioMuted ? "Sound off" : "Sound on");
         }
+
+        const isCtp = cfg.miniClickThrough === true;
+        const btnToggleCtp = document.getElementById("ctx-toggle-clickthrough");
+        const ctpIco = document.getElementById("cal-ctp-ico");
+        const ctpLbl = document.getElementById("cal-ctp-lbl");
+        if (btnToggleCtp) {
+            btnToggleCtp.classList.toggle("ctp-active", isCtp);
+            btnToggleCtp.setAttribute("aria-pressed", String(isCtp));
+        }
+        if (ctpIco) {
+            ctpIco.innerHTML = "";
+            ctpIco.setAttribute("data-ico", isCtp ? "eye-off" : "eye");
+        }
+        if (ctpLbl) {
+            ctpLbl.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.clickThrough") : "Click-through";
+        }
+
         if (window.ccIcons && window.ccIcons.inject) {
             window.ccIcons.inject(document);
         }
@@ -728,6 +745,18 @@
             cfg.audioMuted = next;
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ audioMuted: next });
+            }
+        });
+    }
+
+    const ctxToggleClickThrough = document.getElementById("ctx-toggle-clickthrough");
+    if (ctxToggleClickThrough) {
+        ctxToggleClickThrough.addEventListener("click", () => {
+            closeContextMenu();
+            const next = !cfg.miniClickThrough;
+            cfg.miniClickThrough = next;
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ miniClickThrough: next });
             }
         });
     }

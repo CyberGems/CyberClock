@@ -428,6 +428,26 @@ body.is-dragging * {
     color: #ff5470;
 }
 
+.analog-ctx-item .ctp-dot {
+    margin-left: auto;
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    background: #64748b;
+    box-shadow: none;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+}
+
+.analog-ctx-item.ctp-active .ctp-dot {
+    background: #20bfdf;
+    box-shadow: 0 0 5px rgba(32, 191, 223, 0.7);
+}
+
+.analog-ctx-item.ctp-active .ico {
+    color: #20bfdf;
+}
+
 .analog-ctx-opacity-chips {
     display: flex;
     gap: 3px;

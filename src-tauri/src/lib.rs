@@ -4254,6 +4254,18 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
                 s.audio_muted = !cur;
                 Ok(())
             });
+            let _ = app.emit("settings:updated", load_settings(&app));
+            true
+        }
+        "toggle_click_through" => {
+            let cur = load_settings(&app).mini_click_through;
+            let next = !cur;
+            let _ = update_settings(&app, |s| {
+                s.mini_click_through = next;
+                Ok(())
+            });
+            apply_click_through(&app, next);
+            let _ = app.emit("settings:updated", load_settings(&app));
             true
         }
         "full" => {

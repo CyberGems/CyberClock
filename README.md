@@ -90,7 +90,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Show Date** — On by default. Off hides the date and shortens the bar; both return on hover. Compact (2 Rows) stays unavailable while Show Date is off.
 - **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage.
 - **CRT Scanlines** — Retro overlay effect
-- **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from the tray menu or Settings)
+- **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes

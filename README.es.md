@@ -90,7 +90,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Mostrar Fecha:** activado por defecto. Apagado, oculta la fecha y acorta la barra; ambas vuelven al pasar el cursor. Compacto (2 Filas) no está disponible mientras Mostrar Fecha está apagado.
 - **Avance del Día:** línea opcional en el borde inferior de la barra mini. Al pasar el cursor muestra cuánto del día ha pasado, en porcentaje.
 - **Líneas de exploración CRT:** efecto retro de superposición
-- **Click-through:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde el menú de la bandeja o desde Configuración)
+- **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas

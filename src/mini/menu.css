@@ -369,6 +369,24 @@
         color: #ff5470;
         filter: drop-shadow(0 0 3px rgba(255, 84, 112, 0.5));
     }
+    .ctx-item .ctp-dot {
+        flex: 0 0 auto;
+        margin-left: auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #64748b;
+        box-shadow: none;
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ctx-item.ctp-active .ctp-dot {
+        background: #20bfdf;
+        box-shadow: 0 0 6px rgba(32, 191, 223, 0.7);
+    }
+    .ctx-item.ctp-active .ico .cc-ico {
+        color: #20bfdf;
+        filter: drop-shadow(0 0 3px rgba(32, 191, 223, 0.5));
+    }
     .ctx-item.danger {
         color: rgba(255, 255, 255, 0.85);
     }
