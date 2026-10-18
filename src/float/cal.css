@@ -732,12 +732,14 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     box-shadow: 0 0 8px var(--accent-a);
 }
 
-.cal-ctx-opacity-chips {
+.cal-ctx-opacity-chips,
+.cal-ctx-zoom-chips {
     display: flex;
     gap: 3px;
 }
 
-.cal-op-chip {
+.cal-op-chip,
+.cal-zoom-chip {
     flex: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -751,12 +753,14 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     text-align: center;
 }
 
-.cal-op-chip:hover {
+.cal-op-chip:hover,
+.cal-zoom-chip:hover {
     background: rgba(var(--rgb-accent), 0.15);
     color: var(--accent-a);
 }
 
-.cal-op-chip.active {
+.cal-op-chip.active,
+.cal-zoom-chip.active {
     background: var(--accent-a);
     color: #0b0f17;
     font-weight: 700;

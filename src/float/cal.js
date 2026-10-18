@@ -122,6 +122,39 @@
         });
     }
 
+    const BASE_CAL_W = 286;
+    const BASE_CAL_H = 268;
+
+    function currentZoom() {
+        const z = cfg.floatCalZoom;
+        if (typeof z === "number" && Number.isFinite(z) && z > 0) return z;
+        return 1.0;
+    }
+
+    function applyZoom(zoom, persist = false) {
+        if (!Number.isFinite(zoom) || zoom <= 0) return;
+        const w = Math.round(BASE_CAL_W * zoom);
+        const h = Math.round(BASE_CAL_H * zoom);
+
+        if (shell) {
+            shell.style.zoom = String(zoom);
+        }
+
+        if (window.cc && window.cc.setWindowSize) {
+            window.cc.setWindowSize({ width: w, height: h, recenter: true });
+        }
+
+        const targetPct = Math.round(zoom * 100);
+        document.querySelectorAll(".cal-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("active", chipVal === targetPct);
+        });
+
+        if (persist && window.cc && window.cc.saveSettings) {
+            window.cc.saveSettings({ floatCalZoom: zoom });
+        }
+    }
+
     function getDailySkinId(date = new Date()) {
         const start = new Date(date.getFullYear(), 0, 0);
         const diff = date - start;
@@ -305,6 +338,7 @@
         }
 
         applyOpacity(currentOpacity());
+        applyZoom(currentZoom(), false);
         showWeeks = cfg.floatCalShowWeeks === true;
         if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
         renderCalendar();
@@ -787,6 +821,17 @@
                 if (window.cc && window.cc.saveSettings) {
                     window.cc.saveSettings({ floatCalOpacity: op });
                 }
+            }
+        });
+    });
+
+    const calZoomChips = document.querySelectorAll(".cal-zoom-chip");
+    calZoomChips.forEach(chip => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (Number.isFinite(z)) {
+                applyZoom(z, true);
             }
         });
     });

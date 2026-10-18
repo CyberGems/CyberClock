@@ -294,6 +294,16 @@ pub struct AppSettings {
     #[serde(default)]
     pub float_relax_design: Option<u32>,
     #[serde(default)]
+    pub float_analog_zoom: Option<f64>,
+    #[serde(default)]
+    pub float_cal_zoom: Option<f64>,
+    #[serde(default)]
+    pub float_timer_zoom: Option<f64>,
+    #[serde(default)]
+    pub float_sw_zoom: Option<f64>,
+    #[serde(default)]
+    pub float_relax_zoom: Option<f64>,
+    #[serde(default)]
     pub float_timer_opacity: Option<f64>,
     #[serde(default)]
     pub float_sw_opacity: Option<f64>,
@@ -488,6 +498,11 @@ impl Default for AppSettings {
             float_relax_opacity: None,
             float_relax_show_breathe: true,
             float_relax_design: None,
+            float_analog_zoom: None,
+            float_cal_zoom: None,
+            float_timer_zoom: None,
+            float_sw_zoom: None,
+            float_relax_zoom: None,
             float_timer_opacity: None,
             float_sw_opacity: None,
             timer_sound_enabled: true,

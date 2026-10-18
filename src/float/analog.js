@@ -83,6 +83,55 @@
         });
     }
 
+    const BASE_CANVAS_SZ = 266;
+    const BASE_PLATE_SZ = 274;
+    const BASE_WIN_SZ = 316;
+
+    function currentZoom() {
+        const z = cfg.floatAnalogZoom;
+        if (typeof z === "number" && Number.isFinite(z) && z > 0) return z;
+        return 1.0;
+    }
+
+    function applyZoom(zoom, persist = false) {
+        if (!Number.isFinite(zoom) || zoom <= 0) return;
+        const canvasSz = Math.round(BASE_CANVAS_SZ * zoom);
+        const plateSz = Math.round(BASE_PLATE_SZ * zoom);
+        const winSz = Math.round(BASE_WIN_SZ * zoom);
+
+        const plate = document.getElementById("analog-plate");
+        const shell = document.getElementById("analog-shell");
+        if (plate) {
+            plate.style.width = plateSz + "px";
+            plate.style.height = plateSz + "px";
+        }
+        if (shell) {
+            shell.style.width = canvasSz + "px";
+            shell.style.height = canvasSz + "px";
+        }
+        if (canvas) {
+            canvas.width = canvasSz;
+            canvas.height = canvasSz;
+        }
+
+        invalidateFaceCache();
+        renderFrame();
+
+        if (window.cc && window.cc.setWindowSize) {
+            window.cc.setWindowSize({ width: winSz, height: winSz, recenter: true });
+        }
+
+        const targetPct = Math.round(zoom * 100);
+        document.querySelectorAll(".analog-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("active", chipVal === targetPct);
+        });
+
+        if (persist && window.cc && window.cc.saveSettings) {
+            window.cc.saveSettings({ floatAnalogZoom: zoom });
+        }
+    }
+
     function setDesign(d, persist = true) {
         const next = Math.min(10, Math.max(1, parseInt(d, 10) || 1));
         if (next === currentDesign && cachedFaceCanvas) return;
@@ -150,6 +199,7 @@
         buildSkinGrid();
         updateDesignUI();
         applyOpacity(currentOpacity());
+        applyZoom(currentZoom(), false);
 
         const isAudioMuted = cfg.audioMuted === true;
         const btnToggleAudio = document.getElementById("ctx-toggle-audio");
@@ -384,6 +434,17 @@
                 if (window.cc && window.cc.saveSettings) {
                     window.cc.saveSettings({ floatAnalogOpacity: op });
                 }
+            }
+        });
+    });
+
+    const zoomChips = document.querySelectorAll(".analog-zoom-chip");
+    zoomChips.forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (Number.isFinite(z)) {
+                applyZoom(z, true);
             }
         });
     });

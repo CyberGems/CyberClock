@@ -448,12 +448,14 @@ body.is-dragging * {
     color: #20bfdf;
 }
 
-.analog-ctx-opacity-chips {
+.analog-ctx-opacity-chips,
+.analog-ctx-zoom-chips {
     display: flex;
     gap: 3px;
 }
 
-.analog-op-chip {
+.analog-op-chip,
+.analog-zoom-chip {
     flex: 1;
     padding: 2.5px 0;
     border-radius: 4px;
@@ -467,13 +469,15 @@ body.is-dragging * {
     text-align: center;
 }
 
-.analog-op-chip:hover {
+.analog-op-chip:hover,
+.analog-zoom-chip:hover {
     background: rgba(var(--rgb-accent), 0.15);
     color: #ffffff;
     border-color: rgba(var(--rgb-accent), 0.3);
 }
 
-.analog-op-chip.active {
+.analog-op-chip.active,
+.analog-zoom-chip.active {
     background: rgba(var(--rgb-accent), 0.25);
     border-color: var(--accent-a, #00d4ff);
     color: var(--accent-a, #00d4ff);

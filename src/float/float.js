@@ -109,7 +109,7 @@
     const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34, 13: 48, 14: 48, 15: 48 };
     const DESIGN_WIDTHS  = { 1: 280, 2: 280, 3: 295, 4: 280, 5: 295, 6: 280, 7: 300, 8: 300, 9: 300, 10: 280, 11: 300, 12: 300, 13: 290, 14: 295, 15: 290 };
     function zoomFactor() {
-        const z = cfg.miniZoom ?? 1;
+        const z = (KIND === "timer" ? cfg.floatTimerZoom : cfg.floatSwZoom) ?? 1;
         return Number.isFinite(z) && z > 0 ? z : 1;
     }
 

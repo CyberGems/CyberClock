@@ -770,8 +770,15 @@ fn spawn_float_window_with_slot(
         (seq, format!("float-{}-{}", kind, seq))
     };
     let settings = load_settings(app);
-    let zoom = if settings.mini_zoom.is_finite() && settings.mini_zoom > 0.0 {
-        settings.mini_zoom
+    let raw_zoom = match kind {
+        "cal" => settings.float_cal_zoom.unwrap_or(1.0),
+        "analog" => settings.float_analog_zoom.unwrap_or(1.0),
+        "relax" => settings.float_relax_zoom.unwrap_or(1.0),
+        "timer" => settings.float_timer_zoom.unwrap_or(1.0),
+        _ => settings.float_sw_zoom.unwrap_or(1.0),
+    };
+    let zoom = if raw_zoom.is_finite() && raw_zoom > 0.0 {
+        raw_zoom
     } else {
         1.0
     };

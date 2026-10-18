@@ -126,6 +126,20 @@
         }
         applyAudioPrefs();
         refreshLabels();
+        applyRelaxZoom(s.floatRelaxZoom);
+    }
+
+    const BASE_RELAX_W = 300;
+    const BASE_RELAX_H = 176;
+
+    function applyRelaxZoom(z) {
+        const zoom = (typeof z === "number" && Number.isFinite(z) && z > 0) ? z : 1;
+        if (shell) shell.style.zoom = String(zoom);
+        const w = Math.round(BASE_RELAX_W * zoom);
+        const h = Math.round(BASE_RELAX_H * zoom);
+        if (window.cc && window.cc.setWindowSize) {
+            window.cc.setWindowSize({ width: w, height: h, recenter: true });
+        }
     }
 
     function startTrack(index) {

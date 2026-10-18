@@ -974,6 +974,35 @@
         border-color: rgba(var(--rgb-accent), 0.35);
     }
 
+    .timer-ctx-zoom-chips,
+    .relax-zoom-chips {
+        display: flex;
+        gap: 4px;
+        padding: 2px 6px 6px;
+    }
+    .timer-zoom-chip,
+    .relax-zoom-chip {
+        flex: 1;
+        padding: 3px 0;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #94a3b8;
+        font-size: 9.5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.12s ease;
+    }
+    .timer-zoom-chip:hover,
+    .timer-zoom-chip.active,
+    .relax-zoom-chip:hover,
+    .relax-zoom-chip.on {
+        background: rgba(var(--rgb-accent), 0.16);
+        color: #fff;
+        border-color: rgba(var(--rgb-accent), 0.35);
+    }
+
     /* ── Suite Tooltip Override: Solid Opaque Obsidian (No Bleed/Overlap) ── */
     [data-tooltip]::after {
         background: #0c101a !important;

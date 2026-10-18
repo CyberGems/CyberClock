@@ -83,6 +83,17 @@
         });
     }
 
+    function syncTimerZoomUI() {
+        if (!activeCaller) return;
+        const isTimer = activeCaller.kind === "timer";
+        const z = (isTimer ? currentCfg.floatTimerZoom : currentCfg.floatSwZoom) ?? 1.0;
+        const targetPct = Math.round(z * 100);
+        document.querySelectorAll(".timer-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("active", chipVal === targetPct);
+        });
+    }
+
     function relaxSkinId(cfg) {
         const id = parseInt(cfg && cfg.floatRelaxDesign, 10);
         return id >= 1 && id <= 10 ? id : 1;
@@ -137,6 +148,12 @@
         const op = typeof cfg.floatRelaxOpacity === "number" ? cfg.floatRelaxOpacity : 1;
         document.querySelectorAll(".relax-op-chip").forEach((chip) => {
             chip.classList.toggle("on", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
+        });
+        const rz = typeof cfg.floatRelaxZoom === "number" ? cfg.floatRelaxZoom : 1.0;
+        const targetRelaxPct = Math.round(rz * 100);
+        document.querySelectorAll(".relax-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("on", chipVal === targetRelaxPct);
         });
     }
 
@@ -323,6 +340,7 @@
                                 : (cfg.swDesign || cfg.miniDesign || 1);
                         }
                         syncTimerDesignUI(freshDesign);
+                        syncTimerZoomUI();
 
                         const tglTimerLock = document.getElementById("toggle-timer-lock");
                         if (tglTimerLock) {
@@ -1038,6 +1056,40 @@
         });
     }
 
+    document.querySelectorAll(".timer-zoom-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (!Number.isFinite(z)) return;
+            const isTimer = activeCaller && activeCaller.kind === "timer";
+            if (isTimer) {
+                currentCfg.floatTimerZoom = z;
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatTimerZoom: z });
+                }
+            } else {
+                currentCfg.floatSwZoom = z;
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatSwZoom: z });
+                }
+            }
+            syncTimerZoomUI();
+        });
+    });
+
+    document.querySelectorAll(".relax-zoom-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (!Number.isFinite(z)) return;
+            currentCfg.floatRelaxZoom = z;
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatRelaxZoom: z });
+            }
+            syncRelaxMenu(currentCfg);
+        });
+    });
+
     // Show Seconds toggle handler
     const secondsRow = document.getElementById("ctx-seconds");
     if (secondsRow) {
@@ -1378,6 +1430,7 @@
                     } catch (_) {}
                     const td = localD ? parseInt(localD, 10) : (isTimer ? (cfg.timerDesign || cfg.miniDesign || 1) : (cfg.swDesign || cfg.miniDesign || 1));
                     syncTimerDesignUI(td);
+                    syncTimerZoomUI();
                 }
                 if (typeof cfg.audioMuted === "boolean") {
                     updateAudioUi(cfg.audioMuted);
