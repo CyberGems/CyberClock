@@ -3863,11 +3863,11 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
 static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
-static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(900);
+static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(430);
 
-fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, _logical_h: f64) {
+fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f64) {
     let anchor = MINI_MENU_ANCHOR.lock().ok().and_then(|g| *g);
-    let (clock_x, _clock_y, clock_w, _clock_h, screen_x, screen_y) = match anchor {
+    let (clock_x, clock_y, clock_w, _clock_h, screen_x, screen_y) = match anchor {
         Some(a) => a,
         None => return,
     };
@@ -3893,9 +3893,16 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, _logical_h: 
             let mon_right = monitor_pos.x + monitor_size.width as i32;
             let mon_bottom = monitor_pos.y + monitor_size.height as i32;
 
-            // Always take advantage of the full work area height
-            let pos_y = mon_top + margin_y;
-            let final_menu_h = ((mon_bottom - mon_top) - (2 * margin_y)).max(300);
+            let max_avail_h = ((mon_bottom - mon_top) - (2 * margin_y)).max(200);
+
+            let desired_h = if logical_h > 0.0 {
+                (logical_h * scale).round() as i32
+            } else {
+                let last = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
+                (last * scale).round() as i32
+            };
+
+            let final_menu_h = desired_h.clamp(150, max_avail_h);
 
             // Preferred horizontal placement: to the right of the widget if space permits, otherwise to the left
             let room_right = clock_x + clock_w + gap + menu_width <= mon_right - gap;
@@ -3920,6 +3927,15 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, _logical_h: 
             }
             if pos_x < mon_left + gap {
                 pos_x = mon_left + gap;
+            }
+
+            // Align vertically with the widget's top edge, keeping inside work area
+            let mut pos_y = clock_y;
+            if pos_y + final_menu_h > mon_bottom - margin_y {
+                pos_y = mon_bottom - margin_y - final_menu_h;
+            }
+            if pos_y < mon_top + margin_y {
+                pos_y = mon_top + margin_y;
             }
 
             let _ = menu.set_size(tauri::Size::Physical(tauri::PhysicalSize {
@@ -4040,7 +4056,9 @@ fn get_open_float_labels(app: AppHandle) -> Vec<String> {
 
 #[tauri::command]
 fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
-    MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
+    if height > 0.0 {
+        MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
+    }
     if let Some(menu) = app.get_webview_window("menu") {
         position_mini_context_menu(&menu, width, height);
     }

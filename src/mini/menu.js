@@ -617,12 +617,13 @@
             if (!el) return;
             if (el.classList.contains("gallery-mode")) {
                 if (window.cc && window.cc.miniMenuReady) {
-                    window.cc.miniMenuReady(380, 0);
+                    window.cc.miniMenuReady(380, 480);
                 }
                 return;
             }
+            const h = Math.ceil(el.scrollHeight + 16);
             if (window.cc && window.cc.miniMenuReady) {
-                window.cc.miniMenuReady(292, 0);
+                window.cc.miniMenuReady(292, h);
             }
         });
     }

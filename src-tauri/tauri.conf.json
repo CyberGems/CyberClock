@@ -44,7 +44,7 @@
         "label": "menu",
         "title": "CyberClock Menu",
         "width": 292,
-        "height": 900,
+        "height": 430,
         "resizable": false,
         "fullscreen": false,
         "decorations": false,
