@@ -4,6 +4,23 @@
     let currentCfg = {};
     let menuShownTime = 0;
 
+    // Track active tab per widget kind to restore upon reopening
+    const savedActiveTab = {
+        mini: "actions",
+        timer: "actions",
+        sw: "actions",
+        relax: "actions",
+        analog: "actions",
+        cal: "actions"
+    };
+
+    function resetMenuScroll() {
+        const el = document.getElementById("ctx-menu");
+        if (el) el.scrollTop = 0;
+        const galleryGrid = document.getElementById("gallery-grid");
+        if (galleryGrid) galleryGrid.scrollTop = 0;
+    }
+
     // Discrete zoom stops (slider index → factor). 100% is the default.
     const ZOOM_STEPS = [0.5, 1, 2, 4];
 
@@ -346,13 +363,14 @@
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
             if (relaxView) relaxView.style.display = "flex";
+            const currentTab = savedActiveTab["relax"] || "actions";
             document.querySelectorAll("#ctx-relax-tabs .ctx-tab").forEach((b) => {
-                b.classList.toggle("on", b.dataset.tab === "actions");
+                b.classList.toggle("on", b.dataset.tab === currentTab);
             });
             const relaxActions = document.getElementById("relax-panel-actions");
             const relaxCustomize = document.getElementById("relax-panel-customize");
-            if (relaxActions) relaxActions.style.display = "flex";
-            if (relaxCustomize) relaxCustomize.style.display = "none";
+            if (relaxActions) relaxActions.style.display = currentTab === "actions" ? "flex" : "none";
+            if (relaxCustomize) relaxCustomize.style.display = currentTab === "customize" ? "flex" : "none";
             syncRelaxMenu(currentCfg);
         } else if (isAnalog) {
             if (timerView) timerView.style.display = "none";
@@ -362,13 +380,14 @@
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
             if (analogView) analogView.style.display = "flex";
+            const currentTab = savedActiveTab["analog"] || "actions";
             document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((b) => {
-                b.classList.toggle("on", b.dataset.tab === "actions");
+                b.classList.toggle("on", b.dataset.tab === currentTab);
             });
             const analogActions = document.getElementById("analog-panel-actions");
             const analogCustomize = document.getElementById("analog-panel-customize");
-            if (analogActions) analogActions.style.display = "flex";
-            if (analogCustomize) analogCustomize.style.display = "none";
+            if (analogActions) analogActions.style.display = currentTab === "actions" ? "flex" : "none";
+            if (analogCustomize) analogCustomize.style.display = currentTab === "customize" ? "flex" : "none";
             syncAnalogMenu(currentCfg);
         } else if (isCal) {
             if (timerView) timerView.style.display = "none";
@@ -378,13 +397,14 @@
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
             if (calView) calView.style.display = "flex";
+            const currentTab = savedActiveTab["cal"] || "actions";
             document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((b) => {
-                b.classList.toggle("on", b.dataset.tab === "actions");
+                b.classList.toggle("on", b.dataset.tab === currentTab);
             });
             const calActions = document.getElementById("cal-panel-actions");
             const calCustomize = document.getElementById("cal-panel-customize");
-            if (calActions) calActions.style.display = "flex";
-            if (calCustomize) calCustomize.style.display = "none";
+            if (calActions) calActions.style.display = currentTab === "actions" ? "flex" : "none";
+            if (calCustomize) calCustomize.style.display = currentTab === "customize" ? "flex" : "none";
             syncCalMenu(currentCfg);
         } else if (isFloat) {
             if (relaxView) relaxView.style.display = "none";
@@ -394,13 +414,14 @@
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
+            const currentTab = savedActiveTab[activeCaller.kind] || "actions";
             document.querySelectorAll("#ctx-timer-tabs .ctx-tab").forEach((b) => {
-                b.classList.toggle("on", b.dataset.tab === "actions");
+                b.classList.toggle("on", b.dataset.tab === currentTab);
             });
             const timerActions = document.getElementById("timer-panel-actions");
             const timerCustomize = document.getElementById("timer-panel-customize");
-            if (timerActions) timerActions.style.display = "flex";
-            if (timerCustomize) timerCustomize.style.display = "none";
+            if (timerActions) timerActions.style.display = currentTab === "actions" ? "flex" : "none";
+            if (timerCustomize) timerCustomize.style.display = currentTab === "customize" ? "flex" : "none";
 
             // Sound and loop only apply to timers
             const rowSound = document.getElementById("ctx-timer-sound");
@@ -552,10 +573,15 @@
             if (analogView) analogView.style.display = "none";
             if (calView) calView.style.display = "none";
             if (tabs) tabs.style.display = "flex";
-            const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "actions";
-            if (actionsPanel) actionsPanel.style.display = onTab === "actions" ? "flex" : "none";
-            if (customizePanel) customizePanel.style.display = onTab === "customize" ? "flex" : "none";
+            const currentTab = savedActiveTab["mini"] || "actions";
+            document.querySelectorAll("#ctx-tabs .ctx-tab").forEach((b) => {
+                b.classList.toggle("on", b.dataset.tab === currentTab);
+            });
+            if (actionsPanel) actionsPanel.style.display = currentTab === "actions" ? "flex" : "none";
+            if (customizePanel) customizePanel.style.display = currentTab === "customize" ? "flex" : "none";
         }
+        resetMenuScroll();
+        setTimeout(resetMenuScroll, 20);
         reportMenuHeight();
         setTimeout(reportMenuHeight, 40);
     }
@@ -591,13 +617,12 @@
             if (!el) return;
             if (el.classList.contains("gallery-mode")) {
                 if (window.cc && window.cc.miniMenuReady) {
-                    window.cc.miniMenuReady(380, 480);
+                    window.cc.miniMenuReady(380, 0);
                 }
                 return;
             }
-            const h = Math.ceil(el.offsetHeight + 18);
             if (window.cc && window.cc.miniMenuReady) {
-                window.cc.miniMenuReady(292, h);
+                window.cc.miniMenuReady(292, 0);
             }
         });
     }
@@ -703,8 +728,12 @@
         if (!galleryView) return;
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
+        const analogView = document.getElementById("ctx-analog-view");
+        const calView = document.getElementById("ctx-cal-view");
         if (timerView) timerView.style.display = "none";
         if (relaxView) relaxView.style.display = "none";
+        if (analogView) analogView.style.display = "none";
+        if (calView) calView.style.display = "none";
         if (ctxTabs) ctxTabs.style.display = "none";
         if (panelActions) panelActions.style.display = "none";
         if (panelCustomize) panelCustomize.style.display = "none";
@@ -713,8 +742,9 @@
         if (ctxMenu) ctxMenu.classList.add("gallery-mode");
 
         if (window.cc && window.cc.miniMenuReady) {
-            window.cc.miniMenuReady(380, 480);
+            window.cc.miniMenuReady(380, 0);
         }
+        resetMenuScroll();
     }
 
     function closeGallery() {
@@ -725,30 +755,77 @@
 
         const isFloat = activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw");
         const isRelax = activeCaller && activeCaller.kind === "relax";
+        const isAnalog = activeCaller && activeCaller.kind === "analog";
+        const isCal = activeCaller && activeCaller.kind === "cal";
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
+        const analogView = document.getElementById("ctx-analog-view");
+        const calView = document.getElementById("ctx-cal-view");
 
         if (isRelax) {
             if (timerView) timerView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (relaxView) relaxView.style.display = "flex";
             if (ctxTabs) ctxTabs.style.display = "none";
             if (panelActions) panelActions.style.display = "none";
             if (panelCustomize) panelCustomize.style.display = "none";
+            const onTab = savedActiveTab["relax"] || "actions";
+            const relaxActions = document.getElementById("relax-panel-actions");
+            const relaxCustomize = document.getElementById("relax-panel-customize");
+            if (relaxActions) relaxActions.style.display = onTab === "actions" ? "flex" : "none";
+            if (relaxCustomize) relaxCustomize.style.display = onTab === "customize" ? "flex" : "none";
+        } else if (isAnalog) {
+            if (timerView) timerView.style.display = "none";
+            if (relaxView) relaxView.style.display = "none";
+            if (calView) calView.style.display = "none";
+            if (analogView) analogView.style.display = "flex";
+            if (ctxTabs) ctxTabs.style.display = "none";
+            if (panelActions) panelActions.style.display = "none";
+            if (panelCustomize) panelCustomize.style.display = "none";
+            const onTab = savedActiveTab["analog"] || "actions";
+            const analogActions = document.getElementById("analog-panel-actions");
+            const analogCustomize = document.getElementById("analog-panel-customize");
+            if (analogActions) analogActions.style.display = onTab === "actions" ? "flex" : "none";
+            if (analogCustomize) analogCustomize.style.display = onTab === "customize" ? "flex" : "none";
+        } else if (isCal) {
+            if (timerView) timerView.style.display = "none";
+            if (relaxView) relaxView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "flex";
+            if (ctxTabs) ctxTabs.style.display = "none";
+            if (panelActions) panelActions.style.display = "none";
+            if (panelCustomize) panelCustomize.style.display = "none";
+            const onTab = savedActiveTab["cal"] || "actions";
+            const calActions = document.getElementById("cal-panel-actions");
+            const calCustomize = document.getElementById("cal-panel-customize");
+            if (calActions) calActions.style.display = onTab === "actions" ? "flex" : "none";
+            if (calCustomize) calCustomize.style.display = onTab === "customize" ? "flex" : "none";
         } else if (isFloat) {
             if (relaxView) relaxView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (timerView) timerView.style.display = "flex";
             if (ctxTabs) ctxTabs.style.display = "none";
             if (panelActions) panelActions.style.display = "none";
             if (panelCustomize) panelCustomize.style.display = "none";
+            const onTab = savedActiveTab[activeCaller.kind] || "actions";
+            const timerActions = document.getElementById("timer-panel-actions");
+            const timerCustomize = document.getElementById("timer-panel-customize");
+            if (timerActions) timerActions.style.display = onTab === "actions" ? "flex" : "none";
+            if (timerCustomize) timerCustomize.style.display = onTab === "customize" ? "flex" : "none";
         } else {
             if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (ctxTabs) ctxTabs.style.display = "flex";
-            const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "customize";
+            const onTab = savedActiveTab["mini"] || "actions";
             if (panelCustomize) panelCustomize.style.display = onTab === "customize" ? "flex" : "none";
             if (panelActions) panelActions.style.display = onTab === "actions" ? "flex" : "none";
         }
 
+        resetMenuScroll();
         reportMenuHeight();
     }
 
@@ -1332,12 +1409,14 @@
     document.querySelectorAll("#ctx-tabs .ctx-tab").forEach((tabBtn) => {
         tabBtn.addEventListener("click", () => {
             const target = tabBtn.dataset.tab;
+            savedActiveTab["mini"] = target;
             document.querySelectorAll("#ctx-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
             document.querySelectorAll("#tab-panel-actions, #tab-panel-customize").forEach((p) => {
                 const isTarget = p.id === `tab-panel-${target}`;
                 p.style.display = isTarget ? "flex" : "none";
                 p.classList.toggle("on", isTarget);
             });
+            resetMenuScroll();
             reportMenuHeight();
         });
     });
@@ -1346,11 +1425,17 @@
         tabBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const target = tabBtn.dataset.tab;
+            if (activeCaller && activeCaller.kind) {
+                savedActiveTab[activeCaller.kind] = target;
+            } else {
+                savedActiveTab["timer"] = target;
+            }
             document.querySelectorAll("#ctx-timer-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === target));
             const actions = document.getElementById("timer-panel-actions");
             const customize = document.getElementById("timer-panel-customize");
             if (actions) actions.style.display = target === "actions" ? "flex" : "none";
             if (customize) customize.style.display = target === "customize" ? "flex" : "none";
+            resetMenuScroll();
             reportMenuHeight();
         });
     });
@@ -1359,11 +1444,13 @@
         tabBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const target = tabBtn.dataset.tab;
+            savedActiveTab["relax"] = target;
             document.querySelectorAll("#ctx-relax-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === target));
             const actions = document.getElementById("relax-panel-actions");
             const customize = document.getElementById("relax-panel-customize");
             if (actions) actions.style.display = target === "actions" ? "flex" : "none";
             if (customize) customize.style.display = target === "customize" ? "flex" : "none";
+            resetMenuScroll();
             reportMenuHeight();
         });
     });
@@ -1585,11 +1672,13 @@
     document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((tabBtn) => {
         tabBtn.addEventListener("click", () => {
             const target = tabBtn.dataset.tab;
+            savedActiveTab["analog"] = target;
             document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
             const act = document.getElementById("analog-panel-actions");
             const cust = document.getElementById("analog-panel-customize");
             if (act) act.style.display = target === "actions" ? "flex" : "none";
             if (cust) cust.style.display = target === "customize" ? "flex" : "none";
+            resetMenuScroll();
             reportMenuHeight();
         });
     });
@@ -1638,11 +1727,13 @@
     document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((tabBtn) => {
         tabBtn.addEventListener("click", () => {
             const target = tabBtn.dataset.tab;
+            savedActiveTab["cal"] = target;
             document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
             const act = document.getElementById("cal-panel-actions");
             const cust = document.getElementById("cal-panel-customize");
             if (act) act.style.display = target === "actions" ? "flex" : "none";
             if (cust) cust.style.display = target === "customize" ? "flex" : "none";
+            resetMenuScroll();
             reportMenuHeight();
         });
     });

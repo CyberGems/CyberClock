@@ -3863,11 +3863,11 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
 static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
-static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(360);
+static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(900);
 
-fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f64) {
+fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, _logical_h: f64) {
     let anchor = MINI_MENU_ANCHOR.lock().ok().and_then(|g| *g);
-    let (clock_x, clock_y, clock_w, clock_h, screen_x, screen_y) = match anchor {
+    let (clock_x, _clock_y, clock_w, _clock_h, screen_x, screen_y) = match anchor {
         Some(a) => a,
         None => return,
     };
@@ -3881,8 +3881,8 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
         if let Some(found_monitor) = found_monitor {
             let scale = found_monitor.scale_factor();
             let menu_width = (logical_w * scale).round() as i32;
-            let menu_height = (logical_h * scale).round() as i32;
             let gap = (8.0 * scale).round() as i32;
+            let margin_y = (8.0 * scale).round() as i32;
 
             let work_area = found_monitor.work_area();
             let monitor_pos = work_area.position;
@@ -3893,55 +3893,33 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
             let mon_right = monitor_pos.x + monitor_size.width as i32;
             let mon_bottom = monitor_pos.y + monitor_size.height as i32;
 
-            let room_below = clock_y + clock_h + gap + menu_height <= mon_bottom;
-            let room_above = clock_y - gap - menu_height >= mon_top;
-            let room_right = clock_x + clock_w + gap + menu_width <= mon_right;
-            let room_left = clock_x - gap - menu_width >= mon_left;
+            // Always take advantage of the full work area height
+            let pos_y = mon_top + margin_y;
+            let final_menu_h = ((mon_bottom - mon_top) - (2 * margin_y)).max(300);
 
-            // Smart horizontal alignment:
-            // If the user clicked on the right half of the widget (e.g. right-side controls),
-            // align the menu's right edge to the widget's right edge to avoid crossing the entire widget.
-            let click_on_right_half = screen_x > clock_x + clock_w / 2;
-            let aligned_x = if click_on_right_half && clock_w > menu_width {
-                clock_x + clock_w - menu_width
-            } else {
-                clock_x
-            };
+            // Preferred horizontal placement: to the right of the widget if space permits, otherwise to the left
+            let room_right = clock_x + clock_w + gap + menu_width <= mon_right - gap;
+            let room_left = clock_x - gap - menu_width >= mon_left + gap;
 
-            let (mut pos_x, mut pos_y) = if room_below {
-                (aligned_x, clock_y + clock_h + gap)
-            } else if room_above {
-                (aligned_x, clock_y - menu_height - gap)
+            let mut pos_x = if room_right {
+                clock_x + clock_w + gap
+            } else if room_left {
+                clock_x - menu_width - gap
             } else {
-                let clock_center = clock_x + clock_w / 2;
-                let mon_center = mon_left + (mon_right - mon_left) / 2;
-                let go_right = if room_right && room_left {
-                    clock_center <= mon_center
-                } else {
-                    room_right
-                };
-                let x = if go_right {
+                let space_right = mon_right - (clock_x + clock_w);
+                let space_left = clock_x - mon_left;
+                if space_right >= space_left {
                     clock_x + clock_w + gap
                 } else {
                     clock_x - menu_width - gap
-                };
-                (x, clock_y)
+                }
             };
 
-            let max_mon_h = (mon_bottom - mon_top).max(200);
-            let final_menu_h = menu_height.min(max_mon_h);
-
-            if pos_x + menu_width > mon_right {
-                pos_x = mon_right - menu_width;
+            if pos_x + menu_width > mon_right - gap {
+                pos_x = mon_right - menu_width - gap;
             }
-            if pos_x < mon_left {
-                pos_x = mon_left;
-            }
-            if pos_y + final_menu_h > mon_bottom {
-                pos_y = mon_bottom - final_menu_h;
-            }
-            if pos_y < mon_top {
-                pos_y = mon_top;
+            if pos_x < mon_left + gap {
+                pos_x = mon_left + gap;
             }
 
             let _ = menu.set_size(tauri::Size::Physical(tauri::PhysicalSize {
