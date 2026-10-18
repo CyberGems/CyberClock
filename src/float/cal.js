@@ -642,7 +642,11 @@
         ctxMenu.style.maxHeight = `${Math.max(100, maxH - curTop - 8)}px`;
     }
 
+    let menuOpenTime = 0;
+
     function openContextMenu(clientX, clientY) {
+        menuOpenTime = Date.now();
+        window.focus();
         closePicker();
 
         // Make menu visible first so layout engine computes accurate offset dimensions
@@ -696,6 +700,12 @@
             btnMenu.classList.remove("menu-open");
         }
     }
+
+    window.addEventListener("blur", () => {
+        if (Date.now() - menuOpenTime < 150) return;
+        closeContextMenu();
+        closePicker();
+    });
 
     if (ctxMenu) {
         ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());

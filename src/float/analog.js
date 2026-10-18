@@ -299,7 +299,11 @@
     }
 
     // ── Context Menu (Top-Layer Inside Window) ───────────────────
+    let menuOpenTime = 0;
+
     function openContextMenu(clientX, clientY) {
+        menuOpenTime = Date.now();
+        window.focus();
         ctxMenu.hidden = false;
         const menuWidth = ctxMenu.offsetWidth || 204;
         const menuHeight = ctxMenu.offsetHeight || 215;
@@ -338,6 +342,11 @@
         if (btnMenu) btnMenu.classList.remove("menu-open");
         setAnalogMenuCapture(false);
     }
+
+    window.addEventListener("blur", () => {
+        if (Date.now() - menuOpenTime < 150) return;
+        closeContextMenu();
+    });
 
     // The native window is a square around the dial. Tell the backend to
     // accept clicks only on the circle, and on the whole square while this

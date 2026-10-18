@@ -2149,15 +2149,12 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
     }
     #[link(name = "gdi32")]
     extern "system" {
+        fn CreateRectRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
         fn CreateEllipticRgn(x1: i32, y1: i32, x2: i32, y2: i32) -> *mut core::ffi::c_void;
         fn DeleteObject(ho: *mut core::ffi::c_void) -> i32;
     }
 
     unsafe {
-        if full {
-            SetWindowRgn(hwnd, std::ptr::null_mut(), 1);
-            return;
-        }
         let mut rc = RECT {
             left: 0,
             top: 0,
@@ -2170,6 +2167,15 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         let w = rc.right - rc.left;
         let h = rc.bottom - rc.top;
         if w <= 1 || h <= 1 {
+            return;
+        }
+        if full {
+            let rgn = CreateRectRgn(0, 0, w, h);
+            if !rgn.is_null() {
+                if SetWindowRgn(hwnd, rgn, 1) == 0 {
+                    DeleteObject(rgn);
+                }
+            }
             return;
         }
         let mut client = RECT {
