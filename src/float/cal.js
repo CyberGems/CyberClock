@@ -25,35 +25,7 @@
     const pickerGrid = document.getElementById("picker-months-grid");
     const btnPickerPrevYear = document.getElementById("btn-picker-prev-year");
     const btnPickerNextYear = document.getElementById("btn-picker-next-year");
-
-    const ctxMenu = document.getElementById("cal-context-menu");
-    const ctxAot = document.getElementById("ctx-aot");
-    const ctxAotCheck = document.getElementById("ctx-aot-check");
-    const ctxLock = document.getElementById("ctx-lock");
-    const ctxLockCheck = document.getElementById("ctx-lock-check");
-    const ctxWeeks = document.getElementById("ctx-weeks");
-    const ctxWeeksCheck = document.getElementById("ctx-weeks-check");
-    const ctxToday = document.getElementById("ctx-today");
-    const ctxPicker = document.getElementById("ctx-picker");
-    const ctxFull = document.getElementById("ctx-full");
-    const ctxNewTimer = document.getElementById("ctx-new-timer");
-    const ctxNewSw = document.getElementById("ctx-new-sw");
-    const ctxNewAnalog = document.getElementById("ctx-new-analog");
-    const ctxNewRelax = document.getElementById("ctx-new-relax");
-    const ctxNewAlarm = document.getElementById("ctx-new-alarm");
-    const ctxSettings = document.getElementById("ctx-settings");
-    const ctxAbout = document.getElementById("ctx-about");
-    const ctxClose = document.getElementById("ctx-close");
-    const opChips = document.querySelectorAll(".cal-op-chip");
-
     const btnMenu = document.getElementById("btn-cal-menu");
-    const tabBtnActions = document.getElementById("tab-btn-actions");
-    const tabBtnStyle = document.getElementById("tab-btn-style");
-    const panelActions = document.getElementById("panel-actions");
-    const panelStyle = document.getElementById("panel-style");
-    const skinBadge = document.getElementById("cal-skin-badge");
-    const skinGrid = document.getElementById("cal-skin-grid");
-    const btnSkinAuto = document.getElementById("btn-skin-auto");
 
     const CAL_SKINS = [
         { id: 1, key: "float.calSkin.1", fallback: "Cyber Obsidian" },
@@ -111,15 +83,6 @@
 
     function applyOpacity(op) {
         if (shell) shell.style.setProperty("--cal-opacity", op);
-        syncOpacityChips(op);
-    }
-
-    function syncOpacityChips(op) {
-        const target = Math.round(op * 100);
-        opChips.forEach(chip => {
-            const chipVal = Math.round(parseFloat(chip.dataset.op) * 100);
-            chip.classList.toggle("active", chipVal === target);
-        });
     }
 
     const BASE_CAL_W = 286;
@@ -144,12 +107,6 @@
             window.cc.setWindowSize({ width: w, height: h, recenter: true });
         }
 
-        const targetPct = Math.round(zoom * 100);
-        document.querySelectorAll(".cal-zoom-chip").forEach((chip) => {
-            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
-            chip.classList.toggle("active", chipVal === targetPct);
-        });
-
         if (persist && window.cc && window.cc.saveSettings) {
             window.cc.saveSettings({ floatCalZoom: zoom });
         }
@@ -163,42 +120,6 @@
         return ((dayOfYear - 1) % 10) + 1; // 1 to 10
     }
 
-    function setTab(tabName) {
-        if (tabName === "style") {
-            if (tabBtnActions) tabBtnActions.classList.remove("active");
-            if (tabBtnStyle) tabBtnStyle.classList.add("active");
-            if (panelActions) panelActions.style.display = "none";
-            if (panelStyle) panelStyle.style.display = "flex";
-        } else {
-            if (tabBtnActions) tabBtnActions.classList.add("active");
-            if (tabBtnStyle) tabBtnStyle.classList.remove("active");
-            if (panelActions) panelActions.style.display = "flex";
-            if (panelStyle) panelStyle.style.display = "none";
-        }
-        repositionContextMenu();
-    }
-
-    if (tabBtnActions) {
-        tabBtnActions.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setTab("actions");
-        });
-    }
-    if (tabBtnStyle) {
-        tabBtnStyle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setTab("style");
-        });
-    }
-
-    function getSkinName(skin) {
-        if (window.ccI18n && window.ccI18n.t) {
-            const trans = window.ccI18n.t(skin.key);
-            if (trans && trans !== skin.key) return trans;
-        }
-        return skin.fallback;
-    }
-
     function selectCalSkin(id, save = true) {
         const numId = parseInt(id, 10);
         if (!numId || numId < 1 || numId > 10) return;
@@ -206,20 +127,9 @@
         if (shell) {
             shell.dataset.skin = String(numId);
         }
-        const skin = CAL_SKINS.find(s => s.id === numId) || CAL_SKINS[0];
-        if (skinBadge) {
-            const skinName = getSkinName(skin);
-            skinBadge.textContent = isAutoRotate ? `↻ ${skinName}` : skinName;
-        }
-        if (skinGrid) {
-            skinGrid.querySelectorAll(".cal-skin-pill").forEach(p => {
-                p.classList.toggle("active", parseInt(p.dataset.skinId, 10) === numId);
-            });
-        }
         if (save) {
             if (isAutoRotate) {
                 isAutoRotate = false;
-                if (btnSkinAuto) btnSkinAuto.classList.remove("active");
                 try {
                     localStorage.setItem("cc_float_cal_auto_rotate", "0");
                 } catch (_) {}
@@ -238,17 +148,11 @@
 
     function setAutoRotate(enabled, save = true) {
         isAutoRotate = !!enabled;
-        if (btnSkinAuto) {
-            btnSkinAuto.classList.toggle("active", isAutoRotate);
-        }
         if (isAutoRotate) {
             const dailyId = getDailySkinId();
             selectCalSkin(dailyId, false);
-            const skin = CAL_SKINS.find(s => s.id === dailyId) || CAL_SKINS[0];
-            if (skinBadge) skinBadge.textContent = `↻ ${getSkinName(skin)}`;
         } else {
-            const skin = CAL_SKINS.find(s => s.id === currentSkinId) || CAL_SKINS[0];
-            if (skinBadge) skinBadge.textContent = getSkinName(skin);
+            selectCalSkin(currentSkinId, false);
         }
         if (save) {
             try {
@@ -257,45 +161,6 @@
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ floatCalAutoRotate: isAutoRotate });
             }
-        }
-    }
-
-    if (btnSkinAuto) {
-        btnSkinAuto.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setAutoRotate(!isAutoRotate, true);
-        });
-    }
-
-    function buildSkinPills() {
-        if (!skinGrid) return;
-        skinGrid.innerHTML = "";
-        CAL_SKINS.forEach(s => {
-            const pill = document.createElement("button");
-            pill.className = `cal-skin-pill${s.id === currentSkinId ? " active" : ""}`;
-            pill.dataset.skinId = String(s.id);
-            pill.textContent = String(s.id);
-            const name = getSkinName(s);
-            pill.setAttribute("data-tooltip", name);
-            pill.setAttribute("data-tooltip-dir", "bottom");
-
-            const col = (s.id - 1) % 5;
-            if (col === 0 || col === 1) {
-                pill.setAttribute("data-tooltip-align", "left");
-            } else if (col === 3 || col === 4) {
-                pill.setAttribute("data-tooltip-align", "right");
-            }
-
-            pill.addEventListener("click", (e) => {
-                e.stopPropagation();
-                selectCalSkin(s.id, true);
-            });
-            skinGrid.appendChild(pill);
-        });
-        const activeSkin = CAL_SKINS.find(s => s.id === currentSkinId) || CAL_SKINS[0];
-        if (skinBadge) {
-            const skinName = getSkinName(activeSkin);
-            skinBadge.textContent = isAutoRotate ? `↻ ${skinName}` : skinName;
         }
     }
 
@@ -340,40 +205,7 @@
         applyOpacity(currentOpacity());
         applyZoom(currentZoom(), false);
         showWeeks = cfg.floatCalShowWeeks === true;
-        if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
         renderCalendar();
-
-        const isAudioMuted = cfg.audioMuted === true;
-        const btnToggleAudio = document.getElementById("ctx-toggle-audio");
-        const audioIco = document.getElementById("cal-audio-ico");
-        const audioLbl = document.getElementById("cal-audio-lbl");
-        if (btnToggleAudio) {
-            btnToggleAudio.classList.toggle("muted", isAudioMuted);
-            btnToggleAudio.setAttribute("aria-pressed", String(isAudioMuted));
-        }
-        if (audioIco) {
-            audioIco.innerHTML = "";
-            audioIco.setAttribute("data-ico", isAudioMuted ? "volume-x" : "volume-high");
-        }
-        if (audioLbl) {
-            audioLbl.textContent = window.ccI18n ? window.ccI18n.t(isAudioMuted ? "tray.soundOff" : "tray.soundOn") : (isAudioMuted ? "Sound off" : "Sound on");
-        }
-
-        const isCtp = cfg.miniClickThrough === true;
-        const btnToggleCtp = document.getElementById("ctx-toggle-clickthrough");
-        const ctpIco = document.getElementById("cal-ctp-ico");
-        const ctpLbl = document.getElementById("cal-ctp-lbl");
-        if (btnToggleCtp) {
-            btnToggleCtp.classList.toggle("ctp-active", isCtp);
-            btnToggleCtp.setAttribute("aria-pressed", String(isCtp));
-        }
-        if (ctpIco) {
-            ctpIco.innerHTML = "";
-            ctpIco.setAttribute("data-ico", isCtp ? "eye-off" : "eye");
-        }
-        if (ctpLbl) {
-            ctpLbl.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.clickThrough") : "Click-through";
-        }
 
         if (window.ccIcons && window.ccIcons.replaceIcons) {
             window.ccIcons.replaceIcons(document);
@@ -621,313 +453,95 @@
         });
     }
 
-    // ── Custom Cyber Context Menu ────────────────────────────────
-    function repositionContextMenu() {
-        if (!ctxMenu || ctxMenu.hidden) return;
-        const maxW = (shell && shell.clientWidth) || window.innerWidth || 286;
-        const maxH = (shell && shell.clientHeight) || window.innerHeight || 268;
-        const menuWidth = ctxMenu.offsetWidth || 190;
-        const menuHeight = ctxMenu.offsetHeight || 190;
+    // ── Context Menu (Central Floating Popup) ────────────────────
+    let popupMenuOpen = false;
+    let blockMenuOpen = false;
+    let ignoreNextMenuClosed = false;
+    let menuPointerAt = 0;
+    let menuClosedAt = 0;
 
-        let curTop = parseInt(ctxMenu.style.top, 10) || 8;
-        let curLeft = parseInt(ctxMenu.style.left, 10) || 8;
-
-        if (curTop + menuHeight > maxH - 8) {
-            curTop = Math.max(8, maxH - menuHeight - 8);
-        }
-        if (curLeft + menuWidth > maxW - 8) {
-            curLeft = Math.max(8, maxW - menuWidth - 8);
-        }
-
-        ctxMenu.style.top = `${curTop}px`;
-        ctxMenu.style.left = `${curLeft}px`;
-        ctxMenu.style.maxHeight = `${Math.max(100, maxH - curTop - 8)}px`;
+    if (window.cc && window.cc.onMenuClosed) {
+        window.cc.onMenuClosed(() => {
+            popupMenuOpen = false;
+            menuClosedAt = Date.now();
+            if (ignoreNextMenuClosed) {
+                ignoreNextMenuClosed = false;
+                return;
+            }
+            if (Date.now() - menuPointerAt < 400) blockMenuOpen = true;
+        });
     }
 
-    let menuOpenTime = 0;
+    function armMenuToggle() {
+        menuPointerAt = Date.now();
+        if (popupMenuOpen || Date.now() - menuClosedAt < 80) blockMenuOpen = true;
+    }
 
-    function openContextMenu(clientX, clientY) {
-        menuOpenTime = Date.now();
-        window.focus();
+    function menuPointFromClient(clientX, clientY, winPos) {
+        const origin = winPos || [0, 0];
+        return {
+            x: clientX,
+            y: clientY,
+            screenX: origin[0] + clientX,
+            screenY: origin[1] + clientY,
+        };
+    }
+
+    async function openOrToggleMenu(point) {
+        if (!window.cc) return;
+        if (blockMenuOpen) {
+            blockMenuOpen = false;
+            popupMenuOpen = false;
+            ignoreNextMenuClosed = true;
+            setTimeout(() => { ignoreNextMenuClosed = false; }, 450);
+            if (window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
+            return;
+        }
+        if (!window.cc.openMiniContextMenu) return;
+        const opened = await window.cc.openMiniContextMenu(point);
+        popupMenuOpen = opened !== false;
+        blockMenuOpen = false;
+        if (!popupMenuOpen) menuClosedAt = Date.now();
+    }
+
+    function openMenuAt(clientX, clientY) {
         closePicker();
-
-        // Make menu visible first so layout engine computes accurate offset dimensions
-        ctxMenu.hidden = false;
-
-        const maxW = (shell && shell.clientWidth) || window.innerWidth || 286;
-        const maxH = (shell && shell.clientHeight) || window.innerHeight || 268;
-        const menuWidth = ctxMenu.offsetWidth || 190;
-        const menuHeight = ctxMenu.offsetHeight || 190;
-
-        let x = clientX;
-        let y = clientY;
-
-        if (y + menuHeight > maxH - 8) {
-            y = maxH - menuHeight - 8;
+        if (window.cc && window.cc.getWindowPosition) {
+            window.cc.getWindowPosition().then((winPos) => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY, winPos));
+            }).catch(() => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY));
+            });
+        } else {
+            openOrToggleMenu(menuPointFromClient(clientX, clientY));
         }
-        if (y < 8) y = 8;
-
-        if (x + menuWidth > maxW - 8) {
-            x = maxW - menuWidth - 8;
-        }
-        if (x < 8) x = 8;
-
-        ctxMenu.style.left = `${x}px`;
-        ctxMenu.style.top = `${y}px`;
-        ctxMenu.style.maxHeight = `${Math.max(100, maxH - y - 8)}px`;
-
-        // Sync Always on top
-        if (window.__TAURI__ && window.__TAURI__.window) {
-            window.__TAURI__.window.getCurrentWindow().isAlwaysOnTop().then(aot => {
-                isAot = !!aot;
-                ctxAotCheck.classList.toggle("visible", isAot);
-            }).catch(() => {});
-        }
-
-        if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", Boolean(cfg.calPositionLocked));
-        if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
-
-        // Sync opacity chips
-        syncOpacityChips(currentOpacity());
-
-        if (btnMenu) {
-            btnMenu.classList.add("menu-open");
-            btnMenu.blur();
-        }
-    }
-
-    function closeContextMenu() {
-        if (ctxMenu) ctxMenu.hidden = true;
-        if (btnMenu) {
-            btnMenu.classList.remove("menu-open");
-        }
-    }
-
-    window.addEventListener("blur", () => {
-        if (Date.now() - menuOpenTime < 150) return;
-        closeContextMenu();
-        closePicker();
-    });
-
-    if (ctxMenu) {
-        ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());
-        ctxMenu.addEventListener("pointerdown", (e) => e.stopPropagation());
-    }
-
-    if (popoverEl) {
-        popoverEl.addEventListener("mousedown", (e) => e.stopPropagation());
-        popoverEl.addEventListener("pointerdown", (e) => e.stopPropagation());
     }
 
     if (btnMenu) {
+        btnMenu.addEventListener("pointerdown", () => armMenuToggle());
         btnMenu.addEventListener("click", (e) => {
             e.stopPropagation();
-            if (ctxMenu && !ctxMenu.hidden) {
-                closeContextMenu();
-            } else {
-                const rect = btnMenu.getBoundingClientRect();
-                openContextMenu(rect.right - 190, rect.bottom + 4);
-            }
+            btnMenu.blur();
+            const rect = btnMenu.getBoundingClientRect();
+            const clientX = Math.round(rect.left + rect.width / 2);
+            const clientY = Math.round(rect.bottom + 4);
+            openMenuAt(clientX, clientY);
         });
     }
 
     document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openContextMenu(e.clientX, e.clientY);
+        armMenuToggle();
+        openMenuAt(e.clientX, e.clientY);
     });
 
-    // Close context menu & popovers immediately on pointerdown outside
+    // Close picker immediately on pointerdown outside
     document.addEventListener("pointerdown", (e) => {
-        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target) && (!btnMenu || !btnMenu.contains(e.target))) {
-            closeContextMenu();
-        }
         if (popoverEl && !popoverEl.hidden && !popoverEl.contains(e.target) && !e.target.closest("#cal-title")) {
             closePicker();
         }
     }, { capture: true });
-
-    if (ctxAot) {
-        ctxAot.addEventListener("click", async () => {
-            closeContextMenu();
-            if (window.cc && window.cc.toggleAlwaysOnTop) {
-                const res = await window.cc.toggleAlwaysOnTop();
-                isAot = !!res;
-                ctxAotCheck.classList.toggle("visible", isAot);
-            }
-        });
-    }
-
-    if (ctxLock) {
-        ctxLock.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.calPositionLocked;
-            cfg.calPositionLocked = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ calPositionLocked: next });
-            }
-            if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", next);
-        });
-    }
-
-    if (ctxWeeks) {
-        ctxWeeks.addEventListener("click", () => {
-            closeContextMenu();
-            showWeeks = !showWeeks;
-            cfg.floatCalShowWeeks = showWeeks;
-            if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ floatCalShowWeeks: showWeeks });
-            }
-            renderCalendar();
-        });
-    }
-
-    const ctxToggleAudio = document.getElementById("ctx-toggle-audio");
-    if (ctxToggleAudio) {
-        ctxToggleAudio.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.audioMuted;
-            cfg.audioMuted = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ audioMuted: next });
-            }
-        });
-    }
-
-    const ctxToggleClickThrough = document.getElementById("ctx-toggle-clickthrough");
-    if (ctxToggleClickThrough) {
-        ctxToggleClickThrough.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.miniClickThrough;
-            cfg.miniClickThrough = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniClickThrough: next });
-            }
-        });
-    }
-
-    if (ctxToday) {
-        ctxToday.addEventListener("click", () => {
-            closeContextMenu();
-            const t = new Date();
-            viewYear = t.getFullYear();
-            viewMonth = t.getMonth();
-            renderCalendar();
-        });
-    }
-
-    if (ctxPicker) {
-        ctxPicker.addEventListener("click", () => {
-            closeContextMenu();
-            openPicker();
-        });
-    }
-
-    opChips.forEach(chip => {
-        chip.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const op = parseFloat(chip.dataset.op);
-            if (Number.isFinite(op)) {
-                applyOpacity(op);
-                if (window.cc && window.cc.saveSettings) {
-                    window.cc.saveSettings({ floatCalOpacity: op });
-                }
-            }
-        });
-    });
-
-    const calZoomChips = document.querySelectorAll(".cal-zoom-chip");
-    calZoomChips.forEach(chip => {
-        chip.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const z = parseFloat(chip.dataset.zoom);
-            if (Number.isFinite(z)) {
-                applyZoom(z, true);
-            }
-        });
-    });
-
-    if (ctxFull) {
-        ctxFull.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.menuAction) {
-                window.cc.menuAction("home");
-            } else if (window.cc && window.cc.goFull) {
-                window.cc.goFull();
-            }
-        });
-    }
-
-    if (ctxNewTimer) {
-        ctxNewTimer.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("timer");
-            }
-        });
-    }
-
-    if (ctxNewSw) {
-        ctxNewSw.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("sw");
-            }
-        });
-    }
-
-    if (ctxNewAnalog) {
-        ctxNewAnalog.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("analog");
-            }
-        });
-    }
-
-    if (ctxNewRelax) {
-        ctxNewRelax.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("relax");
-            }
-        });
-    }
-
-    if (ctxNewAlarm) {
-        ctxNewAlarm.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.menuAction) {
-                window.cc.menuAction("new_alarm");
-            }
-        });
-    }
-
-    if (ctxSettings) {
-        ctxSettings.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.openSettings) {
-                window.cc.openSettings();
-            }
-        });
-    }
-
-    if (ctxAbout) {
-        ctxAbout.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.showAboutWindow) {
-                window.cc.showAboutWindow();
-            }
-        });
-    }
-
-    if (ctxClose) {
-        ctxClose.addEventListener("click", () => {
-            closeContextMenu();
-            closeWindow();
-        });
-    }
 
     function closeWindow() {
         try {
@@ -986,8 +600,8 @@
     // ── Keyboard Navigation ──────────────────────────────────────
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            if (ctxMenu && !ctxMenu.hidden) {
-                closeContextMenu();
+            if (popupMenuOpen && window.cc && window.cc.closeMenuPopup) {
+                window.cc.closeMenuPopup().catch(() => {});
                 return;
             }
             if (popoverEl && !popoverEl.hidden) {
@@ -1053,22 +667,18 @@
     // ── Window Dragging from Any Dead Space ──────────────────────
     if (shell) {
         shell.addEventListener("mousedown", (e) => {
-            // Never process or close menu/popover if click started inside the context menu or popover itself
-            if (e.target.closest("#cal-context-menu, .cal-ctx-menu, #cal-picker-popover, .cal-picker-popover")) return;
+            if (e.target.closest("#cal-picker-popover, .cal-picker-popover")) return;
 
-            if (ctxMenu && !ctxMenu.hidden) {
-                if (e.target.closest("#btn-cal-menu")) return;
-                closeContextMenu();
-                return;
+            if (popupMenuOpen && window.cc && window.cc.closeMenuPopup) {
+                window.cc.closeMenuPopup().catch(() => {});
             }
             if (popoverEl && !popoverEl.hidden) {
                 if (e.target.closest("#cal-title")) return;
                 closePicker();
                 return;
             }
-            // Exclude interactive elements: buttons, popover, day cells, context menu, op-chips
-            if (e.target.closest("button, .cal-btn, .picker-btn, .picker-month-btn, .cal-ctx-menu, .cal-picker-popover, #cal-title, .cal-op-chip")) return;
-            if (e.button !== 0) return; // Only primary left-click
+            if (e.target.closest("button, .cal-btn, .picker-btn, .picker-month-btn, .cal-picker-popover, #cal-title")) return;
+            if (e.button !== 0) return;
             if (cfg.calPositionLocked === true) return;
 
             e.preventDefault();
@@ -1098,7 +708,6 @@
     try {
         isAutoRotate = localStorage.getItem("cc_float_cal_auto_rotate") === "1";
     } catch (_) {}
-    if (btnSkinAuto) btnSkinAuto.classList.toggle("active", isAutoRotate);
 
     try {
         const saved = parseInt(localStorage.getItem("cc_float_cal_design"), 10);
@@ -1107,7 +716,6 @@
         }
     } catch (_) {}
 
-    buildSkinPills();
     if (isAutoRotate) {
         selectCalSkin(getDailySkinId(), false);
     } else {

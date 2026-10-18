@@ -323,6 +323,219 @@
                 </div>
             </div>
 
+            <!-- VIEW: Floating Analog Clock -->
+            <div class="ctx-timer-view" id="ctx-analog-view" style="display: none;">
+                <div class="ctx-tabs" id="ctx-analog-tabs">
+                    <button type="button" class="ctx-tab on" data-tab="actions" data-i18n="float.tabActions">Actions</button>
+                    <button type="button" class="ctx-tab" data-tab="customize" data-i18n="float.tabStyle">Customize</button>
+                </div>
+                <div id="analog-panel-actions" style="display: flex; flex-direction: column;">
+                    <div class="ctx-item" data-action="full">
+                        <span class="ico" data-ico="expand"></span>
+                        <span class="label" data-i18n="float.fullMode">Open Full Mode</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" id="ctx-analog-audio" data-action="toggle_audio">
+                        <span class="ico" id="ctx-analog-audio-ico" data-ico="volume-high"></span>
+                        <span class="label" id="ctx-analog-audio-lbl" data-i18n="tray.soundOn">Sound on</span>
+                        <span class="audio-dot" aria-hidden="true"></span>
+                    </div>
+                    <div class="ctx-item" id="ctx-analog-ctp" data-action="toggle_click_through">
+                        <span class="ico" id="ctx-analog-ctp-ico" data-ico="eye"></span>
+                        <span class="label" id="ctx-analog-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                        <span class="ctp-dot" aria-hidden="true"></span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="new_timer">
+                        <span class="ico" data-ico="timer"></span>
+                        <span class="label" data-i18n="float.newTimer">New Timer</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_stopwatch">
+                        <span class="ico" data-ico="stopwatch"></span>
+                        <span class="label" data-i18n="float.newStopwatch">New Stopwatch</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_calendar">
+                        <span class="ico" data-ico="calendar"></span>
+                        <span class="label" data-i18n="float.newCalendar">New Calendar</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_relax">
+                        <span class="ico" data-ico="lotus"></span>
+                        <span class="label" data-i18n="float.newRelax">New Relax</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_alarm">
+                        <span class="ico" data-ico="bell"></span>
+                        <span class="label" data-i18n="tray.newAlarm">New Alarm</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="settings">
+                        <span class="ico" data-ico="gear"></span>
+                        <span class="label" data-i18n="menu.settings">Settings...</span>
+                    </div>
+                    <div class="ctx-item" data-action="about">
+                        <span class="ico" data-ico="info"></span>
+                        <span class="label" data-i18n="tray.about">About...</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item danger" data-action="close_current_analog">
+                        <span class="ico" data-ico="power"></span>
+                        <span class="label" data-i18n="float.close">Close</span>
+                    </div>
+                </div>
+                <div id="analog-panel-customize" style="display: none; flex-direction: column;">
+                    <div class="ctx-section">
+                        <div class="ctx-section-header">
+                            <div class="ctx-section-title-wrap">
+                                <span class="ctx-section-title" data-i18n="float.skin">Design</span>
+                                <span class="ctx-timer-skin-badge" id="ctx-analog-skin-badge">Classic</span>
+                            </div>
+                        </div>
+                        <div class="analog-skin-pills" id="analog-skin-pills"></div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="switch-row" id="ctx-analog-aot">
+                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        <div class="toggle" id="toggle-analog-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-analog-lock">
+                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        <div class="toggle" id="toggle-analog-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-section">
+                        <span class="ctx-section-title" data-i18n="float.opacity">Opacity</span>
+                        <div class="analog-ctx-opacity-chips">
+                            <button type="button" class="analog-op-chip" data-op="1.0">100%</button>
+                            <button type="button" class="analog-op-chip" data-op="0.85">85%</button>
+                            <button type="button" class="analog-op-chip" data-op="0.70">70%</button>
+                            <button type="button" class="analog-op-chip" data-op="0.50">50%</button>
+                            <button type="button" class="analog-op-chip" data-op="0.40">40%</button>
+                        </div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-section">
+                        <span class="ctx-section-title" data-i18n="settings.mini.zoom">Zoom</span>
+                        <div class="analog-ctx-zoom-chips">
+                            <button type="button" class="analog-zoom-chip" data-zoom="0.75">75%</button>
+                            <button type="button" class="analog-zoom-chip active" data-zoom="1.0">100%</button>
+                            <button type="button" class="analog-zoom-chip" data-zoom="1.25">125%</button>
+                            <button type="button" class="analog-zoom-chip" data-zoom="1.5">150%</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: Floating Calendar -->
+            <div class="ctx-timer-view" id="ctx-cal-view" style="display: none;">
+                <div class="ctx-tabs" id="ctx-cal-tabs">
+                    <button type="button" class="ctx-tab on" data-tab="actions" data-i18n="float.tabActions">Actions</button>
+                    <button type="button" class="ctx-tab" data-tab="customize" data-i18n="float.tabStyle">Customize</button>
+                </div>
+                <div id="cal-panel-actions" style="display: flex; flex-direction: column;">
+                    <div class="ctx-item" data-action="full">
+                        <span class="ico" data-ico="expand"></span>
+                        <span class="label" data-i18n="float.fullMode">Open Full Mode</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" id="ctx-cal-ctp" data-action="toggle_click_through">
+                        <span class="ico" id="ctx-cal-ctp-ico" data-ico="eye"></span>
+                        <span class="label" id="ctx-cal-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                        <span class="ctp-dot" aria-hidden="true"></span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="new_timer">
+                        <span class="ico" data-ico="timer"></span>
+                        <span class="label" data-i18n="float.newTimer">New Timer</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_stopwatch">
+                        <span class="ico" data-ico="stopwatch"></span>
+                        <span class="label" data-i18n="float.newStopwatch">New Stopwatch</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_analog">
+                        <span class="ico" data-ico="clock"></span>
+                        <span class="label" data-i18n="float.newAnalog">New Analog Clock</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_relax">
+                        <span class="ico" data-ico="lotus"></span>
+                        <span class="label" data-i18n="float.newRelax">New Relax</span>
+                    </div>
+                    <div class="ctx-item" data-action="new_alarm">
+                        <span class="ico" data-ico="bell"></span>
+                        <span class="label" data-i18n="tray.newAlarm">New Alarm</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item" data-action="settings">
+                        <span class="ico" data-ico="gear"></span>
+                        <span class="label" data-i18n="menu.settings">Settings...</span>
+                    </div>
+                    <div class="ctx-item" data-action="about">
+                        <span class="ico" data-ico="info"></span>
+                        <span class="label" data-i18n="tray.about">About...</span>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item danger" data-action="close_current_cal">
+                        <span class="ico" data-ico="power"></span>
+                        <span class="label" data-i18n="float.close">Close</span>
+                    </div>
+                </div>
+                <div id="cal-panel-customize" style="display: none; flex-direction: column;">
+                    <div class="ctx-section">
+                        <div class="ctx-section-header">
+                            <div class="ctx-section-title-wrap">
+                                <span class="ctx-section-title" data-i18n="float.skin">Design</span>
+                                <span class="ctx-timer-skin-badge" id="ctx-cal-skin-badge">Cyber Obsidian</span>
+                            </div>
+                            <button type="button" class="cal-auto-pill" id="btn-cal-skin-auto" data-tooltip="Rotate design daily" data-i18n-attr="data-tooltip:float.dailyRotateTip">
+                                <span data-i18n="float.auto">Auto</span>
+                            </button>
+                        </div>
+                        <div class="cal-skin-pills" id="cal-skin-pills"></div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="switch-row" id="ctx-cal-aot">
+                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        <div class="toggle" id="toggle-cal-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-cal-lock">
+                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        <div class="toggle" id="toggle-cal-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-cal-weeks">
+                        <span class="switch-lbl" data-i18n="float.showWeekNumbers">Week numbers</span>
+                        <div class="toggle" id="toggle-cal-weeks">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-section">
+                        <span class="ctx-section-title" data-i18n="float.opacity">Opacity</span>
+                        <div class="cal-ctx-opacity-chips">
+                            <button type="button" class="cal-op-chip" data-op="1.0">100%</button>
+                            <button type="button" class="cal-op-chip" data-op="0.85">85%</button>
+                            <button type="button" class="cal-op-chip" data-op="0.70">70%</button>
+                            <button type="button" class="cal-op-chip" data-op="0.50">50%</button>
+                        </div>
+                    </div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-section">
+                        <span class="ctx-section-title" data-i18n="settings.mini.zoom">Zoom</span>
+                        <div class="cal-ctx-zoom-chips">
+                            <button type="button" class="cal-zoom-chip" data-zoom="0.85">85%</button>
+                            <button type="button" class="cal-zoom-chip active" data-zoom="1.0">100%</button>
+                            <button type="button" class="cal-zoom-chip" data-zoom="1.15">115%</button>
+                            <button type="button" class="cal-zoom-chip" data-zoom="1.30">130%</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB BAR -->
             <div class="ctx-tabs" id="ctx-tabs">
                 <button class="ctx-tab on" id="tab-btn-actions" data-tab="actions" data-i18n="menu.tabActions">Actions</button>

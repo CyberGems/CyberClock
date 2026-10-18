@@ -3866,11 +3866,6 @@ static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> = std::sync::Mutex:
 static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(360);
 
 fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f64) {
-    let scale = menu.scale_factor().unwrap_or(1.0);
-    let menu_width = (logical_w * scale).round() as i32;
-    let menu_height = (logical_h * scale).round() as i32;
-    let gap = (8.0 * scale).round() as i32;
-
     let anchor = MINI_MENU_ANCHOR.lock().ok().and_then(|g| *g);
     let (clock_x, clock_y, clock_w, clock_h, screen_x, screen_y) = match anchor {
         Some(a) => a,
@@ -3884,6 +3879,11 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
             .or_else(|| monitors.first());
 
         if let Some(found_monitor) = found_monitor {
+            let scale = found_monitor.scale_factor();
+            let menu_width = (logical_w * scale).round() as i32;
+            let menu_height = (logical_h * scale).round() as i32;
+            let gap = (8.0 * scale).round() as i32;
+
             let work_area = found_monitor.work_area();
             let monitor_pos = work_area.position;
             let monitor_size = work_area.size;
@@ -3898,10 +3898,20 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
             let room_right = clock_x + clock_w + gap + menu_width <= mon_right;
             let room_left = clock_x - gap - menu_width >= mon_left;
 
+            // Smart horizontal alignment:
+            // If the user clicked on the right half of the widget (e.g. right-side controls),
+            // align the menu's right edge to the widget's right edge to avoid crossing the entire widget.
+            let click_on_right_half = screen_x > clock_x + clock_w / 2;
+            let aligned_x = if click_on_right_half && clock_w > menu_width {
+                clock_x + clock_w - menu_width
+            } else {
+                clock_x
+            };
+
             let (mut pos_x, mut pos_y) = if room_below {
-                (clock_x, clock_y + clock_h + gap)
+                (aligned_x, clock_y + clock_h + gap)
             } else if room_above {
-                (clock_x, clock_y - menu_height - gap)
+                (aligned_x, clock_y - menu_height - gap)
             } else {
                 let clock_center = clock_x + clock_w / 2;
                 let mon_center = mon_left + (mon_right - mon_left) / 2;
@@ -3983,7 +3993,7 @@ fn open_mini_context_menu(
         }
 
         let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
-        position_mini_context_menu(&menu, 286.0, last_h);
+        position_mini_context_menu(&menu, 292.0, last_h);
 
         let caller_kind = if caller_label.starts_with("float-timer-") {
             "timer"
@@ -3991,6 +4001,10 @@ fn open_mini_context_menu(
             "sw"
         } else if caller_label.starts_with("float-relax-") {
             "relax"
+        } else if caller_label.starts_with("float-analog-") {
+            "analog"
+        } else if caller_label.starts_with("float-cal-") {
+            "cal"
         } else {
             "mini"
         };
@@ -4019,6 +4033,10 @@ fn get_menu_caller() -> Option<serde_json::Value> {
         "sw"
     } else if caller.starts_with("float-relax-") {
         "relax"
+    } else if caller.starts_with("float-analog-") {
+        "analog"
+    } else if caller.starts_with("float-cal-") {
+        "cal"
     } else {
         "mini"
     };
@@ -4375,7 +4393,11 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             }
             true
         }
-        "close_current_timer" | "close_current_sw" | "close_current_relax" => {
+        "close_current_timer"
+        | "close_current_sw"
+        | "close_current_relax"
+        | "close_current_analog"
+        | "close_current_cal" => {
             let caller = CURRENT_MENU_CALLER
                 .lock()
                 .ok()
@@ -4408,7 +4430,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             let _ = app.emit("settings:updated", load_settings(&app));
             true
         }
-        "home" | "timer" | "stopwatch" | "relax" | "settings" => {
+        "home" | "timer" | "stopwatch" | "relax" | "settings" | "calendar" => {
             switch_to_full_mode(app.clone());
             if let Some(main) = app.get_webview_window("main") {
                 let _ = main.emit("mini:menu-action", &action);

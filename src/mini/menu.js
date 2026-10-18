@@ -157,10 +157,154 @@
         });
     }
 
+    const ANALOG_SKIN_KEYS = [
+        "settings.appearance.dialClassic",
+        "settings.appearance.dialMinimal",
+        "settings.appearance.dialSegments",
+        "settings.appearance.dialHud",
+        "settings.appearance.dialQuantum",
+        "settings.appearance.dialChrono",
+        "settings.appearance.dialMatrix",
+        "settings.appearance.dialReactor",
+        "settings.appearance.dialCircuit",
+        "settings.appearance.dialGemCrown",
+    ];
+
+    function analogSkinLabel(id) {
+        const key = ANALOG_SKIN_KEYS[id - 1];
+        if (key && window.ccI18n) {
+            const name = window.ccI18n.t(key);
+            if (name && name !== key) return name;
+        }
+        return `Design ${id}`;
+    }
+
+    function ensureAnalogSkins() {
+        const grid = document.getElementById("analog-skin-pills");
+        if (!grid || grid.dataset.ready === "1") return;
+        grid.dataset.ready = "1";
+        for (let i = 1; i <= 10; i++) {
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "analog-skin-pill";
+            pill.dataset.skin = String(i);
+            pill.textContent = String(i);
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatAnalogDesign: i });
+                }
+                currentCfg = Object.assign({}, currentCfg, { floatAnalogDesign: i });
+                syncAnalogMenu(currentCfg);
+            });
+            grid.appendChild(pill);
+        }
+    }
+
+    function syncAnalogMenu(cfg) {
+        cfg = cfg || {};
+        ensureAnalogSkins();
+        const skin = Math.min(10, Math.max(1, parseInt(cfg.floatAnalogDesign || cfg.clockDesign, 10) || 1));
+        document.querySelectorAll("#analog-skin-pills .analog-skin-pill").forEach((pill) => {
+            pill.classList.toggle("active", parseInt(pill.dataset.skin, 10) === skin);
+        });
+        const badge = document.getElementById("ctx-analog-skin-badge");
+        if (badge) badge.textContent = analogSkinLabel(skin);
+        const aot = document.getElementById("toggle-analog-aot");
+        if (aot) aot.classList.toggle("on", !!cfg.alwaysOnTop);
+        const lock = document.getElementById("toggle-analog-lock");
+        if (lock) lock.classList.toggle("on", cfg.analogPositionLocked === true);
+        const op = typeof cfg.floatAnalogOpacity === "number" ? cfg.floatAnalogOpacity : 1;
+        document.querySelectorAll(".analog-op-chip").forEach((chip) => {
+            chip.classList.toggle("active", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
+        });
+        const z = typeof cfg.floatAnalogZoom === "number" ? cfg.floatAnalogZoom : 1.0;
+        const targetPct = Math.round(z * 100);
+        document.querySelectorAll(".analog-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("active", chipVal === targetPct);
+        });
+    }
+
+    const CAL_SKIN_KEYS = [
+        "float.calSkin.1",
+        "float.calSkin.2",
+        "float.calSkin.3",
+        "float.calSkin.4",
+        "float.calSkin.5",
+        "float.calSkin.6",
+        "float.calSkin.7",
+        "float.calSkin.8",
+        "float.calSkin.9",
+        "float.calSkin.10"
+    ];
+
+    function calSkinLabel(id) {
+        const key = CAL_SKIN_KEYS[id - 1];
+        if (key && window.ccI18n) {
+            const name = window.ccI18n.t(key);
+            if (name && name !== key) return name;
+        }
+        return `Skin ${id}`;
+    }
+
+    function ensureCalSkins() {
+        const grid = document.getElementById("cal-skin-pills");
+        if (!grid || grid.dataset.ready === "1") return;
+        grid.dataset.ready = "1";
+        for (let i = 1; i <= 10; i++) {
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "cal-skin-pill";
+            pill.dataset.skin = String(i);
+            pill.textContent = String(i);
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (window.cc && window.cc.saveSettings) {
+                    window.cc.saveSettings({ floatCalDesign: i, floatCalAutoRotate: false });
+                }
+                currentCfg = Object.assign({}, currentCfg, { floatCalDesign: i, floatCalAutoRotate: false });
+                syncCalMenu(currentCfg);
+            });
+            grid.appendChild(pill);
+        }
+    }
+
+    function syncCalMenu(cfg) {
+        cfg = cfg || {};
+        ensureCalSkins();
+        const skin = Math.min(10, Math.max(1, parseInt(cfg.floatCalDesign, 10) || 1));
+        document.querySelectorAll("#cal-skin-pills .cal-skin-pill").forEach((pill) => {
+            pill.classList.toggle("active", parseInt(pill.dataset.skin, 10) === skin);
+        });
+        const badge = document.getElementById("ctx-cal-skin-badge");
+        if (badge) badge.textContent = calSkinLabel(skin);
+        const autoPill = document.getElementById("btn-cal-skin-auto");
+        if (autoPill) autoPill.classList.toggle("active", cfg.floatCalAutoRotate === true);
+        const aot = document.getElementById("toggle-cal-aot");
+        if (aot) aot.classList.toggle("on", !!cfg.alwaysOnTop);
+        const lock = document.getElementById("toggle-cal-lock");
+        if (lock) lock.classList.toggle("on", cfg.calPositionLocked === true);
+        const weeks = document.getElementById("toggle-cal-weeks");
+        if (weeks) weeks.classList.toggle("on", cfg.calShowWeeks === true);
+        const op = typeof cfg.floatCalOpacity === "number" ? cfg.floatCalOpacity : 1;
+        document.querySelectorAll(".cal-op-chip").forEach((chip) => {
+            chip.classList.toggle("active", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
+        });
+        const z = typeof cfg.floatCalZoom === "number" ? cfg.floatCalZoom : 1.0;
+        const targetPct = Math.round(z * 100);
+        document.querySelectorAll(".cal-zoom-chip").forEach((chip) => {
+            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
+            chip.classList.toggle("active", chipVal === targetPct);
+        });
+    }
+
     function widgetBrandKey() {
         if (activeCaller && activeCaller.kind === "relax") return "float.relaxTitle";
         if (activeCaller && activeCaller.kind === "timer") return "menu.timer";
         if (activeCaller && activeCaller.kind === "sw") return "menu.stopwatch";
+        if (activeCaller && activeCaller.kind === "analog") return "float.analogTitle";
+        if (activeCaller && activeCaller.kind === "cal") return "float.calTitle";
         return "menu.miniMode";
     }
 
@@ -179,6 +323,8 @@
         const isTimer = activeCaller.kind === "timer";
         const isSw = activeCaller.kind === "sw";
         const isRelax = activeCaller.kind === "relax";
+        const isAnalog = activeCaller.kind === "analog";
+        const isCal = activeCaller.kind === "cal";
         const isFloat = isTimer || isSw;
         updateMenuBrand();
         updateAudioUi(currentCfg.audioMuted);
@@ -186,12 +332,16 @@
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
+        const analogView = document.getElementById("ctx-analog-view");
+        const calView = document.getElementById("ctx-cal-view");
         const tabs = document.getElementById("ctx-tabs");
         const actionsPanel = document.getElementById("tab-panel-actions");
         const customizePanel = document.getElementById("tab-panel-customize");
 
         if (isRelax) {
             if (timerView) timerView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
             if (customizePanel) customizePanel.style.display = "none";
@@ -204,8 +354,42 @@
             if (relaxActions) relaxActions.style.display = "flex";
             if (relaxCustomize) relaxCustomize.style.display = "none";
             syncRelaxMenu(currentCfg);
+        } else if (isAnalog) {
+            if (timerView) timerView.style.display = "none";
+            if (relaxView) relaxView.style.display = "none";
+            if (calView) calView.style.display = "none";
+            if (tabs) tabs.style.display = "none";
+            if (actionsPanel) actionsPanel.style.display = "none";
+            if (customizePanel) customizePanel.style.display = "none";
+            if (analogView) analogView.style.display = "flex";
+            document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((b) => {
+                b.classList.toggle("on", b.dataset.tab === "actions");
+            });
+            const analogActions = document.getElementById("analog-panel-actions");
+            const analogCustomize = document.getElementById("analog-panel-customize");
+            if (analogActions) analogActions.style.display = "flex";
+            if (analogCustomize) analogCustomize.style.display = "none";
+            syncAnalogMenu(currentCfg);
+        } else if (isCal) {
+            if (timerView) timerView.style.display = "none";
+            if (relaxView) relaxView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (tabs) tabs.style.display = "none";
+            if (actionsPanel) actionsPanel.style.display = "none";
+            if (customizePanel) customizePanel.style.display = "none";
+            if (calView) calView.style.display = "flex";
+            document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((b) => {
+                b.classList.toggle("on", b.dataset.tab === "actions");
+            });
+            const calActions = document.getElementById("cal-panel-actions");
+            const calCustomize = document.getElementById("cal-panel-customize");
+            if (calActions) calActions.style.display = "flex";
+            if (calCustomize) calCustomize.style.display = "none";
+            syncCalMenu(currentCfg);
         } else if (isFloat) {
             if (relaxView) relaxView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (timerView) timerView.style.display = "flex";
             if (tabs) tabs.style.display = "none";
             if (actionsPanel) actionsPanel.style.display = "none";
@@ -365,6 +549,8 @@
         } else {
             if (relaxView) relaxView.style.display = "none";
             if (timerView) timerView.style.display = "none";
+            if (analogView) analogView.style.display = "none";
+            if (calView) calView.style.display = "none";
             if (tabs) tabs.style.display = "flex";
             const onTab = document.querySelector("#ctx-tabs .ctx-tab.on")?.dataset.tab || "actions";
             if (actionsPanel) actionsPanel.style.display = onTab === "actions" ? "flex" : "none";
@@ -1233,6 +1419,7 @@
                     if (kind === "timer") act = "timer";
                     else if (kind === "sw") act = "stopwatch";
                     else if (kind === "relax") act = "relax";
+                    else if (kind === "cal") act = "calendar";
                     else act = "home";
                 }
                 window.cc.menuAction(act);
@@ -1393,6 +1580,132 @@
         });
     }
 
+    // ── Dedicated Analog Listeners ────────────────────────────────
+    ensureAnalogSkins();
+    document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((tabBtn) => {
+        tabBtn.addEventListener("click", () => {
+            const target = tabBtn.dataset.tab;
+            document.querySelectorAll("#ctx-analog-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
+            const act = document.getElementById("analog-panel-actions");
+            const cust = document.getElementById("analog-panel-customize");
+            if (act) act.style.display = target === "actions" ? "flex" : "none";
+            if (cust) cust.style.display = target === "customize" ? "flex" : "none";
+            reportMenuHeight();
+        });
+    });
+
+    const tglAnalogAotRow = document.getElementById("ctx-analog-aot");
+    if (tglAnalogAotRow) {
+        tglAnalogAotRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-analog-aot");
+            if (tgl) tgl.classList.toggle("on");
+            if (window.cc && window.cc.menuAction) window.cc.menuAction("aot");
+        });
+    }
+
+    const tglAnalogLockRow = document.getElementById("ctx-analog-lock");
+    if (tglAnalogLockRow) {
+        tglAnalogLockRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-analog-lock");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ analogPositionLocked: on });
+        });
+    }
+
+    document.querySelectorAll(".analog-op-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const op = parseFloat(chip.dataset.op);
+            if (!Number.isFinite(op)) return;
+            document.querySelectorAll(".analog-op-chip").forEach((c) => c.classList.toggle("active", c === chip));
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatAnalogOpacity: op });
+        });
+    });
+
+    document.querySelectorAll(".analog-zoom-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (!Number.isFinite(z)) return;
+            document.querySelectorAll(".analog-zoom-chip").forEach((c) => c.classList.toggle("active", c === chip));
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatAnalogZoom: z });
+        });
+    });
+
+    // ── Dedicated Calendar Listeners ──────────────────────────────
+    ensureCalSkins();
+    document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((tabBtn) => {
+        tabBtn.addEventListener("click", () => {
+            const target = tabBtn.dataset.tab;
+            document.querySelectorAll("#ctx-cal-tabs .ctx-tab").forEach((b) => b.classList.toggle("on", b === tabBtn));
+            const act = document.getElementById("cal-panel-actions");
+            const cust = document.getElementById("cal-panel-customize");
+            if (act) act.style.display = target === "actions" ? "flex" : "none";
+            if (cust) cust.style.display = target === "customize" ? "flex" : "none";
+            reportMenuHeight();
+        });
+    });
+
+    const tglCalAotRow = document.getElementById("ctx-cal-aot");
+    if (tglCalAotRow) {
+        tglCalAotRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-cal-aot");
+            if (tgl) tgl.classList.toggle("on");
+            if (window.cc && window.cc.menuAction) window.cc.menuAction("aot");
+        });
+    }
+
+    const tglCalLockRow = document.getElementById("ctx-cal-lock");
+    if (tglCalLockRow) {
+        tglCalLockRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-cal-lock");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ calPositionLocked: on });
+        });
+    }
+
+    const tglCalWeeksRow = document.getElementById("ctx-cal-weeks");
+    if (tglCalWeeksRow) {
+        tglCalWeeksRow.addEventListener("click", () => {
+            const tgl = document.getElementById("toggle-cal-weeks");
+            if (!tgl) return;
+            const on = tgl.classList.toggle("on");
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ calShowWeeks: on });
+        });
+    }
+
+    const btnCalAuto = document.getElementById("btn-cal-skin-auto");
+    if (btnCalAuto) {
+        btnCalAuto.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const on = !btnCalAuto.classList.contains("active");
+            btnCalAuto.classList.toggle("active", on);
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalAutoRotate: on });
+        });
+    }
+
+    document.querySelectorAll(".cal-op-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const op = parseFloat(chip.dataset.op);
+            if (!Number.isFinite(op)) return;
+            document.querySelectorAll(".cal-op-chip").forEach((c) => c.classList.toggle("active", c === chip));
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalOpacity: op });
+        });
+    });
+
+    document.querySelectorAll(".cal-zoom-chip").forEach((chip) => {
+        chip.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const z = parseFloat(chip.dataset.zoom);
+            if (!Number.isFinite(z)) return;
+            document.querySelectorAll(".cal-zoom-chip").forEach((c) => c.classList.toggle("active", c === chip));
+            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalZoom: z });
+        });
+    });
+
     // Listen for caller event and query current caller
     if (window.__TAURI__ && window.__TAURI__.event) {
         window.__TAURI__.event.listen("menu:caller", (e) => {
@@ -1420,6 +1733,12 @@
                 if (toggleDayLive) toggleDayLive.classList.toggle("on", cfg.miniDayProgress === true);
                 if (activeCaller && activeCaller.kind === "relax") {
                     syncRelaxMenu(cfg);
+                }
+                if (activeCaller && activeCaller.kind === "analog") {
+                    syncAnalogMenu(cfg);
+                }
+                if (activeCaller && activeCaller.kind === "cal") {
+                    syncCalMenu(cfg);
                 }
                 if (activeCaller && (activeCaller.kind === "timer" || activeCaller.kind === "sw")) {
                     const isTimer = activeCaller.kind === "timer";

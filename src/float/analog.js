@@ -27,26 +27,6 @@
     const btnPrev = document.getElementById("btn-dial-prev");
     const btnNext = document.getElementById("btn-dial-next");
 
-    const ctxMenu = document.getElementById("analog-ctx-menu");
-    const analogTabActions = document.getElementById("analog-tab-actions");
-    const analogTabStyle = document.getElementById("analog-tab-style");
-    const analogPanelActions = document.getElementById("analog-panel-actions");
-    const analogPanelStyle = document.getElementById("analog-panel-style");
-    const ctxCurrentSkin = document.getElementById("ctx-current-skin");
-    const skinGrid = document.getElementById("analog-skin-grid");
-    const ctxAot = document.getElementById("ctx-aot");
-    const ctxAotCheck = document.getElementById("ctx-aot-check");
-    const ctxFull = document.getElementById("ctx-full");
-    const ctxNewTimer = document.getElementById("ctx-new-timer");
-    const ctxNewSw = document.getElementById("ctx-new-sw");
-    const ctxNewCal = document.getElementById("ctx-new-cal");
-    const ctxNewRelax = document.getElementById("ctx-new-relax");
-    const ctxNewAlarm = document.getElementById("ctx-new-alarm");
-    const ctxSettings = document.getElementById("ctx-settings");
-    const ctxAbout = document.getElementById("ctx-about");
-    const ctxCloseItem = document.getElementById("ctx-close");
-    const opChips = document.querySelectorAll(".analog-op-chip");
-
     // Initialize Canvas Resolution
     function initCanvasResolution() {
         const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
@@ -72,15 +52,6 @@
         const plate = document.getElementById("analog-plate");
         const target = plate || shell;
         if (target) target.style.setProperty("--analog-opacity", op);
-        syncOpacityChips(op);
-    }
-
-    function syncOpacityChips(op) {
-        const target = Math.round(op * 100);
-        opChips.forEach((chip) => {
-            const chipVal = Math.round(parseFloat(chip.dataset.op) * 100);
-            chip.classList.toggle("active", chipVal === target);
-        });
     }
 
     const BASE_CANVAS_SZ = 266;
@@ -122,17 +93,9 @@
             window.cc.setWindowSize({ width: winSz, height: winSz, recenter: true, zoom: zoom });
         }
 
-        const targetPct = Math.round(zoom * 100);
-        document.querySelectorAll(".analog-zoom-chip").forEach((chip) => {
-            const chipVal = Math.round(parseFloat(chip.dataset.zoom) * 100);
-            chip.classList.toggle("active", chipVal === targetPct);
-        });
-
         if (persist && window.cc && window.cc.saveSettings) {
             window.cc.saveSettings({ floatAnalogZoom: zoom });
         }
-
-        repositionContextMenu();
     }
 
     function setDesign(d, persist = true) {
@@ -151,30 +114,6 @@
         const skinName = window.CCAnalog ? window.CCAnalog.getDialDesignName(currentDesign) : `Design ${currentDesign}`;
         if (badgeText) badgeText.textContent = `${currentDesign}/10`;
         if (dialBadge) dialBadge.setAttribute("data-tooltip", skinName);
-        if (ctxCurrentSkin) ctxCurrentSkin.textContent = skinName;
-
-        // Sync skin grid active state
-        document.querySelectorAll(".analog-skin-btn").forEach((btn) => {
-            const btnDesign = parseInt(btn.dataset.design, 10);
-            btn.classList.toggle("active", btnDesign === currentDesign);
-        });
-    }
-
-    function buildSkinGrid() {
-        if (!skinGrid || !window.CCAnalog) return;
-        skinGrid.innerHTML = "";
-        window.CCAnalog.DIAL_DESIGNS.forEach((d) => {
-            const btn = document.createElement("button");
-            btn.className = "analog-skin-btn";
-            btn.dataset.design = d.id;
-            if (d.id === currentDesign) btn.classList.add("active");
-            btn.textContent = window.ccI18n ? window.ccI18n.t(d.key) : d.name;
-            btn.addEventListener("click", () => {
-                setDesign(d.id, true);
-                closeContextMenu();
-            });
-            skinGrid.appendChild(btn);
-        });
     }
 
     function applySettings(s) {
@@ -199,42 +138,9 @@
             invalidateFaceCache();
         }
 
-        buildSkinGrid();
         updateDesignUI();
         applyOpacity(currentOpacity());
         applyZoom(currentZoom(), false);
-
-        const isAudioMuted = cfg.audioMuted === true;
-        const btnToggleAudio = document.getElementById("ctx-toggle-audio");
-        const audioIco = document.getElementById("analog-audio-ico");
-        const audioLbl = document.getElementById("analog-audio-lbl");
-        if (btnToggleAudio) {
-            btnToggleAudio.classList.toggle("muted", isAudioMuted);
-            btnToggleAudio.setAttribute("aria-pressed", String(isAudioMuted));
-        }
-        if (audioIco) {
-            audioIco.innerHTML = "";
-            audioIco.setAttribute("data-ico", isAudioMuted ? "volume-x" : "volume-high");
-        }
-        if (audioLbl) {
-            audioLbl.textContent = window.ccI18n ? window.ccI18n.t(isAudioMuted ? "tray.soundOff" : "tray.soundOn") : (isAudioMuted ? "Sound off" : "Sound on");
-        }
-
-        const isCtp = cfg.miniClickThrough === true;
-        const btnToggleCtp = document.getElementById("ctx-toggle-clickthrough");
-        const ctpIco = document.getElementById("analog-ctp-ico");
-        const ctpLbl = document.getElementById("analog-ctp-lbl");
-        if (btnToggleCtp) {
-            btnToggleCtp.classList.toggle("ctp-active", isCtp);
-            btnToggleCtp.setAttribute("aria-pressed", String(isCtp));
-        }
-        if (ctpIco) {
-            ctpIco.innerHTML = "";
-            ctpIco.setAttribute("data-ico", isCtp ? "eye-off" : "eye");
-        }
-        if (ctpLbl) {
-            ctpLbl.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.clickThrough") : "Click-through";
-        }
 
         if (window.ccIcons && window.ccIcons.replaceIcons) {
             window.ccIcons.replaceIcons(document);
@@ -282,276 +188,87 @@
         });
     }
 
-    function setAnalogTab(tabName) {
-        const style = tabName === "style";
-        if (analogTabActions) analogTabActions.classList.toggle("active", !style);
-        if (analogTabStyle) analogTabStyle.classList.toggle("active", style);
-        if (analogPanelActions) analogPanelActions.style.display = style ? "none" : "flex";
-        if (analogPanelStyle) analogPanelStyle.style.display = style ? "flex" : "none";
-        repositionContextMenu();
-    }
+    // ── Context Menu (Central Floating Popup) ────────────────────
+    let popupMenuOpen = false;
+    let blockMenuOpen = false;
+    let ignoreNextMenuClosed = false;
+    let menuPointerAt = 0;
+    let menuClosedAt = 0;
 
-    if (analogTabActions) {
-        analogTabActions.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setAnalogTab("actions");
-        });
-    }
-    if (analogTabStyle) {
-        analogTabStyle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            setAnalogTab("style");
+    if (window.cc && window.cc.onMenuClosed) {
+        window.cc.onMenuClosed(() => {
+            popupMenuOpen = false;
+            menuClosedAt = Date.now();
+            if (ignoreNextMenuClosed) {
+                ignoreNextMenuClosed = false;
+                return;
+            }
+            if (Date.now() - menuPointerAt < 400) blockMenuOpen = true;
         });
     }
 
-    // ── Context Menu (Top-Layer Inside Window) ───────────────────
-    let menuOpenTime = 0;
-
-    function repositionContextMenu(targetX, targetY) {
-        if (!ctxMenu || ctxMenu.hidden) return;
-        const margin = 8;
-        const menuWidth = 230;
-        const menuHeight = ctxMenu.offsetHeight || 320;
-        const maxX = Math.max(margin, window.innerWidth - menuWidth - margin);
-        const maxY = Math.max(margin, window.innerHeight - menuHeight - margin);
-
-        const curX = typeof targetX === "number" ? targetX : (parseFloat(ctxMenu.style.left) || margin);
-        const curY = typeof targetY === "number" ? targetY : (parseFloat(ctxMenu.style.top) || margin);
-
-        const x = Math.max(margin, Math.min(curX, maxX));
-        const y = Math.max(margin, Math.min(curY, maxY));
-
-        ctxMenu.style.left = `${x}px`;
-        ctxMenu.style.top = `${y}px`;
-        ctxMenu.style.maxHeight = `${Math.max(160, window.innerHeight - y - margin)}px`;
+    function armMenuToggle() {
+        menuPointerAt = Date.now();
+        if (popupMenuOpen || Date.now() - menuClosedAt < 80) blockMenuOpen = true;
     }
 
-    function openContextMenu(clientX, clientY) {
-        menuOpenTime = Date.now();
-        window.focus();
-        ctxMenu.hidden = false;
-        repositionContextMenu(clientX, clientY);
-        setAnalogMenuCapture(true);
+    function menuPointFromClient(clientX, clientY, winPos) {
+        const origin = winPos || [0, 0];
+        return {
+            x: clientX,
+            y: clientY,
+            screenX: origin[0] + clientX,
+            screenY: origin[1] + clientY,
+        };
+    }
 
-        if (btnMenu) {
-            btnMenu.classList.add("menu-open");
-            btnMenu.blur();
+    async function openOrToggleMenu(point) {
+        if (!window.cc) return;
+        if (blockMenuOpen) {
+            blockMenuOpen = false;
+            popupMenuOpen = false;
+            ignoreNextMenuClosed = true;
+            setTimeout(() => { ignoreNextMenuClosed = false; }, 450);
+            if (window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
+            return;
         }
+        if (!window.cc.openMiniContextMenu) return;
+        const opened = await window.cc.openMiniContextMenu(point);
+        popupMenuOpen = opened !== false;
+        blockMenuOpen = false;
+        if (!popupMenuOpen) menuClosedAt = Date.now();
+    }
 
-        if (window.__TAURI__ && window.__TAURI__.window) {
-            window.__TAURI__.window.getCurrentWindow().isAlwaysOnTop().then((aot) => {
-                isAot = !!aot;
-                ctxAotCheck.classList.toggle("visible", isAot);
-            }).catch(() => {});
+    function openMenuAt(clientX, clientY) {
+        if (window.cc && window.cc.getWindowPosition) {
+            window.cc.getWindowPosition().then((winPos) => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY, winPos));
+            }).catch(() => {
+                openOrToggleMenu(menuPointFromClient(clientX, clientY));
+            });
+        } else {
+            openOrToggleMenu(menuPointFromClient(clientX, clientY));
         }
-
-        const ctxLockCheck = document.getElementById("ctx-lock-check");
-        if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", Boolean(cfg.analogPositionLocked));
-
-        syncOpacityChips(currentOpacity());
-    }
-
-    function closeContextMenu() {
-        if (ctxMenu) ctxMenu.hidden = true;
-        if (btnMenu) btnMenu.classList.remove("menu-open");
-        setAnalogMenuCapture(false);
-    }
-
-    window.addEventListener("blur", () => {
-        if (Date.now() - menuOpenTime < 150) return;
-        closeContextMenu();
-    });
-
-    // The native window is a square around the dial. Tell the backend to
-    // accept clicks only on the circle, and on the whole square while this
-    // menu is open (it sits outside the circular frame).
-    function setAnalogMenuCapture(open) {
-        if (!window.cc || !window.cc.setAnalogMenuCapture) return;
-        window.cc.setAnalogMenuCapture(!!open).catch(() => {});
     }
 
     if (btnMenu) {
+        btnMenu.addEventListener("pointerdown", () => armMenuToggle());
         btnMenu.addEventListener("click", (e) => {
             e.stopPropagation();
-            if (ctxMenu && !ctxMenu.hidden) {
-                closeContextMenu();
-            } else {
-                const rect = btnMenu.getBoundingClientRect();
-                openContextMenu(rect.left, rect.bottom + 8);
-            }
+            btnMenu.blur();
+            const rect = btnMenu.getBoundingClientRect();
+            const clientX = Math.round(rect.left + rect.width / 2);
+            const clientY = Math.round(rect.bottom + 4);
+            openMenuAt(clientX, clientY);
         });
-    }
-
-    if (ctxMenu) {
-        ctxMenu.addEventListener("mousedown", (e) => e.stopPropagation());
-        ctxMenu.addEventListener("pointerdown", (e) => e.stopPropagation());
     }
 
     document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openContextMenu(e.clientX, e.clientY);
+        armMenuToggle();
+        openMenuAt(e.clientX, e.clientY);
     });
-
-    document.addEventListener("pointerdown", (e) => {
-        if (ctxMenu && !ctxMenu.hidden && !ctxMenu.contains(e.target) && (!btnMenu || !btnMenu.contains(e.target))) {
-            closeContextMenu();
-        }
-    }, { capture: true });
-
-    if (ctxAot) {
-        ctxAot.addEventListener("click", async () => {
-            closeContextMenu();
-            if (window.cc && window.cc.toggleAlwaysOnTop) {
-                const res = await window.cc.toggleAlwaysOnTop();
-                isAot = !!res;
-                ctxAotCheck.classList.toggle("visible", isAot);
-            }
-        });
-    }
-
-    const ctxLock = document.getElementById("ctx-lock");
-    const ctxLockCheck = document.getElementById("ctx-lock-check");
-    if (ctxLock) {
-        ctxLock.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.analogPositionLocked;
-            cfg.analogPositionLocked = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ analogPositionLocked: next });
-            }
-            if (ctxLockCheck) ctxLockCheck.classList.toggle("visible", next);
-        });
-    }
-
-    const ctxToggleAudio = document.getElementById("ctx-toggle-audio");
-    if (ctxToggleAudio) {
-        ctxToggleAudio.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.audioMuted;
-            cfg.audioMuted = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ audioMuted: next });
-            }
-        });
-    }
-
-    const ctxToggleClickThrough = document.getElementById("ctx-toggle-clickthrough");
-    if (ctxToggleClickThrough) {
-        ctxToggleClickThrough.addEventListener("click", () => {
-            closeContextMenu();
-            const next = !cfg.miniClickThrough;
-            cfg.miniClickThrough = next;
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniClickThrough: next });
-            }
-        });
-    }
-
-    opChips.forEach((chip) => {
-        chip.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const op = parseFloat(chip.dataset.op);
-            if (Number.isFinite(op)) {
-                applyOpacity(op);
-                if (window.cc && window.cc.saveSettings) {
-                    window.cc.saveSettings({ floatAnalogOpacity: op });
-                }
-            }
-        });
-    });
-
-    const zoomChips = document.querySelectorAll(".analog-zoom-chip");
-    zoomChips.forEach((chip) => {
-        chip.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const z = parseFloat(chip.dataset.zoom);
-            if (Number.isFinite(z)) {
-                applyZoom(z, true);
-            }
-        });
-    });
-
-    if (ctxFull) {
-        ctxFull.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.menuAction) {
-                window.cc.menuAction("home");
-            } else if (window.cc && window.cc.goFull) {
-                window.cc.goFull();
-            }
-        });
-    }
-
-    if (ctxNewTimer) {
-        ctxNewTimer.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("timer");
-            }
-        });
-    }
-
-    if (ctxNewSw) {
-        ctxNewSw.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("sw");
-            }
-        });
-    }
-
-    if (ctxNewCal) {
-        ctxNewCal.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("cal");
-            }
-        });
-    }
-
-    if (ctxNewRelax) {
-        ctxNewRelax.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.spawnFloat) {
-                window.cc.spawnFloat("relax");
-            }
-        });
-    }
-
-    if (ctxNewAlarm) {
-        ctxNewAlarm.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.menuAction) {
-                window.cc.menuAction("new_alarm");
-            }
-        });
-    }
-
-    if (ctxSettings) {
-        ctxSettings.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.openSettings) {
-                window.cc.openSettings();
-            }
-        });
-    }
-
-    if (ctxAbout) {
-        ctxAbout.addEventListener("click", () => {
-            closeContextMenu();
-            if (window.cc && window.cc.showAboutWindow) {
-                window.cc.showAboutWindow();
-            }
-        });
-    }
-
-    if (ctxCloseItem) {
-        ctxCloseItem.addEventListener("click", () => {
-            closeContextMenu();
-            closeWindow();
-        });
-    }
 
     function closeWindow() {
         try {
@@ -594,8 +311,8 @@
     // ── Keyboard Controls ────────────────────────────────────────
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            if (ctxMenu && !ctxMenu.hidden) {
-                closeContextMenu();
+            if (popupMenuOpen && window.cc && window.cc.closeMenuPopup) {
+                window.cc.closeMenuPopup().catch(() => {});
                 return;
             }
             closeWindow();
@@ -613,7 +330,6 @@
     // ── Mouse Wheel Quick Design Switching ───────────────────────
     if (shell) {
         shell.addEventListener("wheel", (e) => {
-            if (ctxMenu && !ctxMenu.hidden) return;
             if (e.deltaY < 0) {
                 const prev = currentDesign <= 1 ? 10 : currentDesign - 1;
                 setDesign(prev, true);
@@ -626,13 +342,12 @@
 
     // ── Window Dragging ──────────────────────────────────────────
     function handleDragStart(e) {
-        if (e.target.closest("button, .analog-ov-btn, .analog-ctx-menu, .analog-op-chip, .analog-skin-btn")) return;
+        if (e.target.closest("button, .analog-ov-btn")) return;
         if (e.button !== 0) return;
         if (cfg.analogPositionLocked === true) return;
 
-        if (ctxMenu && !ctxMenu.hidden) {
-            closeContextMenu();
-            return;
+        if (popupMenuOpen && window.cc && window.cc.closeMenuPopup) {
+            window.cc.closeMenuPopup().catch(() => {});
         }
 
         e.preventDefault();
@@ -661,7 +376,6 @@
     // Window Resize Handling
     window.addEventListener("resize", () => {
         initCanvasResolution();
-        repositionContextMenu();
     });
 
     // ── Initialization & Settings ────────────────────────────────
@@ -677,10 +391,6 @@
         window.cc.onInit((s) => applySettings(s));
     }
 
-    buildSkinGrid();
     updateDesignUI();
-    setAnalogMenuCapture(false);
-    // WebView2's input child can appear just after the page is ready.
-    setTimeout(() => setAnalogMenuCapture(ctxMenu ? !ctxMenu.hidden : false), 400);
     rafId = requestAnimationFrame(tick);
 })();
