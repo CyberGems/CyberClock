@@ -432,7 +432,7 @@
     }
 
     async function openTip() {
-        if (isDragging || isPointerDown) return;
+        if (isDragging || isPointerDown || popupMenuOpen) return;
         if (document.body.classList.contains("click-through")) return;
         const payload = buildTipPayload();
         isTipVisible = true;
@@ -566,7 +566,7 @@
     });
 
     function onClockAreaEnter(e) {
-        if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
+        if (isDragging || isPointerDown || popupMenuOpen || Date.now() - lastDragEndTime < 1000) return;
         // Click-through mode: the OS never delivers mouse events, so skip
         // the tooltip pipeline (no timers, no resize churn) entirely.
         if (document.body.classList.contains("click-through")) return;
@@ -578,7 +578,7 @@
 
         clearTimeout(tipTimer);
         tipTimer = setTimeout(() => {
-            if (isDragging || isPointerDown || Date.now() - lastDragEndTime < 1000) return;
+            if (isDragging || isPointerDown || popupMenuOpen || Date.now() - lastDragEndTime < 1000) return;
             openTip();
             const dp = document.getElementById("day-progress");
             if (dp && isElementHovered(dp)) {
@@ -920,6 +920,14 @@
 
     async function openOrToggleMenu(point) {
         if (!window.cc) return;
+        clearTimeout(tipTimer);
+        tipTimer = null;
+        clearTimeout(tipHideTimer);
+        tipHideTimer = null;
+        isTipVisible = false;
+        if (window.cc.hideMiniTip) {
+            window.cc.hideMiniTip().catch(() => {});
+        }
         if (blockMenuOpen) {
             blockMenuOpen = false;
             popupMenuOpen = false;
@@ -932,12 +940,23 @@
         const opened = await window.cc.openMiniContextMenu(point);
         popupMenuOpen = opened !== false;
         blockMenuOpen = false;
+        if (popupMenuOpen && window.cc.hideMiniTip) {
+            window.cc.hideMiniTip().catch(() => {});
+        }
         if (!popupMenuOpen) menuClosedAt = Date.now();
     }
 
     shell.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
+        clearTimeout(tipTimer);
+        tipTimer = null;
+        clearTimeout(tipHideTimer);
+        tipHideTimer = null;
+        isTipVisible = false;
+        if (window.cc && window.cc.hideMiniTip) {
+            window.cc.hideMiniTip().catch(() => {});
+        }
         armMenuToggle();
         const point = (winPos) => ({
             x: e.clientX,

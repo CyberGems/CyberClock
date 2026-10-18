@@ -4013,6 +4013,7 @@ fn open_mini_context_menu(
         let _ = menu.show();
         let _ = menu.set_focus();
         refresh_taskbar_tab(&menu);
+        hide_mini_tip(app.clone());
         return true;
     }
     false
