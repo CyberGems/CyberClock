@@ -1144,6 +1144,10 @@ fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Opt
         width as f64,
         height as f64,
     )));
+    #[cfg(windows)]
+    if window.label().starts_with("float-analog") {
+        sync_analog_hit_region(&window);
+    }
 }
 
 #[tauri::command]
@@ -2078,7 +2082,8 @@ fn analog_cursor_on_dial(root: isize) -> bool {
         }
         let dpi = GetDpiForWindow(root_hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let radius = (ANALOG_PLATE_CSS_PX / 2.0 - ANALOG_REGION_INSET_CSS_PX
+        let zoom = ((w / scale) / 316.0).max(0.5);
+        let radius = ((ANALOG_PLATE_CSS_PX * zoom) / 2.0 - ANALOG_REGION_INSET_CSS_PX
             + ANALOG_DIAL_HIT_SLACK_CSS_PX)
             * scale;
         let dx = pt.x as f64 - w / 2.0;
@@ -2184,7 +2189,8 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         }
         let dpi = GetDpiForWindow(hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let mut d = ((ANALOG_PLATE_CSS_PX - ANALOG_REGION_INSET_CSS_PX * 2.0
+        let zoom = ((cw as f64 / scale) / 316.0).max(0.5);
+        let mut d = (((ANALOG_PLATE_CSS_PX * zoom) - ANALOG_REGION_INSET_CSS_PX * 2.0
             + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0)
             * scale)
             .round() as i32;

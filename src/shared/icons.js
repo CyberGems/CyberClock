@@ -341,10 +341,11 @@
       d="M3 3v5h5"/>
   </symbol>
   <symbol id="cc-i-help" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
-      d="M12 17.9v.1"/>
+    <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+      d="M12 17h.01"/>
   </symbol>
   <symbol id="cc-i-faq" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
