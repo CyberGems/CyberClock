@@ -800,7 +800,7 @@ fn spawn_float_window_with_slot(
         "timer" => ("Timer · CyberClock", 286.0 * zoom, 92.0 * zoom),
         "cal" => ("Calendar · CyberClock", 286.0 * zoom, 268.0 * zoom),
         "analog" => {
-            let sz = (316.0 * zoom).max(320.0);
+            let sz = (320.0 * zoom).max(380.0);
             ("Analog Clock · CyberClock", sz, sz)
         }
         "relax" => ("Relax · CyberClock", 300.0 * zoom, 176.0 * zoom),
@@ -959,8 +959,8 @@ fn spawn_float_window_with_slot(
             }
             remember_window_target(
                 &win,
-                (wide * zoom).round() as u32,
-                (tall * zoom).round() as u32,
+                wide.round() as u32,
+                tall.round() as u32,
             );
             clamp_window_to_monitors(&win);
             #[cfg(windows)]

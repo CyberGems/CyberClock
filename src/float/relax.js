@@ -23,6 +23,7 @@
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
+    const btnMute = document.getElementById("btn-mute");
     const btnBreathe = document.getElementById("btn-breathe");
     const ring = document.getElementById("breathe-ring");
     const btnMenu = document.getElementById("btn-menu");
@@ -93,6 +94,15 @@
         btnPlay.setAttribute("aria-label", label);
         btnPlay.classList.toggle("is-playing", playing && !paused);
         if (btnShuffle) btnShuffle.classList.toggle("is-on", shuffleOn);
+        if (btnMute) {
+            const isMuted = cfg && cfg.audioMuted === true;
+            btnMute.style.display = isMuted ? "inline-flex" : "none";
+            if (isMuted) {
+                const label = t("relax.tooltip.unmute");
+                btnMute.setAttribute("data-tooltip", label);
+                btnMute.setAttribute("aria-label", label);
+            }
+        }
         btnBreathe.classList.toggle("is-paused", guideOn && guidePaused);
         phaseEl.classList.toggle("is-paused", guideOn && guidePaused);
     }
@@ -335,6 +345,17 @@
         btnShuffle.addEventListener("click", (e) => {
             e.stopPropagation();
             toggleShuffle();
+        });
+    }
+    if (btnMute) {
+        btnMute.addEventListener("click", (e) => {
+            e.stopPropagation();
+            cfg.audioMuted = false;
+            applyAudioPrefs();
+            refreshLabels();
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ audioMuted: false });
+            }
         });
     }
     btnBreathe.addEventListener("click", (e) => {

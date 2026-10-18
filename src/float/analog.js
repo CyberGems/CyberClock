@@ -85,8 +85,8 @@
 
     const BASE_CANVAS_SZ = 266;
     const BASE_PLATE_SZ = 274;
-    const BASE_WIN_SZ = 316;
-    const MIN_WIN_SZ = 320;
+    const BASE_WIN_SZ = 320;
+    const MIN_WIN_SZ = 380;
 
     function currentZoom() {
         const z = cfg.floatAnalogZoom;
@@ -131,6 +131,8 @@
         if (persist && window.cc && window.cc.saveSettings) {
             window.cc.saveSettings({ floatAnalogZoom: zoom });
         }
+
+        repositionContextMenu();
     }
 
     function setDesign(d, persist = true) {
@@ -286,6 +288,7 @@
         if (analogTabStyle) analogTabStyle.classList.toggle("active", style);
         if (analogPanelActions) analogPanelActions.style.display = style ? "none" : "flex";
         if (analogPanelStyle) analogPanelStyle.style.display = style ? "flex" : "none";
+        repositionContextMenu();
     }
 
     if (analogTabActions) {
@@ -304,22 +307,30 @@
     // ── Context Menu (Top-Layer Inside Window) ───────────────────
     let menuOpenTime = 0;
 
+    function repositionContextMenu(targetX, targetY) {
+        if (!ctxMenu || ctxMenu.hidden) return;
+        const margin = 8;
+        const menuWidth = 230;
+        const menuHeight = ctxMenu.offsetHeight || 320;
+        const maxX = Math.max(margin, window.innerWidth - menuWidth - margin);
+        const maxY = Math.max(margin, window.innerHeight - menuHeight - margin);
+
+        const curX = typeof targetX === "number" ? targetX : (parseFloat(ctxMenu.style.left) || margin);
+        const curY = typeof targetY === "number" ? targetY : (parseFloat(ctxMenu.style.top) || margin);
+
+        const x = Math.max(margin, Math.min(curX, maxX));
+        const y = Math.max(margin, Math.min(curY, maxY));
+
+        ctxMenu.style.left = `${x}px`;
+        ctxMenu.style.top = `${y}px`;
+        ctxMenu.style.maxHeight = `${Math.max(160, window.innerHeight - y - margin)}px`;
+    }
+
     function openContextMenu(clientX, clientY) {
         menuOpenTime = Date.now();
         window.focus();
         ctxMenu.hidden = false;
-        const menuWidth = ctxMenu.offsetWidth || 230;
-        const menuHeight = ctxMenu.offsetHeight || 310;
-
-        const margin = 8;
-        const maxX = Math.max(margin, window.innerWidth - menuWidth - margin);
-        const maxY = Math.max(margin, window.innerHeight - menuHeight - margin);
-
-        const x = Math.max(margin, Math.min(clientX, maxX));
-        const y = Math.max(margin, Math.min(clientY, maxY));
-
-        ctxMenu.style.left = `${x}px`;
-        ctxMenu.style.top = `${y}px`;
+        repositionContextMenu(clientX, clientY);
         setAnalogMenuCapture(true);
 
         if (btnMenu) {
@@ -650,6 +661,7 @@
     // Window Resize Handling
     window.addEventListener("resize", () => {
         initCanvasResolution();
+        repositionContextMenu();
     });
 
     // ── Initialization & Settings ────────────────────────────────
