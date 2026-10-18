@@ -344,6 +344,9 @@ fn show_clock_window(app: &AppHandle) {
         refresh_taskbar_tab(&win);
         let _ = win.set_focus();
         if target_win == "mini" {
+            let mut hidden = lock_or_recover(hidden_by_fullscreen_map());
+            hidden.remove("mini");
+            drop(hidden);
             reapply_click_through(app, &win);
         }
         broadcast_active_window(app, target_win);
@@ -401,6 +404,9 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
 
     apply_always_on_top(&app, settings.always_on_top);
     apply_click_through(&app, settings.mini_click_through);
+    if !settings.hide_widgets_on_fullscreen {
+        restore_fullscreen_hidden_windows(&app);
+    }
     Ok(settings)
 }
 
@@ -419,6 +425,9 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
 
     apply_always_on_top(&app, merged.always_on_top);
     apply_click_through(&app, merged.mini_click_through);
+    if !merged.hide_widgets_on_fullscreen {
+        restore_fullscreen_hidden_windows(&app);
+    }
     if merged.mini_edge_limits {
         if let Some(mini) = app.get_webview_window("mini") {
             clamp_window_to_monitors(&mini);
@@ -1442,6 +1451,15 @@ impl WinRect {
         };
         (dx as i64) * (dx as i64) + (dy as i64) * (dy as i64)
     }
+    fn contains_point(&self, px: i32, py: i32) -> bool {
+        px >= self.left && px < self.right && py >= self.top && py < self.bottom
+    }
+    fn is_covered_by(&self, wrect: &WinRect) -> bool {
+        wrect.left <= self.left + 2
+            && wrect.top <= self.top + 2
+            && wrect.right >= self.right - 2
+            && wrect.bottom >= self.bottom - 2
+    }
 }
 
 /// Clamp a floating window (mini clock, timer, calendar, analog clock) to the
@@ -1668,6 +1686,321 @@ fn get_all_work_areas() -> Vec<WinRect> {
         );
     }
     list
+}
+
+// ─────────────────────────────────────────────────────────────
+// Fullscreen App Monitor Watcher (Auto-hide widgets & mini clock)
+// ─────────────────────────────────────────────────────────────
+
+#[derive(Clone, Debug)]
+struct MonitorFullscreenInfo {
+    rect: WinRect,
+    is_fullscreen: bool,
+}
+
+static HIDDEN_BY_FULLSCREEN: OnceLock<Mutex<HashMap<String, WinRect>>> = OnceLock::new();
+
+fn hidden_by_fullscreen_map() -> &'static Mutex<HashMap<String, WinRect>> {
+    HIDDEN_BY_FULLSCREEN.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn restore_fullscreen_hidden_windows(app: &AppHandle) {
+    let mut hidden = lock_or_recover(hidden_by_fullscreen_map());
+    if hidden.is_empty() {
+        return;
+    }
+    let settings = load_settings(app);
+    for (label, _) in hidden.drain() {
+        if label == "mini" {
+            if settings.window_mode == "mini" {
+                if let Some(win) = app.get_webview_window("mini") {
+                    let _ = win.show();
+                    reapply_click_through(app, &win);
+                }
+            }
+        } else if label.starts_with("float-") {
+            if let Some(win) = app.get_webview_window(&label) {
+                let _ = win.show();
+                reapply_click_through(app, &win);
+            }
+        }
+    }
+}
+
+#[cfg(windows)]
+fn get_monitors_fullscreen_state() -> Vec<MonitorFullscreenInfo> {
+    use windows_sys::Win32::Foundation::{HWND, LPARAM, RECT};
+    use windows_sys::Win32::Graphics::Gdi::{
+        EnumDisplayMonitors, GetMonitorInfoW, HDC, HMONITOR, MONITORINFO,
+    };
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        EnumWindows, GetClassNameW, GetDesktopWindow, GetShellWindow, GetWindowLongW,
+        GetWindowRect, GetWindowThreadProcessId, IsIconic, IsWindowVisible, GWL_EXSTYLE, GWL_STYLE,
+        WS_CAPTION, WS_EX_TRANSPARENT,
+    };
+
+    #[link(name = "dwmapi")]
+    extern "system" {
+        fn DwmGetWindowAttribute(
+            hwnd: HWND,
+            dw_attribute: u32,
+            pv_attribute: *mut std::ffi::c_void,
+            cb_attribute: u32,
+        ) -> i32;
+    }
+
+    struct MonitorCollector {
+        monitors: Vec<MonitorFullscreenInfo>,
+    }
+
+    unsafe extern "system" fn enum_monitors_fs_proc(
+        hmon: HMONITOR,
+        _hdc: HDC,
+        _rect: *mut RECT,
+        lparam: LPARAM,
+    ) -> i32 {
+        let collector = &mut *(lparam as *mut MonitorCollector);
+        let mut info = MONITORINFO {
+            cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+            ..Default::default()
+        };
+        if GetMonitorInfoW(hmon, &mut info) != 0 {
+            collector.monitors.push(MonitorFullscreenInfo {
+                rect: WinRect {
+                    left: info.rcMonitor.left,
+                    top: info.rcMonitor.top,
+                    right: info.rcMonitor.right,
+                    bottom: info.rcMonitor.bottom,
+                },
+                is_fullscreen: false,
+            });
+        }
+        1
+    }
+
+    let mut collector = MonitorCollector {
+        monitors: Vec::new(),
+    };
+
+    unsafe {
+        EnumDisplayMonitors(
+            std::ptr::null_mut(),
+            std::ptr::null(),
+            Some(enum_monitors_fs_proc),
+            &mut collector as *mut _ as isize,
+        );
+    }
+
+    if collector.monitors.is_empty() {
+        return Vec::new();
+    }
+
+    let my_pid = std::process::id();
+    let shell_wnd = unsafe { GetShellWindow() };
+    let desktop_wnd = unsafe { GetDesktopWindow() };
+
+    struct WindowEnumData<'a> {
+        collector: &'a mut MonitorCollector,
+        my_pid: u32,
+        shell_wnd: HWND,
+        desktop_wnd: HWND,
+    }
+
+    unsafe extern "system" fn enum_windows_fs_proc(hwnd: HWND, lparam: LPARAM) -> i32 {
+        let data = &mut *(lparam as *mut WindowEnumData);
+
+        if IsWindowVisible(hwnd) == 0 || IsIconic(hwnd) != 0 {
+            return 1;
+        }
+
+        if hwnd == data.shell_wnd || hwnd == data.desktop_wnd {
+            return 1;
+        }
+
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if pid == data.my_pid {
+            return 1;
+        }
+
+        let mut cloaked: u32 = 0;
+        let hr = DwmGetWindowAttribute(
+            hwnd,
+            14, // DWMWA_CLOAKED
+            &mut cloaked as *mut _ as *mut std::ffi::c_void,
+            std::mem::size_of::<u32>() as u32,
+        );
+        if hr == 0 && cloaked != 0 {
+            return 1;
+        }
+
+        let mut class_buf = [0u16; 256];
+        let len = GetClassNameW(hwnd, class_buf.as_mut_ptr(), 256);
+        if len > 0 {
+            let class_name = String::from_utf16_lossy(&class_buf[..len as usize]);
+            if class_name == "Progman"
+                || class_name == "WorkerW"
+                || class_name == "Shell_TrayWnd"
+                || class_name == "Shell_SecondaryTrayWnd"
+            {
+                return 1;
+            }
+        }
+
+        let ex_style = GetWindowLongW(hwnd, GWL_EXSTYLE);
+        if (ex_style as u32 & WS_EX_TRANSPARENT) != 0 {
+            return 1;
+        }
+
+        let style = GetWindowLongW(hwnd, GWL_STYLE) as u32;
+        if (style & WS_CAPTION) == WS_CAPTION {
+            return 1;
+        }
+
+        let mut wrect = RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        if GetWindowRect(hwnd, &mut wrect) == 0 {
+            return 1;
+        }
+
+        let win_rect = WinRect {
+            left: wrect.left,
+            top: wrect.top,
+            right: wrect.right,
+            bottom: wrect.bottom,
+        };
+
+        let mut all_done = true;
+        for mon in data.collector.monitors.iter_mut() {
+            if mon.is_fullscreen {
+                continue;
+            }
+            if mon.rect.is_covered_by(&win_rect) {
+                mon.is_fullscreen = true;
+            } else {
+                all_done = false;
+            }
+        }
+
+        if all_done {
+            return 0;
+        }
+
+        1
+    }
+
+    let mut data = WindowEnumData {
+        collector: &mut collector,
+        my_pid,
+        shell_wnd,
+        desktop_wnd,
+    };
+
+    unsafe {
+        EnumWindows(Some(enum_windows_fs_proc), &mut data as *mut _ as isize);
+    }
+
+    collector.monitors
+}
+
+#[cfg(not(windows))]
+fn get_monitors_fullscreen_state() -> Vec<MonitorFullscreenInfo> {
+    Vec::new()
+}
+
+fn check_fullscreen_widgets(app: &AppHandle) {
+    let settings = load_settings(app);
+    if !settings.hide_widgets_on_fullscreen {
+        restore_fullscreen_hidden_windows(app);
+        return;
+    }
+
+    let monitor_states = get_monitors_fullscreen_state();
+    if monitor_states.is_empty() {
+        return;
+    }
+
+    // 1. Check existing hidden windows: should any be restored because their monitor exited fullscreen?
+    let mut to_restore = Vec::new();
+    {
+        let hidden = lock_or_recover(hidden_by_fullscreen_map());
+        for (label, mon_rect) in hidden.iter() {
+            if let Some(mon_state) = monitor_states
+                .iter()
+                .find(|m| m.rect.left == mon_rect.left && m.rect.top == mon_rect.top)
+            {
+                if !mon_state.is_fullscreen {
+                    to_restore.push(label.clone());
+                }
+            } else {
+                to_restore.push(label.clone());
+            }
+        }
+    }
+
+    for label in to_restore {
+        let mut hidden = lock_or_recover(hidden_by_fullscreen_map());
+        hidden.remove(&label);
+        drop(hidden);
+
+        if label == "mini" {
+            if settings.window_mode == "mini" {
+                if let Some(win) = app.get_webview_window("mini") {
+                    let _ = win.show();
+                    reapply_click_through(app, &win);
+                }
+            }
+        } else if label.starts_with("float-") {
+            if let Some(win) = app.get_webview_window(&label) {
+                let _ = win.show();
+                reapply_click_through(app, &win);
+            }
+        }
+    }
+
+    // 2. Check candidate windows that should be hidden because their monitor entered fullscreen
+    for (label, win) in app.webview_windows() {
+        if label != "mini" && !label.starts_with("float-") {
+            continue;
+        }
+
+        let is_vis = win.is_visible().unwrap_or(false);
+        if !is_vis {
+            continue;
+        }
+
+        let (pos, size) = match (win.outer_position(), win.outer_size()) {
+            (Ok(p), Ok(s)) => (p, s),
+            _ => continue,
+        };
+        let center_x = pos.x + (size.width as i32 / 2);
+        let center_y = pos.y + (size.height as i32 / 2);
+
+        if let Some(mon) = monitor_states
+            .iter()
+            .find(|m| m.rect.contains_point(center_x, center_y))
+        {
+            if mon.is_fullscreen {
+                let _ = win.hide();
+                let mut hidden = lock_or_recover(hidden_by_fullscreen_map());
+                hidden.insert(label.clone(), mon.rect);
+                drop(hidden);
+
+                if label == "mini" {
+                    if let Some(menu) = app.get_webview_window("menu") {
+                        let _ = menu.hide();
+                    }
+                    if let Some(tip) = app.get_webview_window("mini_tip") {
+                        let _ = tip.hide();
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(windows)]
@@ -5473,6 +5806,13 @@ pub fn run() {
             let app_for_clock = app.handle().clone();
             std::thread::spawn(move || {
                 clock_accuracy_loop(app_for_clock);
+            });
+
+            // Fullscreen monitor watcher (hide mini clock and widgets on fullscreen displays)
+            let app_for_fs = app.handle().clone();
+            std::thread::spawn(move || loop {
+                std::thread::sleep(std::time::Duration::from_millis(750));
+                check_fullscreen_widgets(&app_for_fs);
             });
 
             // Global hotkey (show/hide the clock)

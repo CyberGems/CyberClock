@@ -2410,6 +2410,8 @@
         if (miniAnim) miniAnim.checked = s.miniNoAnimations !== true;
         const miniEdgeLimits = document.getElementById('s-mini-edge-limits');
         if (miniEdgeLimits) miniEdgeLimits.checked = s.miniEdgeLimits !== false;
+        const miniHideOnFullscreen = document.getElementById('s-mini-hide-on-fullscreen');
+        if (miniHideOnFullscreen) miniHideOnFullscreen.checked = s.hideWidgetsOnFullscreen !== false;
         const miniAutoFade = document.getElementById('s-mini-auto-fade');
         if (miniAutoFade) miniAutoFade.value = s.miniAutoFade || 'off';
 
@@ -7643,6 +7645,12 @@
     if (sMiniEdgeLimits) {
         sMiniEdgeLimits.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniEdgeLimits: e.target.checked });
+        });
+    }
+    const sMiniHideOnFullscreen = document.getElementById('s-mini-hide-on-fullscreen');
+    if (sMiniHideOnFullscreen) {
+        sMiniHideOnFullscreen.addEventListener('change', (e) => {
+            window.cc.saveSettings({ hideWidgetsOnFullscreen: e.target.checked });
         });
     }
     const sMiniAutoFade = document.getElementById('s-mini-auto-fade');

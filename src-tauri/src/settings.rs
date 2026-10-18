@@ -384,6 +384,8 @@ pub struct AppSettings {
     pub mini_no_animations: bool,
     #[serde(default = "default_true")]
     pub mini_edge_limits: bool,
+    #[serde(default = "default_true")]
+    pub hide_widgets_on_fullscreen: bool,
     #[serde(default)]
     pub mini_auto_fade: Option<String>,
 
@@ -539,6 +541,7 @@ impl Default for AppSettings {
             mini_click_through: false,
             mini_no_animations: false,
             mini_edge_limits: true,
+            hide_widgets_on_fullscreen: true,
             mini_auto_fade: None,
             ui_scale: 1.0,
             full_hide_clock: false,
