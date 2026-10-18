@@ -341,26 +341,26 @@
         display: none !important;
     }
 
-    /* ── Master audio toggle row ─────────────────────────────── */
+    /* ── Master audio & click-through toggles ────────────────── */
     .tray-item .audio-dot {
         flex: 0 0 auto;
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #10b981;
-        box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+        background: #20bfdf;
+        box-shadow: 0 0 6px rgba(32, 191, 223, 0.7);
         transition: background 0.15s ease, box-shadow 0.15s ease;
     }
     #btn-audio.muted .audio-dot {
-        background: #ef4444;
-        box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+        background: #64748b;
+        box-shadow: none;
     }
     #btn-audio.muted .ico {
         color: var(--text-lo);
         filter: none;
     }
 
-    /* ── Click-through toggle (same dot language as audio) ───── */
+    /* Click-through toggle (same dot and active language as audio) */
     #btn-clickthrough .audio-dot {
         flex: 0 0 auto;
         width: 7px;
@@ -369,6 +369,10 @@
         background: #64748b;
         box-shadow: none;
         transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    #btn-clickthrough:not(.on) .ico {
+        color: var(--text-lo);
+        filter: none;
     }
     #btn-clickthrough.on .audio-dot {
         background: #20bfdf;
