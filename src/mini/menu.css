@@ -853,10 +853,53 @@
         padding: 6px 10px;
         cursor: pointer;
         border-radius: 6px;
-        transition: background 0.12s;
+        transition: background 0.12s, color 0.12s;
+        min-height: 28px;
+        box-sizing: border-box;
     }
     .switch-row:hover {
-        background: rgba(var(--rgb-accent), 0.08);
+        background: rgba(var(--rgb-accent), 0.12);
+        color: #ffffff;
+    }
+    .switch-row:active {
+        background: rgba(var(--rgb-accent), 0.2);
+    }
+    .switch-label-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+    .switch-label-group .ico {
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .switch-label-group .ico .cc-ico {
+        width: 16px;
+        height: 16px;
+        overflow: visible;
+        stroke: url(#cc-grad-menu);
+        color: var(--accent-a, #00d4ff);
+        filter: drop-shadow(0 0 2px rgba(var(--rgb-accent), 0.4));
+        transition: filter 0.15s, stroke 0.15s, transform 0.15s;
+    }
+    .switch-row:hover .switch-label-group .ico .cc-ico {
+        filter: drop-shadow(0 0 4px rgba(var(--rgb-accent), 0.75))
+            drop-shadow(0 0 8px rgba(var(--rgb-accent), 0.4));
+        transform: scale(1.08);
+    }
+    .switch-row.muted .switch-label-group .ico .cc-ico {
+        stroke: url(#cc-grad-danger);
+        color: #ff5470;
+        filter: drop-shadow(0 0 3px rgba(255, 84, 112, 0.5));
+    }
+    .switch-row.ctp-active .switch-label-group .ico .cc-ico {
+        color: #20bfdf;
+        filter: drop-shadow(0 0 3px rgba(32, 191, 223, 0.5));
     }
     .switch-lbl {
         font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;

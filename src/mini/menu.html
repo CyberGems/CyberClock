@@ -71,15 +71,41 @@
                     <span class="label" data-i18n="tray.fullMode">Full Mode</span>
                 </div>
                 <div class="ctx-sep"></div>
-                <div class="ctx-item" id="ctx-timer-audio" data-action="toggle_audio">
-                    <span class="ico" id="ctx-timer-audio-ico" data-ico="volume-high"></span>
-                    <span class="label" id="ctx-timer-audio-lbl" data-i18n="tray.soundOn">Sound on</span>
-                    <span class="audio-dot" aria-hidden="true"></span>
+                <div class="switch-row" id="ctx-timer-aot">
+                    <div class="switch-label-group">
+                        <span class="ico" data-ico="pin"></span>
+                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                    </div>
+                    <div class="toggle" id="toggle-timer-aot">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
                 </div>
-                <div class="ctx-item" id="ctx-timer-ctp" data-action="toggle_click_through">
-                    <span class="ico" id="ctx-timer-ctp-ico" data-ico="eye"></span>
-                    <span class="label" id="ctx-timer-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
-                    <span class="ctp-dot" aria-hidden="true"></span>
+                <div class="switch-row" id="ctx-timer-lock">
+                    <div class="switch-label-group">
+                        <span class="ico" data-ico="lock"></span>
+                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                    </div>
+                    <div class="toggle" id="toggle-timer-lock">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
+                </div>
+                <div class="switch-row" id="ctx-timer-ctp" data-action="toggle_click_through">
+                    <div class="switch-label-group">
+                        <span class="ico" id="ctx-timer-ctp-ico" data-ico="eye"></span>
+                        <span class="switch-lbl" id="ctx-timer-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                    </div>
+                    <div class="toggle" id="toggle-timer-ctp">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
+                </div>
+                <div class="switch-row" id="ctx-timer-audio" data-action="toggle_audio">
+                    <div class="switch-label-group">
+                        <span class="ico" id="ctx-timer-audio-ico" data-ico="volume-high"></span>
+                        <span class="switch-lbl" id="ctx-timer-audio-lbl" data-i18n="settings.alarms.sound">Sound</span>
+                    </div>
+                    <div class="toggle on" id="toggle-timer-audio">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
                 </div>
                 <div class="ctx-sep"></div>
                 <div class="ctx-item" id="ctx-action-new" data-action="new_timer">
@@ -170,27 +196,9 @@
                     </div>
                 </div>
 
-                <div class="switch-row" id="ctx-timer-aot">
-                    <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
-                    <div class="toggle" id="toggle-timer-aot">
-                        <div class="toggle-track">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="switch-row" id="ctx-timer-taskbar">
                     <span class="switch-lbl" data-i18n="float.showInTaskbar">Show in Taskbar</span>
                     <div class="toggle" id="toggle-timer-taskbar">
-                        <div class="toggle-track">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="switch-row" id="ctx-timer-lock">
-                    <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
-                    <div class="toggle" id="toggle-timer-lock">
                         <div class="toggle-track">
                             <div class="toggle-thumb"></div>
                         </div>
@@ -224,15 +232,41 @@
                         <span class="label" data-i18n="float.openRelax">Open Relax</span>
                     </div>
                     <div class="ctx-sep"></div>
-                    <div class="ctx-item" id="ctx-relax-audio" data-action="toggle_audio">
-                        <span class="ico" id="ctx-relax-audio-ico" data-ico="volume-high"></span>
-                        <span class="label" id="ctx-relax-audio-lbl" data-i18n="tray.soundOn">Sound on</span>
-                        <span class="audio-dot" aria-hidden="true"></span>
+                    <div class="switch-row" id="ctx-relax-aot">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="pin"></span>
+                            <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        </div>
+                        <div class="toggle" id="toggle-relax-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
                     </div>
-                    <div class="ctx-item" id="ctx-relax-ctp" data-action="toggle_click_through">
-                        <span class="ico" id="ctx-relax-ctp-ico" data-ico="eye"></span>
-                        <span class="label" id="ctx-relax-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
-                        <span class="ctp-dot" aria-hidden="true"></span>
+                    <div class="switch-row" id="ctx-relax-lock">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="lock"></span>
+                            <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        </div>
+                        <div class="toggle" id="toggle-relax-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-relax-ctp" data-action="toggle_click_through">
+                        <div class="switch-label-group">
+                            <span class="ico" id="ctx-relax-ctp-ico" data-ico="eye"></span>
+                            <span class="switch-lbl" id="ctx-relax-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                        </div>
+                        <div class="toggle" id="toggle-relax-ctp">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-relax-audio" data-action="toggle_audio">
+                        <div class="switch-label-group">
+                            <span class="ico" id="ctx-relax-audio-ico" data-ico="volume-high"></span>
+                            <span class="switch-lbl" id="ctx-relax-audio-lbl" data-i18n="settings.alarms.sound">Sound</span>
+                        </div>
+                        <div class="toggle on" id="toggle-relax-audio">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
                     </div>
                     <div class="ctx-sep"></div>
                     <div class="ctx-item" data-action="new_timer">
@@ -281,18 +315,6 @@
                         <div class="relax-skin-pills" id="relax-skin-pills"></div>
                     </div>
                     <div class="ctx-sep"></div>
-                    <div class="switch-row" id="ctx-relax-aot">
-                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
-                        <div class="toggle" id="toggle-relax-aot">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
-                    <div class="switch-row" id="ctx-relax-lock">
-                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
-                        <div class="toggle" id="toggle-relax-lock">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
                     <div class="switch-row" id="ctx-relax-breathe">
                         <span class="switch-lbl" data-i18n="float.showBreathe">Breathing guide</span>
                         <div class="toggle on" id="toggle-relax-breathe">
@@ -335,15 +357,41 @@
                         <span class="label" data-i18n="float.fullMode">Open Full Mode</span>
                     </div>
                     <div class="ctx-sep"></div>
-                    <div class="ctx-item" id="ctx-analog-audio" data-action="toggle_audio">
-                        <span class="ico" id="ctx-analog-audio-ico" data-ico="volume-high"></span>
-                        <span class="label" id="ctx-analog-audio-lbl" data-i18n="tray.soundOn">Sound on</span>
-                        <span class="audio-dot" aria-hidden="true"></span>
+                    <div class="switch-row" id="ctx-analog-aot">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="pin"></span>
+                            <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        </div>
+                        <div class="toggle" id="toggle-analog-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
                     </div>
-                    <div class="ctx-item" id="ctx-analog-ctp" data-action="toggle_click_through">
-                        <span class="ico" id="ctx-analog-ctp-ico" data-ico="eye"></span>
-                        <span class="label" id="ctx-analog-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
-                        <span class="ctp-dot" aria-hidden="true"></span>
+                    <div class="switch-row" id="ctx-analog-lock">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="lock"></span>
+                            <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        </div>
+                        <div class="toggle" id="toggle-analog-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-analog-ctp" data-action="toggle_click_through">
+                        <div class="switch-label-group">
+                            <span class="ico" id="ctx-analog-ctp-ico" data-ico="eye"></span>
+                            <span class="switch-lbl" id="ctx-analog-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                        </div>
+                        <div class="toggle" id="toggle-analog-ctp">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-analog-audio" data-action="toggle_audio">
+                        <div class="switch-label-group">
+                            <span class="ico" id="ctx-analog-audio-ico" data-ico="volume-high"></span>
+                            <span class="switch-lbl" id="ctx-analog-audio-lbl" data-i18n="settings.alarms.sound">Sound</span>
+                        </div>
+                        <div class="toggle on" id="toggle-analog-audio">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
                     </div>
                     <div class="ctx-sep"></div>
                     <div class="ctx-item" data-action="new_timer">
@@ -390,20 +438,6 @@
                             </div>
                         </div>
                         <div class="analog-skin-pills" id="analog-skin-pills"></div>
-                    </div>
-                    <div class="ctx-sep"></div>
-                    <div class="switch-row" id="ctx-analog-aot">
-                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
-                        <div class="toggle" id="toggle-analog-aot">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
-                    <div class="switch-row" id="ctx-analog-lock">
-                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
-                        <div class="toggle" id="toggle-analog-lock">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
                     <div class="ctx-sep"></div>
                     <div class="ctx-section">
                         <span class="ctx-section-title" data-i18n="float.opacity">Opacity</span>
@@ -440,10 +474,32 @@
                         <span class="label" data-i18n="float.fullMode">Open Full Mode</span>
                     </div>
                     <div class="ctx-sep"></div>
-                    <div class="ctx-item" id="ctx-cal-ctp" data-action="toggle_click_through">
-                        <span class="ico" id="ctx-cal-ctp-ico" data-ico="eye"></span>
-                        <span class="label" id="ctx-cal-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
-                        <span class="ctp-dot" aria-hidden="true"></span>
+                    <div class="switch-row" id="ctx-cal-aot">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="pin"></span>
+                            <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
+                        </div>
+                        <div class="toggle" id="toggle-cal-aot">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-cal-lock">
+                        <div class="switch-label-group">
+                            <span class="ico" data-ico="lock"></span>
+                            <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                        </div>
+                        <div class="toggle" id="toggle-cal-lock">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                    <div class="switch-row" id="ctx-cal-ctp" data-action="toggle_click_through">
+                        <div class="switch-label-group">
+                            <span class="ico" id="ctx-cal-ctp-ico" data-ico="eye"></span>
+                            <span class="switch-lbl" id="ctx-cal-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                        </div>
+                        <div class="toggle" id="toggle-cal-ctp">
+                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        </div>
                     </div>
                     <div class="ctx-sep"></div>
                     <div class="ctx-item" data-action="new_timer">
@@ -493,20 +549,7 @@
                             </button>
                         </div>
                         <div class="cal-skin-pills" id="cal-skin-pills"></div>
-                    </div>
                     <div class="ctx-sep"></div>
-                    <div class="switch-row" id="ctx-cal-aot">
-                        <span class="switch-lbl" data-i18n="float.alwaysOnTop">Always on Top</span>
-                        <div class="toggle" id="toggle-cal-aot">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
-                    <div class="switch-row" id="ctx-cal-lock">
-                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
-                        <div class="toggle" id="toggle-cal-lock">
-                            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                        </div>
-                    </div>
                     <div class="switch-row" id="ctx-cal-weeks">
                         <span class="switch-lbl" data-i18n="float.showWeekNumbers">Week numbers</span>
                         <div class="toggle" id="toggle-cal-weeks">
@@ -549,15 +592,41 @@
                     <span class="label" data-i18n="tray.fullMode">Full Mode</span>
                 </div>
                 <div class="ctx-sep"></div>
-                <div class="ctx-item" id="ctx-action-audio" data-action="toggle_audio">
-                    <span class="ico" id="ctx-action-audio-ico" data-ico="volume-high"></span>
-                    <span class="label" id="ctx-action-audio-lbl" data-i18n="tray.soundOn">Sound on</span>
-                    <span class="audio-dot" aria-hidden="true"></span>
+                <div class="switch-row" id="ctx-aot">
+                    <div class="switch-label-group">
+                        <span class="ico" data-ico="pin"></span>
+                        <span class="switch-lbl" data-i18n="menu.alwaysOnTop">Always on Top</span>
+                    </div>
+                    <div class="toggle" id="toggle-aot">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
                 </div>
-                <div class="ctx-item" id="ctx-action-ctp" data-action="toggle_click_through">
-                    <span class="ico" id="ctx-action-ctp-ico" data-ico="eye"></span>
-                    <span class="label" id="ctx-action-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
-                    <span class="ctp-dot" aria-hidden="true"></span>
+                <div class="switch-row" id="ctx-lock">
+                    <div class="switch-label-group">
+                        <span class="ico" data-ico="lock"></span>
+                        <span class="switch-lbl" data-i18n="settings.mini.lockPos">Position Lock</span>
+                    </div>
+                    <div class="toggle" id="toggle-lock">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
+                </div>
+                <div class="switch-row" id="ctx-action-ctp" data-action="toggle_click_through">
+                    <div class="switch-label-group">
+                        <span class="ico" id="ctx-action-ctp-ico" data-ico="eye"></span>
+                        <span class="switch-lbl" id="ctx-action-ctp-lbl" data-i18n="settings.mini.clickThrough">Click-through</span>
+                    </div>
+                    <div class="toggle" id="toggle-ctp">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
+                </div>
+                <div class="switch-row" id="ctx-action-audio" data-action="toggle_audio">
+                    <div class="switch-label-group">
+                        <span class="ico" id="ctx-action-audio-ico" data-ico="volume-high"></span>
+                        <span class="switch-lbl" id="ctx-action-audio-lbl" data-i18n="settings.alarms.sound">Sound</span>
+                    </div>
+                    <div class="toggle on" id="toggle-audio">
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                    </div>
                 </div>
                 <div class="ctx-sep"></div>
                 <div class="ctx-item" data-action="new_timer">
@@ -742,26 +811,6 @@
                 <div class="switch-row" id="ctx-seconds">
                     <span class="switch-lbl" data-i18n="settings.appearance.showSeconds">Show Seconds</span>
                     <div class="toggle on" id="toggle-seconds">
-                        <div class="toggle-track">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION: Position Lock Switch -->
-                <div class="switch-row" id="ctx-lock">
-                    <span class="switch-lbl">Position Lock</span>
-                    <div class="toggle" id="toggle-lock">
-                        <div class="toggle-track">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- SECTION: Always on Top Toggle -->
-                <div class="switch-row" id="ctx-aot">
-                    <span class="switch-lbl">Always on Top</span>
-                    <div class="toggle" id="toggle-aot">
                         <div class="toggle-track">
                             <div class="toggle-thumb"></div>
                         </div>

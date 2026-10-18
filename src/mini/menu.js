@@ -346,6 +346,7 @@
         updateMenuBrand();
         updateAudioUi(currentCfg.audioMuted);
         updateClickThroughUi(currentCfg.miniClickThrough);
+        updateAotState(currentCfg.alwaysOnTop || false);
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
@@ -606,9 +607,10 @@
     }
 
     function updateAotState(on) {
-        alwaysOnTop = on;
-        const tgl = document.getElementById("toggle-aot");
-        if (tgl) tgl.classList.toggle("on", on);
+        alwaysOnTop = Boolean(on);
+        document.querySelectorAll("#toggle-aot, #toggle-timer-aot, #toggle-relax-aot, #toggle-analog-aot, #toggle-cal-aot").forEach((tgl) => {
+            tgl.classList.toggle("on", Boolean(on));
+        });
     }
 
     function reportMenuHeight() {
@@ -836,19 +838,21 @@
     function updateAudioUi(muted) {
         const isMuted = muted === true;
         const icoName = isMuted ? "volume-x" : "volume-high";
-        const textKey = isMuted ? "tray.soundOff" : "tray.soundOn";
-        const text = window.ccI18n ? window.ccI18n.t(textKey) : (isMuted ? "Sound off" : "Sound on");
+        const textKey = "settings.alarms.sound";
+        const text = window.ccI18n ? window.ccI18n.t(textKey) : "Sound";
 
-        document.querySelectorAll('.ctx-item[data-action="toggle_audio"]').forEach((el) => {
+        document.querySelectorAll('[data-action="toggle_audio"]').forEach((el) => {
             el.classList.toggle("muted", isMuted);
-            el.setAttribute("aria-pressed", String(isMuted));
+            el.setAttribute("aria-pressed", String(!isMuted));
             const ico = el.querySelector(".ico");
             if (ico) {
                 ico.innerHTML = "";
                 ico.setAttribute("data-ico", icoName);
             }
-            const lbl = el.querySelector(".label");
+            const lbl = el.querySelector(".switch-lbl, .label");
             if (lbl) lbl.textContent = text;
+            const tgl = el.querySelector(".toggle");
+            if (tgl) tgl.classList.toggle("on", !isMuted);
         });
 
         if (window.ccIcons) {
@@ -862,7 +866,7 @@
         const textKey = "settings.mini.clickThrough";
         const text = window.ccI18n ? window.ccI18n.t(textKey) : "Click-through";
 
-        document.querySelectorAll('.ctx-item[data-action="toggle_click_through"]').forEach((el) => {
+        document.querySelectorAll('[data-action="toggle_click_through"]').forEach((el) => {
             el.classList.toggle("ctp-active", isCtp);
             el.setAttribute("aria-pressed", String(isCtp));
             const ico = el.querySelector(".ico");
@@ -870,8 +874,10 @@
                 ico.innerHTML = "";
                 ico.setAttribute("data-ico", icoName);
             }
-            const lbl = el.querySelector(".label");
+            const lbl = el.querySelector(".switch-lbl, .label");
             if (lbl) lbl.textContent = text;
+            const tgl = el.querySelector(".toggle");
+            if (tgl) tgl.classList.toggle("on", isCtp);
         });
 
         if (window.ccIcons) {
@@ -1457,7 +1463,7 @@
     });
 
     // Menu action click handlers (full, timer, settings, etc.)
-    document.querySelectorAll(".ctx-item[data-action]").forEach((el) => {
+    document.querySelectorAll("[data-action]").forEach((el) => {
         el.addEventListener("click", () => {
             const action = el.dataset.action;
             if (action === "toggle_audio") {

@@ -37,6 +37,11 @@
         d="M12 17v5"/>
     </g>
   </symbol>
+  <symbol id="cc-i-lock" viewBox="0 0 24 24">
+    <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M8 11V7a4 4 0 0 1 8 0v4"/>
+  </symbol>
   <symbol id="cc-i-expand" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M15 3h6v6"/>
