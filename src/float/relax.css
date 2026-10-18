@@ -26,9 +26,9 @@ body {
 .relax-shell {
     width: calc(100% - 4px);
     height: calc(100% - 4px);
-    --skin-accent: #ff4d9a;
-    --skin-rgb: 255, 77, 154;
-    background: linear-gradient(165deg, #1a0820 0%, #09030f 100%);
+    --skin-accent: var(--accent-a, #c8dce8);
+    --skin-rgb: var(--rgb-accent, 200, 220, 232);
+    background: linear-gradient(165deg, #14171f 0%, #08090c 100%);
     border-radius: 14px;
     box-shadow:
         inset 0 0 0 1px rgba(var(--skin-rgb), 0.38),
@@ -291,18 +291,8 @@ body.breathe-off .phase {
     display: none;
 }
 
-/* Ten designs. Skin 1 is Neon Tokyo (default). Skin 5 is Cyber Obsidian (user accent). The stroke stays inset
+/* Ten designs. Skin 1 keeps the user accent. The stroke stays inset
    so the transparent window does not pick up a light corner chip. */
-
-#relax-shell[data-skin="1"] {
-    --skin-accent: #ff4d9a;
-    --skin-rgb: 255, 77, 154;
-    background: linear-gradient(165deg, #1a0820 0%, #09030f 100%);
-}
-#relax-shell[data-skin="1"] .elapsed,
-#relax-shell:not([data-skin]) .elapsed {
-    color: rgba(0, 245, 255, 0.72);
-}
 
 #relax-shell[data-skin="2"] {
     --skin-accent: #38bdf8;
@@ -334,9 +324,12 @@ body.breathe-off .phase {
 }
 
 #relax-shell[data-skin="5"] {
-    --skin-accent: var(--accent-a, #c8dce8);
-    --skin-rgb: var(--rgb-accent, 200, 220, 232);
-    background: linear-gradient(165deg, #14171f 0%, #08090c 100%);
+    --skin-accent: #ff4d9a;
+    --skin-rgb: 255, 77, 154;
+    background: linear-gradient(165deg, #1a0820 0%, #09030f 100%);
+}
+#relax-shell[data-skin="5"] .elapsed {
+    color: rgba(0, 245, 255, 0.72);
 }
 
 #relax-shell[data-skin="6"] {
