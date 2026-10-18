@@ -408,6 +408,26 @@ body.is-dragging * {
     opacity: 1;
 }
 
+.analog-ctx-item .audio-dot {
+    margin-left: auto;
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.7);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+}
+
+.analog-ctx-item.muted .audio-dot {
+    background: #ef4444;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.6);
+}
+
+.analog-ctx-item.muted .ico {
+    color: #ff5470;
+}
+
 .analog-ctx-opacity-chips {
     display: flex;
     gap: 3px;

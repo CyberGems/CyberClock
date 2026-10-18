@@ -308,6 +308,25 @@
         showWeeks = cfg.floatCalShowWeeks === true;
         if (ctxWeeksCheck) ctxWeeksCheck.classList.toggle("visible", showWeeks);
         renderCalendar();
+
+        const isAudioMuted = cfg.audioMuted === true;
+        const btnToggleAudio = document.getElementById("ctx-toggle-audio");
+        const audioIco = document.getElementById("cal-audio-ico");
+        const audioLbl = document.getElementById("cal-audio-lbl");
+        if (btnToggleAudio) {
+            btnToggleAudio.classList.toggle("muted", isAudioMuted);
+            btnToggleAudio.setAttribute("aria-pressed", String(isAudioMuted));
+        }
+        if (audioIco) {
+            audioIco.innerHTML = "";
+            audioIco.setAttribute("data-ico", isAudioMuted ? "volume-x" : "volume-high");
+        }
+        if (audioLbl) {
+            audioLbl.textContent = window.ccI18n ? window.ccI18n.t(isAudioMuted ? "tray.soundOff" : "tray.soundOn") : (isAudioMuted ? "Sound off" : "Sound on");
+        }
+        if (window.ccIcons && window.ccIcons.inject) {
+            window.ccIcons.inject(document);
+        }
     }
 
     function renderCalendar() {
@@ -698,6 +717,18 @@
                 window.cc.saveSettings({ floatCalShowWeeks: showWeeks });
             }
             renderCalendar();
+        });
+    }
+
+    const ctxToggleAudio = document.getElementById("ctx-toggle-audio");
+    if (ctxToggleAudio) {
+        ctxToggleAudio.addEventListener("click", () => {
+            closeContextMenu();
+            const next = !cfg.audioMuted;
+            cfg.audioMuted = next;
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ audioMuted: next });
+            }
         });
     }
 

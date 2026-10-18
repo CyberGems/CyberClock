@@ -164,6 +164,7 @@
         const isRelax = activeCaller.kind === "relax";
         const isFloat = isTimer || isSw;
         updateMenuBrand();
+        updateAudioUi(currentCfg.audioMuted);
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
@@ -550,6 +551,29 @@
     if (btnOpenGallery) btnOpenGallery.addEventListener("click", openGallery);
     if (btnCloseGallery) btnCloseGallery.addEventListener("click", closeGallery);
 
+    function updateAudioUi(muted) {
+        const isMuted = muted === true;
+        const icoName = isMuted ? "volume-x" : "volume-high";
+        const textKey = isMuted ? "tray.soundOff" : "tray.soundOn";
+        const text = window.ccI18n ? window.ccI18n.t(textKey) : (isMuted ? "Sound off" : "Sound on");
+
+        document.querySelectorAll('.ctx-item[data-action="toggle_audio"]').forEach((el) => {
+            el.classList.toggle("muted", isMuted);
+            el.setAttribute("aria-pressed", String(isMuted));
+            const ico = el.querySelector(".ico");
+            if (ico) {
+                ico.innerHTML = "";
+                ico.setAttribute("data-ico", icoName);
+            }
+            const lbl = el.querySelector(".label");
+            if (lbl) lbl.textContent = text;
+        });
+
+        if (window.ccIcons && window.ccIcons.inject) {
+            window.ccIcons.inject(document);
+        }
+    }
+
     // Sync menu options with saved configurations
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
@@ -617,6 +641,7 @@
                     const taskbarLbl = document.querySelector("#ctx-timer-taskbar .switch-lbl");
                     if (taskbarLbl) taskbarLbl.textContent = window.ccI18n.t("float.showInTaskbar");
                 }
+                updateAudioUi(cfg.audioMuted);
                 
                 // Active Layout Form Factor
                 const activeLayout = cfg.miniCollapseDate ? "inline" : (cfg.miniLayout || "stacked");
@@ -1085,6 +1110,15 @@
     document.querySelectorAll(".ctx-item[data-action]").forEach((el) => {
         el.addEventListener("click", () => {
             const action = el.dataset.action;
+            if (action === "toggle_audio") {
+                const nextMuted = currentCfg.audioMuted !== true;
+                currentCfg.audioMuted = nextMuted;
+                updateAudioUi(nextMuted);
+                if (window.cc && window.cc.menuAction) {
+                    window.cc.menuAction("toggle_audio");
+                }
+                return;
+            }
             if (action === "close_current_timer" || action === "close_current_sw") {
                 if (activeCaller && activeCaller.caller) {
                     localStorage.removeItem("cc_name_" + activeCaller.caller);
@@ -1310,6 +1344,9 @@
                     } catch (_) {}
                     const td = localD ? parseInt(localD, 10) : (isTimer ? (cfg.timerDesign || cfg.miniDesign || 1) : (cfg.swDesign || cfg.miniDesign || 1));
                     syncTimerDesignUI(td);
+                }
+                if (typeof cfg.audioMuted === "boolean") {
+                    updateAudioUi(cfg.audioMuted);
                 }
             }
         });

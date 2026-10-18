@@ -4248,6 +4248,14 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
     }
 
     match action.as_str() {
+        "toggle_audio" => {
+            let cur = load_settings(&app).audio_muted;
+            let _ = update_settings(&app, |s| {
+                s.audio_muted = !cur;
+                Ok(())
+            });
+            true
+        }
         "full" => {
             switch_to_full_mode(app);
             true

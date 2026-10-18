@@ -567,6 +567,26 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     flex: 1;
 }
 
+.cal-ctx-item .audio-dot {
+    margin-left: auto;
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.7);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+}
+
+.cal-ctx-item.muted .audio-dot {
+    background: #ef4444;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.6);
+}
+
+.cal-ctx-item.muted .ico {
+    color: #ff5470;
+}
+
 .ctx-check {
     font-size: 11px;
     color: var(--accent-a);

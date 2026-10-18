@@ -350,6 +350,25 @@
     .ctx-item.checked .check {
         visibility: visible;
     }
+    .ctx-item .audio-dot {
+        flex: 0 0 auto;
+        margin-left: auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ctx-item.muted .audio-dot {
+        background: #ef4444;
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+    .ctx-item.muted .ico .cc-ico {
+        stroke: url(#cc-grad-danger);
+        color: #ff5470;
+        filter: drop-shadow(0 0 3px rgba(255, 84, 112, 0.5));
+    }
     .ctx-item.danger {
         color: rgba(255, 255, 255, 0.85);
     }
