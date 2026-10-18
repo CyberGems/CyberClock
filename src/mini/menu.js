@@ -862,7 +862,7 @@
 
     function updateClickThroughUi(on) {
         const isCtp = on === true;
-        const icoName = isCtp ? "eye-off" : "eye";
+        const icoName = "click";
         const textKey = "settings.mini.clickThrough";
         const text = window.ccI18n ? window.ccI18n.t(textKey) : "Click-through";
 

@@ -4316,8 +4316,8 @@ fn schedule_hide_mini_tip(app: AppHandle) {
 // float windows for both the tray menu and the mini context menu.
 #[tauri::command]
 async fn menu_action(app: AppHandle, action: String) -> bool {
-    // Hide menu first (except for "aot" which needs a visual delay in the UI)
-    if action != "aot" {
+    // Hide menu first (except for "aot", "toggle_audio", and "toggle_click_through" which keep the menu open)
+    if action != "aot" && action != "toggle_audio" && action != "toggle_click_through" {
         if let Some(menu) = app.get_webview_window("menu") {
             if menu.is_visible().unwrap_or(false) {
                 let _ = menu.hide();

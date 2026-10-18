@@ -160,10 +160,10 @@
             ctpBtn.classList.toggle("on", ctpOn);
             ctpBtn.setAttribute("aria-pressed", String(ctpOn));
         }
-        if (ctpIco) ctpIco.setAttribute("data-ico", ctpOn ? "eye-off" : "eye");
+        if (ctpIco) ctpIco.setAttribute("data-ico", "click");
         if (ctpLbl) ctpLbl.textContent = ctpOn
-            ? T("tray.clickThroughOff", "Click-through off")
-            : T("tray.clickThrough", "Click-through");
+            ? T("tray.clickThroughOn", "Click-through on")
+            : T("tray.clickThroughOff", "Click-through off");
 
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
