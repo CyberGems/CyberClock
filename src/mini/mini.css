@@ -2229,10 +2229,21 @@
         color: var(--accent-a, #00e5ff);
         text-shadow: 0 0 6px rgba(var(--rgb-accent), 0.4);
     }
-    .mini-tip-edit-btn.save:hover {
+    .mini-tip-edit-btn.save:hover:not(:disabled) {
         background: rgba(var(--rgb-accent), 0.4);
         box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.35);
         transform: translateY(-1px);
+    }
+    .mini-tip-edit-btn.save:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.38);
+        text-shadow: none;
+        box-shadow: none;
+        transform: none;
+        pointer-events: none;
     }
     .mini-tip-edit-btn.cancel {
         background: rgba(255, 255, 255, 0.08);
@@ -2266,6 +2277,12 @@
     .mini-tip[data-design="4"] .mini-tip-edit-btn.save {
         color: #1c2e44;
         border-color: color-mix(in srgb, var(--accent-a) 60%, #2c5282);
+    }
+    .mini-tip[data-design="4"] .mini-tip-edit-btn.save:disabled {
+        opacity: 0.35;
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.12);
+        color: rgba(0, 0, 0, 0.35);
     }
     .mini-tip[data-design="4"] .mini-tip-edit-btn.cancel {
         background: rgba(0, 0, 0, 0.06);

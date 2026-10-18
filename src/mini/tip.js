@@ -219,7 +219,12 @@
             cancelBtn.className = "mini-tip-edit-btn cancel";
             cancelBtn.textContent = `✕ ${t("mini.tip.cancel")}`;
 
+            const updateSaveState = () => {
+                saveBtn.disabled = textarea.value.trim().length === 0;
+            };
+
             const doSave = async () => {
+                if (saveBtn.disabled) return;
                 const text = textarea.value.trim();
                 await saveNote(text);
             };
@@ -238,6 +243,9 @@
                 e.stopPropagation();
                 doCancel();
             });
+
+            textarea.addEventListener("input", updateSaveState);
+            updateSaveState();
 
             actionsDiv.appendChild(saveBtn);
             actionsDiv.appendChild(cancelBtn);
@@ -260,7 +268,7 @@
                 e.stopPropagation();
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    doSave();
+                    if (!saveBtn.disabled) doSave();
                 } else if (e.key === "Escape") {
                     e.preventDefault();
                     doCancel();
