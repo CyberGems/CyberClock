@@ -163,7 +163,7 @@ const ANALOG_PLATE_CSS_PX: f64 = ANALOG_DIAL_CSS_PX + 8.0;
 /// The mask is smaller than the plate so it cuts solid color. The plate's
 /// antialiased rim stays outside the mask. Pixels inside a region that are
 /// still transparent get painted white, which is the bright arc on top.
-const ANALOG_REGION_INSET_CSS_PX: f64 = 2.0;
+const ANALOG_REGION_INSET_CSS_PX: f64 = 0.0;
 /// Kept at 0. Extra radius would include transparent pixels, and those
 /// paint white.
 const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 0.0;
@@ -2172,7 +2172,7 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         if full {
             let rgn = CreateRectRgn(0, 0, w, h);
             if !rgn.is_null() {
-                if SetWindowRgn(hwnd, rgn, 1) == 0 {
+                if SetWindowRgn(hwnd, rgn, 0) == 0 {
                     DeleteObject(rgn);
                 }
             }
@@ -2209,7 +2209,7 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         if rgn.is_null() {
             return;
         }
-        if SetWindowRgn(hwnd, rgn, 1) == 0 {
+        if SetWindowRgn(hwnd, rgn, 0) == 0 {
             DeleteObject(rgn);
         }
     }
@@ -2325,9 +2325,23 @@ unsafe extern "system" fn window_drag_subclass_proc(
 ) -> windows_sys::Win32::Foundation::LRESULT {
     use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        WM_CREATE, WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_MOVING, WM_NCDESTROY, WM_NCHITTEST,
-        WM_PARENTNOTIFY, WM_SETCURSOR,
+        WM_CREATE, WM_ENTERSIZEMOVE, WM_ERASEBKGND, WM_EXITSIZEMOVE, WM_MOVING,
+        WM_NCACTIVATE, WM_NCDESTROY, WM_NCHITTEST, WM_NCPAINT, WM_PARENTNOTIFY, WM_SETCURSOR,
     };
+
+    // For analog windows, prevent Windows from painting a classic frame or
+    // inactive titlebar on activation state changes or non-client paint events.
+    if analog_hit_root(hwnd).is_some() {
+        if msg == WM_NCPAINT {
+            return 0;
+        }
+        if msg == WM_NCACTIVATE {
+            return 1;
+        }
+        if msg == WM_ERASEBKGND {
+            return 1;
+        }
+    }
 
     // The analog window is a square larger than the dial. Clicks in that
     // margin (and in the square's corners outside the circle) pass through
