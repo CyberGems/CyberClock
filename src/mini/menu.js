@@ -409,8 +409,7 @@
                 }
                 return;
             }
-            const borderY = el.offsetHeight - el.clientHeight;
-            const h = Math.max(el.scrollHeight, el.offsetHeight) + borderY + 44;
+            const h = Math.ceil(el.offsetHeight + 18);
             if (window.cc && window.cc.miniMenuReady) {
                 window.cc.miniMenuReady(292, h);
             }
@@ -588,8 +587,8 @@
             if (lbl) lbl.textContent = text;
         });
 
-        if (window.ccIcons && window.ccIcons.inject) {
-            window.ccIcons.inject(document);
+        if (window.ccIcons) {
+            window.ccIcons.replaceIcons();
         }
     }
 
@@ -611,8 +610,8 @@
             if (lbl) lbl.textContent = text;
         });
 
-        if (window.ccIcons && window.ccIcons.inject) {
-            window.ccIcons.inject(document);
+        if (window.ccIcons) {
+            window.ccIcons.replaceIcons();
         }
     }
 

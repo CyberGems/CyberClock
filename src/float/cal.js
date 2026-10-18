@@ -375,7 +375,9 @@
             ctpLbl.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.clickThrough") : "Click-through";
         }
 
-        if (window.ccIcons && window.ccIcons.inject) {
+        if (window.ccIcons && window.ccIcons.replaceIcons) {
+            window.ccIcons.replaceIcons(document);
+        } else if (window.ccIcons && window.ccIcons.inject) {
             window.ccIcons.inject(document);
         }
     }

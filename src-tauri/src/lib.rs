@@ -155,6 +155,7 @@ static ANALOG_HIT_ROOTS: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
 /// Analog windows whose context menu is open. While set, the whole square
 /// stays clickable so menu items outside the circle still work.
 static ANALOG_MENU_CAPTURE: OnceLock<Mutex<HashSet<isize>>> = OnceLock::new();
+static ANALOG_HWND_ZOOMS: OnceLock<Mutex<HashMap<isize, f64>>> = OnceLock::new();
 /// CSS size of `.float-analog-shell` (border-box). Kept in sync with analog.css.
 const ANALOG_DIAL_CSS_PX: f64 = 266.0;
 /// Opaque plate behind the dial (`.analog-plate`). 4px larger than the
@@ -184,6 +185,18 @@ fn analog_hit_roots() -> &'static Mutex<HashSet<isize>> {
 
 fn analog_menu_capture() -> &'static Mutex<HashSet<isize>> {
     ANALOG_MENU_CAPTURE.get_or_init(|| Mutex::new(HashSet::new()))
+}
+
+fn analog_hwnd_zooms() -> &'static Mutex<HashMap<isize, f64>> {
+    ANALOG_HWND_ZOOMS.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn remember_analog_hwnd_zoom(hwnd: isize, zoom: f64) {
+    lock_or_recover(analog_hwnd_zooms()).insert(hwnd, zoom);
+}
+
+fn get_analog_hwnd_zoom(hwnd: isize) -> f64 {
+    lock_or_recover(analog_hwnd_zooms()).get(&hwnd).copied().unwrap_or(1.0)
 }
 
 fn remember_window_target(window: &WebviewWindow, width: u32, height: u32) {
@@ -784,11 +797,14 @@ fn spawn_float_window_with_slot(
     };
     // Compact size per float kind
     let (title, wide, tall) = match kind {
-        "timer" => ("Timer · CyberClock", 286.0, 92.0),
-        "cal" => ("Calendar · CyberClock", 286.0, 268.0),
-        "analog" => ("Analog Clock · CyberClock", 316.0, 316.0),
-        "relax" => ("Relax · CyberClock", 300.0, 176.0),
-        _ => ("Stopwatch · CyberClock", 286.0, 52.0),
+        "timer" => ("Timer · CyberClock", 286.0 * zoom, 92.0 * zoom),
+        "cal" => ("Calendar · CyberClock", 286.0 * zoom, 268.0 * zoom),
+        "analog" => {
+            let sz = (316.0 * zoom).max(320.0);
+            ("Analog Clock · CyberClock", sz, sz)
+        }
+        "relax" => ("Relax · CyberClock", 300.0 * zoom, 176.0 * zoom),
+        _ => ("Stopwatch · CyberClock", 286.0 * zoom, 52.0 * zoom),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
     let url = if kind == "cal" {
@@ -880,7 +896,7 @@ fn spawn_float_window_with_slot(
 
     let builder = WebviewWindowBuilder::new(app, &label, url)
         .title(title)
-        .inner_size(wide * zoom, tall * zoom)
+        .inner_size(wide, tall)
         .position(pos_x, pos_y)
         .decorations(false)
         .transparent(true)
@@ -907,6 +923,9 @@ fn spawn_float_window_with_slot(
                     Ok(())
                 });
             } else if kind == "analog" {
+                if let Ok(hwnd) = win.hwnd() {
+                    remember_analog_hwnd_zoom(hwnd.0 as isize, zoom);
+                }
                 let app_handle = app.clone();
                 let _ = update_settings(&app_handle, |s| {
                     s.float_analog_open = true;
@@ -1083,7 +1102,19 @@ fn move_window(window: WebviewWindow, x: i32, y: i32) {
 }
 
 #[tauri::command]
-fn set_window_size(window: WebviewWindow, width: i32, height: i32, recenter: Option<bool>) {
+fn set_window_size(
+    window: WebviewWindow,
+    width: i32,
+    height: i32,
+    recenter: Option<bool>,
+    zoom: Option<f64>,
+) {
+    if let Some(z) = zoom {
+        #[cfg(windows)]
+        if let Ok(hwnd) = window.hwnd() {
+            remember_analog_hwnd_zoom(hwnd.0 as isize, z);
+        }
+    }
     // Reject invalid values.
     // Wide display faces (Orbitron bold, seconds, AM/PM) grow the mini
     // bar past the old 2000px cap once zoom is applied.
@@ -2082,7 +2113,7 @@ fn analog_cursor_on_dial(root: isize) -> bool {
         }
         let dpi = GetDpiForWindow(root_hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let zoom = ((w / scale) / 316.0).max(0.5);
+        let zoom = get_analog_hwnd_zoom(root);
         let radius = ((ANALOG_PLATE_CSS_PX * zoom) / 2.0 - ANALOG_REGION_INSET_CSS_PX
             + ANALOG_DIAL_HIT_SLACK_CSS_PX)
             * scale;
@@ -2195,7 +2226,7 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         }
         let dpi = GetDpiForWindow(hwnd);
         let scale = if dpi == 0 { 1.0 } else { dpi as f64 / 96.0 };
-        let zoom = ((cw as f64 / scale) / 316.0).max(0.5);
+        let zoom = get_analog_hwnd_zoom(hwnd as isize);
         let mut d = (((ANALOG_PLATE_CSS_PX * zoom) - ANALOG_REGION_INSET_CSS_PX * 2.0
             + ANALOG_DIAL_HIT_SLACK_CSS_PX * 2.0)
             * scale)
@@ -2430,6 +2461,7 @@ unsafe extern "system" fn window_drag_subclass_proc(
         let key = hwnd as isize;
         lock_or_recover(analog_hit_roots()).remove(&key);
         lock_or_recover(analog_menu_capture()).remove(&key);
+        lock_or_recover(analog_hwnd_zooms()).remove(&key);
         RemoveWindowSubclass(hwnd, Some(window_drag_subclass_proc), uid_subclass);
     }
     DefSubclassProc(hwnd, msg, wparam, lparam)

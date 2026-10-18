@@ -171,8 +171,8 @@ body.is-dragging * {
 
 .analog-ctx-menu {
     position: absolute;
-    width: 236px;
-    max-height: calc(100% - 20px);
+    width: 230px;
+    max-height: calc(100% - 16px);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
@@ -425,6 +425,22 @@ body.is-dragging * {
 .analog-ctx-item.muted .audio-dot {
     background: #ef4444;
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.6);
+}
+
+.analog-ctx-item .ico {
+    width: 13px;
+    height: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--accent-a, #00d4ff);
+    opacity: 0.9;
+}
+
+.analog-ctx-item .ico .cc-ico {
+    width: 13px;
+    height: 13px;
 }
 
 .analog-ctx-item.muted .ico {

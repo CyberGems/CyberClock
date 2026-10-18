@@ -86,6 +86,7 @@
     const BASE_CANVAS_SZ = 266;
     const BASE_PLATE_SZ = 274;
     const BASE_WIN_SZ = 316;
+    const MIN_WIN_SZ = 320;
 
     function currentZoom() {
         const z = cfg.floatAnalogZoom;
@@ -97,7 +98,7 @@
         if (!Number.isFinite(zoom) || zoom <= 0) return;
         const canvasSz = Math.round(BASE_CANVAS_SZ * zoom);
         const plateSz = Math.round(BASE_PLATE_SZ * zoom);
-        const winSz = Math.round(BASE_WIN_SZ * zoom);
+        const winSz = Math.max(MIN_WIN_SZ, Math.round(BASE_WIN_SZ * zoom));
 
         const plate = document.getElementById("analog-plate");
         const shell = document.getElementById("analog-shell");
@@ -118,7 +119,7 @@
         renderFrame();
 
         if (window.cc && window.cc.setWindowSize) {
-            window.cc.setWindowSize({ width: winSz, height: winSz, recenter: true });
+            window.cc.setWindowSize({ width: winSz, height: winSz, recenter: true, zoom: zoom });
         }
 
         const targetPct = Math.round(zoom * 100);
@@ -233,7 +234,9 @@
             ctpLbl.textContent = window.ccI18n ? window.ccI18n.t("settings.mini.clickThrough") : "Click-through";
         }
 
-        if (window.ccIcons && window.ccIcons.inject) {
+        if (window.ccIcons && window.ccIcons.replaceIcons) {
+            window.ccIcons.replaceIcons(document);
+        } else if (window.ccIcons && window.ccIcons.inject) {
             window.ccIcons.inject(document);
         }
     }
@@ -305,12 +308,12 @@
         menuOpenTime = Date.now();
         window.focus();
         ctxMenu.hidden = false;
-        const menuWidth = ctxMenu.offsetWidth || 204;
-        const menuHeight = ctxMenu.offsetHeight || 215;
+        const menuWidth = ctxMenu.offsetWidth || 230;
+        const menuHeight = ctxMenu.offsetHeight || 310;
 
-        const margin = 16;
-        const maxX = window.innerWidth - menuWidth - margin;
-        const maxY = window.innerHeight - menuHeight - margin;
+        const margin = 8;
+        const maxX = Math.max(margin, window.innerWidth - menuWidth - margin);
+        const maxY = Math.max(margin, window.innerHeight - menuHeight - margin);
 
         const x = Math.max(margin, Math.min(clientX, maxX));
         const y = Math.max(margin, Math.min(clientY, maxY));

@@ -585,6 +585,22 @@ button, .cal-btn, .picker-btn, .picker-month-btn, .cal-day-cell, .cal-op-chip, .
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.6);
 }
 
+.cal-ctx-item .ico {
+    width: 12px;
+    height: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--accent-a);
+    opacity: 0.9;
+}
+
+.cal-ctx-item .ico .cc-ico {
+    width: 12px;
+    height: 12px;
+}
+
 .cal-ctx-item.muted .ico {
     color: #ff5470;
 }

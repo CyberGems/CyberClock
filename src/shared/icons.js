@@ -507,6 +507,7 @@
     window.ccIcons = {
         init,
         replaceIcons,
+        inject: replaceIcons,
     };
 
     if (document.readyState === "loading") {

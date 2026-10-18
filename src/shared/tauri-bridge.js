@@ -89,6 +89,7 @@
             // visual center instead of the top-left anchor (see
             // set_window_size in lib.rs).
             if (size.recenter) args.recenter = true;
+            if (typeof size.zoom === "number") args.zoom = size.zoom;
             await invoke("set_window_size", args);
         },
         openMiniContextMenu: async (point) => {
