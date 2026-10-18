@@ -303,7 +303,7 @@
         const lock = document.getElementById("toggle-cal-lock");
         if (lock) lock.classList.toggle("on", cfg.calPositionLocked === true);
         const weeks = document.getElementById("toggle-cal-weeks");
-        if (weeks) weeks.classList.toggle("on", cfg.calShowWeeks === true);
+        if (weeks) weeks.classList.toggle("on", cfg.floatCalShowWeeks === true);
         const op = typeof cfg.floatCalOpacity === "number" ? cfg.floatCalOpacity : 1;
         document.querySelectorAll(".cal-op-chip").forEach((chip) => {
             chip.classList.toggle("active", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
@@ -1764,7 +1764,11 @@
             const tgl = document.getElementById("toggle-cal-weeks");
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
-            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ calShowWeeks: on });
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalShowWeeks: on });
+            }
+            currentCfg = Object.assign({}, currentCfg, { floatCalShowWeeks: on });
+            syncCalMenu(currentCfg);
         });
     }
 
@@ -1774,7 +1778,11 @@
             e.stopPropagation();
             const on = !btnCalAuto.classList.contains("active");
             btnCalAuto.classList.toggle("active", on);
-            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalAutoRotate: on });
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalAutoRotate: on });
+            }
+            currentCfg = Object.assign({}, currentCfg, { floatCalAutoRotate: on });
+            syncCalMenu(currentCfg);
         });
     }
 
@@ -1784,7 +1792,11 @@
             const op = parseFloat(chip.dataset.op);
             if (!Number.isFinite(op)) return;
             document.querySelectorAll(".cal-op-chip").forEach((c) => c.classList.toggle("active", c === chip));
-            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalOpacity: op });
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalOpacity: op });
+            }
+            currentCfg = Object.assign({}, currentCfg, { floatCalOpacity: op });
+            syncCalMenu(currentCfg);
         });
     });
 
@@ -1794,7 +1806,11 @@
             const z = parseFloat(chip.dataset.zoom);
             if (!Number.isFinite(z)) return;
             document.querySelectorAll(".cal-zoom-chip").forEach((c) => c.classList.toggle("active", c === chip));
-            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatCalZoom: z });
+            if (window.cc && window.cc.saveSettings) {
+                window.cc.saveSettings({ floatCalZoom: z });
+            }
+            currentCfg = Object.assign({}, currentCfg, { floatCalZoom: z });
+            syncCalMenu(currentCfg);
         });
     });
 
@@ -1802,13 +1818,29 @@
     if (window.__TAURI__ && window.__TAURI__.event) {
         window.__TAURI__.event.listen("menu:caller", (e) => {
             if (e.payload) {
-                setupMenuForCaller(e.payload);
+                if (window.cc && window.cc.getSettings) {
+                    window.cc.getSettings().then((cfg) => {
+                        if (cfg) currentCfg = Object.assign(currentCfg || {}, cfg);
+                        setupMenuForCaller(e.payload);
+                    }).catch(() => setupMenuForCaller(e.payload));
+                } else {
+                    setupMenuForCaller(e.payload);
+                }
             }
         });
     }
     if (window.cc && window.cc.getMenuCaller) {
         window.cc.getMenuCaller().then((info) => {
-            if (info) setupMenuForCaller(info);
+            if (info) {
+                if (window.cc && window.cc.getSettings) {
+                    window.cc.getSettings().then((cfg) => {
+                        if (cfg) currentCfg = Object.assign(currentCfg || {}, cfg);
+                        setupMenuForCaller(info);
+                    }).catch(() => setupMenuForCaller(info));
+                } else {
+                    setupMenuForCaller(info);
+                }
+            }
         }).catch(() => {});
     }
 

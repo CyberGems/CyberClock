@@ -178,8 +178,6 @@
             window.ccI18n.apply(document);
         }
 
-        buildSkinPills();
-
         if (typeof cfg.floatCalAutoRotate === "boolean") {
             isAutoRotate = cfg.floatCalAutoRotate;
         } else {
@@ -187,7 +185,6 @@
                 isAutoRotate = localStorage.getItem("cc_float_cal_auto_rotate") === "1";
             } catch (_) {}
         }
-        if (btnSkinAuto) btnSkinAuto.classList.toggle("active", isAutoRotate);
 
         if (isAutoRotate) {
             selectCalSkin(getDailySkinId(), false);
