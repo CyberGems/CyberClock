@@ -88,14 +88,21 @@
             phaseEl.textContent = t("relax.breathe.start");
             phaseName = "";
         }
-        const key = !playing ? "relax.play" : paused ? "relax.resume" : "relax.pause";
-        const label = t(key);
-        btnPlay.setAttribute("data-tooltip", label);
-        btnPlay.setAttribute("aria-label", label);
+        const isMuted = cfg && cfg.audioMuted === true;
+        btnPlay.disabled = isMuted;
+        if (isMuted) {
+            const muteLabel = t("relax.tooltip.unmute");
+            btnPlay.setAttribute("data-tooltip", muteLabel);
+            btnPlay.setAttribute("aria-label", muteLabel);
+        } else {
+            const key = !playing ? "relax.play" : paused ? "relax.resume" : "relax.pause";
+            const label = t(key);
+            btnPlay.setAttribute("data-tooltip", label);
+            btnPlay.setAttribute("aria-label", label);
+        }
         btnPlay.classList.toggle("is-playing", playing && !paused);
         if (btnShuffle) btnShuffle.classList.toggle("is-on", shuffleOn);
         if (btnMute) {
-            const isMuted = cfg && cfg.audioMuted === true;
             btnMute.style.display = isMuted ? "inline-flex" : "none";
             if (isMuted) {
                 const label = t("relax.tooltip.unmute");
@@ -134,6 +141,13 @@
             guideStart = performance.now();
             phaseName = "";
         }
+        if (s.audioMuted === true && playing && !paused) {
+            sessionShown = performance.now() - sessionStart;
+            paused = true;
+            if (engine) engine.suspend();
+            clearTimeout(shuffleTimer);
+            shuffleTimer = null;
+        }
         applyAudioPrefs();
         refreshLabels();
         applyRelaxZoom(s.floatRelaxZoom);
@@ -155,6 +169,10 @@
     function startTrack(index) {
         trackIndex = (index + TRACKS.length) % TRACKS.length;
         if (!engine) return;
+        if (cfg && cfg.audioMuted === true) {
+            refreshLabels();
+            return;
+        }
         engine.resume();
         applyAudioPrefs();
         engine.playTrack(TRACKS[trackIndex]);
@@ -192,13 +210,13 @@
     function toggleShuffle() {
         shuffleOn = !shuffleOn;
         shuffleQueue = [];
-        if (shuffleOn && !playing) startTrack(nextShuffleIndex());
+        if (shuffleOn && !playing && (!cfg || !cfg.audioMuted)) startTrack(nextShuffleIndex());
         else scheduleShuffle();
         refreshLabels();
     }
 
     function togglePlay() {
-        if (!engine) return;
+        if (!engine || (cfg && cfg.audioMuted === true)) return;
         if (!playing) {
             startTrack(trackIndex);
             return;

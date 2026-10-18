@@ -2329,6 +2329,14 @@
         // Relax engine (otherwise the module looks simply "broken").
         const muteBanner = document.getElementById("r-mute-banner");
         if (muteBanner) muteBanner.style.display = s.audioMuted === true ? "" : "none";
+        const muteWrap = document.getElementById("r-mute-wrap");
+        if (muteWrap) muteWrap.style.display = s.audioMuted === true ? "" : "none";
+        if (s.audioMuted === true && window.audioEngine.isPlaying && typeof rPause === "function" && !rPaused) {
+            rPause();
+        }
+        if (typeof updatePlayButtonUI === "function") {
+            updatePlayButtonUI(window.audioEngine.isPlaying);
+        }
         if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
         if (typeof updatePlayingTrackCardClass === "function") {
             updatePlayingTrackCardClass(window.audioEngine.isPlaying);
@@ -6340,6 +6348,7 @@
         zenFlowQueue = [];
 
     function startZenFlow() {
+        if (cfg && cfg.audioMuted === true) return;
         zenFlowActive = true;
         if (zenFlowTimer) clearTimeout(zenFlowTimer);
         
@@ -6418,10 +6427,17 @@
             window.cc.reportRelaxPlaying(reported);
         }
 
+        const isMuted = cfg && cfg.audioMuted === true;
+        playBtn.disabled = isMuted;
+
         let text = "";
         let labelKey = "";
         let tooltipKey = "";
-        if (isPlaying && rPaused) {
+        if (isMuted) {
+            labelKey = "relax.play";
+            text = window.ccI18n.t("relax.play");
+            tooltipKey = "relax.tooltip.unmute";
+        } else if (isPlaying && rPaused) {
             labelKey = "relax.resume";
             text = window.ccI18n.t("relax.resume");
             tooltipKey = "relax.tooltip.resume";
@@ -6445,18 +6461,19 @@
         if (playWrap) {
             playWrap.setAttribute("data-i18n-attr", `data-tooltip:${tooltipKey}`);
             playWrap.setAttribute("data-tooltip", window.ccI18n.t(tooltipKey));
+            playWrap.classList.toggle("is-disabled", isMuted);
         }
 
         // Breathe circle active tint follows playback state
         const circle = document.getElementById("breathe-circle");
         if (circle) {
-            circle.setAttribute("data-active", isPlaying && !rPaused ? "1" : "0");
+            circle.setAttribute("data-active", !isMuted && isPlaying && !rPaused ? "1" : "0");
         }
 
         // Shuffle button shows its active state while Zen Flow runs
         const shuffleBtn = document.getElementById("r-shuffle");
         if (shuffleBtn) {
-            shuffleBtn.classList.toggle("on", zenFlowActive);
+            shuffleBtn.classList.toggle("on", !isMuted && zenFlowActive);
         }
     }
 
@@ -6582,7 +6599,7 @@
 
     // Normal track play (triggered when a track is clicked manually)
     function rPlayTrack() {
-        if (!rSelected) return;
+        if (!rSelected || (cfg && cfg.audioMuted === true)) return;
         stopZenFlow();
         window.audioEngine.playTrack(rSelected);
         window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
@@ -6615,6 +6632,7 @@
     }
 
     function rTogglePlay() {
+        if (cfg && cfg.audioMuted === true) return;
         if (window.audioEngine.isPlaying) {
             rPauseOrResume();
         } else if (rSelected) {
@@ -6942,6 +6960,7 @@
 
             if (rPaused && rSelected === t) {
                 // Same track while paused: just resume
+                if (cfg && cfg.audioMuted === true) return;
                 stopZenFlow();
                 rResume();
                 return;
@@ -6957,11 +6976,17 @@
             preSelectRelaxTrack(t);
             rSelected = t;
             if (window.audioEngine.isPlaying) {
-                window.audioEngine.playTrack(t);
-                updatePlayButtonUI(true);
-                updatePlayingTrackCardClass(true);
+                if (cfg && cfg.audioMuted === true) {
+                    rPause();
+                } else {
+                    window.audioEngine.playTrack(t);
+                    updatePlayButtonUI(true);
+                    updatePlayingTrackCardClass(true);
+                }
             } else {
-                rPlayTrack();
+                if (cfg && cfg.audioMuted !== true) {
+                    rPlayTrack();
+                }
             }
             updateMixStateUI();
         });
@@ -6997,6 +7022,7 @@
         if (zenFlowActive) {
             rStop(true);
         } else {
+            if (cfg && cfg.audioMuted === true) return;
             if (rSelected) preSelectRelaxTrack(null);
             startZenFlow();
         }
@@ -7019,6 +7045,7 @@
     // mid-session glance at the circle can't wipe the session timer).
     document.getElementById("breathe-circle").addEventListener("click", () => {
         if (!window.audioEngine.isPlaying) {
+            if (cfg && cfg.audioMuted === true) return;
             if (rSelected) rPlayTrack();
             else startZenFlow();
         } else {
@@ -7038,13 +7065,27 @@
         );
     });
 
-    // Mute banner: one click clears the global mute that silences every
-    // sound in the app (same setting as the tray "Sound" toggle).
+    // Mute banner and control row mute indicator: one click clears
+    // the global mute that silences every sound in the app.
+    function clearAudioMute() {
+        if (cfg) cfg.audioMuted = false;
+        window.audioEngine.setMuted(false);
+        const muteBanner = document.getElementById("r-mute-banner");
+        if (muteBanner) muteBanner.style.display = "none";
+        const muteWrap = document.getElementById("r-mute-wrap");
+        if (muteWrap) muteWrap.style.display = "none";
+        updatePlayButtonUI(window.audioEngine.isPlaying);
+        window.cc.saveSettings({ audioMuted: false });
+    }
+
+    const rMuteBtn = document.getElementById("r-mute-btn");
+    if (rMuteBtn) {
+        rMuteBtn.addEventListener("click", clearAudioMute);
+    }
+
     const rMuteEnable = document.getElementById("r-mute-enable");
     if (rMuteEnable) {
-        rMuteEnable.addEventListener("click", () => {
-            window.cc.saveSettings({ audioMuted: false });
-        });
+        rMuteEnable.addEventListener("click", clearAudioMute);
     }
 
     document.querySelectorAll(".ast-btn").forEach((b) => {
