@@ -922,12 +922,22 @@
         trigger.innerHTML = '<span class="alarm-choice-label"></span><span class="alarm-sound-caret" aria-hidden="true"></span>';
         select.before(trigger);
         select.addEventListener("change", () => syncAlarmChoice(select));
-        trigger.addEventListener("click", () => openAlarmChoiceMenu(select, trigger));
+        trigger.addEventListener("click", () => {
+            if (select.id === "alarm-edit-sound-count") {
+                const countRadio = document.getElementById("alarm-edit-repeat-count");
+                if (countRadio && !countRadio.checked) {
+                    countRadio.checked = true;
+                    countRadio.dispatchEvent(new Event("change", { bubbles: true }));
+                    syncAlarmSoundRepeat();
+                }
+            }
+            openAlarmChoiceMenu(select, trigger);
+        });
         syncAlarmChoice(select);
     }
 
     function mountAlarmChoices() {
-        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period"].forEach((id) => {
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count"].forEach((id) => {
             mountAlarmChoice(document.getElementById(id), true);
         });
         ["alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
@@ -1386,7 +1396,17 @@
         const pauseInput = document.getElementById("alarm-edit-sound-pause");
         if (countRadio) countRadio.checked = !untilDismiss;
         if (untilRadio) untilRadio.checked = untilDismiss;
-        if (countInput) countInput.value = String(alarmEditorDraft.soundRepeatCount || 1);
+        if (countInput) {
+            const countVal = String(alarmEditorDraft.soundRepeatCount || 1);
+            if (![...countInput.options].some((o) => o.value === countVal)) {
+                const opt = document.createElement("option");
+                opt.value = countVal;
+                opt.textContent = countVal;
+                countInput.appendChild(opt);
+            }
+            countInput.value = countVal;
+            syncAlarmChoice(countInput);
+        }
         if (pauseInput) pauseInput.value = String(alarmEditorDraft.soundPauseSecs ?? 1);
         const deleteAfter = document.getElementById("alarm-edit-delete-after");
         if (deleteAfter) deleteAfter.checked = !!alarmEditorDraft.deleteAfter;
@@ -1693,8 +1713,14 @@
 
     function syncAlarmSoundRepeat() {
         const until = document.getElementById("alarm-edit-repeat-until")?.checked === true;
-        const countInput = document.getElementById("alarm-edit-sound-count");
-        if (countInput) countInput.disabled = until;
+        const countSelect = document.getElementById("alarm-edit-sound-count");
+        if (countSelect) {
+            countSelect.disabled = until;
+            const trigger = countSelect.previousElementSibling;
+            if (trigger && trigger.classList.contains("alarm-choice-trigger")) {
+                trigger.classList.toggle("is-dimmed", until);
+            }
+        }
     }
 
     let alarmConfirmCallback = null;
@@ -9511,7 +9537,7 @@
             e.preventDefault();
             return;
         }
-        const textTarget = e.target.closest("input[type='text'], input[type='number'], input[type='search'], input:not([type]), textarea");
+        const textTarget = e.target.closest("input[type='text'], input[type='search'], input:not([type]), textarea");
         const alarmCard = e.target.closest(".alarm-card");
         e.preventDefault();
         if (textTarget) {

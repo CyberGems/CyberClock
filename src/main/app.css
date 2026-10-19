@@ -4018,38 +4018,104 @@
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.02);
     }
+    .alarm-repeat-modes {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 6px 10px;
+    }
     .alarm-repeat-mode {
-        display: grid;
-        grid-template-columns: 16px minmax(0, 1fr) auto;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
         margin: 0;
-        padding: 6px 10px;
-        color: var(--text-hi);
+        padding: 2px 0;
+        color: var(--text-md);
         cursor: pointer;
-        font-size: calc(11.5px * var(--ui-scale));
-        transition: background 0.15s ease, box-shadow 0.15s ease;
-    }
-    .alarm-repeat-mode + .alarm-repeat-mode {
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: calc(11px * var(--ui-scale));
+        user-select: none;
+        transition: color 0.15s ease;
     }
     .alarm-repeat-mode:hover {
-        background: rgba(255, 255, 255, 0.07);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-    .alarm-repeat-mode:has(input[type="radio"]:checked) {
-        background: rgba(var(--rgb-accent), 0.12);
-        box-shadow: inset 3px 0 0 var(--accent-a);
-    }
-    .alarm-repeat-mode:has(input[type="radio"]:checked):hover {
-        background: rgba(var(--rgb-accent), 0.18);
-        box-shadow: inset 3px 0 0 var(--accent-a);
+        color: var(--text-hi);
     }
     .alarm-repeat-mode input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
         margin: 0;
-        accent-color: var(--accent-a);
     }
-    .alarm-repeat-mode input[type="number"],
+    /* Cyber LED Radio Indicator */
+    .alarm-radio-led {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1.5px solid rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+        flex-shrink: 0;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .alarm-repeat-mode:hover .alarm-radio-led {
+        border-color: rgba(var(--rgb-accent), 0.6);
+        box-shadow: 0 0 6px rgba(var(--rgb-accent), 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+    /* LED ON (Encendido) */
+    .alarm-repeat-mode:has(input[type="radio"]:checked) .alarm-radio-led {
+        background: var(--accent-a);
+        border-color: #ffffff;
+        box-shadow: 0 0 8px var(--accent-a), 0 0 16px rgba(var(--rgb-accent), 0.7);
+    }
+    .alarm-repeat-mode:has(input[type="radio"]:checked) .alarm-radio-led::after {
+        content: "";
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 0 2px #ffffff;
+    }
+    .alarm-repeat-mode-text {
+        font-size: calc(11px * var(--ui-scale));
+        color: var(--text-md);
+        transition: color 0.15s ease;
+    }
+    .alarm-repeat-mode:has(input[type="radio"]:checked) .alarm-repeat-mode-text {
+        color: var(--text-hi);
+        font-weight: 600;
+    }
+    /* Count dropdown button inside alarm-repeat-mode */
+    .alarm-repeat-mode .alarm-choice-trigger.is-compact {
+        min-height: 24px;
+        height: 24px;
+        padding: 2px 6px;
+        font-family: var(--font-mono);
+        font-size: calc(11px * var(--ui-scale));
+        min-width: 42px;
+        border-radius: 6px;
+        margin-left: 2px;
+    }
+    .alarm-repeat-mode .alarm-choice-trigger.is-dimmed {
+        opacity: 0.35;
+    }
+    .alarm-repeat-pause {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 0;
+        padding: 6px 10px;
+        border-top: 1px solid var(--border);
+        color: var(--text-md);
+        font-size: calc(11px * var(--ui-scale));
+    }
     .alarm-repeat-pause input[type="number"] {
         width: 48px;
         height: 24px;
@@ -4061,20 +4127,6 @@
         border-radius: 6px;
         font: inherit;
         font-size: calc(11px * var(--ui-scale));
-    }
-    .alarm-repeat-mode input[type="number"]:disabled {
-        opacity: 0.4;
-    }
-    .alarm-repeat-pause {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin: 0;
-        padding: 6px 10px;
-        border-top: 1px solid var(--border);
-        color: var(--text-md);
-        font-size: calc(11.5px * var(--ui-scale));
     }
     .alarm-repeat-pause-value {
         display: inline-flex;

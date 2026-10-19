@@ -478,14 +478,25 @@
                                         </div>
                                         <div class="alarm-sound-repeat" id="alarm-sound-repeat">
                                             <div class="alarm-repeat-modes">
-                                                <label class="alarm-repeat-mode">
+                                                <label class="alarm-repeat-mode" for="alarm-edit-repeat-count">
                                                     <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-count" value="count" checked />
-                                                    <span data-i18n="alarms.editor.soundTimes">Times to repeat</span>
-                                                    <input id="alarm-edit-sound-count" type="number" min="1" max="20" value="1" inputmode="numeric" />
+                                                    <span class="alarm-radio-led" aria-hidden="true"></span>
+                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundTimes">Times to repeat</span>
+                                                    <select id="alarm-edit-sound-count" data-i18n-attr="aria-label:alarms.editor.soundTimes">
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                        <option value="10">10</option>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                    </select>
                                                 </label>
-                                                <label class="alarm-repeat-mode">
+                                                <label class="alarm-repeat-mode" for="alarm-edit-repeat-until">
                                                     <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-until" value="until" />
-                                                    <span data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
+                                                    <span class="alarm-radio-led" aria-hidden="true"></span>
+                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
                                                 </label>
                                             </div>
                                             <label class="alarm-repeat-pause">
