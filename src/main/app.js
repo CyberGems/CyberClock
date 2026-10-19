@@ -9777,7 +9777,7 @@
         if (window.cc && window.cc.getActiveWindow) {
             try {
                 const activeWin = await window.cc.getActiveWindow();
-                if (activeWin) {
+                if (activeWin && activeWin !== "none") {
                     isActive = activeWin === "main";
                 }
             } catch (e) {

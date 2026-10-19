@@ -403,17 +403,18 @@ fn get_settings(app: AppHandle) -> AppSettings {
 
 #[tauri::command]
 fn get_active_window(app: AppHandle) -> String {
-    if let Some(main) = app.get_webview_window("main") {
-        if main.is_visible().unwrap_or(false) && !main.is_minimized().unwrap_or(false) {
-            return "main".to_string();
+    let settings = load_settings(&app);
+    let target = if settings.window_mode == "full" {
+        "main"
+    } else {
+        "mini"
+    };
+    if let Some(win) = app.get_webview_window(target) {
+        if win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false) {
+            return target.to_string();
         }
     }
-    if let Some(mini) = app.get_webview_window("mini") {
-        if mini.is_visible().unwrap_or(false) && !mini.is_minimized().unwrap_or(false) {
-            return "mini".to_string();
-        }
-    }
-    "none".to_string()
+    target.to_string()
 }
 
 /// Say one sentence with the Windows voice. WebView2 is not used:
