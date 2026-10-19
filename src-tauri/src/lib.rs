@@ -3908,7 +3908,7 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
             let room_right = clock_x + clock_w + gap + menu_width <= mon_right - gap;
             let room_left = clock_x - gap - menu_width >= mon_left + gap;
 
-            let mut pos_x = if room_right {
+            let anchor_pos_x = if room_right {
                 clock_x + clock_w + gap
             } else if room_left {
                 clock_x - menu_width - gap
@@ -3922,6 +3922,21 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
                 }
             };
 
+            let anchor_pos_y = clock_y;
+
+            // If menu is already visible (e.g. user toggled gallery view switcher or tabs),
+            // preserve its existing screen position so it doesn't snap back to the clock.
+            let is_already_visible = menu.is_visible().unwrap_or(false);
+            let (mut pos_x, mut pos_y) = if is_already_visible {
+                if let Ok(curr) = menu.outer_position() {
+                    (curr.x, curr.y)
+                } else {
+                    (anchor_pos_x, anchor_pos_y)
+                }
+            } else {
+                (anchor_pos_x, anchor_pos_y)
+            };
+
             if pos_x + menu_width > mon_right - gap {
                 pos_x = mon_right - menu_width - gap;
             }
@@ -3929,8 +3944,6 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
                 pos_x = mon_left + gap;
             }
 
-            // Align vertically with the widget's top edge, keeping inside work area
-            let mut pos_y = clock_y;
             if pos_y + final_menu_h > mon_bottom - margin_y {
                 pos_y = mon_bottom - margin_y - final_menu_h;
             }
@@ -4057,12 +4070,10 @@ fn get_open_float_labels(app: AppHandle) -> Vec<String> {
 
 #[tauri::command]
 fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
-    if height > 0.0 {
+    if height > 0.0 && width <= 320.0 {
         MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
     }
     if let Some(menu) = app.get_webview_window("menu") {
-        #[cfg(windows)]
-        attach_window_drag_subclass(&menu);
         position_mini_context_menu(&menu, width, height);
     }
 }

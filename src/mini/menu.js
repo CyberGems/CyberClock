@@ -624,28 +624,18 @@
             if (!el) return;
             if (el.classList.contains("gallery-mode")) {
                 const grid = document.getElementById("gallery-grid");
-                const brand = document.querySelector(".ctx-brand");
-                const header = document.querySelector(".gallery-header");
-                const formatBar = document.querySelector(".gallery-format-bar");
+                const view = grid ? (grid.dataset.view || "both") : "both";
 
-                let naturalGridH = 0;
-                if (grid) {
-                    const prevMaxH = grid.style.maxHeight;
-                    const prevOverflow = grid.style.overflowY;
-                    grid.style.maxHeight = "none";
-                    grid.style.overflowY = "visible";
-                    naturalGridH = grid.scrollHeight;
-                    grid.style.maxHeight = prevMaxH;
-                    grid.style.overflowY = prevOverflow;
-                }
-
-                const brandH = brand ? brand.offsetHeight : 20;
-                const headerH = header ? header.offsetHeight : 36;
-                const formatH = formatBar ? formatBar.offsetHeight : 28;
-                const totalH = Math.ceil(brandH + headerH + formatH + naturalGridH + 34);
+                // Target heights for 20 skins in 2 columns (10 rows):
+                // 'both': 10 rows with stacked + inline previews (~1120px logical)
+                // 'stacked': 10 rows with stacked preview only (~860px logical)
+                // 'inline': 10 rows with inline preview only (~760px logical)
+                let targetH = 1120;
+                if (view === "stacked") targetH = 860;
+                else if (view === "inline") targetH = 760;
 
                 if (window.cc && window.cc.miniMenuReady) {
-                    window.cc.miniMenuReady(410, totalH);
+                    window.cc.miniMenuReady(410, targetH);
                 }
                 return;
             }
@@ -917,8 +907,7 @@
             if (!el) return;
             el.addEventListener("mousedown", (e) => {
                 if (e.button !== 0) return;
-                if (e.target.closest("button, input, select, a, .gallery-close-btn, .gallery-format-btn")) return;
-                e.preventDefault();
+                if (e.target.closest("button, input, select, a, .gallery-close-btn, .gallery-format-btn, .gallery-format-switcher")) return;
                 if (window.cc && window.cc.startDragging) {
                     window.cc.startDragging().catch(() => {});
                 }
