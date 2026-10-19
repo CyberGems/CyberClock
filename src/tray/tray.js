@@ -169,6 +169,7 @@
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
         setLbl("lbl-datetime", T("tray.datetimeProperties", "Date and time properties..."));
+        setLbl("lbl-docs", T("tray.docs", "Online Documentation"));
         setLbl("lbl-faq", T("tray.faq", "FAQ"));
         setLbl("lbl-changelog", T("tray.changelog", "Changelog"));
         setLbl("lbl-website", T("tray.homepage", "Website"));
@@ -236,10 +237,11 @@
     // CyberClock repo links for the Help section and About modal.
     const REPO_URL = "https://github.com/CyberGems/CyberClock";
     const HELP_URLS = {
+        docs: `${REPO_URL}/wiki`,
         faq: `${REPO_URL}/wiki#faq`,
         changelog: `${REPO_URL}/releases`,
         website: "https://cybergems.org",
-        donate: "https://ko-fi.com/cybergems",
+        donate: "https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate",
         github: REPO_URL,
         issues: `${REPO_URL}/issues`,
     };

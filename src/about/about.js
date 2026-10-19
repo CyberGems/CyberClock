@@ -11,11 +11,11 @@
     const REPO_URL = "https://github.com/CyberGems/CyberClock";
     const LINKS = {
         website: "https://cybergems.org",
-        docs: `${REPO_URL}/wiki/Home`,
+        docs: `${REPO_URL}/wiki`,
         github: REPO_URL,
         issues: `${REPO_URL}/issues`,
         releases: `${REPO_URL}/releases`,
-        donate: "https://ko-fi.com/cybergems",
+        donate: "https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate",
     };
 
     const T = (key, fallback) =>

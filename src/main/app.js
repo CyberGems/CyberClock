@@ -8862,35 +8862,86 @@
     }
 
     window.addEventListener("keydown", (e) => {
-        if (!firstCloseOverlay || firstCloseOverlay.hidden) {
-            if (e.altKey && (e.key === "F4" || e.code === "F4")) {
+        if (firstCloseOverlay && !firstCloseOverlay.hidden) {
+            if (e.key === "Escape") {
                 e.preventDefault();
                 e.stopPropagation();
-                requestWindowClose();
+                closeFirstCloseModal();
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+                handleFirstCloseChoice("tray");
+            } else if (e.key === "m" || e.key === "M" || e.code === "KeyM") {
+                const tag = (e.target && e.target.tagName) || "";
+                if (tag === "INPUT" || tag === "BUTTON") return;
+                e.preventDefault();
+                e.stopPropagation();
+                handleFirstCloseChoice("mini");
+            } else if (e.key === " " || e.code === "Space") {
+                const tag = (e.target && e.target.tagName) || "";
+                if (tag === "INPUT" || tag === "BUTTON") return;
+                e.preventDefault();
+                e.stopPropagation();
+                handleFirstCloseChoice("quit");
             }
             return;
         }
 
-        if (e.key === "Escape") {
+        // ── Titlebar Hotkeys (CyberNotes pattern) ─────────────────
+        // 1. Alt+F4 -> Close / requestWindowClose()
+        if (e.altKey && (e.key === "F4" || e.code === "F4")) {
             e.preventDefault();
             e.stopPropagation();
-            closeFirstCloseModal();
-        } else if (e.key === "Enter") {
+            ttHide();
+            requestWindowClose();
+            return;
+        }
+
+        // 2. F1 -> About CyberClock
+        if (e.key === "F1" || e.code === "F1") {
             e.preventDefault();
             e.stopPropagation();
-            handleFirstCloseChoice("tray");
-        } else if (e.key === "m" || e.key === "M" || e.code === "KeyM") {
+            ttHide();
+            if (window.cc && window.cc.showAboutWindow) {
+                window.cc.showAboutWindow();
+            }
+            return;
+        }
+
+        // 3. Ctrl+, -> Settings
+        if (e.ctrlKey && !e.altKey && !e.shiftKey && (e.key === "," || e.code === "Comma")) {
+            e.preventDefault();
+            e.stopPropagation();
+            ttHide();
+            const sOverlay = document.getElementById("s-overlay");
+            if (sOverlay && sOverlay.classList.contains("open")) {
+                closeSettings();
+            } else {
+                openSettings();
+            }
+            return;
+        }
+
+        // 4. Alt+M -> More Menu
+        if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "m" || e.key === "M" || e.code === "KeyM")) {
+            e.preventDefault();
+            e.stopPropagation();
+            ttHide();
+            toggleTbarMoreMenu();
+            return;
+        }
+
+        // 5. Ctrl+M or Alt+N -> Switch to Mini Mode
+        const isCtrlM = e.ctrlKey && !e.altKey && !e.shiftKey && (e.key === "m" || e.key === "M" || e.code === "KeyM");
+        const isAltN = e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "n" || e.key === "N" || e.code === "KeyN");
+        if (isCtrlM || isAltN) {
             const tag = (e.target && e.target.tagName) || "";
-            if (tag === "INPUT" || tag === "BUTTON") return;
+            if (tag === "INPUT" || tag === "TEXTAREA") return;
             e.preventDefault();
             e.stopPropagation();
-            handleFirstCloseChoice("mini");
-        } else if (e.key === " " || e.code === "Space") {
-            const tag = (e.target && e.target.tagName) || "";
-            if (tag === "INPUT" || tag === "BUTTON") return;
-            e.preventDefault();
-            e.stopPropagation();
-            handleFirstCloseChoice("quit");
+            ttHide();
+            window.cc.goMini();
+            return;
         }
     });
 
@@ -8982,17 +9033,27 @@
                 hideTbarMoreMenu();
                 const action = btn.dataset.action;
                 if (action === "donate") {
-                    window.cc.openExternalUrl("https://ko-fi.com/cybergems");
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate");
+                } else if (action === "center_widgets") {
+                    if (window.cc && window.cc.trayMenuAction) {
+                        window.cc.trayMenuAction("center_widgets");
+                    }
+                } else if (action === "datetime_properties") {
+                    if (window.cc && window.cc.openDatetimeProperties) {
+                        window.cc.openDatetimeProperties();
+                    }
+                } else if (action === "docs") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
+                } else if (action === "faq") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki#faq");
+                } else if (action === "changelog") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/releases");
+                } else if (action === "website") {
+                    window.cc.openExternalUrl("https://cybergems.org");
                 } else if (action === "check_updates") {
                     if (window.cc && window.cc.trayMenuAction) {
                         window.cc.trayMenuAction("check-updates");
                     }
-                } else if (action === "mini_mode") {
-                    window.cc.goMini();
-                } else if (action === "docs") {
-                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
-                } else if (action === "website") {
-                    window.cc.openExternalUrl("https://cybergems.org");
                 } else if (action === "about") {
                     window.cc.showAboutWindow();
                 } else if (action === "exit") {
@@ -9001,6 +9062,108 @@
             });
         });
     }
+
+    // ── Titlebar Tooltip System with Hotkey Badges (CyberNotes pattern) ──
+    const TT_SHOW_DELAY_MS = 250;
+    const TT_VIEWPORT_MARGIN = 8;
+    const TT_GAP = 8;
+    let ttCard = null;
+    let ttLabelEl = null;
+    let ttKbdEl = null;
+    let ttAnchor = null;
+    let ttShowTimer = null;
+
+    function ttTextFor(el) {
+        let text = el.getAttribute("data-tooltip") || "";
+        text = text.replace(/\s*\((?:Alt\+F4|Ctrl\+M|Alt\+N|Ctrl\+,|Alt\+M|F1)\)\s*/gi, "").trim();
+        return text;
+    }
+
+    function ttSuppressedWhileOpen(el) {
+        if (el.id === "tbar-btn-more") {
+            const m = document.getElementById("tbar-more-menu");
+            return !!(m && !m.hidden);
+        }
+        if (el.id === "tbar-btn-settings") {
+            const ov = document.getElementById("s-overlay");
+            return !!(ov && ov.classList.contains("open"));
+        }
+        return false;
+    }
+
+    function ttPositionCard() {
+        if (!ttCard || !ttAnchor) return;
+        const rect = ttAnchor.getBoundingClientRect();
+        const card = ttCard.getBoundingClientRect();
+        let left = rect.left + rect.width / 2 - card.width / 2;
+        left = Math.max(TT_VIEWPORT_MARGIN, Math.min(left, window.innerWidth - card.width - TT_VIEWPORT_MARGIN));
+        const top = rect.bottom + TT_GAP;
+        const arrowX = Math.max(12, Math.min(rect.left + rect.width / 2 - left, card.width - 12));
+        ttCard.style.left = `${Math.round(left)}px`;
+        ttCard.style.top = `${Math.round(top)}px`;
+        ttCard.style.setProperty("--tt-arrow-x", `${Math.round(arrowX)}px`);
+    }
+
+    function ttShow(el) {
+        if (!el || ttSuppressedWhileOpen(el)) return;
+        const text = ttTextFor(el);
+        if (!text) return;
+        if (!ttCard) {
+            ttCard = document.createElement("div");
+            ttCard.id = "titlebar-tooltip";
+            ttCard.setAttribute("role", "tooltip");
+            ttCard.hidden = true;
+            ttLabelEl = document.createElement("span");
+            ttLabelEl.className = "tt-label";
+            ttKbdEl = document.createElement("kbd");
+            ttKbdEl.className = "tooltip-shortcut-key";
+            ttKbdEl.hidden = true;
+            ttCard.append(ttLabelEl, ttKbdEl);
+            document.body.appendChild(ttCard);
+        }
+        ttAnchor = el;
+        ttLabelEl.textContent = text;
+        const kbd = el.dataset.tooltipKbd;
+        ttKbdEl.textContent = kbd || "";
+        ttKbdEl.hidden = !kbd;
+        ttCard.hidden = false;
+        ttPositionCard();
+        requestAnimationFrame(() => {
+            if (ttCard) ttCard.classList.add("is-visible");
+        });
+    }
+
+    function ttHide() {
+        clearTimeout(ttShowTimer);
+        ttShowTimer = null;
+        ttAnchor = null;
+        if (ttCard) {
+            ttCard.classList.remove("is-visible");
+            ttCard.hidden = true;
+        }
+    }
+
+    function ttBind(el) {
+        if (!el) return;
+        el.addEventListener("mouseenter", () => {
+            clearTimeout(ttShowTimer);
+            ttShowTimer = setTimeout(() => ttShow(el), TT_SHOW_DELAY_MS);
+        });
+        el.addEventListener("mouseleave", ttHide);
+        el.addEventListener("focus", () => ttShow(el));
+        el.addEventListener("blur", ttHide);
+        el.addEventListener("click", ttHide);
+    }
+
+    ["wheel", "scroll"].forEach((type) => window.addEventListener(type, ttHide, true));
+    window.addEventListener("blur", ttHide);
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) ttHide();
+    });
+
+    ["tbar-brand", "tbar-btn-settings", "tbar-btn-more", "btn-mini", "btn-close"].forEach((id) => {
+        ttBind(document.getElementById(id));
+    });
 
     // ══════════════════════════════════════════════════════════════
     // CUSTOM CONTEXT MENUS (Full Mode & Text Inputs)

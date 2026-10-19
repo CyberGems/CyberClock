@@ -43,7 +43,7 @@
         <div class="app">
             <!-- ═══ TITLE BAR ═══════════════════════════════════════════ -->
             <div class="tbar">
-                <div class="tbar-brand" id="tbar-brand" role="button" tabindex="0" data-tooltip="About CyberClock" data-i18n-attr="data-tooltip:about.title, aria-label:about.title" data-tooltip-dir="bottom">
+                <div class="tbar-brand" id="tbar-brand" role="button" tabindex="0" data-tooltip="About CyberClock" data-tooltip-kbd="F1" data-i18n-attr="data-tooltip:about.title, aria-label:about.title" data-tooltip-dir="bottom">
                     <img class="tbar-logo" src="../assets/images/icon.png" alt="" />
                     <span class="tbar-name"><span class="tbar-name-a">Cyber</span><span class="tbar-name-b">Clock</span></span>
                     <span class="tbar-welcome" id="tbar-welcome" aria-live="polite"></span>
@@ -56,11 +56,11 @@
                     <div id="dig-date">SUN · 01 JAN 2026</div>
                 </div>
                 <div class="tbar-right">
-                    <button class="wmbtn" id="tbar-btn-settings" type="button" data-tooltip="Settings" data-i18n-attr="data-tooltip:tooltip.settings, aria-label:tooltip.settings" data-tooltip-dir="bottom">
+                    <button class="wmbtn" id="tbar-btn-settings" type="button" data-tooltip="Settings" data-tooltip-kbd="Ctrl+," data-i18n-attr="data-tooltip:tooltip.settings, aria-label:tooltip.settings" data-tooltip-dir="bottom">
                         <span data-ico="gear"></span>
                     </button>
                     <div class="tbar-more-wrap">
-                        <button class="wmbtn" id="tbar-btn-more" type="button" aria-haspopup="true" aria-expanded="false" data-tooltip="More options" data-i18n-attr="data-tooltip:tooltip.more, aria-label:tooltip.more" data-tooltip-dir="bottom">
+                        <button class="wmbtn" id="tbar-btn-more" type="button" aria-haspopup="true" aria-expanded="false" data-tooltip="More options" data-tooltip-kbd="Alt+M" data-i18n-attr="data-tooltip:tooltip.more, aria-label:tooltip.more" data-tooltip-dir="bottom">
                             <span data-ico="dots"></span>
                         </button>
                         <div class="tbar-more-menu" id="tbar-more-menu" role="menu" hidden>
@@ -69,22 +69,35 @@
                                 <span class="lbl" data-i18n="tray.donate">Donate</span>
                             </button>
                             <div class="tbar-more-divider"></div>
-                            <button type="button" class="tbar-more-item" data-action="check_updates">
-                                <span class="ico" data-ico="download"></span>
-                                <span class="lbl" data-i18n="tray.checkUpdates">Check for Update...</span>
+                            <button type="button" class="tbar-more-item" data-action="center_widgets">
+                                <span class="ico" data-ico="target"></span>
+                                <span class="lbl" data-i18n="tray.centerWidgets">Center widgets on screen</span>
                             </button>
-                            <button type="button" class="tbar-more-item" data-action="mini_mode">
-                                <span class="ico" data-ico="compact"></span>
-                                <span class="lbl" data-i18n="tooltip.switchToMini">Switch to Mini Mode</span>
+                            <button type="button" class="tbar-more-item" data-action="datetime_properties">
+                                <span class="ico" data-ico="clock"></span>
+                                <span class="lbl" data-i18n="tray.datetimeProperties">Date and time properties...</span>
                             </button>
                             <div class="tbar-more-divider"></div>
                             <button type="button" class="tbar-more-item" data-action="docs">
                                 <span class="ico" data-ico="book"></span>
-                                <span class="lbl" data-i18n="about.docs">Online Documentation</span>
+                                <span class="lbl" data-i18n="tray.docs">Online Documentation</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="faq">
+                                <span class="ico" data-ico="faq"></span>
+                                <span class="lbl" data-i18n="tray.faq">FAQ</span>
+                            </button>
+                            <button type="button" class="tbar-more-item" data-action="changelog">
+                                <span class="ico" data-ico="changelog"></span>
+                                <span class="lbl" data-i18n="tray.changelog">Changelog</span>
                             </button>
                             <button type="button" class="tbar-more-item" data-action="website">
                                 <span class="ico" data-ico="globe"></span>
                                 <span class="lbl" data-i18n="tray.homepage">Website</span>
+                            </button>
+                            <div class="tbar-more-divider"></div>
+                            <button type="button" class="tbar-more-item" data-action="check_updates">
+                                <span class="ico" data-ico="download"></span>
+                                <span class="lbl" data-i18n="tray.checkUpdates">Check for Update...</span>
                             </button>
                             <button type="button" class="tbar-more-item" data-action="about">
                                 <span class="ico" data-ico="info"></span>
@@ -98,13 +111,13 @@
                         </div>
                     </div>
                     <span class="tbar-sep" aria-hidden="true"></span>
-                    <button class="wmbtn" id="btn-mini" type="button" data-tooltip="Switch to Mini Mode" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom">
+                    <button class="wmbtn" id="btn-mini" type="button" data-tooltip="Switch to Mini Mode" data-tooltip-kbd="Ctrl+M" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom">
                         <svg class="cc-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
                             <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
                         </svg>
                     </button>
-                    <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom" data-tooltip-align="right">
+                    <button class="wmbtn close" id="btn-close" type="button" data-tooltip="Close" data-tooltip-kbd="Alt+F4" data-i18n-attr="data-tooltip:common.close, aria-label:common.close" data-tooltip-dir="bottom" data-tooltip-align="right">
                         <span data-ico="x"></span>
                     </button>
                 </div>

@@ -6608,6 +6608,82 @@
         animation-delay: 0.35s;
     }
 
+    /* ── TITLEBAR TOOLTIPS WITH HOTKEY BADGES (CyberNotes pattern) ── */
+    #titlebar-tooltip {
+        position: fixed;
+        z-index: 1000001;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        max-width: min(420px, calc(100vw - 16px));
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: rgba(10, 16, 26, 0.96);
+        border: 1px solid rgba(var(--rgb-accent), 0.5);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), var(--glow-xs);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: var(--accent-a, #fff);
+        font-family: var(--font-ui);
+        font-size: calc(11px * var(--ui-scale, 1));
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        line-height: 1.4;
+        white-space: pre-line;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1), transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #titlebar-tooltip[hidden] {
+        display: none;
+    }
+
+    #titlebar-tooltip.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Arrow tracks anchor center (clamped), matching CyberNotes */
+    #titlebar-tooltip::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: var(--tt-arrow-x, 50%);
+        width: 8px;
+        height: 8px;
+        background: rgba(10, 16, 26, 0.96);
+        border-left: 1px solid rgba(var(--rgb-accent), 0.5);
+        border-top: 1px solid rgba(var(--rgb-accent), 0.5);
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    #titlebar-tooltip .tooltip-shortcut-key {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        padding: 0 5px;
+        border: 1px solid rgba(var(--rgb-accent), 0.3);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--accent-b, #8ba3c7);
+        font-family: var(--font-mono, monospace);
+        font-size: 9.5px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+
+    #titlebar-tooltip .tooltip-shortcut-key[hidden] {
+        display: none;
+    }
+
+    .tbar [data-tooltip-kbd]::after {
+        display: none !important;
+    }
+
     /* scanlines */
     .scanlines {
         position: fixed;
