@@ -937,7 +937,7 @@
     }
 
     function mountAlarmChoices() {
-        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count"].forEach((id) => {
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count", "alarm-edit-sound-pause"].forEach((id) => {
             mountAlarmChoice(document.getElementById(id), true);
         });
         ["alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
@@ -1407,7 +1407,18 @@
             countInput.value = countVal;
             syncAlarmChoice(countInput);
         }
-        if (pauseInput) pauseInput.value = String(alarmEditorDraft.soundPauseSecs ?? 1);
+        if (pauseInput) {
+            const pauseVal = String(alarmEditorDraft.soundPauseSecs ?? 1);
+            if (![...pauseInput.options].some((o) => o.value === pauseVal)) {
+                const opt = document.createElement("option");
+                opt.value = pauseVal;
+                const secUnit = window.ccI18n ? window.ccI18n.t("alarms.editor.soundSeconds") : "sec";
+                opt.textContent = `${pauseVal} ${secUnit}`;
+                pauseInput.appendChild(opt);
+            }
+            pauseInput.value = pauseVal;
+            syncAlarmChoice(pauseInput);
+        }
         const deleteAfter = document.getElementById("alarm-edit-delete-after");
         if (deleteAfter) deleteAfter.checked = !!alarmEditorDraft.deleteAfter;
         const cloneBtn = document.getElementById("alarm-editor-clone");
@@ -9540,6 +9551,14 @@
         const textTarget = e.target.closest("input[type='text'], input[type='search'], input:not([type]), textarea");
         const alarmCard = e.target.closest(".alarm-card");
         e.preventDefault();
+        if (e.target.closest("#alarm-editor-overlay")) {
+            if (textTarget) {
+                showTextContextMenu(e.clientX, e.clientY, textTarget);
+            } else {
+                hideAllContextMenus();
+            }
+            return;
+        }
         if (textTarget) {
             showTextContextMenu(e.clientX, e.clientY, textTarget);
         } else if (alarmCard?.dataset.alarmId) {

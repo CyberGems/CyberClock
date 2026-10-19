@@ -481,7 +481,7 @@
                                                 <label class="alarm-repeat-mode" for="alarm-edit-repeat-count">
                                                     <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-count" value="count" checked />
                                                     <span class="alarm-radio-led" aria-hidden="true"></span>
-                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundTimes">Times to repeat</span>
+                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundTimes">Repeat</span>
                                                     <select id="alarm-edit-sound-count" data-i18n-attr="aria-label:alarms.editor.soundTimes">
                                                         <option value="1">1</option>
                                                         <option value="2">2</option>
@@ -496,16 +496,22 @@
                                                 <label class="alarm-repeat-mode" for="alarm-edit-repeat-until">
                                                     <input type="radio" name="cc-alarm-sound-repeat" id="alarm-edit-repeat-until" value="until" />
                                                     <span class="alarm-radio-led" aria-hidden="true"></span>
-                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundUntil">Until the alarm is dismissed</span>
+                                                    <span class="alarm-repeat-mode-text" data-i18n="alarms.editor.soundUntil">Until alert is dismissed</span>
                                                 </label>
                                             </div>
-                                            <label class="alarm-repeat-pause">
+                                            <div class="alarm-repeat-pause">
                                                 <span data-i18n="alarms.editor.soundPause">Pause between sounds</span>
-                                                <span class="alarm-repeat-pause-value">
-                                                    <input id="alarm-edit-sound-pause" type="number" min="0" max="60" value="1" inputmode="numeric" />
-                                                    <span data-i18n="alarms.editor.soundSeconds">sec</span>
-                                                </span>
-                                            </label>
+                                                <select id="alarm-edit-sound-pause" data-i18n-attr="aria-label:alarms.editor.soundPause">
+                                                    <option value="0" data-i18n="alarms.pause.0">0 sec</option>
+                                                    <option value="1" data-i18n="alarms.pause.1" selected>1 sec</option>
+                                                    <option value="2" data-i18n="alarms.pause.2">2 sec</option>
+                                                    <option value="3" data-i18n="alarms.pause.3">3 sec</option>
+                                                    <option value="5" data-i18n="alarms.pause.5">5 sec</option>
+                                                    <option value="10" data-i18n="alarms.pause.10">10 sec</option>
+                                                    <option value="15" data-i18n="alarms.pause.15">15 sec</option>
+                                                    <option value="30" data-i18n="alarms.pause.30">30 sec</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <label class="alarm-field">
                                             <span data-i18n="alarms.editor.message">Message</span>

@@ -4019,12 +4019,11 @@
         background: rgba(255, 255, 255, 0.02);
     }
     .alarm-repeat-modes {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
         gap: 12px;
-        padding: 6px 10px;
+        padding: 8px 12px;
     }
     .alarm-repeat-mode {
         display: inline-flex;
@@ -4034,8 +4033,9 @@
         padding: 2px 0;
         color: var(--text-md);
         cursor: pointer;
-        font-size: calc(11px * var(--ui-scale));
+        font-size: calc(11.5px * var(--ui-scale));
         user-select: none;
+        white-space: nowrap;
         transition: color 0.15s ease;
     }
     .alarm-repeat-mode:hover {
@@ -4083,8 +4083,9 @@
         box-shadow: 0 0 2px #ffffff;
     }
     .alarm-repeat-mode-text {
-        font-size: calc(11px * var(--ui-scale));
+        font-size: calc(11.5px * var(--ui-scale));
         color: var(--text-md);
+        white-space: nowrap;
         transition: color 0.15s ease;
     }
     .alarm-repeat-mode:has(input[type="radio"]:checked) .alarm-repeat-mode-text {
@@ -4109,30 +4110,21 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
+        gap: 12px;
         margin: 0;
-        padding: 6px 10px;
+        padding: 6px 12px;
         border-top: 1px solid var(--border);
         color: var(--text-md);
-        font-size: calc(11px * var(--ui-scale));
+        font-size: calc(11.5px * var(--ui-scale));
     }
-    .alarm-repeat-pause input[type="number"] {
-        width: 48px;
+    .alarm-repeat-pause .alarm-choice-trigger.is-compact {
+        min-height: 24px;
         height: 24px;
-        margin: 0;
-        padding: 2px 6px;
-        color: var(--text-hi);
-        background: rgba(0, 0, 0, 0.28);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font: inherit;
+        padding: 2px 8px;
+        font-family: var(--font-mono);
         font-size: calc(11px * var(--ui-scale));
-    }
-    .alarm-repeat-pause-value {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: var(--text-lo);
+        min-width: 64px;
+        border-radius: 6px;
     }
     .alarm-editor {
         width: min(500px, 100%);
