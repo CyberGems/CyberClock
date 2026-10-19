@@ -8861,6 +8861,126 @@
         });
     }
 
+    // ── Titlebar More Menu ────────────────────────────────────
+    const tbarBtnMore = document.getElementById("tbar-btn-more");
+    const tbarMoreMenu = document.getElementById("tbar-more-menu");
+    let lastMenuPointerX = -1;
+    let lastMenuPointerY = -1;
+
+    function getMoreMenuItems() {
+        return Array.from(tbarMoreMenu ? tbarMoreMenu.querySelectorAll(".tbar-more-item") : []);
+    }
+
+    function focusMoreMenuItem(index) {
+        const items = getMoreMenuItems();
+        if (!items.length) return;
+        const clamped = (index + items.length) % items.length;
+        if (tbarMoreMenu) tbarMoreMenu.classList.add("keyboard-nav");
+        items[clamped].focus();
+    }
+
+    function hideTbarMoreMenu(returnFocus = false) {
+        if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
+        tbarMoreMenu.hidden = true;
+        tbarMoreMenu.classList.remove("keyboard-nav");
+        if (tbarBtnMore) {
+            tbarBtnMore.setAttribute("aria-expanded", "false");
+            tbarBtnMore.classList.remove("on");
+            if (returnFocus) {
+                tbarBtnMore.focus();
+            }
+        }
+    }
+
+    function toggleTbarMoreMenu(fromKeyboard = false) {
+        if (!tbarMoreMenu) return;
+        const willShow = tbarMoreMenu.hidden;
+        hideAllContextMenus();
+        tbarMoreMenu.hidden = !willShow;
+        if (tbarBtnMore) {
+            tbarBtnMore.setAttribute("aria-expanded", String(willShow));
+            tbarBtnMore.classList.toggle("on", willShow);
+        }
+        if (willShow) {
+            if (fromKeyboard) {
+                tbarMoreMenu.classList.add("keyboard-nav");
+                lastMenuPointerX = -1;
+                lastMenuPointerY = -1;
+                // Focus the first item (Donate) so the user can immediately navigate with arrows and press Enter
+                requestAnimationFrame(() => {
+                    const first = tbarMoreMenu.querySelector(".tbar-more-item");
+                    if (first) first.focus();
+                });
+            } else {
+                tbarMoreMenu.classList.remove("keyboard-nav");
+            }
+        } else {
+            tbarMoreMenu.classList.remove("keyboard-nav");
+            if (fromKeyboard && tbarBtnMore) {
+                tbarBtnMore.focus();
+            }
+        }
+    }
+
+    if (tbarBtnMore && tbarMoreMenu) {
+        tbarBtnMore.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleTbarMoreMenu(false);
+        });
+        document.addEventListener("pointerdown", (e) => {
+            if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
+            if (e.target.closest("#tbar-more-menu, #tbar-btn-more")) return;
+            hideTbarMoreMenu(false);
+        }, true);
+        document.addEventListener("pointermove", (e) => {
+            if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
+            // Only switch from keyboard mode if the pointer physically moved
+            if (lastMenuPointerX >= 0 && lastMenuPointerY >= 0) {
+                const dist = Math.hypot(e.clientX - lastMenuPointerX, e.clientY - lastMenuPointerY);
+                if (dist > 3) {
+                    tbarMoreMenu.classList.remove("keyboard-nav");
+                }
+            }
+            lastMenuPointerX = e.clientX;
+            lastMenuPointerY = e.clientY;
+        }, true);
+
+        tbarMoreMenu.querySelectorAll(".tbar-more-item").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                hideTbarMoreMenu(false);
+                const action = btn.dataset.action;
+                if (action === "donate") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate");
+                } else if (action === "center_widgets") {
+                    if (window.cc && window.cc.trayMenuAction) {
+                        window.cc.trayMenuAction("center_widgets");
+                    }
+                } else if (action === "datetime_properties") {
+                    if (window.cc && window.cc.openDatetimeProperties) {
+                        window.cc.openDatetimeProperties();
+                    }
+                } else if (action === "docs") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
+                } else if (action === "faq") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki#faq");
+                } else if (action === "changelog") {
+                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/releases");
+                } else if (action === "website") {
+                    window.cc.openExternalUrl("https://cybergems.org");
+                } else if (action === "check_updates") {
+                    if (window.cc && window.cc.trayMenuAction) {
+                        window.cc.trayMenuAction("check-updates");
+                    }
+                } else if (action === "about") {
+                    window.cc.showAboutWindow();
+                } else if (action === "exit") {
+                    requestWindowClose();
+                }
+            });
+        });
+    }
+
     window.addEventListener("keydown", (e) => {
         if (firstCloseOverlay && !firstCloseOverlay.hidden) {
             if (e.key === "Escape") {
@@ -8885,6 +9005,61 @@
                 handleFirstCloseChoice("quit");
             }
             return;
+        }
+
+        // ── Active More Menu Navigation ──────────────────────────
+        if (tbarMoreMenu && !tbarMoreMenu.hidden) {
+            const items = getMoreMenuItems();
+            const currentIndex = items.indexOf(document.activeElement);
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                e.stopPropagation();
+                const nextIdx = currentIndex === -1 ? 0 : currentIndex + 1;
+                focusMoreMenuItem(nextIdx);
+                return;
+            }
+            if (e.key === "ArrowUp") {
+                e.preventDefault();
+                e.stopPropagation();
+                const prevIdx = currentIndex === -1 ? items.length - 1 : currentIndex - 1;
+                focusMoreMenuItem(prevIdx);
+                return;
+            }
+            if (e.key === "Home") {
+                e.preventDefault();
+                e.stopPropagation();
+                focusMoreMenuItem(0);
+                return;
+            }
+            if (e.key === "End") {
+                e.preventDefault();
+                e.stopPropagation();
+                focusMoreMenuItem(items.length - 1);
+                return;
+            }
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                hideTbarMoreMenu(true);
+                return;
+            }
+            if (e.key === "Tab") {
+                e.preventDefault();
+                e.stopPropagation();
+                const delta = e.shiftKey ? -1 : 1;
+                const targetIdx = currentIndex === -1 ? (e.shiftKey ? items.length - 1 : 0) : currentIndex + delta;
+                focusMoreMenuItem(targetIdx);
+                return;
+            }
+            if (e.key === "Enter" || e.key === " ") {
+                if (document.activeElement && document.activeElement.classList.contains("tbar-more-item")) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.activeElement.click();
+                    return;
+                }
+            }
         }
 
         // ── Titlebar Hotkeys (CyberNotes pattern) ─────────────────
@@ -8927,7 +9102,7 @@
             e.preventDefault();
             e.stopPropagation();
             ttHide();
-            toggleTbarMoreMenu();
+            toggleTbarMoreMenu(true /* fromKeyboard */);
             return;
         }
 
@@ -8987,79 +9162,6 @@
                     window.cc.showAboutWindow();
                 }
             }
-        });
-    }
-
-    // ── Titlebar More Menu ────────────────────────────────────
-    const tbarBtnMore = document.getElementById("tbar-btn-more");
-    const tbarMoreMenu = document.getElementById("tbar-more-menu");
-    function hideTbarMoreMenu() {
-        if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
-        tbarMoreMenu.hidden = true;
-        if (tbarBtnMore) {
-            tbarBtnMore.setAttribute("aria-expanded", "false");
-            tbarBtnMore.classList.remove("on");
-        }
-    }
-    function toggleTbarMoreMenu() {
-        if (!tbarMoreMenu) return;
-        const willShow = tbarMoreMenu.hidden;
-        hideAllContextMenus();
-        tbarMoreMenu.hidden = !willShow;
-        if (tbarBtnMore) {
-            tbarBtnMore.setAttribute("aria-expanded", String(willShow));
-            tbarBtnMore.classList.toggle("on", willShow);
-        }
-    }
-    if (tbarBtnMore && tbarMoreMenu) {
-        tbarBtnMore.addEventListener("click", (e) => {
-            e.stopPropagation();
-            toggleTbarMoreMenu();
-        });
-        document.addEventListener("pointerdown", (e) => {
-            if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
-            if (e.target.closest("#tbar-more-menu, #tbar-btn-more")) return;
-            hideTbarMoreMenu();
-        }, true);
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && !tbarMoreMenu.hidden) {
-                hideTbarMoreMenu();
-            }
-        });
-
-        tbarMoreMenu.querySelectorAll(".tbar-more-item").forEach((btn) => {
-            btn.addEventListener("click", async (e) => {
-                e.stopPropagation();
-                hideTbarMoreMenu();
-                const action = btn.dataset.action;
-                if (action === "donate") {
-                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate");
-                } else if (action === "center_widgets") {
-                    if (window.cc && window.cc.trayMenuAction) {
-                        window.cc.trayMenuAction("center_widgets");
-                    }
-                } else if (action === "datetime_properties") {
-                    if (window.cc && window.cc.openDatetimeProperties) {
-                        window.cc.openDatetimeProperties();
-                    }
-                } else if (action === "docs") {
-                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
-                } else if (action === "faq") {
-                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki#faq");
-                } else if (action === "changelog") {
-                    window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/releases");
-                } else if (action === "website") {
-                    window.cc.openExternalUrl("https://cybergems.org");
-                } else if (action === "check_updates") {
-                    if (window.cc && window.cc.trayMenuAction) {
-                        window.cc.trayMenuAction("check-updates");
-                    }
-                } else if (action === "about") {
-                    window.cc.showAboutWindow();
-                } else if (action === "exit") {
-                    requestWindowClose();
-                }
-            });
         });
     }
 
