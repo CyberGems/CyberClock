@@ -4061,6 +4061,8 @@ fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
         MINI_MENU_LAST_HEIGHT.store(height.round() as u32, std::sync::atomic::Ordering::Relaxed);
     }
     if let Some(menu) = app.get_webview_window("menu") {
+        #[cfg(windows)]
+        attach_window_drag_subclass(&menu);
         position_mini_context_menu(&menu, width, height);
     }
 }

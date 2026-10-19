@@ -43,10 +43,10 @@
         </svg>
 
         <div class="ctx-menu" id="ctx-menu">
-            <div class="ctx-brand">
-                <span class="ctx-brand-widget" id="ctx-brand-widget">Mini Mode</span>
-                <span class="ctx-brand-sep" aria-hidden="true">·</span>
-                <span class="ctx-brand-mark">CyberClock</span>
+            <div class="ctx-brand" id="ctx-brand" data-tauri-drag-region>
+                <span class="ctx-brand-widget" id="ctx-brand-widget" data-tauri-drag-region>Mini Mode</span>
+                <span class="ctx-brand-sep" aria-hidden="true" data-tauri-drag-region>·</span>
+                <span class="ctx-brand-mark" data-tauri-drag-region>CyberClock</span>
             </div>
             <!-- VIEW: Dedicated Timer Context Panel -->
             <div class="ctx-timer-view" id="ctx-timer-view" style="display: none;">
@@ -857,14 +857,22 @@
 
             <!-- VIEW 3: Visual Skin Gallery Overlay -->
             <div class="gallery-view" id="gallery-view" style="display: none;">
-                <div class="gallery-header">
-                    <div class="gallery-title-group">
-                        <span class="gallery-title" data-i18n="gallery.title">Galería de Diseños Mini</span>
-                        <span class="gallery-subtitle" data-i18n="gallery.subtitle">20 diseños en formatos de 2 filas y 1 fila</span>
+                <div class="gallery-header" id="gallery-header" data-tauri-drag-region>
+                    <div class="gallery-title-group" data-tauri-drag-region>
+                        <span class="gallery-title" data-i18n="gallery.title" data-tauri-drag-region>Galería de Diseños Mini</span>
+                        <span class="gallery-subtitle" data-i18n="gallery.subtitle" data-tauri-drag-region>20 diseños en formatos de 2 filas y 1 fila</span>
                     </div>
                     <button class="gallery-close-btn" id="btn-close-gallery" data-tooltip="Cerrar Galería" data-i18n-attr="data-tooltip:gallery.close" data-tooltip-dir="bottom" data-tooltip-align="right">✕</button>
                 </div>
-                <div class="gallery-grid" id="gallery-grid">
+                <div class="gallery-format-bar">
+                    <span class="gallery-format-lbl" data-i18n="gallery.previewFormat">Vista:</span>
+                    <div class="gallery-format-switcher" id="gallery-format-switcher">
+                        <button type="button" class="gallery-format-btn active" data-format="both" data-i18n="gallery.formatBoth">Ambos</button>
+                        <button type="button" class="gallery-format-btn" data-format="stacked" data-i18n="gallery.formatStacked">2 Filas</button>
+                        <button type="button" class="gallery-format-btn" data-format="inline" data-i18n="gallery.formatInline">1 Fila</button>
+                    </div>
+                </div>
+                <div class="gallery-grid" id="gallery-grid" data-view="both">
                     <!-- Populated dynamically with rich cards in menu.js -->
                 </div>
             </div>

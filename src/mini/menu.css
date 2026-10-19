@@ -191,6 +191,12 @@
         background: linear-gradient(180deg, rgba(var(--rgb-accent), 0.16), transparent);
         border-radius: 6px 6px 0 0;
         white-space: nowrap;
+        cursor: grab;
+        -webkit-app-region: drag;
+        user-select: none;
+    }
+    .ctx-brand:active {
+        cursor: grabbing;
     }
     .ctx-brand-widget {
         font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
@@ -690,30 +696,37 @@
 
     /* ── Visual Skin Gallery Overlay / Subview ── */
     body.gallery-open {
-        padding: 6px 12px 6px 12px;
+        padding: 6px 10px 6px 10px;
     }
     .ctx-menu.gallery-mode {
-        width: 356px;
+        width: 388px;
         height: auto;
         max-height: calc(100vh - 12px);
     }
     .gallery-view {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
         animation: ctx-fade-in 0.18s ease-out;
     }
     .gallery-header {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        padding-bottom: 6px;
+        padding-bottom: 5px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: grab;
+        -webkit-app-region: drag;
+        user-select: none;
+    }
+    .gallery-header:active {
+        cursor: grabbing;
     }
     .gallery-title-group {
         display: flex;
         flex-direction: column;
         gap: 2px;
+        pointer-events: none;
     }
     .gallery-title {
         font-family: "Space Grotesk", system-ui, sans-serif;
@@ -741,12 +754,64 @@
         font-size: 11px;
         cursor: pointer;
         transition: all 0.14s ease;
+        -webkit-app-region: no-drag !important;
     }
     .gallery-close-btn:hover {
         background: rgba(255, 45, 85, 0.2);
         border-color: #ff2d55;
         color: #ff4d6d;
     }
+
+    /* Format Switcher Controls */
+    .gallery-format-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 0 2px 2px 2px;
+    }
+    .gallery-format-lbl {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .gallery-format-switcher {
+        display: inline-flex;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 5px;
+        padding: 2px;
+        gap: 2px;
+    }
+    .gallery-format-btn {
+        background: transparent;
+        border: none;
+        outline: none;
+        border-radius: 4px;
+        color: rgba(255, 255, 255, 0.6);
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        padding: 2px 8px;
+        cursor: pointer;
+        transition: all 0.14s ease;
+        -webkit-app-region: no-drag !important;
+    }
+    .gallery-format-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .gallery-format-btn.active {
+        background: var(--accent-a);
+        color: #0b0f17;
+        font-weight: 700;
+        box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+    }
+
     .gallery-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -767,14 +832,15 @@
         background: rgba(0, 0, 0, 0.4);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 6px;
-        padding: 8px;
+        padding: 6px 7px;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
         cursor: pointer;
         transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
+        -webkit-app-region: no-drag !important;
     }
     .gallery-card:hover {
         background: rgba(var(--rgb-accent), 0.1);
@@ -791,15 +857,17 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-bottom: 1px;
     }
     .gallery-card-badge {
         font-family: "JetBrains Mono", monospace;
-        font-size: 9px;
+        font-size: 8.5px;
         font-weight: 700;
-        padding: 1px 5px;
+        padding: 1px 4px;
         border-radius: 3px;
         background: rgba(255, 255, 255, 0.08);
         color: rgba(255, 255, 255, 0.85);
+        line-height: 1.2;
     }
     .gallery-card.active .gallery-card-badge {
         background: var(--accent-a);
@@ -807,23 +875,97 @@
     }
     .gallery-card-name {
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 10.5px;
+        font-size: 10px;
         font-weight: 600;
         color: #ffffff;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .gallery-card-preview {
-        height: 26px;
+    .gallery-card-previews {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+    }
+    .gallery-preview-box {
+        position: relative;
         border-radius: 4px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        transition: all 0.15s ease;
+        box-sizing: border-box;
+    }
+    .preview-mode-tag {
+        position: absolute;
+        top: 2px;
+        right: 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 7.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: rgba(255, 255, 255, 0.35);
+        pointer-events: none;
+        line-height: 1;
+    }
+    .preview-stacked {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
+        height: 30px;
+        padding: 2px 4px;
+    }
+    .preview-stacked .preview-time {
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.6px;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .preview-stacked .preview-date {
+        font-size: 8px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        line-height: 1;
+        opacity: 0.85;
+        white-space: nowrap;
+    }
+    .preview-inline {
+        height: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
+        padding: 1px 4px;
+    }
+    .preview-inline-content {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+    .preview-inline .preview-time {
+        font-size: 10.5px;
         font-weight: 600;
-        letter-spacing: 0.5px;
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        letter-spacing: 0.4px;
+        line-height: 1;
+    }
+    .preview-inline .preview-date {
+        font-size: 7.5px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        line-height: 1;
+        opacity: 0.85;
+    }
+    .gallery-grid[data-view="stacked"] .preview-inline {
+        display: none !important;
+    }
+    .gallery-grid[data-view="inline"] .preview-stacked {
+        display: none !important;
     }
 
     /* Opacity Slider Control */

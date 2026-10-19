@@ -31,26 +31,26 @@
 
     // 20 Skins Metadata with signature styling for the visual gallery cards
     const SKINS_META = [
-        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(165deg, #14171f 0%, #08090c 100%)", border: "rgba(200, 220, 232, 0.35)", color: "#f0f4f8", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 2, key: "settings.mini.skin.2", bg: "rgba(0, 240, 255, 0.08)", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', monospace", sample: "12:45:00" },
-        { id: 3, key: "settings.mini.skin.3", bg: "rgba(0, 255, 65, 0.07)", border: "rgba(0, 255, 65, 0.35)", color: "#00ff41", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
-        { id: 4, key: "settings.mini.skin.4", bg: "rgba(255, 255, 255, 0.06)", border: "rgba(255, 255, 255, 0.3)", color: "#ffffff", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 5, key: "settings.mini.skin.5", bg: "rgba(255, 0, 128, 0.08)", border: "rgba(255, 0, 128, 0.4)", color: "#ff0080", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 6, key: "settings.mini.skin.6", bg: "rgba(255, 255, 255, 0.04)", border: "rgba(255, 255, 255, 0.15)", color: "#e6e6e6", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
-        { id: 7, key: "settings.mini.skin.7", bg: "linear-gradient(135deg, rgba(255, 80, 50, 0.15), rgba(150, 40, 200, 0.15))", border: "rgba(255, 100, 50, 0.4)", color: "#ff7e47", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 8, key: "settings.mini.skin.8", bg: "rgba(180, 230, 255, 0.08)", border: "rgba(180, 230, 255, 0.4)", color: "#aee4ff", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
-        { id: 9, key: "settings.mini.skin.9", bg: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 120, 0.1))", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 10, key: "settings.mini.skin.10", bg: "#0c0d10", border: "rgba(255, 255, 255, 0.12)", color: "#f0f0f0", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
-        { id: 11, key: "settings.mini.skin.11", bg: "linear-gradient(135deg, rgba(255, 45, 120, 0.15), rgba(120, 40, 255, 0.15))", border: "rgba(255, 45, 120, 0.4)", color: "#ff4090", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 12, key: "settings.mini.skin.12", bg: "rgba(138, 43, 226, 0.12)", border: "rgba(138, 43, 226, 0.45)", color: "#c084fc", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 13, key: "settings.mini.skin.13", bg: "linear-gradient(135deg, #121008, #1a1608)", border: "rgba(255, 153, 0, 0.4)", color: "#ff9d00", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 14, key: "settings.mini.skin.14", bg: "linear-gradient(135deg, #0e1117, #131720)", border: "rgba(0, 229, 255, 0.45)", color: "#00e5ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(0, 255, 200, 0.45)", color: "#00ffc8", font: "'Outfit', sans-serif", sample: "12:45:00" },
-        { id: 16, key: "settings.mini.skin.16", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
-        { id: 17, key: "settings.mini.skin.17", bg: "linear-gradient(145deg, #160a2c 0%, #080312 100%)", border: "rgba(168, 85, 247, 0.4)", color: "#c084fc", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
-        { id: 18, key: "settings.mini.skin.18", bg: "linear-gradient(150deg, #051a10 0%, #010805 100%)", border: "rgba(16, 185, 129, 0.45)", color: "#10b981", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
-        { id: 19, key: "settings.mini.skin.19", bg: "linear-gradient(150deg, #1f0a0e 0%, #0a0204 100%)", border: "rgba(244, 63, 94, 0.4)", color: "#fb7185", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 20, key: "settings.mini.skin.20", bg: "linear-gradient(155deg, #021415 0%, #12051d 100%)", border: "rgba(52, 211, 153, 0.45)", color: "#34d399", font: "'Outfit', sans-serif", sample: "12:45:00" }
+        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(165deg, #14171f 0%, #08090c 100%)", border: "rgba(200, 220, 232, 0.35)", color: "#f0f4f8", dateColor: "rgba(200, 220, 235, 0.75)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 2, key: "settings.mini.skin.2", bg: "rgba(0, 240, 255, 0.08)", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", dateColor: "rgba(180, 240, 255, 0.7)", font: "'Orbitron', sans-serif", dateFont: "'Share Tech Mono', monospace" },
+        { id: 3, key: "settings.mini.skin.3", bg: "rgba(0, 255, 65, 0.07)", border: "rgba(0, 255, 65, 0.35)", color: "#00ff41", dateColor: "rgba(0, 255, 65, 0.65)", font: "'JetBrains Mono', monospace", dateFont: "'JetBrains Mono', monospace" },
+        { id: 4, key: "settings.mini.skin.4", bg: "linear-gradient(145deg, #e4ecf4 0%, #c8d8e8 100%)", border: "rgba(120, 168, 214, 0.55)", color: "#1c2e44", dateColor: "rgba(28, 46, 68, 0.75)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 5, key: "settings.mini.skin.5", bg: "rgba(0, 229, 255, 0.06)", border: "rgba(0, 229, 255, 0.45)", color: "#00e5ff", dateColor: "rgba(140, 220, 245, 0.68)", font: "'Orbitron', sans-serif", dateFont: "'Share Tech Mono', monospace" },
+        { id: 6, key: "settings.mini.skin.6", bg: "rgba(255, 255, 255, 0.04)", border: "rgba(255, 255, 255, 0.18)", color: "#ffffff", dateColor: "rgba(255, 255, 255, 0.65)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 7, key: "settings.mini.skin.7", bg: "linear-gradient(135deg, rgba(255, 80, 50, 0.15), rgba(150, 40, 200, 0.15))", border: "rgba(255, 100, 50, 0.4)", color: "#fff5ec", dateColor: "rgba(255, 245, 236, 0.7)", font: "'Space Grotesk', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 8, key: "settings.mini.skin.8", bg: "linear-gradient(145deg, #d8ebfa 0%, #b8dcf6 100%)", border: "rgba(110, 176, 224, 0.55)", color: "#1c3a5e", dateColor: "rgba(28, 58, 94, 0.75)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 9, key: "settings.mini.skin.9", bg: "linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 120, 0.1))", border: "rgba(255, 41, 117, 0.45)", color: "#ff2975", dateColor: "rgba(255, 41, 117, 0.7)", font: "'Orbitron', sans-serif", dateFont: "'Share Tech Mono', monospace" },
+        { id: 10, key: "settings.mini.skin.10", bg: "#0c0d10", border: "rgba(212, 165, 116, 0.35)", color: "#e8d5c0", dateColor: "rgba(232, 213, 192, 0.65)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 11, key: "settings.mini.skin.11", bg: "linear-gradient(135deg, rgba(255, 0, 128, 0.15), rgba(13, 13, 43, 0.8))", border: "rgba(255, 0, 128, 0.45)", color: "#ff0080", dateColor: "rgba(0, 240, 255, 0.75)", font: "'Share Tech Mono', monospace", dateFont: "'Orbitron', sans-serif" },
+        { id: 12, key: "settings.mini.skin.12", bg: "rgba(0, 255, 65, 0.08)", border: "rgba(0, 255, 65, 0.4)", color: "#00ff41", dateColor: "rgba(0, 255, 65, 0.65)", font: "'JetBrains Mono', monospace", dateFont: "'JetBrains Mono', monospace" },
+        { id: 13, key: "settings.mini.skin.13", bg: "linear-gradient(135deg, #121008, #1a1608)", border: "rgba(255, 157, 0, 0.45)", color: "#ff9d00", dateColor: "rgba(255, 157, 0, 0.7)", font: "'Share Tech Mono', monospace", dateFont: "'Share Tech Mono', monospace" },
+        { id: 14, key: "settings.mini.skin.14", bg: "linear-gradient(135deg, #0e1117, #131720)", border: "rgba(0, 240, 255, 0.45)", color: "#00f0ff", dateColor: "rgba(0, 240, 255, 0.75)", font: "'Orbitron', sans-serif", dateFont: "'Orbitron', sans-serif" },
+        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(38, 255, 217, 0.45)", color: "#26ffd9", dateColor: "rgba(38, 255, 217, 0.7)", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 16, key: "settings.mini.skin.16", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", dateColor: "rgba(255, 183, 0, 0.75)", font: "'Share Tech Mono', monospace", dateFont: "'Share Tech Mono', monospace" },
+        { id: 17, key: "settings.mini.skin.17", bg: "linear-gradient(145deg, #160a2c 0%, #080312 100%)", border: "rgba(168, 85, 247, 0.4)", color: "#c084fc", dateColor: "rgba(192, 132, 252, 0.75)", font: "'Space Grotesk', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 18, key: "settings.mini.skin.18", bg: "linear-gradient(150deg, #051a10 0%, #010805 100%)", border: "rgba(16, 185, 129, 0.45)", color: "#10b981", dateColor: "rgba(16, 185, 129, 0.75)", font: "'JetBrains Mono', monospace", dateFont: "'JetBrains Mono', monospace" },
+        { id: 19, key: "settings.mini.skin.19", bg: "linear-gradient(150deg, #1f0a0e 0%, #0a0204 100%)", border: "rgba(244, 63, 94, 0.4)", color: "#fb7185", dateColor: "rgba(251, 113, 133, 0.75)", font: "'Orbitron', sans-serif", dateFont: "'Outfit', sans-serif" },
+        { id: 20, key: "settings.mini.skin.20", bg: "linear-gradient(155deg, #021415 0%, #12051d 100%)", border: "rgba(52, 211, 153, 0.45)", color: "#34d399", dateColor: "#d8b4fe", font: "'Outfit', sans-serif", dateFont: "'Outfit', sans-serif" }
     ];
 
     function buildTimerSkinPills() {
@@ -623,8 +623,29 @@
             const el = document.getElementById("ctx-menu");
             if (!el) return;
             if (el.classList.contains("gallery-mode")) {
+                const grid = document.getElementById("gallery-grid");
+                const brand = document.querySelector(".ctx-brand");
+                const header = document.querySelector(".gallery-header");
+                const formatBar = document.querySelector(".gallery-format-bar");
+
+                let naturalGridH = 0;
+                if (grid) {
+                    const prevMaxH = grid.style.maxHeight;
+                    const prevOverflow = grid.style.overflowY;
+                    grid.style.maxHeight = "none";
+                    grid.style.overflowY = "visible";
+                    naturalGridH = grid.scrollHeight;
+                    grid.style.maxHeight = prevMaxH;
+                    grid.style.overflowY = prevOverflow;
+                }
+
+                const brandH = brand ? brand.offsetHeight : 20;
+                const headerH = header ? header.offsetHeight : 36;
+                const formatH = formatBar ? formatBar.offsetHeight : 28;
+                const totalH = Math.ceil(brandH + headerH + formatH + naturalGridH + 34);
+
                 if (window.cc && window.cc.miniMenuReady) {
-                    window.cc.miniMenuReady(380, 480);
+                    window.cc.miniMenuReady(410, totalH);
                 }
                 return;
             }
@@ -688,10 +709,27 @@
         }
     }
 
+    function getSampleDate() {
+        try {
+            const now = new Date();
+            const isEs = window.ccI18n && window.ccI18n.getLang() === "es";
+            const locale = isEs ? "es-ES" : "en-US";
+            const dayName = now.toLocaleDateString(locale, { weekday: "short" }).toUpperCase().replace(".", "");
+            const dayNum = String(now.getDate()).padStart(2, "0");
+            const monthName = now.toLocaleDateString(locale, { month: "short" }).toUpperCase().replace(".", "");
+            return `${dayName} · ${dayNum} ${monthName}`;
+        } catch (_) {
+            const isEs = window.ccI18n && window.ccI18n.getLang() === "es";
+            return isEs ? "DOM · 18 OCT" : "SUN · 18 OCT";
+        }
+    }
+
     function buildGalleryGrid(activeDesign) {
         const grid = document.getElementById("gallery-grid");
         if (!grid) return;
         grid.innerHTML = "";
+        const sampleDate = getSampleDate();
+        const sampleTime = "12:45:00";
 
         SKINS_META.forEach((skin) => {
             const card = document.createElement("div");
@@ -706,8 +744,19 @@
                     <span class="gallery-card-name" data-i18n="${skin.key}">${nameText}</span>
                     <span class="gallery-card-badge">#${skin.id < 10 ? "0" + skin.id : skin.id}</span>
                 </div>
-                <div class="gallery-card-preview" style="background: ${skin.bg}; border: 1px solid ${skin.border}; color: ${skin.color}; font-family: ${skin.font};">
-                    ${skin.sample}
+                <div class="gallery-card-previews">
+                    <div class="gallery-preview-box preview-stacked" style="background: ${skin.bg}; border: 1px solid ${skin.border};">
+                        <span class="preview-mode-tag">2F</span>
+                        <div class="preview-time" style="color: ${skin.color}; font-family: ${skin.font};">${sampleTime}</div>
+                        <div class="preview-date" style="color: ${skin.dateColor || skin.color}; font-family: ${skin.dateFont || skin.font};">${sampleDate}</div>
+                    </div>
+                    <div class="gallery-preview-box preview-inline" style="background: ${skin.bg}; border: 1px solid ${skin.border};">
+                        <span class="preview-mode-tag">1F</span>
+                        <div class="preview-inline-content">
+                            <span class="preview-time" style="color: ${skin.color}; font-family: ${skin.font};">${sampleTime}</span>
+                            <span class="preview-date" style="color: ${skin.dateColor || skin.color}; font-family: ${skin.dateFont || skin.font};">${sampleDate}</span>
+                        </div>
+                    </div>
                 </div>
             `;
 
@@ -749,9 +798,16 @@
         document.body.classList.add("gallery-open");
         if (ctxMenu) ctxMenu.classList.add("gallery-mode");
 
-        if (window.cc && window.cc.miniMenuReady) {
-            window.cc.miniMenuReady(380, 0);
+        let activeDesign = currentDesign || 1;
+        if (activeCaller && activeCaller.kind === "timer") {
+            activeDesign = parseInt(currentCfg.timerDesign, 10) || 1;
+        } else if (activeCaller && activeCaller.kind === "sw") {
+            activeDesign = parseInt(currentCfg.swDesign, 10) || 1;
+        } else if (currentCfg && currentCfg.miniDesign) {
+            activeDesign = parseInt(currentCfg.miniDesign, 10) || 1;
         }
+        buildGalleryGrid(activeDesign);
+        reportMenuHeight();
         resetMenuScroll();
     }
 
@@ -839,6 +895,37 @@
 
     if (btnOpenGallery) btnOpenGallery.addEventListener("click", openGallery);
     if (btnCloseGallery) btnCloseGallery.addEventListener("click", closeGallery);
+
+    document.querySelectorAll(".gallery-format-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const format = btn.dataset.format || "both";
+            document.querySelectorAll(".gallery-format-btn").forEach((b) => {
+                b.classList.toggle("active", b === btn);
+            });
+            const grid = document.getElementById("gallery-grid");
+            if (grid) {
+                grid.dataset.view = format;
+            }
+            reportMenuHeight();
+        });
+    });
+
+    function attachTitlebarDrag() {
+        const brand = document.getElementById("ctx-brand");
+        const header = document.getElementById("gallery-header");
+        [brand, header].forEach((el) => {
+            if (!el) return;
+            el.addEventListener("mousedown", (e) => {
+                if (e.button !== 0) return;
+                if (e.target.closest("button, input, select, a, .gallery-close-btn, .gallery-format-btn")) return;
+                e.preventDefault();
+                if (window.cc && window.cc.startDragging) {
+                    window.cc.startDragging().catch(() => {});
+                }
+            });
+        });
+    }
+    attachTitlebarDrag();
 
     function updateAudioUi(muted) {
         const isMuted = muted === true;
