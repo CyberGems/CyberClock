@@ -192,10 +192,10 @@
         border-radius: 6px 6px 0 0;
         white-space: nowrap;
         cursor: grab;
-        -webkit-app-region: drag;
         user-select: none;
     }
-    .ctx-brand:active {
+    .ctx-brand:active,
+    body.is-dragging .ctx-brand {
         cursor: grabbing;
     }
     .ctx-brand-widget {
@@ -725,11 +725,11 @@
         padding-bottom: 5px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         cursor: grab;
-        -webkit-app-region: drag;
         user-select: none;
         flex-shrink: 0;
     }
-    .gallery-header:active {
+    .gallery-header:active,
+    body.is-dragging .gallery-header {
         cursor: grabbing;
     }
     .gallery-title-group {
@@ -737,7 +737,6 @@
         flex-direction: column;
         gap: 2px;
         pointer-events: none;
-        -webkit-app-region: drag;
     }
     .gallery-title {
         font-family: "Space Grotesk", system-ui, sans-serif;

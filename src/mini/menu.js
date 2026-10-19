@@ -3,6 +3,8 @@
     let activeCaller = { caller: "mini", kind: "mini" };
     let currentCfg = {};
     let menuShownTime = 0;
+    let isDraggingMenu = false;
+    let lastDragEndTime = 0;
 
     // Track active tab per widget kind to restore upon reopening
     const savedActiveTab = {
@@ -908,10 +910,31 @@
             el.addEventListener("mousedown", (e) => {
                 if (e.button !== 0) return;
                 if (e.target.closest("button, input, select, a, .gallery-close-btn, .gallery-format-btn, .gallery-format-switcher")) return;
+                isDraggingMenu = true;
+                e.preventDefault();
+                document.body.classList.add("is-dragging");
                 if (window.cc && window.cc.startDragging) {
-                    window.cc.startDragging().catch(() => {});
+                    window.cc.startDragging()
+                        .then(() => {
+                            isDraggingMenu = false;
+                            lastDragEndTime = Date.now();
+                            document.body.classList.remove("is-dragging");
+                        })
+                        .catch(() => {
+                            isDraggingMenu = false;
+                            lastDragEndTime = Date.now();
+                            document.body.classList.remove("is-dragging");
+                        });
                 }
             });
+        });
+
+        window.addEventListener("mouseup", () => {
+            if (isDraggingMenu) {
+                isDraggingMenu = false;
+                lastDragEndTime = Date.now();
+                document.body.classList.remove("is-dragging");
+            }
         });
     }
     attachTitlebarDrag();
@@ -1604,6 +1627,7 @@
 
     // Close context menu on outside click
     document.addEventListener("click", (e) => {
+        if (isDraggingMenu || Date.now() - lastDragEndTime < 500) return;
         if (!e.target.closest(".ctx-menu, input, button, label, span, select, option")) {
             if (window.cc && window.cc.closeMenuPopup) {
                 window.cc.closeMenuPopup();
@@ -1973,8 +1997,9 @@
 
     // Close menu popup when it loses focus (click on other windows)
     window.addEventListener("blur", () => {
-        // Prevent spurious blur during initial focus transition
+        // Prevent spurious blur during initial focus transition or while dragging
         if (Date.now() - menuShownTime < 350) return;
+        if (isDraggingMenu || Date.now() - lastDragEndTime < 500) return;
         if (galleryView && galleryView.style.display !== "none") {
             closeGallery();
         }
