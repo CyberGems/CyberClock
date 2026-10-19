@@ -1346,6 +1346,13 @@
         const overlay = document.getElementById("alarm-editor-overlay");
         if (!overlay) return;
 
+        const kickerEl = document.querySelector("#alarm-editor-overlay .alarms-kicker [data-i18n]");
+        if (kickerEl) {
+            kickerEl.textContent = alarmEditorId
+                ? (window.ccI18n ? window.ccI18n.t("alarms.editor.editTitle").toUpperCase() : "EDIT ALARM")
+                : (window.ccI18n ? window.ccI18n.t("alarms.editor.kicker") : "NEW ALARM");
+        }
+
         const title = document.getElementById("alarm-editor-title");
         const time = document.getElementById("alarm-edit-time");
         const repeat = document.getElementById("alarm-edit-repeat");
