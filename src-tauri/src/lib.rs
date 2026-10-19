@@ -80,14 +80,14 @@ fn broadcast_active_window(app: &AppHandle, label: &str) {
 /// mini listened on `alarm:chime` and each played the sound in
 /// its own AudioContext.
 fn active_event_target(app: &AppHandle) -> Option<String> {
-    for label in ["main", "mini"] {
-        if let Some(win) = app.get_webview_window(label) {
-            if win.is_visible().unwrap_or(false) {
-                return Some(label.to_string());
-            }
+    let settings = load_settings(app);
+    let target = if settings.window_mode == "full" { "main" } else { "mini" };
+    if let Some(win) = app.get_webview_window(target) {
+        if win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false) {
+            return Some(target.to_string());
         }
     }
-    None
+    Some(target.to_string())
 }
 
 /// A due alarm stays reachable for this long after its minute starts.
@@ -120,6 +120,32 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
 /// The visible window plays the sound. The other window still shows the
 /// notice, marked silent, so opening it later does not replay the chime.
 fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
+    let settings = load_settings(app);
+    let is_custom_alarm = payload.get("type").and_then(|v| v.as_str()) == Some("custom");
+
+    // If an alarm fires, make sure the target window for the current mode is restored/visible
+    if is_custom_alarm {
+        if settings.window_mode == "full" {
+            if let Some(main) = app.get_webview_window("main") {
+                let hidden = !main.is_visible().unwrap_or(false) || main.is_minimized().unwrap_or(false);
+                if hidden {
+                    place_full_clock(&main, &settings);
+                }
+                let _ = main.unminimize();
+                let _ = main.show();
+                let _ = main.set_focus();
+                refresh_taskbar_tab(&main);
+                broadcast_active_window(app, "main");
+            }
+        } else if let Some(mini) = app.get_webview_window("mini") {
+            let _ = mini.unminimize();
+            let _ = mini.show();
+            let _ = mini.set_focus();
+            refresh_taskbar_tab(&mini);
+            broadcast_active_window(app, "mini");
+        }
+    }
+
     let active = active_event_target(app);
     for label in ["main", "mini"] {
         if app.get_webview_window(label).is_none() {
@@ -128,7 +154,7 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
         let mut data = payload.clone();
         let plays_sound = match active.as_deref() {
             Some(current) => current == label,
-            None => label == "main",
+            None => label == if settings.window_mode == "full" { "main" } else { "mini" },
         };
         if !plays_sound {
             data["silent"] = serde_json::Value::Bool(true);

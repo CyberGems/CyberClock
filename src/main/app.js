@@ -9143,6 +9143,11 @@
     const btnMin = document.getElementById("btn-minimize");
     if (btnMin) {
         btnMin.addEventListener("click", () => {
+            ttHide();
+            btnMin.blur();
+            if (document.activeElement && typeof document.activeElement.blur === "function") {
+                document.activeElement.blur();
+            }
             if (window.cc && window.cc.minimizeWindow) {
                 window.cc.minimizeWindow();
             }
@@ -9261,13 +9266,26 @@
             ttShowTimer = setTimeout(() => ttShow(el), TT_SHOW_DELAY_MS);
         });
         el.addEventListener("mouseleave", ttHide);
-        el.addEventListener("focus", () => ttShow(el));
+        el.addEventListener("focus", () => {
+            if (el.matches(":focus-visible")) {
+                ttShow(el);
+            }
+        });
         el.addEventListener("blur", ttHide);
-        el.addEventListener("click", ttHide);
+        el.addEventListener("click", () => {
+            ttHide();
+            el.blur();
+        });
     }
 
     ["wheel", "scroll"].forEach((type) => window.addEventListener(type, ttHide, true));
     window.addEventListener("blur", ttHide);
+    window.addEventListener("focus", () => {
+        ttHide();
+        if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("wmbtn")) {
+            document.activeElement.blur();
+        }
+    });
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) ttHide();
     });
@@ -9894,6 +9912,7 @@
 
     window.cc.onAlarmChime((p) => {
         if (p.type === "custom") {
+            ttHide();
             showAlarmNotice(p);
             if (!p.silent && window.audioEngine?.playAlarmAlert) window.audioEngine.playAlarmAlert(p);
             return;

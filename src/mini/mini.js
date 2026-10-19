@@ -786,9 +786,11 @@
     window.cc.onSettingsUpdated((s) => applySettings(s));
 
     window.cc.onAlarmChime((p) => {
+        if (cfg.windowMode && cfg.windowMode !== "mini") return;
+        if (p.silent) return;
         if (p.type === "custom") {
             showMiniAlarm(p);
-            if (!p.silent && window.audioEngine && window.audioEngine.playAlarmAlert) {
+            if (window.audioEngine && window.audioEngine.playAlarmAlert) {
                 window.audioEngine.playAlarmAlert(p);
             }
             return;
