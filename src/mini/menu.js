@@ -50,7 +50,7 @@
         { id: 17, key: "settings.mini.skin.17", bg: "linear-gradient(145deg, #160a2c 0%, #080312 100%)", border: "rgba(168, 85, 247, 0.4)", color: "#c084fc", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
         { id: 18, key: "settings.mini.skin.18", bg: "linear-gradient(150deg, #051a10 0%, #010805 100%)", border: "rgba(16, 185, 129, 0.45)", color: "#10b981", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
         { id: 19, key: "settings.mini.skin.19", bg: "linear-gradient(150deg, #1f0a0e 0%, #0a0204 100%)", border: "rgba(244, 63, 94, 0.4)", color: "#fb7185", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 20, key: "settings.mini.skin.20", bg: "linear-gradient(155deg, #061c24 0%, #020a0e 100%)", border: "rgba(6, 182, 212, 0.45)", color: "#22d3ee", font: "'Outfit', sans-serif", sample: "12:45:00" }
+        { id: 20, key: "settings.mini.skin.20", bg: "linear-gradient(155deg, #021415 0%, #12051d 100%)", border: "rgba(52, 211, 153, 0.45)", color: "#34d399", font: "'Outfit', sans-serif", sample: "12:45:00" }
     ];
 
     function buildTimerSkinPills() {

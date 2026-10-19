@@ -2041,74 +2041,74 @@
 
     /* ═══════════════════════════════════════════════════════
        SKIN 20: Solar Aurora / Arctic Teal
-       Vibrant arctic cyan & teal aurora borealis flow with crisp
-       contrast against deep polar obsidian.
+       Vibrant boreal emerald & celestial lavender aurora flow with crisp
+       contrast against deep polar night sky.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="20"] .mini-bg {
         background:
-            radial-gradient(ellipse at 25% 40%, rgba(6, 182, 212, 0.18), transparent 55%),
-            radial-gradient(ellipse at 80% 70%, rgba(14, 165, 233, 0.14), transparent 50%),
-            linear-gradient(155deg, #061c24 0%, #05141b 50%, #020a0e 100%);
+            radial-gradient(ellipse at 15% 25%, rgba(52, 211, 153, 0.20), transparent 55%),
+            radial-gradient(ellipse at 85% 75%, rgba(168, 85, 247, 0.22), transparent 55%),
+            linear-gradient(155deg, #021415 0%, #060b18 50%, #12051d 100%);
         backdrop-filter: blur(20px);
     }
     .mini-shell[data-design="20"] {
         border-radius: 12px;
         clip-path: inset(0 round 12px);
-        border: 1px solid rgba(6, 182, 212, 0.45);
+        border: 1px solid rgba(52, 211, 153, 0.45);
         box-shadow:
             0 8px 30px rgba(0, 0, 0, 0.65),
-            inset 0 0 12px rgba(6, 182, 212, 0.15),
-            0 0 20px rgba(14, 165, 233, 0.25);
+            inset 0 0 14px rgba(168, 85, 247, 0.18),
+            0 0 20px rgba(52, 211, 153, 0.22);
         padding: 0 12px;
         gap: 10px;
     }
     .mini-shell[data-design="20"] #mini-time {
         font-family: "Outfit", sans-serif;
         font-weight: 600;
-        color: #22d3ee;
+        color: #34d399;
         letter-spacing: 0.8px;
         text-shadow:
-            0 0 12px rgba(34, 211, 238, 0.6),
-            0 0 26px rgba(6, 182, 212, 0.4);
+            0 0 12px rgba(52, 211, 153, 0.65),
+            0 0 26px rgba(168, 85, 247, 0.4);
         white-space: nowrap;
     }
     .mini-shell[data-design="20"] #mini-date {
         font-family: "Outfit", sans-serif;
         font-weight: 400;
-        color: #a5f3fc;
-        opacity: 0.85;
-        letter-spacing: 0.5px;
+        color: #d8b4fe;
+        opacity: 0.9;
+        letter-spacing: 0.6px;
         text-transform: uppercase;
         white-space: nowrap;
-        text-shadow: none;
+        text-shadow: 0 0 8px rgba(168, 85, 247, 0.35);
     }
     .mini-shell[data-design="20"] .status-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: #06b6d4;
-        box-shadow: 0 0 10px #06b6d4, 0 0 20px rgba(6, 182, 212, 0.5);
-        --led-halo: #06b6d4;
+        background: #34d399;
+        box-shadow: 0 0 10px #34d399, 0 0 20px rgba(168, 85, 247, 0.65);
+        --led-halo: #34d399;
         --led-period: 3s;
         animation: led-core-breathe 3s ease-in-out infinite;
     }
     .mini-shell[data-design="20"] .sep {
         width: 1px;
         height: 22px;
-        background: linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.35), transparent);
+        background: linear-gradient(to bottom, transparent, rgba(52, 211, 153, 0.35), transparent);
     }
     .mini-shell[data-design="20"] .ctl-btn {
-        color: rgba(34, 211, 238, 0.65);
+        color: rgba(52, 211, 153, 0.7);
     }
     .mini-shell[data-design="20"] .ctl-btn:hover {
-        color: #cffafe;
-        background: rgba(6, 182, 212, 0.18);
+        color: #f5d0fe;
+        background: rgba(168, 85, 247, 0.18);
     }
     .mini-shell[data-design="20"] #btn-aot.active {
-        color: #22d3ee;
+        color: #34d399;
     }
     .mini-shell[data-design="20"] #btn-aot.active .ctl-ico {
-        filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.85));
+        filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.85));
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -2315,6 +2315,12 @@
     .mini-shell[data-design="4"] .day-progress:hover .day-progress-track,
     .mini-shell[data-design="8"] .day-progress:hover .day-progress-track {
         background: rgba(140, 186, 226, 0.55);
+    }
+    /* Skin 5 corner bracket at bottom-right extends 4px-16px from right edge;
+       inset day-progress to give clearance so it doesn't collide with the bracket. */
+    .mini-shell[data-design="5"] .day-progress {
+        left: 14px;
+        right: 24px;
     }
     .controls {
         display: flex;
@@ -3223,25 +3229,25 @@
 
     /* Skin 20: Solar Aurora */
     .mini-tip[data-design="20"] {
-        background: #04161d;
-        border: 1px solid rgba(6, 182, 212, 0.45);
+        background: #021415;
+        border: 1px solid rgba(52, 211, 153, 0.45);
         border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(14, 165, 233, 0.25);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(168, 85, 247, 0.25);
         font-family: "Outfit", sans-serif;
     }
     .mini-tip[data-design="20"]::after {
-        background: #04161d;
-        border-color: rgba(6, 182, 212, 0.45);
+        background: #021415;
+        border-color: rgba(52, 211, 153, 0.45);
     }
     .mini-tip[data-design="20"] .mini-tip-date,
     .mini-tip[data-design="20"] .mini-tip-stat b {
-        color: #22d3ee;
-        text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+        color: #34d399;
+        text-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
     }
     .mini-tip[data-design="20"] .mini-tip-action-btn {
-        border-color: #06b6d4;
-        color: #22d3ee;
-        background: rgba(6, 182, 212, 0.14);
+        border-color: #34d399;
+        color: #d8b4fe;
+        background: rgba(168, 85, 247, 0.16);
     }
 
     /* ── Mini Mode Update Notice ─────────────────────────── */
@@ -3560,7 +3566,7 @@
     .mini-shell[data-design="17"] { --skin-ink: #c084fc; --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
     .mini-shell[data-design="18"] { --skin-ink: #10b981; --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
     .mini-shell[data-design="19"] { --skin-ink: #fb7185; --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="20"] { --skin-ink: #22d3ee; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="20"] { --skin-ink: #34d399; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
 
     /* Digital Matrix prompt and cursor sit beside the time, not inside it,
        so a wider face cannot run the glyphs through the numbers. */
