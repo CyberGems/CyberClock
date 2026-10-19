@@ -53,6 +53,13 @@ pub struct CustomAlarm {
     /// Remove the alarm when the notice is dismissed. Snooze keeps it.
     #[serde(default)]
     pub delete_after: bool,
+    /// Visual icon chosen for the alarm. Defaults to "bell".
+    #[serde(default = "default_alarm_icon")]
+    pub icon: String,
+}
+
+fn default_alarm_icon() -> String {
+    "bell".to_string()
 }
 
 impl Default for CustomAlarm {
@@ -74,6 +81,7 @@ impl Default for CustomAlarm {
             sound_until_dismiss: false,
             sound_pause_secs: default_sound_pause_secs(),
             delete_after: false,
+            icon: default_alarm_icon(),
         }
     }
 }
@@ -133,6 +141,9 @@ pub fn normalize_custom_alarms(settings: &mut AppSettings) {
         }
         if alarm.sound_repeat_count == 0 {
             alarm.sound_repeat_count = default_sound_repeat_count();
+        }
+        if alarm.icon.trim().is_empty() {
+            alarm.icon = default_alarm_icon();
         }
     }
     // The old three-slot editor stored unnamed defaults as "Alarm 1/2/3".

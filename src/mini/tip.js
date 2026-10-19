@@ -32,9 +32,15 @@
 
             const alarmTitle = document.createElement("div");
             alarmTitle.className = "mini-tip-alarm-title";
-            alarmTitle.textContent = window.ccI18n?.displayAlarmLabel
+            const iconSpan = document.createElement("span");
+            iconSpan.setAttribute("data-ico", data.alarm.icon || "bell");
+            alarmTitle.appendChild(iconSpan);
+            const labelSpan = document.createElement("span");
+            labelSpan.textContent = window.ccI18n?.displayAlarmLabel
                 ? window.ccI18n.displayAlarmLabel(data.alarm.label)
                 : (data.alarm.label || t("alarms.notice.title"));
+            alarmTitle.appendChild(labelSpan);
+            if (window.ccIcons) window.ccIcons.replaceIcons(alarmTitle);
 
             const alarmMsg = document.createElement("div");
             alarmMsg.className = "mini-tip-alarm-msg";

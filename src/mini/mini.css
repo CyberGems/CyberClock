@@ -2439,10 +2439,19 @@
         text-align: center;
     }
     .mini-tip-alarm-title {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
         color: var(--accent-a);
         font-size: 14px;
         font-weight: 700;
         line-height: 1.3;
+    }
+    .mini-tip-alarm-title .cc-ico {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
     }
     .mini-tip-alarm-msg {
         margin: 4px 0 8px;

@@ -5113,6 +5113,7 @@ fn custom_alarms_scheduler(app: AppHandle) {
                         "label": alarm.label,
                         "message": alarm.message,
                         "repeatMode": alarm.repeat_mode,
+                        "icon": alarm.icon,
                         "snoozeMinutes": alarm.snooze_minutes,
                         "sound": alarm.sound,
                         "customPath": alarm.custom_path,

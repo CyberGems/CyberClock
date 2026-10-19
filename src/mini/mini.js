@@ -406,6 +406,7 @@
                 label: activeAlarmNotice.label,
                 message: activeAlarmNotice.message,
                 snoozeMinutes: activeAlarmNotice.snoozeMinutes || 10,
+                icon: activeAlarmNotice.icon || "bell",
             };
         }
 

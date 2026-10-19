@@ -668,9 +668,13 @@
                 : alarmText("alarms.card.off", "OFF");
             const label = alarmDisplayLabel(alarm);
             const message = alarm.message || alarmText("alarms.card.noMessage", "No message");
+            const icon = alarm.icon || "bell";
             return `
                 <article class="alarm-card${enabled ? "" : " is-off"}" data-alarm-id="${alarmEscape(id)}">
                     <div class="alarm-card-top">
+                        <div class="alarm-card-badge" aria-hidden="true">
+                            <span data-ico="${alarmEscape(icon)}"></span>
+                        </div>
                         <div class="alarm-card-copy">
                             <div class="alarm-card-time">${alarmEscape(alarmTimeString(alarm.hour, alarm.minute))}</div>
                             <div class="alarm-card-label">${alarmEscape(label)}</div>
@@ -746,6 +750,7 @@
             label: "",
             message: "",
             enabled: true,
+            icon: "bell",
             hour: now.getHours(),
             minute: now.getMinutes(),
             daysMask: 0,
@@ -773,11 +778,17 @@
             focus: alarmText("alarms.preset.focus", "Focus time"),
             pause: alarmText("alarms.preset.pause", "Take a pause"),
         };
+        const icons = {
+            wake: "sun",
+            focus: "laptop",
+            pause: "coffee",
+        };
         const times = { wake: [7, 0], focus: [9, 0], pause: [15, 0] };
         const [hour, minute] = times[preset] || times.focus;
         return newAlarmDraft({
             label: labels[preset] || labels.focus,
             message: messages[preset] || messages.focus,
+            icon: icons[preset] || "bell",
             hour,
             minute,
             repeatMode: preset === "pause" ? "weekdays" : "weekdays",
@@ -1259,6 +1270,75 @@
         if (daysWrap) daysWrap.hidden = repeat !== "weekly";
     }
 
+    const ALARM_ICONS = [
+        "bell", "cake", "calendar", "heart", "phone", "star",
+        "cash", "alert", "briefcase", "pill", "coffee", "dumbbell",
+        "utensils", "moon", "clock", "plane", "home", "gift",
+        "book", "flame", "music", "sun", "laptop", "trophy"
+    ];
+
+    function setAlarmEditorIcon(iconName) {
+        const hidden = document.getElementById("alarm-edit-icon");
+        const preview = document.getElementById("alarm-icon-preview");
+        const icon = ALARM_ICONS.includes(iconName) ? iconName : "bell";
+        if (hidden) hidden.value = icon;
+        if (preview) {
+            preview.setAttribute("data-ico", icon);
+            if (window.ccIcons) window.ccIcons.replaceIcons(preview.parentElement);
+        }
+        if (alarmEditorDraft) alarmEditorDraft.icon = icon;
+        closeAlarmIconPopover();
+    }
+
+    function openAlarmIconPopover() {
+        const popover = document.getElementById("alarm-icon-popover");
+        const trigger = document.getElementById("alarm-icon-trigger");
+        if (!popover || !trigger) return;
+        renderAlarmIconGrid();
+        popover.hidden = false;
+        trigger.setAttribute("aria-expanded", "true");
+        repositionAlarmIconPopover();
+    }
+
+    function closeAlarmIconPopover() {
+        const popover = document.getElementById("alarm-icon-popover");
+        const trigger = document.getElementById("alarm-icon-trigger");
+        if (popover) popover.hidden = true;
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+    }
+
+    function repositionAlarmIconPopover() {
+        const popover = document.getElementById("alarm-icon-popover");
+        const trigger = document.getElementById("alarm-icon-trigger");
+        if (!popover || !trigger || popover.hidden) return;
+        const rect = trigger.getBoundingClientRect();
+        const margin = 8;
+        const popW = popover.offsetWidth || 284;
+        let left = rect.left;
+        if (left + popW > window.innerWidth - margin) {
+            left = window.innerWidth - popW - margin;
+        }
+        left = Math.max(margin, left);
+        popover.style.top = `${Math.round(rect.bottom + 6)}px`;
+        popover.style.left = `${Math.round(left)}px`;
+    }
+
+    function renderAlarmIconGrid() {
+        const grid = document.getElementById("alarm-icon-grid");
+        if (!grid) return;
+        const currentIcon = document.getElementById("alarm-edit-icon")?.value || "bell";
+        grid.innerHTML = ALARM_ICONS.map((icon) => {
+            const isSelected = icon === currentIcon;
+            const tooltip = window.ccI18n ? window.ccI18n.t(`alarms.icon.${icon}`) : icon;
+            return `
+                <button type="button" class="alarm-icon-cell${isSelected ? " is-selected" : ""}" data-icon="${icon}" data-tooltip="${alarmEscape(tooltip)}" data-tooltip-dir="bottom" aria-label="${alarmEscape(tooltip)}">
+                    <span data-ico="${icon}"></span>
+                </button>
+            `;
+        }).join("");
+        if (window.ccIcons) window.ccIcons.replaceIcons(grid);
+    }
+
     function openAlarmEditor(alarm = null, options = {}) {
         const isExisting = options.isExisting !== false;
         alarmEditorId = alarm && isExisting ? alarm.id : null;
@@ -1313,6 +1393,15 @@
         });
         setAlarmEditorFileLabel(alarmEditorDraft.customPath);
         syncAlarmEditorSchedule();
+        const chosenIcon = alarmEditorDraft.icon || "bell";
+        const iconHidden = document.getElementById("alarm-edit-icon");
+        const iconPreview = document.getElementById("alarm-icon-preview");
+        if (iconHidden) iconHidden.value = chosenIcon;
+        if (iconPreview) {
+            iconPreview.setAttribute("data-ico", chosenIcon);
+            if (window.ccIcons) window.ccIcons.replaceIcons(iconPreview.parentElement);
+        }
+        closeAlarmIconPopover();
         overlay.hidden = false;
         requestAnimationFrame(() => overlay.classList.add("open"));
         setTimeout(() => document.getElementById("alarm-edit-hour")?.focus(), 30);
@@ -1321,6 +1410,7 @@
     function closeAlarmEditor() {
         const overlay = document.getElementById("alarm-editor-overlay");
         if (!overlay) return;
+        closeAlarmIconPopover();
         adpClose();
         closeAlarmSoundMenu();
         overlay.classList.remove("open");
@@ -1347,6 +1437,7 @@
         }
         return {
             ...(alarmEditorDraft || newAlarmDraft()),
+            icon: document.getElementById("alarm-edit-icon")?.value || "bell",
             label: document.getElementById("alarm-editor-title")?.value.trim() || nextAlarmLabel(alarmEditorId),
             message: document.getElementById("alarm-edit-message")?.value.trim() || "",
             hour: Number.isFinite(hour) ? hour : 9,
@@ -1525,6 +1616,12 @@
         const snooze = document.getElementById("alarm-notice-snooze");
         const takeover = !!payload.alarmId;
         notice.classList.toggle("is-takeover", takeover);
+        const noticeIcon = notice.querySelector(".alarm-notice-icon");
+        if (noticeIcon) {
+            const ico = payload.icon || "bell";
+            noticeIcon.innerHTML = `<span data-ico="${alarmEscape(ico)}"></span>`;
+            if (window.ccIcons) window.ccIcons.replaceIcons(noticeIcon);
+        }
         if (title) title.textContent = alarmDisplayLabel({ label: payload.label });
         if (message) {
             const text = (payload.message || "").trim();
@@ -1564,6 +1661,11 @@
         if (notice) {
             notice.hidden = true;
             notice.classList.remove("is-takeover");
+            const noticeIcon = notice.querySelector(".alarm-notice-icon");
+            if (noticeIcon) {
+                noticeIcon.innerHTML = '<span data-ico="bell"></span>';
+                if (window.ccIcons) window.ccIcons.replaceIcons(noticeIcon);
+            }
         }
         clearTimeout(alarmNoticeTimer);
         alarmNoticeAlarm = null;
@@ -1672,6 +1774,29 @@
             const template = (cfg.alarmTemplates || []).find((item) => item.id === use.dataset.templateId);
             openAlarmFromTemplate(template);
         });
+        document.getElementById("alarm-icon-trigger")?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const popover = document.getElementById("alarm-icon-popover");
+            if (popover && !popover.hidden) {
+                closeAlarmIconPopover();
+            } else {
+                openAlarmIconPopover();
+            }
+        });
+        document.getElementById("alarm-icon-grid")?.addEventListener("click", (e) => {
+            const cell = e.target.closest(".alarm-icon-cell");
+            if (cell && cell.dataset.icon) {
+                setAlarmEditorIcon(cell.dataset.icon);
+            }
+        });
+        document.addEventListener("pointerdown", (event) => {
+            const popover = document.getElementById("alarm-icon-popover");
+            if (!popover || popover.hidden) return;
+            if (event.target.closest("#alarm-icon-popover, #alarm-icon-trigger")) return;
+            closeAlarmIconPopover();
+        });
+        window.addEventListener("resize", repositionAlarmIconPopover);
+
         document.getElementById("alarm-editor-cancel")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-editor-close")?.addEventListener("click", closeAlarmEditor);
         document.getElementById("alarm-edit-repeat-count")?.addEventListener("change", syncAlarmSoundRepeat);
@@ -1760,6 +1885,11 @@
                 return;
             }
             if (document.getElementById("alarm-editor-overlay")?.hidden) return;
+            const iconPopover = document.getElementById("alarm-icon-popover");
+            if (iconPopover && !iconPopover.hidden) {
+                closeAlarmIconPopover();
+                return;
+            }
             const soundMenu = document.getElementById("alarm-sound-menu");
             if (soundMenu && !soundMenu.hidden) {
                 closeAlarmSoundMenu();

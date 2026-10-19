@@ -340,7 +340,20 @@
                                 <div class="alarm-editor-head">
                                     <div class="alarm-editor-title-wrap">
                                         <div class="alarms-kicker"><span data-ico="bell"></span> <span data-i18n="alarms.editor.kicker">ALARM DESIGNER</span></div>
-                                        <input id="alarm-editor-title" class="alarm-editor-name" type="text" name="cc-alarm-title" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Alarm 1" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
+                                        <div class="alarm-title-row">
+                                            <div class="alarm-icon-picker-wrap">
+                                                <button type="button" class="alarm-icon-trigger" id="alarm-icon-trigger" aria-haspopup="dialog" aria-expanded="false" data-tooltip="Choose icon" data-i18n-attr="data-tooltip:alarms.editor.chooseIcon, aria-label:alarms.editor.chooseIcon">
+                                                    <span class="alarm-icon-preview" id="alarm-icon-preview" data-ico="bell"></span>
+                                                    <span class="alarm-icon-caret" aria-hidden="true">▾</span>
+                                                </button>
+                                                <div class="alarm-icon-popover" id="alarm-icon-popover" role="dialog" hidden>
+                                                    <div class="alarm-icon-popover-title" data-i18n="alarms.editor.selectIcon">Select icon</div>
+                                                    <div class="alarm-icon-grid" id="alarm-icon-grid"></div>
+                                                </div>
+                                                <input type="hidden" id="alarm-edit-icon" value="bell" />
+                                            </div>
+                                            <input id="alarm-editor-title" class="alarm-editor-name" type="text" name="cc-alarm-title" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Alarm 1" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
+                                        </div>
                                     </div>
                                     <button class="alarm-icon-btn" id="alarm-editor-close" type="button" data-tooltip="Cancel" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.cancel, aria-label:common.cancel">
                                         <span data-ico="x"></span>

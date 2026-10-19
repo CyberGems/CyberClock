@@ -466,6 +466,67 @@
       d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
       d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+  <symbol id="cc-i-cake" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16s2-1.5 4 0 4 0 4 0 2-1.5 4 0 4 0 4 0M2 21h20M12 4v4M12 2a1 1 0 0 1 1 1c0 .6-.4 1-1 1s-1-.4-1-1a1 1 0 0 1 1-1Z"/>
+  </symbol>
+  <symbol id="cc-i-phone" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/>
+  </symbol>
+  <symbol id="cc-i-star" viewBox="0 0 24 24">
+    <polygon fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <symbol id="cc-i-cash" viewBox="0 0 24 24">
+    <rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" d="M6 12h.01M18 12h.01"/>
+  </symbol>
+  <symbol id="cc-i-alert" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3ZM12 9v4M12 17h.01"/>
+  </symbol>
+  <symbol id="cc-i-briefcase" viewBox="0 0 24 24">
+    <rect x="2" y="7" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 12h20M12 12v3"/>
+  </symbol>
+  <symbol id="cc-i-pill" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7ZM8.5 8.5l7 7"/>
+  </symbol>
+  <symbol id="cc-i-dumbbell" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="m6.5 6.5 11 11M3 10l4-4M14 21l4-4M2 8l4-4 2 2-4 4ZM16 22l4-4 2 2-4 4ZM7.5 10.5l-2-2M15.5 18.5l-2-2"/>
+  </symbol>
+  <symbol id="cc-i-utensils" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M18 2v20M21 2v6a3 3 0 0 1-3 3M18 5h3M6 2v7a3 3 0 0 0 3 3v10M3 2v7a3 3 0 0 0 3 3"/>
+  </symbol>
+  <symbol id="cc-i-plane" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.6-.1-1.2.1-1.5.6l-.7.8 6.4 4.5-3.5 3.5-2.5-.5c-.4-.1-.8.1-1 .4l-.5.6 3.5 2 2 3.5.6-.5c.3-.2.5-.6.4-1l-.5-2.5 3.5-3.5 4.5 6.4.8-.7c.5-.3.7-.9.6-1.5Z"/>
+  </symbol>
+  <symbol id="cc-i-gift" viewBox="0 0 24 24">
+    <rect x="3" y="8" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M12 8v13M3 13h18M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8ZM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8Z"/>
+  </symbol>
+  <symbol id="cc-i-music" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M9 18V5l12-2v13M9 9l12-2"/>
+    <circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+  </symbol>
+  <symbol id="cc-i-laptop" viewBox="0 0 24 24">
+    <rect x="4" y="4" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M2 19h20M9 16v3M15 16v3"/>
+  </symbol>
+  <symbol id="cc-i-trophy" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M8 21h8M12 17v4M6 4h12v4a6 6 0 0 1-12 0V4ZM6 6H3a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1M18 6h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1"/>
   </symbol>
 </svg>
         `;
