@@ -697,17 +697,27 @@
     /* ── Visual Skin Gallery Overlay / Subview ── */
     body.gallery-open {
         padding: 6px 10px 6px 10px;
+        overflow: hidden !important;
     }
     .ctx-menu.gallery-mode {
         width: 388px;
-        height: auto;
+        height: 100%;
         max-height: calc(100vh - 12px);
+        overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
+    }
+    .ctx-menu.gallery-mode .ctx-brand {
+        flex-shrink: 0;
     }
     .gallery-view {
         display: flex;
         flex-direction: column;
         gap: 6px;
         animation: ctx-fade-in 0.18s ease-out;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
     }
     .gallery-header {
         display: flex;
@@ -718,6 +728,7 @@
         cursor: grab;
         -webkit-app-region: drag;
         user-select: none;
+        flex-shrink: 0;
     }
     .gallery-header:active {
         cursor: grabbing;
@@ -767,49 +778,50 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 6px;
-        padding: 0 2px 2px 2px;
+        gap: 8px;
+        padding: 2px 2px 4px 2px;
+        flex-shrink: 0;
     }
     .gallery-format-lbl {
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 10px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.5);
-        letter-spacing: 0.5px;
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.65);
+        letter-spacing: 0.8px;
         text-transform: uppercase;
     }
     .gallery-format-switcher {
         display: inline-flex;
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 5px;
-        padding: 2px;
-        gap: 2px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        padding: 2px 3px;
+        gap: 3px;
     }
     .gallery-format-btn {
         background: transparent;
         border: none;
         outline: none;
         border-radius: 4px;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.7);
         font-family: "Space Grotesk", system-ui, sans-serif;
-        font-size: 9.5px;
+        font-size: 11.5px;
         font-weight: 600;
-        letter-spacing: 0.3px;
-        padding: 2px 8px;
+        letter-spacing: 0.4px;
+        padding: 3px 10px;
         cursor: pointer;
         transition: all 0.14s ease;
         -webkit-app-region: no-drag !important;
     }
     .gallery-format-btn:hover {
         color: #ffffff;
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.1);
     }
     .gallery-format-btn.active {
         background: var(--accent-a);
         color: #0b0f17;
         font-weight: 700;
-        box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.4);
+        box-shadow: 0 0 10px rgba(var(--rgb-accent), 0.45);
     }
 
     .gallery-grid {
@@ -817,16 +829,18 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 6px;
         flex: 1;
-        max-height: calc(100vh - 90px);
-        overflow-y: auto;
+        min-height: 0;
+        max-height: none;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         padding-right: 4px;
     }
     .gallery-grid::-webkit-scrollbar {
-        width: 3px;
+        width: 4px;
     }
     .gallery-grid::-webkit-scrollbar-thumb {
-        background: rgba(var(--rgb-accent), 0.35);
-        border-radius: 3px;
+        background: rgba(var(--rgb-accent), 0.4);
+        border-radius: 4px;
     }
     .gallery-card {
         background: rgba(0, 0, 0, 0.4);
