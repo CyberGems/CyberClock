@@ -1016,7 +1016,7 @@
         const [y, m, d] = iso.split("-").map(Number);
         const dt = new Date(y, m - 1, d);
         const lang = window.ccI18n?.getEffectiveLang() === "es" ? "es-ES" : "en-US";
-        const str = dt.toLocaleDateString(lang, { weekday: "short", day: "numeric", month: "long", year: "numeric" });
+        const str = dt.toLocaleDateString(lang, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 

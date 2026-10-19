@@ -4127,7 +4127,7 @@
         border-radius: 6px;
     }
     .alarm-editor {
-        width: min(500px, 100%);
+        width: min(524px, 100%);
         max-height: calc(100% - 24px);
         display: flex;
         flex-direction: column;
@@ -4323,7 +4323,7 @@
         border-radius: 10px;
     }
     .alarm-form-hero.is-once {
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+        grid-template-columns: auto minmax(0, 1fr);
     }
     .alarm-form-hero > .alarm-field {
         grid-template-columns: minmax(0, 1fr);
@@ -5026,15 +5026,20 @@
     }
 
     .alarm-editor-foot {
-        justify-content: flex-end;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         flex-wrap: wrap;
         border-top: 1px solid var(--border);
         border-bottom: 0;
     }
     .alarm-editor-foot .note-btn {
-        padding: 6px 14px;
+        padding: 6px 12px;
         min-height: 32px;
         font-size: calc(11px * var(--ui-scale));
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     .alarm-template-status {
         display: flex;
@@ -5056,11 +5061,15 @@
     .alarm-templates[hidden] {
         display: none !important;
     }
-    .alarm-editor-foot-start {
+    .alarm-editor-foot-start,
+    .alarm-editor-foot-end {
         display: flex;
-        flex-wrap: wrap;
+        align-items: center;
+        flex-wrap: nowrap;
         gap: 8px;
-        margin-right: auto;
+    }
+    .alarm-editor-foot-end {
+        margin-left: auto;
     }
     .alarm-check {
         display: flex;
