@@ -5138,6 +5138,7 @@ fn custom_alarms_scheduler(app: AppHandle) {
 pub struct TrayMenuState {
     pub version: String,
     pub is_visible: bool,
+    pub window_state: String,
     pub window_mode: String,
     pub language: String,
     pub update_available: bool,
@@ -5303,7 +5304,23 @@ fn friendly_hotkey(canonical: &str) -> String {
 
 pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     let settings = load_settings(app);
-    let is_visible = is_any_clock_window_visible(app);
+    let target_label = if settings.window_mode == "full" {
+        "main"
+    } else {
+        "mini"
+    };
+    let window_state = if let Some(target_win) = app.get_webview_window(target_label) {
+        if target_win.is_minimized().unwrap_or(false) {
+            "minimized".to_string()
+        } else if target_win.is_visible().unwrap_or(false) {
+            "visible".to_string()
+        } else {
+            "hidden".to_string()
+        }
+    } else {
+        "hidden".to_string()
+    };
+    let is_visible = window_state == "visible";
     let relax_playing = app
         .state::<AlarmState>()
         .relax_playing
@@ -5321,6 +5338,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     TrayMenuState {
         version: app.package_info().version.to_string(),
         is_visible,
+        window_state,
         window_mode: settings.window_mode.clone(),
         language: settings.language.clone(),
         update_available,

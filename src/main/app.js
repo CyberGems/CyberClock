@@ -9140,6 +9140,15 @@
         });
     }
 
+    const btnMin = document.getElementById("btn-minimize");
+    if (btnMin) {
+        btnMin.addEventListener("click", () => {
+            if (window.cc && window.cc.minimizeWindow) {
+                window.cc.minimizeWindow();
+            }
+        });
+    }
+
     document
         .getElementById("btn-mini")
         .addEventListener("click", () => window.cc.goMini());
@@ -9263,7 +9272,7 @@
         if (document.hidden) ttHide();
     });
 
-    ["tbar-brand", "tbar-btn-settings", "tbar-btn-more", "btn-mini", "btn-close"].forEach((id) => {
+    ["tbar-brand", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close"].forEach((id) => {
         ttBind(document.getElementById(id));
     });
 

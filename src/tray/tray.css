@@ -196,6 +196,10 @@
         background: #3dff9a;
         box-shadow: 0 0 6px rgba(61, 255, 154, 0.75);
     }
+    .tray-status.is-minimized .tray-status-dot {
+        background: #fbbf24;
+        box-shadow: 0 0 6px rgba(251, 191, 36, 0.75);
+    }
     .tray-status.is-hidden .tray-status-dot {
         background: #8b93a7;
         box-shadow: none;

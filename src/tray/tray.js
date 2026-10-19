@@ -52,15 +52,27 @@
         // Status is information. The two mode rows stay visible, and
         // the marked one is the mode the clock is actually in.
         const T = (k, fb) => (window.ccI18n ? window.ccI18n.t(k) : fb);
-        const isVis = !!state.is_visible;
+        const winState = state.window_state || (state.is_visible ? "visible" : "hidden");
+        const isVis = winState === "visible";
+        const isMin = winState === "minimized";
         const isFull = state.window_mode === "full";
         const modeName = T(isFull ? "tray.fullMode" : "tray.miniMode", isFull ? "Full Mode" : "Mini Mode");
         const statusEl = document.getElementById("tray-clock-status");
         const statusLbl = document.getElementById("lbl-clock-status");
-        if (statusEl) statusEl.classList.toggle("is-hidden", !isVis);
+        if (statusEl) {
+            statusEl.classList.toggle("is-hidden", winState === "hidden");
+            statusEl.classList.toggle("is-minimized", isMin);
+        }
         if (statusLbl) {
-            const key = isVis ? "tray.statusVisible" : "tray.statusHidden";
-            const fallback = (isVis ? "On screen · " : "Hidden · ") + modeName;
+            let key = "tray.statusVisible";
+            let fallback = "Visible · " + modeName;
+            if (isMin) {
+                key = "tray.statusMinimized";
+                fallback = "Minimized · " + modeName;
+            } else if (winState === "hidden") {
+                key = "tray.statusHidden";
+                fallback = "Hidden";
+            }
             statusLbl.textContent = window.ccI18n ? window.ccI18n.t(key, { mode: modeName }) : fallback;
         }
         const markMode = (id, on) => {
@@ -84,10 +96,16 @@
         const btnVis = document.getElementById("btn-visibility");
         if (btnVis) btnVis.dataset.action = isVis ? "hide" : "show";
         if (lblVis) {
-            lblVis.textContent = T(isVis ? "tray.hide" : "tray.show", isVis ? "Hide Clock" : "Show Clock");
+            if (isVis) {
+                lblVis.textContent = T("tray.hide", "Hide");
+            } else if (isMin) {
+                lblVis.textContent = T("tray.restore", "Restore");
+            } else {
+                lblVis.textContent = T("tray.show", "Show");
+            }
         }
         if (icoVis) {
-            icoVis.setAttribute("data-ico", isVis ? "eye-off" : "eye");
+            icoVis.setAttribute("data-ico", isVis ? "eye-off" : (isMin ? "maximize" : "eye"));
         }
         if (hintVis) {
             const hotkey = state.hotkey || "";
