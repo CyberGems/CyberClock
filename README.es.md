@@ -40,7 +40,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Mantente organizado | Calendario completo con agenda, notas por día, estadísticas, fase lunar y calendario flotante |
 | Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
 | Relájate y concéntrate | 6 paisajes sonoros ambientales con síntesis de audio procedural |
-| Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 15 skins únicas |
+| Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 20 skins únicas |
 | Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, líneas de exploración CRT, controles de transparencia, multi-monitor |
 
 ---
@@ -81,7 +81,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
 
 ### 📌 Modo Mini
-- **15 skins únicas:** diseños distintos para la barra de reloj compacta, cada uno con sus propias dimensiones y zoom opcional (0.5×–4×)
+- **20 skins únicas:** diseños distintos para la barra de reloj compacta, cada uno con sus propias dimensiones y zoom opcional (0.5×–4×)
 - **Herramientas flotantes con skin:** las ventanas de temporizador y cronómetro reutilizan los diseños seleccionados con disposiciones dimensionadas para sus controles
 - **Controles de transparencia:** deslizadores de opacidad del fondo y del contenido
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas

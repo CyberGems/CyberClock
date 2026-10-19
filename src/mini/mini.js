@@ -180,7 +180,7 @@
             return cfg.miniLayout;
         }
         const d = parseInt(cfg.miniDesign, 10) || 1;
-        return d <= 6 ? "stacked" : "inline";
+        return (d <= 6 || d === 16) ? "stacked" : "inline";
     }
 
     // Discrete zoom stops for the mini clock (slider index → factor).
@@ -294,8 +294,8 @@
 
         const shell = document.getElementById("shell");
         if (shell) {
-            const activeDesign = Math.min(15, Math.max(1, parseInt(s.miniDesign, 10) || 1));
-            let activeLayout = s.miniLayout || (activeDesign <= 6 ? "stacked" : "inline");
+            const activeDesign = Math.min(20, Math.max(1, parseInt(s.miniDesign, 10) || 1));
+            let activeLayout = s.miniLayout || ((activeDesign <= 6 || activeDesign === 16) ? "stacked" : "inline");
             // Collapse Date hides the second row, so 2 rows is not a real choice.
             if (s.miniCollapseDate === true && activeLayout === "stacked") {
                 activeLayout = "inline";
@@ -717,13 +717,13 @@
         const ms = mins * 60 * 1000;
         miniAutoCycleTimer = setInterval(() => {
             if (document.hidden || activeBackendLabel === "main") return;
-            const cur = Math.min(15, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
+            const cur = Math.min(20, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
             let next;
             if (cfg.miniAutoCycleMode === "random") {
-                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].filter((n) => n !== cur);
+                const others = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].filter((n) => n !== cur);
                 next = others[Math.floor(Math.random() * others.length)];
             } else {
-                next = (cur % 15) + 1;
+                next = (cur % 20) + 1;
             }
             cfg.miniDesign = next;
             window.cc.saveSettings({ miniDesign: next });

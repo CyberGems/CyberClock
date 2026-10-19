@@ -29,9 +29,9 @@
         return i >= 0 ? i : 1;
     }
 
-    // 15 Skins Metadata with signature styling for the visual gallery cards
+    // 20 Skins Metadata with signature styling for the visual gallery cards
     const SKINS_META = [
-        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
+        { id: 1, key: "settings.mini.skin.1", bg: "linear-gradient(165deg, #14171f 0%, #08090c 100%)", border: "rgba(200, 220, 232, 0.35)", color: "#f0f4f8", font: "'Outfit', sans-serif", sample: "12:45:00" },
         { id: 2, key: "settings.mini.skin.2", bg: "rgba(0, 240, 255, 0.08)", border: "rgba(0, 240, 255, 0.4)", color: "#00f0ff", font: "'Orbitron', monospace", sample: "12:45:00" },
         { id: 3, key: "settings.mini.skin.3", bg: "rgba(0, 255, 65, 0.07)", border: "rgba(0, 255, 65, 0.35)", color: "#00ff41", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
         { id: 4, key: "settings.mini.skin.4", bg: "rgba(255, 255, 255, 0.06)", border: "rgba(255, 255, 255, 0.3)", color: "#ffffff", font: "'Outfit', sans-serif", sample: "12:45:00" },
@@ -45,14 +45,19 @@
         { id: 12, key: "settings.mini.skin.12", bg: "rgba(138, 43, 226, 0.12)", border: "rgba(138, 43, 226, 0.45)", color: "#c084fc", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
         { id: 13, key: "settings.mini.skin.13", bg: "linear-gradient(135deg, #121008, #1a1608)", border: "rgba(255, 153, 0, 0.4)", color: "#ff9d00", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
         { id: 14, key: "settings.mini.skin.14", bg: "linear-gradient(135deg, #0e1117, #131720)", border: "rgba(0, 229, 255, 0.45)", color: "#00e5ff", font: "'Orbitron', sans-serif", sample: "12:45:00" },
-        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(0, 255, 200, 0.45)", color: "#00ffc8", font: "'Outfit', sans-serif", sample: "12:45:00" }
+        { id: 15, key: "settings.mini.skin.15", bg: "linear-gradient(135deg, #06121a, #0b1a24)", border: "rgba(0, 255, 200, 0.45)", color: "#00ffc8", font: "'Outfit', sans-serif", sample: "12:45:00" },
+        { id: 16, key: "settings.mini.skin.16", bg: "linear-gradient(135deg, #1e2229 0%, #15181e 100%)", border: "rgba(255, 183, 0, 0.45)", color: "#ffb700", font: "'Share Tech Mono', monospace", sample: "12:45:00" },
+        { id: 17, key: "settings.mini.skin.17", bg: "linear-gradient(145deg, #160a2c 0%, #080312 100%)", border: "rgba(168, 85, 247, 0.4)", color: "#c084fc", font: "'Space Grotesk', sans-serif", sample: "12:45:00" },
+        { id: 18, key: "settings.mini.skin.18", bg: "linear-gradient(150deg, #051a10 0%, #010805 100%)", border: "rgba(16, 185, 129, 0.45)", color: "#10b981", font: "'JetBrains Mono', monospace", sample: "12:45:00" },
+        { id: 19, key: "settings.mini.skin.19", bg: "linear-gradient(150deg, #1f0a0e 0%, #0a0204 100%)", border: "rgba(244, 63, 94, 0.4)", color: "#fb7185", font: "'Orbitron', sans-serif", sample: "12:45:00" },
+        { id: 20, key: "settings.mini.skin.20", bg: "linear-gradient(155deg, #061c24 0%, #020a0e 100%)", border: "rgba(6, 182, 212, 0.45)", color: "#22d3ee", font: "'Outfit', sans-serif", sample: "12:45:00" }
     ];
 
     function buildTimerSkinPills() {
         const container = document.getElementById("timer-skin-pills");
         if (!container) return;
         container.innerHTML = "";
-        for (let i = 1; i <= 15; i++) {
+        for (let i = 1; i <= 20; i++) {
             const pill = document.createElement("button");
             pill.className = "timer-skin-pill";
             pill.dataset.skin = String(i);

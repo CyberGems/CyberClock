@@ -381,13 +381,14 @@
     height: 14px;
 }
 
-/* Tall skins (1-6) stack time over date; keep the row compact */
+/* Tall skins stack time over date; keep the row compact */
 .mini-shell[data-design="1"] .controls,
 .mini-shell[data-design="2"] .controls,
 .mini-shell[data-design="3"] .controls,
 .mini-shell[data-design="4"] .controls,
 .mini-shell[data-design="5"] .controls,
-.mini-shell[data-design="6"] .controls {
+.mini-shell[data-design="6"] .controls,
+.mini-shell[data-design="16"] .controls {
     flex-direction: row;
 }
 

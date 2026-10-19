@@ -106,8 +106,8 @@
 
     let cfg = {};
 
-    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34, 13: 48, 14: 48, 15: 48 };
-    const DESIGN_WIDTHS  = { 1: 280, 2: 280, 3: 295, 4: 280, 5: 295, 6: 280, 7: 300, 8: 300, 9: 300, 10: 280, 11: 300, 12: 300, 13: 290, 14: 295, 15: 290 };
+    const DESIGN_HEIGHTS = { 1: 48, 2: 48, 3: 46, 4: 52, 5: 50, 6: 48, 7: 34, 8: 34, 9: 34, 10: 32, 11: 34, 12: 34, 13: 48, 14: 48, 15: 48, 16: 48, 17: 48, 18: 48, 19: 48, 20: 48 };
+    const DESIGN_WIDTHS  = { 1: 280, 2: 280, 3: 295, 4: 280, 5: 295, 6: 280, 7: 300, 8: 300, 9: 300, 10: 280, 11: 300, 12: 300, 13: 290, 14: 295, 15: 290, 16: 280, 17: 290, 18: 290, 19: 290, 20: 290 };
     function zoomFactor() {
         const z = (KIND === "timer" ? cfg.floatTimerZoom : cfg.floatSwZoom) ?? 1;
         return Number.isFinite(z) && z > 0 ? z : 1;
@@ -139,7 +139,7 @@
         } catch (_) {}
         if (localDesign) {
             const parsed = parseInt(localDesign, 10);
-            if (parsed >= 1 && parsed <= 15) return parsed;
+            if (parsed >= 1 && parsed <= 20) return parsed;
         }
         return (KIND === "timer" && cfg.timerDesign)
             ? cfg.timerDesign

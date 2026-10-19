@@ -40,7 +40,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
 | Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
-| Save screen space | Mini mode — compact always-on-top clock bar with 15 unique skins |
+| Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
 | Make it yours | 10 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
 
 ---
@@ -81,7 +81,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
 
 ### 📌 Mini Mode
-- **15 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
+- **20 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
 - **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
