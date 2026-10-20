@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "1.13.0"
+version = "1.14.0"
 description = "CyberClock - Premium Cyber-Neon Clock"
 authors = ["CyberGems"]
 license = "GPL-3.0-only"

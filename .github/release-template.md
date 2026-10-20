@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-The mini bar can show how far the day has gone, and it shortens when the date is hidden. Alarms can be saved as templates, copied, or removed after they ring. The analog clock accepts clicks only on the dial, and its rim no longer shows a white arc.
+Custom alarms gain a 24-icon catalog picker, sound repeat controls with pause presets, and a duplicate action. The mini mode popover is now a native window with inline note editing. Floating widgets feature individual zoom, centralized menus, and multi-monitor auto-hide.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,66 +17,62 @@ The mini bar can show how far the day has gone, and it shortens when the date is
 
 ### ✨ Key Features & Highlights
 
-- 🕐 **Mini clock**:
-  - An optional Day Progress line sits on the bottom edge. Hover shows the percentage of the day that has passed.
-  - Turning Show Date off hides the date and shortens the bar. Both return on hover.
-  - The note banner under the clock keeps its full shadow.
+- 🔔 **Custom Alarms**:
+  - **24-Icon Catalog**: Choose visual icons for custom alarms, displayed directly on alarm cards, full-screen alert notices, and the mini popover tip.
+  - **Sound Repeat & Pause Presets**: Redesigned single-row repeat controls with cyber LED radio indicators and themed dropdown pause presets (30s, 1m, 2m, etc.).
+  - **Duplicate Workflow**: Quickly duplicate existing alarms; editor layout is compacted with aligned footer actions.
+  - **Alarm Window Restoration**: Full mode restores automatically when an alarm fires.
 
-- 🔔 **Alarms**:
-  - Templates save a setup without scheduling it.
-  - Clone copies an alarm. Delete after the alarm removes it when the notice is dismissed. Snooze keeps it.
-  - New Alarm is in the tray and in every widget menu.
-  - Old unnamed slots no longer ring after the list has hidden them.
+- 📌 **Mini Mode & Native Popover Tip**:
+  - **Native Popover Window**: Decoupled hover popover into an independent native window with work-area clamping, multi-monitor alignment, and non-activating display.
+  - **Inline Note Editing**: Create, edit, and delete day notes directly inside the popover without switching to full mode.
+  - **Show Seconds Toggle**: Added in the Mini Mode menu for compact second-by-second tracking.
 
-- 🎛️ **Analog clock**:
-  - Clicks and drags land on the visible dial, not the empty square around it.
-  - The rim no longer shows a white arc along the top.
-  - The drag cursor is the system move cursor, and it shows only while a widget is being moved.
+- 🎛️ **Floating Widgets & Centralized Menus**:
+  - **Centralized Widget Menus**: Unified context menu popup with dedicated Actions tab for quick switching.
+  - **Individual Zoom**: Per-widget zoom controls allow tailoring each floating tool size independently.
+  - **Multi-Monitor Fullscreen Auto-Hide**: Mini clock and floating widgets intelligently hide during fullscreen games or apps across multiple displays.
+  - **Audio & Click-Through Toggles**: Toggle master audio and click-through directly from widget context menus.
 
-- 🧭 **Menus**:
-  - Each widget menu opens with that widget's name.
-  - On the calendar and Relax widgets, the menu button appears only while the pointer is over the widget.
-  - A left click on the tray icon brings the clock forward and does not hide it.
-
-- 🎨 **Also in this release**:
-  - On-screen hints for floating widget buttons take their color from the active skin.
-  - Widget frames that were clipped square now keep a soft inner edge.
+- 🎨 **Gallery & Visual Themes**:
+  - **Dual Layout Gallery**: Switch between 1-row and 2-row preview modes with auto-fitting window height and draggable titlebar.
+  - **Deep Space Skin**: New default skin #1, Titanium Mech re-indexed to #16, plus 4 new widget designs (now 20 unique skins).
+  - **Full Mode Minimize**: Added titlebar minimize button and refined 3-state tray status labels.
+  - **Installer Graphics**: Custom themed header and sidebar graphics for the NSIS installer.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-La barra del Modo Mini puede mostrar el Avance del Día, y se acorta cuando la fecha está oculta. Las alarmas se pueden guardar como plantillas, copiar, o quitar al descartarlas. El reloj analógico solo recibe clics dentro de la esfera, y su borde ya no muestra un arco blanco.
+Las alarmas personalizadas reciben un catálogo de 24 iconos, control de repetición de sonido con preajustes de pausa y acción de duplicar. La nota emergente del Modo Mini es ahora una ventana nativa con edición en línea. Los widgets flotantes incorporan zoom individual, menús centralizados y ocultación multi-monitor.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🕐 **Modo Mini**:
-  - Una línea opcional, Avance del Día, queda en el borde inferior. Al pasar el cursor muestra el porcentaje del día que ha pasado.
-  - Con Mostrar Fecha apagado, la fecha se oculta y la barra se acorta. Ambas vuelven al pasar el cursor.
-  - El banner de notas bajo el reloj conserva la sombra completa.
+- 🔔 **Alarmas personalizadas**:
+  - **Catálogo de 24 iconos**: Asigna iconos visuales a las alarmas, visibles en sus tarjetas, en los avisos en pantalla completa y en la nota emergente mini.
+  - **Repetición de sonido y pausas**: Controles de repetición en una fila con indicadores LED cyber y menú desplegable de pausas predefinidas (30s, 1m, 2m, etc.).
+  - **Acción Duplicar**: Duplica alarmas existentes con un clic; diseño del editor más compacto y acciones de pie alineadas.
+  - **Restauración de ventana**: El modo completo se restaura automáticamente cuando suena una alarma.
 
-- 🔔 **Alarmas**:
-  - Las plantillas guardan una configuración sin programarla.
-  - Clonar copia una alarma. Eliminar después de la alarma la quita al cerrar el aviso. Posponer la conserva.
-  - Nueva Alarma está en la bandeja y en el menú de cada widget.
-  - Los huecos viejos sin nombre ya no suenan cuando la lista los ha ocultado.
+- 📌 **Modo Mini y nota emergente nativa**:
+  - **Ventana emergente nativa**: La nota al pasar el cursor es ahora una ventana nativa independiente, adaptada al área de trabajo y compatible con múltiples monitores.
+  - **Edición de notas en línea**: Crea, edita y elimina notas del día directamente en la ventana emergente sin abrir el modo completo.
+  - **Interruptor Mostrar Segundos**: Añadido en el menú del Modo Mini para seguimiento segundo a segundo.
 
-- 🎛️ **Reloj analógico**:
-  - Los clics y el arrastre caen en la esfera visible, no en el cuadrado vacío de alrededor.
-  - El borde ya no muestra un arco blanco en la parte superior.
-  - El cursor de arrastre es el de mover del sistema, y aparece solo mientras se mueve un widget.
+- 🎛️ **Widgets flotantes y menús centralizados**:
+  - **Menús centralizados**: Menú contextual unificado con pestaña de Acciones para cambios rápidos.
+  - **Zoom individual**: Controles de escala independientes para ajustar el tamaño de cada widget flotante por separado.
+  - **Ocultación automática en pantalla completa**: El reloj mini y los widgets flotantes se ocultan solos ante aplicaciones o juegos en pantalla completa en cualquier monitor.
+  - **Interruptores de audio y clic a través**: Alterna el audio general y el clic a través directamente desde los menús de los widgets.
 
-- 🧭 **Menús**:
-  - Cada menú de widget se abre con el nombre de ese widget.
-  - En el calendario y en Relajación, el botón de menú aparece solo con el puntero sobre el widget.
-  - Un clic izquierdo en el icono de la bandeja trae el reloj al frente y no lo oculta.
-
-- 🎨 **También en esta versión**:
-  - Los avisos en pantalla de los botones de los widgets flotantes toman el color del diseño activo.
-  - Los marcos de widget que se recortaban en seco conservan un borde interior suave.
+- 🎨 **Galería y temas visuales**:
+  - **Galería de doble vista**: Alterna entre vistas de 1 fila y 2 filas con altura adaptable y barra de título arrastrable.
+  - **Skin Deep Space**: Nuevo diseño predeterminado #1, Titanium Mech reubicado en el puesto #16, más 4 skins nuevos para widgets (20 skins en total).
+  - **Minimizar en Modo Completo**: Botón de minimizar en la barra de título y etiquetas neutrales de 3 estados en la bandeja.
+  - **Gráficos del instalador**: Cabecera y barra lateral con estética cyber-neon en el instalador NSIS.
 
 </details>
 
