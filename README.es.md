@@ -82,13 +82,16 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ### 📌 Modo Mini
 - **20 skins únicas:** diseños distintos para la barra de reloj compacta, cada uno con sus propias dimensiones y zoom opcional (0.5×–4×)
+- **Nota emergente nativa:** ventana emergente al pasar el cursor que muestra notas del calendario y alarmas activas, con creación, edición y eliminación de notas directamente en el escritorio
 - **Herramientas flotantes con skin:** las ventanas de temporizador y cronómetro reutilizan los diseños seleccionados con disposiciones dimensionadas para sus controles
+- **Zoom individual por widget:** controles de escala independientes para ajustar el tamaño de cada herramienta flotante por separado
+- **Ocultación automática en pantalla completa multi-monitor:** el reloj mini y los widgets flotantes se ocultan solos ante aplicaciones o juegos en pantalla completa en cualquier monitor conectado
 - **Controles de transparencia:** deslizadores de opacidad del fondo y del contenido
 - **Siempre visible:** mantiene el reloj visible sobre otras ventanas
 - **Bloqueo de posición:** bloqueo contextual por widget (Reloj Mini, Temporizadores, Cronómetros, Reloj Analógico, Calendario, Relajación)
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
-- **Mostrar Fecha:** activado por defecto. Apagado, oculta la fecha y acorta la barra; ambas vuelven al pasar el cursor. Compacto (2 Filas) no está disponible mientras Mostrar Fecha está apagado.
-- **Avance del Día:** línea opcional en el borde inferior de la barra mini. Al pasar el cursor muestra cuánto del día ha pasado, en porcentaje.
+- **Mostrar Fecha y Mostrar Segundos:** interruptores en el menú del Modo Mini; ocultar la fecha acorta la barra (ambas vuelven al pasar el cursor)
+- **Avance del Día:** línea opcional en el borde inferior de la barra mini. Al pasar el cursor muestra cuánto del día ha pasado, en porcentaje
 - **Líneas de exploración CRT:** efecto retro de superposición
 - **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
@@ -100,11 +103,11 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias
 - **Campanada personalizada:** carga tu propio archivo de audio para un intervalo de campanada
 - **Ventana de horario:** silencia las campanadas durante horas concretas
-- **Alarmas:** vista de Alarmas con preajustes, tarjetas y diseñador. La programación es una vez, todos los días, entre semana, fines de semana o días seleccionados. Las alarmas nuevas empiezan en Sin sonido, con veinte tonos sintetizados o tu propio MP3 o WAV. Posponer muestra su demora, y al sonar la alarma ocupa la ventana. Eliminar después de la alarma la quita al cerrar el aviso. Clonar copia una alarma, y las plantillas guardan una configuración sin programarla
+- **Alarmas:** vista de Alarmas con preajustes, tarjetas y diseñador. Elige glifos visuales de un catálogo de 24 iconos, configura repetición de sonido con preajustes de pausa (30s, 1m, 2m…), o programa una vez, diario, entre semana, fines de semana o días personalizados. Las alarmas nuevas empiezan en Sin sonido, con veinte tonos sintetizados o tu propio MP3 o WAV. Posponer muestra su demora, y al sonar la alarma se restaura y enfoca el Modo Completo. Eliminar después de la alarma la quita al cerrar el aviso. Duplicar copia una alarma, y las plantillas guardan una configuración sin programarla
 
 ### 🖥️ Integración con escritorio
 - **Bandeja del sistema:** menú emergente HTML personalizado con navegación deslizante, anclado al icono de la bandeja (con compatibilidad para barras de tareas verticales) y con submenú de Ayuda completo, incluido un acceso al diálogo de fecha y hora de Windows. Un clic izquierdo trae el reloj delante y no lo oculta. El menú dice si está en pantalla, y lista Modo Completo y Modo Mini juntos, con el actual marcado. Nueva Alarma abre el diseñador en Modo Completo
-- **Cierre de ventana flexible:** comportamiento al cerrar configurable (minimizar a la bandeja, pasar a Modo Mini o salir) con diálogo de confirmación en el primer cierre, botón de cierre directo y descarte desde el fondo
+- **Opciones de minimizar y cerrar:** botón dedicado para minimizar en la barra de título, comportamiento al cerrar configurable (minimizar a la bandeja, pasar a Modo Mini o salir) con diálogo de confirmación en el primer cierre, botón de cierre directo y descarte desde el fondo
 - **Atajo global:** muestra u oculta el reloj desde cualquier lugar (Alt+Shift+C por defecto; graba tu propia combinación o desactívala en Configuración)
 - **Monitor automático:** el modo completo se abre en el monitor donde está el ratón (estilo CyberLauncher), o fíjalo a una pantalla preferida
 - **Modo completo en el área de trabajo:** el modo completo llena el área de trabajo de la pantalla seleccionada y queda fijado allí: se respetan barras de tareas ancladas en cualquier borde, y el arrastre o el doble clic de maximizar/restaurar no pueden romper el diseño

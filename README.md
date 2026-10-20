@@ -82,13 +82,16 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 📌 Mini Mode
 - **20 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
+- **Native Note Popover** — Hover popover displays calendar notes and active alarms, with inline note creation, editing, and deletion directly on the desktop
 - **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
+- **Individual Widget Zoom** — Per-widget scale controls to size each floating tool independently
+- **Multi-Monitor Fullscreen Auto-Hide** — Mini clock and floating widgets intelligently hide when games or apps go fullscreen on any connected monitor
 - **Transparency Controls** — Background and content opacity sliders
 - **Always on Top** — Keep the clock visible over other windows
 - **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
-- **Show Date** — On by default. Off hides the date and shortens the bar; both return on hover. Compact (2 Rows) stays unavailable while Show Date is off.
-- **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage.
+- **Show Date & Show Seconds** — Toggles in the Mini Mode menu; hiding the date shortens the bar (both return on hover)
+- **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage
 - **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
 - **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
@@ -100,11 +103,11 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
 - **Custom Chime Support** — Load your own audio file for an hourly chime interval
 - **Schedule Window** — Silence chimes during specific hours
-- **Alarms** — An Alarms view with presets, cards, and a designer. Schedules are once, every day, weekdays, weekends, or selected days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm takes over the window. Delete after the alarm removes it when you dismiss the notice. Clone copies an alarm, and templates save a setup without scheduling it
+- **Alarms** — An Alarms view with presets, cards, and a designer. Pick visual glyphs from a 24-icon catalog, configure sound repeat with pause presets (30s, 1m, 2m…), or schedule once, daily, weekdays, weekends, or custom days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm restores and focuses Full Mode. Delete after the alarm removes it when you dismiss the notice. Duplicate copies an alarm, and templates save a setup without scheduling it
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked. New Alarm opens the designer in Full Mode
-- **Flexible Window Close** — Configurable close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
+- **Minimize & Close Options** — Dedicated minimize button on the titlebar, flexible close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
 - **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
 - **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
 - **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
