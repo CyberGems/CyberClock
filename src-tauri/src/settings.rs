@@ -799,7 +799,9 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
             serde_json::from_value(target).map_err(|e| format!("invalid settings patch: {}", e))?;
         let mut normalized = merged;
         normalize_custom_alarms(&mut normalized);
-        normalized.calendar_notes.retain(|_, v| !v.trim().is_empty());
+        normalized
+            .calendar_notes
+            .retain(|_, v| !v.trim().is_empty());
         *current = normalized.clone();
         merged_out = Some(normalized);
         Ok(())
@@ -895,4 +897,3 @@ mod tests {
         assert_eq!(base["calendarNotes"]["2026-10-18"], "Dentist");
     }
 }
-

@@ -81,7 +81,11 @@ fn broadcast_active_window(app: &AppHandle, label: &str) {
 /// its own AudioContext.
 fn active_event_target(app: &AppHandle) -> Option<String> {
     let settings = load_settings(app);
-    let target = if settings.window_mode == "full" { "main" } else { "mini" };
+    let target = if settings.window_mode == "full" {
+        "main"
+    } else {
+        "mini"
+    };
     if let Some(win) = app.get_webview_window(target) {
         if win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false) {
             return Some(target.to_string());
@@ -127,7 +131,8 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
     if is_custom_alarm {
         if settings.window_mode == "full" {
             if let Some(main) = app.get_webview_window("main") {
-                let hidden = !main.is_visible().unwrap_or(false) || main.is_minimized().unwrap_or(false);
+                let hidden =
+                    !main.is_visible().unwrap_or(false) || main.is_minimized().unwrap_or(false);
                 if hidden {
                     place_full_clock(&main, &settings);
                 }
@@ -154,7 +159,14 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
         let mut data = payload.clone();
         let plays_sound = match active.as_deref() {
             Some(current) => current == label,
-            None => label == if settings.window_mode == "full" { "main" } else { "mini" },
+            None => {
+                label
+                    == if settings.window_mode == "full" {
+                        "main"
+                    } else {
+                        "mini"
+                    }
+            }
         };
         if !plays_sound {
             data["silent"] = serde_json::Value::Bool(true);
@@ -222,7 +234,10 @@ fn remember_analog_hwnd_zoom(hwnd: isize, zoom: f64) {
 }
 
 fn get_analog_hwnd_zoom(hwnd: isize) -> f64 {
-    lock_or_recover(analog_hwnd_zooms()).get(&hwnd).copied().unwrap_or(1.0)
+    lock_or_recover(analog_hwnd_zooms())
+        .get(&hwnd)
+        .copied()
+        .unwrap_or(1.0)
 }
 
 fn remember_window_target(window: &WebviewWindow, width: u32, height: u32) {
@@ -984,11 +999,7 @@ fn spawn_float_window_with_slot(
                     Ok(())
                 });
             }
-            remember_window_target(
-                &win,
-                wide.round() as u32,
-                tall.round() as u32,
-            );
+            remember_window_target(&win, wide.round() as u32, tall.round() as u32);
             clamp_window_to_monitors(&win);
             #[cfg(windows)]
             attach_window_drag_subclass(&win);
@@ -2229,10 +2240,8 @@ fn apply_analog_window_region(hwnd: windows_sys::Win32::Foundation::HWND, full: 
         }
         if full {
             let rgn = CreateRectRgn(0, 0, w, h);
-            if !rgn.is_null() {
-                if SetWindowRgn(hwnd, rgn, 0) == 0 {
-                    DeleteObject(rgn);
-                }
+            if !rgn.is_null() && SetWindowRgn(hwnd, rgn, 0) == 0 {
+                DeleteObject(rgn);
             }
             return;
         }
@@ -2383,8 +2392,8 @@ unsafe extern "system" fn window_drag_subclass_proc(
 ) -> windows_sys::Win32::Foundation::LRESULT {
     use windows_sys::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        WM_CREATE, WM_ENTERSIZEMOVE, WM_ERASEBKGND, WM_EXITSIZEMOVE, WM_MOVING,
-        WM_NCACTIVATE, WM_NCDESTROY, WM_NCHITTEST, WM_NCPAINT, WM_PARENTNOTIFY, WM_SETCURSOR,
+        WM_CREATE, WM_ENTERSIZEMOVE, WM_ERASEBKGND, WM_EXITSIZEMOVE, WM_MOVING, WM_NCACTIVATE,
+        WM_NCDESTROY, WM_NCHITTEST, WM_NCPAINT, WM_PARENTNOTIFY, WM_SETCURSOR,
     };
 
     // For analog windows, prevent Windows from painting a classic frame or
@@ -4122,12 +4131,12 @@ fn close_mini_context_menu(app: AppHandle) {
 
 static MINI_TIP_HOVERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static MINI_TIP_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
-static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> = std::sync::Mutex::new(None);
+static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> =
+    std::sync::Mutex::new(None);
 static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new((280.0, 110.0));
 static MINI_TIP_LAST_PAYLOAD: std::sync::Mutex<Option<serde_json::Value>> =
     std::sync::Mutex::new(None);
-static MINI_TIP_LAST_PLACEMENT: std::sync::Mutex<String> =
-    std::sync::Mutex::new(String::new());
+static MINI_TIP_LAST_PLACEMENT: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
 
 fn position_mini_tip(
     tip: &WebviewWindow,
@@ -4148,7 +4157,7 @@ fn position_mini_tip(
             tip.available_monitors().ok().and_then(|monitors| {
                 monitors
                     .into_iter()
-                    .find(|m| is_position_in_monitor(clock_center_x, clock_center_y, &m))
+                    .find(|m| is_position_in_monitor(clock_center_x, clock_center_y, m))
             })
         })
         .or_else(|| tip.current_monitor().ok().flatten());
@@ -4248,12 +4257,18 @@ fn open_mini_tip(
             *g = Some((clock_x, clock_y, clock_w, clock_h));
         }
 
-        let (w, h) = MINI_TIP_LAST_SIZE.lock().map(|s| *s).unwrap_or((280.0, 110.0));
+        let (w, h) = MINI_TIP_LAST_SIZE
+            .lock()
+            .map(|s| *s)
+            .unwrap_or((280.0, 110.0));
         let placement = position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
 
         if let Some(mut data) = payload {
             if let Some(obj) = data.as_object_mut() {
-                obj.insert("placement".to_string(), serde_json::Value::String(placement));
+                obj.insert(
+                    "placement".to_string(),
+                    serde_json::Value::String(placement),
+                );
             }
             if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
                 *p = Some(data.clone());
