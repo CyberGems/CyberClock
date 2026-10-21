@@ -1,9 +1,19 @@
-; CyberClock — NSIS installer hooks
-; Adds a "Start with Windows" option page (checked by default) and keeps
-; the HKCU Run entry in sync with it. The registry value name and command
-; mirror exactly what the app's set_startup writes (Settings > General >
-; Start with Windows), so the installer and the app manage the SAME
-; entry instead of creating duplicates.
+﻿; CyberClock — NSIS installer hooks
+;
+; Adds a "Start with Windows" checkbox to the installer's Finish page, right
+; next to the "Create desktop shortcut" and "Run CyberClock" checkboxes, and
+; keeps the HKCU Run entry in sync with it. The registry value name and the
+; command mirror exactly what the app's set_startup writes (Settings > General
+; > Start with Windows), so the installer and the app manage the SAME entry
+; instead of creating duplicates.
+;
+; The Finish page is the last screen of the wizard, so the Welcome page stays
+; first. Tauri includes this file *before* the MUI page declarations, so a
+; `Page custom` declared here would become the very first screen of the
+; wizard. MUI does not offer a way to add controls to the Finish page either,
+; so the checkbox is registered through the page's custom SHOW/LEAVE
+; callbacks; see the vendored template (nsis/installer.nsi) for where those
+; callbacks are wired.
 
 !ifndef CC_STARTUP_NSH
 !define CC_STARTUP_NSH
@@ -12,71 +22,126 @@
 !include nsDialogs.nsh
 
 ; --- Option state ---
-; NSIS variables initialize to 0. $CcStartupUserSet is only flipped to 1
-; when the option page is shown and the user leaves it, so silent and
-; passive installs (where the page is skipped) fall through to the
-; default: startup ON, matching the app's own default.
-Var CcStartupChecked
-Var CcStartupUserSet
+; NSIS variables initialize to 0.
+; CcStartupDefault  1 = start with Windows by default for this run
+; CcStartupState    1 = register the Run entry, 0 = remove it
+; CcStartupApplied  1 = the Run entry has already been written
+; CcInstalled       1 = the install section ran (installer, not uninstaller)
+; CcNoPage          1 = the Finish page was skipped (silent / passive)
+; CcPreviousInstall 1 = CyberClock was already installed before this run
+; CcRunEntryExisted 1 = a Run entry existed before this run
 Var CcStartupCheckbox
+Var CcStartupDefault
+Var CcStartupState
+Var CcStartupApplied
+Var CcInstalled
+Var CcNoPage
+Var CcPreviousInstall
+Var CcRunEntryExisted
+Var CcExePath
 
-; Custom page: this hook file is included before the MUI page
-; declarations, so a Page declared here is the first one the user sees —
-; a simple startup option reads naturally right after the welcome
-; wizard starts, and passive/silent installs skip it entirely.
-; NOTE: $PassiveMode is declared by the template AFTER this include, so
-; the page detects passive mode itself from the command line (/P), the
-; same way the template's .onInit does.
-Function CcStartupPageCreate
-  ${If} ${Silent}
-    Abort
-  ${EndIf}
-  ${GetOptions} $CMDLINE "/P" $R0
-  ${IfNot} ${Errors}
-    Abort
-  ${EndIf}
+; Localized texts. NSIS language IDs: 1033 = English, 1034 = Spanish.
+LangString CC_STARTUP_CHECKBOX 1033 "Start $(^NameDA) automatically when Windows starts"
+LangString CC_STARTUP_CHECKBOX 1034 "Iniciar $(^NameDA) automáticamente al iniciar Windows"
 
-  !insertmacro MUI_HEADER_TEXT "Startup" "Choose startup options"
-
-  nsDialogs::Create 1018
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-
-  ${NSD_CreateCheckbox} 0 20u 100% 12u "Start $(^NameDA) automatically when Windows starts"
+; --- Finish page checkbox ---
+; MUI places the "Run" checkbox at 90u and the "Create desktop shortcut"
+; checkbox at 110u, so the new one goes right below them at 130u.
+Function CcFinishPageShow
+  ${NSD_CreateCheckbox} 120u 130u 195u 10u "$(CC_STARTUP_CHECKBOX)"
   Pop $CcStartupCheckbox
-  ; Default ON — matches the app's default (start_with_windows: true)
-  ${NSD_SetState} $CcStartupCheckbox ${BST_CHECKED}
 
-  ${NSD_CreateLabel} 0 42u 100% 24u "You can change this anytime in the app's Settings (General), or from the tray menu."
-  Pop $1
-
-  nsDialogs::Show
-FunctionEnd
-
-Function CcStartupPageLeave
-  ${NSD_GetState} $CcStartupCheckbox $CcStartupChecked
-  StrCpy $CcStartupUserSet 1
-FunctionEnd
-
-Page custom CcStartupPageCreate CcStartupPageLeave
-
-; Apply the choice once files are in place. Same value name and command
-; shape as the app's own registration. When the page was skipped
-; (silent/passive install), default to registering startup.
-!macro NSIS_HOOK_POSTINSTALL
-  ${If} $CcStartupUserSet = 1
-  ${AndIf} $CcStartupChecked <> ${BST_CHECKED}
-    DeleteRegValue HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
+  ${If} $CcStartupDefault = 1
+    ${NSD_SetState} $CcStartupCheckbox ${BST_CHECKED}
   ${Else}
-    WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "CyberClock" '"$INSTDIR\${MAINBINARYNAME}.exe" --startup'
+    ${NSD_SetState} $CcStartupCheckbox ${BST_UNCHECKED}
+  ${EndIf}
+FunctionEnd
+
+Function CcFinishPageLeave
+  ${NSD_GetState} $CcStartupCheckbox $CcStartupState
+  Call CcApplyStartup
+FunctionEnd
+
+; Writes (or removes) the HKCU Run entry. The value name and the command
+; shape are the same as the app's own registration, so both agree.
+Function CcApplyStartup
+  StrCpy $CcStartupApplied 1
+  ${If} $CcStartupState = 1
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "CyberClock" '"$CcExePath" --startup'
+  ${Else}
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
+  ${EndIf}
+FunctionEnd
+
+; --- Install / uninstall hooks ---
+
+; Capture the state before the installer touches the registry, so an update
+; never overrides a choice the user made inside the app.
+!macro NSIS_HOOK_PREINSTALL
+  ReadRegStr $R0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberClock" "DisplayVersion"
+  ${If} $R0 != ""
+    StrCpy $CcPreviousInstall 1
+  ${EndIf}
+
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
+  ${If} $R0 != ""
+    StrCpy $CcRunEntryExisted 1
+  ${EndIf}
+
+  StrCpy $CcExePath "$INSTDIR\${MAINBINARYNAME}.exe"
+  StrCpy $CcInstalled 1
+
+  ; A fresh install starts with Windows (the app's own default); an update
+  ; keeps whatever the user already had.
+  ${If} $CcPreviousInstall = 1
+    StrCpy $CcStartupDefault $CcRunEntryExisted
+  ${Else}
+    StrCpy $CcStartupDefault 1
   ${EndIf}
 !macroend
 
+; The Finish page is skipped on silent and passive installs (the in-app
+; updater runs the installer with /P), so the default is applied there. In
+; interactive installs the user's choice is applied when the Finish page is
+; left.
+!macro NSIS_HOOK_POSTINSTALL
+  ${If} ${Silent}
+    StrCpy $CcNoPage 1
+  ${EndIf}
+
+  ClearErrors
+  ${GetOptions} $CMDLINE "/P" $R0
+  ${IfNot} ${Errors}
+    StrCpy $CcNoPage 1
+  ${EndIf}
+
+  ${If} $CcNoPage = 1
+    StrCpy $CcStartupState $CcStartupDefault
+    Call CcApplyStartup
+  ${EndIf}
+!macroend
+
+; If the wizard is closed without pressing Finish, the choice is never
+; applied, so fall back to the state of the checkbox (it may still be alive
+; here) or to the default. The uninstaller shares this script, hence the
+; CcInstalled guard.
+Function .onGUIEnd
+  ${If} $CcInstalled = 1
+  ${AndIf} $CcStartupApplied = 0
+    System::Call 'user32::IsWindow(i $CcStartupCheckbox) i.r0'
+    ${If} $r0 == 0
+      StrCpy $CcStartupState $CcStartupDefault
+    ${Else}
+      ${NSD_GetState} $CcStartupCheckbox $CcStartupState
+    ${EndIf}
+    Call CcApplyStartup
+  ${EndIf}
+FunctionEnd
+
 ; The uninstaller never leaves a Run entry behind.
 !macro NSIS_HOOK_PREUNINSTALL
-  DeleteRegValue HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
 !macroend
 
 !endif ; CC_STARTUP_NSH
