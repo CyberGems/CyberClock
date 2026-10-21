@@ -2,6 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
+// Regenerates the NSIS installer artwork in src-tauri/nsis.
+//
+// The sidebar is the 164x314 image shown on the installer's Welcome and
+// Finish pages. NSIS only reads BMP, so the PNG is kept alongside it as a
+// preview. The source artwork lives in the repository (sidebar-source.jpg)
+// so the script runs on any machine without external dependencies.
+
+const NSIS_DIR = path.resolve('src-tauri/nsis');
+const SOURCE_IMAGE = path.join(NSIS_DIR, 'sidebar-source.jpg');
+
 function encodeBMP(width, height, rawRGBBuffer) {
   const rowSize = Math.floor((24 * width + 31) / 32) * 4;
   const pixelArraySize = rowSize * height;
@@ -42,29 +52,19 @@ function encodeBMP(width, height, rawRGBBuffer) {
 }
 
 async function main() {
-  const sourceImage = 'C:/Users/CARLOS/.gemini/antigravity-ide/brain/a2c918fe-3e36-45a4-b506-18b39d9f946e/cyberclock_installer_sidebar_1792283900787.jpg';
-  const outDirs = [
-    path.resolve('src-tauri/nsis'),
-    'C:/Users/CARLOS/.gemini/antigravity-ide/brain/a2c918fe-3e36-45a4-b506-18b39d9f946e'
-  ];
-
-  for (const dir of outDirs) {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+  if (!fs.existsSync(SOURCE_IMAGE)) {
+    throw new Error(`Missing source artwork: ${SOURCE_IMAGE}`);
   }
 
+  fs.mkdirSync(NSIS_DIR, { recursive: true });
+
   console.log('Generating installer sidebar (164x314)...');
-  // Resize source image to 164x314 with cover / center fit
-  const sidebarSharp = sharp(sourceImage)
+  const sidebarSharp = sharp(SOURCE_IMAGE)
     .resize(164, 314, { fit: 'cover', position: 'center' });
 
   const sidebarPngBuf = await sidebarSharp.clone().png().toBuffer();
-  for (const dir of outDirs) {
-    fs.writeFileSync(path.join(dir, 'installerSidebar.png'), sidebarPngBuf);
-  }
+  fs.writeFileSync(path.join(NSIS_DIR, 'installerSidebar.png'), sidebarPngBuf);
 
-  // Get raw RGB buffer for BMP
   const { data: rawSidebar, info: sidebarInfo } = await sidebarSharp
     .clone()
     .removeAlpha()
@@ -72,58 +72,12 @@ async function main() {
     .toBuffer({ resolveWithObject: true });
 
   const sidebarBmp = encodeBMP(sidebarInfo.width, sidebarInfo.height, rawSidebar);
-  for (const dir of outDirs) {
-    fs.writeFileSync(path.join(dir, 'installerSidebar.bmp'), sidebarBmp);
-  }
+  fs.writeFileSync(path.join(NSIS_DIR, 'installerSidebar.bmp'), sidebarBmp);
+
   console.log(`Saved installerSidebar.bmp (${sidebarBmp.length} bytes) and installerSidebar.png`);
-
-  console.log('Generating installer header (150x57)...');
-  // For header, create a clean modern 150x57 banner:
-  // soft tech gradient on white/pale cyan with logo on right
-  const logoSharp = sharp(path.resolve('src-tauri/icons/icon.png'))
-    .resize(44, 44, { fit: 'contain' });
-  const logoBuf = await logoSharp.png().toBuffer();
-
-  const svgHeader = `
-    <svg width="150" height="57" viewBox="0 0 150 57" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#FFFFFF" />
-          <stop offset="60%" stop-color="#F6F9FD" />
-          <stop offset="100%" stop-color="#E8F1FC" />
-        </linearGradient>
-      </defs>
-      <rect width="150" height="57" fill="url(#headerGrad)" />
-      <circle cx="126" cy="28" r="24" fill="#06B6D4" opacity="0.08" />
-      <circle cx="126" cy="28" r="16" fill="#3B82F6" opacity="0.06" />
-    </svg>
-  `;
-
-  const headerSharp = sharp(Buffer.from(svgHeader))
-    .composite([
-      {
-        input: logoBuf,
-        top: 6,
-        left: 98,
-      },
-    ]);
-
-  const headerPngBuf = await headerSharp.clone().png().toBuffer();
-  for (const dir of outDirs) {
-    fs.writeFileSync(path.join(dir, 'installerHeader.png'), headerPngBuf);
-  }
-
-  const { data: rawHeader, info: headerInfo } = await headerSharp
-    .clone()
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  const headerBmp = encodeBMP(headerInfo.width, headerInfo.height, rawHeader);
-  for (const dir of outDirs) {
-    fs.writeFileSync(path.join(dir, 'installerHeader.bmp'), headerBmp);
-  }
-  console.log(`Saved installerHeader.bmp (${headerBmp.length} bytes) and installerHeader.png`);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -149,11 +149,11 @@
         "installerHooks": "installer.nsh",
         "template": "nsis/installer.nsi",
         "sidebarImage": "nsis/installerSidebar.bmp",
-        "headerImage": "nsis/installerHeader.bmp",
         "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
         "languages": [
-          "Spanish",
-          "English"
+          "English",
+          "Spanish"
         ]
       }
     },
