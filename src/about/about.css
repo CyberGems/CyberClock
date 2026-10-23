@@ -624,6 +624,11 @@ body {
     border-radius: 8px;
     display: block;
     pointer-events: none;
+    opacity: 0.55;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ab-suite-btn:hover img {
+    opacity: 1;
 }
 .ab-suite-more-btn {
     font-family: var(--font-display, "Space Grotesk", sans-serif);
