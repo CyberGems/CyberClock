@@ -1338,6 +1338,12 @@ fn open_external_url(url: String) -> bool {
 
 #[tauri::command]
 fn open_window(app: AppHandle, name: String) -> bool {
+    // The About dialog is repositioned onto the invoking monitor on every
+    // show; plain show() would leave it at its stale (primary) position.
+    if name == "about" {
+        show_about_window(&app);
+        return true;
+    }
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.show();
         reapply_click_through(&app, &window);
@@ -1348,23 +1354,29 @@ fn open_window(app: AppHandle, name: String) -> bool {
     false
 }
 
-/// Show the dedicated About window centered on the monitor that currently
-/// holds the clock (main or mini), so the dialog feels attached to the app
-/// instead of popping up on an arbitrary display.
+/// Show the dedicated About window centered on the monitor it was invoked
+/// from. Every entry point (main settings, mini menu, tray menu) is a pointer
+/// click, so the monitor under the cursor identifies the invoking display;
+/// fall back to the monitor holding a visible clock window, then primary.
 fn show_about_window(app: &AppHandle) {
     let Some(win) = app.get_webview_window("about") else {
         return;
     };
-    // Center on the monitor of the first *visible* clock or widget window; fall back
-    // to the primary monitor when all are hidden.
     let reference = app
-        .webview_windows()
-        .into_iter()
-        .find(|(lbl, w)| {
-            (lbl == "main" || lbl == "mini" || lbl.starts_with("float-"))
-                && w.is_visible().unwrap_or(false)
+        .cursor_position()
+        .ok()
+        .and_then(|pos| app.monitor_from_point(pos.x, pos.y).ok().flatten())
+        .or_else(|| {
+            // No usable cursor reading: center on the monitor of the first
+            // *visible* clock or widget window instead.
+            app.webview_windows()
+                .into_iter()
+                .find(|(lbl, w)| {
+                    (lbl == "main" || lbl == "mini" || lbl.starts_with("float-"))
+                        && w.is_visible().unwrap_or(false)
+                })
+                .and_then(|(_, w)| w.current_monitor().ok().flatten())
         })
-        .and_then(|(_, w)| w.current_monitor().ok().flatten())
         .or_else(|| win.primary_monitor().ok().flatten());
 
     if let Some(m) = reference {
