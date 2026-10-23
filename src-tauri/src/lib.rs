@@ -1380,20 +1380,39 @@ fn show_about_window(app: &AppHandle) {
         .or_else(|| win.primary_monitor().ok().flatten());
 
     if let Some(m) = reference {
-        let scale = m.scale_factor();
-        let size = match win.outer_size() {
-            Ok(s) if s.width > 100 && s.height > 100 => s,
-            _ => tauri::PhysicalSize {
-                width: (740.0 * scale).round() as u32,
-                height: (535.0 * scale).round() as u32,
-            },
+        let target_scale = m.scale_factor();
+        // The window's physical size belongs to the monitor it currently sits
+        // on. Crossing a DPI boundary makes Windows resize it to keep its
+        // logical size (and re-anchor it), so convert that physical size to
+        // the logical one and re-scale it to the target monitor before
+        // centering, otherwise the dialog lands off-center on mixed-DPI
+        // setups.
+        let cur_scale = win
+            .current_monitor()
+            .ok()
+            .flatten()
+            .map(|mon| mon.scale_factor())
+            .unwrap_or(target_scale);
+        let (logical_w, logical_h) = match win.outer_size() {
+            Ok(s) if s.width > 100 && s.height > 100 => {
+                (s.width as f64 / cur_scale, s.height as f64 / cur_scale)
+            }
+            _ => (740.0, 535.0),
+        };
+        let size = tauri::PhysicalSize {
+            width: (logical_w * target_scale).round() as u32,
+            height: (logical_h * target_scale).round() as u32,
         };
         let work = m.work_area();
         let x = work.position.x + (work.size.width as i32 - size.width as i32) / 2;
         let y = work.position.y + (work.size.height as i32 - size.height as i32) / 2;
-        let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-            x, y,
-        )));
+
+        // Moving the window may fire a DPI change that re-applies Windows'
+        // own rect; fix the size and re-assert the centered position after.
+        let center = tauri::PhysicalPosition::new(x, y);
+        let _ = win.set_position(tauri::Position::Physical(center));
+        let _ = win.set_size(tauri::Size::Physical(size));
+        let _ = win.set_position(tauri::Position::Physical(center));
     }
     let _ = win.show();
     let _ = win.set_focus();
