@@ -374,54 +374,70 @@ body {
     cursor: default;
 }
 
-/* ── Cyber Neon Toggle Switch ──────────────────────────────── */
-.ab-switch {
-    flex: 0 0 auto;
-    display: inline-block;
-    cursor: pointer;
+/* ── Suite Standard Toggle (same design as settings .s-tog) ── */
+:root {
+    --cc-tog-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.35 6.45 11.45 12.8 4.7' fill='none' stroke='%2312161e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-.ab-switch input {
-    position: absolute;
+.ab-tog {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+.ab-tog input {
     opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
     pointer-events: none;
 }
-.ab-switch-track {
-    width: 38px;
-    height: 20px;
-    border-radius: 10px;
-    border: 1px solid rgba(var(--rgb-accent), 0.32);
-    background: rgba(var(--rgb-accent), 0.06);
-    position: relative;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.ab-switch-thumb {
+.ab-tog-tr {
     position: absolute;
-    top: 50%;
-    left: 4px;
+    inset: 0;
+    background: #5e6672;
+    border: 0;
+    border-radius: 12px;
+    transition: background 0.22s ease, box-shadow 0.22s ease;
+    pointer-events: none;
+}
+.ab-tog input:checked ~ .ab-tog-tr {
+    background: var(--accent-a);
+    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.4);
+}
+.ab-tog-th {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #12161e;
+    border-radius: 50%;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.ab-tog-th::after {
+    content: "";
+    position: absolute;
+    inset: 0;
     width: 12px;
     height: 12px;
-    margin-top: -6px;
-    border-radius: 50%;
-    background: var(--text-md, #96a2b4);
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
+    margin: auto;
+    background: var(--cc-tog-check) center / 12px 12px no-repeat;
+    opacity: 0;
+    transition: opacity 0.15s ease;
 }
-.ab-switch:hover .ab-switch-track {
-    background: rgba(var(--rgb-accent), 0.14);
-    border-color: var(--accent-a);
+.ab-tog input:checked ~ .ab-tog-tr .ab-tog-th {
+    background: #ffffff;
+    transform: translateX(20px);
 }
-.ab-switch:hover .ab-switch-thumb {
-    background: var(--text-hi, #ffffff);
+.ab-tog input:checked ~ .ab-tog-tr .ab-tog-th::after {
+    opacity: 1;
 }
-.ab-switch input:checked + .ab-switch-track {
-    background: var(--accent-a);
-    border-color: var(--accent-a);
-    box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.50);
-}
-.ab-switch input:checked + .ab-switch-track .ab-switch-thumb {
-    background: #06080e;
-    transform: translateX(18px);
-}
-.ab-switch input:focus-visible + .ab-switch-track {
+.ab-tog input:focus-visible ~ .ab-tog-tr {
     outline: 2px solid var(--accent-a);
     outline-offset: 2px;
 }
