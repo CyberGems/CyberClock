@@ -443,7 +443,7 @@
             note: "",
             upcoming: 0,
             design: "1",
-            theme: "ice",
+            theme: "azure",
             language: lang,
             placement: document.body.dataset.placement || "below"
         };

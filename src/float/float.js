@@ -435,7 +435,7 @@
     function applySettings(s) {
         cfg = s || {};
         if (cfg.showWidgetHints === false) hideActionTicker();
-        window.CCTint.apply(cfg.theme || "ice");
+        window.CCTint.apply(cfg.theme || "azure");
         window.ccI18n.setLang(cfg.language || "auto");
         const sh = shellEl();
         const activeDesign = getEffectiveDesign();

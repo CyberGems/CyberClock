@@ -54,7 +54,7 @@
     // ── Theme / language / auto-update toggle / suite showcase ──
     function applySettings(s) {
         currentSettings = s || {};
-        window.CCTint.apply(s.theme || "ice");
+        window.CCTint.apply(s.theme || "azure");
         if (window.ccI18n) {
             window.ccI18n.setLang(s.language || "auto");
             window.ccI18n.apply(document);
@@ -542,7 +542,7 @@
     async function copyDiagnosticInfo() {
         const diagBtn = document.getElementById("ab-link-diag");
         const effectiveLang = window.ccI18n ? window.ccI18n.getEffectiveLang() : "en";
-        const theme = currentSettings.theme || "ice";
+        const theme = currentSettings.theme || "azure";
         const autoUp = currentSettings.autoUpdate !== false;
         const now = new Date();
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";

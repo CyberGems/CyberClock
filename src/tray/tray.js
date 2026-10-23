@@ -28,7 +28,7 @@
     }
 
     function applyTheme(theme) {
-        window.CCTint.apply(theme || "ice");
+        window.CCTint.apply(theme || "azure");
     }
 
     function renderState(state) {

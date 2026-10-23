@@ -287,7 +287,7 @@
         cfg = s;
         if (s.showWidgetHints === false && typeof hideActionTicker === "function") hideActionTicker();
         calNotes = s.calendarNotes || {};
-        window.CCTint.apply(s.theme || "ice");
+        window.CCTint.apply(s.theme || "azure");
 
         window.ccI18n.setLang(s.language || "auto");
         window.ccI18n.apply(document);
@@ -426,7 +426,7 @@
             alarm: alarmData,
             updateVersion: updateVer,
             design: cfg ? (cfg.miniDesign || cfg.dialDesign || "1") : "1",
-            theme: cfg ? cfg.theme : "ice",
+            theme: cfg ? cfg.theme : "azure",
             language: cfg ? cfg.language : "auto",
             placement: initialPlacement
         };

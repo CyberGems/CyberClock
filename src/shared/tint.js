@@ -15,9 +15,9 @@
     // use, so these hexes are starting points, not exact paints
     // (swatch pickers should render normalizeSeed(seed) instead).
     const PRESETS = [
+        { id: "azure",  seed: "#6f9fe8" },
         { id: "ice",    seed: "#c8dce8" },
         { id: "cyan",   seed: "#5ac8dc" },
-        { id: "azure",  seed: "#6f9fe8" },
         { id: "mint",   seed: "#7fd0b8" },
         { id: "sage",   seed: "#a8c98f" },
         { id: "gold",   seed: "#d4c06a" },
@@ -27,7 +27,7 @@
         { id: "violet", seed: "#b39ddb" },
     ];
 
-    const DEFAULT_ID = "ice";
+    const DEFAULT_ID = "azure";
 
     // Settings saved by pre-tint versions carry old skin ids;
     // each maps onto the tint that inherited its palette.

@@ -2225,7 +2225,7 @@
             }
         }
         // Scanlines are mini-mode only — full mode never has them
-        applyTint(s.theme || "ice");
+        applyTint(s.theme || "azure");
         // Text size tier: labels, body copy and values. Display digits
         // and layout metrics stay fixed, so nothing reflows badly.
         const scale = Number(s.uiScale) >= 0 ? Number(s.uiScale) : 1;
