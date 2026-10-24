@@ -428,7 +428,8 @@
     }
 
     .tray-deck[data-view="pin-tip"] #view-help,
-    .tray-deck[data-view="pin-tip"] #view-suite {
+    .tray-deck[data-view="pin-tip"] #view-suite,
+    .tray-deck[data-view="pin-tip"] #view-clickthrough {
         display: none;
     }
 
@@ -450,6 +451,7 @@
         animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tray-deck[data-view="clickthrough"] #view-help,
+    .tray-deck[data-view="clickthrough"] #view-pin-tip,
     .tray-deck[data-view="clickthrough"] #view-suite {
         display: none;
     }

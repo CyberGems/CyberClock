@@ -341,7 +341,7 @@
         if (label) btn.dataset.ctpLabel = label;
         const ico = document.createElement("span");
         ico.className = "ico";
-        ico.setAttribute("data-ico", disabled ? "x" : meta.ico);
+        ico.setAttribute("data-ico", meta.ico);
         const lbl = document.createElement("span");
         lbl.className = "label";
         lbl.textContent = disabled
