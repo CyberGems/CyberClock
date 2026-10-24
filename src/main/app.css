@@ -5111,12 +5111,15 @@
     }
     .alarm-check {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 10px;
         margin: 2px 0 0;
         color: var(--text-hi);
         cursor: pointer;
         font-size: calc(12.5px * var(--ui-scale));
+    }
+    .alarm-check .s-tog {
+        flex: 0 0 auto;
     }
     .alarm-check input {
         width: 16px;

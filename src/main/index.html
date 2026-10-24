@@ -342,7 +342,7 @@
                                         <div class="alarms-kicker"><span data-i18n="alarms.editor.kicker">NEW ALARM</span></div>
                                         <div class="alarm-title-row">
                                             <div class="alarm-icon-picker-wrap">
-                                                <button type="button" class="alarm-icon-trigger" id="alarm-icon-trigger" aria-haspopup="dialog" aria-expanded="false" data-tooltip="Choose icon" data-i18n-attr="data-tooltip:alarms.editor.chooseIcon, aria-label:alarms.editor.chooseIcon">
+                                                <button type="button" class="alarm-icon-trigger" id="alarm-icon-trigger" aria-haspopup="dialog" aria-expanded="false" data-tooltip="Choose icon" data-tooltip-dir="bottom" data-i18n-attr="data-tooltip:alarms.editor.chooseIcon, aria-label:alarms.editor.chooseIcon">
                                                     <span class="alarm-icon-preview" id="alarm-icon-preview" data-ico="bell"></span>
                                                     <span class="alarm-icon-caret" aria-hidden="true">▾</span>
                                                 </button>
@@ -527,13 +527,16 @@
                                                 <option value="30" data-i18n="alarms.snooze.30">30 min</option>
                                             </select>
                                         </label>
-                                        <label class="alarm-check">
-                                            <input type="checkbox" id="alarm-edit-delete-after" />
-                                            <span class="alarm-check-copy">
+                                        <div class="alarm-check">
+                                            <label class="s-tog" for="alarm-edit-delete-after">
+                                                <input type="checkbox" id="alarm-edit-delete-after" />
+                                                <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                            </label>
+                                            <label class="alarm-check-copy" for="alarm-edit-delete-after">
                                                 <span data-i18n="alarms.editor.deleteAfter">Delete after the alarm</span>
                                                 <small data-i18n="alarms.editor.deleteAfterHint">Removed when you dismiss it. Snooze keeps it.</small>
-                                            </span>
-                                        </label>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="alarm-editor-foot">
@@ -542,8 +545,8 @@
                                         <span id="alarm-template-status-text">Template saved</span>
                                     </p>
                                     <div class="alarm-editor-foot-start">
-                                        <button class="alarm-icon-btn" id="alarm-editor-template" type="button" data-ico="bookmark" data-tooltip="Save as template" data-i18n-attr="data-tooltip:alarms.editor.saveTemplate, aria-label:alarms.editor.saveTemplate"></button>
-                                        <button class="alarm-icon-btn" id="alarm-editor-clone" type="button" data-ico="copy" data-tooltip="Duplicate" data-i18n-attr="data-tooltip:alarms.editor.clone, aria-label:alarms.editor.clone" hidden></button>
+                                        <button class="alarm-icon-btn" id="alarm-editor-template" type="button" data-ico="bookmark" data-tooltip="Save as template" data-tooltip-align="left" data-i18n-attr="data-tooltip:alarms.editor.saveTemplate, aria-label:alarms.editor.saveTemplate"></button>
+                                        <button class="alarm-icon-btn" id="alarm-editor-clone" type="button" data-ico="copy" data-tooltip="Duplicate" data-tooltip-align="left" data-i18n-attr="data-tooltip:alarms.editor.clone, aria-label:alarms.editor.clone" hidden></button>
                                     </div>
                                     <div class="alarm-editor-foot-end">
                                         <button class="note-btn secondary" id="alarm-editor-cancel" type="button">
