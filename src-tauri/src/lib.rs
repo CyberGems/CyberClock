@@ -46,9 +46,13 @@ pub struct AlarmState {
     // Runtime-only snooze times keyed by alarm id. Snoozes intentionally
     // reset when the app exits; the alarm definition itself remains intact.
     pub snoozed_alarms: Mutex<HashMap<String, i64>>,
-    // Live relax playback state, reported by the main window so the tray
-    // can show what's playing without touching the audio engine itself.
+    // Live relax playback state, reported by whichever window is engaged
+    // (main relax view or the float relax widget) so the tray can show
+    // what's playing without touching the audio engine itself.
     pub relax_playing: Mutex<Option<String>>, // track id, or None
+    // Window that reported the playing track ("main" or "float-relax-1");
+    // the tray toggle routes to it. None when nothing is playing.
+    pub relax_playing_source: Mutex<Option<String>>,
 }
 
 /// Lock a mutex without panicking on poison: if another thread
@@ -1141,6 +1145,16 @@ fn spawn_float_window_with_slot(
                                     s.float_relax_open = false;
                                     Ok(())
                                 });
+                            }
+                            // If this widget was the reported playback
+                            // source, its audio died with it: drop the
+                            // tray's relax state.
+                            let state = app_for_event.state::<AlarmState>();
+                            let mut source =
+                                lock_or_recover(&state.relax_playing_source);
+                            if source.as_deref() == Some(float_label.as_str()) {
+                                *source = None;
+                                *lock_or_recover(&state.relax_playing) = None;
                             }
                         } else if kind_for_event == "timer" || kind_for_event == "sw" {
                             let _ = update_settings(&app_for_event, |s| {
@@ -5587,9 +5601,28 @@ fn set_all_click_through(app: AppHandle, on: bool) -> bool {
 }
 
 #[tauri::command]
-fn report_relax_playing(app: AppHandle, track: Option<String>) {
+fn report_relax_playing(app: AppHandle, window: WebviewWindow, track: Option<String>) {
     let state = app.state::<AlarmState>();
-    *lock_or_recover(&state.relax_playing) = track;
+    let caller = window.label().to_string();
+    let mut playing = lock_or_recover(&state.relax_playing);
+    let mut source = lock_or_recover(&state.relax_playing_source);
+    match track {
+        // A window engaging playback becomes the reported source; the
+        // newest reporter wins.
+        Some(t) => {
+            *playing = Some(t);
+            *source = Some(caller);
+        }
+        // A window clearing its playback only resets the shared state if
+        // it is the reported source, so one window stopping cannot clobber
+        // the other's playback report.
+        None => {
+            if source.as_deref() == Some(caller.as_str()) {
+                *playing = None;
+                *source = None;
+            }
+        }
+    }
 }
 
 #[tauri::command]
@@ -5718,11 +5751,20 @@ async fn tray_menu_action(app: AppHandle, action: String) {
                 let _ = main.emit("mini:menu-action", &action);
             }
         }
-        // Quick relax toggle from the tray: main plays/stops without
-        // leaving whatever view the user was on.
+        // Quick relax toggle from the tray: play/pause whichever window
+        // reported playback (main relax view or the float widget) without
+        // leaving the current view. Falls back to main when nothing is
+        // reported, matching the pre-widget behavior.
         "relax_toggle" => {
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("tray:relax-toggle", ());
+            let state = app.state::<AlarmState>();
+            let source = lock_or_recover(&state.relax_playing_source).clone();
+            let target = source
+                .and_then(|label| {
+                    app.get_webview_window(&label).map(|_| label)
+                })
+                .unwrap_or_else(|| "main".to_string());
+            if let Some(win) = app.get_webview_window(&target) {
+                let _ = win.emit("tray:relax-toggle", ());
             }
         }
         "about" => {

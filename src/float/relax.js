@@ -167,6 +167,15 @@
         }
     }
 
+    // Tray sync: report the engage state (track while playing or paused)
+    // so the tray menu can show and toggle it from anywhere, mirroring
+    // the main window's relax view.
+    function reportPlayback() {
+        if (window.cc && window.cc.reportRelaxPlaying) {
+            window.cc.reportRelaxPlaying(playing ? TRACKS[trackIndex] : null);
+        }
+    }
+
     function startTrack(index) {
         trackIndex = (index + TRACKS.length) % TRACKS.length;
         if (!engine) return;
@@ -182,6 +191,7 @@
         if (!sessionStart) sessionStart = performance.now();
         refreshLabels();
         scheduleShuffle();
+        reportPlayback();
     }
 
     function nextShuffleIndex() {
@@ -234,6 +244,7 @@
         }
         refreshLabels();
         scheduleShuffle();
+        reportPlayback();
     }
 
     function toggleGuide() {
@@ -397,6 +408,14 @@
 
     function setMenuButtonOpen(open) {
         if (btnMenu) btnMenu.classList.toggle("is-open", open);
+    }
+
+    // Tray quick toggle: play/pause this widget's playback without
+    // opening it. The backend routes the event to the reported source.
+    if (window.cc && window.cc.onTrayRelaxToggle) {
+        window.cc.onTrayRelaxToggle(() => {
+            togglePlay();
+        });
     }
 
     if (window.cc && window.cc.onMenuClosed) {
