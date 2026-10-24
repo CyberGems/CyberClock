@@ -757,6 +757,7 @@
             soundRepeatCount: 1,
             soundUntilDismiss: false,
             soundPauseSecs: 1,
+            voiceRead: "default",
             deleteAfter: false,
             ...(preset || {}),
         };
@@ -932,7 +933,7 @@
     }
 
     function mountAlarmChoices() {
-        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count", "alarm-edit-sound-pause"].forEach((id) => {
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count", "alarm-edit-sound-pause", "alarm-edit-voice"].forEach((id) => {
             mountAlarmChoice(document.getElementById(id), true);
         });
         ["alarm-edit-repeat"].forEach((id) => {
@@ -1413,6 +1414,12 @@
         }
         const deleteAfter = document.getElementById("alarm-edit-delete-after");
         if (deleteAfter) deleteAfter.checked = !!alarmEditorDraft.deleteAfter;
+        const voiceRead = document.getElementById("alarm-edit-voice");
+        if (voiceRead) {
+            const vr = alarmEditorDraft.voiceRead || "default";
+            voiceRead.value = [...voiceRead.options].some((option) => option.value === vr) ? vr : "default";
+            syncAlarmChoice(voiceRead);
+        }
         const cloneBtn = document.getElementById("alarm-editor-clone");
         if (cloneBtn) cloneBtn.hidden = !alarmEditorId;
         const templateStatus = document.getElementById("alarm-template-status");
@@ -1480,6 +1487,7 @@
             soundUntilDismiss: document.getElementById("alarm-edit-repeat-until")?.checked === true,
             soundRepeatCount: Math.max(1, Math.min(20, Number(document.getElementById("alarm-edit-sound-count")?.value) || 1)),
             soundPauseSecs: Math.max(0, Math.min(60, Number(document.getElementById("alarm-edit-sound-pause")?.value ?? 1))),
+            voiceRead: document.getElementById("alarm-edit-voice")?.value || "default",
             deleteAfter: document.getElementById("alarm-edit-delete-after")?.checked === true,
             enabled: alarmEditorDraft?.enabled !== false,
         };
@@ -2454,6 +2462,8 @@
         const va = s.voiceAnnouncer || {};
         const vEn = document.getElementById("s-voice-en");
         if (vEn) vEn.checked = !!va.enabled;
+        const vRead = document.getElementById("s-voice-alarm-read");
+        if (vRead) vRead.checked = !!va.readAlarms;
         const vInt = document.getElementById("s-voice-interval");
         if (vInt) vInt.value = va.interval || "1h";
         const vSty = document.getElementById("s-voice-style");
@@ -8755,6 +8765,14 @@
         });
     }
 
+    const sVoiceAlarmRead = document.getElementById("s-voice-alarm-read");
+    if (sVoiceAlarmRead) {
+        sVoiceAlarmRead.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
+        });
+    }
+
     const sVoiceInterval = document.getElementById("s-voice-interval");
     if (sVoiceInterval) {
         sVoiceInterval.addEventListener("change", (e) => {
@@ -10098,11 +10116,27 @@
         });
     }
 
+    // Voice for ringing alarms: the per-alarm choice wins ("on"/"off"),
+    // otherwise the read-aloud toggle in the voice settings section.
+    // Quiet hours never apply: the spoken line is part of the alarm.
+    function speakAlarmIfEnabled(p) {
+        if (!window.VoiceAnnouncer || !p) return;
+        const mode = p.voiceRead || "default";
+        const want = mode === "on"
+            ? true
+            : mode === "off"
+                ? false
+                : !!(cfg.voiceAnnouncer && cfg.voiceAnnouncer.readAlarms);
+        if (!want) return;
+        window.VoiceAnnouncer.announceAlarm(cfg, p);
+    }
+
     window.cc.onAlarmChime((p) => {
         if (p.type === "custom") {
             ttHide();
             showAlarmNotice(p);
             if (!p.silent && window.audioEngine?.playAlarmAlert) window.audioEngine.playAlarmAlert(p);
+            if (!p.silent) speakAlarmIfEnabled(p);
             return;
         }
         const vol = p.volume != null ? p.volume : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75);

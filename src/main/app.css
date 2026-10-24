@@ -4094,6 +4094,7 @@
     }
     /* Count dropdown button inside alarm-repeat-mode */
     .alarm-repeat-mode .alarm-choice-trigger.is-compact {
+        width: auto;
         min-height: 24px;
         height: 24px;
         padding: 2px 6px;
@@ -4121,6 +4122,7 @@
         white-space: nowrap;
     }
     .alarm-repeat-pause .alarm-choice-trigger.is-compact {
+        width: auto;
         min-height: 24px;
         height: 24px;
         padding: 2px 8px;
@@ -4568,6 +4570,15 @@
     .alarm-inline-control select {
         min-width: 0;
         flex: 1;
+    }
+    .alarm-voice-picker {
+        flex: 0 0 auto;
+        min-width: 0;
+    }
+    .alarm-voice-picker .alarm-choice-trigger.is-compact {
+        justify-content: space-between;
+        min-width: 96px;
+        padding-inline: 8px;
     }
     .alarm-sound-stack {
         display: grid;

@@ -460,6 +460,13 @@
                                                     <option value="alarm-dawn" data-i18n="settings.alarms.sound.dawn">Dawn</option>
                                                     <option value="alarm-signal" data-i18n="settings.alarms.sound.signal">Signal</option>
                                                 </select>
+                                                <div class="alarm-voice-picker" data-tooltip="Speaks the alarm when it rings. Default follows Settings" data-tooltip-align="right" data-i18n-attr="data-tooltip:alarms.editor.voiceTip">
+                                                    <select id="alarm-edit-voice" class="alarm-sound-native" tabindex="-1" aria-hidden="true" data-i18n-attr="aria-label:alarms.editor.voice">
+                                                        <option value="default" selected data-i18n="alarms.editor.voiceDefault">Voice: Default</option>
+                                                        <option value="on" data-i18n="alarms.editor.voiceOn">Voice: On</option>
+                                                        <option value="off" data-i18n="alarms.editor.voiceOff">Voice: Off</option>
+                                                    </select>
+                                                </div>
                                                 <button class="alarm-secondary-btn" id="alarm-edit-test" type="button" disabled>
                                                     <span data-ico="play"></span> <span data-i18n="alarms.editor.test">Test</span>
                                                 </button>
@@ -1319,6 +1326,18 @@
                                 </div>
                                 <label class="s-tog">
                                     <input type="checkbox" id="s-voice-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+
+                            <!-- Read alarms aloud (independent of the time announcer) -->
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="mic"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="voice.readAlarms">Read alarms aloud</span>
+                                </div>
+                                <label class="s-tog" data-tooltip="Speaks the alarm when it rings, with the voice and volume above" data-tooltip-align="right" data-i18n-attr="data-tooltip:voice.readAlarmsTip">
+                                    <input type="checkbox" id="s-voice-alarm-read" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
                             </div>

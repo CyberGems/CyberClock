@@ -130,6 +130,68 @@
     let lastAnnounceKey = "";
     let lastAnnounceAt = 0;
 
+    // Speaks any sentence through the same pipe as the time announcement:
+    // native synthesizer first (WebView2 duplicates utterances that carry
+    // a voice), web speech only as last resort. Sharing announceGen with
+    // announce() keeps a time announcement and an alarm from talking over
+    // each other; the later request wins.
+    function speakText(text, cfg, opts) {
+        if (!('speechSynthesis' in window) || !text) return;
+        const va = (cfg && cfg.voiceAnnouncer) || {};
+        if (cfg && cfg.audioMuted) return;
+
+        const lang = (cfg && cfg.language) || 'auto';
+        const voice = getBestVoice(lang, va.voiceGender || 'auto', va.voiceName);
+        const gen = ++announceGen;
+
+        const doSpeak = () => {
+            if (gen !== announceGen) return;
+            const volume = Math.max(0, Math.min(1, Number(va.volume ?? 0.85)));
+            const voiceName = voice && voice.name ? voice.name : "";
+            const fallback = () => {
+                if (gen !== announceGen) return;
+                const synth = window.speechSynthesis;
+                const utter = new SpeechSynthesisUtterance(text);
+                if (voice && voice.lang) utter.lang = voice.lang;
+                liveUtterance = utter;
+                try { synth.speak(utter); } catch (_) {}
+            };
+            if (window.cc && window.cc.speakAnnouncement) {
+                window.cc.speakAnnouncement({ text, voiceName, volume }).then((ok) => {
+                    if (!ok) fallback();
+                }).catch(fallback);
+                return;
+            }
+            fallback();
+        };
+
+        const delay = Math.max(0, Number(opts && opts.delayMs) || 0);
+        if (delay > 0) setTimeout(doSpeak, delay);
+        else doSpeak();
+    }
+
+    // Alarm ring sentence: "Alarma {name}. {message}" in the announcement
+    // language. Legacy auto names ("Alarm 12" as stored) already come out
+    // of displayAlarmLabel localized, so they are spoken as-is; a custom
+    // name gets the "Alarm" lead-in so it still sounds like an alarm.
+    function announceAlarm(cfg, alarm, opts) {
+        if (!('speechSynthesis' in window) || !alarm) return;
+        const lang = (cfg && cfg.language) || 'auto';
+        const isEs = (lang || 'auto') === 'es' || (lang === 'auto' && navigator.language.startsWith('es'));
+        const word = isEs ? 'Alarma' : 'Alarm';
+
+        let spoken = String(alarm.label || "").trim();
+        if (window.ccI18n && window.ccI18n.displayAlarmLabel) {
+            spoken = String(window.ccI18n.displayAlarmLabel(spoken)).trim();
+        }
+        if (spoken && !/^(?:alarm|alarma)\b/i.test(spoken)) spoken = `${word} ${spoken}`;
+        if (!spoken) spoken = word;
+
+        const message = String(alarm.message || "").trim();
+        const text = message ? `${spoken}. ${message}` : `${spoken}.`;
+        speakText(text, cfg, Object.assign({ delayMs: 600 }, opts || {}));
+    }
+
     function announce(cfg, hour, minute, opts) {
         if (!('speechSynthesis' in window)) return;
         const va = (cfg && cfg.voiceAnnouncer) || {};
@@ -195,6 +257,8 @@
 
     window.VoiceAnnouncer = {
         announce,
+        speakText,
+        announceAlarm,
         getVoices: () => {
             if (!voices || voices.length === 0) loadVoices();
             return voices;

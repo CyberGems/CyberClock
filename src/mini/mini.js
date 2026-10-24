@@ -794,6 +794,15 @@
             if (window.audioEngine && window.audioEngine.playAlarmAlert) {
                 window.audioEngine.playAlarmAlert(p);
             }
+            // Mirrors the main window: per-alarm choice first, then the
+            // read-aloud toggle in the voice settings section.
+            const mode = p.voiceRead || "default";
+            const wantVoice = mode === "on"
+                ? true
+                : mode === "off"
+                    ? false
+                    : !!(cfg.voiceAnnouncer && cfg.voiceAnnouncer.readAlarms);
+            if (wantVoice && window.VoiceAnnouncer) window.VoiceAnnouncer.announceAlarm(cfg, p);
             return;
         }
         const vol = p.volume != null ? p.volume : (cfg.chimeVolume ?? cfg.alarmVolume ?? 0.75);

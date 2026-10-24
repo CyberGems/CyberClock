@@ -56,6 +56,10 @@ pub struct CustomAlarm {
     /// Visual icon chosen for the alarm. Defaults to "bell".
     #[serde(default = "default_alarm_icon")]
     pub icon: String,
+    /// Spoken announcement override: "on" or "off" force it,
+    /// anything else (null) follows `voice_announcer.read_alarms`.
+    #[serde(default)]
+    pub voice_read: Option<String>,
 }
 
 fn default_alarm_icon() -> String {
@@ -82,6 +86,7 @@ impl Default for CustomAlarm {
             sound_pause_secs: default_sound_pause_secs(),
             delete_after: false,
             icon: default_alarm_icon(),
+            voice_read: None,
         }
     }
 }
@@ -239,6 +244,9 @@ pub struct VoiceAnnouncerSettings {
     pub quiet_hours_start: String,
     pub quiet_hours_end: String,
     pub volume: f64,
+    // Read custom alarms aloud when they ring. Independent of `enabled`,
+    // which only gates the time announcements; reuses voice, style and volume.
+    pub read_alarms: bool,
 }
 
 impl Default for VoiceAnnouncerSettings {
@@ -254,6 +262,7 @@ impl Default for VoiceAnnouncerSettings {
             quiet_hours_start: "22:00".to_string(),
             quiet_hours_end: "08:00".to_string(),
             volume: 0.85,
+            read_alarms: false,
         }
     }
 }

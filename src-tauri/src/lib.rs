@@ -5241,6 +5241,7 @@ fn custom_alarms_scheduler(app: AppHandle) {
                         "soundUntilDismiss": alarm.sound_until_dismiss,
                         "soundPauseSecs": alarm.sound_pause_secs,
                         "deleteAfter": alarm.delete_after,
+                        "voiceRead": alarm.voice_read,
                         "volume": current_settings.alarm_volume,
                         "audioMuted": current_settings.audio_muted
                     });

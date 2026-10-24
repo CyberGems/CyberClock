@@ -2462,7 +2462,7 @@
     .mini-tip-alarm-actions {
         display: flex;
         justify-content: center;
-        gap: 6px;
+        gap: 10px;
     }
     .mini-tip-alarm-btn {
         padding: 5px 12px;

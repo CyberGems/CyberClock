@@ -383,6 +383,11 @@
             "alarms.editor.customSound": "Use your own sound",
             "alarms.editor.customSoundHint": "MP3 or WAV",
             "alarms.editor.customSoundActive": "This file plays",
+            "alarms.editor.voice": "Read aloud",
+            "alarms.editor.voiceDefault": "Voice: Default",
+            "alarms.editor.voiceOn": "Voice: On",
+            "alarms.editor.voiceOff": "Voice: Off",
+            "alarms.editor.voiceTip": "Speaks the alarm when it rings. Default follows Settings",
             "alarms.editor.message": "Message",
             "alarms.editor.messagePlaceholder": "What should CyberClock remind you?",
             "alarms.editor.snooze": "Snooze duration",
@@ -615,6 +620,8 @@
             "voice.addVoices": "Add voices…",
             "voice.addVoicesTip": "Open Windows Settings to install Spanish or other language voices",
             "voice.refreshTip": "Refresh voice list after installing new voices in Windows",
+            "voice.readAlarms": "Read alarms aloud",
+            "voice.readAlarmsTip": "Speaks the alarm when it rings, with the voice and volume above",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Welcome",
@@ -1476,6 +1483,11 @@
             "alarms.editor.customSound": "Usar un sonido propio",
             "alarms.editor.customSoundHint": "MP3 o WAV",
             "alarms.editor.customSoundActive": "Se reproduce este archivo",
+            "alarms.editor.voice": "Leer en voz alta",
+            "alarms.editor.voiceDefault": "Voz: Según ajustes",
+            "alarms.editor.voiceOn": "Voz: Sí",
+            "alarms.editor.voiceOff": "Voz: No",
+            "alarms.editor.voiceTip": "Lee la alarma al sonar. «Según ajustes» sigue Ajustes",
             "alarms.editor.message": "Mensaje",
             "alarms.editor.messagePlaceholder": "¿Qué debe recordarte CyberClock?",
             "alarms.editor.snooze": "Duración de posponer",
@@ -1708,6 +1720,8 @@
             "voice.addVoices": "Agregar voces…",
             "voice.addVoicesTip": "Abrir la configuración de Windows para instalar voces en español u otros idiomas",
             "voice.refreshTip": "Actualizar lista tras instalar nuevas voces en Windows",
+            "voice.readAlarms": "Leer las alarmas en voz alta",
+            "voice.readAlarmsTip": "Dice la alarma al sonar, con la voz y el volumen de esta sección",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Toque personal",
