@@ -97,7 +97,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas
-- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez a las :15, :30 o :00, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio y acceso directo para instalar voces de Windows
+- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez a las :15, :30 o :00, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio, lectura de alarmas en voz alta opcional (interruptor global o por alarma) y acceso directo para instalar voces de Windows
 - **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
 - **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
 - **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias
