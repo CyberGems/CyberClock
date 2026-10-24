@@ -85,7 +85,9 @@
         const id = TRACKS[trackIndex];
         trackEl.textContent = t("relax.track." + id);
         if (!guideOn) {
-            phaseEl.textContent = t("relax.breathe.start");
+            phaseEl.textContent = !playing
+                ? t("relax.breathe.start")
+                : paused ? t("relax.status.paused") : t("relax.status.playing");
             phaseName = "";
         }
         const isMuted = cfg && cfg.audioMuted === true;

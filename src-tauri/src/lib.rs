@@ -5763,9 +5763,10 @@ async fn tray_menu_action(app: AppHandle, action: String) {
                     app.get_webview_window(&label).map(|_| label)
                 })
                 .unwrap_or_else(|| "main".to_string());
-            if let Some(win) = app.get_webview_window(&target) {
-                let _ = win.emit("tray:relax-toggle", ());
-            }
+            // Window::emit broadcasts to every target in Tauri 2; the
+            // toggle must reach only the reported source, otherwise the
+            // main window reacts too and hijacks the state.
+            let _ = app.emit_to(target.as_str(), "tray:relax-toggle", ());
         }
         "about" => {
             show_about_window(&app);
