@@ -49,7 +49,6 @@
             0 2px 6px rgba(0, 0, 0, 0.22),
             0 0 12px rgba(var(--rgb-accent), 0.10),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        animation: tray-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tray-card::-webkit-scrollbar {
         width: 4px;
@@ -69,17 +68,6 @@
     }
     .tray-card::-webkit-scrollbar-thumb:hover {
         background: rgba(var(--rgb-accent), 0.75);
-    }
-
-    @keyframes tray-fade-in {
-        from {
-            opacity: 0;
-            transform: scale(0.96) translateY(4px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
     }
 
     /* Header — suite-standard branding (icon + centered name, click = About) */
@@ -398,7 +386,6 @@
 
     .tray-deck[data-view="main"] #view-main {
         display: block;
-        animation: trayViewFade 0.16s ease;
     }
     .tray-deck[data-view="help"] #view-help,
     .tray-deck[data-view="pin-tip"] #view-pin-tip,
@@ -406,28 +393,6 @@
     .tray-deck[data-view="clickthrough"] #view-clickthrough,
     .tray-deck[data-view="new"] #view-new {
         display: block;
-        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes trayViewSlideRight {
-        from {
-            opacity: 0;
-            transform: translateX(22px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    @keyframes trayViewFade {
-        from {
-            opacity: 0;
-            transform: translateX(-16px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
     }
 
     /* Drill-down navigation items on main view */
