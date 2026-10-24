@@ -174,6 +174,8 @@
         renderClickThrough(state);
 
         setLbl("lbl-clickthrough", T("tray.clickThrough", "Click-through"));
+        setLbl("lbl-new", T("tray.newMenu", "New..."));
+        setLbl("lbl-back-new", T("tray.back", "Back"));
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
@@ -443,6 +445,26 @@
         }
     }
     wireClickThrough();
+
+    // "New..." drill-down: groups every create action one level deep to
+    // keep the main view light. The rows themselves are generic
+    // data-action items handled by the dispatcher below.
+    const btnNavNew = document.getElementById("btn-nav-new");
+    if (btnNavNew) {
+        btnNavNew.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchView("new");
+        });
+    }
+    const btnBackNew = document.getElementById("btn-back-new");
+    if (btnBackNew) {
+        btnBackNew.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchView("main");
+        });
+    }
 
     // Relax quick toggle: fires the backend action that asks the main
     // window to play/pause; the menu closes just like other actions.

@@ -57,34 +57,10 @@
 
                         <!-- Navigation Group -->
                         <div class="tray-group">
-                            <button type="button" class="tray-item" data-action="new_timer">
-                                <span class="ico" data-ico="timer"></span>
-                                <span class="label" id="lbl-timer">New Timer</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_stopwatch">
-                                <span class="ico" data-ico="stopwatch"></span>
-                                <span class="label" id="lbl-stopwatch">New Stopwatch</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_calendar">
-                                <span class="ico" data-ico="calendar"></span>
-                                <span class="label" id="lbl-calendar">New Calendar</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_analog">
-                                <span class="ico" data-ico="clock"></span>
-                                <span class="label" id="lbl-analog">New Analog Clock</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_relax">
-                                <span class="ico" data-ico="lotus"></span>
-                                <span class="label" id="lbl-relax-float">New Relax</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_alarm">
-                                <span class="ico" data-ico="bell"></span>
-                                <span class="label" id="lbl-alarm">New Alarm</span>
+                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-new">
+                                <span class="ico" data-ico="spark"></span>
+                                <span class="label" id="lbl-new">New...</span>
+                                <span class="tray-nav-arrow" data-ico="back"></span>
                             </button>
 
                             <button type="button" class="tray-item tray-relax-toggle" id="btn-relax-toggle" hidden>
@@ -290,6 +266,49 @@
                             <button type="button" class="tray-item" id="btn-ctp-all-off">
                                 <span class="ico" data-ico="x"></span>
                                 <span class="label" id="lbl-ctp-all-off">Disable all</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tray-view tray-view-sub" id="view-new">
+                        <div class="tray-sub-header">
+                            <button type="button" class="tray-back-btn" id="btn-back-new">
+                                <span class="ico" data-ico="back"></span>
+                                <span class="label" id="lbl-back-new">Back</span>
+                            </button>
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <div class="tray-group">
+                            <button type="button" class="tray-item" data-action="new_timer">
+                                <span class="ico" data-ico="timer"></span>
+                                <span class="label" id="lbl-timer">New Timer</span>
+                            </button>
+
+                            <button type="button" class="tray-item" data-action="new_stopwatch">
+                                <span class="ico" data-ico="stopwatch"></span>
+                                <span class="label" id="lbl-stopwatch">New Stopwatch</span>
+                            </button>
+
+                            <button type="button" class="tray-item" data-action="new_calendar">
+                                <span class="ico" data-ico="calendar"></span>
+                                <span class="label" id="lbl-calendar">New Calendar</span>
+                            </button>
+
+                            <button type="button" class="tray-item" data-action="new_analog">
+                                <span class="ico" data-ico="clock"></span>
+                                <span class="label" id="lbl-analog">New Analog Clock</span>
+                            </button>
+
+                            <button type="button" class="tray-item" data-action="new_relax">
+                                <span class="ico" data-ico="lotus"></span>
+                                <span class="label" id="lbl-relax-float">New Relax</span>
+                            </button>
+
+                            <button type="button" class="tray-item" data-action="new_alarm">
+                                <span class="ico" data-ico="bell"></span>
+                                <span class="label" id="lbl-alarm">New Alarm</span>
                             </button>
                         </div>
                     </div>

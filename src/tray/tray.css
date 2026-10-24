@@ -388,72 +388,25 @@
         width: 100%;
         position: relative;
     }
+    /* Views are hidden by default; the deck's data-view picks the one
+       that renders. Adding a view needs exactly one line below. */
     .tray-view {
         width: 100%;
         box-sizing: border-box;
+        display: none;
     }
 
-    /* Active view visibility & smooth slide transitions */
     .tray-deck[data-view="main"] #view-main {
         display: block;
         animation: trayViewFade 0.16s ease;
     }
-    .tray-deck[data-view="main"] #view-help,
-    .tray-deck[data-view="main"] #view-pin-tip,
-    .tray-deck[data-view="main"] #view-suite,
-    .tray-deck[data-view="main"] #view-clickthrough {
-        display: none;
-    }
-
-    .tray-deck[data-view="help"] #view-main,
-    .tray-deck[data-view="pin-tip"] #view-main,
-    .tray-deck[data-view="suite"] #view-main,
-    .tray-deck[data-view="clickthrough"] #view-main {
-        display: none;
-    }
-
-    .tray-deck[data-view="help"] #view-help {
+    .tray-deck[data-view="help"] #view-help,
+    .tray-deck[data-view="pin-tip"] #view-pin-tip,
+    .tray-deck[data-view="suite"] #view-suite,
+    .tray-deck[data-view="clickthrough"] #view-clickthrough,
+    .tray-deck[data-view="new"] #view-new {
         display: block;
         animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .tray-deck[data-view="help"] #view-suite {
-        display: none;
-    }
-
-    .tray-deck[data-view="help"] #view-pin-tip,
-    .tray-deck[data-view="suite"] #view-pin-tip,
-    .tray-deck[data-view="help"] #view-clickthrough,
-    .tray-deck[data-view="suite"] #view-clickthrough {
-        display: none;
-    }
-
-    .tray-deck[data-view="pin-tip"] #view-help,
-    .tray-deck[data-view="pin-tip"] #view-suite,
-    .tray-deck[data-view="pin-tip"] #view-clickthrough {
-        display: none;
-    }
-
-    .tray-deck[data-view="pin-tip"] #view-pin-tip {
-        display: block;
-        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .tray-deck[data-view="suite"] #view-suite {
-        display: block;
-        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .tray-deck[data-view="suite"] #view-help {
-        display: none;
-    }
-
-    .tray-deck[data-view="clickthrough"] #view-clickthrough {
-        display: block;
-        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .tray-deck[data-view="clickthrough"] #view-help,
-    .tray-deck[data-view="clickthrough"] #view-pin-tip,
-    .tray-deck[data-view="clickthrough"] #view-suite {
-        display: none;
     }
 
     @keyframes trayViewSlideRight {
