@@ -69,6 +69,11 @@
     .tray-card::-webkit-scrollbar-thumb:hover {
         background: rgba(var(--rgb-accent), 0.75);
     }
+    /* Invisible (not display:none) while the window is hidden: layout
+       survives, so size reports still measure the card. */
+    .tray-card.is-offscreen {
+        visibility: hidden;
+    }
 
     /* Header — suite-standard branding (icon + centered name, click = About) */
     .tray-header {

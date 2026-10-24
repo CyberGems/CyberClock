@@ -492,6 +492,15 @@
         });
     }
 
+    // The window is persistent (hidden between opens). Keeping the card
+    // invisible while hidden means a frame the webview may still present
+    // on the next show can never flash the old menu content. Layout is
+    // kept, so size reports still measure the card.
+    function setCardOffscreen(off) {
+        const card = document.querySelector(".tray-card");
+        if (card) card.classList.toggle("is-offscreen", off);
+    }
+
     function switchView(viewName) {
         if (!trayDeck) return;
         trayDeck.dataset.view = viewName || "main";
@@ -798,6 +807,7 @@
 
         if (window.cc.onTrayMenuShow) {
             window.cc.onTrayMenuShow(() => {
+                setCardOffscreen(false);
                 // The tray window is persistent (hidden, not destroyed), so
                 // any expanded submenu must collapse so it always opens clean.
                 collapseAllSubmenus();
@@ -807,6 +817,12 @@
                 requestAnimationFrame(() => {
                     requestAnimationFrame(reportSize);
                 });
+            });
+        }
+
+        if (window.cc.onTrayMenuHide) {
+            window.cc.onTrayMenuHide(() => {
+                setCardOffscreen(true);
             });
         }
 

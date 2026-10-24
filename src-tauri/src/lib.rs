@@ -5804,6 +5804,10 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
 
     focus_clock_for_tray_menu(&app);
 
+    // The flag must be up before the events reach the webview:
+    // tray_menu_ready performs the actual show and swaps it off.
+    TRAY_MENU_PENDING_SHOW.store(true, std::sync::atomic::Ordering::SeqCst);
+
     let state = collect_tray_menu_state(&app);
     let _ = app.emit("tray-menu-state", &state);
     let _ = app.emit("tray-menu-show", ());
@@ -5816,16 +5820,32 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
         return;
     };
 
+    // Pre-position at the estimated size while still hidden. Showing here
+    // flashed the stale frame of the previous open and then jumped once
+    // tray_menu_ready resized the visible window to the real rendered
+    // size; that double paint is the flicker on every open. The webview
+    // re-renders the fresh state invisibly, reports the real size, and
+    // tray_menu_ready shows the window once at the final geometry.
     let (x, y, w_px, h_px) = tray_menu_geometry(&win, anchor_x, anchor_y, est_w, est_h);
     let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
         width: w_px,
         height: h_px,
     }));
     let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
-    TRAY_MENU_PENDING_SHOW.store(true, std::sync::atomic::Ordering::SeqCst);
-    let _ = win.show();
-    let _ = win.set_focus();
-    refresh_taskbar_tab(&win);
+
+    // Safety net: if the ready report never arrives (slow or broken
+    // webview), show anyway at the estimated geometry.
+    let fallback = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(600));
+        if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
+            if let Some(win) = fallback.get_webview_window("tray_menu") {
+                let _ = win.show();
+                let _ = win.set_focus();
+                refresh_taskbar_tab(&win);
+            }
+        }
+    });
 }
 
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
