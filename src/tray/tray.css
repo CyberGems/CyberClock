@@ -43,6 +43,10 @@
         border-radius: 16px;
         overflow-x: hidden;
         overflow-y: auto;
+        /* Reserve the scrollbar gutter even when not scrolling: a view
+           briefly taller than the window used to show a scrollbar and
+           shift the content sideways for a frame before the resize. */
+        scrollbar-gutter: stable;
         position: relative;
         box-shadow:
             0 4px 16px rgba(0, 0, 0, 0.38),

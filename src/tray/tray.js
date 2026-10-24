@@ -486,12 +486,6 @@
     // ── Drill-down Views Navigation ────────────────────────────
     const trayDeck = document.getElementById("tray-deck");
 
-    function reportSizeSoon() {
-        requestAnimationFrame(() => {
-            requestAnimationFrame(reportSize);
-        });
-    }
-
     // The window is persistent (hidden between opens). Keeping the card
     // invisible while hidden means a frame the webview may still present
     // on the next show can never flash the old menu content. Layout is
@@ -507,7 +501,13 @@
         if (window.ccIcons) {
             window.ccIcons.replaceIcons();
         }
-        reportSizeSoon();
+        // Measure and report in the same task as the flip: the layout read
+        // in reportSize forces the new view's geometry at once, so the
+        // window resize lands with the first paint. Waiting two rAFs let
+        // the old window size show the taller view clipped under a
+        // transient scrollbar, which read as a flicker on every submenu
+        // entry.
+        reportSize();
     }
 
     function renderTrayPinTipBody(text) {

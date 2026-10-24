@@ -5668,6 +5668,44 @@ fn focus_clock_for_tray_menu(app: &AppHandle) {
     let _ = clock.set_focus();
 }
 
+/// Position and size in ONE atomic Windows operation. Resizing and moving
+/// in two separate calls lets a frame land in between (window already
+/// resized but not yet moved), which read as a flicker every time the
+/// tray menu changed size.
+#[cfg(windows)]
+fn set_window_rect_atomic(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h: u32) -> bool {
+    let Ok(hwnd) = win.hwnd() else {
+        return false;
+    };
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER,
+    };
+    unsafe {
+        SetWindowPos(
+            hwnd.0 as windows_sys::Win32::Foundation::HWND,
+            windows_sys::Win32::UI::WindowsAndMessaging::HWND_TOP,
+            x,
+            y,
+            w as i32,
+            h as i32,
+            SWP_NOZORDER | SWP_NOACTIVATE,
+        );
+    }
+    true
+}
+
+fn apply_tray_window_rect(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h: u32) {
+    #[cfg(windows)]
+    if set_window_rect_atomic(win, x, y, w, h) {
+        return;
+    }
+    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+        width: w,
+        height: h,
+    }));
+    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+}
+
 #[tauri::command]
 fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
     let Some(win) = app.get_webview_window("tray_menu") else {
@@ -5685,11 +5723,7 @@ fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
         .and_then(|g| *g)
         .unwrap_or((100, 100));
     let (x, y, w, h) = tray_menu_geometry(&win, anchor_x, anchor_y, width, height);
-    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-        width: w,
-        height: h,
-    }));
-    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    apply_tray_window_rect(&win, x, y, w, h);
 
     // The show/focus sequence runs only for the first report after a
     // pending show; later reports (Help expand/collapse) just resize.
@@ -5827,11 +5861,7 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
     // re-renders the fresh state invisibly, reports the real size, and
     // tray_menu_ready shows the window once at the final geometry.
     let (x, y, w_px, h_px) = tray_menu_geometry(&win, anchor_x, anchor_y, est_w, est_h);
-    let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
-        width: w_px,
-        height: h_px,
-    }));
-    let _ = win.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }));
+    apply_tray_window_rect(&win, x, y, w_px, h_px);
 
     // Safety net: if the ready report never arrives (slow or broken
     // webview), show anyway at the estimated geometry.
