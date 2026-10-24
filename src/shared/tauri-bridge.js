@@ -38,6 +38,20 @@
         return unlisten;
     }
 
+    // Window-scoped listen: registers the handler under this window's
+    // label, so directed emits (emit_to) reach only this window. A plain
+    // listen registers as target Any and receives every window's events.
+    async function subscribeToWindow(channel, cb) {
+        if (!HAS_TAURI) return async () => { /* unlisten no-op in browser */ };
+        const current = window.__TAURI__.window.getCurrentWebviewWindow
+            ? window.__TAURI__.window.getCurrentWebviewWindow()
+            : window.__TAURI__.window.getCurrentWindow();
+        const unlisten = await current.listen(channel, (event) => cb(event.payload));
+        if (!listenerRegistry.has(channel)) listenerRegistry.set(channel, new Set());
+        listenerRegistry.get(channel).add(unlisten);
+        return unlisten;
+    }
+
     window.cc = {
         // ── Environment ───────────────────────────────────────────
         isTauri: () => HAS_TAURI,
@@ -457,7 +471,9 @@
             return subscribe("mini:menu-action", cb);
         },
         onTrayRelaxToggle: (cb) => {
-            return subscribe("tray:relax-toggle", cb);
+            // Directed event (emit_to the playing window): must be scoped
+            // or every window would react to each other's toggles.
+            return subscribeToWindow("tray:relax-toggle", cb);
         },
         getActiveWindow: async () => {
             return await invokeOrFallback("get_active_window", {}, null);
