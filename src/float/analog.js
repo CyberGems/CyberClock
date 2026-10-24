@@ -119,7 +119,7 @@
     function applySettings(s) {
         if (!s) return;
         cfg = s;
-        document.body.classList.toggle("click-through", cfg.miniClickThrough === true);
+        document.body.classList.toggle("click-through", window.cc.ownClickThrough(cfg));
 
         if (cfg.theme && window.CCTint) {
             window.CCTint.apply(cfg.theme);

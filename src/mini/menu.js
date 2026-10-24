@@ -352,7 +352,7 @@
         const isFloat = isTimer || isSw;
         updateMenuBrand();
         updateAudioUi(currentCfg.audioMuted);
-        updateClickThroughUi(currentCfg.miniClickThrough);
+        updateClickThroughUi(ctpValueForCaller(currentCfg));
         updateAotState(currentCfg.alwaysOnTop || false);
 
         const timerView = document.getElementById("ctx-timer-view");
@@ -964,6 +964,16 @@
         }
     }
 
+    // Click-through is per window: the menu reflects and toggles the
+    // state of the widget that opened it (or the mini clock).
+    function ctpValueForCaller(cfg) {
+        const label = activeCaller && activeCaller.caller;
+        if (label && label.indexOf("float-") === 0) {
+            return !!(cfg && cfg.floatClickThrough && cfg.floatClickThrough[label] === true);
+        }
+        return (cfg && cfg.miniClickThrough) === true;
+    }
+
     function updateClickThroughUi(on) {
         const isCtp = on === true;
         const icoName = "click";
@@ -1057,7 +1067,7 @@
                     if (taskbarLbl) taskbarLbl.textContent = window.ccI18n.t("float.showInTaskbar");
                 }
                 updateAudioUi(cfg.audioMuted);
-                updateClickThroughUi(cfg.miniClickThrough);
+                updateClickThroughUi(ctpValueForCaller(cfg));
                 
                 // Active Layout Form Factor
                 const activeLayout = cfg.miniCollapseDate ? "inline" : (cfg.miniLayout || "stacked");
@@ -1580,8 +1590,15 @@
                 return;
             }
             if (action === "toggle_click_through") {
-                const nextCtp = currentCfg.miniClickThrough !== true;
-                currentCfg.miniClickThrough = nextCtp;
+                const nextCtp = !ctpValueForCaller(currentCfg);
+                const callerLabel = activeCaller && activeCaller.caller;
+                if (callerLabel && callerLabel.indexOf("float-") === 0) {
+                    currentCfg.floatClickThrough = Object.assign(
+                        {}, currentCfg.floatClickThrough, { [callerLabel]: nextCtp },
+                    );
+                } else {
+                    currentCfg.miniClickThrough = nextCtp;
+                }
                 updateClickThroughUi(nextCtp);
                 if (window.cc && window.cc.menuAction) {
                     window.cc.menuAction("toggle_click_through");
@@ -1988,9 +2005,9 @@
                 if (typeof cfg.audioMuted === "boolean") {
                     updateAudioUi(cfg.audioMuted);
                 }
-                if (typeof cfg.miniClickThrough === "boolean") {
-                    updateClickThroughUi(cfg.miniClickThrough);
-                }
+                // The full settings snapshot arrives on every change; the
+                // toggle re-reads whichever field belongs to the caller.
+                updateClickThroughUi(ctpValueForCaller(cfg));
             }
         });
     }

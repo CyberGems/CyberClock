@@ -334,16 +334,37 @@ fn is_click_through_window(label: &str) -> bool {
     label == "mini" || label.starts_with("float-")
 }
 
-/// Pass mouse events through the mini clock and every floating widget.
-/// One setting covers all of them. Applied when it changes, when a
-/// widget is created, and every time one of those windows is shown,
-/// because Windows can drop the flag across hide/show cycles.
-fn apply_click_through(app: &AppHandle, on: bool) {
+/// Click-through state of one window: the mini clock follows its own
+/// setting while every floating widget looks up its per-label entry
+/// (missing = interactive).
+fn click_through_for(app: &AppHandle, label: &str) -> bool {
+    let settings = load_settings(app);
+    if label == "mini" {
+        settings.mini_click_through
+    } else {
+        settings
+            .float_click_through
+            .get(label)
+            .copied()
+            .unwrap_or(false)
+    }
+}
+
+/// Apply each window's own click-through state. Applied when settings
+/// change and every time one of those windows is shown, because
+/// Windows can drop the flag across hide/show cycles.
+fn apply_all_click_through(app: &AppHandle) {
+    let settings = load_settings(app);
     if let Some(mini) = app.get_webview_window("mini") {
-        let _ = mini.set_ignore_cursor_events(on);
+        let _ = mini.set_ignore_cursor_events(settings.mini_click_through);
     }
     for (label, win) in app.webview_windows() {
         if label.starts_with("float-") {
+            let on = settings
+                .float_click_through
+                .get(&label)
+                .copied()
+                .unwrap_or(false);
             let _ = win.set_ignore_cursor_events(on);
         }
     }
@@ -353,8 +374,40 @@ fn reapply_click_through(app: &AppHandle, window: &WebviewWindow) {
     if !is_click_through_window(window.label()) {
         return;
     }
-    let on = load_settings(app).mini_click_through;
+    let on = click_through_for(app, window.label());
     let _ = window.set_ignore_cursor_events(on);
+}
+
+/// Persist one window's click-through state (the mini setting or its
+/// per-widget entry), apply it live and broadcast the new settings and
+/// tray state so the menus re-render. Returns false for unknown labels.
+fn set_click_through_state(app: &AppHandle, label: &str, on: bool) -> bool {
+    if !is_click_through_window(label) {
+        return false;
+    }
+    if label != "mini" && app.get_webview_window(label).is_none() {
+        return false;
+    }
+    let updated = update_settings(app, |s| {
+        if label == "mini" {
+            s.mini_click_through = on;
+        } else if on {
+            s.float_click_through.insert(label.to_string(), true);
+        } else {
+            s.float_click_through.remove(label);
+        }
+        Ok(())
+    });
+    if updated.is_err() {
+        return false;
+    }
+    if let Some(win) = app.get_webview_window(label) {
+        let _ = win.set_ignore_cursor_events(on);
+    }
+    let _ = app.emit("settings:updated", load_settings(app));
+    let state = collect_tray_menu_state(app);
+    let _ = app.emit("tray-menu-state", &state);
+    true
 }
 
 /// main or mini currently visible and not minimized.
@@ -458,7 +511,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, settings.always_on_top);
-    apply_click_through(&app, settings.mini_click_through);
+    apply_all_click_through(&app);
     if !settings.hide_widgets_on_fullscreen {
         restore_fullscreen_hidden_windows(&app);
     }
@@ -479,7 +532,7 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, merged.always_on_top);
-    apply_click_through(&app, merged.mini_click_through);
+    apply_all_click_through(&app);
     if !merged.hide_widgets_on_fullscreen {
         restore_fullscreen_hidden_windows(&app);
     }
@@ -595,7 +648,7 @@ fn reset_settings(app: AppHandle) -> AppSettings {
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, default_settings.always_on_top);
-    apply_click_through(&app, default_settings.mini_click_through);
+    apply_all_click_through(&app);
     for (label, win) in app.webview_windows() {
         if label.starts_with("float-") {
             let _ = win.set_skip_taskbar(true);
@@ -683,7 +736,7 @@ async fn import_backup(
     *lock_or_recover(&state.relax_next_run) = None;
 
     apply_always_on_top(&app, imported.always_on_top);
-    apply_click_through(&app, imported.mini_click_through);
+    apply_all_click_through(&app);
 
     // Broadcast to all windows
     let _ = app.emit("settings:updated", &imported);
@@ -1092,6 +1145,10 @@ fn spawn_float_window_with_slot(
                         } else if kind_for_event == "timer" || kind_for_event == "sw" {
                             let _ = update_settings(&app_for_event, |s| {
                                 s.open_float_widgets.retain(|w| w.label != float_label);
+                                // Slots are reused: the next timer spawned
+                                // into this label must not inherit
+                                // click-through.
+                                s.float_click_through.remove(&float_label);
                                 Ok(())
                             });
                         }
@@ -4424,15 +4481,15 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             true
         }
         "toggle_click_through" => {
-            let cur = load_settings(&app).mini_click_through;
-            let next = !cur;
-            let _ = update_settings(&app, |s| {
-                s.mini_click_through = next;
-                Ok(())
-            });
-            apply_click_through(&app, next);
-            let _ = app.emit("settings:updated", load_settings(&app));
-            true
+            // Per-window: the caller (mini clock or the float widget that
+            // opened the menu) toggles only itself.
+            let caller = CURRENT_MENU_CALLER
+                .lock()
+                .ok()
+                .and_then(|c| c.clone())
+                .unwrap_or_else(|| "mini".to_string());
+            let next = !click_through_for(&app, &caller);
+            set_click_through_state(&app, &caller, next)
         }
         "full" => {
             switch_to_full_mode(app);
@@ -5208,6 +5265,16 @@ fn custom_alarms_scheduler(app: AppHandle) {
 // Custom HTML Tray Menu (CyberPaste style)
 // ─────────────────────────────────────────────────────────────
 
+/// One floating widget's click-through entry for the tray submenu.
+/// `kind`/`seq` come from the window label ("float-timer-2").
+#[derive(Clone, serde::Serialize)]
+pub struct CtpWindowState {
+    pub label: String,
+    pub kind: String,
+    pub seq: u32,
+    pub on: bool,
+}
+
 #[derive(Clone, serde::Serialize)]
 pub struct TrayMenuState {
     pub version: String,
@@ -5221,6 +5288,10 @@ pub struct TrayMenuState {
     pub auto_update: bool,
     pub audio_muted: bool,
     pub mini_click_through: bool,
+    /// Currently open floating widgets with their own click-through
+    /// state; the tray submenu renders one toggle per widget and keeps
+    /// disabled rows for the kinds with no open instance.
+    pub click_through_windows: Vec<CtpWindowState>,
     pub relax_playing: Option<String>,
     /// Friendly form of the configured show/hide hotkey
     /// ("Alt+Shift+C"); empty when the shortcut is disabled.
@@ -5409,6 +5480,51 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
     };
     let update_available = pending_ver.is_some() && !is_skipped;
 
+    // Submenu rows, ordered like the spawn menu (timer, sw, cal,
+    // analog, relax), instances by slot number.
+    const KIND_RANK: [(&str, u8); 5] = [
+        ("timer", 0),
+        ("sw", 1),
+        ("cal", 2),
+        ("analog", 3),
+        ("relax", 4),
+    ];
+    let mut click_through_windows: Vec<CtpWindowState> = app
+        .webview_windows()
+        .into_keys()
+        .filter(|label| label.starts_with("float-"))
+        .map(|label| {
+            let rest = &label["float-".len()..];
+            let (kind, seq) = match rest.rsplit_once('-') {
+                Some((k, s)) => (k.to_string(), s.parse::<u32>().unwrap_or(1)),
+                None => (rest.to_string(), 1),
+            };
+            CtpWindowState {
+                on: settings
+                    .float_click_through
+                    .get(&label)
+                    .copied()
+                    .unwrap_or(false),
+                label,
+                kind,
+                seq,
+            }
+        })
+        .collect();
+    click_through_windows.sort_by(|a, b| {
+        let ra = KIND_RANK
+            .iter()
+            .find(|(k, _)| *k == a.kind)
+            .map(|(_, r)| *r)
+            .unwrap_or(u8::MAX);
+        let rb = KIND_RANK
+            .iter()
+            .find(|(k, _)| *k == b.kind)
+            .map(|(_, r)| *r)
+            .unwrap_or(u8::MAX);
+        ra.cmp(&rb).then(a.seq.cmp(&b.seq)).then(a.label.cmp(&b.label))
+    });
+
     TrayMenuState {
         version: app.package_info().version.to_string(),
         is_visible,
@@ -5421,6 +5537,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         auto_update: settings.auto_update,
         audio_muted: settings.audio_muted,
         mini_click_through: settings.mini_click_through,
+        click_through_windows,
         relax_playing,
         hotkey: friendly_hotkey(&settings.hotkey_toggle),
         show_suite_recommendations: settings.show_suite_recommendations,
@@ -5430,6 +5547,43 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
 #[tauri::command]
 fn get_tray_menu_state(app: AppHandle) -> TrayMenuState {
     collect_tray_menu_state(&app)
+}
+
+/// Set click-through for one window ("mini" or a "float-*" label).
+/// Used by the tray submenu's per-widget toggles.
+#[tauri::command]
+fn set_widget_click_through(app: AppHandle, label: String, on: bool) -> bool {
+    set_click_through_state(&app, &label, on)
+}
+
+/// Set click-through for the mini clock and every open floating widget
+/// at once (the tray submenu's "all" actions). One write, one broadcast.
+#[tauri::command]
+fn set_all_click_through(app: AppHandle, on: bool) -> bool {
+    let labels: Vec<String> = app
+        .webview_windows()
+        .into_keys()
+        .filter(|label| label.starts_with("float-"))
+        .collect();
+    let updated = update_settings(&app, |s| {
+        s.mini_click_through = on;
+        for label in &labels {
+            if on {
+                s.float_click_through.insert(label.clone(), true);
+            } else {
+                s.float_click_through.remove(label);
+            }
+        }
+        Ok(())
+    });
+    if updated.is_err() {
+        return false;
+    }
+    apply_all_click_through(&app);
+    let _ = app.emit("settings:updated", load_settings(&app));
+    let state = collect_tray_menu_state(&app);
+    let _ = app.emit("tray-menu-state", &state);
+    true
 }
 
 #[tauri::command]
@@ -6070,6 +6224,8 @@ pub fn run() {
             get_menu_caller,
             get_open_float_labels,
             get_tray_menu_state,
+            set_widget_click_through,
+            set_all_click_through,
             report_relax_playing,
             hide_tray_menu,
             tray_menu_ready,

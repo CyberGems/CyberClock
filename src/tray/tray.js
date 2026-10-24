@@ -169,20 +169,11 @@
             ? T("tray.soundOff", "Sound off")
             : T("tray.soundOn", "Sound on");
 
-        // Click-through toggle (mini clock and floating widgets ignore the mouse while on)
-        const ctpBtn = document.getElementById("btn-clickthrough");
-        const ctpIco = document.getElementById("ico-clickthrough");
-        const ctpLbl = document.getElementById("lbl-clickthrough");
-        const ctpOn = state.mini_click_through === true;
-        if (ctpBtn) {
-            ctpBtn.classList.toggle("on", ctpOn);
-            ctpBtn.setAttribute("aria-pressed", String(ctpOn));
-        }
-        if (ctpIco) ctpIco.setAttribute("data-ico", "click");
-        if (ctpLbl) ctpLbl.textContent = ctpOn
-            ? T("tray.clickThroughOn", "Click-through on")
-            : T("tray.clickThroughOff", "Click-through off");
+        // Click-through submenu (one toggle per window; rows for kinds
+        // with no open instance render disabled).
+        renderClickThrough(state);
 
+        setLbl("lbl-clickthrough", T("tray.clickThrough", "Click-through"));
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
@@ -197,6 +188,9 @@
         setLbl("lbl-suite", T("tray.suite", "More from CyberGems"));
         setLbl("lbl-back-help", T("tray.back", "Back"));
         setLbl("lbl-back-suite", T("tray.back", "Back"));
+        setLbl("lbl-back-clickthrough", T("tray.back", "Back"));
+        setLbl("lbl-ctp-all-on", T("tray.ctpAllOn", "Enable all"));
+        setLbl("lbl-ctp-all-off", T("tray.ctpAllOff", "Disable all"));
         setLbl("lbl-help-title", T("tray.help", "Help"));
         setLbl("lbl-suite-all", T("tray.suiteAll", "More details online..."));
         setLbl("lbl-pin-tip-title", T("tray.pinTip.title", "Keep CyberClock visible in the tray"));
@@ -288,22 +282,157 @@
         });
     }
 
-    // Click-through toggle: backend applies set_ignore_cursor_events in
-    // the same patch. The tray and Settings are the two places that can
-    // turn it off, because the mini clock and widgets ignore the mouse while on.
-    const ctpBtn = document.getElementById("btn-clickthrough");
-    if (ctpBtn) {
-        ctpBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const next = !ctpBtn.classList.contains("on");
-            if (currentMenuState) currentMenuState.mini_click_through = next;
-            renderState(currentMenuState);
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniClickThrough: next });
+    // Click-through submenu: one independent toggle per window. The mini
+    // clock and every open floating widget can pass clicks through on
+    // their own; kinds with no open instance render as disabled rows.
+    // The backend broadcasts a fresh state after each change, which
+    // re-renders this list authoritatively.
+    const CTP_KIND_META = [
+        { kind: "mini", ico: "clock", nameKey: "tray.ctpMini", nameFallback: "Mini clock" },
+        { kind: "timer", ico: "timer", nameKey: "menu.timer", nameFallback: "Timer" },
+        { kind: "sw", ico: "stopwatch", nameKey: "menu.stopwatch", nameFallback: "Stopwatch" },
+        { kind: "cal", ico: "calendar", nameKey: "menu.calendar", nameFallback: "Calendar" },
+        { kind: "analog", ico: "planet", nameKey: "menu.analog", nameFallback: "Analog clock" },
+        { kind: "relax", ico: "lotus", nameKey: "menu.relax", nameFallback: "Relax" },
+    ];
+
+    function ctpT(key, fallback) {
+        return window.ccI18n ? window.ccI18n.t(key) : fallback;
+    }
+
+    function rowLabel(meta, seq) {
+        const name = ctpT(meta.nameKey, meta.nameFallback);
+        return meta.kind === "mini" || seq === 1 ? name : `${name} ${seq}`;
+    }
+
+    function renderClickThrough(state) {
+        const list = document.getElementById("tray-ctp-list");
+        if (!list) return;
+        const byKind = {};
+        (state.click_through_windows || []).forEach((w) => {
+            (byKind[w.kind] = byKind[w.kind] || []).push(w);
+        });
+        // Multi-instance kinds keep every instance; single-instance
+        // kinds (cal/analog/relax) only ever have one window open.
+        Object.keys(byKind).forEach((k) => byKind[k].sort((a, b) => a.seq - b.seq));
+
+        list.innerHTML = "";
+        CTP_KIND_META.forEach((meta) => {
+            const wins = meta.kind === "mini"
+                ? [{ label: "mini", seq: 1, on: state.mini_click_through === true }]
+                : byKind[meta.kind];
+            if (wins && wins.length) {
+                wins.forEach((w) => {
+                    list.appendChild(buildCtpRow(meta, w.label, rowLabel(meta, w.seq), w.on, false));
+                });
+            } else {
+                const name = ctpT(meta.nameKey, meta.nameFallback);
+                list.appendChild(buildCtpRow(meta, "", name, false, true));
             }
         });
+        if (window.ccIcons) window.ccIcons.replaceIcons();
     }
+
+    function buildCtpRow(meta, label, text, on, disabled) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = disabled ? "tray-item" : "tray-item ctp-row" + (on ? " on" : "");
+        btn.disabled = disabled;
+        if (label) btn.dataset.ctpLabel = label;
+        const ico = document.createElement("span");
+        ico.className = "ico";
+        ico.setAttribute("data-ico", disabled ? "x" : meta.ico);
+        const lbl = document.createElement("span");
+        lbl.className = "label";
+        lbl.textContent = disabled
+            ? `${text} (${ctpT("tray.ctpInactive", "not open")})`
+            : text;
+        btn.setAttribute("aria-pressed", String(on));
+        btn.setAttribute("aria-disabled", String(disabled));
+        btn.appendChild(ico);
+        btn.appendChild(lbl);
+        if (!disabled) {
+            const dot = document.createElement("span");
+            dot.className = "audio-dot";
+            btn.appendChild(dot);
+        }
+        return btn;
+    }
+
+    function wireClickThrough() {
+        const navBtn = document.getElementById("btn-nav-clickthrough");
+        if (navBtn) {
+            navBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                switchView("clickthrough");
+            });
+        }
+        const backBtn = document.getElementById("btn-back-clickthrough");
+        if (backBtn) {
+            backBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                switchView("main");
+            });
+        }
+        const list = document.getElementById("tray-ctp-list");
+        if (list) {
+            list.addEventListener("click", (e) => {
+                const row = e.target.closest("button[data-ctp-label]");
+                if (!row || row.disabled) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const label = row.dataset.ctpLabel;
+                const isMini = label === "mini";
+                const win = isMini
+                    ? { on: currentMenuState && currentMenuState.mini_click_through === true }
+                    : (currentMenuState.click_through_windows || []).find((w) => w.label === label);
+                const next = !(win && win.on === true);
+                // Optimistic flip; the backend broadcast re-renders.
+                if (isMini) {
+                    if (currentMenuState) currentMenuState.mini_click_through = next;
+                } else if (win) {
+                    win.on = next;
+                }
+                renderState(currentMenuState);
+                if (window.cc && window.cc.setWidgetClickThrough) {
+                    window.cc.setWidgetClickThrough(label, next).catch(console.error);
+                }
+            });
+        }
+        const allOn = document.getElementById("btn-ctp-all-on");
+        if (allOn) {
+            allOn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentMenuState) {
+                    currentMenuState.mini_click_through = true;
+                    (currentMenuState.click_through_windows || []).forEach((w) => { w.on = true; });
+                    renderState(currentMenuState);
+                }
+                if (window.cc && window.cc.setAllClickThrough) {
+                    window.cc.setAllClickThrough(true).catch(console.error);
+                }
+            });
+        }
+        const allOff = document.getElementById("btn-ctp-all-off");
+        if (allOff) {
+            allOff.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (currentMenuState) {
+                    currentMenuState.mini_click_through = false;
+                    (currentMenuState.click_through_windows || []).forEach((w) => { w.on = false; });
+                    renderState(currentMenuState);
+                }
+                if (window.cc && window.cc.setAllClickThrough) {
+                    window.cc.setAllClickThrough(false).catch(console.error);
+                }
+            });
+        }
+    }
+    wireClickThrough();
 
     // Relax quick toggle: fires the backend action that asks the main
     // window to play/pause; the menu closes just like other actions.

@@ -364,23 +364,23 @@
         filter: none;
     }
 
-    /* Click-through toggle (same dot and active language as audio) */
-    #btn-clickthrough .audio-dot {
-        flex: 0 0 auto;
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
+    /* Click-through submenu rows: dot lit while that window passes
+       clicks; disabled rows are kinds with no open instance */
+    .tray-item.ctp-row .audio-dot {
         background: #64748b;
         box-shadow: none;
-        transition: background 0.15s ease, box-shadow 0.15s ease;
     }
-    #btn-clickthrough:not(.on) .ico {
+    .tray-item.ctp-row:not(.on) .ico {
         color: var(--text-lo);
         filter: none;
     }
-    #btn-clickthrough.on .audio-dot {
+    .tray-item.ctp-row.on .audio-dot {
         background: #20bfdf;
         box-shadow: 0 0 6px rgba(32, 191, 223, 0.7);
+    }
+    .tray-item:disabled {
+        opacity: 0.45;
+        cursor: default;
     }
 
     /* ── Drill-down Sliding Views ───────────────────────────── */
@@ -400,13 +400,15 @@
     }
     .tray-deck[data-view="main"] #view-help,
     .tray-deck[data-view="main"] #view-pin-tip,
-    .tray-deck[data-view="main"] #view-suite {
+    .tray-deck[data-view="main"] #view-suite,
+    .tray-deck[data-view="main"] #view-clickthrough {
         display: none;
     }
 
     .tray-deck[data-view="help"] #view-main,
     .tray-deck[data-view="pin-tip"] #view-main,
-    .tray-deck[data-view="suite"] #view-main {
+    .tray-deck[data-view="suite"] #view-main,
+    .tray-deck[data-view="clickthrough"] #view-main {
         display: none;
     }
 
@@ -419,7 +421,9 @@
     }
 
     .tray-deck[data-view="help"] #view-pin-tip,
-    .tray-deck[data-view="suite"] #view-pin-tip {
+    .tray-deck[data-view="suite"] #view-pin-tip,
+    .tray-deck[data-view="help"] #view-clickthrough,
+    .tray-deck[data-view="suite"] #view-clickthrough {
         display: none;
     }
 
@@ -438,6 +442,15 @@
         animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tray-deck[data-view="suite"] #view-help {
+        display: none;
+    }
+
+    .tray-deck[data-view="clickthrough"] #view-clickthrough {
+        display: block;
+        animation: trayViewSlideRight 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tray-deck[data-view="clickthrough"] #view-help,
+    .tray-deck[data-view="clickthrough"] #view-suite {
         display: none;
     }
 

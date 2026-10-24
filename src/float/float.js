@@ -448,7 +448,7 @@
         sh.style.setProperty("--mini-zoom", String(zoomFactor()));
         document.body.classList.toggle("no-scanlines", cfg.miniScanlines === false);
         document.body.classList.toggle("no-animations", cfg.miniNoAnimations === true);
-        document.body.classList.toggle("click-through", cfg.miniClickThrough === true);
+        document.body.classList.toggle("click-through", window.cc.ownClickThrough(cfg));
         if (window.audioEngine) window.audioEngine.setMuted(cfg.audioMuted === true);
         if (KIND === "timer") {
             const showPresets = cfg.timerShowPresets !== false;

@@ -42,6 +42,27 @@
         // ── Environment ───────────────────────────────────────────
         isTauri: () => HAS_TAURI,
 
+        // Label of the window running this page ("mini", "float-timer-2");
+        // empty outside Tauri.
+        windowLabel: () => {
+            try {
+                if (HAS_TAURI && window.__TAURI__.window && window.__TAURI__.window.getCurrentWindow) {
+                    const w = window.__TAURI__.window.getCurrentWindow();
+                    return typeof w.label === "string" ? w.label : "";
+                }
+            } catch (err) { /* not inside Tauri */ }
+            return "";
+        },
+
+        // Click-through state of THIS window (mini setting or per-widget
+        // entry; missing = interactive).
+        ownClickThrough: (cfg) => {
+            const label = window.cc.windowLabel();
+            if (!label) return false;
+            if (label === "mini") return (cfg && cfg.miniClickThrough) === true;
+            return !!(cfg && cfg.floatClickThrough && cfg.floatClickThrough[label] === true);
+        },
+
         // ── Floating stopwatch / timer windows ────────────────────
         spawnFloat: async (kind) => {
             return await invoke("spawn_float", { kind });
@@ -352,6 +373,12 @@
         // ── Tray Menu popup (CyberPaste style) ────────────────────
         getTrayMenuState: async () => {
             return await invoke("get_tray_menu_state");
+        },
+        setWidgetClickThrough: async (label, on) => {
+            return await invoke("set_widget_click_through", { label, on });
+        },
+        setAllClickThrough: async (on) => {
+            return await invoke("set_all_click_through", { on });
         },
         hideTrayMenu: async () => {
             await invoke("hide_tray_menu");

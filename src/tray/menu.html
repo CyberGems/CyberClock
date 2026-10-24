@@ -97,10 +97,10 @@
 
                         <!-- Master Toggles (Click-through & Sound) -->
                         <div class="tray-group">
-                            <button type="button" class="tray-item" id="btn-clickthrough" aria-pressed="false">
-                                <span class="ico" data-ico="click" id="ico-clickthrough"></span>
-                                <span class="label" id="lbl-clickthrough">Click-through (clock and widgets)</span>
-                                <span class="audio-dot" id="clickthrough-dot" aria-hidden="true"></span>
+                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-clickthrough">
+                                <span class="ico" data-ico="click"></span>
+                                <span class="label" id="lbl-clickthrough">Click-through</span>
+                                <span class="tray-nav-arrow" data-ico="back"></span>
                             </button>
 
                             <button type="button" class="tray-item" id="btn-audio" aria-pressed="false">
@@ -260,6 +260,36 @@
                             <button type="button" class="tray-item tray-suite-all-btn" id="btn-suite-more">
                                 <span class="ico" data-ico="next"></span>
                                 <span class="label" id="lbl-suite-all">More details online...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tray-view tray-view-sub" id="view-clickthrough">
+                        <div class="tray-sub-header">
+                            <button type="button" class="tray-back-btn" id="btn-back-clickthrough">
+                                <span class="ico" data-ico="back"></span>
+                                <span class="label" id="lbl-back-clickthrough">Back</span>
+                            </button>
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <div class="tray-group" id="tray-ctp-list">
+                            <!-- Populated dynamically by tray.js: one toggle
+                                 per open widget, disabled rows for the kinds
+                                 with no open instance. -->
+                        </div>
+
+                        <div class="tray-divider"></div>
+
+                        <div class="tray-group">
+                            <button type="button" class="tray-item" id="btn-ctp-all-on">
+                                <span class="ico" data-ico="check"></span>
+                                <span class="label" id="lbl-ctp-all-on">Enable all</span>
+                            </button>
+                            <button type="button" class="tray-item" id="btn-ctp-all-off">
+                                <span class="ico" data-ico="x"></span>
+                                <span class="label" id="lbl-ctp-all-off">Disable all</span>
                             </button>
                         </div>
                     </div>

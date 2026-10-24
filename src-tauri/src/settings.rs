@@ -401,6 +401,13 @@ pub struct AppSettings {
     // mini window — tray menu and Settings — because the window stops
     // responding to clicks while this is on).
     pub mini_click_through: bool,
+    // Per-floating-widget click-through, keyed by window label
+    // ("float-timer-1"). A missing label means interactive. timer/sw
+    // entries are dropped when the widget is destroyed (slots are
+    // reused); the single-instance cal/analog/relax widgets remember
+    // their state across close/reopen, like their position does.
+    #[serde(default)]
+    pub float_click_through: HashMap<String, bool>,
     // Zero all mini-mode motion: animations AND transitions.
     pub mini_no_animations: bool,
     #[serde(default = "default_true")]
@@ -565,6 +572,7 @@ impl Default for AppSettings {
             mini_date_font_bold: None,
             mini_date_font_italic: None,
             mini_click_through: false,
+            float_click_through: HashMap::new(),
             mini_no_animations: false,
             mini_edge_limits: true,
             hide_widgets_on_fullscreen: true,
