@@ -403,9 +403,9 @@
         trayMenuAction: async (action) => {
             await invoke("tray_menu_action", { action });
         },
-        reportRelaxPlaying: async (track) => {
+        reportRelaxPlaying: async (track, paused) => {
             if (!HAS_TAURI) return;
-            await invoke("report_relax_playing", { track });
+            await invoke("report_relax_playing", { track, paused: !!paused });
         },
 
         // ── Events (renderer ← main) ──────────────────────────────

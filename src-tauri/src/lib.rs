@@ -53,6 +53,9 @@ pub struct AlarmState {
     // Window that reported the playing track ("main" or "float-relax-1");
     // the tray toggle routes to it. None when nothing is playing.
     pub relax_playing_source: Mutex<Option<String>>,
+    // Whether the reported playback is paused; the tray shows "resume"
+    // instead of "pause" while it is.
+    pub relax_paused: Mutex<bool>,
 }
 
 /// Lock a mutex without panicking on poison: if another thread
@@ -5307,6 +5310,9 @@ pub struct TrayMenuState {
     /// disabled rows for the kinds with no open instance.
     pub click_through_windows: Vec<CtpWindowState>,
     pub relax_playing: Option<String>,
+    /// True when the reported relax playback is paused; the tray then
+    /// offers "resume" instead of "pause".
+    pub relax_paused: bool,
     /// Friendly form of the configured show/hide hotkey
     /// ("Alt+Shift+C"); empty when the shortcut is disabled.
     pub hotkey: String,
@@ -5486,6 +5492,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         .lock()
         .ok()
         .and_then(|g| g.clone());
+    let relax_paused = *lock_or_recover(&app.state::<AlarmState>().relax_paused);
 
     let pending_ver = pending_update_version();
     let is_skipped = match (&settings.skipped_update_version, &pending_ver) {
@@ -5553,6 +5560,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         mini_click_through: settings.mini_click_through,
         click_through_windows,
         relax_playing,
+        relax_paused,
         hotkey: friendly_hotkey(&settings.hotkey_toggle),
         show_suite_recommendations: settings.show_suite_recommendations,
     }
@@ -5601,17 +5609,19 @@ fn set_all_click_through(app: AppHandle, on: bool) -> bool {
 }
 
 #[tauri::command]
-fn report_relax_playing(app: AppHandle, window: WebviewWindow, track: Option<String>) {
+fn report_relax_playing(app: AppHandle, window: WebviewWindow, track: Option<String>, paused: bool) {
     let state = app.state::<AlarmState>();
     let caller = window.label().to_string();
     let mut playing = lock_or_recover(&state.relax_playing);
     let mut source = lock_or_recover(&state.relax_playing_source);
+    let mut is_paused = lock_or_recover(&state.relax_paused);
     match track {
         // A window engaging playback becomes the reported source; the
         // newest reporter wins.
         Some(t) => {
             *playing = Some(t);
             *source = Some(caller);
+            *is_paused = paused;
         }
         // A window clearing its playback only resets the shared state if
         // it is the reported source, so one window stopping cannot clobber
@@ -5620,6 +5630,7 @@ fn report_relax_playing(app: AppHandle, window: WebviewWindow, track: Option<Str
             if source.as_deref() == Some(caller.as_str()) {
                 *playing = None;
                 *source = None;
+                *is_paused = false;
             }
         }
     }

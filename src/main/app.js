@@ -6598,7 +6598,7 @@
             const reported = isPlaying
                 ? (window.audioEngine.currentTrack || rSelected)
                 : null;
-            window.cc.reportRelaxPlaying(reported);
+            window.cc.reportRelaxPlaying(reported, rPaused);
         }
 
         const isMuted = cfg && cfg.audioMuted === true;

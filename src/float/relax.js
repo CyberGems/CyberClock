@@ -150,6 +150,7 @@
             if (engine) engine.suspend();
             clearTimeout(shuffleTimer);
             shuffleTimer = null;
+            reportPlayback();
         }
         applyAudioPrefs();
         refreshLabels();
@@ -169,12 +170,12 @@
         }
     }
 
-    // Tray sync: report the engage state (track while playing or paused)
-    // so the tray menu can show and toggle it from anywhere, mirroring
-    // the main window's relax view.
+    // Tray sync: report the engage state (track while playing or paused,
+    // plus the paused flag) so the tray menu can show and toggle it from
+    // anywhere, mirroring the main window's relax view.
     function reportPlayback() {
         if (window.cc && window.cc.reportRelaxPlaying) {
-            window.cc.reportRelaxPlaying(playing ? TRACKS[trackIndex] : null);
+            window.cc.reportRelaxPlaying(playing ? TRACKS[trackIndex] : null, paused);
         }
     }
 

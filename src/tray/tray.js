@@ -133,14 +133,19 @@
         const relaxTgIco = document.getElementById("ico-relax-toggle");
         const relaxTgLbl = document.getElementById("lbl-relax-toggle");
         const playingTrack = state.relax_playing || null;
+        const relaxPaused = playingTrack && state.relax_paused === true;
         if (relaxTgBtn) relaxTgBtn.hidden = !playingTrack;
         if (relaxTgIco) {
-            relaxTgIco.setAttribute("data-ico", playingTrack ? "pause" : "play");
+            relaxTgIco.setAttribute("data-ico", playingTrack && !relaxPaused ? "pause" : "play");
         }
         if (relaxTgLbl) {
-            relaxTgLbl.textContent = playingTrack
-                ? (window.ccI18n ? window.ccI18n.t("tray.pauseRelax", { track: window.ccI18n.t("relax.track." + playingTrack) }) : "Pause relax")
-                : (window.ccI18n ? window.ccI18n.t("tray.playRelax") : "Play relax");
+            const trackName = playingTrack
+                && window.ccI18n ? window.ccI18n.t("relax.track." + playingTrack) : "";
+            relaxTgLbl.textContent = !playingTrack
+                ? (window.ccI18n ? window.ccI18n.t("tray.playRelax") : "Play relax")
+                : relaxPaused
+                    ? (window.ccI18n ? window.ccI18n.t("tray.resumeRelax", { track: trackName }) : "Resume relax")
+                    : (window.ccI18n ? window.ccI18n.t("tray.pauseRelax", { track: trackName }) : "Pause relax");
         }
 
         const lblSettings = document.getElementById("lbl-settings");
