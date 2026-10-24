@@ -518,15 +518,6 @@
                                             <span data-i18n="alarms.editor.message">Message</span>
                                             <textarea id="alarm-edit-message" name="cc-alarm-message" rows="2" maxlength="180" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="What should CyberClock remind you?" data-i18n-attr="placeholder:alarms.editor.messagePlaceholder, aria-label:alarms.editor.message"></textarea>
                                         </label>
-                                        <label class="alarm-field">
-                                            <span data-i18n="alarms.editor.snooze">Snooze duration</span>
-                                            <select id="alarm-edit-snooze" data-i18n-attr="aria-label:alarms.editor.snooze">
-                                                <option value="5" data-i18n="alarms.snooze.5">5 min</option>
-                                                <option value="10" selected data-i18n="alarms.snooze.10">10 min</option>
-                                                <option value="15" data-i18n="alarms.snooze.15">15 min</option>
-                                                <option value="30" data-i18n="alarms.snooze.30">30 min</option>
-                                            </select>
-                                        </label>
                                         <div class="alarm-check">
                                             <label class="s-tog" for="alarm-edit-delete-after">
                                                 <input type="checkbox" id="alarm-edit-delete-after" />
@@ -2706,7 +2697,15 @@
                     <span id="alarm-notice-message"></span>
                 </div>
                 <div class="alarm-stage-actions">
-                    <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span id="alarm-notice-snooze-label">Snooze 10 min</span></button>
+                    <div class="alarm-notice-snooze-wrap" id="alarm-notice-snooze-wrap">
+                        <select id="alarm-notice-snooze-mins" data-i18n-attr="aria-label:alarms.editor.snooze">
+                            <option value="5" data-i18n="alarms.snooze.5">5 min</option>
+                            <option value="10" selected data-i18n="alarms.snooze.10">10 min</option>
+                            <option value="15" data-i18n="alarms.snooze.15">15 min</option>
+                            <option value="30" data-i18n="alarms.snooze.30">30 min</option>
+                        </select>
+                        <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span id="alarm-notice-snooze-label">Snooze</span></button>
+                    </div>
                     <button class="alarm-notice-dismiss" id="alarm-notice-dismiss" type="button" data-tooltip="Dismiss alarm" data-i18n-attr="data-tooltip:alarms.notice.dismiss, aria-label:alarms.notice.dismiss">
                         <span class="alarm-notice-dismiss-x" data-ico="x"></span>
                         <span class="alarm-notice-dismiss-label" data-i18n="alarms.notice.dismissAction">Dismiss</span>

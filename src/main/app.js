@@ -545,11 +545,6 @@
 
     const snoozedAlarmUntil = new Map();
 
-    function alarmSnoozeLabel(minutes) {
-        const n = Math.max(1, Number(minutes) || 10);
-        return alarmText("alarms.notice.snoozeFor", "Snooze {n} min", { n });
-    }
-
     function alarmNextOccurrence(alarm, now = new Date()) {
         if (!alarm || !alarm.enabled) return null;
         const until = alarm.id && snoozedAlarmUntil.get(alarm.id);
@@ -940,7 +935,7 @@
         ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-sound-count", "alarm-edit-sound-pause"].forEach((id) => {
             mountAlarmChoice(document.getElementById(id), true);
         });
-        ["alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
+        ["alarm-edit-repeat"].forEach((id) => {
             mountAlarmChoice(document.getElementById(id), false);
         });
     }
@@ -1370,7 +1365,6 @@
         const repeat = document.getElementById("alarm-edit-repeat");
         const message = document.getElementById("alarm-edit-message");
         const sound = document.getElementById("alarm-edit-sound");
-        const snooze = document.getElementById("alarm-edit-snooze");
         if (time) time.value = `${String(alarmEditorDraft.hour).padStart(2, "0")}:${String(alarmEditorDraft.minute).padStart(2, "0")}`;
         syncAlarmTimeControls(time?.value);
         if (!alarmEditorDraft.label) alarmEditorDraft.label = nextAlarmLabel(alarmEditorId);
@@ -1387,10 +1381,6 @@
             sound.value = [...sound.options].some((option) => option.value === chosen) ? chosen : "none";
         }
         syncAlarmSoundTrigger();
-        if (snooze) {
-            snooze.value = String(alarmEditorDraft.snoozeMinutes || 10);
-            syncAlarmChoice(snooze);
-        }
         const untilDismiss = !!alarmEditorDraft.soundUntilDismiss;
         const countRadio = document.getElementById("alarm-edit-repeat-count");
         const untilRadio = document.getElementById("alarm-edit-repeat-until");
@@ -1486,7 +1476,7 @@
             date: document.getElementById("alarm-edit-date")?.value || alarmTodayIso(),
             daysMask,
             sound: document.getElementById("alarm-edit-sound")?.value || "none",
-            snoozeMinutes: Number(document.getElementById("alarm-edit-snooze")?.value) || 10,
+            snoozeMinutes: Math.max(1, Number(alarmEditorDraft?.snoozeMinutes) || 10),
             soundUntilDismiss: document.getElementById("alarm-edit-repeat-until")?.checked === true,
             soundRepeatCount: Math.max(1, Math.min(20, Number(document.getElementById("alarm-edit-sound-count")?.value) || 1)),
             soundPauseSecs: Math.max(0, Math.min(60, Number(document.getElementById("alarm-edit-sound-pause")?.value ?? 1))),
@@ -1669,9 +1659,15 @@
             message.hidden = takeover && !text;
         }
         if (snooze) {
-            snooze.hidden = !takeover;
+            const wrap = document.getElementById("alarm-notice-snooze-wrap");
+            if (wrap) wrap.hidden = !takeover;
+            const mins = document.getElementById("alarm-notice-snooze-mins");
+            if (mins) {
+                const def = String(Number(payload.snoozeMinutes) || 10);
+                mins.value = [...mins.options].some((option) => option.value === def) ? def : "10";
+            }
             const label = snooze.querySelector("span");
-            if (label) label.textContent = alarmSnoozeLabel(payload.snoozeMinutes);
+            if (label) label.textContent = alarmText("alarms.notice.snooze", "Snooze");
         }
         const dismiss = document.getElementById("alarm-notice-dismiss");
         if (dismiss) {
@@ -1900,10 +1896,9 @@
         });
         document.getElementById("alarm-notice-snooze")?.addEventListener("click", async () => {
             if (alarmNoticeAlarm?.alarmId && window.cc.snoozeAlarm) {
-                await window.cc.snoozeAlarm(
-                    alarmNoticeAlarm.alarmId,
-                    Number(alarmNoticeAlarm.snoozeMinutes) || 10,
-                );
+                const mins = Number(document.getElementById("alarm-notice-snooze-mins")?.value)
+                    || Number(alarmNoticeAlarm.snoozeMinutes) || 10;
+                await window.cc.snoozeAlarm(alarmNoticeAlarm.alarmId, mins);
             }
             hideAlarmNotice();
         });
@@ -2384,7 +2379,7 @@
             calGripEl.removeAttribute("title");
         }
         syncAlarmSoundTrigger();
-        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-repeat", "alarm-edit-snooze"].forEach((id) => {
+        ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-repeat"].forEach((id) => {
             syncAlarmChoice(document.getElementById(id));
         });
         renderAlarmsView();

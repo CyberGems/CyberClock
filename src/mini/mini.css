@@ -2478,6 +2478,30 @@
     .mini-tip-alarm-btn:hover {
         background: rgba(var(--rgb-accent), 0.22);
     }
+    .mini-tip-snooze {
+        display: flex;
+        align-items: stretch;
+        gap: 4px;
+    }
+    .mini-tip-snooze-select {
+        color: var(--text-hi);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font: inherit;
+        font-size: 11px;
+        padding: 0 4px;
+        outline: none;
+        cursor: pointer;
+    }
+    .mini-tip-snooze-select:focus {
+        border-color: var(--accent-a);
+    }
+    .mini-tip[data-design="4"] .mini-tip-snooze-select {
+        color: #1c2e44;
+        background: rgba(28, 46, 68, 0.08);
+        border-color: rgba(28, 46, 68, 0.4);
+    }
     .mini-tip[data-design="4"] .mini-tip-alarm-title,
     .mini-tip[data-design="4"] .mini-tip-alarm-msg,
     .mini-tip[data-design="4"] .mini-tip-alarm-btn {

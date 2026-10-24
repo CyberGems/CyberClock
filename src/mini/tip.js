@@ -50,23 +50,39 @@
             alarmActions.className = "mini-tip-alarm-actions";
 
             if (data.alarm.alarmId) {
+                const snoozeMinutes = Number(data.alarm.snoozeMinutes) || 10;
+                // Snooze duration is chosen at ring time; the alarm's
+                // stored value only preselects it.
+                const wrap = document.createElement("div");
+                wrap.className = "mini-tip-snooze";
+                const minsSel = document.createElement("select");
+                minsSel.className = "mini-tip-snooze-select";
+                minsSel.setAttribute("aria-label", t("alarms.editor.snooze"));
+                [5, 10, 15, 30].forEach((n) => {
+                    const option = document.createElement("option");
+                    option.value = String(n);
+                    option.textContent = t("alarms.snooze." + n);
+                    if (n === snoozeMinutes) option.selected = true;
+                    minsSel.appendChild(option);
+                });
                 const snoozeBtn = document.createElement("button");
                 snoozeBtn.type = "button";
                 snoozeBtn.className = "mini-tip-alarm-btn";
-                const snoozeMinutes = Number(data.alarm.snoozeMinutes) || 10;
-                snoozeBtn.textContent = t("alarms.notice.snoozeFor", { n: snoozeMinutes });
+                snoozeBtn.textContent = t("alarms.notice.snooze");
                 snoozeBtn.addEventListener("click", async (e) => {
                     e.stopPropagation();
                     if (window.cc?.snoozeAlarm) {
                         try {
-                            await window.cc.snoozeAlarm(data.alarm.alarmId, snoozeMinutes);
+                            await window.cc.snoozeAlarm(data.alarm.alarmId, Number(minsSel.value) || snoozeMinutes);
                         } catch (err) {
                             console.error(err);
                         }
                     }
                     if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
                 });
-                alarmActions.appendChild(snoozeBtn);
+                wrap.appendChild(minsSel);
+                wrap.appendChild(snoozeBtn);
+                alarmActions.appendChild(wrap);
             }
 
             const dismissBtn = document.createElement("button");

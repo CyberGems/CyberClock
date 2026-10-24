@@ -5324,6 +5324,32 @@
         font-size: calc(9px * var(--ui-scale));
         font-weight: 800;
     }
+    /* Snooze duration picker: joins the notice row as if it were the
+       button itself (display: contents in the compact notice). */
+    .alarm-notice-snooze-wrap {
+        display: contents;
+    }
+    #alarm-notice-snooze-mins {
+        min-height: 28px;
+        padding: 5px 4px;
+        color: var(--bg-00);
+        background: rgba(var(--rgb-accent), 0.55);
+        border: 0;
+        border-radius: 5px;
+        outline: none;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: calc(9px * var(--ui-scale));
+        font-weight: 800;
+    }
+    #alarm-notice-snooze-mins option {
+        color: #eaf4ff;
+        background: #111a25;
+    }
+    #alarm-notice-snooze-mins:hover,
+    #alarm-notice-snooze-mins:focus {
+        background: var(--accent-a);
+    }
     .alarm-stage-veil,
     .alarm-stage-kicker,
     .alarm-stage-clock,
@@ -5444,6 +5470,27 @@
         color: var(--text-hi);
         background: transparent;
         border: 1px solid var(--border-bright);
+    }
+    .alarm-notice.is-takeover .alarm-notice-snooze-wrap {
+        display: flex;
+        gap: 8px;
+    }
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins {
+        min-width: 110px;
+        min-height: 48px;
+        height: auto;
+        padding: 0 16px;
+        color: var(--text-hi);
+        background: transparent;
+        border: 1px solid var(--border-bright);
+        border-radius: 999px;
+        font-size: calc(15px * var(--ui-scale));
+    }
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins:hover,
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins:focus {
+        color: var(--accent-a);
+        background: transparent;
+        border-color: var(--accent-a);
     }
     .alarm-notice.is-takeover .alarm-notice-btn:hover {
         border-color: var(--accent-a);
