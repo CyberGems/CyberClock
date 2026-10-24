@@ -331,6 +331,16 @@
             }
         });
         if (window.ccIcons) window.ccIcons.replaceIcons();
+
+        // "Enable/Disable all" only apply while something can actually
+        // change; open widgets and the mini clock are the targets, not
+        // the disabled not-open rows.
+        const targets = [{ on: state.mini_click_through === true }]
+            .concat(state.click_through_windows || []);
+        const allOnBtn = document.getElementById("btn-ctp-all-on");
+        const allOffBtn = document.getElementById("btn-ctp-all-off");
+        if (allOnBtn) allOnBtn.disabled = !targets.some((w) => w.on !== true);
+        if (allOffBtn) allOffBtn.disabled = !targets.some((w) => w.on === true);
     }
 
     function buildCtpRow(meta, label, text, on, disabled) {
