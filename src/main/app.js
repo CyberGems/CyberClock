@@ -1016,7 +1016,9 @@
         const [y, m, d] = iso.split("-").map(Number);
         const dt = new Date(y, m - 1, d);
         const lang = window.ccI18n?.getEffectiveLang() === "es" ? "es-ES" : "en-US";
-        const str = dt.toLocaleDateString(lang, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+        // Long form: there is room for it in the date trigger and it reads
+        // friendlier than the compact short-weekday version.
+        const str = dt.toLocaleDateString(lang, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
@@ -1800,6 +1802,15 @@
                 window.setTimeout(() => field.removeAttribute("readonly"), 0);
             });
             field.addEventListener("blur", () => field.setAttribute("readonly", "readonly"));
+        });
+        // Pencil affordance next to the alarm name: the input is readonly
+        // until focus (WebView2 quirk), so the click must unlock it first.
+        document.getElementById("alarm-editor-rename")?.addEventListener("click", () => {
+            const field = document.getElementById("alarm-editor-title");
+            if (!field) return;
+            field.removeAttribute("readonly");
+            field.focus();
+            field.select();
         });
         document.querySelectorAll("#alarm-edit-days .alarm-day").forEach((day) => {
             day.addEventListener("click", () => day.classList.toggle("on"));

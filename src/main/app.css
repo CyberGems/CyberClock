@@ -4305,6 +4305,30 @@
         background: rgba(var(--rgb-accent), 0.06);
         box-shadow: 0 0 0 2px rgba(var(--rgb-accent), 0.1);
     }
+    .alarm-name-edit {
+        display: inline-grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        flex-shrink: 0;
+        padding: 0;
+        color: var(--text-lo);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+    }
+    .alarm-name-edit:hover,
+    .alarm-name-edit:focus-visible {
+        color: var(--accent-a);
+        background: rgba(var(--rgb-accent), 0.1);
+        border-color: rgba(var(--rgb-accent), 0.4);
+    }
+    .alarm-name-edit .cc-ico {
+        width: 14px;
+        height: 14px;
+    }
     .alarm-editor-body {
         display: grid;
         min-height: 0;
@@ -5031,7 +5055,7 @@
     .alarm-editor-foot {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
         gap: 8px;
         row-gap: 8px;
         flex-wrap: wrap;
@@ -5045,6 +5069,18 @@
         letter-spacing: 0.6px;
         white-space: nowrap;
         flex-shrink: 0;
+    }
+    .alarm-editor-foot .alarm-icon-btn {
+        width: 32px;
+        height: 32px;
+        color: var(--text-md);
+        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--border);
+    }
+    .alarm-editor-foot .alarm-icon-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.25);
     }
     .alarm-template-status {
         display: flex;

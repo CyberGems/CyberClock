@@ -353,6 +353,7 @@
                                                 <input type="hidden" id="alarm-edit-icon" value="bell" />
                                             </div>
                                             <input id="alarm-editor-title" class="alarm-editor-name" type="text" name="cc-alarm-title" maxlength="48" autocomplete="off" autocorrect="off" spellcheck="false" readonly placeholder="Alarm 1" data-i18n-attr="placeholder:alarms.editor.labelPlaceholder, aria-label:alarms.editor.label" />
+                                            <button type="button" class="alarm-name-edit" id="alarm-editor-rename" data-ico="pencil" data-tooltip="Edit name" data-tooltip-dir="bottom" data-i18n-attr="data-tooltip:alarms.editor.editName, aria-label:alarms.editor.editName"></button>
                                         </div>
                                     </div>
                                     <button class="alarm-icon-btn" id="alarm-editor-close" type="button" data-tooltip="Cancel" data-tooltip-dir="left" data-i18n-attr="data-tooltip:common.cancel, aria-label:common.cancel">
@@ -541,12 +542,8 @@
                                         <span id="alarm-template-status-text">Template saved</span>
                                     </p>
                                     <div class="alarm-editor-foot-start">
-                                        <button class="note-btn secondary" id="alarm-editor-template" type="button">
-                                            <span data-i18n="alarms.editor.saveTemplate">Save as template</span>
-                                        </button>
-                                        <button class="note-btn secondary" id="alarm-editor-clone" type="button" hidden>
-                                            <span data-i18n="alarms.editor.clone">Duplicate</span>
-                                        </button>
+                                        <button class="alarm-icon-btn" id="alarm-editor-template" type="button" data-ico="bookmark" data-tooltip="Save as template" data-i18n-attr="data-tooltip:alarms.editor.saveTemplate, aria-label:alarms.editor.saveTemplate"></button>
+                                        <button class="alarm-icon-btn" id="alarm-editor-clone" type="button" data-ico="copy" data-tooltip="Duplicate" data-i18n-attr="data-tooltip:alarms.editor.clone, aria-label:alarms.editor.clone" hidden></button>
                                     </div>
                                     <div class="alarm-editor-foot-end">
                                         <button class="note-btn secondary" id="alarm-editor-cancel" type="button">

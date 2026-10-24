@@ -232,6 +232,16 @@
     <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
       d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1"/>
   </symbol>
+  <symbol id="cc-i-pencil" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+      d="M16.7 3.8a2.2 2.2 0 0 1 3.1 3.1L7.5 19.2 3 20.5 4.3 16Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+      d="M14.5 6 18 9.5"/>
+  </symbol>
+  <symbol id="cc-i-bookmark" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+      d="M18.5 21 12 16.2 5.5 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2Z"/>
+  </symbol>
   <symbol id="cc-i-trash" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
       d="M4 7h16"/>
