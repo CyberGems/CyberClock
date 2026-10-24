@@ -226,7 +226,7 @@
                 btnAbout.setAttribute("data-tooltip", T("tray.updateBadgeTooltip", "New update available — click to view"));
                 btnAbout.setAttribute("data-tooltip-dir", "bottom");
             } else {
-                btnAbout.setAttribute("data-tooltip", "CyberClock: About");
+                btnAbout.setAttribute("data-tooltip", T("tray.brandAboutTooltip", "About CyberClock..."));
                 btnAbout.setAttribute("data-tooltip-dir", "bottom");
             }
         }
