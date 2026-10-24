@@ -2473,6 +2473,7 @@
         font: inherit;
         font-size: 11px;
         font-weight: 700;
+        white-space: nowrap;
         cursor: pointer;
     }
     .mini-tip-alarm-btn:hover {
@@ -2494,8 +2495,24 @@
         outline: none;
         cursor: pointer;
     }
+    /* WebView2 renders native dropdown popups with broken colors once the
+       popup has been reused; explicit option colors keep them readable. */
+    .mini-tip-snooze-select option {
+        color: #eaf4ff;
+        background: #111a25;
+    }
     .mini-tip-snooze-select:focus {
         border-color: var(--accent-a);
+    }
+    .mini-tip-snooze-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        padding: 5px 0;
+    }
+    .mini-tip-snooze-btn .cc-ico {
+        width: 16px;
+        height: 16px;
     }
     .mini-tip[data-design="4"] .mini-tip-snooze-select {
         color: #1c2e44;

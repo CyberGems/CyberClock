@@ -262,6 +262,14 @@
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M18 16V11a6 6 0 1 0-12 0v5l-2 2h16l-2-2Z"/>
   </symbol>
+  <symbol id="cc-i-snooze" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M10 21a2 2 0 0 0 4 0"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M18 16V11a6 6 0 1 0-12 0v5l-2 2h16l-2-2Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+      d="M10 8.5h4.5L10 12h4.5"/>
+  </symbol>
   <symbol id="cc-i-volume-low" viewBox="0 0 24 24">
     <path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
       d="M11 5 6 9H3v6h3l5 4V5Z"/>

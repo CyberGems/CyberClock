@@ -58,17 +58,29 @@
                 const minsSel = document.createElement("select");
                 minsSel.className = "mini-tip-snooze-select";
                 minsSel.setAttribute("aria-label", t("alarms.editor.snooze"));
-                [5, 10, 15, 30].forEach((n) => {
-                    const option = document.createElement("option");
-                    option.value = String(n);
-                    option.textContent = t("alarms.snooze." + n);
-                    if (n === snoozeMinutes) option.selected = true;
-                    minsSel.appendChild(option);
+                const groups = [
+                    { max: 59, label: t("alarms.snooze.groupMinutes") },
+                    { max: Infinity, label: t("alarms.snooze.groupHours") },
+                ];
+                groups.forEach((group) => {
+                    const optgroup = document.createElement("optgroup");
+                    optgroup.label = group.label;
+                    [3, 5, 10, 15, 20, 30, 45, 60, 120, 180, 240, 360, 480, 720]
+                        .filter((n) => n <= group.max && n > (group.max === 59 ? 0 : 59))
+                        .forEach((n) => {
+                            const option = document.createElement("option");
+                            option.value = String(n);
+                            option.textContent = n < 60 ? `${n} min` : `${n / 60} h`;
+                            if (n === snoozeMinutes) option.selected = true;
+                            optgroup.appendChild(option);
+                        });
+                    minsSel.appendChild(optgroup);
                 });
                 const snoozeBtn = document.createElement("button");
                 snoozeBtn.type = "button";
-                snoozeBtn.className = "mini-tip-alarm-btn";
-                snoozeBtn.textContent = t("alarms.notice.snooze");
+                snoozeBtn.className = "mini-tip-alarm-btn mini-tip-snooze-btn";
+                snoozeBtn.setAttribute("data-ico", "snooze");
+                snoozeBtn.setAttribute("aria-label", t("alarms.notice.snooze"));
                 snoozeBtn.addEventListener("click", async (e) => {
                     e.stopPropagation();
                     if (window.cc?.snoozeAlarm) {
@@ -83,6 +95,7 @@
                 wrap.appendChild(minsSel);
                 wrap.appendChild(snoozeBtn);
                 alarmActions.appendChild(wrap);
+                if (window.ccIcons) window.ccIcons.replaceIcons(wrap);
             }
 
             const dismissBtn = document.createElement("button");

@@ -5331,7 +5331,7 @@
     }
     #alarm-notice-snooze-mins {
         min-height: 28px;
-        padding: 5px 4px;
+        padding: 5px 18px 5px 6px;
         color: var(--bg-00);
         background: rgba(var(--rgb-accent), 0.55);
         border: 0;
@@ -5479,7 +5479,7 @@
         min-width: 110px;
         min-height: 48px;
         height: auto;
-        padding: 0 16px;
+        padding: 0 32px 0 18px;
         color: var(--text-hi);
         background: transparent;
         border: 1px solid var(--border-bright);

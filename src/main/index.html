@@ -2699,10 +2699,24 @@
                 <div class="alarm-stage-actions">
                     <div class="alarm-notice-snooze-wrap" id="alarm-notice-snooze-wrap">
                         <select id="alarm-notice-snooze-mins" data-i18n-attr="aria-label:alarms.editor.snooze">
-                            <option value="5" data-i18n="alarms.snooze.5">5 min</option>
-                            <option value="10" selected data-i18n="alarms.snooze.10">10 min</option>
-                            <option value="15" data-i18n="alarms.snooze.15">15 min</option>
-                            <option value="30" data-i18n="alarms.snooze.30">30 min</option>
+                            <optgroup label="Minutes" data-i18n-attr="label:alarms.snooze.groupMinutes">
+                                <option value="3">3 min</option>
+                                <option value="5">5 min</option>
+                                <option value="10" selected>10 min</option>
+                                <option value="15">15 min</option>
+                                <option value="20">20 min</option>
+                                <option value="30">30 min</option>
+                                <option value="45">45 min</option>
+                            </optgroup>
+                            <optgroup label="Hours" data-i18n-attr="label:alarms.snooze.groupHours">
+                                <option value="60">1 h</option>
+                                <option value="120">2 h</option>
+                                <option value="180">3 h</option>
+                                <option value="240">4 h</option>
+                                <option value="360">6 h</option>
+                                <option value="480">8 h</option>
+                                <option value="720">12 h</option>
+                            </optgroup>
                         </select>
                         <button class="alarm-notice-btn" id="alarm-notice-snooze" type="button"><span id="alarm-notice-snooze-label">Snooze</span></button>
                     </div>
