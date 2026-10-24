@@ -4117,6 +4117,9 @@
         color: var(--text-md);
         font-size: calc(11.5px * var(--ui-scale));
     }
+    .alarm-repeat-pause > span {
+        white-space: nowrap;
+    }
     .alarm-repeat-pause .alarm-choice-trigger.is-compact {
         min-height: 24px;
         height: 24px;
@@ -4127,7 +4130,7 @@
         border-radius: 6px;
     }
     .alarm-editor {
-        width: min(524px, 100%);
+        width: min(552px, 100%);
         max-height: calc(100% - 24px);
         display: flex;
         flex-direction: column;
@@ -4378,7 +4381,7 @@
         gap: 8px;
     }
     .alarm-alert-section .alarm-form-section-title {
-        padding-top: 0;
+        padding-top: 6px;
     }
     .alarm-alert-section .alarm-field {
         grid-template-columns: 88px minmax(0, 1fr);
@@ -5028,16 +5031,18 @@
     .alarm-editor-foot {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 8px;
+        row-gap: 8px;
         flex-wrap: wrap;
         border-top: 1px solid var(--border);
         border-bottom: 0;
     }
     .alarm-editor-foot .note-btn {
-        padding: 6px 12px;
+        padding: 6px 11px;
         min-height: 32px;
         font-size: calc(11px * var(--ui-scale));
+        letter-spacing: 0.6px;
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -5067,9 +5072,6 @@
         align-items: center;
         flex-wrap: nowrap;
         gap: 8px;
-    }
-    .alarm-editor-foot-end {
-        margin-left: auto;
     }
     .alarm-check {
         display: flex;
