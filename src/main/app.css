@@ -5330,10 +5330,16 @@
         display: contents;
     }
     #alarm-notice-snooze-mins {
+        -webkit-appearance: none;
+        appearance: none;
         min-height: 28px;
         padding: 5px 18px 5px 6px;
         color: var(--bg-00);
-        background: rgba(var(--rgb-accent), 0.55);
+        background-color: rgba(var(--rgb-accent), 0.55);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%230b0f19' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 5px center;
+        background-size: 9px auto;
         border: 0;
         border-radius: 5px;
         outline: none;
@@ -5346,9 +5352,14 @@
         color: #eaf4ff;
         background: #111a25;
     }
+    #alarm-notice-snooze-mins optgroup {
+        color: #9fb0c8;
+        background: #111a25;
+        font-style: normal;
+    }
     #alarm-notice-snooze-mins:hover,
     #alarm-notice-snooze-mins:focus {
-        background: var(--accent-a);
+        background-color: var(--accent-a);
     }
     .alarm-stage-veil,
     .alarm-stage-kicker,
@@ -5476,15 +5487,26 @@
         gap: 8px;
     }
     .alarm-notice.is-takeover #alarm-notice-snooze-mins {
+        -webkit-appearance: none;
+        appearance: none;
         min-width: 110px;
         min-height: 48px;
         height: auto;
-        padding: 0 32px 0 18px;
+        padding: 0 40px 0 20px;
         color: var(--text-hi);
-        background: transparent;
+        background-color: transparent;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23aab4c4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 13px auto;
         border: 1px solid var(--border-bright);
         border-radius: 999px;
         font-size: calc(15px * var(--ui-scale));
+    }
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins optgroup {
+        color: #9fb0c8;
+        background: #111a25;
+        font-style: normal;
     }
     .alarm-notice.is-takeover #alarm-notice-snooze-mins:hover,
     .alarm-notice.is-takeover #alarm-notice-snooze-mins:focus {
