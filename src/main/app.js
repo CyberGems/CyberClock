@@ -2319,9 +2319,14 @@
         }
         syncClockBrandUI(s.clockShowBrand !== false);
         // Hide analog clock / hide calendar (full-mode Home): collapse either
-        // panel and let the other absorb the full width.
-        const hideClock = s.fullHideClock === true;
-        const hideCalendar = s.fullHideCalendar === true;
+        // panel and let the other absorb the full width. Both hidden would
+        // empty the panel, so a config saved that way re-shows the calendar.
+        let hideClock = s.fullHideClock === true;
+        let hideCalendar = s.fullHideCalendar === true;
+        if (hideClock && hideCalendar) {
+            hideCalendar = false;
+            window.cc.saveSettings({ fullHideCalendar: false });
+        }
         const homeView = document.getElementById("view-home");
         if (homeView) {
             homeView.classList.toggle("no-clock", hideClock);
@@ -7705,30 +7710,40 @@
         });
     }
 
-    // Hide analog clock / hide calendar: side grips on Home view and Settings
-    // toggles drive the respective settings through broadcast round-trip.
+    // Hide analog clock / hide calendar: side grips on Home view, Settings
+    // toggles and the More menu items drive the respective settings through
+    // broadcast round-trip. Hiding both would leave the Home panel empty, so
+    // turning one on brings the other back.
+    function setFullHide(key, value) {
+        const patch = { [key]: value };
+        if (value) {
+            const other = key === "fullHideClock" ? "fullHideCalendar" : "fullHideClock";
+            if (cfg[other] === true) patch[other] = false;
+        }
+        window.cc.saveSettings(patch);
+    }
     const clockGrip = document.getElementById("clock-grip");
     if (clockGrip) {
         clockGrip.addEventListener("click", () => {
-            window.cc.saveSettings({ fullHideClock: !(cfg.fullHideClock === true) });
+            setFullHide("fullHideClock", !(cfg.fullHideClock === true));
         });
     }
     const sHideClock = document.getElementById("s-hide-clock");
     if (sHideClock) {
         sHideClock.addEventListener("change", (e) => {
-            window.cc.saveSettings({ fullHideClock: e.target.checked });
+            setFullHide("fullHideClock", e.target.checked);
         });
     }
     const calGrip = document.getElementById("cal-grip");
     if (calGrip) {
         calGrip.addEventListener("click", () => {
-            window.cc.saveSettings({ fullHideCalendar: !(cfg.fullHideCalendar === true) });
+            setFullHide("fullHideCalendar", !(cfg.fullHideCalendar === true));
         });
     }
     const sHideCal = document.getElementById("s-hide-cal");
     if (sHideCal) {
         sHideCal.addEventListener("change", (e) => {
-            window.cc.saveSettings({ fullHideCalendar: e.target.checked });
+            setFullHide("fullHideCalendar", e.target.checked);
         });
     }
     // Greeting card click opens Settings on General tab with username field focused and selected
@@ -9227,9 +9242,9 @@
                 } else if (action === "expand_clock") {
                     openClockStage();
                 } else if (action === "toggle_clock") {
-                    window.cc.saveSettings({ fullHideClock: !(cfg.fullHideClock === true) });
+                    setFullHide("fullHideClock", !(cfg.fullHideClock === true));
                 } else if (action === "toggle_calendar") {
-                    window.cc.saveSettings({ fullHideCalendar: !(cfg.fullHideCalendar === true) });
+                    setFullHide("fullHideCalendar", !(cfg.fullHideCalendar === true));
                 } else if (action === "docs") {
                     window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
                 } else if (action === "faq") {
