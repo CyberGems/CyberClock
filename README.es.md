@@ -41,7 +41,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
 | Relájate y concéntrate | 6 paisajes sonoros ambientales con síntesis de audio procedural |
 | Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 20 skins únicas |
-| Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, líneas de exploración CRT, controles de transparencia, multi-monitor |
+| Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, controles de transparencia, multi-monitor |
 
 ---
 
@@ -93,7 +93,6 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Desvanecido automático (atenuación por inactividad):** desvanecido opcional en reposo (70%, 50%, 30%, 15%) que restaura la opacidad completa al instante al pasar el cursor
 - **Mostrar Fecha y Mostrar Segundos:** interruptores en el menú del Modo Mini; ocultar la fecha acorta la barra (ambas vuelven al pasar el cursor)
 - **Avance del Día:** línea opcional en el borde inferior de la barra mini. Al pasar el cursor muestra cuánto del día ha pasado, en porcentaje
-- **Líneas de exploración CRT:** efecto retro de superposición
 - **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
 
 ### 🔔 Alarmas y campanadas
@@ -266,7 +265,6 @@ los antiguos temas de 5 skins migran automáticamente a su tinte heredero.
 ### Opciones de pantalla
 - Formato de hora: 12H / 24H
 - Mostrar u ocultar segundos
-- Superposición de líneas de exploración CRT
 - Modo Mini: opacidad del fondo y opacidad del contenido
 - Saludo de bienvenida: nombre para mostrar opcional junto a la marca en el modo completo
 

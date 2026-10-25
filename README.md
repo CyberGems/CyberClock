@@ -41,7 +41,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
 | Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
 | Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
-| Make it yours | 10 accent tints, text size scale, CRT scanlines, transparency controls, multi-monitor |
+| Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
 
 ---
 
@@ -93,7 +93,6 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
 - **Show Date & Show Seconds** — Toggles in the Mini Mode menu; hiding the date shortens the bar (both return on hover)
 - **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage
-- **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
 
 ### 🔔 Alarms & Chimes
@@ -268,7 +267,6 @@ old 5-skin themes migrate automatically to their heir tint.
 ### Display Options
 - Time format: 12H / 24H
 - Show/hide seconds
-- CRT scanlines overlay
 - Mini mode: background opacity, content opacity
 - Welcome greeting: optional display name shown beside the brand in Full Mode
 
