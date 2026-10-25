@@ -275,6 +275,13 @@ pub struct AppSettings {
     // Brand wordmark drawn on the analog clock face (uppercased, max 16).
     pub clock_brand: String,
     pub show_seconds: bool,
+    // Mini bar clock format, split from the full window's clock_format /
+    // show_seconds. None = not chosen yet; the frontend falls back to
+    // those shared keys until the user picks one.
+    #[serde(default)]
+    pub mini_clock_format: Option<String>,
+    #[serde(default)]
+    pub mini_show_seconds: Option<bool>,
     pub always_on_top: bool,
     pub start_with_windows: bool,
     pub start_in_mini_mode: bool,
@@ -503,6 +510,8 @@ impl Default for AppSettings {
             clock_format: "12h".to_string(),
             clock_brand: "CYBERGEMS".to_string(),
             show_seconds: true,
+            mini_clock_format: None,
+            mini_show_seconds: None,
             always_on_top: false,
             start_with_windows: true,
             start_in_mini_mode: true,

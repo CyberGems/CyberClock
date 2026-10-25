@@ -2297,11 +2297,12 @@
                 (s.miniShowSeconds ?? s.showSeconds) !== false;
         }
         // One-time seed: the format used to be one shared setting; split it
-        // so both sides start from the value the user already chose.
-        if (s.miniClockFormat === undefined) {
+        // so both sides start from the value the user already chose. The
+        // Rust side serves unset Option fields as null, so cover null too.
+        if (s.miniClockFormat == null) {
             window.cc?.saveSettings?.({ miniClockFormat: s.clockFormat || "24h" });
         }
-        if (s.miniShowSeconds === undefined) {
+        if (s.miniShowSeconds == null) {
             window.cc?.saveSettings?.({ miniShowSeconds: s.showSeconds !== false });
         }
         // Text size buttons: mark the active tier (data-ui-scale strings

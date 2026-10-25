@@ -43,11 +43,7 @@
             h = h % 12 || 12;
         }
         hh = pad(h); mm = pad(m); ss = pad(s);
-        const withSeconds =
-            !noSeconds &&
-            (cfg.miniShowSeconds !== undefined
-                ? cfg.miniShowSeconds === true
-                : cfg.showSeconds !== false);
+        const withSeconds = !noSeconds && (cfg.miniShowSeconds ?? cfg.showSeconds) !== false;
         const timeStr = ampm
             ? `${hh}:${mm}${withSeconds ? ":" + ss : ""} ${ampm}`
             : `${hh}:${mm}${withSeconds ? ":" + ss : ""}`;
