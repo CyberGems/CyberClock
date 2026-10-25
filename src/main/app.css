@@ -6728,6 +6728,11 @@
         display: flex;
         gap: 6px;
     }
+    /* Text Size buttons sit right under their section description (no
+       s-row spacing), so give them the same air as the tint grid. */
+    #s-ui-scale {
+        margin-top: 12px;
+    }
     #s-dial-design {
         flex-wrap: wrap;
         justify-content: flex-end;
