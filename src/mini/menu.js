@@ -1125,7 +1125,7 @@
                 const toggleCollapse = document.getElementById("toggle-collapse");
                 if (toggleCollapse) toggleCollapse.classList.toggle("on", cfg.miniCollapseDate !== true);
                 const toggleSeconds = document.getElementById("toggle-seconds");
-                if (toggleSeconds) toggleSeconds.classList.toggle("on", cfg.showSeconds !== false);
+                if (toggleSeconds) toggleSeconds.classList.toggle("on", (cfg.miniShowSeconds ?? cfg.showSeconds) !== false);
                 const toggleDay = document.getElementById("toggle-day-progress");
                 if (toggleDay) toggleDay.classList.toggle("on", cfg.miniDayProgress === true);
 
@@ -1445,7 +1445,8 @@
         });
     });
 
-    // Show Seconds toggle handler
+    // Show Seconds toggle handler (mini clock; independent of the full
+    // window's digital clock preference)
     const secondsRow = document.getElementById("ctx-seconds");
     if (secondsRow) {
         secondsRow.addEventListener("click", () => {
@@ -1453,7 +1454,7 @@
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ showSeconds: on });
+                window.cc.saveSettings({ miniShowSeconds: on });
             }
         });
     }

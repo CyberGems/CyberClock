@@ -38,12 +38,16 @@
         const noSeconds = false;
 
         let hh, mm, ss, ampm = "";
-        if (cfg.clockFormat === "12h") {
+        if ((cfg.miniClockFormat ?? cfg.clockFormat) === "12h") {
             ampm = h >= 12 ? "PM" : "AM";
             h = h % 12 || 12;
         }
         hh = pad(h); mm = pad(m); ss = pad(s);
-        const withSeconds = !noSeconds && cfg.showSeconds !== false;
+        const withSeconds =
+            !noSeconds &&
+            (cfg.miniShowSeconds !== undefined
+                ? cfg.miniShowSeconds === true
+                : cfg.showSeconds !== false);
         const timeStr = ampm
             ? `${hh}:${mm}${withSeconds ? ":" + ss : ""} ${ampm}`
             : `${hh}:${mm}${withSeconds ? ":" + ss : ""}`;

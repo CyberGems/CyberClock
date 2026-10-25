@@ -2272,7 +2272,7 @@
 
         // Settings modal controls
         document
-            .querySelectorAll(".s-fmt")
+            .querySelectorAll(".s-fmt[data-fmt]")
             .forEach((b) =>
                 b.classList.toggle(
                     "on",
@@ -2281,6 +2281,29 @@
             );
         const secEl = document.getElementById("s-sec");
         if (secEl) secEl.checked = s.showSeconds !== false;
+        // Mini clock format: independent of the full window's. Reads fall
+        // back to the legacy shared keys until the seed migration below ran.
+        document
+            .querySelectorAll(".s-fmt[data-mini-fmt]")
+            .forEach((b) =>
+                b.classList.toggle(
+                    "on",
+                    b.dataset.miniFmt === (s.miniClockFormat ?? s.clockFormat ?? "24h"),
+                ),
+            );
+        const miniSecEl = document.getElementById("s-mini-sec");
+        if (miniSecEl) {
+            miniSecEl.checked =
+                (s.miniShowSeconds ?? s.showSeconds) !== false;
+        }
+        // One-time seed: the format used to be one shared setting; split it
+        // so both sides start from the value the user already chose.
+        if (s.miniClockFormat === undefined) {
+            window.cc?.saveSettings?.({ miniClockFormat: s.clockFormat || "24h" });
+        }
+        if (s.miniShowSeconds === undefined) {
+            window.cc?.saveSettings?.({ miniShowSeconds: s.showSeconds !== false });
+        }
         // Text size buttons: mark the active tier (data-ui-scale strings
         // compare exactly with the persisted value).
         const uiScaleVal = String(scale || 1);
@@ -2859,8 +2882,8 @@
         const now = new Date();
 
         // The expanded clock always shows seconds, independent of the
-        // showSeconds preference the mini clock's menu shares with the
-        // header: its seconds progress bar is part of the design.
+        // full and mini showSeconds preferences: its seconds progress
+        // bar is part of the design.
         setDigits(document.getElementById("expanded-clock-time"), digitalTimeString(now, true));
         const dateText = digitalDateString(now);
         const dateEl = document.getElementById("expanded-clock-date");
@@ -7529,16 +7552,32 @@
         btn.addEventListener("click", () => switchSettingsTab(btn.dataset.stab));
     });
 
-    // Format
-    document.querySelectorAll(".s-fmt").forEach((b) => {
+    // Format (Full Mode's digital clocks; the mini bar has its own copy)
+    document.querySelectorAll(".s-fmt[data-fmt]").forEach((b) => {
         b.addEventListener("click", () => {
             window.cc.saveSettings({ clockFormat: b.dataset.fmt });
             document
-                .querySelectorAll(".s-fmt")
+                .querySelectorAll(".s-fmt[data-fmt]")
                 .forEach((x) => x.classList.remove("on"));
             b.classList.add("on");
         });
     });
+
+    // Mini clock format (Mini Mode tab)
+    document.querySelectorAll(".s-fmt[data-mini-fmt]").forEach((b) => {
+        b.addEventListener("click", () => {
+            window.cc.saveSettings({ miniClockFormat: b.dataset.miniFmt });
+            document
+                .querySelectorAll(".s-fmt[data-mini-fmt]")
+                .forEach((x) => x.classList.remove("on"));
+            b.classList.add("on");
+        });
+    });
+    document
+        .getElementById("s-mini-sec")
+        .addEventListener("change", (e) =>
+            window.cc.saveSettings({ miniShowSeconds: e.target.checked }),
+        );
 
     // Text size tiers (Full Mode tab): apply live via the CSS var so the
     // change is visible instantly, and persist for next launch.
