@@ -38,7 +38,7 @@ jobs:
           CARGO_VER=$(grep '^version' src-tauri/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
           echo "tag=$TAG package.json=$NODE_VER tauri.conf=$CONF_VER Cargo.toml=$CARGO_VER"
           if [ "$TAG" != "$NODE_VER" ] || [ "$TAG" != "$CONF_VER" ] || [ "$TAG" != "$CARGO_VER" ]; then
-            echo "::error::Version mismatch â€” tag v$TAG does not match package.json ($NODE_VER), tauri.conf.json ($CONF_VER) and/or Cargo.toml ($CARGO_VER)."
+            echo "::error::Version mismatch — tag v$TAG does not match package.json ($NODE_VER), tauri.conf.json ($CONF_VER) and/or Cargo.toml ($CARGO_VER)."
             exit 1
           fi
 
