@@ -2407,6 +2407,7 @@
             calGripEl.setAttribute("aria-label", calGripLabel);
             calGripEl.removeAttribute("title");
         }
+        if (typeof refreshMoreMenuViewItems === "function") refreshMoreMenuViewItems();
         syncAlarmSoundTrigger();
         ["alarm-edit-hour", "alarm-edit-minute", "alarm-edit-period", "alarm-edit-repeat"].forEach((id) => {
             syncAlarmChoice(document.getElementById(id));
@@ -9139,6 +9140,35 @@
         }
     }
 
+    function setMoreMenuItemIcon(item, name) {
+        const ico = item?.querySelector(".ico");
+        if (!ico) return;
+        ico.setAttribute("data-ico", name);
+        ico.replaceChildren();
+        if (window.ccIcons) window.ccIcons.replaceIcons(item);
+    }
+
+    // The More menu mirrors the Home view's side grips: its clock and
+    // calendar items follow the current fullHideClock / fullHideCalendar
+    // state, so labels and icons swap between hide and show.
+    function refreshMoreMenuViewItems() {
+        const pairs = [
+            ["more-item-toggle-clock", cfg.fullHideClock === true, "tooltip.showClock", "tooltip.hideClock"],
+            ["more-item-toggle-calendar", cfg.fullHideCalendar === true, "tooltip.showCalendar", "tooltip.hideCalendar"],
+        ];
+        for (const [id, hidden, showKey, hideKey] of pairs) {
+            const item = document.getElementById(id);
+            if (!item) continue;
+            const key = hidden ? showKey : hideKey;
+            const lbl = item.querySelector(".lbl");
+            if (lbl) {
+                lbl.setAttribute("data-i18n", key);
+                lbl.textContent = window.ccI18n ? window.ccI18n.t(key) : key;
+            }
+            setMoreMenuItemIcon(item, hidden ? "eye" : "eye-off");
+        }
+    }
+
     function toggleTbarMoreMenu(fromKeyboard = false) {
         if (!tbarMoreMenu) return;
         const willShow = tbarMoreMenu.hidden;
@@ -9149,6 +9179,7 @@
             tbarBtnMore.classList.toggle("on", willShow);
         }
         if (willShow) {
+            refreshMoreMenuViewItems();
             if (fromKeyboard) {
                 tbarMoreMenu.classList.add("keyboard-nav");
                 lastMenuPointerX = -1;
@@ -9207,6 +9238,12 @@
                     if (window.cc && window.cc.openDatetimeProperties) {
                         window.cc.openDatetimeProperties();
                     }
+                } else if (action === "expand_clock") {
+                    openClockStage();
+                } else if (action === "toggle_clock") {
+                    window.cc.saveSettings({ fullHideClock: !(cfg.fullHideClock === true) });
+                } else if (action === "toggle_calendar") {
+                    window.cc.saveSettings({ fullHideCalendar: !(cfg.fullHideCalendar === true) });
                 } else if (action === "docs") {
                     window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock/wiki");
                 } else if (action === "faq") {
