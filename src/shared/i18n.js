@@ -2000,7 +2000,7 @@
             "settings.mini.fontDate": "Fecha",
             "settings.mini.fontDefault": "Predeterminada",
             "settings.mini.fontBold": "Negrita",
-            "settings.mini.fontItalic": "Cursiva",
+            "settings.mini.fontItalic": "Itálica",
             "settings.mini.fontReset": "Restablecer a predeterminado",
             "settings.mini.openGallery": "Explorar Galería de Diseños...",
             "settings.mini.openGalleryTip": "Explorar Galería de Diseños",
