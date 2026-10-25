@@ -2957,9 +2957,9 @@
     // stays open, so returning to full mode lands back on the clock.
     document.getElementById("expanded-clock-mini")?.addEventListener("click", () => window.cc.goMini());
     // The brand wordmark edits like the analog dial's: Settings opens
-    // on Appearance with the brand field focused and selected.
+    // on Full Mode with the brand field focused and selected.
     document.getElementById("expanded-clock-brand")?.addEventListener("click", () =>
-        openSettings("appearance", "#s-clock-name"),
+        openSettings("display", "#s-clock-name"),
     );
     // Click on the empty stage closes it; clicks inside the panel (the
     // clock itself) do nothing, so brushing the time never dismisses it.
@@ -10113,7 +10113,7 @@
         if (clockCanvas) {
             clockCanvas.style.cursor = "pointer";
             clockCanvas.addEventListener("click", () =>
-                openSettings("appearance", "#s-clock-name"),
+                openSettings("display", "#s-clock-name"),
             );
         }
         window.addEventListener("resize", () => {

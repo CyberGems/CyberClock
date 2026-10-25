@@ -1057,93 +1057,6 @@
                             </div>
                         </div>
 
-                        <!-- Analog Clock -->
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.appearance.analogSection">Analog Clock</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl" data-i18n="settings.appearance.dialDesign">Dial Style</div>
-                                <div class="s-fmts" id="s-dial-design">
-                                    <button class="s-fmt on" data-clock-design="1" data-i18n="settings.appearance.dialClassic">Classic</button
-                                    ><button class="s-fmt" data-clock-design="2" data-i18n="settings.appearance.dialMinimal">Minimal</button
-                                    ><button class="s-fmt" data-clock-design="3" data-i18n="settings.appearance.dialSegments">Segments</button
-                                    ><button class="s-fmt" data-clock-design="4" data-i18n="settings.appearance.dialHud">HUD</button
-                                    ><button class="s-fmt" data-clock-design="5" data-i18n="settings.appearance.dialQuantum">Quantum</button
-                                    ><button class="s-fmt" data-clock-design="6" data-i18n="settings.appearance.dialChrono">Chrono</button
-                                    ><button class="s-fmt" data-clock-design="7" data-i18n="settings.appearance.dialMatrix">Hex Matrix</button
-                                    ><button class="s-fmt" data-clock-design="8" data-i18n="settings.appearance.dialReactor">Reactor Core</button
-                                    ><button class="s-fmt" data-clock-design="9" data-i18n="settings.appearance.dialCircuit">Circuit PCB</button
-                                    ><button class="s-fmt" data-clock-design="10" data-i18n="settings.appearance.dialGemCrown">Gem Crown</button>
-                                </div>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="refresh"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.dialAutoCycle">Auto-change dial style</span>
-                                    <small data-i18n="settings.appearance.dialAutoCycleDesc">Automatically rotate the clock style over time</small>
-                                </div>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-clock-auto-cycle" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-row s-sub-row" id="s-clock-auto-cycle-sub" style="display: none;">
-                                <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>
-                                <select id="s-clock-auto-cycle-interval" class="sched-select">
-                                    <option value="1" data-i18n="settings.cycle.1m">Every 1 min</option>
-                                    <option value="5" data-i18n="settings.cycle.5m">Every 5 min</option>
-                                    <option value="15" selected data-i18n="settings.cycle.15m">Every 15 min</option>
-                                    <option value="30" data-i18n="settings.cycle.30m">Every 30 min</option>
-                                    <option value="60" data-i18n="settings.cycle.1h">Every 1 hour</option>
-                                    <option value="1440" data-i18n="settings.cycle.daily">Daily</option>
-                                </select>
-                                <div class="s-lbl" style="margin-left: 12px;" data-i18n="settings.cycle.mode">Order</div>
-                                <select id="s-clock-auto-cycle-mode" class="sched-select">
-                                    <option value="sequential" selected data-i18n="settings.cycle.sequential">Sequential</option>
-                                    <option value="random" data-i18n="settings.cycle.random">Random</option>
-                                </select>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="tag"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.showClockBrand">Show Brand on Clock</span>
-                                    <small data-i18n="settings.appearance.showClockBrandDesc">Display customized brand name on the clock face</small>
-                                </div>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-clock-show-brand" checked />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-row s-brand-row" id="s-clock-brand-wrap">
-                                <span class="s-row-ico" data-ico="flag"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.clockName">Brand Text</span>
-                                    <small data-i18n="settings.appearance.clockNameDesc">Custom text shown across the middle of the dial (up to 12 chars)</small>
-                                </div>
-                                <div class="s-name-wrap">
-                                    <input
-                                        type="text"
-                                        id="s-clock-name"
-                                        class="s-inp"
-                                        maxlength="16"
-                                        spellcheck="false"
-                                        autocomplete="off"
-                                        data-i18n-attr="placeholder:settings.appearance.clockNamePlaceholder"
-                                    />
-                                    <button
-                                        class="s-name-restore"
-                                        id="s-clock-name-restore"
-                                        style="display: none"
-                                        data-tooltip="Restore default name"
-                                        data-i18n-attr="data-tooltip:settings.appearance.clockNameRestoreTip"
-                                        aria-label="Restore default name"
-                                    >
-                                        <span data-ico="rotate-ccw"></span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Screen Layout -->
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.appearance.layoutSection">Screen Layout</div>
@@ -1901,6 +1814,93 @@
 
                     <!-- Display -->
                     <div class="s-panel" id="stab-display">
+                        <!-- Analog Clock -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.appearance.analogSection">Analog Clock</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="clock"></span>
+                                <div class="s-lbl" data-i18n="settings.appearance.dialDesign">Dial Style</div>
+                                <div class="s-fmts" id="s-dial-design">
+                                    <button class="s-fmt on" data-clock-design="1" data-i18n="settings.appearance.dialClassic">Classic</button
+                                    ><button class="s-fmt" data-clock-design="2" data-i18n="settings.appearance.dialMinimal">Minimal</button
+                                    ><button class="s-fmt" data-clock-design="3" data-i18n="settings.appearance.dialSegments">Segments</button
+                                    ><button class="s-fmt" data-clock-design="4" data-i18n="settings.appearance.dialHud">HUD</button
+                                    ><button class="s-fmt" data-clock-design="5" data-i18n="settings.appearance.dialQuantum">Quantum</button
+                                    ><button class="s-fmt" data-clock-design="6" data-i18n="settings.appearance.dialChrono">Chrono</button
+                                    ><button class="s-fmt" data-clock-design="7" data-i18n="settings.appearance.dialMatrix">Hex Matrix</button
+                                    ><button class="s-fmt" data-clock-design="8" data-i18n="settings.appearance.dialReactor">Reactor Core</button
+                                    ><button class="s-fmt" data-clock-design="9" data-i18n="settings.appearance.dialCircuit">Circuit PCB</button
+                                    ><button class="s-fmt" data-clock-design="10" data-i18n="settings.appearance.dialGemCrown">Gem Crown</button>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="refresh"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.dialAutoCycle">Auto-change dial style</span>
+                                    <small data-i18n="settings.appearance.dialAutoCycleDesc">Automatically rotate the clock style over time</small>
+                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-clock-auto-cycle" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row s-sub-row" id="s-clock-auto-cycle-sub" style="display: none;">
+                                <div class="s-lbl" data-i18n="settings.cycle.interval">Interval</div>
+                                <select id="s-clock-auto-cycle-interval" class="sched-select">
+                                    <option value="1" data-i18n="settings.cycle.1m">Every 1 min</option>
+                                    <option value="5" data-i18n="settings.cycle.5m">Every 5 min</option>
+                                    <option value="15" selected data-i18n="settings.cycle.15m">Every 15 min</option>
+                                    <option value="30" data-i18n="settings.cycle.30m">Every 30 min</option>
+                                    <option value="60" data-i18n="settings.cycle.1h">Every 1 hour</option>
+                                    <option value="1440" data-i18n="settings.cycle.daily">Daily</option>
+                                </select>
+                                <div class="s-lbl" style="margin-left: 12px;" data-i18n="settings.cycle.mode">Order</div>
+                                <select id="s-clock-auto-cycle-mode" class="sched-select">
+                                    <option value="sequential" selected data-i18n="settings.cycle.sequential">Sequential</option>
+                                    <option value="random" data-i18n="settings.cycle.random">Random</option>
+                                </select>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="tag"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.showClockBrand">Show Brand on Clock</span>
+                                    <small data-i18n="settings.appearance.showClockBrandDesc">Display customized brand name on the clock face</small>
+                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-clock-show-brand" checked />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row s-brand-row" id="s-clock-brand-wrap">
+                                <span class="s-row-ico" data-ico="flag"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.clockName">Brand Text</span>
+                                    <small data-i18n="settings.appearance.clockNameDesc">Custom text shown across the middle of the dial (up to 12 chars)</small>
+                                </div>
+                                <div class="s-name-wrap">
+                                    <input
+                                        type="text"
+                                        id="s-clock-name"
+                                        class="s-inp"
+                                        maxlength="16"
+                                        spellcheck="false"
+                                        autocomplete="off"
+                                        data-i18n-attr="placeholder:settings.appearance.clockNamePlaceholder"
+                                    />
+                                    <button
+                                        class="s-name-restore"
+                                        id="s-clock-name-restore"
+                                        style="display: none"
+                                        data-tooltip="Restore default name"
+                                        data-i18n-attr="data-tooltip:settings.appearance.clockNameRestoreTip"
+                                        aria-label="Restore default name"
+                                    >
+                                        <span data-ico="rotate-ccw"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.display.behaviorTitle">Inactivity & Revert</div>
                             <div class="s-row">
