@@ -2803,8 +2803,7 @@
         if (isMain) setupClock();
     });
 
-    function updateDigital() {
-        const now = new Date();
+    function digitalTimeString(now) {
         let h = now.getHours(),
             m = now.getMinutes(),
             s = now.getSeconds(),
@@ -2816,14 +2815,153 @@
         } else {
             t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
         }
-        setDigits(document.getElementById("dig-time"), t);
-        const days = getDays();
-        const months = getMonths();
-        document.getElementById("dig-date").textContent =
-            `${days[now.getDay()]}·${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        return t;
+    }
+
+    function digitalDateString(now) {
+        return `${getDays()[now.getDay()]}·${pad(now.getDate())} ${getMonths()[now.getMonth()]} ${now.getFullYear()}`;
+    }
+
+    function updateDigital() {
+        const now = new Date();
+        setDigits(document.getElementById("dig-time"), digitalTimeString(now));
+        document.getElementById("dig-date").textContent = digitalDateString(now);
         refreshAlarmOverviewLead();
         refreshAlarmStageClock();
+        updateClockStage();
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // EXPANDED CLOCK STAGE
+    // Fullscreen digital clock over the whole window, shown when the
+    // titlebar clock/date is clicked. It feeds off updateDigital()'s
+    // single tick, so it can never drift from the header clock. The
+    // window is never reloaded between modes: hiding it in mini mode
+    // keeps this overlay open, so returning to full mode restores the
+    // stage exactly as it was.
+    // ══════════════════════════════════════════════════════════════
+    let clockStageHideTimer = null;
+    let clockStageBrandWord = "";
+    let clockStageBarPct = -1;
+    let clockStageGreeting = "";
+    let clockStageNextLine = "";
+
+    function clockStageIsOpen() {
+        const stage = document.getElementById("expanded-clock");
+        return !!stage && !stage.hidden;
+    }
+
+    function updateClockStage() {
+        const stage = document.getElementById("expanded-clock");
+        if (!stage || stage.hidden) return;
+        const now = new Date();
+
+        setDigits(document.getElementById("expanded-clock-time"), digitalTimeString(now));
+        const dateText = digitalDateString(now);
+        const dateEl = document.getElementById("expanded-clock-date");
+        if (dateEl.textContent !== dateText) dateEl.textContent = dateText;
+
+        // Seconds hairline: one sweep per minute, animated by a 1s CSS
+        // transition that is skipped on the 59→00 wrap so the reset is
+        // instant instead of visibly sliding back.
+        const pct = Math.round((now.getSeconds() / 60) * 1000) / 10;
+        if (pct !== clockStageBarPct) {
+            const fill = document.getElementById("expanded-clock-bar-fill");
+            if (fill) {
+                fill.classList.toggle("no-anim", pct < clockStageBarPct);
+                fill.style.width = pct + "%";
+            }
+            clockStageBarPct = pct;
+        }
+
+        // Brand wordmark with the analog dial's pendulum glow sweep:
+        // the lit letter walks left↔right, one letter per second, with
+        // the same triangle wave the canvas dial uses.
+        const brandEl = document.getElementById("expanded-clock-brand");
+        const showBrand = cfg.clockShowBrand !== false;
+        brandEl.hidden = !showBrand;
+        if (showBrand) {
+            const word = (String(cfg.clockBrand || "").trim() || "CYBERGEMS").toUpperCase().slice(0, 16);
+            if (word !== clockStageBrandWord) {
+                clockStageBrandWord = word;
+                brandEl.textContent = "";
+                for (const ch of word) {
+                    const letter = document.createElement("span");
+                    letter.textContent = ch;
+                    brandEl.append(letter);
+                }
+            }
+            const letters = brandEl.children;
+            const span = word.length - 1;
+            const per = span > 0 ? span * 2 : 0;
+            const ph = per > 0 ? now.getSeconds() % per : 0;
+            const center = span > 0 ? (ph <= span ? ph : per - ph) : 0;
+            for (let i = 0; i < letters.length; i++) {
+                letters[i].classList.toggle("lit", Math.abs(i - center) < 1.7);
+            }
+        }
+
+        const greeting = welcomeGreetingText();
+        if (greeting !== clockStageGreeting) {
+            clockStageGreeting = greeting;
+            document.getElementById("expanded-clock-greeting").textContent = greeting;
+        }
+
+        const next = nextUpcomingAlarm(now);
+        const line = next
+            ? `${alarmText("alarms.overview.next", "NEXT ALARM")} · ${nextAlarmLeadLine(next, now)}`
+            : "";
+        if (line !== clockStageNextLine) {
+            clockStageNextLine = line;
+            const nextEl = document.getElementById("expanded-clock-next");
+            nextEl.hidden = !line;
+            nextEl.textContent = line;
+        }
+    }
+
+    function openClockStage() {
+        const stage = document.getElementById("expanded-clock");
+        if (!stage || !stage.hidden) return;
+        if (clockStageHideTimer) {
+            clearTimeout(clockStageHideTimer);
+            clockStageHideTimer = null;
+        }
+        stage.hidden = false;
+        requestAnimationFrame(() => stage.classList.add("open"));
+        clockStageBarPct = -1;
+        updateClockStage();
+        document.getElementById("expanded-clock-close")?.focus({ preventScroll: true });
+    }
+
+    function closeClockStage() {
+        const stage = document.getElementById("expanded-clock");
+        if (!stage || stage.hidden) return;
+        stage.classList.remove("open");
+        if (clockStageHideTimer) clearTimeout(clockStageHideTimer);
+        clockStageHideTimer = setTimeout(() => {
+            clockStageHideTimer = null;
+            stage.hidden = true;
+        }, 340);
+        const trigger = document.getElementById("tbar-mid");
+        if (trigger) trigger.focus({ preventScroll: true });
+    }
+
+    document.getElementById("tbar-mid")?.addEventListener("click", openClockStage);
+    document.getElementById("expanded-clock-close")?.addEventListener("click", closeClockStage);
+    // Click on the empty stage closes it; clicks inside the panel (the
+    // clock itself) do nothing, so brushing the time never dismisses it.
+    document.getElementById("expanded-clock")?.addEventListener("click", (e) => {
+        if (!e.target.closest(".expanded-clock-panel")) closeClockStage();
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape" || !clockStageIsOpen()) return;
+        // Dedicated surfaces handle Esc first: settings drawer, note
+        // editor, close prompt, alarm takeover, titlebar menu, editor.
+        if (document.querySelector(
+            ".s-overlay.open, .note-overlay.open, #first-close-overlay.open, .alarm-notice.is-takeover, #tbar-more-menu:not([hidden]), .alarm-editor-overlay.open, #alarm-confirm-overlay.open, #confirm-overlay.open",
+        )) return;
+        closeClockStage();
+    });
 
     // ══════════════════════════════════════════════════════════════
     // ANALOG CLOCK (Canvas)
@@ -9199,6 +9337,9 @@
             e.preventDefault();
             e.stopPropagation();
             ttHide();
+            // The menu paints inside .tbar (z 20) and can never surface
+            // above the expanded clock stage, so don't open it blind.
+            if (clockStageIsOpen()) return;
             toggleTbarMoreMenu(true /* fromKeyboard */);
             return;
         }
@@ -9387,7 +9528,7 @@
         if (document.hidden) ttHide();
     });
 
-    ["tbar-brand", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close"].forEach((id) => {
+    ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-close"].forEach((id) => {
         ttBind(document.getElementById(id));
     });
 
@@ -9486,6 +9627,10 @@
             showTextContextMenu(e.clientX, e.clientY, textTarget);
         } else if (alarmCard?.dataset.alarmId) {
             showAlarmContextMenu(e.clientX, e.clientY, alarmCard.dataset.alarmId);
+        } else if (clockStageIsOpen()) {
+            // The stage covers the UI the full context menu targets;
+            // right-click there should not summon a menu over the clock.
+            hideAllContextMenus();
         } else {
             showFullContextMenu(e.clientX, e.clientY);
         }

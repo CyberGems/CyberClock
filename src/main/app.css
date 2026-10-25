@@ -181,8 +181,23 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 1px;
-        pointer-events: none;
+        padding: 4px 12px;
+        background: none;
+        border: 0;
+        border-radius: 6px;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        transition: background 0.15s ease;
+    }
+    .tbar-mid:hover {
+        background: rgba(var(--rgb-accent), 0.09);
+    }
+    .tbar-mid:focus-visible {
+        outline: 1px solid var(--accent-a);
+        outline-offset: -1px;
     }
     #dig-time {
         font-family: var(--font-display);
@@ -5597,6 +5612,147 @@
         .alarm-notice.is-takeover .alarm-stage-veil,
         .alarm-notice.is-takeover .alarm-notice-icon {
             animation: none;
+        }
+    }
+
+    /* ════════════════════════════════════════════════════
+   EXPANDED CLOCK STAGE — fullscreen digital clock
+   Layered below the settings drawer (100), the update
+   notice (120) and the alarm takeover (140) on purpose:
+   those surfaces must stay usable on top of it. Class
+   prefix expanded-clock avoids the home view's
+   .clock-stage (the analog canvas stage).
+════════════════════════════════════════════════════ */
+    .expanded-clock {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        display: grid;
+        place-items: center;
+        background: #07080b;
+        opacity: 0;
+        transition: opacity 0.32s ease;
+    }
+    .expanded-clock[hidden] {
+        display: none !important;
+    }
+    .expanded-clock.open {
+        opacity: 1;
+    }
+    .expanded-clock-veil {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 50% 42%, rgba(var(--rgb-accent), 0.17), transparent 48%),
+            radial-gradient(ellipse at 50% 78%, rgba(var(--rgb-accent), 0.05), transparent 44%);
+        animation: expanded-clock-bloom 9s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes expanded-clock-bloom {
+        0%, 100% { opacity: 0.72; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.045); }
+    }
+    /* Two classes on purpose: this must outrank the later
+       [data-tooltip] { position: relative } rule, which would drop
+       the button into the stage's center grid cell. */
+    .expanded-clock .expanded-clock-close {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        z-index: 1;
+    }
+    .expanded-clock-panel {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 24px;
+        text-align: center;
+        animation: expanded-clock-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes expanded-clock-in {
+        from { opacity: 0; transform: translateY(14px) scale(0.985); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .expanded-clock-greeting {
+        margin: 0;
+        color: var(--text-md);
+        font-size: clamp(13px, 1.15vw, 17px);
+        font-weight: 500;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+    }
+    .expanded-clock-time {
+        color: var(--text-hi);
+        font-family: var(--font-display);
+        font-size: clamp(96px, 13vw, 224px);
+        font-weight: 500;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+        text-shadow: 0 0 46px rgba(var(--rgb-accent), 0.22);
+    }
+    .expanded-clock-date {
+        margin-top: 2px;
+        color: var(--text-md);
+        font-family: var(--font-mono);
+        font-size: clamp(13px, 1.3vw, 19px);
+        font-weight: 500;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+    }
+    .expanded-clock-brand {
+        display: flex;
+        margin-top: 10px;
+        font-family: "Orbitron", var(--font-mono), monospace;
+        font-size: clamp(10px, 0.85vw, 13px);
+        letter-spacing: 0.55em;
+    }
+    .expanded-clock-brand span {
+        color: rgba(var(--rgb-accent), 0.34);
+        transition: color 0.5s ease, text-shadow 0.5s ease;
+    }
+    .expanded-clock-brand span.lit {
+        color: var(--accent-a);
+        text-shadow: var(--glow-sm);
+    }
+    .expanded-clock-bar {
+        overflow: hidden;
+        width: clamp(240px, 30vw, 460px);
+        height: 2px;
+        margin-top: 14px;
+        background: rgba(255, 255, 255, 0.09);
+        border-radius: 999px;
+    }
+    .expanded-clock-bar-fill {
+        width: 0%;
+        height: 100%;
+        background: var(--accent-a);
+        border-radius: inherit;
+        box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.55);
+        transition: width 1s linear;
+    }
+    /* The 59→00 wrap jumps backwards; without the transition the
+       reset is instant instead of visibly sliding back to the left. */
+    .expanded-clock-bar-fill.no-anim {
+        transition: none;
+    }
+    .expanded-clock-next {
+        margin: 6px 0 0;
+        color: var(--text-md);
+        font-size: calc(12px * var(--ui-scale));
+        letter-spacing: 0.08em;
+        opacity: 0.9;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .expanded-clock,
+        .expanded-clock-veil,
+        .expanded-clock-panel,
+        .expanded-clock-bar-fill,
+        .expanded-clock-brand span {
+            animation: none;
+            transition: none;
         }
     }
 

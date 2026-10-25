@@ -273,6 +273,9 @@
             "tooltip.showCalendar": "Show calendar",
             "tooltip.editName": "Click to personalize your greeting",
             "tooltip.pin": "Always on Top",
+            "tooltip.expandClock": "Expand clock",
+            "clock.stageLabel": "Expanded clock",
+            "clock.stageClose": "Close expanded clock",
 
             "alarms.custom.title": "Custom Alarms",
             "alarms.custom.slot1": "Alarm 1",
@@ -1378,6 +1381,9 @@
             "tooltip.showCalendar": "Mostrar calendario",
             "tooltip.editName": "Haz clic para personalizar tu saludo",
             "tooltip.pin": "Siempre visible",
+            "tooltip.expandClock": "Ampliar reloj",
+            "clock.stageLabel": "Reloj ampliado",
+            "clock.stageClose": "Cerrar reloj ampliado",
 
             "alarms.custom.title": "Alarmas personalizadas",
             "alarms.custom.slot1": "Alarma 1",

@@ -48,13 +48,13 @@
                     <span class="tbar-name"><span class="tbar-name-a">Cyber</span><span class="tbar-name-b">Clock</span></span>
                     <span class="tbar-welcome" id="tbar-welcome" aria-live="polite"></span>
                 </div>
-                <div class="tbar-mid">
-                    <div class="tbar-time-row">
+                <button class="tbar-mid" id="tbar-mid" type="button" data-tooltip="Expand clock" data-i18n-attr="data-tooltip:tooltip.expandClock, aria-label:tooltip.expandClock" data-tooltip-dir="bottom">
+                    <span class="tbar-time-row">
                         <span class="tbar-dot" aria-hidden="true"></span>
-                        <div id="dig-time">00:00:00</div>
-                    </div>
-                    <div id="dig-date">SUN · 01 JAN 2026</div>
-                </div>
+                        <span id="dig-time">00:00:00</span>
+                    </span>
+                    <span id="dig-date">SUN · 01 JAN 2026</span>
+                </button>
                 <div class="tbar-right">
                     <button class="wmbtn" id="tbar-btn-settings" type="button" data-tooltip="Settings" data-tooltip-kbd="Ctrl+," data-i18n-attr="data-tooltip:tooltip.settings, aria-label:tooltip.settings" data-tooltip-dir="bottom">
                         <span data-ico="gear"></span>
@@ -2552,6 +2552,23 @@
             </div>
         </div>
 
+            <!-- ═══ EXPANDED CLOCK STAGE ═════════════════════════════════ -->
+            <div class="expanded-clock" id="expanded-clock" role="dialog" aria-modal="true" aria-label="Expanded clock" data-i18n-attr="aria-label:clock.stageLabel" hidden>
+                <div class="expanded-clock-veil" aria-hidden="true"></div>
+                <button class="expanded-clock-close wmbtn" id="expanded-clock-close" type="button" data-tooltip="Close expanded clock" data-i18n-attr="data-tooltip:clock.stageClose, aria-label:clock.stageClose" data-tooltip-dir="bottom" data-tooltip-align="right">
+                    <span data-ico="x"></span>
+                </button>
+                <div class="expanded-clock-panel">
+                    <p class="expanded-clock-greeting" id="expanded-clock-greeting"></p>
+                    <div class="expanded-clock-time" id="expanded-clock-time" role="timer"></div>
+                    <div class="expanded-clock-date" id="expanded-clock-date"></div>
+                    <div class="expanded-clock-brand" id="expanded-clock-brand" aria-hidden="true"></div>
+                    <div class="expanded-clock-bar" aria-hidden="true"><div class="expanded-clock-bar-fill" id="expanded-clock-bar-fill"></div></div>
+                    <p class="expanded-clock-next" id="expanded-clock-next" hidden></p>
+                </div>
+            </div>
+
+            <!-- ═══ ALARM NOTICE (toast pill, fullscreen takeover when ringing) ═════════════════════════════════ -->
         <div class="alarm-notice" id="alarm-notice" role="alert" aria-live="assertive" hidden>
             <div class="alarm-stage-veil" aria-hidden="true"></div>
             <div class="alarm-stage-panel">

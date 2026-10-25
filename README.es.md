@@ -51,6 +51,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Reloj analógico:** renderizado en canvas con animaciones suaves y acentos neón; puede ocultarse en el modo completo para dar todo el ancho al calendario
 - **Diez diseños de esfera:** Clásica, Minimalista, Segmentos, HUD, Cuántica, Cronógrafo, Matriz Hex, Núcleo Reactor, Circuito PCB y la esfera multicolor Corona de Gemas
 - **Pantalla digital:** fuente Space Grotesk con celdas de dígitos de ancho fijo (12H / 24H)
+- **Reloj ampliado:** haz clic en el reloj o la fecha de la barra de título para llenar toda la pantalla con el reloj digital: saludo, barra de progreso de segundos, próxima alarma y el nombre de la esfera con su brillo de letras. Se cierra con Esc, el botón de la esquina o un clic en el fondo; permanece abierto al cambiar al Modo Mini y volver
 - **Calendario completo:** vista mensual con agenda, notas por día y estadísticas
 - **Inteligencia de fechas:** día del año, semana ISO, días restantes, fase lunar
 - **Notas del día:** adjunta notas a fechas concretas con un editor en ventana
