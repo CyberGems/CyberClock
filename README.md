@@ -95,7 +95,6 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage
 - **CRT Scanlines** — Retro overlay effect
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
-- **Real Sun Cycle** — The Sunset Pulse skin follows the actual sun position
 
 ### 🔔 Alarms & Chimes
 - **Voice Time Announcer (Talking Clock)** — Speaks the time once at :15, :30, or :00, with selectable Windows voices, a customizable style (Natural, Cyber/Tactical, Concise), an optional soft pre-chime, quiet hours, optional alarm read-aloud (global toggle or per-alarm choice), and a shortcut to install Windows voices

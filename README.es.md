@@ -95,7 +95,6 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Avance del Día:** línea opcional en el borde inferior de la barra mini. Al pasar el cursor muestra cuánto del día ha pasado, en porcentaje
 - **Líneas de exploración CRT:** efecto retro de superposición
 - **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
-- **Ciclo solar real:** la skin Sunset Pulse sigue la posición real del sol
 
 ### 🔔 Alarmas y campanadas
 - **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez a las :15, :30 o :00, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio, lectura de alarmas en voz alta opcional (interruptor global o por alarma) y acceso directo para instalar voces de Windows

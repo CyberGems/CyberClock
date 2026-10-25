@@ -60,18 +60,6 @@
         }
 
         paintDayProgress(now);
-
-        // Keep the real-sun phase in sync across phase boundaries (the
-        // dataset attribute is a no-op write when the phase hasn't changed).
-        const shellForSolar = document.getElementById("shell");
-        if ((cfg.miniDesign || 1) == 7 && cfg.miniSolarReal === true) {
-            const phase = solarPhaseFor(now.getHours());
-            if (shellForSolar.dataset.solar !== phase) {
-                shellForSolar.dataset.solar = phase;
-            }
-        } else if (shellForSolar.dataset.solar) {
-            delete shellForSolar.dataset.solar;
-        }
     }
 
     // Fixed-width digit cells (same pattern as the main window's digital
@@ -124,10 +112,6 @@
         }
     }
 
-    // Real-sun phase for the Sunset Pulse skin (design 7). Derived from the
-    // local hour only (no geolocation), computed once per tick, and only
-    // applied when the user enabled it — see applySettings. Phases:
-    // dawn 5-8h, day 8-16h, sunset 16-19h, night 19-5h.
     function dayPercent(now) {
         const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         const pct = Math.round(((now.getTime() - start) / 86400000) * 100);
@@ -159,13 +143,6 @@
                 }
             }
         }
-    }
-
-    function solarPhaseFor(hour) {
-        if (hour >= 5 && hour < 8) return "dawn";
-        if (hour >= 8 && hour < 16) return "day";
-        if (hour >= 16 && hour < 19) return "sunset";
-        return "night";
     }
 
     // ═══════════════════════════════════════════════════════
@@ -336,17 +313,6 @@
         updateClock();
         updateDriftIndicator();
         resetAutoFadeTimer();
-
-        // Real-sun cycle for the Sunset Pulse skin (design 7). Applied as a
-        // data-solar phase attribute on the shell; CSS owns the palettes.
-        const shellEl = document.getElementById("shell");
-        if (shellEl) {
-            if ((s.miniDesign || 1) == 7 && s.miniSolarReal === true) {
-                shellEl.dataset.solar = solarPhaseFor(new Date().getHours());
-            } else {
-                delete shellEl.dataset.solar;
-            }
-        }
 
         // Resize window to match the skin height/width when design, layout or collapse setting changes
         if (designChanged || layoutChanged || collapseChanged || zoomChanged || lastAppliedWidth === 0) {

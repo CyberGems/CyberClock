@@ -594,14 +594,6 @@
         setTimeout(reportMenuHeight, 40);
     }
 
-    // The Real Sun Cycle toggle only applies to the Sunset Pulse skin
-    // (design 7); show the row only when that design is active.
-    function syncSolarVisibility(design) {
-        currentDesign = design;
-        const row = document.getElementById("ctx-solar");
-        if (row) row.style.display = design === 7 ? "flex" : "none";
-    }
-
     // Debounced settings save for slider drags: each save broadcasts
     // the full settings object to every window, so coalesce the burst
     // of `input` events into one trailing save.
@@ -675,7 +667,6 @@
         document.querySelectorAll(".gallery-card").forEach((c) => {
             c.classList.toggle("active", parseInt(c.dataset.mode) === mode);
         });
-        syncSolarVisibility(mode);
         syncTimerDesignUI(mode);
 
         if (activeCaller && activeCaller.caller) {
@@ -1020,8 +1011,6 @@
                     if (lockLbl) lockLbl.textContent = window.ccI18n.t("settings.mini.lockPos");
                     const aotLbl = document.querySelector("#ctx-aot .switch-lbl");
                     if (aotLbl) aotLbl.textContent = window.ccI18n.t("menu.alwaysOnTop");
-                    const solarLbl = document.querySelector("#ctx-solar .switch-lbl");
-                    if (solarLbl) solarLbl.textContent = window.ccI18n.t("settings.mini.solarReal");
                     const animLbl = document.querySelector("#ctx-anim .switch-lbl");
                     if (animLbl) animLbl.textContent = window.ccI18n.t("settings.mini.animations");
                     const edgeLimitsLbl = document.querySelector("#ctx-edge-limits .switch-lbl");
@@ -1094,10 +1083,6 @@
                 const btnDateItalic = document.getElementById("btn-date-italic");
                 if (btnDateItalic) btnDateItalic.classList.toggle("active", cfg.miniDateFontItalic === true);
 
-                // Real Sun Cycle (design 7 only)
-                const toggleSolar = document.getElementById("toggle-solar");
-                if (toggleSolar) toggleSolar.classList.toggle("on", cfg.miniSolarReal || false);
-                
                 // Active Opacity (Content)
                 const activeOpacity = Math.round((cfg.miniOpacity ?? 1.0) * 100);
                 const opSlider = document.getElementById("opacity-slider");
@@ -1302,19 +1287,6 @@
             selectSkin(mode);
         });
     });
-
-    // Real Sun Cycle toggle handler (design 7 only)
-    const solarRow = document.getElementById("ctx-solar");
-    if (solarRow) {
-        solarRow.addEventListener("click", () => {
-            const tgl = document.getElementById("toggle-solar");
-            if (!tgl) return;
-            const on = tgl.classList.toggle("on");
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ miniSolarReal: on });
-            }
-        });
-    }
 
     // Opacity slider handler (Content)
     const slider = document.getElementById("opacity-slider");
