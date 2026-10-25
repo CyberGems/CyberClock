@@ -2457,21 +2457,6 @@
         if (af.customPath) showCustomFile("full", af.customPath); else showCustomFile("full", null);
         if (aq.customPath) showCustomFile("quart", aq.customPath); else showCustomFile("quart", null);
 
-        // Custom alarms (3 slots with day-of-week repetition)
-        buildCustomAlarmTimeOptions();
-        (s.customAlarms || []).slice(0, 3).forEach((alarm, i) => {
-            const base = `s-cust-${i}`;
-            const enEl = document.getElementById(`${base}-en`);
-            if (enEl) enEl.checked = !!alarm.enabled;
-            setCustomAlarmTime(i, alarm.hour ?? 9, alarm.minute ?? 0);
-            document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((btn) => {
-                btn.classList.toggle("on", (alarm.daysMask & parseInt(btn.dataset.day)) !== 0);
-            });
-            const sndEl = document.getElementById(`${base}-snd`);
-            if (sndEl) sndEl.value = alarm.sound || "chime-digital";
-            showCustomFile(`cust-${i}`, alarm.customPath || null);
-        });
-
         // Apply alarm time restriction schedule controls
         buildAlarmSchedTimeOptions();
         const alSchedEn = document.getElementById("s-alarm-sched-en");
@@ -2485,6 +2470,8 @@
         if (vEn) vEn.checked = !!va.enabled;
         const vRead = document.getElementById("s-voice-alarm-read");
         if (vRead) vRead.checked = !!va.readAlarms;
+        const vReadMirror = document.getElementById("s-alarm-read-mirror");
+        if (vReadMirror) vReadMirror.checked = !!va.readAlarms;
         const vInt = document.getElementById("s-voice-interval");
         if (vInt) vInt.value = va.interval || "1h";
         const vSty = document.getElementById("s-voice-style");
@@ -2662,130 +2649,8 @@
     }
 
     // ── Custom alarms (3 slots, day-of-week repetition) ──────
-    function buildCustomAlarmTimeOptions() {
-        const is12 = cfg.clockFormat === '12h';
-        for (let i = 0; i < 3; i++) {
-            const hSel = document.getElementById(`s-cust-${i}-h`);
-            const mSel = document.getElementById(`s-cust-${i}-m`);
-            const apSel = document.getElementById(`s-cust-${i}-ap`);
-            if (!hSel || !mSel || !apSel) continue;
-            hSel.innerHTML = '';
-            const hStart = is12 ? 1 : 0, hEnd = is12 ? 12 : 23;
-            for (let h = hStart; h <= hEnd; h++) {
-                const o = document.createElement('option');
-                o.value = String(h); o.textContent = pad(h);
-                hSel.appendChild(o);
-            }
-            if (!mSel.options.length) {
-                for (let m = 0; m <= 59; m++) {
-                    const o = document.createElement('option');
-                    o.value = String(m); o.textContent = pad(m);
-                    mSel.appendChild(o);
-                }
-            }
-            apSel.style.display = is12 ? '' : 'none';
-        }
-    }
-    function setCustomAlarmTime(i, H, M) {
-        const is12 = cfg.clockFormat === '12h';
-        const hSel = document.getElementById(`s-cust-${i}-h`);
-        const mSel = document.getElementById(`s-cust-${i}-m`);
-        const apSel = document.getElementById(`s-cust-${i}-ap`);
-        if (!hSel) return;
-        mSel.value = String(M);
-        if (is12) {
-            let h12 = H % 12; if (h12 === 0) h12 = 12;
-            hSel.value = String(h12);
-            apSel.value = H >= 12 ? 'PM' : 'AM';
-        } else {
-            hSel.value = String(H);
-        }
-    }
-    function getCustomAlarmTime(i) {
-        const is12 = cfg.clockFormat === '12h';
-        const hSel = document.getElementById(`s-cust-${i}-h`);
-        const mSel = document.getElementById(`s-cust-${i}-m`);
-        const apSel = document.getElementById(`s-cust-${i}-ap`);
-        if (!hSel) return { hour: 9, minute: 0 };
-        let H = parseInt(hSel.value, 10);
-        const M = parseInt(mSel.value, 10);
-        if (is12) {
-            if (apSel.value === 'AM') { if (H === 12) H = 0; }
-            else { if (H !== 12) H += 12; }
-        }
-        return { hour: H, minute: M };
-    }
-    function getCustomAlarmDaysMask(i) {
-        let mask = 0;
-        document.querySelectorAll(`#s-cust-${i}-days .s-day-btn[data-day]`).forEach((btn) => {
-            if (btn.classList.contains("on")) mask |= parseInt(btn.dataset.day);
-        });
-        return mask;
-    }
-    function saveCustomAlarmField(i, patch) {
-        const current = cfg.customAlarms || [];
-        const list = [...current];
-        while (list.length < 3) list.push({ enabled: false, hour: 9, minute: 0, daysMask: 0, sound: "chime-digital", customPath: null });
-        list[i] = { ...list[i], ...patch };
-        window.cc.saveSettings({ customAlarms: list });
-    }
-    function wireCustomAlarms() {
-        for (let i = 0; i < 3; i++) {
-            const base = `s-cust-${i}`;
-            document.getElementById(`${base}-en`)?.addEventListener("change", (e) => {
-                const daysMask = getCustomAlarmDaysMask(i);
-                if (e.target.checked && daysMask === 0) {
-                    // No days picked: enable every day rather than a silent never-firing alarm
-                    document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((b) => b.classList.add("on"));
-                    saveCustomAlarmField(i, { enabled: true, daysMask: 127 });
-                } else {
-                    saveCustomAlarmField(i, { enabled: e.target.checked });
-                }
-            });
-            [`${base}-h`, `${base}-m`, `${base}-ap`].forEach((id) => {
-                document.getElementById(id)?.addEventListener("change", () => {
-                    const { hour, minute } = getCustomAlarmTime(i);
-                    saveCustomAlarmField(i, { hour, minute });
-                });
-            });
-            document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    btn.classList.toggle("on");
-                    saveCustomAlarmField(i, { daysMask: getCustomAlarmDaysMask(i) });
-                });
-            });
-            document.querySelector(`#${base}-days .s-day-all`)?.addEventListener("click", () => {
-                const allOn = document.querySelectorAll(`#${base}-days .s-day-btn[data-day].on`).length === 7;
-                document.querySelectorAll(`#${base}-days .s-day-btn[data-day]`).forEach((b) => {
-                    b.classList.toggle("on", !allOn);
-                });
-                saveCustomAlarmField(i, { daysMask: allOn ? 0 : 127 });
-            });
-            document.getElementById(`${base}-snd`)?.addEventListener("change", (e) => {
-                saveCustomAlarmField(i, { sound: e.target.value, customPath: null });
-            });
-            document.getElementById(`${base}-test`)?.addEventListener("click", () => {
-                const alarm = (cfg.customAlarms || [])[i] || {};
-                if (alarm.customPath) window.audioEngine.playFile(alarm.customPath, { loop: false });
-                else {
-                    const sndEl = document.getElementById(`${base}-snd`);
-                    window.audioEngine.chime(sndEl ? sndEl.value : "chime-digital", cfg.alarmVolume || 0.75);
-                }
-            });
-            document.getElementById(`${base}-file`)?.addEventListener("click", async () => {
-                const p = await window.cc.openFileDialog();
-                if (p) {
-                    saveCustomAlarmField(i, { customPath: p });
-                    showCustomFile(`cust-${i}`, p);
-                }
-            });
-            document.getElementById(`${base}-fclr`)?.addEventListener("click", () => {
-                saveCustomAlarmField(i, { customPath: null });
-                showCustomFile(`cust-${i}`, null);
-            });
-        }
-    }
-    wireCustomAlarms();
+    // The legacy 3-slot editor was removed from the settings UI; the
+    // per-alarm Alarm view (customAlarms vs custom_alarms) replaced it.
 
     // ══════════════════════════════════════════════════════════════
     // DIGITAL CLOCK
@@ -8791,6 +8656,19 @@
         sVoiceAlarmRead.addEventListener("change", (e) => {
             const va = cfg.voiceAnnouncer || {};
             window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
+            const mirror = document.getElementById("s-alarm-read-mirror");
+            if (mirror) mirror.checked = e.target.checked;
+        });
+    }
+    // Alarmas tab keeps a mirror of the read-aloud switch (one setting,
+    // two synced checkboxes).
+    const sAlarmReadMirror = document.getElementById("s-alarm-read-mirror");
+    if (sAlarmReadMirror) {
+        sAlarmReadMirror.addEventListener("change", (e) => {
+            const va = cfg.voiceAnnouncer || {};
+            window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
+            const main = document.getElementById("s-voice-alarm-read");
+            if (main) main.checked = e.target.checked;
         });
     }
 

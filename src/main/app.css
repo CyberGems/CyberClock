@@ -6689,9 +6689,6 @@
         color: var(--text-lo);
         line-height: 1.35;
     }
-    .s-legacy-custom-alarms {
-        display: none !important;
-    }
     .s-alarm-t {
         font-family: "Space Grotesk", sans-serif;
         font-size: calc(11.5px * var(--ui-scale));

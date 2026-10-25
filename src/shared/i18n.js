@@ -387,7 +387,7 @@
             "alarms.editor.voiceDefault": "Voice: Default",
             "alarms.editor.voiceOn": "Voice: On",
             "alarms.editor.voiceOff": "Voice: Off",
-            "alarms.editor.voiceTip": "Speaks the alarm when it rings. Default follows Settings",
+            "alarms.editor.voiceTip": "Speaks the alarm when it rings. Default: Settings → Alarms",
             "alarms.editor.message": "Message",
             "alarms.editor.messagePlaceholder": "What should CyberClock remind you?",
             "alarms.editor.snooze": "Snooze duration",
@@ -491,6 +491,7 @@
             "settings.tab.general": "General",
             "settings.tab.display": "Full Mode",
             "settings.tab.mini": "Mini Mode",
+            "settings.tab.voice": "Voice",
             "settings.tab.backup": "Backup & Data",
             "settings.saved": "Saved",
             "settings.close": "Close",
@@ -595,7 +596,7 @@
             "settings.alarms.managerTip": "Open Alarm view",
 
             // Voice Time Announcer (Talking Clock)
-            "voice.sectionTitle": "Voice Time Announcer",
+            "voice.sectionAnnouncer": "Hourly announcements",
             "voice.title": "Talking Clock",
             "voice.enable": "Enable Voice Announcement",
             "voice.interval": "Interval",
@@ -621,7 +622,11 @@
             "voice.addVoicesTip": "Open Windows Settings to install Spanish or other language voices",
             "voice.refreshTip": "Refresh voice list after installing new voices in Windows",
             "voice.readAlarms": "Read alarms aloud",
-            "voice.readAlarmsTip": "Speaks the alarm when it rings, with the voice and volume above",
+            "voice.readAlarmsTip": "Speaks the alarm when it rings, with the configured voice and volume",
+            "voice.readAlarmsDesc": "One switch for every alarm; each alarm can override it from its editor",
+            "voice.readAlarmsMirrorDesc": "Voice, style and volume are configured in the Voice tab",
+            "voice.sectionAlarmVoices": "Alarm voices",
+            "voice.sectionVoice": "Voice",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Welcome",
@@ -1487,7 +1492,7 @@
             "alarms.editor.voiceDefault": "Voz: Según ajustes",
             "alarms.editor.voiceOn": "Voz: Sí",
             "alarms.editor.voiceOff": "Voz: No",
-            "alarms.editor.voiceTip": "Lee la alarma al sonar. «Según ajustes» sigue Ajustes",
+            "alarms.editor.voiceTip": "Lee la alarma al sonar. «Según ajustes»: Ajustes → Alarmas",
             "alarms.editor.message": "Mensaje",
             "alarms.editor.messagePlaceholder": "¿Qué debe recordarte CyberClock?",
             "alarms.editor.snooze": "Duración de posponer",
@@ -1591,6 +1596,7 @@
             "settings.tab.general": "General",
             "settings.tab.display": "Modo Full",
             "settings.tab.mini": "Modo Mini",
+            "settings.tab.voice": "Voz",
             "settings.tab.backup": "Respaldo y Datos",
             "settings.saved": "Guardado",
             "settings.close": "Cerrar",
@@ -1695,7 +1701,7 @@
             "settings.alarms.managerTip": "Abrir la vista de Alarmas",
 
             // Voice Time Announcer (Talking Clock)
-            "voice.sectionTitle": "Locutor de Hora",
+            "voice.sectionAnnouncer": "Locución de hora",
             "voice.title": "Reloj Parlante",
             "voice.enable": "Activar locución de hora",
             "voice.interval": "Intervalo",
@@ -1721,7 +1727,11 @@
             "voice.addVoicesTip": "Abrir la configuración de Windows para instalar voces en español u otros idiomas",
             "voice.refreshTip": "Actualizar lista tras instalar nuevas voces en Windows",
             "voice.readAlarms": "Leer las alarmas en voz alta",
-            "voice.readAlarmsTip": "Dice la alarma al sonar, con la voz y el volumen de esta sección",
+            "voice.readAlarmsTip": "Dice la alarma al sonar, con la voz y el volumen configurados",
+            "voice.readAlarmsDesc": "Un interruptor para todas las alarmas; cada una puede anularlo desde su editor",
+            "voice.readAlarmsMirrorDesc": "La voz, el estilo y el volumen se configuran en la pestaña Voz",
+            "voice.sectionAlarmVoices": "Voz en alarmas",
+            "voice.sectionVoice": "Voz",
 
             // Settings modal - General
             "settings.general.welcomeTitle": "Toque personal",
