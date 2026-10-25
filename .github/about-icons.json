@@ -1,0 +1,18 @@
+{
+  "destinations": [
+    "src/assets/suite"
+  ],
+  "catalogs": [
+    {
+      "path": "src/shared/suite-data.js",
+      "pattern": "\\bslug\\s*:\\s*['\"](cyber[a-z0-9-]+)['\"]"
+    },
+    {
+      "path": "src/assets/suite/suite.json",
+      "pattern": "\"slug\"\\s*:\\s*\"(cyber[a-z0-9-]+)\""
+    }
+  ],
+  "exclude": [
+    "cyberclock"
+  ]
+}

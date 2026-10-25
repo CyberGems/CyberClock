@@ -360,3 +360,9 @@ Más aplicaciones gratuitas, de código abierto y con la privacidad primero de [
 | 🛡️&nbsp;[**CyberWall**](https://github.com/CyberGems/CyberWall#readme) | Cortafuegos de Windows fácil de usar con reglas por aplicación en tiempo real gracias al motor kernel WFP. |
 
 ➡️ **[Todas las aplicaciones en cybergems.org](https://cybergems.org)**
+
+## Sincronización de iconos para releases
+
+Antes de empaquetar un release de Windows, el workflow actualiza los iconos de «Acerca de CyberClock» desde los repositorios oficiales de CyberGems mediante una acción compartida fijada a un commit revisado. `.github/about-icons.json` define los catálogos y carpetas de esta app. Todos los PNG deben decodificarse, ser cuadrados y superar las comprobaciones de tamaño y catálogo antes de reemplazar iconos. Una fuente ausente o inválida detiene el release; el resumen muestra las URL y los hashes SHA256. El workflow **Verify About icon synchronization** comprueba la integración sin crear un release.
+
+Con un repositorio vecino de CyberSnap, actualiza las copias antes de guardar los cambios y crear la etiqueta con `pwsh -NoProfile -File ../CyberSnap/scripts/Sync-SuiteIcons.ps1 -RepositoryRoot .`. Añade `-Check` para validar sin modificar archivos, o `-Source Local` para leer los originales de los repositorios vecinos.

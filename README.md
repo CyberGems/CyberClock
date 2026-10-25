@@ -362,3 +362,9 @@ More free, open-source, privacy-first apps from [**CyberGems**](https://github.c
 | 🛡️&nbsp;[**CyberWall**](https://github.com/CyberGems/CyberWall#readme) | User-friendly Windows firewall with real-time per-app rules powered by the WFP kernel engine. |
 
 ➡️ **[Browse all apps at cybergems.org](https://cybergems.org)**
+
+## Release icon synchronization
+
+Before packaging a Windows release, the workflow refreshes the About icons from the official CyberGems repositories using a shared action pinned to a reviewed commit. `.github/about-icons.json` defines this app's catalogs and icon folders. All PNGs must decode, be square, and pass size and catalog checks before any cached icon is replaced. A missing or invalid source stops the release; source URLs and SHA256 hashes appear in the job summary. The **Verify About icon synchronization** workflow checks the integration without creating a release.
+
+With a neighboring CyberSnap checkout, refresh tracked copies before committing and tagging with `pwsh -NoProfile -File ../CyberSnap/scripts/Sync-SuiteIcons.ps1 -RepositoryRoot .`. Add `-Check` to validate without changing files, or `-Source Local` to read the canonical icons from sibling app checkouts.
