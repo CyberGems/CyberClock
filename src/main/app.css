@@ -325,7 +325,7 @@
         border: none;
         color: var(--text-md);
         font-family: var(--font-ui);
-        font-size: calc(11px * var(--ui-scale));
+        font-size: calc(13px * var(--ui-scale));
         cursor: pointer;
         text-align: left;
         width: 100%;
@@ -338,12 +338,18 @@
         color: var(--text-hi);
         outline: none;
     }
+    /* Exit stays neutral in text on hover; only the power icon goes
+       red, so the danger cue rides on the icon and the background. */
     .tbar-more-item.close-item:hover,
     .tbar-more-item.close-item:focus,
     .tbar-more-item.close-item:focus-visible {
         background: rgba(255, 68, 102, 0.18);
-        color: #ff4466;
+        color: var(--text-hi);
         outline: none;
+    }
+    .tbar-more-item.close-item .cc-ico {
+        color: #ff4466;
+        filter: drop-shadow(0 0 5px rgba(255, 61, 102, 0.6));
     }
     .tbar-more-item .ico {
         display: inline-flex;
@@ -354,14 +360,13 @@
         font-size: 14px;
         opacity: 0.85;
     }
-    .tbar-more-item.donate-item {
-        color: #ff6b86;
-    }
+    /* Donate keeps its red heart as the only accent; the label reads
+       neutral like every other item. */
     .tbar-more-item.donate-item:hover,
     .tbar-more-item.donate-item:focus,
     .tbar-more-item.donate-item:focus-visible {
         background: rgba(255, 68, 102, 0.16);
-        color: #ffb3c2;
+        color: var(--text-hi);
         outline: none;
     }
 
@@ -369,9 +374,6 @@
     .tbar-more-menu.keyboard-nav .tbar-more-item:not(:focus) {
         background: transparent !important;
         color: var(--text-md) !important;
-    }
-    .tbar-more-menu.keyboard-nav .tbar-more-item.donate-item:not(:focus) {
-        color: #ff6b86 !important;
     }
     .tbar-more-menu.keyboard-nav .tbar-more-item.close-item:not(:focus) {
         color: var(--text-md) !important;
@@ -5654,12 +5656,15 @@
     }
     /* Two classes on purpose: this must outrank the later
        [data-tooltip] { position: relative } rule, which would drop
-       the button into the stage's center grid cell. */
-    .expanded-clock .expanded-clock-close {
+       the buttons into the stage's center grid cell. */
+    .expanded-clock .expanded-clock-actions {
         position: absolute;
         top: 16px;
         right: 20px;
         z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     .expanded-clock-panel {
         position: relative;
@@ -5702,16 +5707,35 @@
         letter-spacing: 0.32em;
         text-transform: uppercase;
     }
+    /* A button on purpose: clicking it opens Settings on the brand
+       field, mirroring the analog dial's editable wordmark. */
     .expanded-clock-brand {
         display: flex;
         margin-top: 10px;
+        padding: 2px 4px;
+        background: none;
+        border: 0;
+        border-radius: 6px;
+        color: inherit;
+        cursor: pointer;
         font-family: "Orbitron", var(--font-mono), monospace;
-        font-size: clamp(10px, 0.85vw, 13px);
+        font-size: clamp(14px, 1.25vw, 20px);
         letter-spacing: 0.55em;
+        transition: background 0.2s ease;
+    }
+    .expanded-clock-brand:hover {
+        background: rgba(var(--rgb-accent), 0.1);
+    }
+    .expanded-clock-brand:focus-visible {
+        outline: 1px solid var(--accent-a);
+        outline-offset: 2px;
     }
     .expanded-clock-brand span {
         color: rgba(var(--rgb-accent), 0.34);
         transition: color 0.5s ease, text-shadow 0.5s ease;
+    }
+    .expanded-clock-brand:hover span {
+        color: rgba(var(--rgb-accent), 0.55);
     }
     .expanded-clock-brand span.lit {
         color: var(--accent-a);
@@ -7041,6 +7065,12 @@
     /* ── Premium Tooltips ── */
     [data-tooltip] {
         position: relative;
+    }
+    /* While an element shows the JS tooltip card, its own CSS suite
+       tooltip must not render: both fire on hover and dir/align
+       variants misalign into a visible double. */
+    [data-tt-js]::after {
+        content: none !important;
     }
     /* Side grips stay pinned to the view edge; the generic tooltip
        rule would otherwise turn them into in-flow boxes. */

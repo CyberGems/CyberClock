@@ -2555,14 +2555,22 @@
             <!-- ═══ EXPANDED CLOCK STAGE ═════════════════════════════════ -->
             <div class="expanded-clock" id="expanded-clock" role="dialog" aria-modal="true" aria-label="Expanded clock" data-i18n-attr="aria-label:clock.stageLabel" hidden>
                 <div class="expanded-clock-veil" aria-hidden="true"></div>
-                <button class="expanded-clock-close wmbtn" id="expanded-clock-close" type="button" data-tooltip="Close expanded clock" data-i18n-attr="data-tooltip:clock.stageClose, aria-label:clock.stageClose" data-tooltip-dir="bottom" data-tooltip-align="right">
-                    <span data-ico="x"></span>
-                </button>
+                <div class="expanded-clock-actions">
+                    <button class="expanded-clock-mini wmbtn" id="expanded-clock-mini" type="button" data-tooltip="Switch to Mini Mode" data-i18n-attr="data-tooltip:tooltip.switchToMini, aria-label:tooltip.switchToMini" data-tooltip-dir="bottom" data-tooltip-align="left">
+                        <svg class="cc-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                            <rect x="11.5" y="11" width="8" height="6.5" rx="1.5" fill="currentColor" fill-opacity="0.35" />
+                        </svg>
+                    </button>
+                    <button class="expanded-clock-back wmbtn" id="expanded-clock-back" type="button" data-tooltip="Back to the main panel" data-i18n-attr="data-tooltip:clock.stageBack, aria-label:clock.stageBack" data-tooltip-dir="bottom" data-tooltip-align="right">
+                        <span data-ico="back"></span>
+                    </button>
+                </div>
                 <div class="expanded-clock-panel">
                     <p class="expanded-clock-greeting" id="expanded-clock-greeting"></p>
                     <div class="expanded-clock-time" id="expanded-clock-time" role="timer"></div>
                     <div class="expanded-clock-date" id="expanded-clock-date"></div>
-                    <div class="expanded-clock-brand" id="expanded-clock-brand" aria-hidden="true"></div>
+                    <button class="expanded-clock-brand" id="expanded-clock-brand" type="button" aria-label="Edit brand text" data-i18n-attr="aria-label:clock.stageEditBrand"></button>
                     <div class="expanded-clock-bar" aria-hidden="true"><div class="expanded-clock-bar-fill" id="expanded-clock-bar-fill"></div></div>
                     <p class="expanded-clock-next" id="expanded-clock-next" hidden></p>
                 </div>

@@ -275,7 +275,8 @@
             "tooltip.pin": "Always on Top",
             "tooltip.expandClock": "Expand clock",
             "clock.stageLabel": "Expanded clock",
-            "clock.stageClose": "Close expanded clock",
+            "clock.stageBack": "Back to the main panel",
+            "clock.stageEditBrand": "Edit brand text",
 
             "alarms.custom.title": "Custom Alarms",
             "alarms.custom.slot1": "Alarm 1",
@@ -1383,7 +1384,8 @@
             "tooltip.pin": "Siempre visible",
             "tooltip.expandClock": "Ampliar reloj",
             "clock.stageLabel": "Reloj ampliado",
-            "clock.stageClose": "Cerrar reloj ampliado",
+            "clock.stageBack": "Regresar al panel principal",
+            "clock.stageEditBrand": "Editar texto de la marca",
 
             "alarms.custom.title": "Alarmas personalizadas",
             "alarms.custom.slot1": "Alarma 1",

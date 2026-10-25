@@ -2803,17 +2803,18 @@
         if (isMain) setupClock();
     });
 
-    function digitalTimeString(now) {
+    function digitalTimeString(now, forceSeconds = false) {
         let h = now.getHours(),
             m = now.getMinutes(),
             s = now.getSeconds(),
             t;
+        const withSeconds = forceSeconds || cfg.showSeconds !== false;
         if (cfg.clockFormat === "12h") {
             const ap = h >= 12 ? "PM" : "AM";
             h = h % 12 || 12;
-            t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""} ${ap}`;
+            t = `${pad(h)}:${pad(m)}${withSeconds ? ":" + pad(s) : ""} ${ap}`;
         } else {
-            t = `${pad(h)}:${pad(m)}${cfg.showSeconds !== false ? ":" + pad(s) : ""}`;
+            t = `${pad(h)}:${pad(m)}${withSeconds ? ":" + pad(s) : ""}`;
         }
         return t;
     }
@@ -2856,7 +2857,10 @@
         if (!stage || stage.hidden) return;
         const now = new Date();
 
-        setDigits(document.getElementById("expanded-clock-time"), digitalTimeString(now));
+        // The expanded clock always shows seconds, independent of the
+        // showSeconds preference the mini clock's menu shares with the
+        // header: its seconds progress bar is part of the design.
+        setDigits(document.getElementById("expanded-clock-time"), digitalTimeString(now, true));
         const dateText = digitalDateString(now);
         const dateEl = document.getElementById("expanded-clock-date");
         if (dateEl.textContent !== dateText) dateEl.textContent = dateText;
@@ -2930,7 +2934,7 @@
         requestAnimationFrame(() => stage.classList.add("open"));
         clockStageBarPct = -1;
         updateClockStage();
-        document.getElementById("expanded-clock-close")?.focus({ preventScroll: true });
+        document.getElementById("expanded-clock-back")?.focus({ preventScroll: true });
     }
 
     function closeClockStage() {
@@ -2947,7 +2951,15 @@
     }
 
     document.getElementById("tbar-mid")?.addEventListener("click", openClockStage);
-    document.getElementById("expanded-clock-close")?.addEventListener("click", closeClockStage);
+    document.getElementById("expanded-clock-back")?.addEventListener("click", closeClockStage);
+    // Mini Mode from inside the stage: the window hides but the stage
+    // stays open, so returning to full mode lands back on the clock.
+    document.getElementById("expanded-clock-mini")?.addEventListener("click", () => window.cc.goMini());
+    // The brand wordmark edits like the analog dial's: Settings opens
+    // on Appearance with the brand field focused and selected.
+    document.getElementById("expanded-clock-brand")?.addEventListener("click", () =>
+        openSettings("appearance", "#s-clock-name"),
+    );
     // Click on the empty stage closes it; clicks inside the panel (the
     // clock itself) do nothing, so brushing the time never dismisses it.
     document.getElementById("expanded-clock")?.addEventListener("click", (e) => {
@@ -9476,6 +9488,10 @@
             document.body.appendChild(ttCard);
         }
         ttAnchor = el;
+        // While the JS card is up, suppress this element's CSS suite
+        // tooltip ([data-tooltip]::after): both fire on hover and, for
+        // dir/align variants, they misalign into a visible double.
+        el.setAttribute("data-tt-js", "");
         ttLabelEl.textContent = text;
         const kbd = el.dataset.tooltipKbd;
         ttKbdEl.textContent = kbd || "";
@@ -9490,6 +9506,7 @@
     function ttHide() {
         clearTimeout(ttShowTimer);
         ttShowTimer = null;
+        if (ttAnchor) ttAnchor.removeAttribute("data-tt-js");
         ttAnchor = null;
         if (ttCard) {
             ttCard.classList.remove("is-visible");
@@ -9528,7 +9545,7 @@
         if (document.hidden) ttHide();
     });
 
-    ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-close"].forEach((id) => {
+    ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-mini", "expanded-clock-back"].forEach((id) => {
         ttBind(document.getElementById(id));
     });
 

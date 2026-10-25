@@ -51,7 +51,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
 - **Ten Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, Reactor Core, Circuit PCB, and the multicolor Gem Crown dial
 - **Digital Display** — Space Grotesk font with fixed-width digit cells (12H / 24H)
-- **Expanded Clock** — Click the titlebar clock or date to fill the whole screen with the digital clock: greeting, seconds progress bar, next alarm line, and the dial's brand name with its letter glow sweep. Close with Esc, the corner button, or a background click; it stays open when you switch to Mini Mode and back
+- **Expanded Clock** — Click the titlebar clock or date to fill the whole screen with the digital clock: greeting, seconds progress bar, next alarm line, and the dial's editable brand name (click it to rename). It includes its own Mini Mode button and always shows seconds; Esc, the back arrow, or a background click returns to the panel
 - **Full Calendar** — Month view with agenda, day notes, and statistics
 - **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
 - **Day Notes** — Attach notes to specific dates with an editor modal
