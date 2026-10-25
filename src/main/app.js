@@ -1645,6 +1645,18 @@
         if (window.ccIcons) window.ccIcons.replaceIcons(list);
     }
 
+    // The notice snooze pill is a styled span; the transparent native
+    // select above it only opens the OS dropdown (WebView2 repaints native
+    // select chrome on hover, which slid its own arrow across the custom
+    // chevron). Keep the span's text in step with the selected option.
+    function syncNoticeSnoozeTrigger() {
+        const mins = document.getElementById("alarm-notice-snooze-mins");
+        const trigger = document.getElementById("alarm-notice-snooze-mins-trigger");
+        if (!mins || !trigger) return;
+        const option = mins.selectedOptions[0];
+        trigger.textContent = option ? option.textContent.trim() : "";
+    }
+
     function showAlarmNotice(payload = {}) {
         const notice = document.getElementById("alarm-notice");
         if (!notice) return;
@@ -1673,6 +1685,7 @@
             if (mins) {
                 const def = String(Number(payload.snoozeMinutes) || 10);
                 mins.value = [...mins.options].some((option) => option.value === def) ? def : "10";
+                syncNoticeSnoozeTrigger();
             }
             const label = snooze.querySelector("span");
             if (label) label.textContent = alarmText("alarms.notice.snooze", "Snooze");
@@ -1910,6 +1923,14 @@
             }
             hideAlarmNotice();
         });
+        // The notice snooze pill is a styled span; the transparent native
+        // select above it only opens the OS dropdown. Keep the span's text
+        // in step with the selected option.
+        const noticeMins = document.getElementById("alarm-notice-snooze-mins");
+        if (noticeMins) {
+            noticeMins.addEventListener("change", syncNoticeSnoozeTrigger);
+            syncNoticeSnoozeTrigger();
+        }
         document.getElementById("alarm-confirm-ok")?.addEventListener("click", async () => {
             const cb = alarmConfirmCallback;
             closeAlarmConfirm();

@@ -5349,10 +5349,18 @@
     .alarm-notice-snooze-wrap {
         display: contents;
     }
-    #alarm-notice-snooze-mins {
-        -webkit-appearance: none;
-        appearance: none;
+    .alarm-notice-snooze-field {
+        position: relative;
+        display: inline-flex;
+    }
+    /* The pill the user sees. The native select is overlaid invisibly
+       (see below) and only opens the OS dropdown, so this span is the
+       single source of the pill's painting. */
+    #alarm-notice-snooze-mins-trigger {
+        display: inline-flex;
+        align-items: center;
         min-height: 28px;
+        flex: 1 0 auto;
         padding: 5px 18px 5px 6px;
         color: var(--bg-00);
         background-color: rgba(var(--rgb-accent), 0.55);
@@ -5363,10 +5371,30 @@
         border: 0;
         border-radius: 5px;
         outline: none;
-        cursor: pointer;
         font-family: var(--font-ui);
         font-size: calc(9px * var(--ui-scale));
         font-weight: 800;
+        white-space: nowrap;
+    }
+    /* The native select stays in the DOM only to open the OS dropdown on
+       click and is fully transparent: WebView2 repaints native select
+       chrome on hover and its own arrow slid across the custom chevron. */
+    #alarm-notice-snooze-mins {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        font-family: var(--font-ui);
+        font-size: calc(9px * var(--ui-scale));
+        outline: none;
+        cursor: pointer;
     }
     #alarm-notice-snooze-mins option {
         color: #eaf4ff;
@@ -5377,8 +5405,8 @@
         background: #111a25;
         font-style: normal;
     }
-    #alarm-notice-snooze-mins:hover,
-    #alarm-notice-snooze-mins:focus {
+    .alarm-notice-snooze-field:hover #alarm-notice-snooze-mins-trigger,
+    .alarm-notice-snooze-field:focus-within #alarm-notice-snooze-mins-trigger {
         background-color: var(--accent-a);
     }
     .alarm-stage-veil,
@@ -5506,12 +5534,11 @@
         display: flex;
         gap: 8px;
     }
-    .alarm-notice.is-takeover #alarm-notice-snooze-mins {
-        -webkit-appearance: none;
-        appearance: none;
+    .alarm-notice.is-takeover .alarm-notice-snooze-field {
         min-width: 110px;
+    }
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins-trigger {
         min-height: 48px;
-        height: auto;
         padding: 0 40px 0 20px;
         color: var(--text-hi);
         background-color: transparent;
@@ -5528,10 +5555,9 @@
         background: #111a25;
         font-style: normal;
     }
-    .alarm-notice.is-takeover #alarm-notice-snooze-mins:hover,
-    .alarm-notice.is-takeover #alarm-notice-snooze-mins:focus {
+    .alarm-notice.is-takeover .alarm-notice-snooze-field:hover #alarm-notice-snooze-mins-trigger,
+    .alarm-notice.is-takeover .alarm-notice-snooze-field:focus-within #alarm-notice-snooze-mins-trigger {
         color: var(--accent-a);
-        background: transparent;
         border-color: var(--accent-a);
     }
     .alarm-notice.is-takeover .alarm-notice-btn:hover {
