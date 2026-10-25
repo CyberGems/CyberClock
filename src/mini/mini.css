@@ -712,9 +712,8 @@
        SKIN 7: Sunset Pulse
        A real dusk gradient — deep indigo → dusk magenta → coral
        → amber (the old version used four near-identical dark
-       purples, so the gradient was invisible) with a glowing
-       horizon line across the lower third. Warm-white text with
-       a coral glow.
+       purples, so the gradient was invisible). Warm-white text
+       with a coral glow.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="7"] .mini-bg {
         background: linear-gradient(115deg,
@@ -735,23 +734,6 @@
             inset 0 1px 0 rgba(255, 189, 143, 0.16);
         position: relative;
         overflow: hidden;
-    }
-    .mini-shell[data-design="7"]::before {
-        /* Horizon: a glowing line across the lower third. */
-        content: '';
-        position: absolute;
-        top: 62%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg,
-            transparent 6%,
-            rgba(255, 217, 143, 0.65) 30%,
-            rgba(255, 234, 190, 0.8) 50%,
-            rgba(255, 217, 143, 0.65) 70%,
-            transparent 94%);
-        box-shadow: 0 0 6px rgba(255, 200, 120, 0.4);
-        pointer-events: none;
     }
     .mini-shell[data-design="7"] #mini-time {
         font-family: "Space Grotesk", sans-serif;
