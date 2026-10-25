@@ -968,10 +968,6 @@
                                     <span class="s-nav-ico" data-ico="gear"></span>
                                     <span data-i18n="settings.tab.general">General</span>
                                 </button>
-                                <button type="button" class="s-nav-btn" data-stab="appearance">
-                                    <span class="s-nav-ico" data-ico="eye"></span>
-                                    <span data-i18n="settings.tab.appearance">Appearance</span>
-                                </button>
                                 <button type="button" class="s-nav-btn" data-stab="time">
                                     <span class="s-nav-ico" data-ico="clock"></span>
                                     <span data-i18n="settings.tab.time">Time</span>
@@ -986,7 +982,7 @@
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="display">
                                     <span class="s-nav-ico" data-ico="monitor"></span>
-                                    <span data-i18n="settings.tab.display">Display</span>
+                                    <span data-i18n="settings.tab.display">Full Mode</span>
                                 </button>
                                 <button type="button" class="s-nav-btn" data-stab="mini">
                                     <span class="s-nav-ico" data-ico="compact"></span>
@@ -1022,34 +1018,6 @@
                             </div>
                         </aside>
                         <div class="s-content">
-                    <!-- Appearance -->
-                    <div class="s-panel" id="stab-appearance">
-                        <!-- Screen Layout -->
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.appearance.layoutSection">Screen Layout</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="eye-off"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.hideClock">Hide Analog Clock</span>
-                                    <small data-i18n="settings.appearance.hideClockDesc">Calendar takes the full width</small>
-                                </div>
-                                <label class="s-tog"><input type="checkbox" id="s-hide-clock" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="eye-off"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.appearance.hideCalendar">Hide Calendar</span>
-                                    <small data-i18n="settings.appearance.hideCalendarDesc">Clock takes the full width</small>
-                                </div>
-                                <label class="s-tog"><input type="checkbox" id="s-hide-cal" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Time -->
                     <div class="s-panel" id="stab-time">
                         <!-- Hourly Chimes -->
@@ -1897,6 +1865,31 @@
                                         <span data-ico="rotate-ccw"></span>
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Screen Layout -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.appearance.layoutSection">Screen Layout</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="eye-off"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.hideClock">Hide Analog Clock</span>
+                                    <small data-i18n="settings.appearance.hideClockDesc">Calendar takes the full width</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-hide-clock" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="eye-off"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.appearance.hideCalendar">Hide Calendar</span>
+                                    <small data-i18n="settings.appearance.hideCalendarDesc">Clock takes the full width</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-hide-cal" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
                             </div>
                         </div>
 

@@ -490,7 +490,6 @@
             "menu.tabCustomize": "Customize",
 
             // Settings modal - Tabs
-            "settings.tab.appearance": "Appearance",
             "settings.tab.alarms": "Alarms",
             "settings.tab.general": "General",
             "settings.tab.display": "Full Mode",
@@ -1598,7 +1597,6 @@
             "menu.tabCustomize": "Personalizar",
 
             // Settings modal - Tabs
-            "settings.tab.appearance": "Apariencia",
             "settings.tab.alarms": "Alarmas",
             "settings.tab.general": "General",
             "settings.tab.display": "Modo Full",
