@@ -7277,21 +7277,6 @@
         display: none !important;
     }
 
-    /* scanlines */
-    .scanlines {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 9999;
-        background: repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.045) 2px,
-            rgba(0, 0, 0, 0.045) 4px
-        );
-        transition: opacity 0.4s;
-    }
     /* ════════════════════════════════════════════════════
    CUSTOM CONTEXT MENU
 ════════════════════════════════════════════════════ */

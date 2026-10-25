@@ -2259,7 +2259,6 @@
                 window.cc?.saveSettings?.({ customAlarms: kept }).catch(console.error);
             }
         }
-        // Scanlines are mini-mode only — full mode never has them
         applyTint(s.theme || "azure");
         // Text size tier: labels, body copy and values. Display digits
         // and layout metrics stay fixed, so nothing reflows badly.
@@ -2633,8 +2632,6 @@
         if (miniCollapse) miniCollapse.checked = s.miniCollapseDate !== true;
         const miniDayProgress = document.getElementById('s-mini-day-progress');
         if (miniDayProgress) miniDayProgress.checked = s.miniDayProgress === true;
-        const miniScan = document.getElementById('s-mini-scan');
-        if (miniScan) miniScan.checked = s.miniScanlines !== false;
         const miniClickThrough = document.getElementById('s-mini-clickthrough');
         if (miniClickThrough) miniClickThrough.checked = s.miniClickThrough === true;
         const miniAnim = document.getElementById('s-mini-anim');
@@ -7930,12 +7927,6 @@
     if (sMiniDayProgress) {
         sMiniDayProgress.addEventListener('change', (e) => {
             window.cc.saveSettings({ miniDayProgress: e.target.checked });
-        });
-    }
-    const sMiniScan = document.getElementById('s-mini-scan');
-    if (sMiniScan) {
-        sMiniScan.addEventListener('change', (e) => {
-            window.cc.saveSettings({ miniScanlines: e.target.checked });
         });
     }
     const sMiniClickThrough = document.getElementById('s-mini-clickthrough');

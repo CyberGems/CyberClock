@@ -41,23 +41,6 @@
     body.is-dragging,
     body.is-dragging * { cursor: grabbing !important; }
 
-    /* Scanlines overlay (global) */
-    .scanlines {
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.08) 2px,
-            rgba(0, 0, 0, 0.08) 4px
-        );
-        pointer-events: none;
-        z-index: 100;
-        border-radius: inherit;
-    }
-    body.no-scanlines .scanlines { opacity: 0; }
-
     /* ═══════════════════════════════════════════════════════
        OPACITY LAYERS
        .mini-bg  → background fill only (Background slider, --bg-op)

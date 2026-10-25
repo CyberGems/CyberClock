@@ -446,7 +446,6 @@
             : (cfg.floatSwOpacity ?? cfg.miniOpacity ?? 1.0);
         sh.style.setProperty("--fg-op", activeOpacity);
         sh.style.setProperty("--mini-zoom", String(zoomFactor()));
-        document.body.classList.toggle("no-scanlines", cfg.miniScanlines === false);
         document.body.classList.toggle("no-animations", cfg.miniNoAnimations === true);
         document.body.classList.toggle("click-through", window.cc.ownClickThrough(cfg));
         if (window.audioEngine) window.audioEngine.setMuted(cfg.audioMuted === true);

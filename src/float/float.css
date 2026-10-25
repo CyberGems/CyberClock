@@ -1,5 +1,5 @@
 /* CyberClock Float - extra layer on top of mini.css skins.
-   The shell markup reuses .mini-shell / .mini-bg / .scanlines /
+   The shell markup reuses .mini-shell / .mini-bg /
    .status-dot / .time-block / .sep / .controls so all 12
    [data-design] skins keep their visual identity. This file gives
    timer and stopwatch their own geometry, presets row, progress

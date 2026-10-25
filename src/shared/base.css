@@ -40,21 +40,6 @@ body {
 .drag    { -webkit-app-region: drag; }
 .no-drag { -webkit-app-region: no-drag; }
 
-/* ── Scanlines overlay ──────────────────────────────────── */
-.scanlines {
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent, transparent 2px,
-    rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 4px
-  );
-  pointer-events: none;
-  z-index: 9999;
-  transition: opacity 0.4s;
-}
-body.no-scanlines .scanlines { opacity: 0; }
-
 /* ── Window shell ───────────────────────────────────────── */
 .window-shell {
   position: relative;

@@ -291,12 +291,8 @@
             applyFace(shell, "date", s.miniDateFont, s.miniDateFontBold, s.miniDateFontItalic);
         }
 
-        if (s.miniScanlines === false)
-            document.body.classList.add("no-scanlines");
-        else document.body.classList.remove("no-scanlines");
-
         // User motion toggle: zero ALL mini movement (animations AND
-        // transitions) via CSS. Body class mirrors the no-scanlines pattern.
+        // transitions) via CSS.
         document.body.classList.toggle("no-animations", s.miniNoAnimations === true);
 
         // Click-through: the backend sets the OS-level ignore-cursor flag;

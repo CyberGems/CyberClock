@@ -390,9 +390,7 @@ pub struct AppSettings {
     pub audio_muted: bool,
     pub relax_auto_timer: u32,
     pub last_relax_track: Option<String>,
-    pub mini_scanlines: bool,
     pub mini_collapse_date: bool,
-    pub mini_solar_real: bool,
     /// Optional 2px day-progress line on the mini clock. Off until the user asks for it.
     #[serde(default)]
     pub mini_day_progress: bool,
@@ -577,9 +575,7 @@ impl Default for AppSettings {
             audio_muted: false,
             relax_auto_timer: 0,
             last_relax_track: None,
-            mini_scanlines: true,
             mini_collapse_date: false,
-            mini_solar_real: false,
             mini_day_progress: false,
             mini_zoom: 1.0,
             mini_layout: None,
