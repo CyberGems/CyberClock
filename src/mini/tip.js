@@ -76,6 +76,27 @@
                         });
                     minsSel.appendChild(optgroup);
                 });
+                // The visible pill is a styled span; the native select above
+                // it is fully transparent. WebView2 repaints native select
+                // chrome on hover (its own arrow slid across the pill), so
+                // the select only opens the OS dropdown on click: a custom
+                // popup would be clipped by the tiny tip window.
+                const trigger = document.createElement("span");
+                trigger.className = "mini-tip-snooze-trigger";
+                trigger.setAttribute("aria-hidden", "true");
+                const syncTrigger = () => {
+                    const option = minsSel.selectedOptions[0];
+                    trigger.textContent = option ? option.textContent.trim() : "";
+                };
+                syncTrigger();
+                minsSel.addEventListener("change", syncTrigger);
+                // Field anchors the transparent select over the pill only,
+                // so clicks on the snooze button keep reaching the button.
+                const field = document.createElement("div");
+                field.className = "mini-tip-snooze-field";
+                field.appendChild(trigger);
+                field.appendChild(minsSel);
+                wrap.appendChild(field);
                 const snoozeBtn = document.createElement("button");
                 snoozeBtn.type = "button";
                 snoozeBtn.className = "mini-tip-alarm-btn mini-tip-snooze-btn";
@@ -92,7 +113,6 @@
                     }
                     if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
                 });
-                wrap.appendChild(minsSel);
                 wrap.appendChild(snoozeBtn);
                 alarmActions.appendChild(wrap);
                 if (window.ccIcons) window.ccIcons.replaceIcons(wrap);

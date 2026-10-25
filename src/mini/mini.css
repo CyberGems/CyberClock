@@ -2484,9 +2484,17 @@
         align-items: stretch;
         gap: 4px;
     }
-    .mini-tip-snooze-select {
-        -webkit-appearance: none;
-        appearance: none;
+    .mini-tip-snooze-field {
+        position: relative;
+        display: inline-flex;
+    }
+    /* The pill the user sees. The native select is overlaid invisibly
+       (see below) and only opens the OS dropdown, so this span is the
+       single source of the pill's painting. */
+    .mini-tip-snooze-trigger {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
         color: var(--text-hi);
         background-color: rgba(255, 255, 255, 0.06);
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23aab4c4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -2498,8 +2506,31 @@
         font: inherit;
         font-size: 11px;
         padding: 0 16px 0 5px;
+        white-space: nowrap;
+    }
+    /* The native select stays in the DOM only to open the OS dropdown on
+       click (a custom popup would be clipped by the tiny tip window) and
+       is fully transparent: WebView2 repaints native select chrome on
+       hover and its own arrow used to slide across the pill. */
+    .mini-tip-snooze-select {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        margin: 0;
+        border: 0;
+        padding: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        font: inherit;
+        font-size: 11px;
         outline: none;
         cursor: pointer;
+    }
+    .mini-tip-snooze:focus-within .mini-tip-snooze-trigger {
+        border-color: var(--accent-a);
     }
     .mini-tip-snooze-select option {
         color: #eaf4ff;
@@ -2529,7 +2560,7 @@
         width: 16px;
         height: 16px;
     }
-    .mini-tip[data-design="4"] .mini-tip-snooze-select {
+    .mini-tip[data-design="4"] .mini-tip-snooze-trigger {
         color: #1c2e44;
         background-color: rgba(28, 46, 68, 0.08);
         border-color: rgba(28, 46, 68, 0.4);
