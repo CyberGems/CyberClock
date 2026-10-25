@@ -7540,7 +7540,7 @@
         });
     });
 
-    // Text size tiers (Appearance): apply live via the CSS var so the
+    // Text size tiers (Full Mode tab): apply live via the CSS var so the
     // change is visible instantly, and persist for next launch.
     document.querySelectorAll("#s-ui-scale .s-fmt").forEach((b) => {
         b.addEventListener("click", () => {
