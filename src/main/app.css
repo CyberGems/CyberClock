@@ -3780,14 +3780,23 @@
     }
     .alarm-card::before {
         position: absolute;
-        top: 0;
-        bottom: 0;
+        /* Inset past the 13px corner radius so the bar lives on the
+           straight edge only: at top:0/bottom:0 the ends poked past the
+           rounded corners of the card. */
+        top: 12px;
+        bottom: 12px;
         left: 0;
         width: 3px;
         content: "";
         background: var(--accent-a);
-        border-radius: 12px 0 0 12px;
+        border-radius: 0 3px 3px 0;
         box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.62);
+    }
+    /* Disabled alarm: the status bar reads as off, same language as the
+       dimmed badge, so a lit edge never suggests a live alarm. */
+    .alarm-card.is-off::before {
+        background: rgba(255, 255, 255, 0.13);
+        box-shadow: none;
     }
     .alarm-card:hover {
         border-color: var(--border-bright);
