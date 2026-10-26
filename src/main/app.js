@@ -2252,6 +2252,13 @@
 
     function applySettings(s) {
         cfg = s;
+        // One-time restore of the expanded digital clock: the main webview
+        // stays alive in mini mode, so doing this on the first settings load
+        // covers both a full-mode launch and returning from a mini launch.
+        if (!clockStageRestoredOnce) {
+            clockStageRestoredOnce = true;
+            if (s.clockStageOpen === true) openClockStage(false);
+        }
         if (Array.isArray(cfg.customAlarms)) {
             const kept = cfg.customAlarms.filter((alarm) => !isUnnamedLegacyAlarm(alarm));
             if (kept.length !== cfg.customAlarms.length) {
@@ -2862,6 +2869,7 @@
     let clockStageBarPct = -1;
     let clockStageGreeting = "";
     let clockStageNextLine = "";
+    let clockStageRestoredOnce = false;
 
     function clockStageIsOpen() {
         const stage = document.getElementById("expanded-clock");
@@ -2939,7 +2947,7 @@
         }
     }
 
-    function openClockStage() {
+    function openClockStage(persist = true) {
         const stage = document.getElementById("expanded-clock");
         if (!stage || !stage.hidden) return;
         if (clockStageHideTimer) {
@@ -2947,15 +2955,17 @@
             clockStageHideTimer = null;
         }
         stage.hidden = false;
+        if (persist) window.cc.saveSettings({ clockStageOpen: true });
         requestAnimationFrame(() => stage.classList.add("open"));
         clockStageBarPct = -1;
         updateClockStage();
         document.getElementById("expanded-clock-back")?.focus({ preventScroll: true });
     }
 
-    function closeClockStage() {
+    function closeClockStage(persist = true) {
         const stage = document.getElementById("expanded-clock");
         if (!stage || stage.hidden) return;
+        if (persist) window.cc.saveSettings({ clockStageOpen: false });
         stage.classList.remove("open");
         if (clockStageHideTimer) clearTimeout(clockStageHideTimer);
         clockStageHideTimer = setTimeout(() => {

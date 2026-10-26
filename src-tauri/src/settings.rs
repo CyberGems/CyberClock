@@ -282,6 +282,9 @@ pub struct AppSettings {
     pub mini_clock_format: Option<String>,
     #[serde(default)]
     pub mini_show_seconds: Option<bool>,
+    /// Expanded digital clock stage left open when full mode was last used.
+    #[serde(default)]
+    pub clock_stage_open: bool,
     pub always_on_top: bool,
     pub start_with_windows: bool,
     pub start_in_mini_mode: bool,
@@ -510,6 +513,7 @@ impl Default for AppSettings {
             show_seconds: true,
             mini_clock_format: None,
             mini_show_seconds: None,
+            clock_stage_open: false,
             always_on_top: false,
             start_with_windows: true,
             start_in_mini_mode: true,
