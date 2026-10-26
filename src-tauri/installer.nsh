@@ -149,17 +149,21 @@ FunctionEnd
 !macroend
 
 ; The installer remembers the last install path as the default value of
-; ${MANUPRODUCTKEY} so a reinstall lands in the same folder, and the vendored
-; template clears that value only under the uninstaller's own shell context
-; (SHCTX). A leftover in the other hive then overrides the install-mode choice
-; on every later run, which is why "only for me" could still be forced to
-; Program Files. Clear the remembered path in both hives; the /ifempty pass
-; drops the key only when nothing else remains in it.
+; ${MANUPRODUCTKEY} so a reinstall lands in the same folder. The template
+; clears it only when the uninstaller's "Delete app data" checkbox is ticked
+; AND only under the uninstaller's own shell context (SHCTX), so a plain
+; uninstall leaves the value behind in both hives. A stale value then
+; overrides the install-mode choice on every later run, which is why "only for
+; me" could still be forced to Program Files. Clear it in both hives here; the
+; /ifempty pass drops the key only when nothing else remains in it. Updates are
+; skipped, matching the template, so an update keeps the current folder.
 !macro NSIS_HOOK_POSTUNINSTALL
-  DeleteRegValue HKLM "${MANUPRODUCTKEY}" ""
-  DeleteRegValue HKCU "${MANUPRODUCTKEY}" ""
-  DeleteRegKey /ifempty HKLM "${MANUPRODUCTKEY}"
-  DeleteRegKey /ifempty HKCU "${MANUPRODUCTKEY}"
+  ${If} $UpdateMode <> 1
+    DeleteRegValue HKLM "${MANUPRODUCTKEY}" ""
+    DeleteRegValue HKCU "${MANUPRODUCTKEY}" ""
+    DeleteRegKey /ifempty HKLM "${MANUPRODUCTKEY}"
+    DeleteRegKey /ifempty HKCU "${MANUPRODUCTKEY}"
+  ${EndIf}
 !macroend
 
 !endif ; CC_STARTUP_NSH
