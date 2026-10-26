@@ -783,8 +783,7 @@ fn create_auto_backup(app: &AppHandle) -> Result<String, String> {
     let dir = auto_backup_dir(app);
     fs::create_dir_all(&dir).map_err(|e| format!("create backup dir: {}", e))?;
     let settings = load_settings(app);
-    let json =
-        serde_json::to_string_pretty(&settings).map_err(|e| format!("serialize: {}", e))?;
+    let json = serde_json::to_string_pretty(&settings).map_err(|e| format!("serialize: {}", e))?;
     let name = format!(
         "{}{}.json",
         AUTO_BACKUP_PREFIX,
@@ -859,7 +858,7 @@ async fn restore_auto_backup(app: AppHandle, name: String) -> Result<AppSettings
     let valid = name.starts_with(AUTO_BACKUP_PREFIX)
         && name.ends_with(".json")
         && name.len() == AUTO_BACKUP_PREFIX.len() + "YYYYMMDD-HHMMSS".len() + 5
-        && !name.contains('/') 
+        && !name.contains('/')
         && !name.contains('\\')
         && name[AUTO_BACKUP_PREFIX.len()..name.len() - 5]
             .chars()
@@ -886,12 +885,9 @@ async fn restore_auto_backup(app: AppHandle, name: String) -> Result<AppSettings
 #[tauri::command]
 async fn pick_auto_backup_dir(window: WebviewWindow) -> Result<Option<String>, String> {
     let (tx, rx) = std::sync::mpsc::channel();
-    window
-        .dialog()
-        .file()
-        .pick_folder(move |path| {
-            let _ = tx.send(path);
-        });
+    window.dialog().file().pick_folder(move |path| {
+        let _ = tx.send(path);
+    });
     let picked = rx.recv().map_err(|_| "dialog cancelled".to_string())?;
     Ok(picked.and_then(|p| p.as_path().map(|p| p.to_string_lossy().to_string())))
 }
@@ -1325,8 +1321,7 @@ fn spawn_float_window_with_slot(
                             // source, its audio died with it: drop the
                             // tray's relax state.
                             let state = app_for_event.state::<AlarmState>();
-                            let mut source =
-                                lock_or_recover(&state.relax_playing_source);
+                            let mut source = lock_or_recover(&state.relax_playing_source);
                             if source.as_deref() == Some(float_label.as_str()) {
                                 *source = None;
                                 *lock_or_recover(&state.relax_playing) = None;
@@ -5716,7 +5711,9 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
             .find(|(k, _)| *k == b.kind)
             .map(|(_, r)| *r)
             .unwrap_or(u8::MAX);
-        ra.cmp(&rb).then(a.seq.cmp(&b.seq)).then(a.label.cmp(&b.label))
+        ra.cmp(&rb)
+            .then(a.seq.cmp(&b.seq))
+            .then(a.label.cmp(&b.label))
     });
 
     TrayMenuState {
@@ -5782,7 +5779,12 @@ fn set_all_click_through(app: AppHandle, on: bool) -> bool {
 }
 
 #[tauri::command]
-fn report_relax_playing(app: AppHandle, window: WebviewWindow, track: Option<String>, paused: bool) {
+fn report_relax_playing(
+    app: AppHandle,
+    window: WebviewWindow,
+    track: Option<String>,
+    paused: bool,
+) {
     let state = app.state::<AlarmState>();
     let caller = window.label().to_string();
     let mut playing = lock_or_recover(&state.relax_playing);
@@ -5849,9 +5851,7 @@ fn set_window_rect_atomic(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h:
     let Ok(hwnd) = win.hwnd() else {
         return false;
     };
-    use windows_sys::Win32::UI::WindowsAndMessaging::{
-        SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER,
-    };
+    use windows_sys::Win32::UI::WindowsAndMessaging::{SetWindowPos, SWP_NOACTIVATE, SWP_NOZORDER};
     unsafe {
         SetWindowPos(
             hwnd.0 as windows_sys::Win32::Foundation::HWND,
@@ -5977,9 +5977,7 @@ async fn tray_menu_action(app: AppHandle, action: String) {
             let state = app.state::<AlarmState>();
             let source = lock_or_recover(&state.relax_playing_source).clone();
             let target = source
-                .and_then(|label| {
-                    app.get_webview_window(&label).map(|_| label)
-                })
+                .and_then(|label| app.get_webview_window(&label).map(|_| label))
                 .unwrap_or_else(|| "main".to_string());
             // Window::emit broadcasts to every target in Tauri 2; the
             // toggle must reach only the reported source, otherwise the
