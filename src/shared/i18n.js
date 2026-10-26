@@ -229,6 +229,7 @@
             "stopwatch.copied": "Laps copied to clipboard",
 
             "relax.schedulerTitle": "Auto Scheduler",
+            "relax.schedulerDesc": "Starts relaxation sessions automatically: time, repetition, track and duration",
             "relax.schedEnable": "Enable",
             "relax.schedStartAt": "Start At",
             "relax.schedRepeat": "Repeat",
@@ -694,7 +695,6 @@
             "mini.tip.clockDriftTitle": "Clock drift detected",
             "mini.tip.clockDriftMsg": "Windows time is off by {drift}",
             "mini.tip.syncNow": "Sync now",
-            "settings.general.relaxVolume": "Relaxation Volume",
 
             // Settings modal - Backup & Data
             "settings.backup.backupsTitle": "Backups",
@@ -1333,6 +1333,7 @@
             "stopwatch.copied": "Vueltas copiadas al portapapeles",
 
             "relax.schedulerTitle": "Programador automático",
+            "relax.schedulerDesc": "Inicia sesiones de relajación automáticamente: hora, repetición, pista y duración",
             "relax.schedEnable": "Activar",
             "relax.schedStartAt": "Comienza a las",
             "relax.schedRepeat": "Repetir",
@@ -1798,8 +1799,6 @@
             "mini.tip.clockDriftTitle": "Desfase horario detectado",
             "mini.tip.clockDriftMsg": "La hora de Windows está desfasada por {drift}",
             "mini.tip.syncNow": "Sincronizar ahora",
-            "settings.general.relaxVolume": "Volumen de Relajación",
-
             // Settings modal - Backup & Data
             "settings.backup.backupsTitle": "Copias de Seguridad",
             "settings.backup.backupsDesc": "Exporta o restaura todas tus alarmas, notas, temporizadores y preferencias en formato JSON estándar.",

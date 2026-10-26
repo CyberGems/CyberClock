@@ -2972,7 +2972,96 @@
         font-size: calc(10px * var(--ui-scale));
         color: var(--text-md);
     }
-    /* Scheduler status line: mirrors Settings config in one quiet line */
+    /* Auto Scheduler: collapsible panel under the auto-stop row. Collapsed
+       it is a single header line with the next-run summary; expanding it
+       squeezes the track grid (1fr rows, min-height 0) so the view's total
+       height never changes. */
+    .r-sched {
+        flex: 0 0 auto;
+    }
+    .r-sched-hdr {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 10px;
+        cursor: pointer;
+        color: var(--text-lo);
+        transition: border-color 0.2s, color 0.2s;
+        -webkit-app-region: no-drag;
+    }
+    .r-sched-hdr:hover {
+        border-color: var(--border-bright);
+        color: var(--text-hi);
+    }
+    .r-sched-hdr.on {
+        border-color: var(--border-active);
+    }
+    .r-sched-hdr-ico {
+        display: inline-flex;
+    }
+    .r-sched-hdr-ico .cc-ico,
+    .r-sched-hdr.on .r-sched-hdr-ico .cc-ico {
+        color: var(--accent-a);
+    }
+    .r-sched-hdr-t {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: calc(11px * var(--ui-scale));
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .r-sched-hdr .r-sched-line {
+        flex: 1;
+        text-align: right;
+        padding: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .r-sched-chev {
+        display: inline-flex;
+        transition: transform 0.18s ease;
+    }
+    .r-sched.open .r-sched-chev {
+        transform: rotate(90deg);
+    }
+    .r-sched-body {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+    }
+    .r-sched-desc {
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: calc(10.5px * var(--ui-scale));
+        color: var(--text-lo);
+        padding-bottom: 2px;
+    }
+    .r-sched-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 0;
+    }
+    .r-sched-k {
+        flex: 0 0 70px;
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: calc(11px * var(--ui-scale));
+        color: var(--text-lo);
+    }
+    .r-sched-row .sched-select {
+        flex: 1;
+        min-width: 0;
+    }
+    /* Scheduler status line: mirrors the header summary inside the panel */
     .r-sched-line {
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(11.5px * var(--ui-scale));

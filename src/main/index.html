@@ -888,7 +888,77 @@
                                     style="display: none"
                                 ></span>
                             </div>
-                            <div class="r-sched-line" id="r-sched-line" style="display:none"></div>
+                            <div class="r-sched" id="r-sched">
+                                <button type="button" class="r-sched-hdr" id="r-sched-toggle" aria-expanded="false">
+                                    <span class="r-sched-hdr-ico" data-ico="timer"></span>
+                                    <span class="r-sched-hdr-t" data-i18n="relax.schedulerTitle">Auto Scheduler</span>
+                                    <span class="r-sched-line" id="r-sched-line" style="display:none"></span>
+                                    <span class="r-sched-chev" data-ico="next"></span>
+                                </button>
+                                <div class="r-sched-body" id="r-sched-body" hidden>
+                                    <div class="r-sched-desc" data-i18n="relax.schedulerDesc">Schedule automatic relaxation sessions</div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedEnable">Enable</span>
+                                        <label class="s-tog">
+                                            <input type="checkbox" id="sched-enable" />
+                                            <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                        </label>
+                                    </div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedStartAt">Start At</span>
+                                        <div class="sched-time" id="sched-time">
+                                            <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
+                                            <span class="sched-time-sep">:</span>
+                                            <select class="sched-time-sel" id="sched-time-m" aria-label="Minute"></select>
+                                            <select class="sched-time-sel sched-time-ap" id="sched-time-ap" aria-label="AM/PM" style="display:none">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedRepeat">Repeat</span>
+                                        <select class="sched-select" id="sched-repeat">
+                                            <option value="0" data-i18n="relax.repeat.once">Once</option>
+                                            <option value="15" data-i18n="relax.repeat.15min">Every 15 min</option>
+                                            <option value="30" data-i18n="relax.repeat.30min">Every 30 min</option>
+                                            <option value="60" selected data-i18n="relax.repeat.1h">Every 1 hour</option>
+                                            <option value="120" data-i18n="relax.repeat.2h">Every 2 hours</option>
+                                            <option value="240" data-i18n="relax.repeat.4h">Every 4 hours</option>
+                                            <option value="1440" data-i18n="relax.repeat.daily">Daily</option>
+                                        </select>
+                                    </div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedTrack">Track</span>
+                                        <select class="sched-select" id="sched-track">
+                                            <option value="night" data-i18n="relax.track.night">Night</option>
+                                            <option value="forest" data-i18n="relax.track.forest">Forest</option>
+                                            <option value="space" data-i18n="relax.track.space">Outer Space</option>
+                                            <option value="ocean" data-i18n="relax.track.ocean">Ocean</option>
+                                            <option value="rain" data-i18n="relax.track.rain">Rain</option>
+                                            <option value="fireplace" data-i18n="relax.track.fireplace">Fireplace</option>
+                                            <option value="random-one" selected data-i18n="relax.track.randomOne">Random One</option>
+                                            <option value="shuffle-all" data-i18n="relax.track.shuffleAll">Shuffle All</option>
+                                        </select>
+                                    </div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedDuration">Duration</span>
+                                        <select class="sched-select" id="sched-duration">
+                                            <option value="5" data-i18n="relax.duration.5m">5 minutes</option>
+                                            <option value="10" data-i18n="relax.duration.10m">10 minutes</option>
+                                            <option value="15" selected data-i18n="relax.duration.15m">15 minutes</option>
+                                            <option value="30" data-i18n="relax.duration.30m">30 minutes</option>
+                                            <option value="60" data-i18n="relax.duration.1h">1 hour</option>
+                                            <option value="0" data-i18n="relax.duration.stopped">Until stopped</option>
+                                        </select>
+                                    </div>
+                                    <div class="r-sched-row">
+                                        <span class="r-sched-k" data-i18n="relax.schedStatusLbl">Status</span>
+                                        <span class="sched-status" id="sched-status">OFF</span>
+                                        <span class="sched-status" id="sched-next">Next run: —</span>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Global mute warning: without it, a muted
                                  session looks "stuck" (empty spectrum,
                                  no sound) with no hint why. -->
@@ -1649,102 +1719,6 @@
                                 </button>
                             </div>
                         </div>
-
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.general.relaxVolume">Relaxation Volume</div>
-                            <div class="s-vol-row">
-                                <span class="s-row-ico" data-ico="lotus"></span>
-                                <span style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-low"></span></span
-                                ><input
-                                    type="range"
-                                    id="s-rvol"
-                                    min="0"
-                                    max="100"
-                                    value="80"
-                                /><span
-                                    style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-high"></span></span
-                                ><span class="s-vol-val" id="s-rvol-val"
-                                    >80%</span
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Relax Auto Scheduler (moved from the Relax view:
-                             set-and-forget config belongs in Settings; the
-                             Relax view only shows the next-run status line) -->
-                        <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="relax.schedulerTitle">Auto Scheduler</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="timer"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="relax.schedEnable">Enable</span>
-                                    <small data-i18n="relax.tooltip.scheduler">Schedule automatic playback times</small>
-                                </div>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="sched-enable" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="play"></span>
-                                <div class="s-lbl" data-i18n="relax.schedStartAt">Start At</div>
-                                <div class="sched-time" id="sched-time">
-                                    <select class="sched-time-sel" id="sched-time-h" aria-label="Hour"></select>
-                                    <span class="sched-time-sep">:</span>
-                                    <select class="sched-time-sel" id="sched-time-m" aria-label="Minute"></select>
-                                    <select class="sched-time-sel sched-time-ap" id="sched-time-ap" aria-label="AM/PM" style="display:none">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="refresh"></span>
-                                <div class="s-lbl" data-i18n="relax.schedRepeat">Repeat</div>
-                                <select class="sched-select" id="sched-repeat">
-                                    <option value="0" data-i18n="relax.repeat.once">Once</option>
-                                    <option value="15" data-i18n="relax.repeat.15min">Every 15 min</option>
-                                    <option value="30" data-i18n="relax.repeat.30min">Every 30 min</option>
-                                    <option value="60" selected data-i18n="relax.repeat.1h">Every 1 hour</option>
-                                    <option value="120" data-i18n="relax.repeat.2h">Every 2 hours</option>
-                                    <option value="240" data-i18n="relax.repeat.4h">Every 4 hours</option>
-                                    <option value="1440" data-i18n="relax.repeat.daily">Daily</option>
-                                </select>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="shuffle"></span>
-                                <div class="s-lbl" data-i18n="relax.schedTrack">Track</div>
-                                <select class="sched-select" id="sched-track">
-                                    <option value="night" data-i18n="relax.track.night">Night</option>
-                                    <option value="forest" data-i18n="relax.track.forest">Forest</option>
-                                    <option value="space" data-i18n="relax.track.space">Outer Space</option>
-                                    <option value="ocean" data-i18n="relax.track.ocean">Ocean</option>
-                                    <option value="rain" data-i18n="relax.track.rain">Rain</option>
-                                    <option value="fireplace" data-i18n="relax.track.fireplace">Fireplace</option>
-                                    <option value="random-one" selected data-i18n="relax.track.randomOne">Random One</option>
-                                    <option value="shuffle-all" data-i18n="relax.track.shuffleAll">Shuffle All</option>
-                                </select>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="stop"></span>
-                                <div class="s-lbl" data-i18n="relax.schedDuration">Duration</div>
-                                <select class="sched-select" id="sched-duration">
-                                    <option value="5" data-i18n="relax.duration.5m">5 minutes</option>
-                                    <option value="10" data-i18n="relax.duration.10m">10 minutes</option>
-                                    <option value="15" selected data-i18n="relax.duration.15m">15 minutes</option>
-                                    <option value="30" data-i18n="relax.duration.30m">30 minutes</option>
-                                    <option value="60" data-i18n="relax.duration.1h">1 hour</option>
-                                    <option value="0" data-i18n="relax.duration.stopped">Until stopped</option>
-                                </select>
-                            </div>
-                            <div class="s-row">
-                                <span class="s-lbl" data-i18n="relax.schedStatusLbl">Status</span>
-                                <span class="sched-status" id="sched-status">OFF</span>
-                                <span class="sched-status" id="sched-next">Next run: —</span>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Display -->
@@ -1999,7 +1973,7 @@
                             <div class="s-sec-t" data-i18n="settings.mini.fontTitle">Typography</div>
                             <div class="s-row" style="gap: 8px; padding: 6px 0; align-items: center;">
                                 <span class="mini-face-k" data-i18n="settings.mini.fontTime">Time</span>
-                                <select id="s-mini-font" class="sched-select" style="flex: 1;">
+                                <select id="s-mini-font" class="sched-select" style="flex: 1; min-width: 0;">
                                     <option value="default" data-i18n="settings.mini.fontDefault">Predeterminada</option>
                                     <option value="Orbitron">Orbitron (Cyber)</option>
                                     <option value="Share Tech Mono">Share Tech Mono (Tactical)</option>
@@ -2007,20 +1981,24 @@
                                     <option value="Space Grotesk">Space Grotesk (Modern)</option>
                                     <option value="Outfit">Outfit (Clean)</option>
                                 </select>
-                                <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontBold">Bold</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-mini-font-bold" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                                <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontItalic">Italic</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-mini-font-italic" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-left: 14px;">
+                                    <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontBold">Bold</span>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-mini-font-bold" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-left: 14px;">
+                                    <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontItalic">Italic</span>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-mini-font-italic" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
                             </div>
                             <div class="s-row" style="gap: 8px; padding: 6px 0; align-items: center;">
                                 <span class="mini-face-k" data-i18n="settings.mini.fontDate">Date</span>
-                                <select id="s-mini-date-font" class="sched-select" style="flex: 1;">
+                                <select id="s-mini-date-font" class="sched-select" style="flex: 1; min-width: 0;">
                                     <option value="default" data-i18n="settings.mini.fontDefault">Predeterminada</option>
                                     <option value="Orbitron">Orbitron (Cyber)</option>
                                     <option value="Share Tech Mono">Share Tech Mono (Tactical)</option>
@@ -2028,16 +2006,20 @@
                                     <option value="Space Grotesk">Space Grotesk (Modern)</option>
                                     <option value="Outfit">Outfit (Clean)</option>
                                 </select>
-                                <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontBold">Bold</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-mini-date-font-bold" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                                <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontItalic">Italic</span>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-mini-date-font-italic" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-left: 14px;">
+                                    <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontBold">Bold</span>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-mini-date-font-bold" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-left: 14px;">
+                                    <span style="font-size: 12px; color: var(--text-lo);" data-i18n="settings.mini.fontItalic">Italic</span>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-mini-date-font-italic" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
                             </div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="refresh"></span>

@@ -2537,12 +2537,6 @@
             const cvVal = document.getElementById("s-cvol-val");
             if (cvVal) cvVal.textContent = v + "%";
         }
-        const rvEl = document.getElementById("s-rvol");
-        if (rvEl) {
-            const v = Math.round((s.relaxVolume || 0.8) * 100);
-            rvEl.value = v;
-            document.getElementById("s-rvol-val").textContent = v + "%";
-        }
         const rvolEl = document.getElementById("r-vol");
         if (rvolEl) {
             const v = Math.round((s.relaxVolume || 0.8) * 100);
@@ -9020,19 +9014,6 @@
             300,
         );
     });
-    document.getElementById("s-rvol").addEventListener("input", (e) => {
-        document.getElementById("s-rvol-val").textContent =
-            e.target.value + "%";
-        window.audioEngine.setVolume(e.target.value / 100);
-        clearTimeout(sDebounce.rv);
-        sDebounce.rv = setTimeout(
-            () =>
-                window.cc.saveSettings({
-                    relaxVolume: e.target.value / 100,
-                }),
-            300,
-        );
-    });
 
     // ══════════════════════════════════════════════════════════════
     // TITLE BAR BUTTONS
@@ -10007,10 +9988,12 @@
     }
 
     // Compact status line on the Relax view: "Next: 22:00 · Rain · 15m".
-    // The scheduler's controls live in Settings; the Relax view only
-    // needs to answer "when is the next automatic session?".
+    // The scheduler's controls live in the Relax view's collapsible
+    // panel; the collapsed header carries the next-run summary.
     function updateRelaxSchedLine(sched, next) {
         const lineEl = document.getElementById('r-sched-line');
+        const hdrEl = document.getElementById('r-sched-toggle');
+        if (hdrEl) hdrEl.classList.toggle("on", !!(sched && sched.enabled));
         if (!lineEl) return;
         if (!sched || !sched.enabled) {
             lineEl.textContent = "";
@@ -10036,6 +10019,18 @@
     }
 
     // Scheduler event listeners
+    const schedToggle = document.getElementById('r-sched-toggle');
+    if (schedToggle) {
+        schedToggle.addEventListener('click', () => {
+            const panel = document.getElementById('r-sched');
+            const body = document.getElementById('r-sched-body');
+            if (!panel || !body) return;
+            const willOpen = body.hidden;
+            body.hidden = !willOpen;
+            panel.classList.toggle("open", willOpen);
+            schedToggle.setAttribute("aria-expanded", String(willOpen));
+        });
+    }
     document.getElementById('sched-enable').addEventListener('change', (e) => {
         window.cc.saveSettings({
             relaxScheduler: { ...cfg.relaxScheduler, enabled: e.target.checked }
