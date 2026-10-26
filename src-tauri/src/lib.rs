@@ -911,7 +911,7 @@ fn open_auto_backup_dir(app: AppHandle) -> Result<bool, String> {
             .creation_flags(0x08000000)
             .spawn()
             .map_err(|e| format!("open: {}", e))?;
-        return Ok(true);
+        Ok(true)
     }
     #[cfg(not(target_os = "windows"))]
     {
