@@ -3039,6 +3039,11 @@
         border-top: none;
         border-radius: 0 0 8px 8px;
     }
+    /* display:flex above would override the hidden attribute's UA
+       display:none, so the collapsed state needs this explicit rule. */
+    .r-sched-body[hidden] {
+        display: none;
+    }
     .r-sched-desc {
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(10.5px * var(--ui-scale));
