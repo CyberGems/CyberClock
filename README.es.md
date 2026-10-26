@@ -51,7 +51,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Reloj analógico:** renderizado en canvas con animaciones suaves y acentos neón; puede ocultarse en el modo completo para dar todo el ancho al calendario
 - **Diez diseños de esfera:** Clásica, Minimalista, Segmentos, HUD, Cuántica, Cronógrafo, Matriz Hex, Núcleo Reactor, Circuito PCB y la esfera multicolor Corona de Gemas
 - **Pantalla digital:** fuente Space Grotesk con celdas de dígitos de ancho fijo (12H / 24H)
-- **Reloj ampliado:** haz clic en el reloj o la fecha de la barra de título para llenar toda la pantalla con el reloj digital: saludo, barra de progreso de segundos, próxima alarma y el nombre editable de la esfera (haz clic para cambiarlo). Incluye su propio botón de Modo Mini y muestra siempre los segundos; Esc, la flecha de regreso o un clic en el fondo vuelven al panel
+- **Reloj ampliado:** haz clic en el reloj o la fecha de la barra de título para llenar toda la pantalla con el reloj digital: saludo, barra de progreso de segundos, próxima alarma y el nombre editable de la esfera (haz clic para cambiarlo). Incluye su propio botón de Modo Mini y muestra siempre los segundos; Esc, la flecha de regreso o un clic en el fondo vuelven al panel, y su estado abierto se recuerda entre reinicios
 - **Calendario completo:** vista mensual con agenda, notas por día y estadísticas
 - **Inteligencia de fechas:** día del año, semana ISO, días restantes, fase lunar
 - **Notas del día:** adjunta notas a fechas concretas con un editor en ventana
@@ -115,7 +115,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Inicio automático con Windows:** inicio basado en el registro, ofrecido como opción en el propio instalador y sincronizado con el interruptor de Configuración (la app reconcilia ambos en cada arranque)
 - **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
 - **Interfaz bilingüe:** interfaz completa en inglés y español
-- **Respaldo y Datos:** exporta alarmas, notas, temporizadores y preferencias como JSON; importa copias de seguridad previas; abre la carpeta de datos local; o restablece a valores de fábrica, todo desde una pestaña de configuración dedicada
+- **Respaldo y Datos:** exporta alarmas, notas, temporizadores y preferencias como JSON; importa copias de seguridad previas; copias automáticas rotatorias en cada inicio (elige cuántas conservar y dónde, y restaura cualquier copia en un clic); abre la carpeta de datos local; o restablece a valores de fábrica, todo desde una pestaña de configuración dedicada
 - **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de..." en todos los menús contextuales de widgets flotantes y Modo Mini. Cada uno de esos menús abre con el nombre del widget y CyberClock
 - **Bienvenida personalizada:** un nombre para mostrar opcional añade un saludo según la hora junto a la marca CyberClock cuando se abre el modo completo
 
