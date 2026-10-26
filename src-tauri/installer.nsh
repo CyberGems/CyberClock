@@ -14,6 +14,10 @@
 ; so the checkbox is registered through the page's custom SHOW/LEAVE
 ; callbacks; see the vendored template (nsis/installer.nsi) for where those
 ; callbacks are wired.
+;
+; The uninstall hooks below also clear the installer's remembered install path
+; from both registry hives, so a stale path can never override the install-mode
+; choice on a later run.
 
 !ifndef CC_STARTUP_NSH
 !define CC_STARTUP_NSH
@@ -142,6 +146,20 @@ FunctionEnd
 ; The uninstaller never leaves a Run entry behind.
 !macro NSIS_HOOK_PREUNINSTALL
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "CyberClock"
+!macroend
+
+; The installer remembers the last install path as the default value of
+; ${MANUPRODUCTKEY} so a reinstall lands in the same folder, and the vendored
+; template clears that value only under the uninstaller's own shell context
+; (SHCTX). A leftover in the other hive then overrides the install-mode choice
+; on every later run, which is why "only for me" could still be forced to
+; Program Files. Clear the remembered path in both hives; the /ifempty pass
+; drops the key only when nothing else remains in it.
+!macro NSIS_HOOK_POSTUNINSTALL
+  DeleteRegValue HKLM "${MANUPRODUCTKEY}" ""
+  DeleteRegValue HKCU "${MANUPRODUCTKEY}" ""
+  DeleteRegKey /ifempty HKLM "${MANUPRODUCTKEY}"
+  DeleteRegKey /ifempty HKCU "${MANUPRODUCTKEY}"
 !macroend
 
 !endif ; CC_STARTUP_NSH
