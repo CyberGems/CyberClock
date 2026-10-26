@@ -256,6 +256,28 @@
             // Opens a file picker and replaces settings with the backup.
             return await invoke("import_backup");
         },
+        // Automatic rotating backups
+        autoBackupNow: async () => {
+            // Writes a timestamped snapshot and prunes the rotation.
+            return await invoke("auto_backup_now");
+        },
+        listAutoBackups: async () => {
+            // Newest-first [{ name, size }] in the backup folder.
+            return await invokeOrFallback("list_auto_backups", undefined, []);
+        },
+        restoreAutoBackup: async (name) => {
+            // Snapshots the current state, then applies the named backup.
+            return await invoke("restore_auto_backup", { name });
+        },
+        pickAutoBackupDir: async () => {
+            // Folder picker for a custom backup destination.
+            return await invoke("pick_auto_backup_dir");
+        },
+        openAutoBackupDir: async () => {
+            // Opens the backup folder in the system file manager.
+            if (!HAS_TAURI) return false;
+            return await invoke("open_auto_backup_dir");
+        },
         openDataFolder: async () => {
             // Opens the app's local storage directory in the file manager.
             if (!HAS_TAURI) return false;

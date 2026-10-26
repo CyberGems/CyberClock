@@ -2211,6 +2211,52 @@
                             </div>
                         </div>
 
+                        <!-- Automatic Backups (rotating) -->
+                        <div class="s-sec">
+                            <div class="s-sec-t" data-i18n="settings.backup.autoTitle">Automatic Backups</div>
+                            <div class="s-sec-d" data-i18n="settings.backup.autoDesc" style="margin-bottom: 14px;">A snapshot of your settings is taken on every launch and before each restore, keeping only the most recent copies.</div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="gem"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.autoEnable">Enable automatic backups</span>
+                                    <small data-i18n="settings.backup.autoEnableDesc">Taken on launch and before imports or restores</small>
+                                </div>
+                                <label class="s-tog"><input type="checkbox" id="s-auto-backup" checked />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="list"></span>
+                                <div class="s-lbl" data-i18n="settings.backup.autoKeep">Keep</div>
+                                <div class="s-fmts" id="s-auto-backup-keep">
+                                    <button class="s-fmt on" data-keep="3">3</button
+                                    ><button class="s-fmt" data-keep="5">5</button
+                                    ><button class="s-fmt" data-keep="10">10</button>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="folder"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.autoFolder">Destination folder</span>
+                                    <small id="s-auto-backup-dir-label">—</small>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="s-abtn" id="s-auto-backup-dir-choose" type="button" data-i18n="settings.backup.autoChoose">Choose…</button>
+                                    <button class="s-abtn" id="s-auto-backup-dir-reset" type="button" data-i18n="settings.backup.autoReset">Reset</button>
+                                    <button class="s-abtn" id="s-auto-backup-open" type="button" data-i18n="settings.backup.autoOpen">Open</button>
+                                </div>
+                            </div>
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="upload"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="settings.backup.autoNow">Back up now</span>
+                                    <small id="s-auto-backup-status" style="color: var(--accent-a);"></small>
+                                </div>
+                                <button class="s-abtn" id="s-auto-backup-now" type="button" data-i18n="settings.backup.autoNowBtn">Create</button>
+                            </div>
+                            <div id="s-auto-backup-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+                        </div>
+
                         <!-- Local Storage -->
                         <div class="s-sec">
                             <div class="s-sec-t" data-i18n="settings.backup.storageTitle">Local Storage</div>

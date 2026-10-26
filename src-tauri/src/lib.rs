@@ -2,7 +2,7 @@ use chrono::{Datelike, TimeZone};
 use chrono::{Local, Timelike};
 use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
 use tauri::tray::TrayIconBuilder;
@@ -733,23 +733,195 @@ async fn import_backup(
     let imported: AppSettings =
         serde_json::from_str(&content).map_err(|e| format!("invalid backup: {}", e))?;
 
-    // Apply the imported settings
+    // Undo point before replacing anything (rotation keeps it bounded).
+    if load_settings(&app).auto_backup_enabled {
+        let _ = create_auto_backup(&app);
+    }
+    apply_imported_settings(&app, imported);
+
+    info!("Backup imported from {:?}", path);
+    Ok(Some(load_settings(&app)))
+}
+
+/// Persist, re-apply runtime state and broadcast imported settings. Shared
+/// by the manual import and automatic backup restore paths.
+fn apply_imported_settings(app: &AppHandle, imported: AppSettings) {
     set_auto_update(imported.auto_update);
     EDGE_LIMITS_ENABLED.store(imported.mini_edge_limits, Ordering::Release);
-    let _ = persist(&app, &imported);
+    let _ = persist(app, &imported);
 
     // Reset relax scheduler
     let state = app.state::<AlarmState>();
     *lock_or_recover(&state.relax_next_run) = None;
 
-    apply_always_on_top(&app, imported.always_on_top);
-    apply_all_click_through(&app);
+    apply_always_on_top(app, imported.always_on_top);
+    apply_all_click_through(app);
 
     // Broadcast to all windows
     let _ = app.emit("settings:updated", &imported);
+}
 
-    info!("Backup imported from {:?}", path);
-    Ok(Some(imported))
+// ─────────────────────────────────────────────────────────────
+// Automatic rotating backups (Backup & Data tab)
+// ─────────────────────────────────────────────────────────────
+
+/// Backup files share the manual export's naming so any file list reads
+/// uniformly; the timestamp prefix makes lexicographic order chronological.
+const AUTO_BACKUP_PREFIX: &str = "cyberclock-backup-";
+
+fn auto_backup_dir(app: &AppHandle) -> PathBuf {
+    load_settings(app)
+        .auto_backup_dir
+        .filter(|d| !d.trim().is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| storage_dir(app).join("backups"))
+}
+
+/// Write a timestamped snapshot of the current settings, then prune the
+/// rotation down to the configured keep count.
+fn create_auto_backup(app: &AppHandle) -> Result<String, String> {
+    let dir = auto_backup_dir(app);
+    fs::create_dir_all(&dir).map_err(|e| format!("create backup dir: {}", e))?;
+    let settings = load_settings(app);
+    let json =
+        serde_json::to_string_pretty(&settings).map_err(|e| format!("serialize: {}", e))?;
+    let name = format!(
+        "{}{}.json",
+        AUTO_BACKUP_PREFIX,
+        chrono::Local::now().format("%Y%m%d-%H%M%S")
+    );
+    // Same-minute retriggers overwrite the older snapshot; the state is
+    // fresher, so nothing of value is lost.
+    fs::write(dir.join(&name), &json).map_err(|e| format!("write backup: {}", e))?;
+    prune_auto_backups(app, &dir)?;
+    info!("Auto backup written: {:?}", dir.join(&name));
+    Ok(name)
+}
+
+fn prune_auto_backups(app: &AppHandle, dir: &Path) -> Result<(), String> {
+    let keep = load_settings(app).auto_backup_keep.max(1) as usize;
+    let mut entries: Vec<PathBuf> = match fs::read_dir(dir) {
+        Ok(rd) => rd
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .filter(|p| {
+                p.extension().and_then(|x| x.to_str()) == Some("json")
+                    && p.file_name()
+                        .and_then(|n| n.to_str())
+                        .map(|n| n.starts_with(AUTO_BACKUP_PREFIX))
+                        .unwrap_or(false)
+            })
+            .collect(),
+        Err(_) => return Ok(()), // nothing to prune yet
+    };
+    entries.sort(); // timestamped names sort chronologically
+    while entries.len() > keep {
+        let oldest = entries.remove(0);
+        let _ = fs::remove_file(&oldest);
+    }
+    Ok(())
+}
+
+/// Create a rotating snapshot on demand ("Back up now").
+#[tauri::command]
+async fn auto_backup_now(app: AppHandle) -> Result<String, String> {
+    create_auto_backup(&app)
+}
+
+/// Newest-first list of automatic backups: [{ name, size }].
+#[tauri::command]
+fn list_auto_backups(app: AppHandle) -> Result<Vec<serde_json::Value>, String> {
+    let dir = auto_backup_dir(&app);
+    let mut out: Vec<serde_json::Value> = Vec::new();
+    let rd = match fs::read_dir(&dir) {
+        Ok(rd) => rd,
+        Err(_) => return Ok(out), // no backups yet
+    };
+    for entry in rd.filter_map(|e| e.ok()) {
+        let path = entry.path();
+        let name = match path.file_name().and_then(|n| n.to_str()) {
+            Some(n) if n.starts_with(AUTO_BACKUP_PREFIX) => n.to_string(),
+            _ => continue,
+        };
+        let size = entry.metadata().map(|m| m.len()).unwrap_or(0);
+        out.push(serde_json::json!({ "name": name, "size": size }));
+    }
+    // Newest first for display.
+    out.sort_by(|a, b| b["name"].as_str().cmp(&a["name"].as_str()));
+    Ok(out)
+}
+
+/// Restore an automatic backup by file name. A fresh snapshot of the
+/// current state is taken first, so a bad restore can itself be undone.
+#[tauri::command]
+async fn restore_auto_backup(app: AppHandle, name: String) -> Result<AppSettings, String> {
+    // Strict name check: prefix + timestamp + .json, no path parts.
+    let valid = name.starts_with(AUTO_BACKUP_PREFIX)
+        && name.ends_with(".json")
+        && name.len() == AUTO_BACKUP_PREFIX.len() + "YYYYMMDD-HHMMSS".len() + 5
+        && !name.contains('/') 
+        && !name.contains('\\')
+        && name[AUTO_BACKUP_PREFIX.len()..name.len() - 5]
+            .chars()
+            .all(|c| c.is_ascii_digit() || c == '-');
+    if !valid {
+        return Err("invalid backup name".into());
+    }
+    let path = auto_backup_dir(&app).join(&name);
+    let content = fs::read_to_string(&path).map_err(|e| format!("read: {}", e))?;
+    let imported: AppSettings =
+        serde_json::from_str(&content).map_err(|e| format!("invalid backup: {}", e))?;
+
+    // Undo point before replacing anything.
+    if load_settings(&app).auto_backup_enabled {
+        let _ = create_auto_backup(&app);
+    }
+    apply_imported_settings(&app, imported);
+
+    info!("Auto backup restored from {:?}", path);
+    Ok(load_settings(&app))
+}
+
+/// Pick a custom destination folder for the automatic backups.
+#[tauri::command]
+async fn pick_auto_backup_dir(window: WebviewWindow) -> Result<Option<String>, String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    window
+        .dialog()
+        .file()
+        .pick_folder(move |path| {
+            let _ = tx.send(path);
+        });
+    let picked = rx.recv().map_err(|_| "dialog cancelled".to_string())?;
+    Ok(picked.and_then(|p| p.as_path().map(|p| p.to_string_lossy().to_string())))
+}
+
+/// Open the automatic backups folder in the system file manager.
+#[tauri::command]
+fn open_auto_backup_dir(app: AppHandle) -> Result<bool, String> {
+    let dir = auto_backup_dir(&app);
+    fs::create_dir_all(&dir).map_err(|e| format!("create backup dir: {}", e))?;
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        use std::process::Command;
+        Command::new("explorer")
+            .arg(dir.to_string_lossy().to_string())
+            .creation_flags(0x08000000)
+            .spawn()
+            .map_err(|e| format!("open: {}", e))?;
+        return Ok(true);
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        use std::process::Command;
+        Command::new("xdg-open")
+            .arg(&dir)
+            .spawn()
+            .map_err(|e| format!("open: {}", e))?;
+        Ok(true)
+    }
 }
 
 /// Open the application data folder in the system file manager.
@@ -6362,6 +6534,11 @@ pub fn run() {
             center_open_widgets,
             export_backup,
             import_backup,
+            auto_backup_now,
+            list_auto_backups,
+            restore_auto_backup,
+            pick_auto_backup_dir,
+            open_auto_backup_dir,
             open_data_folder
         ]);
 
@@ -6373,6 +6550,19 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
     app.manage(init_settings_store(app.handle()));
+    // Rotating safety net: snapshot the previous session's settings once
+    // per launch (pruned to the configured keep count). Off the main
+    // thread; the webviews load afterwards and cannot miss it.
+    {
+        let app_handle = app.handle().clone();
+        std::thread::spawn(move || {
+            if load_settings(&app_handle).auto_backup_enabled {
+                if let Err(e) = create_auto_backup(&app_handle) {
+                    warn!("Auto backup on launch failed: {}", e);
+                }
+            }
+        });
+    }
     app.run(|_, _| {});
 }
 

@@ -2571,6 +2571,20 @@
         }
         if (typeof applySchedUI === "function") applySchedUI(s);
 
+        // Automatic backups (Backup & Data)
+        const sAutoBk = document.getElementById("s-auto-backup");
+        if (sAutoBk) sAutoBk.checked = s.autoBackupEnabled !== false;
+        const autoKeepVal = String(s.autoBackupKeep ?? 3);
+        document
+            .querySelectorAll("#s-auto-backup-keep .s-fmt")
+            .forEach((b) => b.classList.toggle("on", b.dataset.keep === autoKeepVal));
+        const autoDirLbl = document.getElementById("s-auto-backup-dir-label");
+        if (autoDirLbl) {
+            autoDirLbl.textContent =
+                s.autoBackupDir || window.ccI18n.t("settings.backup.autoDefaultDir");
+        }
+        refreshAutoBackupList();
+
         // Mini mode layout. Show Date off hides the date and locks 2 rows,
         // so that layout only changes the bar by a few pixels.
         const collapseOn = s.miniCollapseDate === true;
@@ -8604,6 +8618,131 @@
     if (sBtnOpenFolder) {
         sBtnOpenFolder.addEventListener("click", () => {
             window.cc.openDataFolder();
+        });
+    }
+
+    // ── Automatic rotating backups ─────────────────────────────
+    const AUTO_BACKUP_PREFIX = "cyberclock-backup-";
+    function autoBackupFriendlyName(name) {
+        // "cyberclock-backup-YYYYMMDD-HHMMSS.json" → "YYYY-MM-DD HH:MM"
+        const stem = name.slice(AUTO_BACKUP_PREFIX.length, name.length - 5);
+        if (stem.length !== 15) return name;
+        return `${stem.slice(0, 4)}-${stem.slice(4, 6)}-${stem.slice(6, 8)} ${stem.slice(9, 11)}:${stem.slice(11, 13)}`;
+    }
+
+    async function refreshAutoBackupList() {
+        const wrap = document.getElementById("s-auto-backup-list");
+        if (!wrap) return;
+        let items = [];
+        try {
+            items = (await window.cc.listAutoBackups()) || [];
+        } catch (err) {
+            console.error("List auto backups failed:", err);
+        }
+        wrap.replaceChildren();
+        if (!items.length) {
+            const empty = document.createElement("small");
+            empty.style.color = "var(--text-lo)";
+            empty.textContent = window.ccI18n.t("settings.backup.autoEmpty");
+            wrap.appendChild(empty);
+            return;
+        }
+        const restoreText = window.ccI18n.t("settings.backup.autoRestore");
+        items.forEach((it) => {
+            const row = document.createElement("div");
+            row.style.cssText = "display:flex;align-items:center;gap:10px;padding:4px 0;";
+            const nm = document.createElement("span");
+            nm.style.cssText =
+                "font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-md);flex:1;";
+            const kb = Math.max(1, Math.round((it.size || 0) / 1024));
+            nm.textContent = `${autoBackupFriendlyName(it.name)}  ·  ${kb} KB`;
+            const btn = document.createElement("button");
+            btn.className = "s-abtn";
+            btn.type = "button";
+            btn.textContent = restoreText;
+            btn.addEventListener("click", () => restoreAutoBackupEntry(it.name));
+            row.append(nm, btn);
+            wrap.appendChild(row);
+        });
+    }
+
+    function restoreAutoBackupEntry(name) {
+        openCustomConfirm({
+            title: window.ccI18n.t("settings.backup.autoRestoreConfirmTitle"),
+            msg: window.ccI18n.t("settings.backup.autoRestoreConfirmMsg"),
+            okText: window.ccI18n.t("settings.backup.autoRestore"),
+            onOk: async () => {
+                try {
+                    const result = await window.cc.restoreAutoBackup(name);
+                    applySettings(result);
+                    renderCalendar();
+                    const st = document.getElementById("s-auto-backup-status");
+                    if (st) st.textContent = window.ccI18n.t("settings.backup.autoRestored");
+                    // The undo snapshot the backend took belongs in the list.
+                    refreshAutoBackupList();
+                } catch (err) {
+                    console.error("Restore failed:", err);
+                    openCustomConfirm({
+                        title: window.ccI18n.t("settings.backup.importErrorTitle"),
+                        msg: window.ccI18n.t("settings.backup.importErrorMsg"),
+                        okText: "OK",
+                        onOk: () => {},
+                    });
+                }
+            },
+        });
+    }
+
+    const sAutoBackup = document.getElementById("s-auto-backup");
+    if (sAutoBackup) {
+        sAutoBackup.addEventListener("change", (e) => {
+            window.cc.saveSettings({ autoBackupEnabled: e.target.checked });
+        });
+    }
+    document.querySelectorAll("#s-auto-backup-keep .s-fmt").forEach((b) => {
+        b.addEventListener("click", () => {
+            window.cc.saveSettings({ autoBackupKeep: parseInt(b.dataset.keep, 10) });
+            document
+                .querySelectorAll("#s-auto-backup-keep .s-fmt")
+                .forEach((x) => x.classList.remove("on"));
+            b.classList.add("on");
+        });
+    });
+    const sAutoDirChoose = document.getElementById("s-auto-backup-dir-choose");
+    if (sAutoDirChoose) {
+        sAutoDirChoose.addEventListener("click", async () => {
+            try {
+                const dir = await window.cc.pickAutoBackupDir();
+                if (dir) window.cc.saveSettings({ autoBackupDir: dir });
+            } catch (err) {
+                console.error("Pick backup folder failed:", err);
+            }
+        });
+    }
+    const sAutoDirReset = document.getElementById("s-auto-backup-dir-reset");
+    if (sAutoDirReset) {
+        sAutoDirReset.addEventListener("click", () => {
+            window.cc.saveSettings({ autoBackupDir: null });
+        });
+    }
+    const sAutoOpen = document.getElementById("s-auto-backup-open");
+    if (sAutoOpen) {
+        sAutoOpen.addEventListener("click", () => window.cc.openAutoBackupDir());
+    }
+    const sAutoNow = document.getElementById("s-auto-backup-now");
+    if (sAutoNow) {
+        sAutoNow.addEventListener("click", async () => {
+            sAutoNow.disabled = true;
+            try {
+                await window.cc.autoBackupNow();
+                const st = document.getElementById("s-auto-backup-status");
+                if (st) st.textContent = window.ccI18n.t("settings.backup.autoCreated");
+                refreshAutoBackupList();
+            } catch (err) {
+                console.error("Backup now failed:", err);
+            } finally {
+                sAutoNow.disabled = false;
+            }
         });
     }
 

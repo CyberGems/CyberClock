@@ -99,6 +99,10 @@ fn default_true() -> bool {
     true
 }
 
+fn default_auto_backup_keep() -> u32 {
+    3
+}
+
 fn default_auto_cycle_interval() -> u32 {
     15
 }
@@ -285,6 +289,14 @@ pub struct AppSettings {
     /// Expanded digital clock stage left open when full mode was last used.
     #[serde(default)]
     pub clock_stage_open: bool,
+    // Automatic rotating backups (Backup & Data). The snapshot captures
+    // the previous session's settings; None dir = <storage>/backups.
+    #[serde(default = "default_true")]
+    pub auto_backup_enabled: bool,
+    #[serde(default = "default_auto_backup_keep")]
+    pub auto_backup_keep: u32,
+    #[serde(default)]
+    pub auto_backup_dir: Option<String>,
     pub always_on_top: bool,
     pub start_with_windows: bool,
     pub start_in_mini_mode: bool,
@@ -514,6 +526,9 @@ impl Default for AppSettings {
             mini_clock_format: None,
             mini_show_seconds: None,
             clock_stage_open: false,
+            auto_backup_enabled: true,
+            auto_backup_keep: default_auto_backup_keep(),
+            auto_backup_dir: None,
             always_on_top: false,
             start_with_windows: true,
             start_in_mini_mode: true,
