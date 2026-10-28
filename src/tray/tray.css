@@ -115,7 +115,7 @@
         height: 14px;
         display: block;
         flex-shrink: 0;
-        filter: grayscale(1);
+        filter: grayscale(0.5);
         transition: filter 0.12s ease;
     }
     .tray-header:hover .tray-head-ico {
