@@ -3970,6 +3970,11 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<String, String> {
         s.hotkey_toggle = normalized.clone();
         Ok(())
     });
+    if let Some(tray) = app.tray_by_id("main") {
+        let _ = tray.set_tooltip(Some(format_tray_tooltip(
+            (!normalized.is_empty()).then_some(normalized.as_str()),
+        )));
+    }
     let _ = app.emit("settings:updated", &load_settings(&app));
     info!("hotkey: set to {:?}", normalized);
     Ok(normalized)
@@ -6048,6 +6053,15 @@ pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
     });
 }
 
+fn format_tray_tooltip(shortcut: Option<&str>) -> String {
+    let clean = shortcut.unwrap_or("").trim();
+    if clean.is_empty() {
+        "CyberClock".to_string()
+    } else {
+        format!("CyberClock · {clean}")
+    }
+}
+
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
     let default_icon = app
         .default_window_icon()
@@ -6056,9 +6070,11 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
             std::io::ErrorKind::NotFound,
             "default window icon missing",
         )))?;
+    let settings = load_settings(app);
+    let tooltip = format_tray_tooltip((!settings.hotkey_toggle.is_empty()).then_some(settings.hotkey_toggle.as_str()));
     let _tray = TrayIconBuilder::with_id("main")
         .icon(default_icon)
-        .tooltip(format!("CyberClock v{}", app.package_info().version))
+        .tooltip(tooltip)
         .on_tray_icon_event(|tray, event| {
             use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
             match event {
