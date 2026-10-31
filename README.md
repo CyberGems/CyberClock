@@ -22,6 +22,31 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [What is CyberClock?](#what-is-cyberclock)
+- [🕐 Why CyberClock?](#-why-cyberclock)
+- [✨ Key Features](#-key-features)
+- [🚀 Getting Started](#-getting-started)
+- [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
+- [🎨 Themes & Customization](#-themes--customization)
+- [❤️ Donate](#️-donate)
+- [📄 License](#-license)
+- [❓ FAQ](#-faq)
+- [🔗 See also](#-see-also)
+
+<details>
+<summary><strong>🔗 Related links (outside this README)</strong></summary>
+
+- 🌐 [CyberClock on the web](https://cybergems.org/apps/cyberclock/) — overview, download and SmartScreen guide
+- 📚 [Documentation & FAQ — Wiki](https://github.com/CyberGems/CyberClock/wiki) — troubleshooting and deep-dives
+- 💾 [Releases](https://github.com/CyberGems/CyberClock/releases) — installers, portable builds and changelog
+- 🟣 [CyberGems suite](https://github.com/CyberGems) — all open-source apps
+
+</details>
+
+---
+
 ## What is CyberClock?
 
 CyberClock is a feature-rich desktop clock for Windows that brings everyday timekeeping, productivity tools, and moments of relaxation into one polished interface. It combines analog and digital clocks, a full calendar, countdown timer, precision stopwatch, alarms, compact Mini Mode, and independent floating time tools. A wellness module adds procedurally generated ambient soundscapes and guided breathing, while local customization lets the experience adapt to your desktop. Built with **Tauri v2** and **Rust**.
@@ -274,9 +299,7 @@ old 5-skin themes migrate automatically to their heir tint.
 
 ## ❤️ Donate
 
-After countless hours building and refining **CyberClock** for my own use, I recently decided to share it with the world along with my other open-source tools in [CyberGems](https://github.com/CyberGems#-all-apps--repositories).
-
-If you’d like to support future updates, I’d truly appreciate it. Your donation helps keep development going, roll out new features, speed up updates and bug resolution, and enhance documentation quality. You can also show your support by [starring the repo on GitHub](https://github.com/CyberGems/CyberClock). Thank you! 🙏
+**CyberClock** is 100% free and open source. If it helps you, please consider [donating](https://cybergems.org/donate) or [starring the repo on GitHub](https://github.com/CyberGems/CyberClock) to support continued development. [Read the full story](https://cybergems.org/about/) behind the project. Thank you! 🙏
 
 <p align="center">
   <a href="https://www.paypal.com/donate/?hosted_button_id=M4PY3UPJA5Y6Q"><img src="https://img.shields.io/badge/Donate-PayPal-0070BA?style=for-the-badge&logo=paypal" alt="Donate via PayPal" /></a>
