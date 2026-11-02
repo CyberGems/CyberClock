@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Reloj, calendario, temporizador, cronómetro, relajación y herramientas de tiempo flotantes para Windows
+### Tu reloj, calendario, temporizador, cronómetro y widgets flotantes, juntos en una sola app ligera para Windows
 
 </div>
 
@@ -58,7 +58,7 @@
 
 ## 👋 Introducción
 
-CyberClock es un reloj de escritorio para Windows repleto de funciones que reúne la medición del tiempo del día a día, herramientas de productividad y momentos de relajación en una interfaz cuidada. Combina relojes analógico y digital, un calendario completo, temporizador, cronómetro de precisión, alarmas, un compacto Modo Mini y herramientas de tiempo flotantes independientes. Un módulo de bienestar añade paisajes sonoros ambientales generados proceduralmente y respiración guiada, mientras que la personalización local adapta la experiencia a tu escritorio. Construido con **Tauri v2** y **Rust**.
+El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas— y deja que cualquiera de ellos se desprenda como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros generados por procedimientos y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 

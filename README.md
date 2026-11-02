@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Clock, calendar, timer, stopwatch, relaxation and floating time tools for Windows
+### Your clock, calendar, timer, stopwatch and floating widgets, together in one lightweight Windows app
 
 </div>
 
@@ -58,7 +58,7 @@
 
 ## 👋 Introduction
 
-CyberClock is a feature-rich desktop clock for Windows that brings everyday timekeeping, productivity tools, and moments of relaxation into one polished interface. It combines analog and digital clocks, a full calendar, countdown timer, precision stopwatch, alarms, compact Mini Mode, and independent floating time tools. A wellness module adds procedurally generated ambient soundscapes and guided breathing, while local customization lets the experience adapt to your desktop. Built with **Tauri v2** and **Rust**.
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms — and lets any of them break away as its own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds procedurally generated soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
