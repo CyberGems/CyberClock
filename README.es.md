@@ -58,7 +58,7 @@
 
 ## 👋 Introducción
 
-El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas— y deja que cualquiera de ellos se desprenda como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
+El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -74,6 +74,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Mantente organizado | Calendario completo con agenda, notas por día, estadísticas, fase lunar y calendario flotante |
 | Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
 | Relájate y concéntrate | 6 paisajes sonoros ambientales grabados con mezcla de capas |
+| Escucha la hora | Reloj parlante opcional con voces de Windows, tres estilos de anuncio, horas de silencio y lectura de alarmas |
 | Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 20 skins únicas |
 | Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, controles de transparencia, multi-monitor |
 
@@ -130,7 +131,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
 
 ### 🔔 Alarmas y campanadas
-- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez a las :15, :30 o :00, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio, lectura de alarmas en voz alta opcional (interruptor global o por alarma) y acceso directo para instalar voces de Windows
+- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez cada 15, 30 o 60 minutos, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio, lectura de alarmas en voz alta opcional (interruptor global o por alarma) y acceso directo para instalar voces de Windows
 - **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
 - **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
 - **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias

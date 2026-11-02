@@ -58,7 +58,7 @@
 
 ## 👋 Introduction
 
-Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms — and lets any of them break away as its own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -74,6 +74,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
 | Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
 | Relax and focus | 6 recorded ambient soundscapes with seamless layering |
+| Hear the time | Optional talking clock with Windows voices, three announcement styles, quiet hours and alarm read-aloud |
 | Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
 | Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
 
@@ -130,7 +131,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
 
 ### 🔔 Alarms & Chimes
-- **Voice Time Announcer (Talking Clock)** — Speaks the time once at :15, :30, or :00, with selectable Windows voices, a customizable style (Natural, Cyber/Tactical, Concise), an optional soft pre-chime, quiet hours, optional alarm read-aloud (global toggle or per-alarm choice), and a shortcut to install Windows voices
+- **Voice Time Announcer (Talking Clock)** — Speaks the time once every 15, 30 or 60 minutes, with selectable Windows voices, a customizable style (Natural, Cyber/Tactical, Concise), an optional soft pre-chime, quiet hours, optional alarm read-aloud (global toggle or per-alarm choice), and a shortcut to install Windows voices
 - **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
 - **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
 - **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
