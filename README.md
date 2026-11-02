@@ -58,7 +58,7 @@
 
 ## 👋 Introduction
 
-Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -76,6 +76,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Relax and focus | 6 recorded ambient soundscapes with seamless layering |
 | Hear the time | Optional talking clock with Windows voices, three announcement styles, quiet hours and alarm read-aloud |
 | Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
+| Never lose your alarms | Automatic JSON snapshots on every launch and before each restore, with a custom folder and rotating retention |
 | Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
 
 ---
@@ -150,7 +151,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
 - **Auto-Updates** — Built-in Tauri updater with GitHub Releases and in-app bilingual release notes
 - **Bilingual UI** — Full English and Spanish interface
-- **Backup & Data** — Export all settings, alarms, notes, and timers as JSON; import previous backups; automatic rotating backups on every launch (choose how many to keep and where, restore any copy in one click); open the local data folder; or factory-reset to defaults, all from a dedicated settings tab
+- **Backup & Data** — Export or import settings, alarms, notes and timers as JSON; automatic rotating snapshots on every launch and before each restore, with a custom folder and a keep count; restore any copy (a safety snapshot is saved first), open the local data folder, or factory-reset to defaults from a dedicated settings tab
 - **Accessible About Window** — Suite-standard About with links, donate options, suite app showcase, check-for-update, and an "About..." entry in all floating widget and mini mode context menus. Each of those menus opens with the widget name and CyberClock
 - **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
 

@@ -58,7 +58,7 @@
 
 ## 👋 Introducción
 
-El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
+El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local, con copias automáticas de tus alarmas, notas y preferencias en la carpeta que elijas. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -76,6 +76,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Relájate y concéntrate | 6 paisajes sonoros ambientales grabados con mezcla de capas |
 | Escucha la hora | Reloj parlante opcional con voces de Windows, tres estilos de anuncio, horas de silencio y lectura de alarmas |
 | Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 20 skins únicas |
+| No pierdas tus alarmas | Copias JSON automáticas en cada inicio y antes de cada restauración, con carpeta propia y retención rotativa |
 | Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, controles de transparencia, multi-monitor |
 
 ---
@@ -150,7 +151,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Inicio automático con Windows:** inicio basado en el registro, ofrecido como opción en el propio instalador y sincronizado con el interruptor de Configuración (la app reconcilia ambos en cada arranque)
 - **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
 - **Interfaz bilingüe:** interfaz completa en inglés y español
-- **Respaldo y Datos:** exporta alarmas, notas, temporizadores y preferencias como JSON; importa copias de seguridad previas; copias automáticas rotatorias en cada inicio (elige cuántas conservar y dónde, y restaura cualquier copia en un clic); abre la carpeta de datos local; o restablece a valores de fábrica, todo desde una pestaña de configuración dedicada
+- **Respaldo y Datos:** exporta o importa alarmas, notas, temporizadores y preferencias como JSON; copias automáticas rotatorias en cada inicio y antes de cada restauración, con carpeta propia y número de copias a conservar; restaura cualquier copia (antes se guarda una instantánea de seguridad), abre la carpeta de datos local o restablece los valores de fábrica desde una pestaña dedicada
 - **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de..." en todos los menús contextuales de widgets flotantes y Modo Mini. Cada uno de esos menús abre con el nombre del widget y CyberClock
 - **Bienvenida personalizada:** un nombre para mostrar opcional añade un saludo según la hora junto a la marca CyberClock cuando se abre el modo completo
 
