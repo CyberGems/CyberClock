@@ -4,27 +4,36 @@
 
 <p align="center">
   <a href="https://cybergems.org/apps/cyberclock/">
-    <img src="https://cybergems.org/banners/es/cyberclock.png" alt="CyberClock: reloj, calendario, temporizador, cronómetro, relajación y herramientas de tiempo flotantes para Windows" />
+    <img src="https://cybergems.org/banners/es/cyberclock.png" alt="Reloj, temporizador, cronómetro y calendario" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Descargar%20CyberClock%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Descargar la última versión" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64 bits)" /></a>
-  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/Todas_las_versiones-30363D?style=for-the-badge&logo=github&logoColor=white" alt="Todas las versiones" /><img src="https://img.shields.io/badge/Notas_de_la_versi%C3%B3n-475569?style=for-the-badge" alt="Notas de la versión" /></a>
+  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Descargar%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Descargar la última versión" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64 bits)" /></a>
+  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/Todas_las_versiones-30363D?style=for-the-badge&logo=github&logoColor=white" alt="Todas las versiones" /></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPL--3.0-1F2428.svg?style=flat-square&color=334155" alt="Licencia" />&nbsp;
   <img src="https://img.shields.io/badge/Plataforma-Windows_10%2F11-1F2428.svg?style=flat-square&color=334155" alt="Plataforma" />&nbsp;
   <img src="https://img.shields.io/badge/Tauri-2-1F2428.svg?style=flat-square&logo=tauri&logoColor=white&color=334155" alt="Tauri" />&nbsp;
-  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentaci%C3%B3n-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>
+  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentaci%C3%B3n-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>&nbsp;
+  <a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/Notas_de_la_versi%C3%B3n-475569?style=flat-square" alt="Notas de la versión" /></a>
 </p>
+
+---
+
+<div align="center">
+
+### Reloj, calendario, temporizador, cronómetro, relajación y herramientas de tiempo flotantes para Windows
+
+</div>
 
 ---
 
 ## 📑 Table of Contents
 
-- [¿Qué es CyberClock?](#qué-es-cyberclock)
+- [👋 Introducción](#-introducción)
 - [🕐 ¿Por qué CyberClock?](#-por-qué-cyberclock)
 - [✨ Funciones principales](#-funciones-principales)
 - [🚀 Primeros pasos](#-primeros-pasos)
@@ -47,7 +56,7 @@
 
 ---
 
-## ¿Qué es CyberClock?
+## 👋 Introducción
 
 CyberClock es un reloj de escritorio para Windows repleto de funciones que reúne la medición del tiempo del día a día, herramientas de productividad y momentos de relajación en una interfaz cuidada. Combina relojes analógico y digital, un calendario completo, temporizador, cronómetro de precisión, alarmas, un compacto Modo Mini y herramientas de tiempo flotantes independientes. Un módulo de bienestar añade paisajes sonoros ambientales generados proceduralmente y respiración guiada, mientras que la personalización local adapta la experiencia a tu escritorio. Construido con **Tauri v2** y **Rust**.
 
