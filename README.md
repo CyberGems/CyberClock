@@ -58,7 +58,7 @@
 
 ## 👋 Introduction
 
-Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms — and lets any of them break away as its own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds procedurally generated soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms — and lets any of them break away as its own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -73,7 +73,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 | Sleek timekeeping | Canvas-rendered analog clock + digital display with 10 selectable dial designs |
 | Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
 | Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
-| Relax and focus | 6 ambient soundscapes with procedural audio synthesis |
+| Relax and focus | 6 recorded ambient soundscapes with seamless layering |
 | Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
 | Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
 
@@ -103,7 +103,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ### 🧘 Relaxation Module
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
-- **Procedural Audio Synthesis** — Web Audio API generated sounds with real audio file fallback
+- **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
 - **True Pause** — Pause freezes the audio, session timer, breathing pacer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
 - **Ambient Blending** — Ctrl+Click any track card to layer it over the playing one (Rain + Fireplace, Ocean + Space…); layers fade in and out independently
 - **Zen Flow Shuffle** — One-click shuffled playback through all tracks
@@ -200,7 +200,7 @@ You can verify the file independently: compare the SHA with the GitHub release, 
 
 - **Platform:** Windows 10 / 11
 - **Framework:** Tauri v2 (Rust backend + HTML/CSS/JS frontend)
-- **Audio:** Web Audio API with procedural synthesis
+- **Audio:** Web Audio API — recorded soundscapes, crossfade layering and a synthesis fallback
 - **Styling:** CSS custom properties for dynamic theming
 - **Architecture:** Multi-window (main, mini, menu, tray_menu, about) plus dynamic floating timer/stopwatch windows, with Tauri commands/events
 
@@ -217,7 +217,7 @@ CyberClock/
 │   │   ├── base.css       Base styles
 │   │   ├── i18n.js        Internationalization
 │   │   ├── icons.js       SVG icon system
-│   │   ├── audio-engine.js Web Audio synthesis, layering & true pause
+│   │   ├── audio-engine.js Web Audio playback, layering & true pause
 │   │   └── tauri-bridge.js Tauri API bridge
 │   └── assets/
 │       ├── images/        Icons & artwork

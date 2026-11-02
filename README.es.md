@@ -58,7 +58,7 @@
 
 ## 👋 Introducción
 
-El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas— y deja que cualquiera de ellos se desprenda como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros generados por procedimientos y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
+El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas— y deja que cualquiera de ellos se desprenda como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -73,7 +73,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 | Medición elegante del tiempo | Reloj analógico renderizado en canvas + pantalla digital con 10 diseños de esfera seleccionables |
 | Mantente organizado | Calendario completo con agenda, notas por día, estadísticas, fase lunar y calendario flotante |
 | Mide tu trabajo | Temporizador, cronómetro de precisión y widgets flotantes de escritorio persistentes |
-| Relájate y concéntrate | 6 paisajes sonoros ambientales con síntesis de audio procedural |
+| Relájate y concéntrate | 6 paisajes sonoros ambientales grabados con mezcla de capas |
 | Ahorra espacio en pantalla | Modo Mini: barra de reloj compacta siempre visible con 20 skins únicas |
 | Hazlo tuyo | 10 tintes de acento, escala de tamaño de texto, controles de transparencia, multi-monitor |
 
@@ -103,7 +103,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ### 🧘 Módulo de relajación
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
-- **Síntesis de audio procedural:** sonidos generados con la Web Audio API, con respaldo de archivos de audio reales
+- **Audio ambiental grabado:** seis paisajes sonoros reales reproducidos con la Web Audio API, con síntesis procedural como respaldo si faltan los archivos
 - **Pausa real:** pausar congela el audio, el tiempo de sesión, la pauta de respiración y el ciclo de consejos; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
 - **Mezcla ambiental:** Ctrl+Clic en cualquier tarjeta de pista para superponerla a la que suena (Lluvia + Chimenea, Océano + Espacio Exterior…); las capas se funden con entrada y salida independientes
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
@@ -200,7 +200,7 @@ Puedes verificar el archivo de forma independiente: compara el SHA con el releas
 
 - **Plataforma:** Windows 10 / 11
 - **Framework:** Tauri v2 (backend en Rust + frontend HTML/CSS/JS)
-- **Audio:** Web Audio API con síntesis procedural
+- **Audio:** Web Audio API — paisajes grabados, mezcla con fundido y síntesis de respaldo
 - **Estilos:** propiedades CSS personalizadas para theming dinámico
 - **Arquitectura:** multi-ventana (main, mini, menu, tray_menu, about) más ventanas flotantes dinámicas de temporizador/cronómetro, con comandos y eventos de Tauri
 
@@ -217,7 +217,7 @@ CyberClock/
 │   │   ├── base.css       Estilos base
 │   │   ├── i18n.js        Internacionalización
 │   │   ├── icons.js       Sistema de iconos SVG
-│   │   ├── audio-engine.js Síntesis Web Audio, mezcla en capas y pausa real
+│   │   ├── audio-engine.js Reproducción Web Audio, mezcla en capas y pausa real
 │   │   └── tauri-bridge.js Puente a la API de Tauri
 │   └── assets/
 │       ├── images/        Iconos y gráficos
