@@ -34,6 +34,7 @@
 ## 📑 Table of Contents
 
 - [👋 Introduction](#-introduction)
+- [📸 Screenshots](#-screenshots)
 - [🕐 Why CyberClock?](#-why-cyberclock)
 - [✨ Key Features](#-key-features)
 - [🚀 Getting Started](#-getting-started)
@@ -61,6 +62,14 @@
 Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
+
+---
+
+<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
+
+## 📸 Screenshots
+
+> Coming soon...
 
 ---
 

@@ -34,6 +34,7 @@
 ## 📑 Table of Contents
 
 - [👋 Introducción](#-introducción)
+- [📸 Capturas](#-capturas)
 - [🕐 ¿Por qué CyberClock?](#-por-qué-cyberclock)
 - [✨ Funciones principales](#-funciones-principales)
 - [🚀 Primeros pasos](#-primeros-pasos)
@@ -61,6 +62,14 @@
 El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local, con copias automáticas de tus alarmas, notas y preferencias en la carpeta que elijas. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
+
+---
+
+<!-- Capturas: pendiente de la galería bilingüe ES/EN del plan en https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — sustituir la cita, conservar este título y su entrada en el índice. -->
+
+## 📸 Capturas
+
+> Próximamente...
 
 ---
 
