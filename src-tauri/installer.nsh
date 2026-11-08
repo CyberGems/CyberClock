@@ -25,6 +25,11 @@
 !include LogicLib.nsh
 !include nsDialogs.nsh
 
+; Keep the header layout unchanged (text left, artwork right) now that a
+; branded header bitmap replaces the default NSIS header icon control, which
+; rendered the app icon distorted at non-default DPI settings.
+!define MUI_HEADERIMAGE_RIGHT
+
 ; --- Option state ---
 ; NSIS variables initialize to 0.
 ; CcStartupDefault  1 = start with Windows by default for this run
