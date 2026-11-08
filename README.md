@@ -34,7 +34,7 @@
 ## 📑 Table of Contents
 
 - [👋 Introduction](#-introduction)
-- [📸 Screenshots](#-screenshots)
+- [🖼️ Screenshots](#️-screenshots)
 - [🕐 Why CyberClock?](#-why-cyberclock)
 - [✨ Key Features](#-key-features)
 - [🚀 Getting Started](#-getting-started)
@@ -67,7 +67,7 @@ Time on a desktop usually arrives in pieces: the clock in the taskbar, a separat
 
 <!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
 
-## 📸 Screenshots
+## 🖼️ Screenshots
 
 > Coming soon...
 
