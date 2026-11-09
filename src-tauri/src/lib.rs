@@ -6071,7 +6071,9 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
             "default window icon missing",
         )))?;
     let settings = load_settings(app);
-    let tooltip = format_tray_tooltip((!settings.hotkey_toggle.is_empty()).then_some(settings.hotkey_toggle.as_str()));
+    let tooltip = format_tray_tooltip(
+        (!settings.hotkey_toggle.is_empty()).then_some(settings.hotkey_toggle.as_str()),
+    );
     let _tray = TrayIconBuilder::with_id("main")
         .icon(default_icon)
         .tooltip(tooltip)
