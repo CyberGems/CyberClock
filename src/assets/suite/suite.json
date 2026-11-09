@@ -1,13 +1,13 @@
 {
-  "updated": "2026-10-23",
+  "updated": "2026-11-08",
   "count": 10,
   "apps": [
     {
       "slug": "cyberclock",
       "name": "CyberClock",
       "tagline": {
-        "en": "Clock, calendar, timer, stopwatch, relaxation, and compact floating time tools for Windows.",
-        "es": "Reloj, calendario, temporizador, cronómetro, relajación y herramientas flotantes compactas para Windows."
+        "en": "Clock, calendar, timers and recorded soundscapes in one lightweight app — with an optional talking clock.",
+        "es": "Reloj, calendario, temporizadores y paisajes sonoros grabados en una app ligera, con reloj parlante opcional."
       },
       "site": "https://cybergems.org/apps/cyberclock/",
       "repo": "https://github.com/CyberGems/CyberClock",
@@ -17,8 +17,8 @@
       "slug": "cyberfeeds",
       "name": "CyberFeeds",
       "tagline": {
-        "en": "A local-first RSS & Atom reader built for speed, privacy and clean reading.",
-        "es": "Un lector RSS y Atom local-first creado para la velocidad, la privacidad y la lectura limpia."
+        "en": "Follow websites, YouTube and Reddit in one calm, private reading space.",
+        "es": "Sigue sitios web, YouTube y Reddit en un espacio de lectura tranquilo y privado."
       },
       "site": "https://cybergems.org/apps/cyberfeeds/",
       "repo": "https://github.com/CyberGems/CyberFeeds",
@@ -28,8 +28,8 @@
       "slug": "cyberlauncher",
       "name": "CyberLauncher",
       "tagline": {
-        "en": "Windows application launcher with hot corners, scheduler, system monitor, glassmorphic UI and integrated terminal.",
-        "es": "Lanzador de aplicaciones con esquinas activas, programador, monitor del sistema, interfaz glassmórfica y terminal integrada."
+        "en": "Apps, files, commands and a real terminal one hotkey away, with your system stats in the same panel.",
+        "es": "Apps, archivos, comandos y una terminal real a un atajo, con las estadísticas del sistema en el mismo panel."
       },
       "site": "https://cybergems.org/apps/cyberlauncher/",
       "repo": "https://github.com/CyberGems/CyberLauncher",
@@ -39,8 +39,8 @@
       "slug": "cybermanager",
       "name": "CyberManager",
       "tagline": {
-        "en": "Lightweight, high-capacity virtualized task manager with instant search and compact mode.",
-        "es": "Gestor de tareas ligero y virtualizado de alta capacidad, con búsqueda instantánea y modo compacto."
+        "en": "See what is slowing your PC down and take action without losing your place.",
+        "es": "Descubre qué ralentiza tu PC y actúa sin perder de vista lo importante."
       },
       "site": "https://cybergems.org/apps/cybermanager/",
       "repo": "https://github.com/CyberGems/CyberManager",
@@ -50,8 +50,8 @@
       "slug": "cybernotes",
       "name": "CyberNotes",
       "tagline": {
-        "en": "Privacy-focused note-taking app with rich text, folders, tabs and floating notes.",
-        "es": "App de notas centrada en la privacidad con texto enriquecido, carpetas, pestañas y notas flotantes."
+        "en": "Catch ideas, organize your thoughts and keep useful notes close, all on your PC.",
+        "es": "Captura ideas, ordena tus pensamientos y ten tus notas a mano, todo en tu PC."
       },
       "site": "https://cybergems.org/apps/cybernotes/",
       "repo": "https://github.com/CyberGems/CyberNotes",
@@ -72,8 +72,8 @@
       "slug": "cybersnap",
       "name": "CyberSnap",
       "tagline": {
-        "en": "Screen capture and annotation suite with vector tools, high-speed OCR, screen recording and color picker.",
-        "es": "Suite de captura y anotación con herramientas vectoriales, OCR de alta velocidad, grabación de pantalla y selector de color."
+        "en": "Screenshots, recordings, OCR, QR codes and a color picker — capture, edit and share it all in one window.",
+        "es": "Capturas, grabaciones, OCR, códigos QR y selector de color: captura, edita y comparte todo en una ventana."
       },
       "site": "https://cybergems.org/apps/cybersnap/",
       "repo": "https://github.com/CyberGems/CyberSnap",
@@ -83,8 +83,8 @@
       "slug": "cybertray",
       "name": "CyberTray",
       "tagline": {
-        "en": "High-performance tray launcher with hotspots, system monitoring, process manager and PIN-protected file vault.",
-        "es": "Lanzador en bandeja de alto rendimiento con zonas activas, monitor del sistema, gestor de procesos y bóveda con PIN."
+        "en": "Your favorite apps, files and links, one gesture away without a crowded taskbar.",
+        "es": "Tus apps, archivos y enlaces favoritos a un gesto, sin saturar la barra de tareas."
       },
       "site": "https://cybergems.org/apps/cybertray/",
       "repo": "https://github.com/CyberGems/CyberTray",
@@ -94,8 +94,8 @@
       "slug": "cyberviewer",
       "name": "CyberViewer",
       "tagline": {
-        "en": "A fast, lightweight image viewer with the essential editing tools built in.",
-        "es": "Un visor de imágenes rápido y ligero con las herramientas de edición esenciales integradas."
+        "en": "Images, video and audio in one fast window — browse whole folders and fix files without leaving it.",
+        "es": "Imágenes, video y audio en una ventana rápida: recorre carpetas y haz los ajustes sin salir de ella."
       },
       "site": "https://cybergems.org/apps/cyberviewer/",
       "repo": "https://github.com/CyberGems/CyberViewer",
@@ -105,8 +105,8 @@
       "slug": "cyberwall",
       "name": "CyberWall",
       "tagline": {
-        "en": "A per-application firewall powered by the WFP kernel engine. Default deny, real-time prompts.",
-        "es": "Un firewall por aplicación impulsado por el motor kernel WFP. Denegación por defecto, avisos en tiempo real."
+        "en": "Choose which apps can connect. Review new connections and keep the rules that work for you.",
+        "es": "Decide qué apps pueden conectarse. Revisa las conexiones nuevas y conserva las reglas que te convengan."
       },
       "site": "https://cybergems.org/apps/cyberwall/",
       "repo": "https://github.com/CyberGems/CyberWall",
