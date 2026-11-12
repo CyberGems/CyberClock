@@ -1627,7 +1627,7 @@
 
     // Close on Escape key (or back to menu if gallery modal is open)
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
+        if (e.key === "Escape" && !e.target.closest?.(":is(select:open)")) {
             if (galleryView && galleryView.style.display !== "none") {
                 closeGallery();
                 return;

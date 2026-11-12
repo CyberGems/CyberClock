@@ -1,0 +1,90 @@
+/* Shared dropdown styling. The browser keeps the original select, including
+   keyboard navigation, grouped options and programmatic value changes. */
+@supports (appearance: base-select) and selector(select::picker(select)) {
+    select:not([multiple]):not([size]),
+    select:not([multiple]):not([size])::picker(select) {
+        appearance: base-select;
+    }
+
+    select:not([multiple]):not([size]):not(.sched-time-sel):where(:hover, :open):not(:disabled) {
+        border-color: var(--border-bright);
+        background-color: var(--bg-03);
+    }
+
+    select::picker-icon {
+        content: "";
+        inline-size: 0.45em;
+        block-size: 0.45em;
+        align-self: center;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        color: var(--accent-a);
+        margin-inline-start: 0.6em;
+        rotate: 45deg;
+    }
+
+    select:open::picker-icon {
+        rotate: 225deg;
+    }
+
+    select:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 2px;
+    }
+
+    select:disabled {
+        cursor: default;
+        opacity: 0.55;
+    }
+
+    select::picker(select) {
+        box-sizing: border-box;
+        max-inline-size: min(22rem, calc(100vw - 12px));
+        max-block-size: min(16rem, calc(100dvh - 8px));
+        overflow-y: auto;
+        padding: 4px;
+        border: 1px solid var(--border-bright);
+        border-radius: 8px;
+        background: var(--bg-03);
+        color: var(--text-hi);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+        font: inherit;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-bright) transparent;
+        text-align: start;
+    }
+
+    select option {
+        min-block-size: 28px;
+        padding: 5px 8px;
+        border-radius: 4px;
+        background: var(--bg-03);
+        color: var(--text-hi);
+        font: inherit;
+        line-height: 1.4;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    select option:checked {
+        color: var(--accent-a);
+    }
+
+    select option:where(:hover, :focus-visible):not(:disabled) {
+        background: var(--accent-dim);
+        outline: none;
+    }
+
+    select option:disabled {
+        color: var(--text-md);
+    }
+
+    select optgroup {
+        color: var(--text-md);
+        font: inherit;
+    }
+
+    .mini-tip[data-design="4"] .mini-tip-snooze-select::picker-icon {
+        color: currentColor;
+    }
+}

@@ -4756,7 +4756,7 @@
         max-height: 240px;
         overflow: auto;
         padding: 4px;
-        background: #101820;
+        background: var(--bg-03);
         border: 1px solid var(--border-bright);
         border-radius: 8px;
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
@@ -4782,9 +4782,10 @@
     }
     .alarm-sound-option:hover,
     .alarm-sound-option:focus-visible {
-        color: var(--bg-00);
-        background: var(--accent-a);
-        outline: none;
+        color: var(--text-hi);
+        background: var(--accent-dim);
+        outline: 1px solid var(--border-bright);
+        outline-offset: -1px;
     }
     .alarm-file-card {
         display: flex;
@@ -5464,61 +5465,11 @@
         position: relative;
         display: inline-flex;
     }
-    /* The pill the user sees. The native select is overlaid invisibly
-       (see below) and only opens the OS dropdown, so this span is the
-       single source of the pill's painting. */
-    #alarm-notice-snooze-mins-trigger {
-        display: inline-flex;
-        align-items: center;
-        min-height: 28px;
-        flex: 1 0 auto;
-        padding: 5px 18px 5px 6px;
-        color: var(--bg-00);
-        background-color: rgba(var(--rgb-accent), 0.55);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%230b0f19' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 5px center;
-        background-size: 9px auto;
-        border: 0;
-        border-radius: 5px;
-        outline: none;
-        font-family: var(--font-ui);
-        font-size: calc(9px * var(--ui-scale));
-        font-weight: 800;
-        white-space: nowrap;
-    }
-    /* The native select stays in the DOM only to open the OS dropdown on
-       click and is fully transparent: WebView2 repaints native select
-       chrome on hover and its own arrow slid across the custom chevron. */
     #alarm-notice-snooze-mins {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        margin: 0;
-        padding: 0;
-        border: 0;
-        -webkit-appearance: none;
-        appearance: none;
-        background: transparent;
-        font-family: var(--font-ui);
-        font-size: calc(9px * var(--ui-scale));
-        outline: none;
-        cursor: pointer;
-    }
-    #alarm-notice-snooze-mins option {
-        color: #eaf4ff;
-        background: #111a25;
-    }
-    #alarm-notice-snooze-mins optgroup {
-        color: #9fb0c8;
-        background: #111a25;
-        font-style: normal;
-    }
-    .alarm-notice-snooze-field:hover #alarm-notice-snooze-mins-trigger,
-    .alarm-notice-snooze-field:focus-within #alarm-notice-snooze-mins-trigger {
-        background-color: var(--accent-a);
+        min-height: 28px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        font-size: calc(11px * var(--ui-scale));
     }
     .alarm-stage-veil,
     .alarm-stage-kicker,
@@ -5648,28 +5599,11 @@
     .alarm-notice.is-takeover .alarm-notice-snooze-field {
         min-width: 110px;
     }
-    .alarm-notice.is-takeover #alarm-notice-snooze-mins-trigger {
+    .alarm-notice.is-takeover #alarm-notice-snooze-mins {
         min-height: 48px;
-        padding: 0 40px 0 20px;
-        color: var(--text-hi);
-        background-color: transparent;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23aab4c4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 16px center;
-        background-size: 13px auto;
-        border: 1px solid var(--border-bright);
-        border-radius: 999px;
+        width: 100%;
+        padding: 0 16px;
         font-size: calc(15px * var(--ui-scale));
-    }
-    .alarm-notice.is-takeover #alarm-notice-snooze-mins optgroup {
-        color: #9fb0c8;
-        background: #111a25;
-        font-style: normal;
-    }
-    .alarm-notice.is-takeover .alarm-notice-snooze-field:hover #alarm-notice-snooze-mins-trigger,
-    .alarm-notice.is-takeover .alarm-notice-snooze-field:focus-within #alarm-notice-snooze-mins-trigger {
-        color: var(--accent-a);
-        border-color: var(--accent-a);
     }
     .alarm-notice.is-takeover .alarm-notice-btn:hover {
         border-color: var(--accent-a);
