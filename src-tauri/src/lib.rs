@@ -41,7 +41,7 @@ pub struct AlarmState {
     pub last_quarter_hour: Mutex<Option<(u32, u32)>>, // (hour, minute)
     pub last_half_hour: Mutex<Option<(u32, u32)>>,    // (hour, minute)
     pub last_full_hour: Mutex<Option<u32>>,           // hour
-    pub last_voice_announcement: Mutex<Option<(u32, u32)>>, // (hour, minute)
+    pub last_voice_announcement: Mutex<Option<i64>>,  // Unix minute
     pub relax_next_run: Mutex<Option<chrono::DateTime<Local>>>,
     // Runtime-only snooze times keyed by alarm id. Snoozes intentionally
     // reset when the app exits; the alarm definition itself remains intact.
@@ -5201,14 +5201,16 @@ fn check_alarms(app: &AppHandle) {
             };
 
             if !in_quiet {
+                let occurrence = now.timestamp().div_euclid(60);
                 let mut last = lock_or_recover(&alarm_state.last_voice_announcement);
-                if last.map_or(true, |(h, m)| h != hour || m != minute) {
-                    *last = Some((hour, minute));
+                if *last != Some(occurrence) {
+                    *last = Some(occurrence);
                     drop(last);
 
                     let announce_data = serde_json::json!({
                         "hour": hour,
-                        "minute": minute
+                        "minute": minute,
+                        "occurrence": occurrence
                     });
 
                     emit_to_active(app, "voice:announce-time", announce_data);
@@ -6432,11 +6434,15 @@ pub fn run() {
             #[cfg(target_os = "windows")]
             spawn_taskbar_tab_poll(app.handle().clone());
 
-            // Fixed-interval chime checker (:00 / :15 / :30 / :45).
-            // 15s cadence so a chime never fires more than 15s late.
+            // Check at the start of every minute, with the remaining 15-second
+            // boundaries as catch-up opportunities. Re-align after each wake.
             let app_handle = app.handle().clone();
             std::thread::spawn(move || loop {
-                std::thread::sleep(std::time::Duration::from_secs(15));
+                let now = Local::now();
+                let elapsed_ms = (now.second() % 15) * 1000 + now.timestamp_subsec_millis();
+                std::thread::sleep(std::time::Duration::from_millis(u64::from(
+                    15_000 - elapsed_ms,
+                )));
                 check_alarms(&app_handle);
             });
 

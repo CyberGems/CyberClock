@@ -459,7 +459,7 @@
             return subscribe("alarm:dismissed", cb);
         },
         onVoiceAnnounceTime: (cb) => {
-            return subscribe("voice:announce-time", cb);
+            return subscribeToWindow("voice:announce-time", cb);
         },
         // Windows voice. Returns false when the native synthesizer is
         // unavailable so the page can fall back without selecting a

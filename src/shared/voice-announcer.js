@@ -127,8 +127,7 @@
 
     let announceGen = 0;
     let liveUtterance = null;
-    let lastAnnounceKey = "";
-    let lastAnnounceAt = 0;
+    let lastAnnounceOccurrence = null;
 
     // Speaks any sentence through the same pipe as the time announcement:
     // native synthesizer first (WebView2 duplicates utterances that carry
@@ -204,21 +203,16 @@
         const lang = (cfg && cfg.language) || 'auto';
         const text = formatAnnouncementText(h, m, lang, va.style || 'natural');
         const voice = getBestVoice(lang, va.voiceGender || 'auto', va.voiceName);
-        const key = h + ":" + m + ":" + text;
-        const nowMs = Date.now();
-        const force = opts && opts.force === true;
-        // A second delivery of the same minute (another window, or the
-        // event arriving twice) queues the sentence again after the
-        // single chime, so the clock speaks twice in a row.
-        if (!force) {
-            if (key === lastAnnounceKey && nowMs - lastAnnounceAt < 20000) return;
+        if (opts?.force !== true) {
+            const occurrence = String(opts?.occurrence ?? Math.floor(now.getTime() / 60000));
+            if (occurrence === lastAnnounceOccurrence) return;
             try {
-                if (localStorage.getItem("cc_voice_claim") === key) return;
-                localStorage.setItem("cc_voice_claim", key);
+                // Keep the claim across reloads and restarts during this minute.
+                if (localStorage.getItem("cc_voice_claim") === occurrence) return;
+                localStorage.setItem("cc_voice_claim", occurrence);
             } catch (_) {}
+            lastAnnounceOccurrence = occurrence;
         }
-        lastAnnounceKey = key;
-        lastAnnounceAt = nowMs;
         const gen = ++announceGen;
 
         const doSpeak = () => {
