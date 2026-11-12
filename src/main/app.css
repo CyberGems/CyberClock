@@ -151,8 +151,12 @@
         height: 6px;
         border-radius: 50%;
         background: var(--accent-a);
-        box-shadow: var(--glow-sm);
-        animation: pulse-dot 2.4s ease-in-out infinite;
+        animation: led-second-blink 1s step-end infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .tbar-dot {
+            animation: none;
+        }
     }
     @keyframes pulse-dot {
         0%,

@@ -34,11 +34,7 @@
 
     function updateClock() {
         const now = new Date();
-        // Seek the existing blink so the LED and digits use the same clock sample.
-        const ledBlink = statusDot?.getAnimations().find(animation => animation.animationName === "led-second-blink");
-        if (ledBlink?.playState === "running") {
-            ledBlink.currentTime = now.getMilliseconds();
-        }
+        window.syncClockLed(statusDot, now);
         let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
         const noSeconds = false;
 

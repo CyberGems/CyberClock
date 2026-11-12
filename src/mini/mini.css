@@ -3052,10 +3052,6 @@
         position: relative;
     }
 
-    @keyframes led-second-blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.25; }
-    }
     /* Fixed-width digit cells (main window pattern, app.css .digit):
        Orbitron/Outfit have no tabular figures, so digits sit in equal
        1ch boxes, centered — the bar width never wobbles per tick. */

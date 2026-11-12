@@ -2672,19 +2672,20 @@
     // ══════════════════════════════════════════════════════════════
     // DIGITAL CLOCK
     // ══════════════════════════════════════════════════════════════
-    let digInterval = null;
+    let digitalTick = null;
+    const titlebarLed = document.querySelector(".tbar-dot");
 
     function isMainWindowVisible() {
-        return mainActive;
+        return mainActive && !document.hidden;
     }
 
     function syncDigitalClock() {
-        if (digInterval) clearInterval(digInterval);
-        digInterval = null;
-        if (isMainWindowVisible()) {
-            updateDigital();
-            digInterval = setInterval(updateDigital, 1000);
-        }
+        clearTimeout(digitalTick);
+        digitalTick = null;
+        if (!isMainWindowVisible()) return;
+        updateDigital();
+        const delay = 1000 - (Date.now() % 1000) + 12;
+        digitalTick = setTimeout(syncDigitalClock, delay);
     }
 
     // WebView2 on Windows does not reliably expose visibility/focus to
@@ -2842,6 +2843,7 @@
 
     function updateDigital() {
         const now = new Date();
+        window.syncClockLed(titlebarLed, now);
         setDigits(document.getElementById("dig-time"), digitalTimeString(now));
         document.getElementById("dig-date").textContent = digitalDateString(now);
         refreshAlarmOverviewLead();
