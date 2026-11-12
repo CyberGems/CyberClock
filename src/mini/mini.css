@@ -367,10 +367,6 @@
         text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
         white-space: nowrap;
     }
-    @keyframes blink-cursor {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-    }
     .mini-shell[data-design="3"] #mini-date {
         font-family: "JetBrains Mono", monospace;
         font-size: 9px;
@@ -387,11 +383,7 @@
         box-shadow: 0 0 6px #00ff88;
         --led-halo: #00ff88;
         --led-period: 2.8s;
-        animation: matrix-blink 2s step-end infinite;
-    }
-    @keyframes matrix-blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.3; }
+        animation: led-core-breathe 2.8s steps(16) infinite;
     }
     .mini-shell[data-design="3"] .sep {
         width: 1px;
@@ -401,17 +393,16 @@
 
     /* ═══════════════════════════════════════════════════════
        SKIN 4: Glass Orb
-       True frosted glass: translucent accent-tinted fill with
-       backdrop blur, soap-bubble rim light, dark-ink typography
-       and a specular 3D orb that breathes. Tints with the color
-       theme via color-mix (the one skin that stays theme-aware).
+       Accent-tinted glass gradient and dark-ink typography with a
+       simple LED status light. Tints with the color theme via color-mix.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="4"] .mini-bg {
         background: linear-gradient(135deg,
             color-mix(in srgb, #ffffff 88%, var(--accent-a)) 0%,
             color-mix(in srgb, #eaf2fc 82%, var(--accent-a)) 45%,
             color-mix(in srgb, #dce8f8 78%, var(--accent-a)) 100%);
-        backdrop-filter: blur(24px) saturate(1.6);
+        /* Keep the glass tint without continuously sampling the desktop. */
+        backdrop-filter: none;
     }
     .mini-shell[data-design="4"] {
         border: 1px solid color-mix(in srgb, var(--accent-a) 55%, rgba(120, 140, 175, 0.45));
@@ -424,22 +415,6 @@
             inset 0 -1px 0 rgba(35, 49, 74, 0.18);
         position: relative;
         overflow: hidden;
-    }
-    .mini-shell[data-design="4"]::after {
-        /* The accent-tinted rim now breathes opacity only on its own layer,
-           avoiding constant box-shadow blur re-rasterization on the CPU. */
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 26px;
-        box-shadow:
-            inset 0 0 20px color-mix(in srgb, var(--accent-a) 42%, transparent),
-            inset 0 0 44px color-mix(in srgb, var(--accent-b) 28%, transparent),
-            0 0 24px color-mix(in srgb, var(--accent-a) 36%, transparent);
-        border: 1px solid color-mix(in srgb, var(--accent-a) 52%, rgba(120, 140, 175, 0.5));
-        will-change: opacity;
-        animation: glass-rim 3.8s ease-in-out infinite;
-        pointer-events: none;
     }
     .mini-shell[data-design="4"] #mini-time {
         font-family: "Outfit", sans-serif;
@@ -463,54 +438,18 @@
         z-index: 1;
     }
     .mini-shell[data-design="4"] .status-dot {
-        width: 14px;
-        height: 14px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent-a) 35%, #162438) 0%, #08111e 100%);
-        border: 1.5px solid color-mix(in srgb, var(--accent-a) 90%, #0a1829);
+        background: color-mix(in srgb, var(--accent-a) 80%, #162438);
         box-shadow:
-            0 0 0 1px color-mix(in srgb, var(--accent-a) 50%, rgba(10, 20, 35, 0.35)),
-            0 2px 7px rgba(0, 0, 0, 0.28),
-            0 0 12px color-mix(in srgb, var(--accent-a) 80%, transparent),
-            inset 0 1px 3px rgba(0, 0, 0, 0.6);
-        animation: none;
+            0 0 8px color-mix(in srgb, var(--accent-a) 90%, transparent),
+            0 0 16px color-mix(in srgb, var(--accent-a) 40%, transparent);
+        --led-halo: var(--accent-a);
+        --led-period: 3s;
+        animation: led-core-breathe 3s steps(16) infinite;
         position: relative;
         z-index: 1;
-    }
-    .mini-shell[data-design="4"] .status-dot::before {
-        top: 50%;
-        left: 50%;
-        width: 250%;
-        height: 250%;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        background: conic-gradient(
-            from 0deg,
-            transparent 0deg 180deg,
-            color-mix(in srgb, var(--accent-a) 45%, transparent) 210deg,
-            var(--accent-a) 265deg,
-            color-mix(in srgb, var(--accent-b) 90%, #081220) 290deg,
-            var(--accent-a) 310deg,
-            transparent 335deg 360deg
-        );
-        filter: drop-shadow(0 0 4px var(--accent-a)) drop-shadow(0 0 7px color-mix(in srgb, var(--accent-b) 75%, #050d18));
-        opacity: 1;
-        will-change: transform;
-        animation: glass-lens-orbit 2.2s linear infinite;
-    }
-    .mini-shell[data-design="4"] .status-dot::after {
-        content: '';
-        position: absolute;
-        inset: 2px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%,
-            #ffffff 0%,
-            var(--accent-a) 35%,
-            color-mix(in srgb, var(--accent-b) 85%, #081220) 80%);
-        box-shadow: 0 0 10px var(--accent-a), 0 0 2px rgba(0, 0, 0, 0.5);
-        opacity: 1;
-        will-change: transform, opacity;
-        animation: glass-lens-pulse 2.6s ease-in-out infinite;
     }
     .mini-shell[data-design="4"] .sep {
         width: 1px;
@@ -3320,22 +3259,6 @@
         50% { opacity: 1; }
     }
 
-    @keyframes glass-lens-orbit {
-        from { transform: translate(-50%, -50%) rotate(0deg); }
-        to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    @keyframes glass-lens-pulse {
-        0%, 100% { opacity: 0.35; transform: scale(0.84); }
-        50% { opacity: 0.95; transform: scale(1.14); }
-    }
-    @keyframes glass-rim {
-        0%, 100% {
-            opacity: 0.55;
-        }
-        50% {
-            opacity: 0.95;
-        }
-    }
     @keyframes t-colon-blink {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.25; }
@@ -3515,8 +3438,7 @@
         font-size: var(--time-size);
         line-height: 1;
     }
-    .mini-shell[data-design="3"] .skin-prompt,
-    .mini-shell[data-design="3"] .skin-cursor {
+    .mini-shell[data-design="3"] .skin-prompt {
         display: inline-block;
     }
     .mini-shell[data-design="3"] .skin-prompt::before {
@@ -3524,11 +3446,4 @@
         color: #ff6b35;
         margin-right: 0.35em;
         text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
-    }
-    .mini-shell[data-design="3"] .skin-cursor::before {
-        content: "_";
-        color: #00ff88;
-        margin-left: 0.12em;
-        text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
-        animation: blink-cursor 1s step-end infinite;
     }
