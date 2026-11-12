@@ -614,8 +614,8 @@
             #1b0f2e 0%,
             #2c1140 22%,
             #6b1d5a 55%,
-            #ff6b57 82%,
-            #ffa94d 100%);
+            #cf5548 82%,
+            #853846 100%);
     }
     .mini-shell[data-design="7"] {
         border: 1px solid rgba(255, 138, 101, 0.4);
@@ -3119,11 +3119,11 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       SHARED LED SECOND PULSE
+       SHARED LED SECOND BLINK
        Skins keep their own LED color and shape. The dot itself
-       gives one brief pulse on each wall-clock second; no glow
+       blinks once per wall-clock second; no glow
        or halo layer is used. mini.js sets the phase from the
-       current millisecond so the pulse aligns to the clock.
+       current millisecond so the blink aligns to the clock.
        ═══════════════════════════════════════════════════════ */
     .mini-shell .status-dot {
         position: relative;
@@ -3133,9 +3133,9 @@
         0%, 100% { opacity: 0.12; }
         50% { opacity: 0.55; }
     }
-    @keyframes led-second-pulse {
-        0%, 10% { opacity: 1; }
-        28%, 100% { opacity: 0.35; }
+    @keyframes led-second-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.25; }
     }
     /* Fixed-width digit cells (main window pattern, app.css .digit):
        Orbitron/Outfit have no tabular figures, so digits sit in equal
@@ -3152,7 +3152,7 @@
     }
     .mini-shell[data-design] .status-dot {
         box-shadow: none;
-        animation: led-second-pulse 1s linear infinite;
+        animation: led-second-blink 1s step-end infinite;
         animation-delay: var(--led-phase, 0ms);
     }
 
@@ -3173,7 +3173,7 @@
     }
 
     /* User toggle "Disable animations": zero ALL motion — infinite
-       animations (LED pulse, colon blink, spins, sweeps) AND
+       animations (LED blink, colon blink, spins, sweeps) AND
        interaction transitions (tooltip, date collapse, hover). Placed
        after the paused rule so it wins with equal importance. */
     body.no-animations .mini-shell,
