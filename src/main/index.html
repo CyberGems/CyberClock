@@ -1112,28 +1112,31 @@
                             <!-- Schedule window row -->
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="clock"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="settings.alarms.playFrom">Play sound from</span>
-                                    <div class="sched-time" id="s-alarm-sched-start" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
-                                        <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
-                                        <span class="sched-time-sep">:</span>
-                                        <select class="sched-time-sel" id="s-alarm-sched-start-m" aria-label="Start Minute"></select>
-                                        <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-start-ap" aria-label="Start AM/PM" style="display:none">
-                                            <option value="AM">AM</option>
-                                            <option value="PM">PM</option>
-                                        </select>
+                                <div class="s-lbl s-schedule">
+                                    <span data-i18n="settings.alarms.playSchedule">Sound schedule</span>
+                                    <div class="s-schedule-range">
+                                        <div class="sched-time" id="s-alarm-sched-start">
+                                            <select class="sched-time-sel" id="s-alarm-sched-start-h" aria-label="Start Hour"></select>
+                                            <span class="sched-time-sep">:</span>
+                                            <select class="sched-time-sel" id="s-alarm-sched-start-m" aria-label="Start Minute"></select>
+                                            <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-start-ap" aria-label="Start AM/PM" style="display:none">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                        </div>
+                                        <div class="s-schedule-end">
+                                            <span data-i18n="settings.alarms.playTo">to</span>
+                                            <div class="sched-time" id="s-alarm-sched-end">
+                                                <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
+                                                <span class="sched-time-sep">:</span>
+                                                <select class="sched-time-sel" id="s-alarm-sched-end-m" aria-label="End Minute"></select>
+                                                <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-end-ap" aria-label="End AM/PM" style="display:none">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span data-i18n="settings.alarms.playTo">to</span>
-                                    <div class="sched-time" id="s-alarm-sched-end" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
-                                        <select class="sched-time-sel" id="s-alarm-sched-end-h" aria-label="End Hour"></select>
-                                        <span class="sched-time-sep">:</span>
-                                        <select class="sched-time-sel" id="s-alarm-sched-end-m" aria-label="End Minute"></select>
-                                        <select class="sched-time-sel sched-time-ap" id="s-alarm-sched-end-ap" aria-label="End AM/PM" style="display:none">
-                                            <option value="AM">AM</option>
-                                            <option value="PM">PM</option>
-                                        </select>
-                                    </div>
-                                    <span data-i18n="settings.alarms.playOnly">only</span>
                                 </div>
                                 <label class="s-tog">
                                     <input type="checkbox" id="s-alarm-sched-en" />
@@ -1383,26 +1386,30 @@
                                 <!-- Quiet schedule times -->
                                 <div class="s-row" id="s-voice-quiet-row" style="display: none;">
                                     <span class="s-row-ico" data-ico="clock"></span>
-                                    <div class="s-lbl">
+                                    <div class="s-lbl s-schedule">
                                         <span data-i18n="voice.quietTime">Silent from</span>
-                                        <div class="sched-time" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
-                                            <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
-                                            <span class="sched-time-sep">:</span>
-                                            <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
-                                            <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
-                                                <option value="AM">AM</option>
-                                                <option value="PM">PM</option>
-                                            </select>
-                                        </div>
-                                        <span style="margin: 0 4px;" data-i18n="voice.quietTo">to</span>
-                                        <div class="sched-time" style="margin: 0 4px; display: inline-flex; vertical-align: middle;">
-                                            <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
-                                            <span class="sched-time-sep">:</span>
-                                            <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
-                                            <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
-                                                <option value="AM">AM</option>
-                                                <option value="PM">PM</option>
-                                            </select>
+                                        <div class="s-schedule-range">
+                                            <div class="sched-time">
+                                                <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
+                                                <span class="sched-time-sep">:</span>
+                                                <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
+                                                <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                            <div class="s-schedule-end">
+                                                <span data-i18n="voice.quietTo">to</span>
+                                                <div class="sched-time">
+                                                    <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
+                                                    <span class="sched-time-sep">:</span>
+                                                    <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
+                                                    <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
+                                                        <option value="AM">AM</option>
+                                                        <option value="PM">PM</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

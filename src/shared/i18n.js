@@ -562,9 +562,8 @@
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
-            "settings.alarms.playFrom": "Play sound from",
+            "settings.alarms.playSchedule": "Sound schedule",
             "settings.alarms.playTo": "to",
-            "settings.alarms.playOnly": "only",
             "settings.alarms.topOfHour": "Top of the hour",
             "settings.alarms.halfHour": "Half hour",
             "settings.alarms.quarterHour": "Quarter hour",
@@ -1684,9 +1683,8 @@
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
-            "settings.alarms.playFrom": "Reproducir sonido de",
+            "settings.alarms.playSchedule": "Horario de sonido",
             "settings.alarms.playTo": "a",
-            "settings.alarms.playOnly": "solamente",
             "settings.alarms.topOfHour": "En punto",
             "settings.alarms.halfHour": "Media hora",
             "settings.alarms.quarterHour": "Cuarto de hora",

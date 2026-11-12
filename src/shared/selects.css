@@ -6,6 +6,11 @@
         appearance: base-select;
     }
 
+    select:not([multiple]):not([size]) {
+        align-items: center;
+        gap: 0.6em;
+    }
+
     select:not([multiple]):not([size]):not(.sched-time-sel):where(:hover, :open):not(:disabled) {
         border-color: var(--border-bright);
         background-color: var(--bg-03);
@@ -15,11 +20,12 @@
         content: "";
         inline-size: 0.45em;
         block-size: 0.45em;
+        flex: none;
         align-self: center;
         border-right: 1.5px solid currentColor;
         border-bottom: 1.5px solid currentColor;
         color: var(--accent-a);
-        margin-inline-start: 0.6em;
+        margin-inline-start: auto;
         rotate: 45deg;
     }
 
@@ -86,5 +92,14 @@
 
     .mini-tip[data-design="4"] .mini-tip-snooze-select::picker-icon {
         color: currentColor;
+    }
+
+    .sched-time-sel:not(.sched-time-ap)::picker-icon {
+        display: none;
+    }
+
+    .sched-time-ap::picker-icon {
+        inline-size: 0.36em;
+        block-size: 0.36em;
     }
 }

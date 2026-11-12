@@ -6541,6 +6541,36 @@
     }
     .s-row .s-lbl {
         flex: 1;
+        min-inline-size: 0;
+    }
+    .s-row > select {
+        flex: 0 1 calc(15rem * var(--ui-scale));
+        inline-size: calc(15rem * var(--ui-scale));
+        min-inline-size: 0;
+        max-inline-size: 50%;
+    }
+    .s-schedule {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+    }
+    .s-schedule-range,
+    .s-schedule-end {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .s-schedule-range {
+        min-inline-size: 0;
+        flex-wrap: wrap;
+    }
+    .s-schedule-range .sched-time {
+        flex: none;
+    }
+    .sched-time select {
+        flex: none;
+        text-align: center;
     }
     .s-vol-row .s-row-ico {
         margin-right: 4px;
