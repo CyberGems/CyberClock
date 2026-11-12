@@ -34,6 +34,9 @@
 
     function updateClock() {
         const now = new Date();
+        if (statusDot) {
+            statusDot.style.setProperty("--led-phase", `${-now.getMilliseconds()}ms`);
+        }
         let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
         const noSeconds = false;
 

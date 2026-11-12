@@ -198,10 +198,6 @@
         height: 8px;
         border-radius: 50%;
         background: #7dd3fc;
-        box-shadow: 0 0 8px #38bdf8, 0 0 16px rgba(56, 189, 248, 0.4);
-        --led-halo: #38bdf8;
-        --led-period: 3s;
-        animation: led-core-breathe 3s ease-in-out infinite;
     }
     .mini-shell[data-design="1"] .sep {
         width: 1px;
@@ -321,10 +317,6 @@
         height: 8px;
         border-radius: 50%;
         background: #7aa2f7;
-        box-shadow: 0 0 10px #7aa2f7;
-        --led-halo: #7aa2f7;
-        --led-period: 3.6s;
-        animation: led-core-breathe 3.6s steps(16) infinite;
     }
     .mini-shell[data-design="2"] .sep {
         width: 1px;
@@ -380,10 +372,6 @@
         height: 6px;
         border-radius: 2px;
         background: #00ff88;
-        box-shadow: 0 0 6px #00ff88;
-        --led-halo: #00ff88;
-        --led-period: 2.8s;
-        animation: led-core-breathe 2.8s steps(16) infinite;
     }
     .mini-shell[data-design="3"] .sep {
         width: 1px;
@@ -442,12 +430,6 @@
         height: 8px;
         border-radius: 50%;
         background: color-mix(in srgb, var(--accent-a) 80%, #162438);
-        box-shadow:
-            0 0 8px color-mix(in srgb, var(--accent-a) 90%, transparent),
-            0 0 16px color-mix(in srgb, var(--accent-a) 40%, transparent);
-        --led-halo: var(--accent-a);
-        --led-period: 3s;
-        animation: led-core-breathe 3s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -551,10 +533,6 @@
         height: 8px;
         border-radius: 2px;
         background: #00e5ff;
-        box-shadow: 0 0 8px #00e5ff;
-        --led-halo: #00e5ff;
-        --led-period: 3s;
-        animation: led-core-breathe 3s steps(16) infinite;
     }
     .mini-shell[data-design="5"] .sep {
         width: 1px;
@@ -613,12 +591,6 @@
         border: 2px solid var(--accent-a);
         background: transparent;
         border-radius: 50%;
-        /* Static glow painted once; the shared LED system breathes
-           via opacity steps on top of it (see bottom of this file). */
-        box-shadow: 0 0 10px 2px rgba(var(--rgb-accent), 0.3);
-        --led-halo: var(--accent-a);
-        --led-period: 4.4s;
-        animation: led-core-breathe 4.4s steps(16) infinite;
     }
     .mini-shell[data-design="6"] .sep {
         width: 1px;
@@ -689,10 +661,6 @@
         height: 9px;
         border-radius: 50%;
         background: #ffd394;
-        box-shadow: 0 0 12px #ffb46b, 0 0 24px rgba(255, 138, 101, 0.5);
-        --led-halo: #ffa94d;
-        --led-period: 3.6s;
-        animation: led-core-breathe 3.6s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -793,10 +761,6 @@
         border-radius: 50%;
         background: #3b82c4;
         border: 1.5px solid rgba(40, 90, 140, 0.6);
-        box-shadow: 0 0 6px rgba(80, 150, 210, 0.45), inset 0 0 3px rgba(255, 255, 255, 0.4);
-        --led-halo: #64c8ff;
-        --led-period: 4s;
-        animation: led-core-breathe 4s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -872,14 +836,6 @@
         height: 8px;
         border-radius: 2px;
         background: #00fff0;
-        box-shadow: 0 0 10px #00fff0, 0 0 24px rgba(0, 255, 240, 0.5);
-        --led-halo: #00fff0;
-        --led-period: 2.4s;
-        animation: neotokyo-scan 1.2s step-end infinite;
-    }
-    @keyframes neotokyo-scan {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.3; transform: scale(0.8); }
     }
     .mini-shell[data-design="9"] .ctl-btn {
         color: rgba(255, 41, 117, 0.5);
@@ -948,10 +904,6 @@
         height: 5px;
         border-radius: 50%;
         background: #d4a574;
-        box-shadow: 0 0 6px rgba(212, 165, 116, 0.4);
-        --led-halo: #d4a574;
-        --led-period: 4.8s;
-        animation: led-core-breathe 4.8s steps(16) infinite;
     }
     .mini-shell[data-design="10"] .ctl-btn {
         color: rgba(212, 165, 116, 0.35);
@@ -1042,10 +994,6 @@
         height: 9px;
         border-radius: 50%;
         background: #00ffff;
-        box-shadow: 0 0 14px #00ffff, 0 0 30px rgba(0, 255, 255, 0.5);
-        --led-halo: #00ffff;
-        --led-period: 3.6s;
-        animation: led-core-breathe 3.6s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -1138,18 +1086,6 @@
         background: transparent;
         border-radius: 0;
         transform: rotate(45deg);
-        box-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
-        --led-halo: #00ff41;
-        --led-period: 3s;
-        will-change: transform;
-        animation: quantum-spin 3s linear infinite;
-    }
-    @keyframes quantum-spin {
-        0% { transform: rotate(45deg); }
-        25% { transform: rotate(135deg); }
-        50% { transform: rotate(225deg); }
-        75% { transform: rotate(315deg); }
-        100% { transform: rotate(405deg); }
     }
     .mini-shell[data-design="12"] .ctl-btn {
         color: rgba(0, 255, 65, 0.4);
@@ -1256,10 +1192,6 @@
         height: 8px;
         border-radius: 50%;
         background: #ff2d55;
-        box-shadow: 0 0 10px #ff2d55, 0 0 20px rgba(255, 45, 85, 0.5);
-        --led-halo: #ff2d55;
-        --led-period: 2s;
-        animation: led-core-breathe 2s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -1364,10 +1296,6 @@
         height: 8px;
         border-radius: 50%;
         background: #ff003c;
-        box-shadow: 0 0 10px #ff003c, 0 0 22px rgba(255, 0, 60, 0.6);
-        --led-halo: #ff003c;
-        --led-period: 1.6s;
-        animation: led-core-breathe 1.6s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -1464,10 +1392,6 @@
         height: 10px;
         border-radius: 50%;
         background: #26ffd9;
-        box-shadow: 0 0 12px #26ffd9, 0 0 26px rgba(192, 132, 252, 0.6);
-        --led-halo: #26ffd9;
-        --led-period: 3.2s;
-        animation: led-core-breathe 3.2s steps(16) infinite;
         position: relative;
         z-index: 1;
     }
@@ -1576,10 +1500,6 @@
         clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
         border-radius: 0;
         background: #ffb700;
-        box-shadow: 0 0 10px #ffb700, 0 0 20px rgba(255, 130, 0, 0.5);
-        --led-halo: #ffb700;
-        --led-period: 2.8s;
-        animation: led-core-breathe 2.8s steps(16) infinite;
     }
     .mini-shell[data-design="16"] .sep {
         width: 1px;
@@ -1648,10 +1568,6 @@
         height: 8px;
         border-radius: 50%;
         background: #c084fc;
-        box-shadow: 0 0 10px #a855f7, 0 0 20px rgba(168, 85, 247, 0.5);
-        --led-halo: #c084fc;
-        --led-period: 3s;
-        animation: led-core-breathe 3s ease-in-out infinite;
     }
     .mini-shell[data-design="17"] .sep {
         width: 1px;
@@ -1719,10 +1635,6 @@
         height: 8px;
         border-radius: 50%;
         background: #10b981;
-        box-shadow: 0 0 10px #10b981, 0 0 20px rgba(16, 185, 129, 0.5);
-        --led-halo: #10b981;
-        --led-period: 2.6s;
-        animation: led-core-breathe 2.6s steps(16) infinite;
     }
     .mini-shell[data-design="18"] .sep {
         width: 1px;
@@ -1790,10 +1702,6 @@
         height: 8px;
         border-radius: 50%;
         background: #f43f5e;
-        box-shadow: 0 0 10px #f43f5e, 0 0 20px rgba(244, 63, 94, 0.5);
-        --led-halo: #f43f5e;
-        --led-period: 2.8s;
-        animation: led-core-breathe 2.8s ease-in-out infinite;
     }
     .mini-shell[data-design="19"] .sep {
         width: 1px;
@@ -1862,10 +1770,6 @@
         height: 8px;
         border-radius: 50%;
         background: #34d399;
-        box-shadow: 0 0 10px #34d399, 0 0 20px rgba(168, 85, 247, 0.65);
-        --led-halo: #34d399;
-        --led-period: 3s;
-        animation: led-core-breathe 3s ease-in-out infinite;
     }
     .mini-shell[data-design="20"] .sep {
         width: 1px;
@@ -3215,48 +3119,23 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       SHARED LED BREATHING SYSTEM
-       Every skin's status dot = core (element itself, static
-       box-shadow painted once) + halo (::before, a radial
-       gradient painted once into its own layer) whose opacity
-       "breathes". The steps() timing makes the compositor
-       produce only ~5 frames/sec instead of one per vsync:
-       invisible in a diffuse glow, but it removes the constant
-       recompositing that used to cost idle CPU. Skins keep
-       their own color/shape/geometry — only the breathing
-       mechanics are shared. The shell animation pause rules at
-       the bottom of this file still cover these.
+       SHARED LED SECOND PULSE
+       Skins keep their own LED color and shape. The dot itself
+       gives one brief pulse on each wall-clock second; no glow
+       or halo layer is used. mini.js sets the phase from the
+       current millisecond so the pulse aligns to the clock.
        ═══════════════════════════════════════════════════════ */
     .mini-shell .status-dot {
         position: relative;
     }
-    .mini-shell .status-dot::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 340%;
-        height: 340%;
-        transform: translate(-50%, -50%);
-        border-radius: inherit;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
-        pointer-events: none;
-        opacity: 0;
-    }
-    /* Halo layers per skin: each skin sets --led-halo below in its
-       own section (fixed neon or theme accent) and optionally
-       --led-halo-scale / --led-period for personality. */
 
     @keyframes led-breathe {
         0%, 100% { opacity: 0.12; }
         50% { opacity: 0.55; }
     }
-    /* Core breathing: opacity-only on the solid dot (composite-only, no
-       transform/scale layer promotion). The halo ::before carries the big
-       visual breathing; the core just dims/brightens in sync. */
-    @keyframes led-core-breathe {
-        0%, 100% { opacity: 0.75; }
-        50% { opacity: 1; }
+    @keyframes led-second-pulse {
+        0%, 10% { opacity: 1; }
+        28%, 100% { opacity: 0.62; }
     }
 
     @keyframes t-colon-blink {
@@ -3277,9 +3156,10 @@
         text-align: center;
         animation: t-colon-blink 1s step-end infinite;
     }
-    .mini-shell .status-dot::before {
-        background: radial-gradient(circle, var(--led-halo, var(--accent-a)) 0%, transparent 70%);
-        animation: led-breathe var(--led-period, 3.6s) steps(16) infinite;
+    .mini-shell[data-design] .status-dot {
+        box-shadow: none;
+        animation: led-second-pulse 1s linear infinite;
+        animation-delay: var(--led-phase, 0ms);
     }
 
     /* Pause decorative animations when hidden or user prefers reduced motion */
@@ -3299,7 +3179,7 @@
     }
 
     /* User toggle "Disable animations": zero ALL motion — infinite
-       animations (LED breathe, colon blink, spins, sweeps) AND
+       animations (LED pulse, colon blink, spins, sweeps) AND
        interaction transitions (tooltip, date collapse, hover). Placed
        after the paused rule so it wins with equal importance. */
     body.no-animations .mini-shell,
