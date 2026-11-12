@@ -3120,10 +3120,8 @@
 
     /* ═══════════════════════════════════════════════════════
        SHARED LED SECOND BLINK
-       Skins keep their own LED color and shape. The dot itself
-       blinks once per wall-clock second; no glow
-       or halo layer is used. mini.js sets the phase from the
-       current millisecond so the blink aligns to the clock.
+       Skins keep their own LED color and shape. mini.js aligns
+       the blink to the same clock sample used for the digits.
        ═══════════════════════════════════════════════════════ */
     .mini-shell .status-dot {
         position: relative;
@@ -3153,7 +3151,6 @@
     .mini-shell[data-design] .status-dot {
         box-shadow: none;
         animation: led-second-blink 1s step-end infinite;
-        animation-delay: var(--led-phase, 0ms);
     }
 
     /* Pause decorative animations when hidden or user prefers reduced motion */

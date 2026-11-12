@@ -34,8 +34,10 @@
 
     function updateClock() {
         const now = new Date();
-        if (statusDot) {
-            statusDot.style.setProperty("--led-phase", `${-now.getMilliseconds()}ms`);
+        // Seek the existing blink so the LED and digits use the same clock sample.
+        const ledBlink = statusDot?.getAnimations().find(animation => animation.animationName === "led-second-blink");
+        if (ledBlink?.playState === "running") {
+            ledBlink.currentTime = now.getMilliseconds();
         }
         let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
         const noSeconds = false;
@@ -69,7 +71,7 @@
     // clock — Orbitron and other display fonts have no tabular figures,
     // so "1" is much narrower than "0" and the layout wobbles each tick).
     // Each digit gets its own equal-width box (1ch = the advance width of
-    // "0" in the active font), centered; the blinking colons sit in their
+    // "0" in the active font), centered; the colons sit in their
     // own cells. Skips DOM work entirely when the string is unchanged, and
     // mutates text in-place across second ticks to avoid tearing down DOM nodes.
     function setDigits(el, val) {
