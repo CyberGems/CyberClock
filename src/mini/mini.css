@@ -221,7 +221,7 @@
     /* ═══════════════════════════════════════════════════════
        SKIN 2: Holo Display
        Holographic cyan→violet gradient text with chromatic
-       aberration, breathing halos behind the digits and HUD
+       aberration, static halos behind the digits and HUD
        corner brackets. Fixed neon identity (not theme-tinted)
        so it never looks washed out under the pastel themes.
        ═══════════════════════════════════════════════════════ */
@@ -257,8 +257,7 @@
         pointer-events: none;
     }
     .mini-shell[data-design="2"]::after {
-        /* Breathing scan sheen over the whole face — gradient painted
-           once; only opacity steps (composite-only). */
+        /* Holographic sheen over the whole face. */
         content: '';
         position: absolute;
         inset: 0;
@@ -267,7 +266,7 @@
             rgba(55, 230, 255, 0.07) 0%,
             transparent 45%,
             rgba(160, 107, 255, 0.05) 100%);
-        animation: led-breathe 4.4s steps(16) infinite;
+        opacity: 0.34;
         pointer-events: none;
     }
     .mini-shell[data-design="2"] .time-block {
@@ -275,14 +274,13 @@
         position: relative;
     }
     .mini-shell[data-design="2"] .time-block::before {
-        /* Hologram halo behind the digits: a broad soft radial glow
-           painted once, breathing via opacity steps. */
+        /* Soft holographic halo behind the digits. */
         content: '';
         position: absolute;
         inset: -6px -16px;
         background: radial-gradient(ellipse at 30% 55%, rgba(55, 230, 255, 0.16), transparent 65%),
                     radial-gradient(ellipse at 70% 55%, rgba(160, 107, 255, 0.13), transparent 65%);
-        animation: led-breathe 4.4s steps(16) infinite;
+        opacity: 0.34;
         pointer-events: none;
         z-index: 0;
     }
@@ -297,9 +295,9 @@
         color: #37e6ff;
         letter-spacing: 1px;
         text-shadow:
-            -1.5px 0 12px rgba(255, 77, 141, 0.55),
-            1.5px 0 14px rgba(55, 230, 255, 0.65),
-            0 0 26px rgba(160, 107, 255, 0.45);
+            -0.75px 0 12px rgba(255, 77, 141, 0.275),
+            0.75px 0 14px rgba(55, 230, 255, 0.325),
+            0 0 26px rgba(160, 107, 255, 0.225);
         white-space: nowrap;
     }
     .mini-shell[data-design="2"] #mini-date {
@@ -514,8 +512,8 @@
         color: #00e5ff;
         letter-spacing: 2px;
         text-shadow:
-            0 0 10px rgba(0, 229, 255, 0.8),
-            0 0 28px rgba(0, 229, 255, 0.35);
+            0 0 10px rgba(0, 229, 255, 0.4),
+            0 0 28px rgba(0, 229, 255, 0.175);
         white-space: nowrap;
     }
     .mini-shell[data-design="5"] #mini-date {
@@ -721,14 +719,7 @@
         width: 200%;
         height: 200%;
         background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(100, 200, 255, 0.03) 60deg, transparent 120deg, rgba(100, 200, 255, 0.02) 180deg, transparent 240deg, rgba(100, 200, 255, 0.03) 300deg, transparent 360deg);
-        /* Conic painted once into its own layer; only rotated on the GPU. */
-        will-change: transform;
-        animation: frost-rotate 12s linear infinite;
         pointer-events: none;
-    }
-    @keyframes frost-rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
     }
     .mini-shell[data-design="8"] #mini-time {
         font-family: "Outfit", sans-serif;
@@ -791,7 +782,6 @@
     }
     .mini-shell[data-design="9"] {
         border: 1px solid #ff2975;
-        border-right: 3px solid #00fff0;
         border-radius: 6px;
         padding: 0 8px;
         gap: 5px;
@@ -815,7 +805,7 @@
         font-weight: 700;
         color: #ff2975;
         letter-spacing: 1px;
-        text-shadow: 0 0 8px rgba(255, 41, 117, 0.7), 0 0 25px rgba(255, 41, 117, 0.3);
+        text-shadow: 0 0 8px rgba(255, 41, 117, 0.35), 0 0 25px rgba(255, 41, 117, 0.15);
         white-space: nowrap;
     }
     .mini-shell[data-design="9"] #mini-date {
@@ -1164,8 +1154,8 @@
         color: #ff9d00;
         letter-spacing: 1.5px;
         text-shadow:
-            0 0 8px rgba(255, 157, 0, 0.75),
-            0 0 22px rgba(255, 110, 0, 0.4);
+            0 0 8px rgba(255, 157, 0, 0.375),
+            0 0 22px rgba(255, 110, 0, 0.2);
         white-space: nowrap;
         position: relative;
         z-index: 1;
@@ -1268,8 +1258,8 @@
         color: #00f0ff;
         letter-spacing: 1.5px;
         text-shadow:
-            0 0 10px rgba(0, 240, 255, 0.75),
-            0 0 26px rgba(0, 240, 255, 0.35);
+            0 0 10px rgba(0, 240, 255, 0.375),
+            0 0 26px rgba(0, 240, 255, 0.175);
         white-space: nowrap;
         position: relative;
         z-index: 1;
@@ -1315,7 +1305,7 @@
     /* ═══════════════════════════════════════════════════════
        SKIN 15: Abyssal Bio / Neuro-Pulse
        Bioluminescent deep ocean synaptic pulse with organic
-       radii, undulating teal-violet waves, and neural glow.
+       radii, a teal-violet band, and a soft glow.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="15"] .mini-bg {
         background:
@@ -1349,13 +1339,7 @@
             rgba(38, 255, 217, 0.08) 65%,
             transparent 100%
         );
-        background-size: 200% 100%;
-        animation: neuro-wave 4s ease-in-out infinite;
         pointer-events: none;
-    }
-    @keyframes neuro-wave {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
     }
     .mini-shell[data-design="15"] #mini-time {
         font-family: "Outfit", sans-serif;
@@ -1363,8 +1347,8 @@
         color: #26ffd9;
         letter-spacing: 1px;
         text-shadow:
-            0 0 10px rgba(38, 255, 217, 0.75),
-            0 0 26px rgba(192, 132, 252, 0.45);
+            0 0 10px rgba(38, 255, 217, 0.375),
+            0 0 26px rgba(192, 132, 252, 0.225);
         white-space: nowrap;
         position: relative;
         z-index: 1;
@@ -1610,8 +1594,8 @@
         color: #10b981;
         letter-spacing: 1px;
         text-shadow:
-            0 0 10px rgba(16, 185, 129, 0.6),
-            0 0 22px rgba(5, 150, 105, 0.35);
+            0 0 10px rgba(16, 185, 129, 0.3),
+            0 0 22px rgba(5, 150, 105, 0.175);
         white-space: nowrap;
     }
     .mini-shell[data-design="18"] #mini-date {
@@ -1677,8 +1661,8 @@
         color: #fb7185;
         letter-spacing: 1px;
         text-shadow:
-            0 0 12px rgba(251, 113, 133, 0.6),
-            0 0 25px rgba(225, 29, 72, 0.4);
+            0 0 12px rgba(251, 113, 133, 0.3),
+            0 0 25px rgba(225, 29, 72, 0.2);
         white-space: nowrap;
     }
     .mini-shell[data-design="19"] #mini-date {
@@ -1717,71 +1701,58 @@
     }
 
     /* ═══════════════════════════════════════════════════════
-       SKIN 20: Solar Aurora / Arctic Teal
-       Vibrant boreal emerald & celestial lavender aurora flow with crisp
-       contrast against deep polar night sky.
+       SKIN 20: Copper Dial
+       Porcelain face with a copper frame and dark tabular numerals.
        ═══════════════════════════════════════════════════════ */
     .mini-shell[data-design="20"] .mini-bg {
-        background:
-            radial-gradient(ellipse at 15% 25%, rgba(52, 211, 153, 0.20), transparent 55%),
-            radial-gradient(ellipse at 85% 75%, rgba(168, 85, 247, 0.22), transparent 55%),
-            linear-gradient(155deg, #021415 0%, #060b18 50%, #12051d 100%);
-        backdrop-filter: blur(20px);
+        background: linear-gradient(155deg, #fff8ed, #ecdbc7);
     }
     .mini-shell[data-design="20"] {
-        border-radius: 12px;
-        clip-path: inset(0 round 12px);
-        border: 1px solid rgba(52, 211, 153, 0.45);
-        box-shadow:
-            0 8px 30px rgba(0, 0, 0, 0.65),
-            inset 0 0 14px rgba(168, 85, 247, 0.18),
-            0 0 20px rgba(52, 211, 153, 0.22);
+        border-radius: 5px;
+        border: 1px solid #a96949;
         padding: 0 12px;
         gap: 10px;
     }
+    .mini-shell[data-design="20"]::before {
+        content: "";
+        position: absolute;
+        inset: 3px;
+        border: 1px solid rgba(139, 68, 39, 0.25);
+        border-radius: 2px;
+        pointer-events: none;
+    }
     .mini-shell[data-design="20"] #mini-time {
-        font-family: "Outfit", sans-serif;
-        font-weight: 600;
-        color: #34d399;
-        letter-spacing: 0.8px;
-        text-shadow:
-            0 0 12px rgba(52, 211, 153, 0.65),
-            0 0 26px rgba(168, 85, 247, 0.4);
+        color: var(--skin-ink);
+        letter-spacing: 0.3px;
+        text-shadow: 0 0 6px rgba(145, 68, 40, 0.2);
         white-space: nowrap;
     }
     .mini-shell[data-design="20"] #mini-date {
-        font-family: "Outfit", sans-serif;
-        font-weight: 400;
-        color: #d8b4fe;
-        opacity: 0.9;
+        color: #75432c;
         letter-spacing: 0.6px;
         text-transform: uppercase;
         white-space: nowrap;
-        text-shadow: 0 0 8px rgba(168, 85, 247, 0.35);
     }
     .mini-shell[data-design="20"] .status-dot {
         width: 8px;
         height: 8px;
-        border-radius: 50%;
-        background: #34d399;
+        border-radius: 2px;
+        background: #a64e2c;
     }
     .mini-shell[data-design="20"] .sep {
         width: 1px;
         height: 22px;
-        background: linear-gradient(to bottom, transparent, rgba(52, 211, 153, 0.35), transparent);
+        background: linear-gradient(to bottom, transparent, #a96949, transparent);
     }
     .mini-shell[data-design="20"] .ctl-btn {
-        color: rgba(52, 211, 153, 0.7);
+        color: #75432c;
     }
     .mini-shell[data-design="20"] .ctl-btn:hover {
-        color: #f5d0fe;
-        background: rgba(168, 85, 247, 0.18);
+        color: #35221b;
+        background: rgba(166, 78, 44, 0.14);
     }
     .mini-shell[data-design="20"] #btn-aot.active {
-        color: #34d399;
-    }
-    .mini-shell[data-design="20"] #btn-aot.active .ctl-ico {
-        filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.85));
+        color: #a64e2c;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -1988,6 +1959,18 @@
     .mini-shell[data-design="4"] .day-progress:hover .day-progress-track,
     .mini-shell[data-design="8"] .day-progress:hover .day-progress-track {
         background: rgba(140, 186, 226, 0.55);
+    }
+    .mini-shell[data-design="20"] .day-progress-track {
+        background: rgba(117, 67, 44, 0.24);
+        box-shadow: none;
+    }
+    .mini-shell[data-design="20"] .day-progress:hover .day-progress-track {
+        background: rgba(117, 67, 44, 0.35);
+    }
+    .mini-shell[data-design="20"] .day-progress-fill,
+    .mini-shell[data-design="20"] .day-progress-track::after {
+        background: #a64e2c;
+        box-shadow: none;
     }
     /* Skin 5 corner bracket at bottom-right extends 4px-16px from right edge;
        inset day-progress to give clearance so it doesn't collide with the bracket. */
@@ -2996,27 +2979,26 @@
         background: rgba(244, 63, 94, 0.14);
     }
 
-    /* Skin 20: Solar Aurora */
+    /* Skin 20: Copper Dial */
     .mini-tip[data-design="20"] {
-        background: #021415;
-        border: 1px solid rgba(52, 211, 153, 0.45);
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(168, 85, 247, 0.25);
+        background: #2c1f1a;
+        border: 1px solid #a96949;
+        border-radius: 5px;
         font-family: "Outfit", sans-serif;
     }
     .mini-tip[data-design="20"]::after {
-        background: #021415;
-        border-color: rgba(52, 211, 153, 0.45);
+        background: #2c1f1a;
+        border-color: #a96949;
     }
     .mini-tip[data-design="20"] .mini-tip-date,
     .mini-tip[data-design="20"] .mini-tip-stat b {
-        color: #34d399;
-        text-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+        color: #f4bf9c;
+        text-shadow: 0 0 8px rgba(244, 191, 156, 0.2);
     }
     .mini-tip[data-design="20"] .mini-tip-action-btn {
-        border-color: #34d399;
-        color: #d8b4fe;
-        background: rgba(168, 85, 247, 0.16);
+        border-color: #a96949;
+        color: #f4bf9c;
+        background: rgba(244, 191, 156, 0.12);
     }
 
     /* ── Mini Mode Update Notice ─────────────────────────── */
@@ -3121,10 +3103,6 @@
         position: relative;
     }
 
-    @keyframes led-breathe {
-        0%, 100% { opacity: 0.12; }
-        50% { opacity: 0.55; }
-    }
     @keyframes led-second-blink {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.25; }
@@ -3290,7 +3268,7 @@
     .mini-shell[data-design="17"] { --skin-ink: #c084fc; --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
     .mini-shell[data-design="18"] { --skin-ink: #10b981; --skin-time-font: "JetBrains Mono", monospace; --skin-time-weight: 700; --skin-date-font: "JetBrains Mono", monospace; --skin-date-weight: 400; }
     .mini-shell[data-design="19"] { --skin-ink: #fb7185; --skin-time-font: "Orbitron", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
-    .mini-shell[data-design="20"] { --skin-ink: #34d399; --skin-time-font: "Outfit", sans-serif; --skin-time-weight: 600; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 400; }
+    .mini-shell[data-design="20"] { --skin-ink: #35221b; --skin-time-font: "Space Grotesk", sans-serif; --skin-time-weight: 700; --skin-date-font: "Outfit", sans-serif; --skin-date-weight: 500; }
 
     /* Digital Matrix prompt and cursor sit beside the time, not inside it,
        so a wider face cannot run the glyphs through the numbers. */
