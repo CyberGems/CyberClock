@@ -3135,12 +3135,7 @@
     }
     @keyframes led-second-pulse {
         0%, 10% { opacity: 1; }
-        28%, 100% { opacity: 0.62; }
-    }
-
-    @keyframes t-colon-blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.25; }
+        28%, 100% { opacity: 0.35; }
     }
     /* Fixed-width digit cells (main window pattern, app.css .digit):
        Orbitron/Outfit have no tabular figures, so digits sit in equal
@@ -3154,7 +3149,6 @@
         display: inline-block;
         width: 1ch;
         text-align: center;
-        animation: t-colon-blink 1s step-end infinite;
     }
     .mini-shell[data-design] .status-dot {
         box-shadow: none;
