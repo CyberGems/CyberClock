@@ -37,11 +37,10 @@
 - [🖼️ Screenshots](#️-screenshots)
 - [🕐 Why CyberClock?](#-why-cyberclock)
 - [✨ Key Features](#-key-features)
-- [🚀 Installation](#-installation)
+- [⬇️ Installation](#️-installation)
 - [🧭 Using the App](#-using-the-app)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
 - [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
-- [🎨 Themes & Customization](#-themes--customization)
 - [❤️ Donate](#️-donate)
 - [📄 License](#-license)
 - [❓ FAQ](#-faq)
@@ -168,7 +167,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ---
 
-## 🚀 Installation
+## ⬇️ Installation
 
 ### Install (Recommended)
 
@@ -300,25 +299,9 @@ npm run build
 
 The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
 
----
+### 🎨 Themes & Customization
 
-## ⌨️ Keyboard Shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Alt+Shift+C` (default, global) | Show / hide the clock in its current mode |
-| `Enter` or `Space` | Open the focused calendar day |
-| `Ctrl+Enter` (note editor) | Save the open day note |
-| `Space` (Relax view) | Play / pause the soundscape |
-| `Escape` | Close the settings panel, dialogs and editors |
-
-Change or disable the global hotkey in **Settings > General > Show / Hide Clock**. The mini clock has no fixed shortcuts; everything is available from its right-click menu and the tray menu. Full reference: [Keyboard Shortcuts](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts).
-
----
-
-## 🎨 Themes & Customization
-
-### 10 Accent Tints
+#### 10 Accent Tints
 One sober structural palette — deep navy surfaces, neutral text — with color
 entering only through the accent: glows, borders, highlights and a subtle
 ambient kiss on the panels. The interface never floods with color.
@@ -339,11 +322,25 @@ luminance/saturation band) by `src/shared/tint.js`, so every preset stays
 readable and no accent can wash out the interface. Settings saved with the
 old 5-skin themes migrate automatically to their heir tint.
 
-### Display Options
+#### Display Options
 - Time format: 12H / 24H
 - Show/hide seconds
 - Mini mode: background opacity, content opacity
 - Welcome greeting: optional display name shown beside the brand in Full Mode
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Alt+Shift+C` (default, global) | Show / hide the clock in its current mode |
+| `Enter` or `Space` | Open the focused calendar day |
+| `Ctrl+Enter` (note editor) | Save the open day note |
+| `Space` (Relax view) | Play / pause the soundscape |
+| `Escape` | Close the settings panel, dialogs and editors |
+
+Change or disable the global hotkey in **Settings > General > Show / Hide Clock**. The mini clock has no fixed shortcuts; everything is available from its right-click menu and the tray menu. Full reference: [Keyboard Shortcuts](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts).
 
 ---
 

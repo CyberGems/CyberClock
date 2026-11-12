@@ -37,11 +37,10 @@
 - [🖼️ Capturas](#️-capturas)
 - [🕐 ¿Por qué CyberClock?](#-por-qué-cyberclock)
 - [✨ Funciones principales](#-funciones-principales)
-- [🚀 Instalación](#-instalación)
+- [⬇️ Instalación](#️-instalación)
 - [🧭 Cómo usar la app](#-cómo-usar-la-app)
 - [🛠️ Stack tecnológico y arquitectura](#️-stack-tecnológico-y-arquitectura)
 - [⌨️ Atajos de teclado](#️-atajos-de-teclado)
-- [🎨 Temas y personalización](#-temas-y-personalización)
 - [❤️ Donar](#️-donar)
 - [📄 Licencia](#-licencia)
 - [❓ Preguntas frecuentes](#-preguntas-frecuentes)
@@ -168,7 +167,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ---
 
-## 🚀 Instalación
+## ⬇️ Instalación
 
 ### Instalación (recomendada)
 
@@ -300,25 +299,9 @@ npm run build
 
 El ejecutable compilado es `CyberClock.exe` y el instalador NSIS queda en `src-tauri/target/release/bundle/nsis/`.
 
----
+### 🎨 Temas y personalización
 
-## ⌨️ Atajos de teclado
-
-| Atajo | Acción |
-|---|---|
-| `Alt+Shift+C` (predeterminado, global) | Muestra u oculta el reloj en su modo actual |
-| `Intro` o `Espacio` | Abre el día del calendario enfocado |
-| `Ctrl+Intro` (editor de notas) | Guarda la nota del día abierta |
-| `Espacio` (vista Relajación) | Reproduce o pausa el paisaje sonoro |
-| `Escape` | Cierra el panel de Configuración, los diálogos y los editores |
-
-Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocultar el reloj**. El reloj mini no tiene atajos fijos: todo está disponible desde su menú contextual y desde el menú de la bandeja. Referencia completa: [Atajos de teclado](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts-es).
-
----
-
-## 🎨 Temas y personalización
-
-### 10 tintes de acento
+#### 10 tintes de acento
 Una paleta estructural sobria, con superficies de azul marino profundo y texto neutro, donde el color entra solo a través del acento: resplandores, bordes, resaltados y un sutil toque ambiental en los paneles. La interfaz nunca se inunda de color.
 
 - **Hielo** *(predeterminado)*: hielo pálido sobre azul marino profundo
@@ -337,11 +320,25 @@ luminosidad/saturación) mediante `src/shared/tint.js`, de modo que cada preset 
 siendo legible y ningún acento puede lavar la interfaz. Las configuraciones guardadas con
 los antiguos temas de 5 skins migran automáticamente a su tinte heredero.
 
-### Opciones de pantalla
+#### Opciones de pantalla
 - Formato de hora: 12H / 24H
 - Mostrar u ocultar segundos
 - Modo Mini: opacidad del fondo y opacidad del contenido
 - Saludo de bienvenida: nombre para mostrar opcional junto a la marca en el modo completo
+
+---
+
+## ⌨️ Atajos de teclado
+
+| Atajo | Acción |
+|---|---|
+| `Alt+Shift+C` (predeterminado, global) | Muestra u oculta el reloj en su modo actual |
+| `Intro` o `Espacio` | Abre el día del calendario enfocado |
+| `Ctrl+Intro` (editor de notas) | Guarda la nota del día abierta |
+| `Espacio` (vista Relajación) | Reproduce o pausa el paisaje sonoro |
+| `Escape` | Cierra el panel de Configuración, los diálogos y los editores |
+
+Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocultar el reloj**. El reloj mini no tiene atajos fijos: todo está disponible desde su menú contextual y desde el menú de la bandeja. Referencia completa: [Atajos de teclado](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts-es).
 
 ---
 
