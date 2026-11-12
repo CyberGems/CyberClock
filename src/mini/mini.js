@@ -291,8 +291,7 @@
             applyFace(shell, "date", s.miniDateFont, s.miniDateFontBold, s.miniDateFontItalic);
         }
 
-        // User motion toggle: zero ALL mini movement (animations AND
-        // transitions) via CSS.
+        // Reduced-effects toggle: remove motion and the backdrop blur via CSS.
         document.body.classList.toggle("no-animations", s.miniNoAnimations === true);
 
         // Click-through: the backend sets the OS-level ignore-cursor flag;
@@ -317,6 +316,7 @@
             syncWindowSize(true, zoomChanged);
         }
         setupMiniAutoCycle();
+        syncMiniClock();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -660,26 +660,54 @@
     // ═══════════════════════════════════════════════════════
     // INITIALIZATION
     // ═══════════════════════════════════════════════════════
-    // Decorative CSS animations are cheap thanks to the steps() LED
-    // breathing (~5 frames/sec, composite-only), so they now run while
-    // the mini clock is visible even without focus or hover — the
-    // widget is the whole point of mini mode. They pause only when the
-    // window is truly hidden (document.hidden) or when the backend
-    // reports another window as the active one (full mode). The clock
-    // text still updates every second regardless.
+    // Decorative CSS animations run while the mini clock is active and
+    // pause whenever the backend reports another active window (or none).
+    // Clock updates follow the displayed precision and stop while inactive.
     let miniHovered = false;
     let miniAutoCycleTimer = null;
+    let miniClockTimer = null;
+
+    function stopMiniClockUpdates() {
+        if (miniClockTimer) {
+            clearTimeout(miniClockTimer);
+            miniClockTimer = null;
+        }
+    }
+
+    function scheduleMiniClockUpdate() {
+        stopMiniClockUpdates();
+        if (document.hidden || activeBackendLabel !== "mini") return;
+
+        // Match the update rate to the precision the user chose. Aligning
+        // to wall-clock boundaries also avoids timer drift over long runs.
+        const showSeconds = (cfg.miniShowSeconds ?? cfg.showSeconds) !== false;
+        const cadence = showSeconds ? 1000 : 60000;
+        const delay = cadence - (Date.now() % cadence) + 12;
+        miniClockTimer = setTimeout(() => {
+            miniClockTimer = null;
+            updateClock();
+            scheduleMiniClockUpdate();
+        }, delay);
+    }
+
+    function syncMiniClock(updateNow = false) {
+        stopMiniClockUpdates();
+        if (document.hidden || activeBackendLabel !== "mini") return;
+        if (updateNow) updateClock();
+        scheduleMiniClockUpdate();
+    }
+
     function setupMiniAutoCycle() {
         if (miniAutoCycleTimer) {
             clearInterval(miniAutoCycleTimer);
             miniAutoCycleTimer = null;
         }
         if (!cfg || !cfg.miniAutoCycle) return;
-        if (document.hidden || activeBackendLabel === "main") return;
+        if (document.hidden || activeBackendLabel !== "mini") return;
         const mins = Math.max(1, parseInt(cfg.miniAutoCycleInterval, 10) || 15);
         const ms = mins * 60 * 1000;
         miniAutoCycleTimer = setInterval(() => {
-            if (document.hidden || activeBackendLabel === "main") return;
+            if (document.hidden || activeBackendLabel !== "mini") return;
             const cur = Math.min(20, Math.max(1, parseInt(cfg.miniDesign, 10) || 1));
             let next;
             if (cfg.miniAutoCycleMode === "random") {
@@ -695,7 +723,7 @@
 
     function syncMiniMotion() {
         const shouldPause =
-            document.hidden || activeBackendLabel === "main";
+            document.hidden || activeBackendLabel !== "mini";
         document.body.classList.toggle("mini-paused", shouldPause);
         if (!shouldPause) {
             setupMiniAutoCycle();
@@ -722,11 +750,16 @@
     window.cc.onActiveWindow((label) => {
         activeBackendLabel = label;
         syncMiniMotion();
+        syncMiniClock(true);
     });
 
-    document.addEventListener("visibilitychange", syncMiniMotion);
-    window.addEventListener("focus", syncMiniMotion);
-    window.addEventListener("blur", syncMiniMotion);
+    function syncMiniWindowActivity() {
+        syncMiniMotion();
+        syncMiniClock(true);
+    }
+    document.addEventListener("visibilitychange", syncMiniWindowActivity);
+    window.addEventListener("focus", syncMiniWindowActivity);
+    window.addEventListener("blur", syncMiniWindowActivity);
 
     window.cc.onInit(async (s) => {
         applySettings(s);
@@ -741,9 +774,7 @@
             }
         }
         syncMiniMotion();
-        requestAnimationFrame(() => {
-            setInterval(updateClock, 1000);
-        });
+        syncMiniClock(true);
     });
 
     window.cc.onSettingsUpdated((s) => applySettings(s));

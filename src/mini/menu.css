@@ -318,17 +318,6 @@
     .ctx-item:hover .cc-ico,
     .ctx-item:hover .cc-ico-fx {
         transform: scale(1.18);
-        animation: ico-glow 1.5s ease-in-out infinite;
-    }
-    @keyframes ico-glow {
-        0%,
-        100% {
-            filter: drop-shadow(0 0 3px rgba(var(--rgb-accent), 0.55));
-        }
-        50% {
-            filter: drop-shadow(0 0 8px rgba(var(--rgb-accent), 1))
-                drop-shadow(0 0 15px rgba(var(--rgb-accent), 0.4));
-        }
     }
     /* Gradient stops follow the active theme */
     #cc-grad-menu .g0 {
@@ -409,17 +398,6 @@
     }
     .ctx-item.danger:hover .cc-ico,
     .ctx-item.danger:hover .cc-ico-fx {
-        animation: ico-glow-danger 1.5s ease-in-out infinite;
-    }
-    @keyframes ico-glow-danger {
-        0%,
-        100% {
-            filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.55));
-        }
-        50% {
-            filter: drop-shadow(0 0 8px rgba(255, 68, 102, 1))
-                drop-shadow(0 0 15px rgba(255, 68, 102, 0.4));
-        }
     }
 
     /* --- CUSTOM CONTROLS --- */

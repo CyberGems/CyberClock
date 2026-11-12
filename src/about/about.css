@@ -172,7 +172,6 @@ body {
     position: relative;
     z-index: 2;
     filter: drop-shadow(0 0 16px rgba(var(--rgb-accent), 0.45));
-    animation: ab-logo-breathe 2.8s ease-in-out infinite;
 }
 .ab-logo-glow {
     position: absolute;
@@ -181,17 +180,6 @@ body {
     background: radial-gradient(circle, rgba(var(--rgb-accent), 0.28) 0%, transparent 70%);
     z-index: 1;
     pointer-events: none;
-    animation: ab-logo-breathe 2.8s ease-in-out infinite;
-}
-@keyframes ab-logo-breathe {
-    0%, 100% {
-        filter: drop-shadow(0 0 14px rgba(var(--rgb-accent), 0.32));
-        opacity: 0.85;
-    }
-    50% {
-        filter: drop-shadow(0 0 24px rgba(var(--rgb-accent), 0.65));
-        opacity: 1;
-    }
 }
 .ab-brand-info {
     flex: 1 1 auto;
