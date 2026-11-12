@@ -7070,9 +7070,31 @@
     @keyframes cc-spin {
         to { transform: rotate(360deg); }
     }
-    #s-voice-announcer-blk .s-alarm-lbl {
-        width: 110px;
-        flex-shrink: 0;
+    .s-voice-help,
+    .s-voice-style-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+    }
+    .s-voice-help {
+        margin-top: 12px;
+    }
+    .s-voice-help p {
+        flex: 1 1 220px;
+        color: var(--text-md);
+        font-size: calc(12.5px * var(--ui-scale));
+        line-height: 1.45;
+    }
+    .s-voice-style-controls {
+        justify-content: flex-end;
+        flex: 0 1 60%;
+        min-width: 0;
+    }
+    .s-voice-style-controls select {
+        flex: 1 1 180px;
+        min-width: 0;
+        max-width: 100%;
     }
     .s-alarm-row.s-voice-row {
         flex-wrap: nowrap;

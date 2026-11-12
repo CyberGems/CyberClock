@@ -1247,7 +1247,94 @@
                             </div>
                         </div>
 
-                        <!-- Voice settings live in their own "Voice" tab (stab-voice). -->
+                        <!-- Hourly announcements -->
+                        <div class="s-sec" id="s-voice-announcer-blk">
+                            <div class="s-sec-t" data-i18n="voice.sectionAnnouncer">Hourly announcements</div>
+
+                            <!-- Enable Announcement -->
+                            <div class="s-row">
+                                <span class="s-row-ico" data-ico="volume-high"></span>
+                                <div class="s-lbl">
+                                    <span data-i18n="voice.enable">Enable Voice Announcement</span>
+                                </div>
+                                <label class="s-tog">
+                                    <input type="checkbox" id="s-voice-en" />
+                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                </label>
+                            </div>
+
+                            <!-- Hour-announcer subcontrols (dimmed when it is disabled).
+                                 The shared voice below stays active: alarms use it too. -->
+                            <div id="s-voice-subcontrols">
+                                <!-- Interval -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="timer"></span>
+                                    <div class="s-lbl" data-i18n="voice.interval">Interval</div>
+                                    <select id="s-voice-interval" class="sched-select">
+                                        <option value="15m" data-i18n="voice.interval15m">Every 15 minutes</option>
+                                        <option value="30m" data-i18n="voice.interval30m">Every 30 minutes</option>
+                                        <option value="1h" selected data-i18n="voice.interval1h">Every hour (:00)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Chime before speaking -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="bell"></span>
+                                    <div class="s-lbl" data-i18n="voice.chimeBefore">Soft chime before speaking</div>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-voice-chime" checked />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+
+                                <!-- Quiet hours toggle -->
+                                <div class="s-row">
+                                    <span class="s-row-ico" data-ico="moon"></span>
+                                    <div class="s-lbl" data-i18n="voice.quietHours">Silence during this schedule</div>
+                                    <label class="s-tog">
+                                        <input type="checkbox" id="s-voice-quiet-en" />
+                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
+                                    </label>
+                                </div>
+
+                                <!-- Quiet schedule times -->
+                                <div class="s-row" id="s-voice-quiet-row" style="display: none;">
+                                    <span class="s-row-ico" data-ico="clock"></span>
+                                    <div class="s-lbl s-schedule">
+                                        <span data-i18n="voice.quietTime">Silent from</span>
+                                        <div class="s-schedule-range">
+                                            <div class="sched-time">
+                                                <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
+                                                <span class="sched-time-sep">:</span>
+                                                <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
+                                                <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                            <div class="s-schedule-end">
+                                                <span data-i18n="voice.quietTo">to</span>
+                                                <div class="sched-time">
+                                                    <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
+                                                    <span class="sched-time-sep">:</span>
+                                                    <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
+                                                    <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
+                                                        <option value="AM">AM</option>
+                                                        <option value="PM">PM</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="s-voice-help">
+                                <p data-i18n="voice.announcerHelp">Choose how the time is spoken in the Voice tab.</p>
+                                <button type="button" class="s-abtn" data-open-voice-settings>
+                                    <span data-ico="mic"></span> <span data-i18n="voice.openSettings">Voice settings</span>
+                                </button>
+                            </div>
+                        </div>
 
                         <!-- Windows Date & Time -->
                         <div class="s-sec" style="margin-top: 22px;">
@@ -1331,135 +1418,29 @@
                         </div>
                     </div>
 
-                    <!-- Voice (talking clock, alarm voices and shared voice config) -->
+                    <!-- Voice -->
                     <div class="s-panel" id="stab-voice">
-                        <!-- Hourly announcements -->
-                        <div class="s-sec" id="s-voice-announcer-blk">
-                            <div class="s-sec-t" data-i18n="voice.sectionAnnouncer">Hourly announcements</div>
-
-                            <!-- Enable Announcement -->
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="volume-high"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="voice.enable">Enable Voice Announcement</span>
-                                </div>
-                                <label class="s-tog">
-                                    <input type="checkbox" id="s-voice-en" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-
-                            <!-- Hour-announcer subcontrols (dimmed when it is disabled).
-                                 The shared voice below stays active: alarms use it too. -->
-                            <div id="s-voice-subcontrols">
-                                <!-- Interval -->
-                                <div class="s-row">
-                                    <span class="s-row-ico" data-ico="timer"></span>
-                                    <div class="s-lbl" data-i18n="voice.interval">Interval</div>
-                                    <select id="s-voice-interval" class="sched-select">
-                                        <option value="15m" data-i18n="voice.interval15m">Every 15 minutes</option>
-                                        <option value="30m" data-i18n="voice.interval30m">Every 30 minutes</option>
-                                        <option value="1h" selected data-i18n="voice.interval1h">Every hour (:00)</option>
-                                    </select>
-                                </div>
-
-                                <!-- Chime before speaking -->
-                                <div class="s-row">
-                                    <span class="s-row-ico" data-ico="bell"></span>
-                                    <div class="s-lbl" data-i18n="voice.chimeBefore">Soft chime before speaking</div>
-                                    <label class="s-tog">
-                                        <input type="checkbox" id="s-voice-chime" checked />
-                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                    </label>
-                                </div>
-
-                                <!-- Quiet hours toggle -->
-                                <div class="s-row">
-                                    <span class="s-row-ico" data-ico="moon"></span>
-                                    <div class="s-lbl" data-i18n="voice.quietHours">Silence during this schedule</div>
-                                    <label class="s-tog">
-                                        <input type="checkbox" id="s-voice-quiet-en" />
-                                        <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                    </label>
-                                </div>
-
-                                <!-- Quiet schedule times -->
-                                <div class="s-row" id="s-voice-quiet-row" style="display: none;">
-                                    <span class="s-row-ico" data-ico="clock"></span>
-                                    <div class="s-lbl s-schedule">
-                                        <span data-i18n="voice.quietTime">Silent from</span>
-                                        <div class="s-schedule-range">
-                                            <div class="sched-time">
-                                                <select class="sched-time-sel" id="s-voice-quiet-start-h" aria-label="Start Hour"></select>
-                                                <span class="sched-time-sep">:</span>
-                                                <select class="sched-time-sel" id="s-voice-quiet-start-m" aria-label="Start Minute"></select>
-                                                <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-start-ap" aria-label="Start AM/PM" style="display:none">
-                                                    <option value="AM">AM</option>
-                                                    <option value="PM">PM</option>
-                                                </select>
-                                            </div>
-                                            <div class="s-schedule-end">
-                                                <span data-i18n="voice.quietTo">to</span>
-                                                <div class="sched-time">
-                                                    <select class="sched-time-sel" id="s-voice-quiet-end-h" aria-label="End Hour"></select>
-                                                    <span class="sched-time-sep">:</span>
-                                                    <select class="sched-time-sel" id="s-voice-quiet-end-m" aria-label="End Minute"></select>
-                                                    <select class="sched-time-sel sched-time-ap" id="s-voice-quiet-end-ap" aria-label="End AM/PM" style="display:none">
-                                                        <option value="AM">AM</option>
-                                                        <option value="PM">PM</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Alarm voices -->
-                        <div class="s-sec" id="s-voice-alarm-blk" style="margin-top: 22px;">
-                            <div class="s-sec-t" data-i18n="voice.sectionAlarmVoices">Alarm voices</div>
-                            <div class="s-row">
-                                <span class="s-row-ico" data-ico="mic"></span>
-                                <div class="s-lbl">
-                                    <span data-i18n="voice.readAlarms">Read alarms aloud</span>
-                                    <small data-i18n="voice.readAlarmsDesc">One switch for every alarm; each alarm can override it from its editor</small>
-                                </div>
-                                <label class="s-tog" data-tooltip="Speaks the alarm when it rings, with the configured voice and volume" data-tooltip-align="right" data-i18n-attr="data-tooltip:voice.readAlarmsTip">
-                                    <input type="checkbox" id="s-voice-alarm-read" />
-                                    <div class="s-tog-tr"><div class="s-tog-th"></div></div>
-                                </label>
-                            </div>
-                        </div>
-
                         <!-- Shared voice configuration -->
-                        <div class="s-sec" id="s-voice-config-blk" style="margin-top: 22px;">
-                            <div class="s-sec-t" data-i18n="voice.sectionVoice">Voice</div>
+                        <div class="s-sec" id="s-voice-config-blk">
+                            <h2 class="s-sec-t" id="s-voice-heading" tabindex="-1" data-i18n="voice.sectionVoice">Voice</h2>
+                            <div class="s-sec-d" data-i18n="voice.configHelp">Time announcements and spoken alarms share the voice and volume. The announcement style changes how the time is spoken. Use Test to hear your selection.</div>
 
                             <!-- Voice selection -->
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="user"></span>
-                                <div class="s-lbl" data-i18n="voice.voice">Voice</div>
-                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                                    <select id="s-voice-select">
-                                        <option value="auto" data-i18n="voice.auto">System Default</option>
-                                        <option value="female" data-i18n="voice.female">Female Voice</option>
-                                        <option value="male" data-i18n="voice.male">Male Voice</option>
-                                    </select>
-                                    <button class="s-abtn s-abtn-icon" id="s-voice-refresh-btn" type="button" disabled data-tooltip="Refresh voice list" data-i18n-attr="data-tooltip:voice.refreshTip">
-                                        <span data-ico="refresh"></span>
-                                    </button>
-                                    <button class="s-abtn" id="s-voice-add-btn" type="button" data-tooltip="Install Spanish and other voices in Windows Settings" data-i18n-attr="data-tooltip:voice.addVoicesTip">
-                                        <span data-ico="download"></span> <span data-i18n="voice.addVoices">Add voices…</span>
-                                    </button>
-                                </div>
+                                <label class="s-lbl" for="s-voice-select" data-i18n="voice.voice">Voice</label>
+                                <select id="s-voice-select">
+                                    <option value="auto" data-i18n="voice.auto">System Default</option>
+                                    <option value="female" data-i18n="voice.female">Female Voice</option>
+                                    <option value="male" data-i18n="voice.male">Male Voice</option>
+                                </select>
                             </div>
 
                             <!-- Style -->
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="message-square"></span>
-                                <div class="s-lbl" data-i18n="voice.style">Announcement Style</div>
-                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <label class="s-lbl" for="s-voice-style" data-i18n="voice.style">Announcement Style</label>
+                                <div class="s-voice-style-controls">
                                     <select id="s-voice-style">
                                         <option value="natural" selected data-i18n="voice.styleNatural">Natural ("It's 11:15 PM")</option>
                                         <option value="cyber" data-i18n="voice.styleCyber">Military / 24h ("Current time: 23 15 hours")</option>
@@ -1474,13 +1455,25 @@
                             <!-- Volume -->
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-low"></span>
-                                <div class="s-lbl" data-i18n="voice.volume">Voice Volume</div>
+                                <label class="s-lbl" for="s-voice-vol" data-i18n="voice.volume">Voice Volume</label>
                                 <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
                                     <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" />
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
                                     <span class="s-vol-val" id="s-voice-vol-val">85%</span>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="s-sec" style="margin-top: 22px;">
+                            <div class="s-sec-t" data-i18n="voice.installTitle">Install Windows voices</div>
+                            <div class="s-sec-d" data-i18n="voice.installHelp">Open Windows speech settings with Add voices. Install a voice in your preferred language, then return to CyberClock and select Refresh voices.</div>
+                            <div class="s-voice-help">
+                                <button class="s-abtn" id="s-voice-add-btn" type="button">
+                                    <span data-ico="download"></span> <span data-i18n="voice.addVoices">Add voices…</span>
+                                </button>
+                                <button class="s-abtn" id="s-voice-refresh-btn" type="button" disabled>
+                                    <span data-ico="refresh"></span> <span data-i18n="voice.refresh">Refresh voices</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1519,19 +1512,25 @@
                             </button>
                         </div>
 
-                        <!-- Alarm voices (mirror of the Voice tab switch) -->
-                        <div class="s-sec" style="margin-top: 22px;">
+                        <!-- Alarm voices -->
+                        <div class="s-sec" id="s-voice-alarm-blk" style="margin-top: 22px;">
                             <div class="s-sec-t" data-i18n="voice.sectionAlarmVoices">Alarm voices</div>
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="mic"></span>
                                 <div class="s-lbl">
                                     <span data-i18n="voice.readAlarms">Read alarms aloud</span>
-                                    <small data-i18n="voice.readAlarmsMirrorDesc">Voice, style and volume are configured in the Voice tab</small>
+                                    <small data-i18n="voice.readAlarmsDesc">One switch for every alarm; each alarm can override it from its editor</small>
                                 </div>
                                 <label class="s-tog" data-tooltip="Speaks the alarm when it rings, with the configured voice and volume" data-tooltip-align="right" data-i18n-attr="data-tooltip:voice.readAlarmsTip">
-                                    <input type="checkbox" id="s-alarm-read-mirror" />
+                                    <input type="checkbox" id="s-voice-alarm-read" />
                                     <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                 </label>
+                            </div>
+                            <div class="s-voice-help">
+                                <p data-i18n="voice.alarmHelp">Alarms use the voice and volume selected in the Voice tab.</p>
+                                <button type="button" class="s-abtn" data-open-voice-settings>
+                                    <span data-ico="mic"></span> <span data-i18n="voice.openSettings">Voice settings</span>
+                                </button>
                             </div>
                         </div>
                     </div>

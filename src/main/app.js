@@ -2486,8 +2486,6 @@
         if (vEn) vEn.checked = !!va.enabled;
         const vRead = document.getElementById("s-voice-alarm-read");
         if (vRead) vRead.checked = !!va.readAlarms;
-        const vReadMirror = document.getElementById("s-alarm-read-mirror");
-        if (vReadMirror) vReadMirror.checked = !!va.readAlarms;
         const vInt = document.getElementById("s-voice-interval");
         if (vInt) vInt.value = va.interval || "1h";
         const vSty = document.getElementById("s-voice-style");
@@ -7549,6 +7547,12 @@
     document.querySelectorAll(".s-nav-btn").forEach((btn) => {
         btn.addEventListener("click", () => switchSettingsTab(btn.dataset.stab));
     });
+    document.querySelectorAll("[data-open-voice-settings]").forEach((button) => {
+        button.addEventListener("click", () => {
+            switchSettingsTab("voice");
+            document.getElementById("s-voice-heading").focus();
+        });
+    });
 
     // Format (Full Mode's digital clocks; the mini bar has its own copy)
     document.querySelectorAll(".s-fmt[data-fmt]").forEach((b) => {
@@ -8964,19 +8968,6 @@
         sVoiceAlarmRead.addEventListener("change", (e) => {
             const va = cfg.voiceAnnouncer || {};
             window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
-            const mirror = document.getElementById("s-alarm-read-mirror");
-            if (mirror) mirror.checked = e.target.checked;
-        });
-    }
-    // Alarmas tab keeps a mirror of the read-aloud switch (one setting,
-    // two synced checkboxes).
-    const sAlarmReadMirror = document.getElementById("s-alarm-read-mirror");
-    if (sAlarmReadMirror) {
-        sAlarmReadMirror.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
-            const main = document.getElementById("s-voice-alarm-read");
-            if (main) main.checked = e.target.checked;
         });
     }
 
