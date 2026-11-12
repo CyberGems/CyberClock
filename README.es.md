@@ -37,8 +37,10 @@
 - [🖼️ Capturas](#️-capturas)
 - [🕐 ¿Por qué CyberClock?](#-por-qué-cyberclock)
 - [✨ Funciones principales](#-funciones-principales)
-- [🚀 Primeros pasos](#-primeros-pasos)
+- [🚀 Instalación](#-instalación)
+- [🧭 Cómo usar la app](#-cómo-usar-la-app)
 - [🛠️ Stack tecnológico y arquitectura](#️-stack-tecnológico-y-arquitectura)
+- [⌨️ Atajos de teclado](#️-atajos-de-teclado)
 - [🎨 Temas y personalización](#-temas-y-personalización)
 - [❤️ Donar](#️-donar)
 - [📄 Licencia](#-licencia)
@@ -166,7 +168,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 
 ---
 
-## 🚀 Primeros pasos
+## 🚀 Instalación
 
 ### Instalación (recomendada)
 
@@ -204,6 +206,20 @@ Windows muestra este aviso para cualquier instalador sin un certificado de firma
 Puedes verificar el archivo de forma independiente: compara el SHA con el release de GitHub, escanéalo en VirusTotal o compila desde el código fuente. Más detalles: [guía de SmartScreen en el sitio web](https://cybergems.org/download#smartscreen).
 
 </details>
+
+---
+
+## 🧭 Cómo usar la app
+
+CyberClock se abre en la vista completa del reloj; el icono de la bandeja lo mantiene a mano cuando está oculto y `Alt+Shift+C` lo muestra u oculta en su modo actual.
+
+1. Abre **Temporizador**, pulsa **25m** para un bloque de concentración y pulsa **INICIAR**.
+2. Cuando suene, toma un descanso de 5 minutos. Repite tres o cuatro veces antes de uno más largo.
+3. Haz clic derecho en el icono de la bandeja y elige **Nuevo Temporizador** para dejar la cuenta regresiva flotando sobre otras apps.
+
+Los ajustes, las notas, las alarmas y los temporizadores se guardan en tu PC y se pueden exportar como JSON. Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocultar el reloj**; el reloj mini no tiene atajos fijos y usa su menú contextual.
+
+Consulta [¿Cómo se usa CyberClock?](https://github.com/CyberGems/CyberClock/wiki/How-Do-You-Use-es) para ver ejemplos cotidianos y las guías completas.
 
 ---
 
@@ -283,6 +299,20 @@ npm run build
 ```
 
 El ejecutable compilado es `CyberClock.exe` y el instalador NSIS queda en `src-tauri/target/release/bundle/nsis/`.
+
+---
+
+## ⌨️ Atajos de teclado
+
+| Atajo | Acción |
+|---|---|
+| `Alt+Shift+C` (predeterminado, global) | Muestra u oculta el reloj en su modo actual |
+| `Intro` o `Espacio` | Abre el día del calendario enfocado |
+| `Ctrl+Intro` (editor de notas) | Guarda la nota del día abierta |
+| `Espacio` (vista Relajación) | Reproduce o pausa el paisaje sonoro |
+| `Escape` | Cierra el panel de Configuración, los diálogos y los editores |
+
+Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocultar el reloj**. El reloj mini no tiene atajos fijos: todo está disponible desde su menú contextual y desde el menú de la bandeja. Referencia completa: [Atajos de teclado](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts-es).
 
 ---
 

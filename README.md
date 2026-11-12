@@ -37,8 +37,10 @@
 - [🖼️ Screenshots](#️-screenshots)
 - [🕐 Why CyberClock?](#-why-cyberclock)
 - [✨ Key Features](#-key-features)
-- [🚀 Getting Started](#-getting-started)
+- [🚀 Installation](#-installation)
+- [🧭 Using the App](#-using-the-app)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
+- [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
 - [🎨 Themes & Customization](#-themes--customization)
 - [❤️ Donate](#️-donate)
 - [📄 License](#-license)
@@ -166,7 +168,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
 ### Install (Recommended)
 
@@ -204,6 +206,20 @@ Windows shows this warning for any installer without a paid code-signing certifi
 You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
 
 </details>
+
+---
+
+## 🧭 Using the App
+
+CyberClock opens to the full clock view; the tray icon keeps it reachable when hidden, and `Alt+Shift+C` shows or hides it in its current mode.
+
+1. Open **Timer** and press **25m** for a focus block, then **Start**.
+2. When it rings, take a 5 minute break. Repeat three or four times before a longer one.
+3. Right-click the tray icon and choose **New Timer** to keep a countdown floating above other apps.
+
+Settings, notes, alarms and timers stay on your PC and can be exported as JSON. Change or disable the global hotkey in **Settings > General > Show / Hide Clock**; the mini clock has no fixed shortcuts and uses its right-click menu instead.
+
+See [How Do You Use CyberClock?](https://github.com/CyberGems/CyberClock/wiki/How-Do-You-Use) for everyday examples and the full guides.
 
 ---
 
@@ -283,6 +299,20 @@ npm run build
 ```
 
 The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Alt+Shift+C` (default, global) | Show / hide the clock in its current mode |
+| `Enter` or `Space` | Open the focused calendar day |
+| `Ctrl+Enter` (note editor) | Save the open day note |
+| `Space` (Relax view) | Play / pause the soundscape |
+| `Escape` | Close the settings panel, dialogs and editors |
+
+Change or disable the global hotkey in **Settings > General > Show / Hide Clock**. The mini clock has no fixed shortcuts; everything is available from its right-click menu and the tray menu. Full reference: [Keyboard Shortcuts](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts).
 
 ---
 
