@@ -6587,6 +6587,7 @@
         rSesInterval = null;
     let rAstMins = 0,
         rAstRemain = 0,
+        rAstDeadline = null,
         rAstTimer = null,
         vizRaf = null,
         rSaveTimer = null;
@@ -6724,12 +6725,14 @@
         const playing = engine.isPlaying;
         window.cc.sendRelaxPlayback({
             track: (playing && engine.currentTrack) || rSelected,
+            layers: playing ? engine.activeLayerIds() : [],
             mixReady: !playing && relaxMixLayers.length > 0,
             playing,
             paused: playing && rPaused,
             shuffled: zenFlowActive,
             startedAt: rSesStart,
-            pausedAt: rPaused ? rPauseResumedAt : null
+            pausedAt: rPaused ? rPauseResumedAt : null,
+            autoStop: rAstRemain > 0 ? { deadline: rAstDeadline, remaining: rAstRemain } : null
         }).catch(console.error);
     }
 
@@ -6807,8 +6810,11 @@
         // Freeze the auto-stop countdown by stopping its interval; the
         // remaining seconds stay in rAstRemain until resume re-arms it.
         if (rAstTimer) {
+            rAstRemain = Math.max(0, Math.ceil((rAstDeadline - rPauseResumedAt) / 1000));
             clearInterval(rAstTimer);
             rAstTimer = null;
+            rAstDeadline = null;
+            rAstUpdateDisplay();
         }
         updatePlayButtonUI(true); // re-render with the Resume label
     }
@@ -6860,19 +6866,21 @@
     // silence over the last minute so sleep sessions fade out gently.
     const AUTO_STOP_FADE_SECS = 60;
     function rStartAutoStop(secs) {
-        rClearAutoStop();
+        if (rAstTimer) clearInterval(rAstTimer);
         rAstRemain = secs;
+        rAstDeadline = Date.now() + secs * 1000;
         rAstUpdateDisplay();
+        publishRelaxPlayback();
         if (secs <= AUTO_STOP_FADE_SECS) window.audioEngine.beginSlowFade(secs);
         rAstTimer = setInterval(() => {
             if (!window.audioEngine.isPlaying) return;
-            rAstRemain = Math.max(0, rAstRemain - 1);
+            const previous = rAstRemain;
+            rAstRemain = Math.max(0, Math.ceil((rAstDeadline - Date.now()) / 1000));
             rAstUpdateDisplay();
-            if (rAstRemain === AUTO_STOP_FADE_SECS) {
-                window.audioEngine.beginSlowFade(AUTO_STOP_FADE_SECS);
+            if (previous > AUTO_STOP_FADE_SECS && rAstRemain > 0 && rAstRemain <= AUTO_STOP_FADE_SECS) {
+                window.audioEngine.beginSlowFade(rAstRemain);
             }
             if (rAstRemain <= 0) {
-                rClearAutoStop();
                 rStop();
                 rShowNotify(window.ccI18n.t("relax.sessionComplete"));
             }
@@ -6881,6 +6889,7 @@
     function rClearAutoStop() {
         if (rAstTimer) clearInterval(rAstTimer);
         rAstTimer = null;
+        rAstDeadline = null;
         rAstRemain = 0;
         rAstUpdateDisplay();
     }
@@ -7264,10 +7273,12 @@
             if (m > 0 && window.audioEngine.isPlaying && rPaused) {
                 rAstRemain = m * 60;
                 rAstUpdateDisplay();
+                publishRelaxPlayback();
             } else if (m > 0 && window.audioEngine.isPlaying) {
                 rStartAutoStop(m * 60);
             } else {
                 rClearAutoStop();
+                publishRelaxPlayback();
             }
         });
     });

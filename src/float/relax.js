@@ -5,8 +5,11 @@
 (function () {
     const shell = document.getElementById("relax-shell");
     const trackEl = document.getElementById("track-name");
+    const trackLabel = document.getElementById("track-label");
     const statusEl = document.getElementById("playback-status");
     const elapsedEl = document.getElementById("elapsed");
+    const autoStopEl = document.getElementById("auto-stop");
+    const autoStopTime = document.getElementById("auto-stop-time");
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
@@ -39,8 +42,13 @@
     }
 
     function refreshLabels() {
-        const {track, mixReady, playing, paused} = playback;
-        trackEl.textContent = t(mixReady ? "relax.savedMix" : track ? "relax.track." + track : "relax.noTrack");
+        const {track, layers, mixReady, playing, paused} = playback;
+        const title = layers?.length
+            ? layers.map(id => t("relax.track." + id)).join(" · ")
+            : t(mixReady ? "relax.savedMix" : track ? "relax.track." + track : "relax.noTrack");
+        if (trackLabel.textContent !== title) trackLabel.textContent = title;
+        updateMarquee();
+        updateAutoStop(Date.now());
         const statusKey = !playing ? "relax.status.ready"
             : paused ? "relax.status.paused" : "relax.status.playing";
         statusEl.textContent = t(statusKey);
@@ -67,6 +75,24 @@
                 btnMute.setAttribute("aria-label", label);
             }
         }
+    }
+
+    function updateMarquee() {
+        const distance = Math.max(0, trackLabel.offsetWidth - trackEl.clientWidth + 10);
+        const overflowing = trackLabel.offsetWidth > trackEl.clientWidth;
+        trackEl.classList.toggle("is-overflowing", overflowing);
+        trackEl.style.setProperty("--track-travel", `-${distance}px`);
+        trackEl.style.setProperty("--track-duration", `${4 + distance / 15}s`);
+    }
+
+    function updateAutoStop(now) {
+        const timer = playback.autoStop;
+        if (autoStopEl.hidden !== !timer) autoStopEl.hidden = !timer;
+        if (!timer) return;
+        const remaining = timer.deadline === null
+            ? timer.remaining : Math.max(0, Math.ceil((timer.deadline - now) / 1000));
+        const time = fmt(remaining * 1000);
+        if (autoStopTime.textContent !== time) autoStopTime.textContent = time;
     }
 
     function applySettings(s) {
@@ -111,11 +137,13 @@
             sendControl("spectrum");
         }
         drawSpectrum(now, active);
+        const wallTime = Date.now();
         const elapsed = playback.startedAt
-            ? (playback.pausedAt ?? Date.now()) - playback.startedAt
+            ? (playback.pausedAt ?? wallTime) - playback.startedAt
             : 0;
         const display = fmt(elapsed);
         if (elapsedEl.textContent !== display) elapsedEl.textContent = display;
+        updateAutoStop(wallTime);
         requestAnimationFrame(frame);
     }
 
@@ -376,5 +404,8 @@
     ]).then(() => sendControl("state")).catch(console.error);
 
     refreshLabels();
+    const trackObserver = new ResizeObserver(updateMarquee);
+    trackObserver.observe(trackEl);
+    trackObserver.observe(trackLabel);
     requestAnimationFrame(frame);
 })();

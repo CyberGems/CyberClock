@@ -19,7 +19,7 @@
                 <span class="relax-mark" data-ico="lotus" data-ico-size="14" aria-hidden="true"></span>
                 <div class="relax-titles">
                     <div class="relax-kicker" data-i18n="float.relaxTitle">Relax</div>
-                    <div class="relax-track" id="track-name"></div>
+                    <div class="relax-track" id="track-name"><span id="track-label"></span></div>
                 </div>
                 <button type="button" class="relax-icon-btn" id="btn-menu" data-tooltip="Menu and settings" data-i18n-attr="data-tooltip:float.menuTooltip, aria-label:float.menuTooltip" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="Menu and settings">
                     <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
@@ -62,7 +62,13 @@
                         </button>
                         <span class="elapsed" id="elapsed">00:00</span>
                     </div>
-                    <div class="playback-status" id="playback-status" role="status">Ready</div>
+                    <div class="transport-meta">
+                        <div class="playback-status" id="playback-status" role="status">Ready</div>
+                        <div class="auto-stop" id="auto-stop" role="timer" aria-label="Auto Stop" data-i18n-attr="aria-label:relax.autoStop" hidden>
+                            <span data-ico="timer" data-ico-size="12" aria-hidden="true"></span>
+                            <span id="auto-stop-time"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <canvas class="spectrum" id="spectrum" aria-hidden="true"></canvas>

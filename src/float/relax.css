@@ -100,6 +100,35 @@ button {
     line-height: 1.25;
 }
 
+.relax-track > span {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.relax-track.is-overflowing {
+    text-overflow: clip;
+    mask-image: linear-gradient(to right, black calc(100% - 10px), transparent);
+}
+
+.relax-track.is-overflowing > span {
+    animation: relax-track-scroll var(--track-duration) ease-in-out infinite alternate;
+}
+
+@keyframes relax-track-scroll {
+    0%, 15% { transform: translateX(0); }
+    85%, 100% { transform: translateX(var(--track-travel)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .relax-track.is-overflowing {
+        mask-image: none;
+        text-overflow: ellipsis;
+    }
+    .relax-track.is-overflowing > span {
+        animation: none;
+    }
+}
+
 .relax-icon-btn {
     width: 24px;
     height: 24px;
@@ -271,9 +300,31 @@ button {
 .elapsed {
     margin-left: auto;
     font-size: 12px;
+    font-family: var(--font-display);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.06em;
     color: rgba(255, 255, 255, 0.55);
+}
+
+.transport-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.auto-stop:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    color: var(--text-md);
+    font: 500 11px/1.25 var(--font-display);
+    font-variant-numeric: tabular-nums;
+}
+
+.auto-stop .cc-ico {
+    color: var(--skin-accent);
 }
 
 .playback-status {
