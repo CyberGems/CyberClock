@@ -2790,10 +2790,10 @@
         font: inherit;
         cursor: pointer;
     }
-    .tcard-add {
+    .tcard-add[data-tooltip-dir] {
         position: absolute;
-        top: 5px;
-        right: 5px;
+        top: 7px;
+        right: 7px;
         display: grid;
         place-items: center;
         width: 24px;
