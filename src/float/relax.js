@@ -202,20 +202,29 @@
         if (shell) shell.style.opacity = String(ownCtp ? op * 0.88 : op);
         const skin = parseInt(s.floatRelaxDesign, 10);
         if (shell) shell.dataset.skin = String(skin >= 1 && skin <= 10 ? skin : 1);
+        spectrum.hidden = s.floatRelaxShowSpectrum === false;
         refreshLabels();
         applyRelaxZoom(s.floatRelaxZoom);
     }
 
     const BASE_RELAX_W = 300;
     const BASE_RELAX_H = 176;
+    const COMPACT_RELAX_H = 144;
+    let appliedSize = "";
 
     function applyRelaxZoom(z) {
         const zoom = (typeof z === "number" && Number.isFinite(z) && z > 0) ? z : 1;
         if (shell) shell.style.zoom = String(zoom);
         const w = Math.round(BASE_RELAX_W * zoom);
-        const h = Math.round(BASE_RELAX_H * zoom);
+        const h = Math.round((spectrum.hidden ? COMPACT_RELAX_H : BASE_RELAX_H) * zoom);
+        const size = `${w}x${h}`;
+        if (size === appliedSize) return;
+        appliedSize = size;
         if (window.cc && window.cc.setWindowSize) {
-            window.cc.setWindowSize({ width: w, height: h, recenter: true });
+            window.cc.setWindowSize({ width: w, height: h, recenter: true }).catch(error => {
+                if (appliedSize === size) appliedSize = "";
+                console.error("Could not resize Relax widget:", error);
+            });
         }
     }
 
@@ -224,12 +233,12 @@
         const sinceRequest = now - lastSpectrumRequest;
         // Pull frames only while the widget is drawing. Limit the request
         // rate and retry if a reply is lost during pause or a window change.
-        if (active && sinceRequest >= (spectrumRequestPending ? 500 : 100)) {
+        if (!spectrum.hidden && active && sinceRequest >= (spectrumRequestPending ? 500 : 100)) {
             lastSpectrumRequest = now;
             spectrumRequestPending = true;
             sendControl("spectrum");
         }
-        drawSpectrum(now, active);
+        if (!spectrum.hidden) drawSpectrum(now, active);
         const wallTime = Date.now();
         const elapsed = playback.startedAt
             ? (playback.pausedAt ?? wallTime) - playback.startedAt

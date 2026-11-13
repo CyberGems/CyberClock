@@ -1001,6 +1001,16 @@
         background: rgba(var(--rgb-accent), 0.12);
         color: #ffffff;
     }
+    #ctx-relax-spectrum {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+    }
+    #ctx-relax-spectrum:hover {
+        background: rgba(var(--rgb-accent), 0.12);
+    }
     .switch-row:active {
         background: rgba(var(--rgb-accent), 0.2);
     }

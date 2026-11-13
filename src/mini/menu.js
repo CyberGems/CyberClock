@@ -167,6 +167,10 @@
         if (lock) lock.classList.toggle("on", cfg.relaxPositionLocked === true);
         const aot = document.getElementById("toggle-relax-aot");
         if (aot) aot.classList.toggle("on", !!cfg.alwaysOnTop);
+        const spectrum = document.getElementById("ctx-relax-spectrum");
+        const showSpectrum = cfg.floatRelaxShowSpectrum !== false;
+        spectrum.setAttribute("aria-checked", String(showSpectrum));
+        spectrum.querySelector(".toggle").classList.toggle("on", showSpectrum);
         const op = typeof cfg.floatRelaxOpacity === "number" ? cfg.floatRelaxOpacity : 1;
         document.querySelectorAll(".relax-op-chip").forEach((chip) => {
             chip.classList.toggle("on", Math.abs(parseFloat(chip.dataset.op) - op) < 0.01);
@@ -1697,6 +1701,21 @@
             }
         });
     }
+
+    const relaxSpectrumSwitch = document.getElementById("ctx-relax-spectrum");
+    relaxSpectrumSwitch.addEventListener("click", async () => {
+        relaxSpectrumSwitch.disabled = true;
+        try {
+            const show = relaxSpectrumSwitch.getAttribute("aria-checked") !== "true";
+            const saved = await window.cc.saveSettings({ floatRelaxShowSpectrum: show });
+            currentCfg = Object.assign(currentCfg || {}, saved);
+            syncRelaxMenu(currentCfg);
+        } catch (error) {
+            console.error("Could not save Relax spectrum visibility:", error);
+        } finally {
+            relaxSpectrumSwitch.disabled = false;
+        }
+    });
 
     const tglRelaxAotRow = document.getElementById("ctx-relax-aot");
     if (tglRelaxAotRow) {

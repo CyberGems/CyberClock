@@ -1191,7 +1191,14 @@ fn spawn_float_window_with_slot(
             let sz = (320.0 * zoom).max(380.0);
             ("Analog Clock · CyberClock", sz, sz)
         }
-        "relax" => ("Relax · CyberClock", 300.0 * zoom, 176.0 * zoom),
+        "relax" => {
+            let height = if settings.float_relax_show_spectrum {
+                176.0
+            } else {
+                144.0
+            };
+            ("Relax · CyberClock", 300.0 * zoom, height * zoom)
+        }
         _ => ("Stopwatch · CyberClock", 286.0 * zoom, 52.0 * zoom),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
