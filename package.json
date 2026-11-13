@@ -2,7 +2,7 @@
   "name": "cyberclock",
   "productName": "CyberClock",
   "version": "1.15.0",
-  "description": "Premium Cyber-Neon Clock for Windows — by CyberGems",
+  "description": "Clock, calendar, timers and recorded soundscapes in one lightweight app.",
   "author": "CyberGems",
   "license": "GPL-3.0-only",
   "scripts": {

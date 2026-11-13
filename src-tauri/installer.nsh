@@ -115,6 +115,9 @@ FunctionEnd
 ; interactive installs the user's choice is applied when the Finish page is
 ; left.
 !macro NSIS_HOOK_POSTINSTALL
+  ; Add/Remove Programs "Comments": the Tauri NSIS template does not write it.
+  ; Keep this line in sync with description in package.json.
+  WriteRegStr SHCTX "${UNINSTKEY}" "Comments" "Clock, calendar, timers and recorded soundscapes in one lightweight app."
   ${If} ${Silent}
     StrCpy $CcNoPage 1
   ${EndIf}
