@@ -6773,8 +6773,7 @@
 
     function rStop(isManual = false) {
         stopZenFlow();
-        const fade = isManual ? 1.0 : 2.0;
-        window.audioEngine.clearLayers();
+        const fade = isManual ? 1.6 : 2.0;
         window.audioEngine.stop(fade);
         // Undo any auto-stop slow fade so the next session starts at
         // the configured volume, not whatever the glide left behind.
@@ -7174,6 +7173,11 @@
         if (!engine.isPlaying) {
             rememberRelaxMix(relaxMixLayers.filter(track => track !== id));
             updateMixStateUI();
+            return;
+        }
+        if (engine.activeLayerIds().length === 1 && engine.isLayerActive(id)) {
+            rememberRelaxMix([]);
+            rStop(true);
             return;
         }
         engine.removeLayer(id);

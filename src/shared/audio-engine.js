@@ -139,7 +139,9 @@ class AudioEngine {
   _fadeAmbientTo(level, seconds) {
     const now = this._ctx.currentTime;
     const gain = this._pauseGain.gain;
+    const from = gain.value;
     gain.cancelAndHoldAtTime(now);
+    gain.setValueAtTime(from, now);
     gain.linearRampToValueAtTime(level, now + seconds);
   }
 
@@ -164,7 +166,7 @@ class AudioEngine {
     this._ensureCtx();
     if (this._ambientPaused) return;
     this._ambientPaused = true;
-    const fadeSeconds = 0.25;
+    const fadeSeconds = 0.85;
     this._fadeAmbientTo(0, fadeSeconds);
     const end = this._ctx.currentTime + fadeSeconds;
     const finishPause = () => {
@@ -275,18 +277,23 @@ class AudioEngine {
     this.isPlaying     = true;
   }
 
-  _retireVoice(voice, fade) {
+  _retireVoice(voice, fade, linear = false) {
     if (!voice.alive) return;
     voice.alive = false;
     clearTimeout(voice.birdTimer);
     const now = this._ctx.currentTime;
     const g   = voice.bus.gain;
-    const from = Math.max(0.0001, g.value);
-    g.cancelScheduledValues(now);
-    if (fade > 0) {
-      g.setValueCurveAtTime(this._fadeCurve(false, from), now, fade);
+    if (linear) {
+      const from = g.value;
+      g.cancelAndHoldAtTime(now);
+      g.setValueAtTime(from, now);
+      if (fade > 0) g.linearRampToValueAtTime(0, now + fade);
+      else g.setValueAtTime(0, now);
     } else {
-      g.setValueAtTime(0, now);
+      const from = Math.max(0.0001, g.value);
+      g.cancelScheduledValues(now);
+      if (fade > 0) g.setValueCurveAtTime(this._fadeCurve(false, from), now, fade);
+      else g.setValueAtTime(0, now);
     }
     // Tear down nodes once the fade has fully elapsed.
     setTimeout(() => this._destroyVoice(voice), fade * 1000 + 120);
@@ -308,10 +315,15 @@ class AudioEngine {
 
   // ── Stop all (fade out, click-free) ───────────────────────
   stop(fadeTime = this.stopFadeTime) {
+    const wasFadingToPause = this._pauseTimer !== null;
     clearTimeout(this._pauseTimer);
     this._pauseTimer = null;
+    // If Stop interrupts the pause fade, hold that level and let the
+    // individual voices fade out without a second envelope on top.
+    if (wasFadingToPause) this._pauseGain.gain.cancelAndHoldAtTime(this._ctx.currentTime);
+    const fade = this._ambientPaused && !wasFadingToPause ? 0 : fadeTime;
     this._trackRequests.clear();
-    this._voices.slice().forEach(v => this._retireVoice(v, fadeTime));
+    this._voices.slice().forEach(v => this._retireVoice(v, fade, true));
     this._layers.forEach(l => { l.active = false; l.voice = null; });
     this._current     = null;
     this.isPlaying    = false;
