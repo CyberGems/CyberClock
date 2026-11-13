@@ -6964,10 +6964,10 @@
                     ctx.fillRect(x, y - 2, barW, 2);
                 }
             } else {
-                const time = Date.now() * 0.001;
+                const time = Date.now() * 0.00065;
                 ctx.lineWidth = 1.5;
                 
-                ctx.strokeStyle = `rgba(${rgb}, 0.08)`;
+                ctx.strokeStyle = `rgba(${rgb}, 0.065)`;
                 ctx.beginPath();
                 ctx.moveTo(0, h / 2);
                 ctx.lineTo(w, h / 2);
@@ -6975,7 +6975,7 @@
 
                 for (let wIdx = 0; wIdx < 3; wIdx++) {
                     ctx.beginPath();
-                    const opacity = 0.05 + (wIdx * 0.04);
+                    const opacity = 0.04 + (wIdx * 0.033);
                     ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
 
                     const freq = 0.008 + (wIdx * 0.004);
