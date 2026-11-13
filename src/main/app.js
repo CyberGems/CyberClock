@@ -6728,6 +6728,7 @@
             track: (playing && engine.currentTrack) || rSelected,
             layers: playing ? engine.activeLayerIds() : [],
             layerVolumes: Object.fromEntries(currentRelaxLayers().map(id => [id, engine.getLayerVolume(id)])),
+            availableLayers: RELAX_TRACKS.map(track => track.id),
             mixReady: !playing && relaxMixLayers.length > 0,
             playing,
             paused: playing && rPaused,
@@ -7218,6 +7219,10 @@
             updateRelaxMasterVolume(action.volume, action.commit === true);
         } else if (action?.type === "layer-volume") {
             updateRelaxLayerVolume(action.track, action.volume, action.commit === true);
+        } else if (action?.type === "add-layer" && RELAX_TRACKS.some(track => track.id === action.track)) {
+            addRelaxLayer(action.track);
+        } else if (action?.type === "remove-layer" && currentRelaxLayers().includes(action.track)) {
+            removeRelaxLayer(action.track);
         } else if (action === "state") {
             publishRelaxPlayback();
         } else if (action === "spectrum") {

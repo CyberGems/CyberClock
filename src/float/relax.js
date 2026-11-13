@@ -18,6 +18,7 @@
     const volumeValue = document.getElementById("master-volume-value");
     const layerVolumes = document.getElementById("layer-volumes");
     const layerRows = document.getElementById("layer-volume-rows");
+    const layerAddChoices = document.getElementById("layer-add-choices");
     const pendingLayerVolumes = new Map();
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
@@ -104,7 +105,8 @@
     function refreshLayerVolumes() {
         const volumes = playback.layerVolumes ?? {};
         const ids = Object.keys(volumes);
-        layerVolumes.hidden = ids.length === 0;
+        const available = (playback.availableLayers ?? []).filter(id => !Object.hasOwn(volumes, id));
+        layerVolumes.hidden = ids.length === 0 && available.length === 0;
         for (const row of layerRows.children) {
             if (!Object.hasOwn(volumes, row.dataset.track)) {
                 pendingLayerVolumes.delete(row.dataset.track);
@@ -117,7 +119,8 @@
                 const row = document.createElement("div");
                 row.className = "layer-volume-row";
                 row.dataset.track = id;
-                row.innerHTML = '<label></label><input type="range" min="0" max="100"><output aria-hidden="true"></output>';
+                row.innerHTML = '<label></label><input type="range" min="0" max="100"><output aria-hidden="true"></output><button type="button" class="layer-remove">×</button>';
+                row.querySelector("button").addEventListener("click", () => sendControl({ type: "remove-layer", track: id }));
                 const slider = row.querySelector("input");
                 slider.id = `layer-volume-${id}`;
                 row.querySelector("label").htmlFor = slider.id;
@@ -143,6 +146,25 @@
             slider.setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track }));
             if (slider.value !== shown) slider.value = shown;
             row.querySelector("output").textContent = shown + "%";
+            row.querySelector("button").setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track }));
+        }
+        if (available.join() !== Array.from(layerAddChoices.children, button => button.dataset.track).join()) {
+            const hadFocus = layerAddChoices.contains(document.activeElement);
+            const nextTrack = document.activeElement.dataset.track;
+            layerAddChoices.replaceChildren(...available.map(id => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.dataset.track = id;
+                button.addEventListener("click", () => sendControl({ type: "add-layer", track: id }));
+                return button;
+            }));
+            if (hadFocus) (document.getElementById(`layer-volume-${nextTrack}`) ?? volumeSlider).focus();
+        }
+        for (const button of layerAddChoices.children) {
+            const track = t("relax.track." + button.dataset.track);
+            button.textContent = "+ " + track;
+            button.setAttribute("aria-label", window.ccI18n.t("relax.addLayer", { track }));
+            button.disabled = cfg.audioMuted === true;
         }
     }
 

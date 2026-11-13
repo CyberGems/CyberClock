@@ -393,7 +393,7 @@ button {
 
 .layer-volume-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(46px, 0.8fr) 4ch;
+    grid-template-columns: minmax(0, 1fr) minmax(40px, 0.8fr) 4ch 20px;
     align-items: center;
     gap: 6px;
     min-height: 24px;
@@ -406,6 +406,34 @@ button {
 .layer-volume-row output {
     text-align: right;
     font-variant-numeric: tabular-nums;
+}
+
+.layer-add-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.layer-remove,
+.layer-add-choices button {
+    min-height: 20px;
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg-02);
+    color: var(--text-md);
+    font-size: 11px;
+}
+
+.layer-remove:hover,
+.layer-add-choices button:hover:not(:disabled) {
+    color: var(--skin-accent);
+    border-color: var(--skin-accent);
+}
+
+.layer-add-choices button:disabled {
+    opacity: 0.5;
 }
 
 .auto-stop-label {
