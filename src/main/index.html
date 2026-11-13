@@ -1102,7 +1102,7 @@
                                     <label for="s-cvol" data-i18n="settings.chimes.volume">Chimes Volume</label>
                                     <small id="s-cvol-help" data-i18n="settings.chimes.volumeHelp">Sets how loud the scheduled chimes sound.</small>
                                 </div>
-                                <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
+                                <div class="s-vol-row s-vol-control">
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
                                     <input type="range" class="s-rng" id="s-cvol" min="0" max="100" value="75" aria-describedby="s-cvol-help" />
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
@@ -1430,10 +1430,11 @@
                             <div class="s-sec-d" data-i18n="voice.configHelp">Time announcements and spoken alarms share the voice and volume. The announcement style changes how the time is spoken. Use Test to hear your selection.</div>
 
                             <!-- Voice selection -->
-                            <div class="s-row">
+                            <div class="s-row s-voice-selection">
                                 <span class="s-row-ico" data-ico="user"></span>
                                 <label class="s-lbl" for="s-voice-select" data-i18n="voice.voice">Voice</label>
                                 <select id="s-voice-select">
+                                    <button type="button"><selectedcontent></selectedcontent></button>
                                     <option value="auto" data-i18n="voice.auto">System Default</option>
                                     <option value="female" data-i18n="voice.female">Female Voice</option>
                                     <option value="male" data-i18n="voice.male">Male Voice</option>
@@ -1463,7 +1464,7 @@
                                     <label for="s-voice-vol" data-i18n="voice.volume">Voice Volume</label>
                                     <small id="s-voice-vol-help" data-i18n="voice.volumeHelp">Sets the volume of time announcements and spoken alarms. The chime before announcing the time uses 70% of this level.</small>
                                 </div>
-                                <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
+                                <div class="s-vol-row s-vol-control">
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
                                     <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" aria-describedby="s-voice-vol-help" />
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
@@ -1488,37 +1489,19 @@
                     <!-- Alarms -->
                     <div class="s-panel" id="stab-alarms">
                         <div class="s-sec">
-                            <label class="s-sec-t" for="s-avol" data-i18n="settings.alarms.volume">Alarm Volume</label>
-                            <p class="s-sec-d" id="s-avol-help" data-i18n="settings.alarms.volumeHelp">Sets how loud the alarm sound plays. Adjust spoken alarms in the Voice tab.</p>
-                            <div class="s-vol-row">
+                            <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
-                                <span style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-low"></span></span
-                                ><input
-                                    type="range"
-                                    id="s-avol"
-                                    aria-describedby="s-avol-help"
-                                    min="0"
-                                    max="100"
-                                    value="75"
-                                /><span
-                                    style="font-size: 10px; color: var(--text-md)"
-                                    ><span data-ico="volume-high"></span></span
-                                ><span class="s-vol-val" id="s-avol-val"
-                                    >75%</span
-                                >
+                                <div class="s-lbl">
+                                    <label for="s-avol" data-i18n="settings.alarms.volume">Alarm Volume</label>
+                                    <small id="s-avol-help" data-i18n="settings.alarms.volumeHelp">Sets how loud the alarm sound plays. Adjust spoken alarms in the Voice tab.</small>
+                                </div>
+                                <div class="s-vol-row s-vol-control">
+                                    <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
+                                    <input type="range" class="s-rng" id="s-avol" min="0" max="100" value="75" aria-describedby="s-avol-help" />
+                                    <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
+                                    <span class="s-vol-val" id="s-avol-val">75%</span>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="s-alarm-manager-card">
-                            <div class="s-alarm-manager-icon"><span data-ico="bell"></span></div>
-                            <div class="s-lbl">
-                                <span data-i18n="settings.alarms.managerTitle">Manage your alarms</span>
-                                <small data-i18n="settings.alarms.managerDesc">Create schedules, messages and reminders from the dedicated Alarm view.</small>
-                            </div>
-                            <button class="s-abtn" id="s-open-alarms" type="button" data-tooltip="Open Alarm view" data-i18n-attr="data-tooltip:settings.alarms.managerTip">
-                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.managerBtn">Open Alarms</span>
-                            </button>
                         </div>
 
                         <!-- Alarm voices -->
@@ -1541,6 +1524,17 @@
                                     <span data-ico="mic"></span> <span data-i18n="voice.openSettings">Voice settings</span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div class="s-alarm-manager-card">
+                            <div class="s-alarm-manager-icon"><span data-ico="bell"></span></div>
+                            <div class="s-lbl">
+                                <span data-i18n="settings.alarms.managerTitle">Manage your alarms</span>
+                                <small data-i18n="settings.alarms.managerDesc">Create schedules, messages and reminders from the dedicated Alarm view.</small>
+                            </div>
+                            <button class="s-abtn" id="s-open-alarms" type="button" data-tooltip="Open Alarm view" data-i18n-attr="data-tooltip:settings.alarms.managerTip">
+                                <span data-ico="bell"></span> <span data-i18n="settings.alarms.managerBtn">Open Alarms</span>
+                            </button>
                         </div>
                     </div>
 

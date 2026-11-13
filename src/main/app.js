@@ -2128,11 +2128,7 @@
         const va = cfg.voiceAnnouncer || {};
         const savedVal = va.voiceName || va.voiceGender || 'auto';
 
-        sel.innerHTML = `
-            <option value="auto" data-i18n="voice.auto">${window.ccI18n ? window.ccI18n.t("voice.auto") : "System Default"}</option>
-            <option value="female" data-i18n="voice.female">${window.ccI18n ? window.ccI18n.t("voice.female") : "Female Voice"}</option>
-            <option value="male" data-i18n="voice.male">${window.ccI18n ? window.ccI18n.t("voice.male") : "Male Voice"}</option>
-        `;
+        sel.querySelector('optgroup')?.remove();
 
         if (window.VoiceAnnouncer) {
             const voices = window.VoiceAnnouncer.getVoices();

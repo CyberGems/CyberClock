@@ -7050,6 +7050,15 @@
     .s-vol-row input[type="range"] {
         flex: 1;
     }
+    .s-vol-control {
+        flex: 1;
+        max-inline-size: 220px;
+        min-inline-size: 0;
+        margin: 0;
+    }
+    .s-vol-control input[type="range"] {
+        min-inline-size: 0;
+    }
     .s-vol-val {
         font-family: var(--font-mono);
         font-size: calc(11px * var(--ui-scale));
@@ -7086,25 +7095,25 @@
         font-size: calc(12.5px * var(--ui-scale));
         line-height: 1.45;
     }
+    .s-voice-selection > select,
+    .s-voice-style-controls {
+        flex: 0 1 min(60%, 25rem);
+        max-inline-size: min(60%, 25rem);
+        min-inline-size: 0;
+    }
     .s-voice-style-controls {
         justify-content: flex-end;
-        flex: 0 1 60%;
-        min-width: 0;
     }
     .s-voice-style-controls select {
         flex: 1 1 180px;
         min-width: 0;
         max-width: 100%;
     }
-    .s-alarm-row.s-voice-row {
-        flex-wrap: nowrap;
-    }
-    .s-alarm-row.s-voice-row #s-voice-select {
-        flex: 1;
-        min-width: 0;
+    #s-voice-select,
+    #s-voice-select selectedcontent {
+        white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        white-space: nowrap;
     }
     .s-abtn.s-abtn-icon {
         padding: 6px 9px;
