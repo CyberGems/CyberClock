@@ -295,16 +295,16 @@
             return;
         }
 
-        const time = now * 0.001;
+        const time = now * 0.00065;
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(" + rgb + ",0.1)";
+        ctx.strokeStyle = "rgba(" + rgb + ",0.08)";
         ctx.beginPath();
         ctx.moveTo(0, h / 2);
         ctx.lineTo(w, h / 2);
         ctx.stroke();
         for (let wIdx = 0; wIdx < 3; wIdx++) {
             ctx.beginPath();
-            ctx.strokeStyle = "rgba(" + rgb + "," + (0.12 + wIdx * 0.08) + ")";
+            ctx.strokeStyle = "rgba(" + rgb + "," + (0.1 + wIdx * 0.065) + ")";
             const freq = 0.02 + wIdx * 0.008;
             const amp = 2.2 + wIdx * 1.6;
             const speed = 1.2 + wIdx * 0.5;
