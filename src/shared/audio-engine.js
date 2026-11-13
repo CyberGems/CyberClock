@@ -95,6 +95,9 @@ class AudioEngine {
   constructor() {
     this._ctx        = null;
     this._master     = null;
+    this._pauseGain  = null;
+    this._pauseTimer = null;
+    this._ambientPaused = false;
     this._analyser   = null;
     this._voices     = [];     // all live voices (current + those fading out)
     this._current    = null;   // the active voice
@@ -120,9 +123,11 @@ class AudioEngine {
     this._ctx      = new (window.AudioContext || window.webkitAudioContext)();
     this._master   = this._ctx.createGain();
     this._master.gain.value = this.volume;
+    this._pauseGain = this._ctx.createGain();
     this._analyser = this._ctx.createAnalyser();
     this._analyser.fftSize = 256;
-    this._master.connect(this._analyser);
+    this._master.connect(this._pauseGain);
+    this._pauseGain.connect(this._analyser);
     this._analyser.connect(this._ctx.destination);
   }
 
@@ -131,11 +136,49 @@ class AudioEngine {
     if (this._ctx.state === 'suspended') this._ctx.resume();
   }
 
-  // Real pause: suspends the whole AudioContext so every voice freezes in
-  // place (HTMLAudioElement media too, via createMediaElementSource).
-  suspend() {
+  _fadeAmbientTo(level, seconds) {
+    const now = this._ctx.currentTime;
+    const gain = this._pauseGain.gain;
+    gain.cancelAndHoldAtTime(now);
+    gain.linearRampToValueAtTime(level, now + seconds);
+  }
+
+  resumeAmbient() {
+    if (!this._ambientPaused) {
+      this.resume();
+      return;
+    }
+    clearTimeout(this._pauseTimer);
+    this._pauseTimer = null;
+    this._ambientPaused = false;
+    this._ctx.resume().catch(console.error);
+    this._fadeAmbientTo(1, 0.22);
+    this._voices.forEach(voice => {
+      if (voice.alive && voice.audioEl?.paused) {
+        voice.audioEl.play().catch(e => console.warn('[AudioEngine] Resume playback:', e));
+      }
+    });
+  }
+
+  pauseAmbient() {
     this._ensureCtx();
-    if (this._ctx.state === 'running') this._ctx.suspend();
+    if (this._ambientPaused) return;
+    this._ambientPaused = true;
+    const fadeSeconds = 0.25;
+    this._fadeAmbientTo(0, fadeSeconds);
+    const end = this._ctx.currentTime + fadeSeconds;
+    const finishPause = () => {
+      if (this._ctx.state === 'running' && this._ctx.currentTime < end) {
+        this._pauseTimer = setTimeout(finishPause, 20);
+        return;
+      }
+      this._pauseTimer = null;
+      this._voices.forEach(voice => {
+        if (voice.alive && voice.track !== 'file') voice.audioEl?.pause();
+      });
+      if (this._ctx.state === 'running') this._ctx.suspend().catch(console.error);
+    };
+    this._pauseTimer = setTimeout(finishPause, fadeSeconds * 1000);
   }
 
   setVolume(v) {
@@ -265,6 +308,8 @@ class AudioEngine {
 
   // ── Stop all (fade out, click-free) ───────────────────────
   stop(fadeTime = this.stopFadeTime) {
+    clearTimeout(this._pauseTimer);
+    this._pauseTimer = null;
     this._trackRequests.clear();
     this._voices.slice().forEach(v => this._retireVoice(v, fadeTime));
     this._layers.forEach(l => { l.active = false; l.voice = null; });
@@ -462,7 +507,7 @@ class AudioEngine {
     this.isPlaying = true;
     if (!this._layerTrack) {
       this.currentTrack = id;
-      this.resume();
+      this.resumeAmbient();
     }
     // Keep the pending request tied to its route until the file check
     // finishes. Removing a layer or stopping can then cancel its start.
@@ -548,7 +593,7 @@ class AudioEngine {
 
   addLayer(id) {
     this._ensureCtx();
-    if (!this.isPlaying) this.resume();
+    if (!this.isPlaying) this.resumeAmbient();
     if (this.isLayerActive(id)) return;
     // If a solo track is currently playing, promote it to a layer first
     // so blending keeps it sounding instead of crossfading it away.
@@ -669,7 +714,9 @@ class AudioEngine {
       }
     });
 
-    audio.play().catch(e => console.warn('[AudioEngine] File playback:', e));
+    if (!this._ambientPaused || this._pauseTimer !== null || !id) {
+      audio.play().catch(e => console.warn('[AudioEngine] File playback:', e));
+    }
     this._commitVoice(voice, fade);
   }
 

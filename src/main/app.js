@@ -6810,7 +6810,7 @@
         if (!window.audioEngine.isPlaying || rPaused) return;
         rPaused = true;
         rPauseResumedAt = Date.now();
-        window.audioEngine.suspend();
+        window.audioEngine.pauseAmbient();
         // Freeze the auto-stop countdown by stopping its interval; the
         // remaining seconds stay in rAstRemain until resume re-arms it.
         if (rAstTimer) {
@@ -6827,7 +6827,7 @@
         if (!rPaused) return;
         rPaused = false;
         const pauseMs = Date.now() - rPauseResumedAt;
-        window.audioEngine.resume();
+        window.audioEngine.resumeAmbient();
         // Guard: if an auto-stop slow fade started before the pause, the
         // master gain may still be gliding toward 0 — pin it back to the
         // configured volume so resuming is actually audible.
