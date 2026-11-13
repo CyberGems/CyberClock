@@ -7097,7 +7097,8 @@
     // active tint too (dot + border). The solo selection keeps its own
     // highlight; the two sources can coexist (solo + layers).
     function updateMixStateUI() {
-        const layered = window.audioEngine.activeLayerIds();
+        const engine = window.audioEngine;
+        const layered = engine.activeLayerIds();
         document.querySelectorAll(".tcard").forEach(card => {
             const id = card.dataset.track;
             const inMix = layered.includes(id);
@@ -7118,10 +7119,21 @@
                 const item = document.createElement("li");
                 item.className = "r-mix-layer";
                 item.dataset.track = id;
-                const name = document.createElement("span");
-                const remove = document.createElement("button");
-                remove.type = "button";
-                remove.innerHTML = '<span data-ico="x" data-ico-size="13"></span>';
+                item.innerHTML = `
+                    <span class="r-mix-name"></span>
+                    <input type="range" min="0" max="100" step="1">
+                    <span class="r-mix-level" aria-hidden="true"></span>
+                    <button type="button"><span data-ico="x" data-ico-size="13"></span></button>
+                `;
+                const slider = item.querySelector("input");
+                const level = item.querySelector(".r-mix-level");
+                slider.value = Math.round(engine.getLayerVolume(id) * 100);
+                level.textContent = slider.value + "%";
+                slider.addEventListener("input", () => {
+                    engine.setLayerVolume(id, slider.valueAsNumber / 100);
+                    level.textContent = slider.value + "%";
+                });
+                const remove = item.querySelector("button");
                 remove.addEventListener("click", () => {
                     const next = item.nextElementSibling || item.previousElementSibling;
                     const nextId = next?.dataset.track;
@@ -7129,17 +7141,17 @@
                     (nextId && list.querySelector(`[data-track="${nextId}"] button`)
                         || document.getElementById("r-play")).focus();
                 });
-                item.append(name, remove);
                 return item;
             }));
             window.ccIcons.replaceIcons(list);
         }
         for (const item of list.children) {
             const name = window.ccI18n.t(`relax.track.${item.dataset.track}`);
-            item.firstElementChild.textContent = name;
-            item.lastElementChild.setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track: name }));
+            item.querySelector(".r-mix-name").textContent = name;
+            item.querySelector("input").setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track: name }));
+            item.querySelector("button").setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track: name }));
         }
-        updatePlayButtonUI(window.audioEngine.isPlaying);
+        updatePlayButtonUI(engine.isPlaying);
     }
 
     function addRelaxLayer(id) {

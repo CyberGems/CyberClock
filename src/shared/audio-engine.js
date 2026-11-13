@@ -502,13 +502,26 @@ class AudioEngine {
     return this._layers.filter(l => l.active).map(l => l.id);
   }
 
+  getLayerVolume(id) {
+    return this.getLayer(id)?.volume ?? 1;
+  }
+
+  setLayerVolume(id, volume) {
+    const layer = this.getLayer(id);
+    if (!layer || !Number.isFinite(volume)) return;
+    layer.volume = Math.max(0, Math.min(1, volume));
+    if (layer.active) {
+      layer.gain.gain.setTargetAtTime(layer.volume, this._ctx.currentTime, 0.04);
+    }
+  }
+
   _ensureLayer(id) {
     let layer = this.getLayer(id);
     if (!layer) {
       const gain = this._ctx.createGain();
       gain.gain.value = 0;                 // silent until activated
       gain.connect(this._master);
-      layer = { id, gain, active: false, voice: null };
+      layer = { id, gain, active: false, voice: null, volume: 1 };
       this._layers.push(layer);
     }
     return layer;
@@ -541,7 +554,7 @@ class AudioEngine {
     if (pending || solo) {
       const promoted = this._ensureLayer(pending?.track ?? solo.track);
       promoted.active = true;
-      promoted.gain.gain.setTargetAtTime(1, this._ctx.currentTime, 0.05);
+      promoted.gain.gain.setTargetAtTime(promoted.volume, this._ctx.currentTime, 0.05);
       if (pending) {
         this._trackRequests.delete(null);
         pending.layer = promoted.id;
@@ -560,7 +573,7 @@ class AudioEngine {
     const layer = this._ensureLayer(id);
     if (layer.active) return;
     this._startLayerVoice(layer);
-    layer.gain.gain.setTargetAtTime(1, this._ctx.currentTime, 0.4);
+    layer.gain.gain.setTargetAtTime(layer.volume, this._ctx.currentTime, 0.4);
     this.currentTrack ??= id;
   }
 

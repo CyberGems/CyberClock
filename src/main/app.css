@@ -2890,28 +2890,44 @@
         font-weight: 600;
     }
     .r-mix:not([hidden]) {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
+        display: grid;
+        gap: 6px;
     }
     .r-mix-layers {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        display: grid;
+        gap: 4px;
         margin: 0;
         padding: 0;
         list-style: none;
     }
     .r-mix-layer {
-        display: inline-flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) 4ch auto;
         align-items: center;
-        gap: 4px;
-        padding: 2px 3px 2px 9px;
+        gap: 8px;
+        padding: 3px 5px 3px 9px;
         border: 1px solid var(--border);
         border-radius: 8px;
         background: var(--bg-02);
         color: var(--text-hi);
         font-size: calc(11px * var(--ui-scale));
+    }
+    .r-mix-name {
+        overflow-wrap: anywhere;
+    }
+    .r-mix-layer input[type="range"] {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+    .r-mix-layer input:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 3px;
+    }
+    .r-mix-level {
+        color: var(--text-md);
+        font-family: var(--font-mono);
+        text-align: right;
     }
     .r-mix-layer button {
         display: grid;
@@ -2982,7 +2998,6 @@
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
-        width: 70px;
         flex-shrink: 0;
     }
     .r-vol-ico {
