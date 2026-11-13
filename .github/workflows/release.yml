@@ -84,7 +84,7 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           $exe = Join-Path (Get-Location) "src-tauri/target/release/CyberClock.exe"
-          $helper = Join-Path (Get-Location) "src-tauri/target/release/bin/open-taskbar-settings.exe"
+          $helper = Join-Path (Get-Location) "src-tauri/bin/open-taskbar-settings.exe"
           $portableDir = Join-Path (Get-Location) "src-tauri/target/release/bundle/portable"
           $zip = Join-Path $portableDir "CyberClock_${version}_x64-portable.zip"
 
