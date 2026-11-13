@@ -648,7 +648,14 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
 /// concurrent writers cannot clobber each other.
 #[tauri::command]
 fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSettings, String> {
+    let scheduler_disclosure_only = patch
+        .as_object()
+        .is_some_and(|fields| fields.len() == 1 && fields.contains_key("relaxSchedulerExpanded"));
     let merged = settings::patch_settings(&app, patch)?;
+    // Opening or closing the controls must not reset the next scheduled run.
+    if scheduler_disclosure_only {
+        return Ok(merged);
+    }
     set_auto_update(merged.auto_update);
     EDGE_LIMITS_ENABLED.store(merged.mini_edge_limits, Ordering::Release);
 

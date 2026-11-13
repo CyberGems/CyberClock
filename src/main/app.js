@@ -2514,7 +2514,7 @@
             const savedLayers = Array.isArray(s.relaxMixLayers) ? s.relaxMixLayers : [];
             relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
         }
-        setRelaxMixExpanded(pendingMixExpansion?.relaxMixExpanded ?? (s.relaxMixExpanded === true));
+        setRelaxMixExpanded(pendingRelaxDisclosures.get("relaxMixExpanded")?.expanded ?? (s.relaxMixExpanded === true));
         const autoStopMinutes = isRelaxAutoStopOption(s.relaxAutoTimer) ? s.relaxAutoTimer : 0;
         if (!pendingAutoStop && autoStopMinutes !== preferredAutoStopMinutes) {
             preferredAutoStopMinutes = autoStopMinutes;
@@ -6580,7 +6580,7 @@
     let relaxSettingsSave = Promise.resolve();
     let relaxMixLayers = [];
     let pendingRelaxMix = null;
-    let pendingMixExpansion = null;
+    const pendingRelaxDisclosures = new Map();
     let preferredAutoStopMinutes = 0;
     let pendingAutoStop = null;
     let pendingMasterVolume = null;
@@ -7023,22 +7023,29 @@
     const mixToggle = document.getElementById("r-mix-toggle");
     const mixList = document.getElementById("r-mix-layers");
     mixToggle.addEventListener("click", () => {
-        const change = { relaxMixExpanded: mixList.hidden };
-        pendingMixExpansion = change;
-        setRelaxMixExpanded(change.relaxMixExpanded);
-        relaxSettingsSave = relaxSettingsSave.then(async () => {
-            if (pendingMixExpansion !== change) return;
-            try {
-                await window.cc.saveSettings(change);
-            } finally {
-                if (pendingMixExpansion === change) pendingMixExpansion = null;
-            }
-        }).catch(console.error);
+        const expanded = mixList.hidden;
+        setRelaxMixExpanded(expanded);
+        saveRelaxDisclosure("relaxMixExpanded", expanded);
     });
 
     function setRelaxMixExpanded(expanded) {
         mixList.hidden = !expanded;
         mixToggle.setAttribute("aria-expanded", String(expanded));
+    }
+
+    function saveRelaxDisclosure(setting, expanded) {
+        const change = { expanded };
+        pendingRelaxDisclosures.set(setting, change);
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
+            if (pendingRelaxDisclosures.get(setting) !== change) return;
+            try {
+                await window.cc.saveSettings({ [setting]: expanded });
+            } finally {
+                if (pendingRelaxDisclosures.get(setting) === change) {
+                    pendingRelaxDisclosures.delete(setting);
+                }
+            }
+        }).catch(console.error);
     }
 
     function playRelaxCard(track, event) {
@@ -9517,7 +9524,7 @@
     });
 
     async function quitFromMainWindow() {
-        while (pendingMixExpansion) await relaxSettingsSave;
+        while (pendingRelaxDisclosures.size) await relaxSettingsSave;
         if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         else window.close();
     }
@@ -10035,6 +10042,7 @@
     }
 
     function applySchedUI(s) {
+        setRelaxSchedulerExpanded(pendingRelaxDisclosures.get("relaxSchedulerExpanded")?.expanded ?? (s.relaxSchedulerExpanded === true));
         const sched = s.relaxScheduler || {};
         document.getElementById('sched-enable').checked = !!sched.enabled;
         buildSchedTimeOptions();
@@ -10122,17 +10130,18 @@
 
     // Scheduler event listeners
     const schedToggle = document.getElementById('r-sched-toggle');
-    if (schedToggle) {
-        schedToggle.addEventListener('click', () => {
-            const panel = document.getElementById('r-sched');
-            const body = document.getElementById('r-sched-body');
-            if (!panel || !body) return;
-            const willOpen = body.hidden;
-            body.hidden = !willOpen;
-            panel.classList.toggle("open", willOpen);
-            schedToggle.setAttribute("aria-expanded", String(willOpen));
-        });
+    const schedPanel = document.getElementById('r-sched');
+    const schedBody = document.getElementById('r-sched-body');
+    function setRelaxSchedulerExpanded(expanded) {
+        schedBody.hidden = !expanded;
+        schedPanel.classList.toggle("open", expanded);
+        schedToggle.setAttribute("aria-expanded", String(expanded));
     }
+    schedToggle.addEventListener('click', () => {
+        const expanded = schedBody.hidden;
+        setRelaxSchedulerExpanded(expanded);
+        saveRelaxDisclosure("relaxSchedulerExpanded", expanded);
+    });
     document.getElementById('sched-enable').addEventListener('change', (e) => {
         window.cc.saveSettings({
             relaxScheduler: { ...cfg.relaxScheduler, enabled: e.target.checked }

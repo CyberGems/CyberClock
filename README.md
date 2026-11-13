@@ -123,7 +123,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
 - **Floating Relax Widget** — Compact desktop session with the track name, a large play/pause button, stop, next and shuffle controls, master volume and controls to add, remove, or adjust layers, playback status, the auto-stop countdown and duration controls, a small spectrum that can be hidden from the widget menu, and 10 designs. The widget controls the main Relax session and can resume the saved mix while full mode is hidden
 - **Session Timer** — Elapsed session time and an auto-stop countdown alongside the track and playback controls. The selected duration is restored in Relax and the widget on the next launch
-- **Auto Scheduler** — Schedule automatic playback times
+- **Auto Scheduler** — Schedule automatic playback times. CyberClock remembers whether this section was expanded between launches
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
 
 ### 📌 Mini Mode

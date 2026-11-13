@@ -498,6 +498,7 @@ pub struct AppSettings {
     pub alarm_templates: Vec<CustomAlarm>,
 
     pub relax_scheduler: RelaxSchedulerSettings,
+    pub relax_scheduler_expanded: bool,
     #[serde(default)]
     pub voice_announcer: VoiceAnnouncerSettings,
 
@@ -643,6 +644,7 @@ impl Default for AppSettings {
             custom_alarms: Vec::new(),
             alarm_templates: Vec::new(),
             relax_scheduler: RelaxSchedulerSettings::default(),
+            relax_scheduler_expanded: false,
             voice_announcer: VoiceAnnouncerSettings::default(),
             show_tooltips: true,
             show_widget_hints: true,
