@@ -3260,13 +3260,14 @@
         flex: 0 0 auto;
         display: flex;
         flex-direction: column;
+        container-type: inline-size;
     }
     .ses-timer {
         font-family: "JetBrains Mono", monospace;
-        font-size: 32px;
+        font-size: min(64px, 19cqi);
         font-weight: 500;
         color: var(--text-hi);
-        letter-spacing: 2px;
+        font-variant-numeric: tabular-nums;
         line-height: 1;
     }
     .ses-timer-lbl {
