@@ -3300,12 +3300,15 @@
         display: flex;
         flex-direction: column;
     }
-    .viz-title {
+    .relax-panel-title {
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(12px * var(--ui-scale));
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-lo);
+        text-align: center;
+    }
+    .viz-title {
         padding: 9px 14px;
         border-bottom: 1px solid var(--border);
         flex-shrink: 0;
@@ -3336,11 +3339,6 @@
         line-height: 1;
     }
     .ses-timer-lbl {
-        font-family: "Outfit", system-ui, sans-serif;
-        font-size: calc(12px * var(--ui-scale));
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        color: var(--text-lo);
         margin-top: 5px;
     }
     .r-notify {
