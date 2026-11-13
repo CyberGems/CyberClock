@@ -511,7 +511,7 @@ fn speak_announcement(text: String, voice_name: String, volume: f64) -> bool {
 fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, String> {
     set_auto_update(settings.auto_update);
     EDGE_LIMITS_ENABLED.store(settings.mini_edge_limits, Ordering::Release);
-    let _ = persist(&app, &settings);
+    persist(&app, &settings)?;
 
     // Reset next run for relax scheduler
     let state = app.state::<AlarmState>();
@@ -522,7 +522,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
     if !settings.hide_widgets_on_fullscreen {
         restore_fullscreen_hidden_windows(&app);
     }
-    Ok(settings)
+    Ok(load_settings(&app))
 }
 
 /// Preferred replacement for `save_settings`: merges a partial

@@ -706,6 +706,7 @@ fn read_settings_file(path: &std::path::Path) -> (AppSettings, &'static str) {
         Ok(content) => {
             if let Ok(mut s) = serde_json::from_str::<AppSettings>(&content) {
                 normalize_custom_alarms(&mut s);
+                normalize_hourly_audio(&mut s);
                 return (s, "ok");
             }
             error!("Settings: file {:?} is corrupt; trying backup", path);
@@ -723,6 +724,7 @@ fn read_settings_file(path: &std::path::Path) -> (AppSettings, &'static str) {
     if let Ok(content) = fs::read_to_string(&bak) {
         if let Ok(mut s) = serde_json::from_str::<AppSettings>(&content) {
             normalize_custom_alarms(&mut s);
+            normalize_hourly_audio(&mut s);
             warn!("Settings: recovered from backup {:?}", bak);
             return (s, "backup");
         }
@@ -760,6 +762,16 @@ pub fn persist(app: &AppHandle, settings: &AppSettings) -> Result<(), String> {
     })
 }
 
+// Older settings and imported backups can contain both choices.
+// Preserve the voice announcement, which already takes priority at playback.
+fn normalize_hourly_audio(settings: &mut AppSettings) {
+    if settings.voice_announcer.enabled {
+        settings.alarm_full_hour.enabled = false;
+        settings.alarm_half_hour.enabled = false;
+        settings.alarm_quarter_hour.enabled = false;
+    }
+}
+
 /// Atomically mutate the settings: the mutation runs while holding
 /// the exclusive lock, then the result is persisted to disk. This
 /// closes the read-modify-write race — concurrent writers queue on
@@ -776,6 +788,7 @@ pub fn update<F: FnOnce(&mut AppSettings) -> Result<(), String>>(
 
     mutate(&mut guard)?;
     normalize_custom_alarms(&mut guard);
+    normalize_hourly_audio(&mut guard);
 
     let content = serde_json::to_string_pretty(&*guard).map_err(|e| {
         error!("Settings: cannot serialize: {}", e);
@@ -840,6 +853,7 @@ pub fn patch_settings(app: &AppHandle, patch: serde_json::Value) -> Result<AppSe
             serde_json::from_value(target).map_err(|e| format!("invalid settings patch: {}", e))?;
         let mut normalized = merged;
         normalize_custom_alarms(&mut normalized);
+        normalize_hourly_audio(&mut normalized);
         normalized
             .calendar_notes
             .retain(|_, v| !v.trim().is_empty());
