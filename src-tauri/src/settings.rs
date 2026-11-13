@@ -410,6 +410,7 @@ pub struct AppSettings {
     #[serde(default = "default_alarm_volume")]
     pub chime_volume: f64,
     pub relax_volume: f64,
+    pub relax_layer_volumes: HashMap<String, f64>,
     pub audio_muted: bool,
     pub relax_auto_timer: u32,
     pub last_relax_track: Option<String>,
@@ -599,6 +600,7 @@ impl Default for AppSettings {
             alarm_volume: 0.75,
             chime_volume: 0.75,
             relax_volume: 0.8,
+            relax_layer_volumes: HashMap::new(),
             audio_muted: false,
             relax_auto_timer: 0,
             last_relax_track: None,

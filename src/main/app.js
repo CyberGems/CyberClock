@@ -2507,12 +2507,16 @@
         }
         const rvolEl = document.getElementById("r-vol");
         if (rvolEl) {
-            const v = Math.round((s.relaxVolume || 0.8) * 100);
+            const v = Math.round((s.relaxVolume ?? 0.8) * 100);
             rvolEl.value = v;
             document.getElementById("r-vol-val").textContent = v + "%";
         }
 
         window.audioEngine.setVolume(s.relaxVolume ?? 0.8);
+        for (const { id } of RELAX_TRACKS) {
+            const level = pendingLayerVolumes.get(id) ?? s.relaxLayerVolumes?.[id] ?? 1;
+            window.audioEngine.setLayerVolume(id, level);
+        }
         window.audioEngine.setMuted(s.audioMuted === true);
         // Quiet but unmissable hint while a global mute silences the
         // Relax engine (otherwise the module looks simply "broken").
@@ -6569,6 +6573,8 @@
     }
 
     const ZEN_FLOW_TRACK_DURATION = 15 * 60 * 1000; // 15 minutes per track
+    const pendingLayerVolumes = new Map();
+    let layerVolumeSave = Promise.resolve();
 
     let rSelected = null,
         rSesStart = null,
@@ -7127,12 +7133,13 @@
                 `;
                 const slider = item.querySelector("input");
                 const level = item.querySelector(".r-mix-level");
-                slider.value = Math.round(engine.getLayerVolume(id) * 100);
-                level.textContent = slider.value + "%";
                 slider.addEventListener("input", () => {
-                    engine.setLayerVolume(id, slider.valueAsNumber / 100);
+                    const volume = slider.valueAsNumber / 100;
+                    pendingLayerVolumes.set(id, volume);
+                    engine.setLayerVolume(id, volume);
                     level.textContent = slider.value + "%";
                 });
+                slider.addEventListener("change", () => saveRelaxLayerVolume(id));
                 const remove = item.querySelector("button");
                 remove.addEventListener("click", () => {
                     const next = item.nextElementSibling || item.previousElementSibling;
@@ -7146,12 +7153,28 @@
             window.ccIcons.replaceIcons(list);
         }
         for (const item of list.children) {
-            const name = window.ccI18n.t(`relax.track.${item.dataset.track}`);
+            const id = item.dataset.track;
+            const name = window.ccI18n.t(`relax.track.${id}`);
             item.querySelector(".r-mix-name").textContent = name;
-            item.querySelector("input").setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track: name }));
+            const slider = item.querySelector("input");
+            slider.setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track: name }));
+            const value = String(Math.round(engine.getLayerVolume(id) * 100));
+            if (slider.value !== value) slider.value = value;
+            item.querySelector(".r-mix-level").textContent = value + "%";
             item.querySelector("button").setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track: name }));
         }
         updatePlayButtonUI(engine.isPlaying);
+    }
+
+    function saveRelaxLayerVolume(id) {
+        const level = pendingLayerVolumes.get(id);
+        if (level === undefined) return;
+        // Keep completed edits in order and preserve any slider value
+        // currently being dragged when another settings event arrives.
+        layerVolumeSave = layerVolumeSave.then(async () => {
+            await window.cc.saveSettings({ relaxLayerVolumes: { [id]: level } });
+            if (pendingLayerVolumes.get(id) === level) pendingLayerVolumes.delete(id);
+        }).catch(console.error);
     }
 
     function addRelaxLayer(id) {

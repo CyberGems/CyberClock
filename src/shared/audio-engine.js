@@ -100,6 +100,7 @@ class AudioEngine {
     this._current    = null;   // the active voice
     this._building   = null;   // voice currently being constructed
     this._layers     = [];     // ambient mix layers (id -> gain + voice)
+    this._layerVolumes = new Map();
     this._layerDest  = null;   // routing hint while a layer voice is built
     this._layerTrack = null;
     this._trackRequests = new Map();
@@ -503,15 +504,17 @@ class AudioEngine {
   }
 
   getLayerVolume(id) {
-    return this.getLayer(id)?.volume ?? 1;
+    return this._layerVolumes.get(id) ?? 1;
   }
 
   setLayerVolume(id, volume) {
+    if (!Number.isFinite(volume)) return;
+    const level = Math.max(0, Math.min(1, volume));
+    if (this.getLayerVolume(id) === level) return;
+    this._layerVolumes.set(id, level);
     const layer = this.getLayer(id);
-    if (!layer || !Number.isFinite(volume)) return;
-    layer.volume = Math.max(0, Math.min(1, volume));
-    if (layer.active) {
-      layer.gain.gain.setTargetAtTime(layer.volume, this._ctx.currentTime, 0.04);
+    if (layer?.active) {
+      layer.gain.gain.setTargetAtTime(level, this._ctx.currentTime, 0.04);
     }
   }
 
@@ -521,7 +524,7 @@ class AudioEngine {
       const gain = this._ctx.createGain();
       gain.gain.value = 0;                 // silent until activated
       gain.connect(this._master);
-      layer = { id, gain, active: false, voice: null, volume: 1 };
+      layer = { id, gain, active: false, voice: null };
       this._layers.push(layer);
     }
     return layer;
@@ -554,7 +557,7 @@ class AudioEngine {
     if (pending || solo) {
       const promoted = this._ensureLayer(pending?.track ?? solo.track);
       promoted.active = true;
-      promoted.gain.gain.setTargetAtTime(promoted.volume, this._ctx.currentTime, 0.05);
+      promoted.gain.gain.setTargetAtTime(this.getLayerVolume(promoted.id), this._ctx.currentTime, 0.05);
       if (pending) {
         this._trackRequests.delete(null);
         pending.layer = promoted.id;
@@ -573,7 +576,7 @@ class AudioEngine {
     const layer = this._ensureLayer(id);
     if (layer.active) return;
     this._startLayerVoice(layer);
-    layer.gain.gain.setTargetAtTime(layer.volume, this._ctx.currentTime, 0.4);
+    layer.gain.gain.setTargetAtTime(this.getLayerVolume(id), this._ctx.currentTime, 0.4);
     this.currentTrack ??= id;
   }
 

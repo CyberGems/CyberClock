@@ -117,7 +117,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
 - **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
 - **True Pause** — Pause freezes the audio, session timer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
-- **Ambient Blending** — Use the **+** on a track card to add it to the mix (Rain + Fireplace, Ocean + Space…). Click the card to play it solo. Adjust or remove each layer in the player. Master volume controls the whole mix
+- **Ambient Blending** — Use the **+** on a track card to add it to the mix (Rain + Fireplace, Ocean + Space…). Click the card to play it solo. Adjust or remove each layer in the player. Layer volumes are remembered between launches. Master volume controls the whole mix
 - **Zen Flow Shuffle** — One-click shuffled playback through all tracks
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
