@@ -6669,6 +6669,7 @@
     function updatePlayButtonUI(isPlaying) {
         const playBtn = document.getElementById("r-play");
         if (!playBtn) return;
+        document.getElementById("r-stop").disabled = !isPlaying;
         const iconName = isPlaying && !rPaused ? "pause" : "play";
         const track = (isPlaying && window.audioEngine.currentTrack) || rSelected;
         const title = document.getElementById("r-player-track");

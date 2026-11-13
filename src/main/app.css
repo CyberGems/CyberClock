@@ -2954,6 +2954,23 @@
         min-width: 48px;
         padding: 13px 0;
     }
+    #r-stop:hover {
+        box-shadow: none;
+    }
+    #r-stop:hover::before {
+        opacity: 0;
+    }
+    #r-stop .cc-ico {
+        filter: none;
+        transform: none;
+    }
+    #r-stop:disabled {
+        background: transparent;
+        border-color: var(--border);
+    }
+    #r-stop-wrap:has(button:disabled)::after {
+        content: none;
+    }
     .r-mute-btn-indicator {
         color: #ff5577 !important;
         border-color: rgba(255, 85, 119, 0.45) !important;
