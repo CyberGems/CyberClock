@@ -7479,19 +7479,15 @@
     const rFloatBtn = document.getElementById("r-float");
     const rFloatWrap = document.getElementById("r-float-wrap");
     let relaxWidgetOpen = false;
-    let openingRelaxWidget = true;
+    let changingRelaxWidget = true;
     let relaxWidgetStateVersion = 0;
 
     function renderRelaxWidgetButton() {
-        const key = relaxWidgetOpen ? "relax.widgetOpen" : "float.newRelax";
-        const label = window.ccI18n.t(key);
-        rFloatBtn.disabled = openingRelaxWidget || relaxWidgetOpen;
+        const key = relaxWidgetOpen ? "relax.closeWidget" : "float.newRelax";
+        rFloatBtn.disabled = changingRelaxWidget;
         rFloatBtn.setAttribute("aria-pressed", String(relaxWidgetOpen));
-        rFloatBtn.setAttribute("aria-label", label);
-        rFloatBtn.dataset.i18nAttr = "aria-label:" + key;
-        rFloatWrap.dataset.tooltip = label;
+        rFloatWrap.dataset.tooltip = window.ccI18n.t(key);
         rFloatWrap.dataset.i18nAttr = "data-tooltip:" + key;
-        rFloatWrap.tabIndex = relaxWidgetOpen ? 0 : -1;
     }
 
     function updateRelaxWidgetOpen(open) {
@@ -7501,19 +7497,20 @@
     }
 
     rFloatBtn.addEventListener("click", async () => {
-        if (openingRelaxWidget || relaxWidgetOpen) return;
+        if (changingRelaxWidget) return;
         const hadFocus = document.activeElement === rFloatBtn;
-        openingRelaxWidget = true;
+        changingRelaxWidget = true;
         renderRelaxWidgetButton();
         try {
-            await window.cc.spawnFloat("relax");
+            if (relaxWidgetOpen) await window.cc.closeRelaxWidget();
+            else await window.cc.spawnFloat("relax");
         } catch (error) {
             console.error(error);
         } finally {
-            openingRelaxWidget = false;
+            changingRelaxWidget = false;
             renderRelaxWidgetButton();
             if (hadFocus && (document.activeElement === document.body || document.activeElement === rFloatBtn)) {
-                (relaxWidgetOpen ? rFloatWrap : rFloatBtn).focus();
+                rFloatBtn.focus();
             }
         }
     });
@@ -7523,7 +7520,7 @@
         const open = (await window.cc.getOpenFloatLabels()).includes("float-relax-1");
         if (relaxWidgetStateVersion === version) updateRelaxWidgetOpen(open);
     }).catch(console.error).finally(() => {
-        openingRelaxWidget = false;
+        changingRelaxWidget = false;
         renderRelaxWidgetButton();
     });
 
@@ -9929,6 +9926,10 @@
     });
     document.querySelectorAll(".tcard-add").forEach(button => ttBind(button, false));
     ttBind(rFloatWrap, false);
+    rFloatBtn.addEventListener("focus", () => {
+        if (rFloatBtn.matches(":focus-visible")) ttShow(rFloatWrap);
+    });
+    rFloatBtn.addEventListener("blur", ttHide);
 
     // ══════════════════════════════════════════════════════════════
     // CUSTOM CONTEXT MENUS (Full Mode & Alarms)

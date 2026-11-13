@@ -3065,11 +3065,6 @@
     #r-float[aria-pressed="true"] .cc-ico {
         filter: none;
     }
-    #r-float-wrap:focus-visible {
-        outline: 2px solid var(--accent-a);
-        outline-offset: 2px;
-        border-radius: 8px;
-    }
     #r-float-wrap[data-tooltip]::after { content: none; }
     #r-stop:hover::before {
         opacity: 0;

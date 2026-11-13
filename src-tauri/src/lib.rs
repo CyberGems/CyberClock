@@ -1501,6 +1501,14 @@ async fn spawn_float(app: AppHandle, kind: String) -> Option<String> {
 }
 
 #[tauri::command]
+async fn close_relax_widget(app: AppHandle) -> Result<(), String> {
+    if let Some(widget) = app.get_webview_window(RELAX_WIDGET_LABEL) {
+        widget.close().map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 fn get_window_position(window: WebviewWindow) -> (i32, i32) {
     window
         .outer_position()
@@ -6462,6 +6470,7 @@ pub fn run() {
             open_window,
             hide_window,
             spawn_float,
+            close_relax_widget,
             switch_to_full_mode,
             switch_to_mini_mode,
             set_mini_preview,

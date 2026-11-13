@@ -485,6 +485,7 @@
         sendRelaxMixResult: (result) => emitTo("float-relax-1", "relax:mix-result", result),
         onRelaxMixResult: (cb) => subscribeToWindow("relax:mix-result", cb),
         onRelaxWidgetOpen: (cb) => subscribe("relax:widget-open", cb),
+        closeRelaxWidget: () => invoke("close_relax_widget"),
         reportRelaxWidgetReady: () => emit("relax:widget-open", true),
         sendRelaxSpectrum: (bins) => emitTo("float-relax-1", "relax:spectrum", bins),
         onRelaxSpectrum: (cb) => subscribeToWindow("relax:spectrum", cb),
