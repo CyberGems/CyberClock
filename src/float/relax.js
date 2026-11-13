@@ -21,6 +21,7 @@
     const layerAddChoices = document.getElementById("layer-add-choices");
     const pendingLayerVolumes = new Map();
     const btnPlay = document.getElementById("btn-play");
+    const btnStop = document.getElementById("btn-stop");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
     const btnMute = document.getElementById("btn-mute");
@@ -80,6 +81,7 @@
         statusEl.classList.toggle("is-playing", playing && !paused);
         const isMuted = cfg && cfg.audioMuted === true;
         btnPlay.disabled = isMuted;
+        btnStop.disabled = !playing;
         if (isMuted) {
             const muteLabel = t("relax.tooltip.unmute");
             btnPlay.setAttribute("data-tooltip", muteLabel);
@@ -363,6 +365,7 @@
         e.stopPropagation();
         sendControl("toggle");
     });
+    btnStop.addEventListener("click", () => sendControl("stop"));
     btnNext.addEventListener("click", (e) => {
         e.stopPropagation();
         sendControl("next");

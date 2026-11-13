@@ -7233,6 +7233,8 @@
             }
         } else if (action === "toggle") {
             rTogglePlay();
+        } else if (action === "stop") {
+            stopRelaxManually();
         } else if (action === "shuffle") {
             toggleRelaxShuffle();
         } else if (action === "next" && !cfg?.audioMuted) {
@@ -7252,10 +7254,13 @@
             }
         }
     }).catch(console.error);
-    document.getElementById("r-stop").addEventListener("click", () => {
+    document.getElementById("r-stop").addEventListener("click", stopRelaxManually);
+
+    function stopRelaxManually() {
+        if (!window.audioEngine.isPlaying) return;
         rSelected = null;
         rStop(true);
-    });
+    }
     const rFloatBtn = document.getElementById("r-float");
     if (rFloatBtn) {
         rFloatBtn.addEventListener("click", () => {
