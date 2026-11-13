@@ -60,7 +60,7 @@
 
 ## 👋 Introducción
 
-El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados y respiración guiada, y cada ajuste de acento, tamaño y transparencia se queda en local, con copias automáticas de tus alarmas, notas y preferencias en la carpeta que elijas. Construido con **Tauri v2** y **Rust**.
+El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tareas, un calendario aparte, el temporizador del móvil, un cronómetro que nunca recuerdas dónde pusiste. CyberClock los reúne en una sola ventana —esferas analógicas y digitales con 10 diseños, calendario completo con agenda y notas del día, temporizador de cuenta atrás, cronómetro de precisión y alarmas, además de un reloj parlante opcional que anuncia la hora y lee las alarmas en voz alta— y deja que las herramientas principales se desprendan como su propio widget flotante: reloj, calendario, temporizador, cronómetro o sesión de relajación, cada uno con su propio diseño y siempre visible sobre tus demás ventanas. El Modo Mini reduce toda la app a una barra compacta con 20 skins, un módulo de bienestar añade paisajes sonoros grabados, y cada ajuste de acento, tamaño y transparencia se queda en local, con copias automáticas de tus alarmas, notas y preferencias en la carpeta que elijas. Construido con **Tauri v2** y **Rust**.
 
 *Gratuito y de código abierto: sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -116,12 +116,11 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 ### 🧘 Módulo de relajación
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
 - **Audio ambiental grabado:** seis paisajes sonoros reales reproducidos con la Web Audio API, con síntesis procedural como respaldo si faltan los archivos
-- **Pausa real:** pausar congela el audio, el tiempo de sesión, la pauta de respiración y el ciclo de consejos; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
+- **Pausa real:** pausar congela el audio, el tiempo de sesión y el ciclo de consejos; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
 - **Mezcla ambiental:** Ctrl+Clic en cualquier tarjeta de pista para superponerla a la que suena (Lluvia + Chimenea, Océano + Espacio Exterior…); las capas se funden con entrada y salida independientes
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
-- **Pautas de respiración:** respiración en caja (4-4-4-4) y técnica 4-7-8
 - **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, anillo de respiración, un espectro pequeño y 10 diseños. El audio sigue sonando cuando el modo completo está oculto
 - **Tiempo de sesión:** con consejos de mindfulness y parada automática (15m, 30m, 1h, 2h)
 - **Programador automático:** programa horarios de reproducción automática

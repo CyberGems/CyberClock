@@ -60,7 +60,7 @@
 
 ## 👋 Introduction
 
-Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes and guided breathing, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
 
 *Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -116,12 +116,11 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ### 🧘 Relaxation Module
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
 - **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
-- **True Pause** — Pause freezes the audio, session timer, breathing pacer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
+- **True Pause** — Pause freezes the audio, session timer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
 - **Ambient Blending** — Ctrl+Click any track card to layer it over the playing one (Rain + Fireplace, Ocean + Space…); layers fade in and out independently
 - **Zen Flow Shuffle** — One-click shuffled playback through all tracks
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
-- **Breathing Patterns** — Box breathing (4-4-4-4) and 4-7-8 technique
 - **Floating Relax Widget** — Compact desktop session with the track name, play and next, a breathing ring, a small spectrum, and 10 designs. Audio keeps playing when full mode is hidden
 - **Session Timer** — With mindfulness tips and auto-stop (15m, 30m, 1h, 2h)
 - **Auto Scheduler** — Schedule automatic playback times

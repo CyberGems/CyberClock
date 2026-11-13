@@ -2435,21 +2435,10 @@
             loadScreensList();
         }
 
-        // Update the Play/Pause button text and guide text for the new language
+        // Update the Play/Pause button text for the new language
         if (typeof updatePlayButtonUI === "function") {
             updatePlayButtonUI(window.audioEngine.isPlaying);
         }
-        if (!rPacerActive) {
-            const guideLabel = document.getElementById("breathe-guide-text");
-            if (guideLabel) guideLabel.textContent = window.ccI18n.t("relax.breathe.guide.ready");
-        }
-
-        // Apply breathing pattern active button class
-        const breathePat = s.breathePattern || "box";
-        document.querySelectorAll(".breathe-pat-btn").forEach((btn) => {
-            btn.classList.toggle("on", btn.dataset.pat === breathePat);
-        });
-
         const chimeMaster = document.getElementById("s-chimes-en");
         if (chimeMaster) chimeMaster.checked = !!s.hourlyChimesEnabled;
         const ah = s.alarmHalfHour || {};
@@ -6584,9 +6573,6 @@
         rAstTimer = null,
         vizRaf = null,
         rSaveTimer = null;
-    let rPacerActive = false,
-        rPacerTimer = null,
-        rPacerStart = null;
     let zenFlowActive = false,
         zenFlowTimer = null,
         zenFlowQueue = [];
@@ -6606,7 +6592,6 @@
         
         rStartSession();
         startViz();
-        startBreathePacer();
         rStartTips();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
@@ -6708,119 +6693,10 @@
             playWrap.classList.toggle("is-disabled", isMuted);
         }
 
-        // Breathe circle active tint follows playback state
-        const circle = document.getElementById("breathe-circle");
-        if (circle) {
-            circle.setAttribute("data-active", !isMuted && isPlaying && !rPaused ? "1" : "0");
-        }
-
         // Shuffle button shows its active state while Zen Flow runs
         const shuffleBtn = document.getElementById("r-shuffle");
         if (shuffleBtn) {
             shuffleBtn.classList.toggle("on", !isMuted && zenFlowActive);
-        }
-    }
-
-    const boxPhases = [
-        { name: "inhale", duration: 4000, startScale: 1.0, endScale: 1.5 },
-        { name: "hold", duration: 4000, startScale: 1.5, endScale: 1.5 },
-        { name: "exhale", duration: 4000, startScale: 1.5, endScale: 1.0 },
-        { name: "hold", duration: 4000, startScale: 1.0, endScale: 1.0 }
-    ];
-    const relax478Phases = [
-        { name: "inhale", duration: 4000, startScale: 1.0, endScale: 1.5 },
-        { name: "hold", duration: 7000, startScale: 1.5, endScale: 1.5 },
-        { name: "exhale", duration: 8000, startScale: 1.5, endScale: 1.0 }
-    ];
-
-    function easeInOut(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    }
-
-    function startBreathePacer() {
-        stopBreathePacer();
-        rPacerActive = true;
-        const pattern = cfg.breathePattern || "box";
-        const phases = pattern === "478" ? relax478Phases : boxPhases;
-        const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
-        rPacerStart = performance.now();
-        
-        function tick() {
-            if (!rPacerActive) return;
-            // Pause rendering while another view is active (the audio
-            // keeps playing; the circle is invisible anyway). The phase
-            // math is time-based, so it re-syncs seamlessly on return.
-            if (curView !== "relax") {
-                rPacerTimer = requestAnimationFrame(tick);
-                return;
-            }
-            // Audio paused: freeze the circle exactly where it is instead
-            // of advancing the pattern clock, so resume continues the
-            // phase mid-breath instead of jumping back.
-            if (rPaused) {
-                rPacerTimer = requestAnimationFrame(tick);
-                return;
-            }
-            const elapsed = (performance.now() - rPacerStart) % totalDuration;
-            
-            let accumulated = 0;
-            let currentPhase = phases[0];
-            let phaseElapsed = 0;
-            
-            for (const p of phases) {
-                if (elapsed < accumulated + p.duration) {
-                    currentPhase = p;
-                    phaseElapsed = elapsed - accumulated;
-                    break;
-                }
-                accumulated += p.duration;
-            }
-            
-            const progress = phaseElapsed / currentPhase.duration;
-            const easedProgress = easeInOut(progress);
-            const scale = currentPhase.startScale + (currentPhase.endScale - currentPhase.startScale) * easedProgress;
-            
-            const circle = document.getElementById("breathe-circle");
-            if (circle) {
-                circle.style.transform = `scale(${scale})`;
-            }
-            const phaseLabel = document.getElementById("breathe-phase");
-            if (phaseLabel) {
-                const phaseText = window.ccI18n.t(`relax.breathe.${currentPhase.name}`);
-                if (phaseLabel.textContent !== phaseText) {
-                    phaseLabel.textContent = phaseText;
-                }
-            }
-            const guideLabel = document.getElementById("breathe-guide-text");
-            if (guideLabel) {
-                const guideText = window.ccI18n.t(`relax.breathe.guide.${currentPhase.name}`);
-                if (guideLabel.textContent !== guideText) {
-                    guideLabel.textContent = guideText;
-                }
-            }
-            
-            rPacerTimer = requestAnimationFrame(tick);
-        }
-        rPacerTimer = requestAnimationFrame(tick);
-    }
-
-    function stopBreathePacer() {
-        rPacerActive = false;
-        if (rPacerTimer) {
-            cancelAnimationFrame(rPacerTimer);
-            rPacerTimer = null;
-        }
-        const circle = document.getElementById("breathe-circle");
-        if (circle) {
-            circle.style.transform = "";
-        }
-        const phaseLabel = document.getElementById("breathe-phase");
-        if (phaseLabel) {
-            phaseLabel.textContent = window.ccI18n.t("relax.breathe.start");
-        }
-        const guideLabel = document.getElementById("breathe-guide-text");
-        if (guideLabel) {
-            guideLabel.textContent = window.ccI18n.t("relax.breathe.guide.ready");
         }
     }
 
@@ -6850,7 +6726,6 @@
         updatePlayButtonUI(true);
         rStartSession();
         startViz();
-        startBreathePacer();
         rStartTips();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
@@ -6868,7 +6743,6 @@
         rPaused = false;
         updatePlayButtonUI(false);
         rStopSession();
-        stopBreathePacer();
         rStopTips();
         rClearAutoStop();
         updatePlayingTrackCardClass(false);
@@ -6925,10 +6799,6 @@
         window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
         // Session clock: shift the epoch so elapsed time skips the pause.
         if (rSesStart) rSesStart += pauseMs;
-        // Pacer: the rAF froze during the pause, so shifting the epoch
-        // forward by the pause length makes `now - rPacerStart` unchanged
-        // — the phase resumes exactly where it froze (mid-breath).
-        if (rPacerStart) rPacerStart += pauseMs;
         if (rSesStart) rStartTips(); // tips cycle resumes with the session
         if (rAstMins > 0 && rAstRemain > 0) rStartAutoStop(rAstRemain);
         updatePlayButtonUI(true);
@@ -7285,18 +7155,6 @@
         });
     }
 
-    // Breathing circle click toggles pause/play (not full stop, so a
-    // mid-session glance at the circle can't wipe the session timer).
-    document.getElementById("breathe-circle").addEventListener("click", () => {
-        if (!window.audioEngine.isPlaying) {
-            if (cfg && cfg.audioMuted === true) return;
-            if (rSelected) rPlayTrack();
-            else startZenFlow();
-        } else {
-            rPauseOrResume();
-        }
-    });
-
     document.getElementById("r-vol").addEventListener("input", (e) => {
         const v = e.target.value / 100;
         document.getElementById("r-vol-val").textContent =
@@ -7347,25 +7205,6 @@
             if (m > 0 && window.audioEngine.isPlaying)
                 rStartAutoStop(m * 60);
             else rClearAutoStop();
-        });
-    });
-
-    document.querySelectorAll(".breathe-pat-btn").forEach((b) => {
-        b.addEventListener("click", () => {
-            const pat = b.dataset.pat;
-            window.cc.saveSettings({ breathePattern: pat });
-            document
-                .querySelectorAll(".breathe-pat-btn")
-                .forEach((x) =>
-                    x.classList.toggle("on", x.dataset.pat === pat),
-                );
-            cfg.breathePattern = pat;
-            // Restart the pacer only while actually breathing; during an
-            // audio pause the tick is frozen, and re-arming here would
-            // leave the circle stuck at "Ready" until the next session.
-            // rResume's epoch shift keeps the old cycle, so the new
-            // pattern simply takes effect on the next full start.
-            if (rPacerActive && !rPaused) startBreathePacer();
         });
     });
 
