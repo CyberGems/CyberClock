@@ -562,6 +562,7 @@
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
+            "settings.alarms.volumeHelp": "Sets how loud the alarm sound plays. Adjust spoken alarms in the Voice tab.",
             "settings.alarms.playSchedule": "Sound schedule",
             "settings.alarms.playTo": "to",
             "settings.alarms.topOfHour": "Top of the hour",
@@ -614,7 +615,9 @@
             "voice.styleCyber": "Military / 24h (\"Current time: 23 15 hours\")",
             "voice.styleConcise": "Concise (\"11:15\")",
             "voice.volume": "Voice Volume",
+            "voice.volumeHelp": "Sets the volume of time announcements and spoken alarms. The chime before announcing the time uses 70% of this level.",
             "voice.chimeBefore": "Soft chime before speaking",
+            "voice.chimeBeforeHelp": "This chime uses 70% of the voice volume.",
             "voice.quietHours": "Silence during this schedule",
             "voice.quietTime": "Silent from",
             "voice.quietTo": "to",
@@ -673,6 +676,7 @@
             "settings.display.digitalFormatSection": "Digital Clock Format",
             "settings.time.sectionChimes": "Hourly Chimes",
             "settings.chimes.volume": "Chimes Volume",
+            "settings.chimes.volumeHelp": "Sets how loud the scheduled chimes sound.",
             "settings.time.sectionSync": "System Time Synchronization",
             "settings.time.sectionWindows": "Windows Date & Time",
             "settings.general.timeSyncTitle": "Unattended time synchronization",
@@ -1687,6 +1691,7 @@
 
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
+            "settings.alarms.volumeHelp": "Ajusta el sonido que se reproduce al sonar una alarma. La lectura en voz alta se ajusta en la pestaña Voz.",
             "settings.alarms.playSchedule": "Horario de sonido",
             "settings.alarms.playTo": "a",
             "settings.alarms.topOfHour": "En punto",
@@ -1739,7 +1744,9 @@
             "voice.styleCyber": "Militar / 24h (\"Hora actual: 23 15 horas\")",
             "voice.styleConcise": "Conciso (\"11:15\")",
             "voice.volume": "Volumen de la voz",
+            "voice.volumeHelp": "Ajusta la locución de hora y la lectura de alarmas en voz alta. El timbre previo a la locución de hora usa el 70 % de este nivel.",
             "voice.chimeBefore": "Timbre suave antes de hablar",
+            "voice.chimeBeforeHelp": "Este timbre usa el 70 % del volumen de la voz.",
             "voice.quietHours": "Silenciar en este horario",
             "voice.quietTime": "En silencio de",
             "voice.quietTo": "a",
@@ -1798,6 +1805,7 @@
             "settings.display.digitalFormatSection": "Formato de reloj digital",
             "settings.time.sectionChimes": "Campanadas horarias",
             "settings.chimes.volume": "Volumen de campanadas",
+            "settings.chimes.volumeHelp": "Ajusta el volumen de las campanadas programadas.",
             "settings.time.sectionSync": "Sincronización del reloj",
             "settings.time.sectionWindows": "Fecha y hora de Windows",
             "settings.general.timeSyncTitle": "Sincronización desatendida",

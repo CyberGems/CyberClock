@@ -1099,11 +1099,12 @@
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
                                 <div class="s-lbl">
-                                    <span data-i18n="settings.chimes.volume">Chimes Volume</span>
+                                    <label for="s-cvol" data-i18n="settings.chimes.volume">Chimes Volume</label>
+                                    <small id="s-cvol-help" data-i18n="settings.chimes.volumeHelp">Sets how loud the scheduled chimes sound.</small>
                                 </div>
                                 <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
-                                    <input type="range" class="s-rng" id="s-cvol" min="0" max="100" value="75" />
+                                    <input type="range" class="s-rng" id="s-cvol" min="0" max="100" value="75" aria-describedby="s-cvol-help" />
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
                                     <span class="s-vol-val" id="s-cvol-val">75%</span>
                                 </div>
@@ -1280,9 +1281,12 @@
                                 <!-- Chime before speaking -->
                                 <div class="s-row">
                                     <span class="s-row-ico" data-ico="bell"></span>
-                                    <div class="s-lbl" data-i18n="voice.chimeBefore">Soft chime before speaking</div>
+                                    <div class="s-lbl">
+                                        <label for="s-voice-chime" data-i18n="voice.chimeBefore">Soft chime before speaking</label>
+                                        <small id="s-voice-chime-help" data-i18n="voice.chimeBeforeHelp">This chime uses 70% of the voice volume.</small>
+                                    </div>
                                     <label class="s-tog">
-                                        <input type="checkbox" id="s-voice-chime" checked />
+                                        <input type="checkbox" id="s-voice-chime" checked aria-describedby="s-voice-chime-help" />
                                         <div class="s-tog-tr"><div class="s-tog-th"></div></div>
                                     </label>
                                 </div>
@@ -1455,10 +1459,13 @@
                             <!-- Volume -->
                             <div class="s-row">
                                 <span class="s-row-ico" data-ico="volume-low"></span>
-                                <label class="s-lbl" for="s-voice-vol" data-i18n="voice.volume">Voice Volume</label>
+                                <div class="s-lbl">
+                                    <label for="s-voice-vol" data-i18n="voice.volume">Voice Volume</label>
+                                    <small id="s-voice-vol-help" data-i18n="voice.volumeHelp">Sets the volume of time announcements and spoken alarms. The chime before announcing the time uses 70% of this level.</small>
+                                </div>
                                 <div class="s-vol-row" style="flex: 1; max-width: 220px; margin: 0;">
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-low"></span></span>
-                                    <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" />
+                                    <input type="range" class="s-rng" id="s-voice-vol" min="0" max="100" value="85" aria-describedby="s-voice-vol-help" />
                                     <span style="font-size: 10px; color: var(--text-md)"><span data-ico="volume-high"></span></span>
                                     <span class="s-vol-val" id="s-voice-vol-val">85%</span>
                                 </div>
@@ -1481,7 +1488,8 @@
                     <!-- Alarms -->
                     <div class="s-panel" id="stab-alarms">
                         <div class="s-sec">
-                            <div class="s-sec-t" data-i18n="settings.alarms.volume">Alarm Volume</div>
+                            <label class="s-sec-t" for="s-avol" data-i18n="settings.alarms.volume">Alarm Volume</label>
+                            <p class="s-sec-d" id="s-avol-help" data-i18n="settings.alarms.volumeHelp">Sets how loud the alarm sound plays. Adjust spoken alarms in the Voice tab.</p>
                             <div class="s-vol-row">
                                 <span class="s-row-ico" data-ico="volume-high"></span>
                                 <span style="font-size: 10px; color: var(--text-md)"
@@ -1489,6 +1497,7 @@
                                 ><input
                                     type="range"
                                     id="s-avol"
+                                    aria-describedby="s-avol-help"
                                     min="0"
                                     max="100"
                                     value="75"
