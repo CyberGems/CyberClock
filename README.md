@@ -121,7 +121,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Zen Flow Shuffle** — One-click shuffled playback through all tracks
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
-- **Floating Relax Widget** — Compact desktop session with the track name, a large play/pause button, next and shuffle controls, playback status, active layers, the auto-stop countdown, a small spectrum, and 10 designs. The widget controls the main Relax session and can resume the saved mix while full mode is hidden
+- **Floating Relax Widget** — Compact desktop session with the track name, a large play/pause button, next and shuffle controls, playback status, active layers, the auto-stop countdown and duration controls, a small spectrum, and 10 designs. The widget controls the main Relax session and can resume the saved mix while full mode is hidden
 - **Session Timer** — Elapsed session time and an auto-stop countdown alongside the track and playback controls
 - **Auto Scheduler** — Schedule automatic playback times
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted

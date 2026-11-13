@@ -313,18 +313,75 @@ button {
     gap: 6px;
 }
 
-.auto-stop:not([hidden]) {
+.auto-stop {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     flex-shrink: 0;
+    min-width: 22px;
+    min-height: 21px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
     color: var(--text-md);
     font: 500 11px/1.25 var(--font-display);
     font-variant-numeric: tabular-nums;
 }
 
-.auto-stop .cc-ico {
+.auto-stop:hover,
+.auto-stop[aria-expanded="true"] {
+    background: rgba(var(--skin-rgb), 0.12);
+}
+
+.auto-stop.is-armed .cc-ico,
+.auto-stop:hover .cc-ico {
     color: var(--skin-accent);
+}
+
+.auto-stop-options {
+    inset: auto 10px 10px auto;
+    width: min(236px, calc(100% - 20px));
+    padding: 8px;
+    border: 1px solid rgba(var(--skin-rgb), 0.35);
+    border-radius: 9px;
+    background: var(--bg-01);
+    color: var(--text-hi);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.auto-stop-label {
+    margin: 0 2px 6px;
+    color: var(--text-md);
+    font-size: 11px;
+}
+
+.auto-stop-choices {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.auto-stop-choices button {
+    min-height: 25px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--bg-02);
+    color: var(--text-md);
+    font-size: 11px;
+}
+
+.auto-stop-choices button:hover,
+.auto-stop-choices button[aria-pressed="true"] {
+    background: rgba(var(--skin-rgb), 0.18);
+    color: var(--skin-accent);
+}
+
+.auto-stop:focus-visible,
+.auto-stop-choices button:focus-visible {
+    outline: 1px solid var(--skin-accent);
+    outline-offset: 1px;
 }
 
 .playback-status {

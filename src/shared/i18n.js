@@ -8,6 +8,7 @@
         en: {
             "relax.audioSpectrum": "Audio Spectrum",
             "relax.autoStop": "Auto Stop",
+            "relax.autoStopOff": "Off",
             "relax.sessionTime": "Session Time",
             "relax.complete": "Session complete",
             "relax.noTrack": "No track selected",
@@ -153,6 +154,7 @@
             "relax.duration.15m": "15 minutes",
             "relax.duration.30m": "30 minutes",
             "relax.duration.1h": "1 hour",
+            "relax.duration.2h": "2 hours",
             "relax.duration.stopped": "Until stopped",
             "relax.stopsIn": "Stops in {time}",
             "relax.sessionComplete": "Session complete",
@@ -1035,6 +1037,7 @@
         es: {
             "relax.audioSpectrum": "Espectro de Audio",
             "relax.autoStop": "Parada Automática",
+            "relax.autoStopOff": "No",
             "relax.sessionTime": "Tiempo de Sesión",
             "relax.complete": "Sesión completada",
             "relax.noTrack": "Ninguna pista seleccionada",
@@ -1180,6 +1183,7 @@
             "relax.duration.15m": "15 minutos",
             "relax.duration.30m": "30 minutos",
             "relax.duration.1h": "1 hora",
+            "relax.duration.2h": "2 horas",
             "relax.duration.stopped": "Hasta detener",
             "relax.stopsIn": "Se detiene en {time}",
             "relax.sessionComplete": "Sesión completada",

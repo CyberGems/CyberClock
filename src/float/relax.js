@@ -10,6 +10,8 @@
     const elapsedEl = document.getElementById("elapsed");
     const autoStopEl = document.getElementById("auto-stop");
     const autoStopTime = document.getElementById("auto-stop-time");
+    const autoStopOptions = document.getElementById("auto-stop-options");
+    const autoStopChoices = Array.from(autoStopOptions.querySelectorAll("button"));
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
@@ -49,6 +51,11 @@
         if (trackLabel.textContent !== title) trackLabel.textContent = title;
         updateMarquee();
         updateAutoStop(Date.now());
+        const minutes = playback.autoStopMinutes ?? 0;
+        autoStopEl.classList.toggle("is-armed", minutes > 0);
+        autoStopChoices.forEach(button => {
+            button.setAttribute("aria-pressed", String(Number(button.dataset.minutes) === minutes));
+        });
         const statusKey = !playing ? "relax.status.ready"
             : paused ? "relax.status.paused" : "relax.status.playing";
         statusEl.textContent = t(statusKey);
@@ -87,7 +94,7 @@
 
     function updateAutoStop(now) {
         const timer = playback.autoStop;
-        if (autoStopEl.hidden !== !timer) autoStopEl.hidden = !timer;
+        if (autoStopTime.hidden !== !timer) autoStopTime.hidden = !timer;
         if (!timer) return;
         const remaining = timer.deadline === null
             ? timer.remaining : Math.max(0, Math.ceil((timer.deadline - now) / 1000));
@@ -231,6 +238,29 @@
         button.addEventListener("pointerleave", () => button.classList.remove("tooltip-dismissed"));
     });
 
+    autoStopOptions.addEventListener("toggle", event => {
+        const open = event.newState === "open";
+        autoStopEl.setAttribute("aria-expanded", String(open));
+        if (open) {
+            const selected = autoStopChoices.find(button => button.getAttribute("aria-pressed") === "true");
+            (selected ?? autoStopChoices[0]).focus();
+        }
+    });
+    autoStopOptions.addEventListener("keydown", event => {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        event.stopPropagation();
+        autoStopOptions.hidePopover();
+        autoStopEl.focus();
+    });
+    autoStopChoices.forEach(button => {
+        button.addEventListener("click", () => {
+            sendControl({ type: "auto-stop", minutes: Number(button.dataset.minutes) });
+            autoStopOptions.hidePopover();
+            autoStopEl.focus();
+        });
+    });
+
     btnPlay.addEventListener("click", (e) => {
         e.stopPropagation();
         sendControl("toggle");
@@ -352,7 +382,7 @@
         shell.addEventListener("mousedown", (e) => {
             if (e.target.closest("#btn-menu")) return;
             if (window.cc && window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
-            if (e.target.closest("button")) return;
+            if (e.target.closest("button, #auto-stop-options")) return;
             if (e.button !== 0) return;
             if (cfg.relaxPositionLocked === true) return;
             e.preventDefault();
@@ -374,6 +404,12 @@
             e.preventDefault();
             sendControl("toggle");
         } else if (e.key === "Escape") {
+            if (autoStopOptions.matches(":popover-open")) {
+                e.preventDefault();
+                autoStopOptions.hidePopover();
+                autoStopEl.focus();
+                return;
+            }
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         }
     });

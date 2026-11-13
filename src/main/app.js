@@ -6732,6 +6732,7 @@
             shuffled: zenFlowActive,
             startedAt: rSesStart,
             pausedAt: rPaused ? rPauseResumedAt : null,
+            autoStopMinutes: rAstMins,
             autoStop: rAstRemain > 0 ? { deadline: rAstDeadline, remaining: rAstRemain } : null
         }).catch(console.error);
     }
@@ -7191,7 +7192,11 @@
     }
 
     window.cc.onRelaxControl(action => {
-        if (action === "state") {
+        if (action?.type === "auto-stop") {
+            if (relaxAutoStopButtons.some(button => Number(button.dataset.min) === action.minutes)) {
+                configureRelaxAutoStop(action.minutes);
+            }
+        } else if (action === "state") {
             publishRelaxPlayback();
         } else if (action === "spectrum") {
             if (window.audioEngine.isPlaying && !rPaused && !cfg?.audioMuted) {
@@ -7266,26 +7271,29 @@
         rMuteEnable.addEventListener("click", clearAudioMute);
     }
 
-    document.querySelectorAll(".ast-btn").forEach((b) => {
-        b.addEventListener("click", () => {
-            const m = parseInt(b.dataset.min);
-            selectRelaxAutoStop(m);
-            if (m > 0 && window.audioEngine.isPlaying && rPaused) {
-                rAstRemain = m * 60;
-                rAstUpdateDisplay();
-                publishRelaxPlayback();
-            } else if (m > 0 && window.audioEngine.isPlaying) {
-                rStartAutoStop(m * 60);
-            } else {
-                rClearAutoStop();
-                publishRelaxPlayback();
-            }
-        });
+    const relaxAutoStopButtons = Array.from(document.querySelectorAll(".ast-btn"));
+    relaxAutoStopButtons.forEach(button => {
+        button.addEventListener("click", () => configureRelaxAutoStop(Number(button.dataset.min)));
     });
+
+    function configureRelaxAutoStop(minutes) {
+        selectRelaxAutoStop(minutes);
+        if (minutes > 0 && window.audioEngine.isPlaying) {
+            if (!rPaused) {
+                rStartAutoStop(minutes * 60);
+                return;
+            }
+            rAstRemain = minutes * 60;
+            rAstUpdateDisplay();
+        } else {
+            rClearAutoStop();
+        }
+        publishRelaxPlayback();
+    }
 
     function selectRelaxAutoStop(minutes) {
         rAstMins = minutes;
-        document.querySelectorAll(".ast-btn").forEach(button => {
+        relaxAutoStopButtons.forEach(button => {
             const selected = Number(button.dataset.min) === minutes;
             button.classList.toggle("on", selected);
             button.setAttribute("aria-checked", String(selected));
