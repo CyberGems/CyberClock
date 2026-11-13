@@ -3263,7 +3263,7 @@
         container-type: inline-size;
     }
     .ses-timer {
-        font-family: "JetBrains Mono", monospace;
+        font-family: var(--font-display);
         font-size: min(64px, 19cqi);
         font-weight: 500;
         color: var(--text-hi);
