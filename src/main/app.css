@@ -2795,6 +2795,9 @@
         cursor: pointer;
         z-index: 1;
     }
+    .tcard-add[data-tooltip]::after {
+        content: none;
+    }
     .tcard-add:hover {
         border-color: var(--border-active);
         color: var(--accent-a);

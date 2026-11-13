@@ -9636,7 +9636,7 @@
         }
     }
 
-    function ttBind(el) {
+    function ttBind(el, blurOnClick = true) {
         if (!el) return;
         el.addEventListener("mouseenter", () => {
             clearTimeout(ttShowTimer);
@@ -9651,7 +9651,7 @@
         el.addEventListener("blur", ttHide);
         el.addEventListener("click", () => {
             ttHide();
-            el.blur();
+            if (blurOnClick) el.blur();
         });
     }
 
@@ -9670,6 +9670,7 @@
     ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-mini", "expanded-clock-back"].forEach((id) => {
         ttBind(document.getElementById(id));
     });
+    document.querySelectorAll(".tcard-add").forEach(button => ttBind(button, false));
 
     // ══════════════════════════════════════════════════════════════
     // CUSTOM CONTEXT MENUS (Full Mode & Text Inputs)
