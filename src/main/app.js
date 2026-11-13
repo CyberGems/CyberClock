@@ -2514,6 +2514,7 @@
             const savedLayers = Array.isArray(s.relaxMixLayers) ? s.relaxMixLayers : [];
             relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
         }
+        setRelaxMixExpanded(pendingMixExpansion?.relaxMixExpanded ?? (s.relaxMixExpanded === true));
         const autoStopMinutes = isRelaxAutoStopOption(s.relaxAutoTimer) ? s.relaxAutoTimer : 0;
         if (!pendingAutoStop && autoStopMinutes !== preferredAutoStopMinutes) {
             preferredAutoStopMinutes = autoStopMinutes;
@@ -6579,6 +6580,7 @@
     let relaxSettingsSave = Promise.resolve();
     let relaxMixLayers = [];
     let pendingRelaxMix = null;
+    let pendingMixExpansion = null;
     let preferredAutoStopMinutes = 0;
     let pendingAutoStop = null;
     let pendingMasterVolume = null;
@@ -7021,9 +7023,24 @@
     const mixToggle = document.getElementById("r-mix-toggle");
     const mixList = document.getElementById("r-mix-layers");
     mixToggle.addEventListener("click", () => {
-        mixList.hidden = !mixList.hidden;
-        mixToggle.setAttribute("aria-expanded", String(!mixList.hidden));
+        const change = { relaxMixExpanded: mixList.hidden };
+        pendingMixExpansion = change;
+        setRelaxMixExpanded(change.relaxMixExpanded);
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
+            if (pendingMixExpansion !== change) return;
+            try {
+                await window.cc.saveSettings(change);
+            } finally {
+                if (pendingMixExpansion === change) pendingMixExpansion = null;
+            }
+        }).catch(console.error);
     });
+
+    function setRelaxMixExpanded(expanded) {
+        mixList.hidden = !expanded;
+        mixToggle.setAttribute("aria-expanded", String(expanded));
+    }
+
     function playRelaxCard(track, event) {
         const engine = window.audioEngine;
         if (event.ctrlKey || event.metaKey) {
@@ -9175,8 +9192,7 @@
         } else if (action === "tray") {
             window.cc.hideWindow("main");
         } else {
-            if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
-            else window.close();
+            quitFromMainWindow();
         }
         updateCloseButtonTooltip();
     }
@@ -9500,6 +9516,12 @@
         }
     });
 
+    async function quitFromMainWindow() {
+        while (pendingMixExpansion) await relaxSettingsSave;
+        if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
+        else window.close();
+    }
+
     function requestWindowClose() {
         const action = (cfg && cfg.closeAction) || (cfg && cfg.closeToTray === true ? "tray" : (cfg && cfg.closeToTray === false ? "quit" : null));
         if (action === "mini") {
@@ -9507,8 +9529,7 @@
         } else if (action === "tray") {
             window.cc.hideWindow("main");
         } else if (action === "quit") {
-            if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
-            else window.close();
+            quitFromMainWindow();
         } else {
             openFirstCloseModal();
         }
