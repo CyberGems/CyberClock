@@ -403,6 +403,8 @@ pub struct AppSettings {
     pub alarm_half_hour: AlarmSettings,
     pub alarm_full_hour: AlarmSettings,
     pub alarm_quarter_hour: AlarmSettings,
+    #[serde(default)]
+    pub hourly_chimes_enabled: Option<bool>,
     pub alarm_schedule_enabled: bool,
     pub alarm_schedule_start: String,
     pub alarm_schedule_end: String,
@@ -594,6 +596,7 @@ impl Default for AppSettings {
                 custom_path: None,
             },
             alarm_quarter_hour: AlarmSettings::default(),
+            hourly_chimes_enabled: Some(true),
             alarm_schedule_enabled: false,
             alarm_schedule_start: "08:00".to_string(),
             alarm_schedule_end: "17:00".to_string(),
@@ -771,13 +774,23 @@ pub fn persist(app: &AppHandle, settings: &AppSettings) -> Result<(), String> {
     })
 }
 
-// Older settings and imported backups can contain both choices.
-// Preserve the voice announcement, which already takes priority at playback.
 fn normalize_hourly_audio(settings: &mut AppSettings) {
-    if settings.voice_announcer.enabled {
+    // Older profiles only stored the interval switches. When both modes are
+    // set, voice takes priority, while the chime interval remains saved.
+    let interval_enabled = settings.alarm_full_hour.enabled
+        || settings.alarm_half_hour.enabled
+        || settings.alarm_quarter_hour.enabled;
+    let chimes_enabled = settings.hourly_chimes_enabled.unwrap_or(interval_enabled)
+        && !settings.voice_announcer.enabled;
+    settings.hourly_chimes_enabled = Some(chimes_enabled);
+
+    if settings.alarm_quarter_hour.enabled {
         settings.alarm_full_hour.enabled = false;
         settings.alarm_half_hour.enabled = false;
-        settings.alarm_quarter_hour.enabled = false;
+    } else if settings.alarm_half_hour.enabled {
+        settings.alarm_full_hour.enabled = false;
+    } else if chimes_enabled {
+        settings.alarm_full_hour.enabled = true;
     }
 }
 

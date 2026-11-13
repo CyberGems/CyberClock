@@ -563,7 +563,7 @@
             // Settings modal - Alarms
             "settings.alarms.volume": "Alarm Volume",
             "settings.alarms.volumeHelp": "Sets how loud the alarm sound plays. Adjust spoken alarms in the Voice tab.",
-            "settings.alarms.playSchedule": "Sound schedule",
+            "settings.chimes.limitSchedule": "Limit chimes to this schedule",
             "settings.alarms.playTo": "to",
             "settings.alarms.topOfHour": "Top of the hour",
             "settings.alarms.halfHour": "Half hour",
@@ -676,6 +676,7 @@
             "settings.display.digitalFormatSection": "Digital Clock Format",
             "settings.time.sectionChimes": "Hourly Chimes",
             "settings.time.chimesOrVoice": "Choose hourly chimes or time announcements. Turning one on automatically turns the other off.",
+            "settings.chimes.enable": "Enable hourly chimes",
             "settings.chimes.volume": "Chimes Volume",
             "settings.chimes.volumeHelp": "Sets how loud the scheduled chimes sound.",
             "settings.time.sectionSync": "System Time Synchronization",
@@ -1693,7 +1694,7 @@
             // Settings modal - Alarms
             "settings.alarms.volume": "Volumen de Alarma",
             "settings.alarms.volumeHelp": "Ajusta el sonido que se reproduce al sonar una alarma. La lectura en voz alta se ajusta en la pestaña Voz.",
-            "settings.alarms.playSchedule": "Horario de sonido",
+            "settings.chimes.limitSchedule": "Limitar las campanadas a este horario",
             "settings.alarms.playTo": "a",
             "settings.alarms.topOfHour": "En punto",
             "settings.alarms.halfHour": "Media hora",
@@ -1806,6 +1807,7 @@
             "settings.display.digitalFormatSection": "Formato de reloj digital",
             "settings.time.sectionChimes": "Campanadas horarias",
             "settings.time.chimesOrVoice": "Puedes activar las campanadas horarias o la locución de hora. Al activar una, la otra se desactiva automáticamente.",
+            "settings.chimes.enable": "Activar campanadas horarias",
             "settings.chimes.volume": "Volumen de campanadas",
             "settings.chimes.volumeHelp": "Ajusta el volumen de las campanadas programadas.",
             "settings.time.sectionSync": "Sincronización del reloj",

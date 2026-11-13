@@ -2450,6 +2450,8 @@
             btn.classList.toggle("on", btn.dataset.pat === breathePat);
         });
 
+        const chimeMaster = document.getElementById("s-chimes-en");
+        if (chimeMaster) chimeMaster.checked = !!s.hourlyChimesEnabled;
         const ah = s.alarmHalfHour || {};
         const af = s.alarmFullHour || {};
         const aq = s.alarmQuarterHour || {};
@@ -8728,89 +8730,63 @@
         });
     }
 
-    // Alarms
-    document
-        .getElementById("s-half-en")
-        .addEventListener("change", (e) => {
-            if (e.target.checked) {
-                document.getElementById("s-full-en").checked = false;
-                document.getElementById("s-quart-en").checked = false;
-                const sVEn = document.getElementById("s-voice-en");
-                if (sVEn) sVEn.checked = false;
-                window.cc.saveSettings({
-                    alarmHalfHour: { ...cfg.alarmHalfHour, enabled: true },
-                    alarmFullHour: { ...cfg.alarmFullHour, enabled: false },
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false },
-                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
-                });
-            } else {
-                window.cc.saveSettings({
-                    alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false }
-                });
+    const chimeMaster = document.getElementById("s-chimes-en");
+    const voiceMaster = document.getElementById("s-voice-en");
+    chimeMaster.addEventListener("change", () => {
+        const enabled = chimeMaster.checked;
+        if (enabled) {
+            voiceMaster.checked = false;
+            if (!document.querySelector('input[name="s-chime-interval"]:checked')) {
+                document.getElementById("s-full-en").checked = true;
             }
-            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
+        }
+        updateChimeStatesUI();
+        window.cc.saveSettings(enabled
+            ? { hourlyChimesEnabled: true, voiceAnnouncer: { enabled: false } }
+            : { hourlyChimesEnabled: false });
+    });
+    voiceMaster.addEventListener("change", () => {
+        const enabled = voiceMaster.checked;
+        if (enabled) chimeMaster.checked = false;
+        updateChimeStatesUI();
+        window.cc.saveSettings(enabled
+            ? { voiceAnnouncer: { enabled: true }, hourlyChimesEnabled: false }
+            : { voiceAnnouncer: { enabled: false } });
+    });
+
+    const chimeIntervals = {
+        "s-full-en": "alarmFullHour",
+        "s-half-en": "alarmHalfHour",
+        "s-quart-en": "alarmQuarterHour"
+    };
+    for (const [id, setting] of Object.entries(chimeIntervals)) {
+        document.getElementById(id).addEventListener("change", () => {
+            const patch = Object.fromEntries(Object.values(chimeIntervals).map(key => [
+                key, { enabled: key === setting }
+            ]));
+            updateChimeStatesUI();
+            window.cc.saveSettings(patch);
         });
-    document
-        .getElementById("s-full-en")
-        .addEventListener("change", (e) => {
-            if (e.target.checked) {
-                document.getElementById("s-half-en").checked = false;
-                document.getElementById("s-quart-en").checked = false;
-                const sVEn = document.getElementById("s-voice-en");
-                if (sVEn) sVEn.checked = false;
-                window.cc.saveSettings({
-                    alarmFullHour: { ...cfg.alarmFullHour, enabled: true },
-                    alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false },
-                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
-                });
-            } else {
-                window.cc.saveSettings({
-                    alarmFullHour: { ...cfg.alarmFullHour, enabled: false }
-                });
-            }
-            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
-        });
-    document
-        .getElementById("s-quart-en")
-        .addEventListener("change", (e) => {
-            if (e.target.checked) {
-                document.getElementById("s-half-en").checked = false;
-                document.getElementById("s-full-en").checked = false;
-                const sVEn = document.getElementById("s-voice-en");
-                if (sVEn) sVEn.checked = false;
-                window.cc.saveSettings({
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: true },
-                    alarmHalfHour: { ...cfg.alarmHalfHour, enabled: false },
-                    alarmFullHour: { ...cfg.alarmFullHour, enabled: false },
-                    voiceAnnouncer: { ...(cfg.voiceAnnouncer || {}), enabled: false }
-                });
-            } else {
-                window.cc.saveSettings({
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, enabled: false }
-                });
-            }
-            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
-        });
+    }
     document
         .getElementById("s-half-snd")
         .addEventListener("change", (e) =>
             window.cc.saveSettings({
-                alarmHalfHour: { ...cfg.alarmHalfHour, sound: e.target.value },
+                alarmHalfHour: { sound: e.target.value },
             }),
         );
     document
         .getElementById("s-full-snd")
         .addEventListener("change", (e) =>
             window.cc.saveSettings({
-                alarmFullHour: { ...cfg.alarmFullHour, sound: e.target.value },
+                alarmFullHour: { sound: e.target.value },
             }),
         );
     document
         .getElementById("s-quart-snd")
         .addEventListener("change", (e) =>
             window.cc.saveSettings({
-                alarmQuarterHour: { ...cfg.alarmQuarterHour, sound: e.target.value },
+                alarmQuarterHour: { sound: e.target.value },
             }),
         );
     document
@@ -8861,7 +8837,7 @@
             const p = await window.cc.openFileDialog();
             if (p) {
                 window.cc.saveSettings({
-                    alarmHalfHour: { ...cfg.alarmHalfHour, customPath: p },
+                    alarmHalfHour: { customPath: p },
                 });
                 showCustomFile("half", p);
             }
@@ -8872,7 +8848,7 @@
             const p = await window.cc.openFileDialog();
             if (p) {
                 window.cc.saveSettings({
-                    alarmFullHour: { ...cfg.alarmFullHour, customPath: p },
+                    alarmFullHour: { customPath: p },
                 });
                 showCustomFile("full", p);
             }
@@ -8883,7 +8859,7 @@
             const p = await window.cc.openFileDialog();
             if (p) {
                 window.cc.saveSettings({
-                    alarmQuarterHour: { ...cfg.alarmQuarterHour, customPath: p },
+                    alarmQuarterHour: { customPath: p },
                 });
                 showCustomFile("quart", p);
             }
@@ -8892,7 +8868,7 @@
         .getElementById("s-half-fclr")
         .addEventListener("click", () => {
             window.cc.saveSettings({
-                alarmHalfHour: { ...cfg.alarmHalfHour, customPath: null },
+                alarmHalfHour: { customPath: null },
             });
             showCustomFile("half", null);
         });
@@ -8900,7 +8876,7 @@
         .getElementById("s-full-fclr")
         .addEventListener("click", () => {
             window.cc.saveSettings({
-                alarmFullHour: { ...cfg.alarmFullHour, customPath: null },
+                alarmFullHour: { customPath: null },
             });
             showCustomFile("full", null);
         });
@@ -8908,7 +8884,7 @@
         .getElementById("s-quart-fclr")
         .addEventListener("click", () => {
             window.cc.saveSettings({
-                alarmQuarterHour: { ...cfg.alarmQuarterHour, customPath: null },
+                alarmQuarterHour: { customPath: null },
             });
             showCustomFile("quart", null);
         });
@@ -8934,44 +8910,17 @@
         }
     });
 
-    // Voice Time Announcer (Talking Clock)
-    const sVoiceEn = document.getElementById("s-voice-en");
-    if (sVoiceEn) {
-        sVoiceEn.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            if (e.target.checked) {
-                const sHalf = document.getElementById("s-half-en");
-                if (sHalf) sHalf.checked = false;
-                const sFull = document.getElementById("s-full-en");
-                if (sFull) sFull.checked = false;
-                const sQuart = document.getElementById("s-quart-en");
-                if (sQuart) sQuart.checked = false;
-                window.cc.saveSettings({
-                    alarmHalfHour: { ...(cfg.alarmHalfHour || {}), enabled: false },
-                    alarmFullHour: { ...(cfg.alarmFullHour || {}), enabled: false },
-                    alarmQuarterHour: { ...(cfg.alarmQuarterHour || {}), enabled: false },
-                    voiceAnnouncer: { ...va, enabled: true }
-                });
-            } else {
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, enabled: false } });
-            }
-            if (typeof updateChimeStatesUI === "function") updateChimeStatesUI();
-        });
-    }
-
     const sVoiceAlarmRead = document.getElementById("s-voice-alarm-read");
     if (sVoiceAlarmRead) {
         sVoiceAlarmRead.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, readAlarms: e.target.checked } });
+            window.cc.saveSettings({ voiceAnnouncer: { readAlarms: e.target.checked } });
         });
     }
 
     const sVoiceInterval = document.getElementById("s-voice-interval");
     if (sVoiceInterval) {
         sVoiceInterval.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, interval: e.target.value } });
+            window.cc.saveSettings({ voiceAnnouncer: { interval: e.target.value } });
         });
     }
 
@@ -8979,11 +8928,10 @@
     if (sVoiceSelect) {
         sVoiceSelect.addEventListener("change", (e) => {
             const val = e.target.value;
-            const va = cfg.voiceAnnouncer || {};
             if (val === 'female' || val === 'male' || val === 'auto') {
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, voiceGender: val, voiceName: null } });
+                window.cc.saveSettings({ voiceAnnouncer: { voiceGender: val, voiceName: null } });
             } else {
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, voiceGender: 'custom', voiceName: val } });
+                window.cc.saveSettings({ voiceAnnouncer: { voiceGender: 'custom', voiceName: val } });
             }
         });
     }
@@ -8991,26 +8939,23 @@
     const sVoiceStyle = document.getElementById("s-voice-style");
     if (sVoiceStyle) {
         sVoiceStyle.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, style: e.target.value } });
+            window.cc.saveSettings({ voiceAnnouncer: { style: e.target.value } });
         });
     }
 
     const sVoiceChime = document.getElementById("s-voice-chime");
     if (sVoiceChime) {
         sVoiceChime.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, chimeBefore: e.target.checked } });
+            window.cc.saveSettings({ voiceAnnouncer: { chimeBefore: e.target.checked } });
         });
     }
 
     const sVoiceQuietEn = document.getElementById("s-voice-quiet-en");
     if (sVoiceQuietEn) {
         sVoiceQuietEn.addEventListener("change", (e) => {
-            const va = cfg.voiceAnnouncer || {};
             const row = document.getElementById("s-voice-quiet-row");
             if (row) row.style.display = e.target.checked ? "" : "none";
-            window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursEnabled: e.target.checked } });
+            window.cc.saveSettings({ voiceAnnouncer: { quietHoursEnabled: e.target.checked } });
         });
     }
 
@@ -9018,8 +8963,7 @@
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener("change", () => {
-                const va = cfg.voiceAnnouncer || {};
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursStart: getVoiceQuietTime("start") } });
+                window.cc.saveSettings({ voiceAnnouncer: { quietHoursStart: getVoiceQuietTime("start") } });
             });
         }
     });
@@ -9028,8 +8972,7 @@
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener("change", () => {
-                const va = cfg.voiceAnnouncer || {};
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, quietHoursEnd: getVoiceQuietTime("end") } });
+                window.cc.saveSettings({ voiceAnnouncer: { quietHoursEnd: getVoiceQuietTime("end") } });
             });
         }
     });
@@ -9041,8 +8984,7 @@
             if (num) num.textContent = e.target.value + "%";
             clearTimeout(sDebounce.vvol);
             sDebounce.vvol = setTimeout(() => {
-                const va = cfg.voiceAnnouncer || {};
-                window.cc.saveSettings({ voiceAnnouncer: { ...va, volume: e.target.value / 100 } });
+                window.cc.saveSettings({ voiceAnnouncer: { volume: e.target.value / 100 } });
             }, 300);
         });
     }
@@ -9184,10 +9126,18 @@
         const qCtrls = document.getElementById("s-quart-ctrls");
         const vSub = document.getElementById("s-voice-subcontrols");
 
-        if (fCtrls) fCtrls.classList.toggle("is-disabled-controls", !fEn || !fEn.checked);
-        if (hCtrls) hCtrls.classList.toggle("is-disabled-controls", !hEn || !hEn.checked);
-        if (qCtrls) qCtrls.classList.toggle("is-disabled-controls", !qEn || !qEn.checked);
-        if (vSub) vSub.classList.toggle("is-disabled-controls", !vEn || !vEn.checked);
+        const chimesOff = !document.getElementById("s-chimes-en")?.checked;
+        setHourlyControlsInactive(document.getElementById("s-chime-controls"), chimesOff);
+        setHourlyControlsInactive(fCtrls, !fEn?.checked);
+        setHourlyControlsInactive(hCtrls, !hEn?.checked);
+        setHourlyControlsInactive(qCtrls, !qEn?.checked);
+        setHourlyControlsInactive(vSub, !vEn?.checked);
+    }
+
+    function setHourlyControlsInactive(controls, inactive) {
+        if (!controls) return;
+        controls.inert = inactive;
+        controls.classList.toggle("is-disabled-controls", inactive);
     }
 
     function openFirstCloseModal() {

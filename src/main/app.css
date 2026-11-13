@@ -6572,6 +6572,14 @@
     .s-schedule-range .sched-time {
         flex: none;
     }
+    .s-chime-interval {
+        flex: none;
+        width: 18px;
+        height: 18px;
+        margin: 5px 13px 0;
+        accent-color: var(--accent-a);
+        cursor: pointer;
+    }
     .sched-time select {
         flex: none;
         text-align: center;
