@@ -6606,9 +6606,9 @@
         
         window.audioEngine.playTrack(track);
         window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
-        updateMixStateUI();
         
         rStartSession();
+        updateMixStateUI();
         startViz();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
@@ -6716,6 +6716,21 @@
         if (shuffleBtn) {
             shuffleBtn.classList.toggle("on", !isMuted && zenFlowActive);
         }
+        publishRelaxPlayback();
+    }
+
+    function publishRelaxPlayback() {
+        const engine = window.audioEngine;
+        const playing = engine.isPlaying;
+        window.cc.sendRelaxPlayback({
+            track: (playing && engine.currentTrack) || rSelected,
+            mixReady: !playing && relaxMixLayers.length > 0,
+            playing,
+            paused: playing && rPaused,
+            shuffled: zenFlowActive,
+            startedAt: rSesStart,
+            pausedAt: rPaused ? rPauseResumedAt : null
+        }).catch(console.error);
     }
 
     function preSelectRelaxTrack(id) {
@@ -6741,8 +6756,8 @@
         stopZenFlow();
         window.audioEngine.playTrack(rSelected);
         window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
-        updateMixStateUI();
         rStartSession();
+        updateMixStateUI();
         startViz();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
@@ -7151,7 +7166,9 @@
     document
         .getElementById("r-play")
         .addEventListener("click", rTogglePlay);
-    document.getElementById("r-shuffle").addEventListener("click", () => {
+    document.getElementById("r-shuffle").addEventListener("click", toggleRelaxShuffle);
+
+    function toggleRelaxShuffle() {
         // Zen Flow (continuous shuffle) is a deliberate mode choice,
         // separate from the primary Play/Pause CTA.
         if (zenFlowActive) {
@@ -7162,7 +7179,38 @@
             if (rSelected) preSelectRelaxTrack(null);
             startZenFlow();
         }
-    });
+    }
+
+    window.cc.onRelaxControl(action => {
+        if (action === "state") {
+            publishRelaxPlayback();
+        } else if (action === "spectrum") {
+            if (window.audioEngine.isPlaying && !rPaused && !cfg?.audioMuted) {
+                const data = window.audioEngine.getAnalyserData();
+                window.cc.sendRelaxSpectrum(Array.from(data.subarray(0, Math.floor(data.length * 0.32))))
+                    .catch(console.error);
+            }
+        } else if (action === "toggle") {
+            rTogglePlay();
+        } else if (action === "shuffle") {
+            toggleRelaxShuffle();
+        } else if (action === "next" && !cfg?.audioMuted) {
+            const current = window.audioEngine.currentTrack || rSelected;
+            if (zenFlowActive) {
+                const next = nextZenFlowTrack();
+                preSelectRelaxTrack(next);
+                window.audioEngine.playTrack(next);
+                window.cc.saveSettings({ lastRelaxTrack: next });
+                updatePlayingTrackCardClass(true);
+                if (rPaused) rResume();
+                else updatePlayButtonUI(true);
+                scheduleNextZenFlowTrack();
+            } else {
+                const index = RELAX_TRACKS.findIndex(track => track.id === current);
+                playRelaxCard(RELAX_TRACKS[(index + 1) % RELAX_TRACKS.length].id, {});
+            }
+        }
+    }).catch(console.error);
     document.getElementById("r-stop").addEventListener("click", () => {
         rSelected = null;
         rStop(true);

@@ -10,7 +10,6 @@
         <script src="../shared/tauri-bridge.js"></script>
         <script src="../shared/tint.js"></script>
         <script src="../shared/i18n.js"></script>
-        <script src="../shared/audio-engine.js"></script>
         <script src="../shared/icons.js"></script>
         <link rel="stylesheet" href="relax.css" />
     </head>
@@ -20,7 +19,7 @@
                 <span class="relax-mark" data-ico="lotus" data-ico-size="14" aria-hidden="true"></span>
                 <div class="relax-titles">
                     <div class="relax-kicker" data-i18n="float.relaxTitle">Relax</div>
-                    <div class="relax-track" id="track-name">Night</div>
+                    <div class="relax-track" id="track-name"></div>
                 </div>
                 <button type="button" class="relax-icon-btn" id="btn-menu" data-tooltip="Menu and settings" data-i18n-attr="data-tooltip:float.menuTooltip, aria-label:float.menuTooltip" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="Menu and settings">
                     <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">

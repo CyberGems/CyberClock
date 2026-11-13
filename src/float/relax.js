@@ -1,9 +1,8 @@
 /**
  * CyberClock — Floating Relax widget.
- * Owns its own audio session so sound continues when full mode is hidden.
+ * Controls the audio session in the main window.
  */
 (function () {
-    const TRACKS = ["night", "forest", "space", "ocean", "rain", "fireplace"];
     const shell = document.getElementById("relax-shell");
     const trackEl = document.getElementById("track-name");
     const statusEl = document.getElementById("playback-status");
@@ -20,17 +19,14 @@
     let spectrumCtx = null;
 
     let cfg = {};
-    let trackIndex = 0;
-    let playing = false;
-    let paused = false;
-    let sessionStart = 0;
-    let sessionShown = 0;
-    let shuffleOn = false;
-    let shuffleTimer = null;
-    let shuffleQueue = [];
-    const SHUFFLE_MS = 15 * 60 * 1000;
+    let playback = {};
+    let spectrumData = [];
+    let lastSpectrumRequest = 0;
+    let spectrumRequestPending = false;
 
-    const engine = window.audioEngine;
+    function sendControl(action) {
+        window.cc.sendRelaxControl(action).catch(console.error);
+    }
 
     function t(key) {
         return window.ccI18n ? window.ccI18n.t(key) : key;
@@ -43,8 +39,8 @@
     }
 
     function refreshLabels() {
-        const id = TRACKS[trackIndex];
-        trackEl.textContent = t("relax.track." + id);
+        const {track, mixReady, playing, paused} = playback;
+        trackEl.textContent = t(mixReady ? "relax.savedMix" : track ? "relax.track." + track : "relax.noTrack");
         const statusKey = !playing ? "relax.status.ready"
             : paused ? "relax.status.paused" : "relax.status.playing";
         statusEl.textContent = t(statusKey);
@@ -56,13 +52,13 @@
             btnPlay.setAttribute("data-tooltip", muteLabel);
             btnPlay.setAttribute("aria-label", muteLabel);
         } else {
-            const key = !playing ? "relax.play" : paused ? "relax.resume" : "relax.pause";
+            const key = paused || mixReady ? "relax.resume" : playing ? "relax.pause" : "relax.play";
             const label = t(key);
             btnPlay.setAttribute("data-tooltip", label);
             btnPlay.setAttribute("aria-label", label);
         }
         btnPlay.classList.toggle("is-playing", playing && !paused);
-        if (btnShuffle) btnShuffle.classList.toggle("is-on", shuffleOn);
+        if (btnShuffle) btnShuffle.classList.toggle("is-on", !!playback.shuffled);
         if (btnMute) {
             btnMute.style.display = isMuted ? "inline-flex" : "none";
             if (isMuted) {
@@ -71,13 +67,6 @@
                 btnMute.setAttribute("aria-label", label);
             }
         }
-    }
-
-    function applyAudioPrefs() {
-        if (!engine) return;
-        const vol = typeof cfg.relaxVolume === "number" ? cfg.relaxVolume : 0.8;
-        engine.setVolume(vol);
-        engine.setMuted(!!cfg.audioMuted);
     }
 
     function applySettings(s) {
@@ -94,15 +83,6 @@
         if (shell) shell.style.opacity = String(ownCtp ? op * 0.88 : op);
         const skin = parseInt(s.floatRelaxDesign, 10);
         if (shell) shell.dataset.skin = String(skin >= 1 && skin <= 10 ? skin : 1);
-        if (s.audioMuted === true && playing && !paused) {
-            sessionShown = performance.now() - sessionStart;
-            paused = true;
-            if (engine) engine.suspend();
-            clearTimeout(shuffleTimer);
-            shuffleTimer = null;
-            reportPlayback();
-        }
-        applyAudioPrefs();
         refreshLabels();
         applyRelaxZoom(s.floatRelaxZoom);
     }
@@ -120,92 +100,22 @@
         }
     }
 
-    // Tray sync: report the engage state (track while playing or paused,
-    // plus the paused flag) so the tray menu can show and toggle it from
-    // anywhere, mirroring the main window's relax view.
-    function reportPlayback() {
-        if (window.cc && window.cc.reportRelaxPlaying) {
-            window.cc.reportRelaxPlaying(playing ? TRACKS[trackIndex] : null, paused);
-        }
-    }
-
-    function startTrack(index) {
-        if (!engine || cfg.audioMuted === true) return;
-        trackIndex = (index + TRACKS.length) % TRACKS.length;
-        const now = performance.now();
-        if (!playing) sessionStart = now;
-        else if (paused) sessionStart = now - sessionShown;
-        engine.resume();
-        applyAudioPrefs();
-        engine.playTrack(TRACKS[trackIndex]);
-        playing = true;
-        paused = false;
-        refreshLabels();
-        scheduleShuffle();
-        reportPlayback();
-    }
-
-    function nextShuffleIndex() {
-        if (shuffleQueue.length === 0) {
-            shuffleQueue = TRACKS.slice().sort(function () { return Math.random() - 0.5; });
-            const current = TRACKS[trackIndex];
-            if (current && shuffleQueue[0] === current && shuffleQueue.length > 1) {
-                const tmp = shuffleQueue[0];
-                shuffleQueue[0] = shuffleQueue[1];
-                shuffleQueue[1] = tmp;
-            }
-        }
-        const idx = TRACKS.indexOf(shuffleQueue.shift());
-        return idx < 0 ? 0 : idx;
-    }
-
-    function scheduleShuffle() {
-        clearTimeout(shuffleTimer);
-        shuffleTimer = null;
-        if (!shuffleOn || !playing || paused) return;
-        shuffleTimer = setTimeout(function () {
-            if (!shuffleOn || !playing || paused) return;
-            startTrack(nextShuffleIndex());
-        }, SHUFFLE_MS);
-    }
-
-    function toggleShuffle() {
-        shuffleOn = !shuffleOn;
-        shuffleQueue = [];
-        if (shuffleOn && !playing && (!cfg || !cfg.audioMuted)) startTrack(nextShuffleIndex());
-        else scheduleShuffle();
-        refreshLabels();
-    }
-
-    function togglePlay() {
-        if (!engine || (cfg && cfg.audioMuted === true)) return;
-        if (!playing) {
-            startTrack(trackIndex);
-            return;
-        }
-        if (!paused) {
-            sessionShown = performance.now() - sessionStart;
-            paused = true;
-            engine.suspend();
-        } else {
-            sessionStart = performance.now() - sessionShown;
-            paused = false;
-            engine.resume();
-            applyAudioPrefs();
-        }
-        refreshLabels();
-        scheduleShuffle();
-        reportPlayback();
-    }
-
     function frame(now) {
-        drawSpectrum(now, playing && !paused && !cfg.audioMuted);
-
-        if (playing && !paused && sessionStart) {
-            elapsedEl.textContent = fmt(now - sessionStart);
-        } else if (playing && paused) {
-            elapsedEl.textContent = fmt(sessionShown);
+        const active = playback.playing && !playback.paused && !cfg.audioMuted;
+        const sinceRequest = now - lastSpectrumRequest;
+        // Pull frames only while the widget is drawing. Limit the request
+        // rate and retry if a reply is lost during pause or a window change.
+        if (active && sinceRequest >= (spectrumRequestPending ? 500 : 100)) {
+            lastSpectrumRequest = now;
+            spectrumRequestPending = true;
+            sendControl("spectrum");
         }
+        drawSpectrum(now, active);
+        const elapsed = playback.startedAt
+            ? (playback.pausedAt ?? Date.now()) - playback.startedAt
+            : 0;
+        const display = fmt(elapsed);
+        if (elapsedEl.textContent !== display) elapsedEl.textContent = display;
         requestAnimationFrame(frame);
     }
 
@@ -237,14 +147,14 @@
         if (!rgb || rgb.indexOf("var(") >= 0) {
             rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "200,220,232";
         }
-        const data = active && engine ? engine.getAnalyserData() : null;
+        const data = active ? spectrumData : null;
 
         if (data && data.length) {
             const gap = w / SPECTRUM_BARS;
             const gradient = ctx.createLinearGradient(0, 0, 0, h);
             gradient.addColorStop(0, acc);
             gradient.addColorStop(1, "rgba(" + rgb + ",.18)");
-            const maxBin = Math.floor(data.length * 0.32);
+            const maxBin = data.length - 1;
             for (let i = 0; i < SPECTRUM_BARS; i++) {
                 const percent = i / (SPECTRUM_BARS - 1);
                 const idx = Math.min(data.length - 1, Math.floor(Math.pow(percent, 1.8) * maxBin));
@@ -295,23 +205,22 @@
 
     btnPlay.addEventListener("click", (e) => {
         e.stopPropagation();
-        togglePlay();
+        sendControl("toggle");
     });
     btnNext.addEventListener("click", (e) => {
         e.stopPropagation();
-        startTrack(shuffleOn ? nextShuffleIndex() : trackIndex + 1);
+        sendControl("next");
     });
     if (btnShuffle) {
         btnShuffle.addEventListener("click", (e) => {
             e.stopPropagation();
-            toggleShuffle();
+            sendControl("shuffle");
         });
     }
     if (btnMute) {
         btnMute.addEventListener("click", (e) => {
             e.stopPropagation();
             cfg.audioMuted = false;
-            applyAudioPrefs();
             refreshLabels();
             if (window.cc && window.cc.saveSettings) {
                 window.cc.saveSettings({ audioMuted: false });
@@ -334,14 +243,6 @@
 
     function setMenuButtonOpen(open) {
         if (btnMenu) btnMenu.classList.toggle("is-open", open);
-    }
-
-    // Tray quick toggle: play/pause this widget's playback without
-    // opening it. The backend routes the event to the reported source.
-    if (window.cc && window.cc.onTrayRelaxToggle) {
-        window.cc.onTrayRelaxToggle(() => {
-            togglePlay();
-        });
     }
 
     if (window.cc && window.cc.onMenuClosed) {
@@ -443,7 +344,7 @@
     window.addEventListener("keydown", (e) => {
         if (e.code === "Space" && !e.repeat && e.target === document.body) {
             e.preventDefault();
-            togglePlay();
+            sendControl("toggle");
         } else if (e.key === "Escape") {
             if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         }
@@ -458,6 +359,21 @@
     if (window.cc && window.cc.onInit) {
         window.cc.onInit((s) => applySettings(s));
     }
+
+    Promise.all([
+        window.cc.onRelaxPlayback(state => {
+            playback = state;
+            if (!state.playing || state.paused) {
+                spectrumData = [];
+                spectrumRequestPending = false;
+            }
+            refreshLabels();
+        }),
+        window.cc.onRelaxSpectrum(data => {
+            spectrumData = data;
+            spectrumRequestPending = false;
+        })
+    ]).then(() => sendControl("state")).catch(console.error);
 
     refreshLabels();
     requestAnimationFrame(frame);

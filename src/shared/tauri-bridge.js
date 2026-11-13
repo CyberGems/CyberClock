@@ -19,6 +19,7 @@
         ? window.__TAURI__.event.listen
         : async () => () => { /* unlisten no-op in browser */ };
     const emit = HAS_TAURI ? window.__TAURI__.event.emit : async () => undefined;
+    const emitTo = HAS_TAURI ? window.__TAURI__.event.emitTo : async () => undefined;
 
     // Browser fallback store (dev only — never used inside the app).
     let browserSettings = null;
@@ -477,6 +478,12 @@
         onRelaxTrigger: (cb) => {
             return subscribe("relax:trigger", cb);
         },
+        sendRelaxControl: (action) => emitTo("main", "relax:control", action),
+        onRelaxControl: (cb) => subscribeToWindow("relax:control", cb),
+        sendRelaxPlayback: (state) => emitTo("float-relax-1", "relax:playback", state),
+        onRelaxPlayback: (cb) => subscribeToWindow("relax:playback", cb),
+        sendRelaxSpectrum: (bins) => emitTo("float-relax-1", "relax:spectrum", bins),
+        onRelaxSpectrum: (cb) => subscribeToWindow("relax:spectrum", cb),
         onMiniContextMenu: (cb) => {
             return subscribe("mini:context-menu", cb);
         },
