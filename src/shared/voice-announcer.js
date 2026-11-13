@@ -243,7 +243,8 @@
             try {
                 window.audioEngine.chime('chime-crystal', (va.volume ?? 0.85) * 0.7);
             } catch (_) {}
-            setTimeout(doSpeak, 450);
+            // Crystal's last note starts at 840 ms. Give it a moment before speaking.
+            setTimeout(doSpeak, 1050);
         } else {
             doSpeak();
         }
