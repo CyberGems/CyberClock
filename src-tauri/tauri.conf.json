@@ -133,6 +133,7 @@
     ],
     "createUpdaterArtifacts": true,
     "publisher": "CyberGems",
+    "homepage": "https://cybergems.org",
     "resources": [
       "bin/open-taskbar-settings.exe"
     ],
