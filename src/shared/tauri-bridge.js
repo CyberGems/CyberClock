@@ -386,9 +386,6 @@
         resetMiniPosition: async () => {
             await invoke("reset_mini_position");
         },
-        saveMiniPosition: async () => {
-            return await invoke("save_mini_position");
-        },
         // Live mini preview while the settings "Modo Mini" tab is open
         setMiniPreview: async (on) => {
             if (!HAS_TAURI) return;

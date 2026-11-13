@@ -256,7 +256,7 @@
         const designChanged = s.miniDesign !== lastDesign;
         const layoutChanged = s.miniLayout !== lastLayout;
         const collapseChanged = s.miniCollapseDate !== lastCollapse;
-        const zoomChanged = s.miniZoom !== lastZoom && s.miniZoom !== undefined;
+        const zoomChanged = lastZoom !== null && s.miniZoom !== lastZoom && s.miniZoom !== undefined;
         lastDesign = s.miniDesign;
         lastLayout = s.miniLayout;
         lastCollapse = s.miniCollapseDate;
@@ -1025,7 +1025,6 @@
                 isPointerDown = false;
                 lastDragEndTime = Date.now();
                 document.body.classList.remove("is-dragging");
-                window.cc.saveMiniPosition().catch(() => {});
             })
             .catch(() => {
                 isDragging = false;

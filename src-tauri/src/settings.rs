@@ -272,6 +272,13 @@ impl Default for VoiceAnnouncerSettings {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct MiniMonitorPosition {
+    pub name: String,
+    pub offset: (f64, f64),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
 pub struct AppSettings {
     pub theme: String,
@@ -302,6 +309,7 @@ pub struct AppSettings {
     pub start_in_mini_mode: bool,
     pub window_mode: String,
     pub mini_position: Option<(i32, i32)>,
+    pub mini_monitor_position: Option<MiniMonitorPosition>,
     pub mini_opacity: f64,
     pub mini_bg_opacity: f64,
     #[serde(default)]
@@ -534,6 +542,7 @@ impl Default for AppSettings {
             start_in_mini_mode: true,
             window_mode: "mini".to_string(),
             mini_position: None,
+            mini_monitor_position: None,
             mini_opacity: 1.0,
             mini_bg_opacity: 1.0,
             float_cal_opacity: None,

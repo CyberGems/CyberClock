@@ -21,7 +21,7 @@ mod updater;
 
 use settings::{
     get_settings as load_settings, init_settings_store, persist, storage_dir,
-    update as update_settings,
+    update as update_settings, MiniMonitorPosition,
 };
 pub use settings::{
     AlarmSettings, AppSettings, CustomAlarm, RelaxSchedulerSettings, SavedFloatWidget,
@@ -217,6 +217,10 @@ const ANALOG_DIAL_HIT_SLACK_CSS_PX: f64 = 0.0;
 /// lasts until that loop starts and replaces it with the arrow.
 #[cfg(windows)]
 static WIDGET_DRAG_CURSOR: AtomicBool = AtomicBool::new(false);
+#[cfg(windows)]
+static MINI_DRAG_WINDOW: OnceLock<(isize, AppHandle)> = OnceLock::new();
+#[cfg(windows)]
+static MINI_DRAG_ORIGIN: Mutex<Option<(i32, i32)>> = Mutex::new(None);
 static FLOAT_TARGET_SIZES: OnceLock<Mutex<HashMap<String, (u32, u32)>>> = OnceLock::new();
 const MAX_FLOAT_WINDOWS: usize = 10;
 
@@ -303,17 +307,131 @@ fn restore_target_size(window: &WebviewWindow) {
     }
 }
 
-/// Half the mini window's default width/height in logical px —
-/// used by every "center the mini clock" call site.
-const MINI_CENTER_OFFSET: (i32, i32) = (130, 24);
+fn mini_size_on_monitor(monitor: &tauri::Monitor) -> (i32, i32) {
+    let scale = monitor.scale_factor();
+    (
+        (f64::from(MINI_TARGET_WIDTH.load(Ordering::Relaxed)) * scale).round() as i32,
+        (f64::from(MINI_TARGET_HEIGHT.load(Ordering::Relaxed)) * scale).round() as i32,
+    )
+}
 
 fn center_mini_on_monitor(monitor: &tauri::Monitor) -> (i32, i32) {
-    let pos = monitor.position();
-    let size = monitor.size();
+    let area = monitor.work_area();
+    let (width, height) = mini_size_on_monitor(monitor);
     (
-        pos.x + (size.width as i32 / 2) - MINI_CENTER_OFFSET.0,
-        pos.y + (size.height as i32 / 2) - MINI_CENTER_OFFSET.1,
+        area.position.x + (area.size.width as i32 - width).max(0) / 2,
+        area.position.y + (area.size.height as i32 - height).max(0) / 2,
     )
+}
+
+fn restore_mini_position(mini: &WebviewWindow, settings: &AppSettings) {
+    let Ok(monitors) = mini.available_monitors() else {
+        return;
+    };
+    let fallback = || {
+        monitors
+            .get(settings.preferred_display_id.unwrap_or(0) as usize)
+            .or_else(|| monitors.first())
+    };
+    let position = if let Some(saved) = &settings.mini_monitor_position {
+        if let Some(monitor) = monitors.iter().find(|m| m.name() == Some(&saved.name)) {
+            let area = monitor.work_area();
+            let scale = monitor.scale_factor();
+            let x = area
+                .position
+                .x
+                .saturating_add((saved.offset.0 * scale).round() as i32);
+            let y = area
+                .position
+                .y
+                .saturating_add((saved.offset.1 * scale).round() as i32);
+            if settings.mini_edge_limits {
+                let (width, height) = mini_size_on_monitor(monitor);
+                Some((
+                    x.clamp(
+                        area.position.x,
+                        area.position.x + (area.size.width as i32 - width).max(0),
+                    ),
+                    y.clamp(
+                        area.position.y,
+                        area.position.y + (area.size.height as i32 - height).max(0),
+                    ),
+                ))
+            } else if is_position_in_monitor(x, y, monitor) {
+                Some((x, y))
+            } else {
+                Some(center_mini_on_monitor(monitor))
+            }
+        } else {
+            // The fallback is temporary. Keep the saved location for reconnects.
+            fallback().map(center_mini_on_monitor)
+        }
+    } else {
+        settings
+            .mini_position
+            .filter(|&(x, y)| monitors.iter().any(|m| is_position_in_monitor(x, y, m)))
+            .or_else(|| fallback().map(center_mini_on_monitor))
+    };
+
+    if let Some((x, y)) = position {
+        let mini = mini.clone();
+        let _ = mini.clone().run_on_main_thread(move || {
+            #[cfg(windows)]
+            if let Ok(hwnd) = mini.hwnd() {
+                use windows_sys::Win32::UI::WindowsAndMessaging::{
+                    SetWindowPos, SWP_NOACTIVATE, SWP_NOSIZE, SWP_NOZORDER,
+                };
+                // Moving across DPI boundaries can synchronously apply a
+                // suggested Windows position. Reassert the saved origin
+                // once the destination monitor's DPI has taken effect.
+                for _ in 0..2 {
+                    if mini.outer_position().is_ok_and(|p| (p.x, p.y) == (x, y)) {
+                        break;
+                    }
+                    if unsafe {
+                        SetWindowPos(
+                            hwnd.0 as _,
+                            std::ptr::null_mut(),
+                            x,
+                            y,
+                            0,
+                            0,
+                            SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER,
+                        )
+                    } == 0
+                    {
+                        break;
+                    }
+                }
+                clamp_window_to_monitors(&mini);
+                return;
+            }
+            let _ = mini.set_position(tauri::PhysicalPosition::new(x, y));
+        });
+    }
+}
+
+fn remember_mini_position(mini: &WebviewWindow) -> bool {
+    let Ok(pos) = mini.outer_position() else {
+        return false;
+    };
+    let monitor_position = find_monitor_for_window(mini).and_then(|(_, monitor)| {
+        let area = monitor.work_area();
+        let scale = monitor.scale_factor();
+        Some(MiniMonitorPosition {
+            name: monitor.name()?.clone(),
+            offset: (
+                f64::from(pos.x - area.position.x) / scale,
+                f64::from(pos.y - area.position.y) / scale,
+            ),
+        })
+    });
+    update_settings(mini.app_handle(), |settings| {
+        settings.mini_position = Some((pos.x, pos.y));
+        settings.mini_monitor_position = monitor_position;
+        Ok(())
+    })
+    .is_ok()
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2712,6 +2830,15 @@ unsafe extern "system" fn window_drag_subclass_proc(
     // there until the drag ends.
     if msg == WM_ENTERSIZEMOVE {
         WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
+        if let Some((_, app)) = MINI_DRAG_WINDOW
+            .get()
+            .filter(|(id, _)| *id == hwnd as isize)
+        {
+            *lock_or_recover(&MINI_DRAG_ORIGIN) = app
+                .get_webview_window("mini")
+                .and_then(|mini| mini.outer_position().ok())
+                .map(|pos| (pos.x, pos.y));
+        }
         show_widget_drag_cursor();
         let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
         if tip_hwnd != 0 {
@@ -2725,6 +2852,19 @@ unsafe extern "system" fn window_drag_subclass_proc(
     }
     if msg == WM_EXITSIZEMOVE {
         WIDGET_DRAG_CURSOR.store(false, Ordering::Release);
+        if let Some((_, app)) = MINI_DRAG_WINDOW
+            .get()
+            .filter(|(id, _)| *id == hwnd as isize)
+        {
+            let origin = lock_or_recover(&MINI_DRAG_ORIGIN).take();
+            if let Some(mini) = app.get_webview_window("mini") {
+                if origin
+                    .is_some_and(|origin| mini.outer_position().is_ok_and(|p| (p.x, p.y) != origin))
+                {
+                    remember_mini_position(&mini);
+                }
+            }
+        }
     }
     if msg == WM_SETCURSOR && WIDGET_DRAG_CURSOR.load(Ordering::Acquire) {
         show_widget_drag_cursor();
@@ -2779,6 +2919,9 @@ unsafe extern "system" fn window_drag_subclass_proc(
 fn attach_window_drag_subclass(window: &WebviewWindow) {
     if let Ok(hwnd) = window.hwnd() {
         use windows_sys::Win32::UI::Shell::SetWindowSubclass;
+        if window.label() == "mini" {
+            let _ = MINI_DRAG_WINDOW.set((hwnd.0 as isize, window.app_handle().clone()));
+        }
         note_analog_hit_window(window);
         unsafe {
             SetWindowSubclass(hwnd.0 as _, Some(window_drag_subclass_proc), 0xCC01, 0);
@@ -2997,10 +3140,7 @@ fn center_open_widgets_on_active_monitor(app: &AppHandle) {
             let label = win.label().to_string();
             if label == "mini" {
                 refresh_taskbar_tab(&win);
-                let _ = update_settings(app, |s| {
-                    s.mini_position = Some((win_x, win_y));
-                    Ok(())
-                });
+                remember_mini_position(&win);
             } else if label.starts_with("float-cal") {
                 let _ = update_settings(app, |s| {
                     s.float_cal_position = Some((win_x, win_y));
@@ -3669,36 +3809,23 @@ fn handle_display_change(app: AppHandle) {
             }
         }
     } else if let Some(mini) = app.get_webview_window("mini") {
-        if mini.is_visible().unwrap_or(false) {
-            let mut reposition_needed = true;
-            if let Some((x, y)) = settings.mini_position {
-                // Check if it is still within any monitor's work area/bounds
-                if monitors.iter().any(|m| is_position_in_monitor(x, y, m)) {
-                    reposition_needed = false;
-                }
-            }
-
-            if reposition_needed {
-                // Move to center of preferred display
-                let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-                if let Some(monitor) = monitors.get(display_id).or_else(|| monitors.first()) {
-                    let (x, y) = center_mini_on_monitor(monitor);
-                    let _ = mini.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(x, y),
-                    ));
-                    settings.mini_position = Some((x, y));
-                    settings_changed = true;
-                }
-            }
-        }
+        restore_mini_position(&mini, &settings);
     }
 
     if settings_changed {
-        let _ = persist(&app, &settings);
+        let fallback_display = settings.preferred_display_id;
+        let _ = update_settings(&app, |s| {
+            if s.preferred_display_id
+                .is_some_and(|id| id as usize >= monitors.len())
+            {
+                s.preferred_display_id = fallback_display;
+            }
+            Ok(())
+        });
     }
 
     // Broadcast the update so frontends refresh their screen lists
-    let _ = app.emit("settings:updated", &settings);
+    let _ = app.emit("settings:updated", load_settings(&app));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -3771,80 +3898,8 @@ fn normalize_hotkey(input: &str) -> Option<String> {
     Some(out)
 }
 
-/// Place the mini clock in the corner of the click's monitor that
-/// sits nearest the tray icon, and return the new physical origin.
-#[cfg(windows)]
-fn move_mini_near_anchor(
-    mini: &tauri::WebviewWindow,
-    anchor_x: i32,
-    anchor_y: i32,
-) -> Option<(i32, i32)> {
-    let (left, top, right, bottom) = work_area_containing(anchor_x, anchor_y)?;
-    let size = mini
-        .outer_size()
-        .unwrap_or(tauri::PhysicalSize::new(260, 48));
-    let w = size.width as i32;
-    let h = size.height as i32;
-    let margin = 12;
-    let max_x = (right - w - margin).max(left);
-    let max_y = (bottom - h - margin).max(top);
-    let x = if (anchor_x - left) <= (right - anchor_x) {
-        left + margin
-    } else {
-        max_x
-    };
-    let y = if (anchor_y - top) <= (bottom - anchor_y) {
-        top + margin
-    } else {
-        max_y
-    };
-    let x = x.clamp(left, max_x);
-    let y = y.clamp(top, max_y);
-    let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-        x, y,
-    )));
-    Some((x, y))
-}
-
-#[cfg(not(windows))]
-fn move_mini_near_anchor(
-    _mini: &tauri::WebviewWindow,
-    _anchor_x: i32,
-    _anchor_y: i32,
-) -> Option<(i32, i32)> {
-    None
-}
-
-/// True when the mini window's center and the tray click share a work area.
-#[cfg(windows)]
-fn mini_is_on_anchor_monitor(mini: &tauri::WebviewWindow, anchor_x: i32, anchor_y: i32) -> bool {
-    let Ok(pos) = mini.outer_position() else {
-        return false;
-    };
-    let Ok(size) = mini.outer_size() else {
-        return false;
-    };
-    let cx = pos.x + (size.width as i32) / 2;
-    let cy = pos.y + (size.height as i32) / 2;
-    match (
-        work_area_containing(anchor_x, anchor_y),
-        work_area_containing(cx, cy),
-    ) {
-        (Some(click_area), Some(clock_area)) => click_area == clock_area,
-        _ => false,
-    }
-}
-
-#[cfg(not(windows))]
-fn mini_is_on_anchor_monitor(_mini: &tauri::WebviewWindow, _anchor_x: i32, _anchor_y: i32) -> bool {
-    true
-}
-
-/// Left click on the tray icon. Shows the clock in its current mode
-/// and brings it forward. Never hides it. An unlocked mini that is
-/// on another monitor moves next to that tray. A locked mini stays
-/// put and flashes so it can be spotted.
-fn reveal_clock_at(app: &AppHandle, anchor_x: i32, anchor_y: i32) {
+/// Reveal the clock in its current mode and flash Mini in its saved location.
+fn reveal_clock(app: &AppHandle) {
     let settings = load_settings(app);
     if settings.window_mode == "full" {
         if let Some(main) = app.get_webview_window("main") {
@@ -3865,19 +3920,10 @@ fn reveal_clock_at(app: &AppHandle, anchor_x: i32, anchor_y: i32) {
     let Some(mini) = app.get_webview_window("mini") else {
         return;
     };
-    let same_monitor = mini_is_on_anchor_monitor(&mini, anchor_x, anchor_y);
     let _ = mini.unminimize();
     let _ = mini.show();
     refresh_taskbar_tab(&mini);
     reapply_click_through(app, &mini);
-    if !settings.mini_position_locked && !same_monitor {
-        if let Some((x, y)) = move_mini_near_anchor(&mini, anchor_x, anchor_y) {
-            let mut settings = settings;
-            settings.mini_position = Some((x, y));
-            let _ = persist(app, &settings);
-            let _ = app.emit("settings:updated", &settings);
-        }
-    }
     let _ = mini.set_focus();
     let _ = mini.emit("mini:locate", ());
     broadcast_active_window(app, "mini");
@@ -3986,24 +4032,17 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<String, String> {
 
 #[tauri::command]
 fn switch_to_full_mode(app: AppHandle) {
-    let mut settings = load_settings(&app);
-    settings.window_mode = "full".to_string();
-
-    // Keep the preferred display in sync with where the mini was, so
-    // the manual selection in the Display tab follows the user.
     if let Some(mini) = app.get_webview_window("mini") {
-        if let Some((idx, _monitor)) = find_monitor_for_window(&mini) {
-            settings.preferred_display_id = Some(idx as u32);
-        }
-
-        // Also save its current position
-        if let Ok(pos) = mini.outer_position() {
-            settings.mini_position = Some((pos.x, pos.y));
-        }
-
         let _ = mini.hide();
     }
 
+    if let Err(error) = update_settings(&app, |s| {
+        s.window_mode = "full".to_string();
+        Ok(())
+    }) {
+        warn!("Could not save Full mode: {error}");
+    }
+    let settings = load_settings(&app);
     if let Some(main) = app.get_webview_window("main") {
         place_full_clock(&main, &settings);
         let _ = main.show();
@@ -4011,67 +4050,33 @@ fn switch_to_full_mode(app: AppHandle) {
         refresh_taskbar_tab(&main);
     }
 
-    let _ = persist(&app, &settings);
     let _ = app.emit("settings:updated", &settings);
     broadcast_active_window(&app, "main");
 }
 
 #[tauri::command]
 fn switch_to_mini_mode(app: AppHandle) {
-    let mut settings = load_settings(&app);
-    settings.window_mode = "mini".to_string();
-
-    let mut detected_monitor = None;
+    lock_or_recover(&MINI_PREVIEW).take();
+    let settings = load_settings(&app);
     if let Some(main) = app.get_webview_window("main") {
-        if let Some((idx, monitor)) = find_monitor_for_window(&main) {
-            settings.preferred_display_id = Some(idx as u32);
-            detected_monitor = Some(monitor);
-        }
         let _ = main.hide();
     }
 
     if let Some(mini) = app.get_webview_window("mini") {
-        let mut positioned = false;
-        if let Some((x, y)) = settings.mini_position {
-            if let Some(ref monitor) = detected_monitor {
-                if is_position_in_monitor(x, y, monitor) {
-                    let _ = mini.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(x, y),
-                    ));
-                    positioned = true;
-                }
-            } else if let Ok(monitors) = mini.available_monitors() {
-                if monitors.iter().any(|m| is_position_in_monitor(x, y, m)) {
-                    let _ = mini.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(x, y),
-                    ));
-                    positioned = true;
-                }
-            }
-        }
-
-        if !positioned {
-            let monitor = detected_monitor.or_else(|| {
-                mini.available_monitors()
-                    .ok()
-                    .and_then(|m| m.first().cloned())
-            });
-            if let Some(m) = monitor {
-                let (x, y) = center_mini_on_monitor(&m);
-                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                    x, y,
-                )));
-            }
-        }
-        clamp_window_to_monitors(&mini);
+        restore_mini_position(&mini, &settings);
         let _ = mini.show();
         let _ = mini.set_focus();
         reapply_click_through(&app, &mini);
         refresh_taskbar_tab(&mini);
     }
 
-    let _ = persist(&app, &settings);
-    let _ = app.emit("settings:updated", &settings);
+    if let Err(error) = update_settings(&app, |s| {
+        s.window_mode = "mini".to_string();
+        Ok(())
+    }) {
+        warn!("Could not save Mini mode: {error}");
+    }
+    let _ = app.emit("settings:updated", load_settings(&app));
     broadcast_active_window(&app, "mini");
 }
 
@@ -4120,6 +4125,7 @@ fn set_mini_preview(app: AppHandle, on: bool) {
         if settings.window_mode != "full" || mini.is_visible().unwrap_or(true) {
             return;
         }
+        restore_mini_position(&mini, &settings);
         let orig_pos = mini.outer_position().ok().map(|p| (p.x, p.y));
         let mut moved = false;
         if let Some((x, y)) = orig_pos {
@@ -4885,42 +4891,18 @@ fn select_display(app: AppHandle, window: WebviewWindow, id: u32) -> bool {
 
 #[tauri::command]
 fn reset_mini_position(app: AppHandle) {
-    let mut settings = load_settings(&app);
-    settings.mini_position = None;
-    let _ = persist(&app, &settings);
-    // Also move the mini window back to default center-ish position
+    if let Err(error) = update_settings(&app, |settings| {
+        settings.mini_position = None;
+        settings.mini_monitor_position = None;
+        Ok(())
+    }) {
+        warn!("Could not reset Mini position: {error}");
+    }
+    let settings = load_settings(&app);
     if let Some(mini) = app.get_webview_window("mini") {
-        if let Ok(monitors) = mini.available_monitors() {
-            if let Some(monitor) = monitors.first() {
-                let (x, y) = center_mini_on_monitor(monitor);
-                let _ = mini.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(
-                    x, y,
-                )));
-            }
-        }
+        restore_mini_position(&mini, &settings);
     }
     let _ = app.emit("settings:updated", &settings);
-}
-
-#[tauri::command]
-fn save_mini_position(app: AppHandle) -> bool {
-    if let Some(mini) = app.get_webview_window("mini") {
-        clamp_window_to_monitors(&mini);
-        if let Ok(pos) = mini.outer_position() {
-            let mut settings = load_settings(&app);
-            settings.mini_position = Some((pos.x, pos.y));
-
-            // Also update preferred_display_id based on where the mini is right now
-            if let Some((idx, _)) = find_monitor_for_window(&mini) {
-                settings.preferred_display_id = Some(idx as u32);
-            }
-
-            let _ = persist(&app, &settings);
-            let _ = app.emit("settings:updated", &settings);
-            return true;
-        }
-    }
-    false
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -6085,22 +6067,11 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                 TrayIconEvent::Click {
                     button: MouseButton::Left,
                     button_state: MouseButtonState::Up,
-                    position,
-                    rect,
                     ..
                 } => {
                     let app = tray.app_handle();
                     hide_tray_menu(app.clone());
-                    let (x, y) = {
-                        use tauri::{Position, Size};
-                        match (rect.position, rect.size) {
-                            (Position::Physical(p), Size::Physical(s)) => {
-                                (p.x + (s.width as i32) / 2, p.y + (s.height as i32) / 2)
-                            }
-                            _ => (position.x.round() as i32, position.y.round() as i32),
-                        }
-                    };
-                    reveal_clock_at(app, x, y);
+                    reveal_clock(app);
                 }
                 TrayIconEvent::Click {
                     button: MouseButton::Right,
@@ -6202,35 +6173,7 @@ fn show_initial_window(app: &AppHandle) {
             refresh_taskbar_tab(&main);
         }
     } else if let Some(mini) = app.get_webview_window("mini") {
-        // Set position if saved and valid
-        let mut positioned = false;
-        if let Some((x, y)) = settings.mini_position {
-            if let Ok(monitors) = mini.available_monitors() {
-                if monitors.iter().any(|m| is_position_in_monitor(x, y, m)) {
-                    let _ = mini.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(x, y),
-                    ));
-                    positioned = true;
-                }
-            }
-        }
-        if !positioned {
-            // Center on preferred display or first
-            let display_id = settings.preferred_display_id.unwrap_or(0) as usize;
-            if let Ok(monitors) = mini.available_monitors() {
-                let monitor = monitors
-                    .get(display_id)
-                    .or_else(|| monitors.first())
-                    .cloned();
-                if let Some(m) = monitor {
-                    let (x, y) = center_mini_on_monitor(&m);
-                    let _ = mini.set_position(tauri::Position::Physical(
-                        tauri::PhysicalPosition::new(x, y),
-                    ));
-                }
-            }
-        }
-        clamp_window_to_monitors(&mini);
+        restore_mini_position(&mini, &settings);
         #[cfg(windows)]
         attach_window_drag_subclass(&mini);
         let _ = mini.show();
@@ -6532,7 +6475,6 @@ pub fn run() {
             get_screens,
             select_display,
             reset_mini_position,
-            save_mini_position,
             open_file_dialog,
             set_startup,
             get_app_version,
