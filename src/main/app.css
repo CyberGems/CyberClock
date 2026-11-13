@@ -2727,10 +2727,13 @@
         flex-direction: column;
         gap: 14px;
         border-right: 1px solid var(--border);
+        overflow-x: hidden;
         overflow-y: auto;
+        scrollbar-gutter: stable;
     }
     .relax-R {
         flex: 1;
+        min-width: 0;
         padding: var(--view-pad-y) var(--view-pad-x);
         display: flex;
         flex-direction: column;
@@ -2747,16 +2750,13 @@
         color: var(--text-lo);
     }
 
-    /* Track grid fills the column: rows share the free height so the
-       six cards grow with the window instead of stacking at the top
-       with dead space below. */
+    /* Keep the track grid independent of the mixer and scheduler height. */
     .track-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: minmax(min-content, 1fr);
         gap: 10px;
-        flex: 1;
-        min-height: calc(144px * var(--ui-scale));
+        flex: 0 0 auto;
     }
     .tcard {
         background: var(--bg-02);
@@ -2767,7 +2767,6 @@
         position: relative;
         transition: border-color 0.2s, background 0.2s;
         -webkit-app-region: no-drag;
-        min-height: 0;
     }
     .tcard:hover {
         border-color: var(--border-bright);
@@ -2783,7 +2782,8 @@
         justify-content: center;
         gap: 7px;
         min-width: 0;
-        padding: 12px 8px;
+        min-height: calc(102px * var(--ui-scale));
+        padding: 16px 8px 12px;
         border: 0;
         border-radius: inherit;
         background: transparent;
@@ -2854,6 +2854,7 @@
         letter-spacing: 0.2px;
         color: var(--text-hi);
         text-align: center;
+        overflow-wrap: anywhere;
     }
     .tcard-desc {
         font-family: "Outfit", system-ui, sans-serif;
@@ -2862,6 +2863,7 @@
         letter-spacing: 0.2px;
         color: var(--text-lo);
         text-align: center;
+        overflow-wrap: anywhere;
     }
     .tcard.on .tcard-name {
         color: var(--accent-a);
@@ -2869,6 +2871,7 @@
 
     .r-player {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: 12px;
         padding: 14px;
         background: var(--bg-01);
@@ -2992,6 +2995,9 @@
         align-items: center;
         gap: 10px;
     }
+    #r-vol {
+        min-width: 0;
+    }
     .r-vol-lbl {
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(12px * var(--ui-scale));
@@ -3087,10 +3093,7 @@
         color: var(--accent-a);
         font-variant-numeric: tabular-nums;
     }
-    /* Auto Scheduler: collapsible panel under the auto-stop row. Collapsed
-       it is a single header line with the next-run summary; expanding it
-       squeezes the track grid (1fr rows, min-height 0) so the view's total
-       height never changes. */
+    /* The scheduler expands below the mixer in the scrollable column. */
     .r-sched {
         flex: 0 0 auto;
     }
