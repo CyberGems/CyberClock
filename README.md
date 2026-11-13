@@ -142,7 +142,7 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 - **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
 
 ### 🔔 Alarms & Chimes
-- **Voice Time Announcer (Talking Clock)** — Speaks the time once every 15, 30 or 60 minutes, with selectable Windows voices, a customizable style (Natural, Cyber/Tactical, Concise), an optional soft pre-chime, quiet hours, optional alarm read-aloud (global toggle or per-alarm choice), and a shortcut to install Windows voices
+- **Voice Time Announcer (Talking Clock)** — In **Time**, choose hourly chimes or spoken announcements every 15, 30 or 60 minutes. The optional pre-chime plays at 70% of the voice volume. Use **Voice** to choose or install Windows voices and select a style (Natural, Military / 24h, Concise). Enable **Read alarms aloud** in **Alarms** and override it in individual alarm editors
 - **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
 - **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
 - **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes

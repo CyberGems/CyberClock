@@ -142,7 +142,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Clic a través:** deja que los clics del ratón atraviesen el reloj mini y los widgets flotantes (se alterna desde los menús contextuales, la bandeja o desde Configuración)
 
 ### 🔔 Alarmas y campanadas
-- **Locutor de hora por voz (Reloj Parlante):** dice la hora una sola vez cada 15, 30 o 60 minutos, con voces de Windows seleccionables, estilo personalizable (Natural, Cyber/Táctico, Conciso), timbre suave opcional, horas de silencio, lectura de alarmas en voz alta opcional (interruptor global o por alarma) y acceso directo para instalar voces de Windows
+- **Locución de hora (Reloj Parlante).** En **Hora** elige campanadas horarias o locución cada 15, 30 o 60 minutos. El timbre previo opcional usa el 70 % del volumen de la voz. En **Voz** puedes elegir o instalar voces de Windows y ajustar el estilo (Natural, Militar / 24h, Conciso). Activa **Leer las alarmas en voz alta** en **Alarmas** y cambia esa preferencia para una alarma desde su editor
 - **Campanadas horarias y alertas:** campanadas de cuarto de hora (:15, :30, :45), media hora (:30) y en punto (:00) con control de volumen dedicado, vistas previas de prueba instantánea y ventana de silencio
 - **Volumen de campanadas dedicado:** deslizador de volumen independiente para las campanadas horarias y las alertas de intervalo, que conserva el volumen maestro de alarma
 - **6 sonidos de campanada:** Campana de Cristal, Timbre Suave, Arpegio Neón, Gong Zen, Aurora y Caja de Música para las campanadas horarias
