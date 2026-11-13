@@ -709,9 +709,6 @@
     #view-stopwatch {
         padding-bottom: 96px !important;
     }
-    .relax-L, .relax-R {
-        padding-bottom: 96px !important;
-    }
     .clock-panel, .cal-panel {
         padding-bottom: 96px !important;
     }
@@ -2703,13 +2700,14 @@
 ════════════════════════════════════════════════════ */
     #view-relax {
         flex-direction: row;
+        bottom: 96px;
     }
     /* Both columns split the tab 50/50 and stretch to the full height.
        Same padding + gap keeps the vertical rhythm mirrored. */
     .relax-L {
         width: 50%;
         flex-shrink: 0;
-        padding: var(--view-pad-y) var(--view-pad-x);
+        padding: var(--view-pad-y) var(--view-pad-x) 0;
         display: flex;
         flex-direction: column;
         gap: 14px;
@@ -2721,10 +2719,11 @@
     .relax-R {
         flex: 1;
         min-width: 0;
-        padding: var(--view-pad-y) var(--view-pad-x);
+        padding: var(--view-pad-y) var(--view-pad-x) 0;
         display: flex;
         flex-direction: column;
         gap: 14px;
+        overflow: auto;
     }
 
     /* Relax label font: modern geometric sans for UI copy;
@@ -2737,13 +2736,15 @@
         color: var(--text-lo);
     }
 
-    /* Keep the track grid independent of the mixer and scheduler height. */
+    /* Let the cards take the space left by the player and scheduler,
+       with a content-sized floor so labels stay inside each card. */
     .track-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         grid-auto-rows: minmax(min-content, 1fr);
         gap: 10px;
-        flex: 0 0 auto;
+        flex: 1 1 0;
+        min-height: min-content;
     }
     .tcard {
         background: var(--bg-02);
@@ -2767,10 +2768,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 7px;
+        gap: 5px;
         min-width: 0;
-        min-height: calc(102px * var(--ui-scale));
-        padding: 16px 8px 12px;
+        min-height: calc(72px * var(--ui-scale));
+        padding: 8px 8px 6px;
         border: 0;
         border-radius: inherit;
         background: transparent;
@@ -2887,8 +2888,11 @@
         display: grid;
         gap: 4px;
         margin: 0;
-        padding: 0;
+        padding: 2px;
         list-style: none;
+        max-height: calc(100px * var(--ui-scale));
+        overflow-y: auto;
+        scrollbar-width: thin;
     }
     .r-mix-layer {
         display: grid;
@@ -3153,20 +3157,19 @@
         transform: rotate(90deg);
     }
     .r-sched-body {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 12px;
         padding: 8px 10px;
         border: 1px solid var(--border);
         border-top: none;
         border-radius: 0 0 8px 8px;
     }
-    /* display:flex above would override the hidden attribute's UA
-       display:none, so the collapsed state needs this explicit rule. */
     .r-sched-body[hidden] {
         display: none;
     }
     .r-sched-desc {
+        grid-column: 1 / -1;
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(10.5px * var(--ui-scale));
         color: var(--text-lo);
@@ -3177,9 +3180,10 @@
         align-items: center;
         gap: 10px;
         min-height: 0;
+        min-width: 0;
     }
     .r-sched-k {
-        flex: 0 0 70px;
+        flex: 0 0 64px;
         font-family: "Outfit", system-ui, sans-serif;
         font-size: calc(11px * var(--ui-scale));
         color: var(--text-lo);
@@ -3187,6 +3191,11 @@
     .r-sched-row .sched-select {
         flex: 1;
         min-width: 0;
+    }
+    .r-sched-row:last-child {
+        flex-wrap: wrap;
+        column-gap: 8px;
+        row-gap: 2px;
     }
     /* Scheduler status line: mirrors the header summary inside the panel */
     .r-sched-line {
