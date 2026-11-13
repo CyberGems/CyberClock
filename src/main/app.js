@@ -2505,14 +2505,7 @@
             const cvVal = document.getElementById("s-cvol-val");
             if (cvVal) cvVal.textContent = v + "%";
         }
-        const rvolEl = document.getElementById("r-vol");
-        if (rvolEl) {
-            const v = Math.round((s.relaxVolume ?? 0.8) * 100);
-            rvolEl.value = v;
-            document.getElementById("r-vol-val").textContent = v + "%";
-        }
-
-        window.audioEngine.setVolume(s.relaxVolume ?? 0.8);
+        applyRelaxMasterVolume(pendingMasterVolume?.relaxVolume ?? s.relaxVolume ?? 0.8);
         for (const { id } of RELAX_TRACKS) {
             const level = pendingLayerVolumes.get(id) ?? s.relaxLayerVolumes?.[id] ?? 1;
             window.audioEngine.setLayerVolume(id, level);
@@ -6588,6 +6581,7 @@
     let pendingRelaxMix = null;
     let preferredAutoStopMinutes = 0;
     let pendingAutoStop = null;
+    let pendingMasterVolume = null;
 
     let rSelected = null,
         rSesStart = null,
@@ -6596,8 +6590,7 @@
         rAstRemain = 0,
         rAstDeadline = null,
         rAstTimer = null,
-        vizRaf = null,
-        rSaveTimer = null;
+        vizRaf = null;
     let zenFlowActive = false,
         zenFlowTimer = null,
         zenFlowQueue = [];
@@ -6738,6 +6731,7 @@
             playing,
             paused: playing && rPaused,
             shuffled: zenFlowActive,
+            volume: engine.volume,
             startedAt: rSesStart,
             pausedAt: rPaused ? rPauseResumedAt : null,
             autoStopMinutes: rAstMins,
@@ -7205,6 +7199,8 @@
             if (isRelaxAutoStopOption(action.minutes)) {
                 configureRelaxAutoStop(action.minutes);
             }
+        } else if (action?.type === "volume" && Number.isFinite(action.volume)) {
+            updateRelaxMasterVolume(action.volume, action.commit === true);
         } else if (action === "state") {
             publishRelaxPlayback();
         } else if (action === "spectrum") {
@@ -7245,17 +7241,32 @@
         });
     }
 
-    document.getElementById("r-vol").addEventListener("input", (e) => {
-        const v = e.target.value / 100;
-        document.getElementById("r-vol-val").textContent =
-            e.target.value + "%";
-        window.audioEngine.setVolume(v);
-        clearTimeout(rSaveTimer);
-        rSaveTimer = setTimeout(
-            () => window.cc.saveSettings({ relaxVolume: v }),
-            400,
-        );
-    });
+    const relaxVolumeSlider = document.getElementById("r-vol");
+    relaxVolumeSlider.addEventListener("input", () => updateRelaxMasterVolume(relaxVolumeSlider.valueAsNumber / 100));
+    relaxVolumeSlider.addEventListener("change", () => updateRelaxMasterVolume(relaxVolumeSlider.valueAsNumber / 100, true));
+
+    function applyRelaxMasterVolume(volume) {
+        cfg.relaxVolume = volume;
+        window.audioEngine.setVolume(volume);
+        const percent = String(Math.round(volume * 100));
+        if (relaxVolumeSlider.value !== percent) relaxVolumeSlider.value = percent;
+        document.getElementById("r-vol-val").textContent = percent + "%";
+    }
+
+    function updateRelaxMasterVolume(volume, commit = false) {
+        const change = { relaxVolume: Math.max(0, Math.min(1, volume)) };
+        pendingMasterVolume = change;
+        applyRelaxMasterVolume(change.relaxVolume);
+        publishRelaxPlayback();
+        if (!commit) return;
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
+            try {
+                await window.cc.saveSettings(change);
+            } finally {
+                if (pendingMasterVolume === change) pendingMasterVolume = null;
+            }
+        }).catch(console.error);
+    }
 
     // Mute banner and control row mute indicator: one click clears
     // the global mute that silences every sound in the app.

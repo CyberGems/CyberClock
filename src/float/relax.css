@@ -313,7 +313,8 @@ button {
     gap: 6px;
 }
 
-.auto-stop {
+.auto-stop,
+.volume-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -331,7 +332,9 @@ button {
 }
 
 .auto-stop:hover,
-.auto-stop[aria-expanded="true"] {
+.auto-stop[aria-expanded="true"],
+.volume-trigger:hover,
+.volume-trigger[aria-expanded="true"] {
     background: rgba(var(--skin-rgb), 0.12);
 }
 
@@ -340,7 +343,11 @@ button {
     color: var(--skin-accent);
 }
 
-.auto-stop-options {
+.volume-trigger {
+    margin-left: auto;
+}
+
+.relax-popover {
     inset: auto 10px 10px auto;
     width: min(236px, calc(100% - 20px));
     padding: 8px;
@@ -349,6 +356,29 @@ button {
     background: var(--bg-01);
     color: var(--text-hi);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.master-volume-options {
+    width: min(184px, calc(100% - 20px));
+}
+
+.master-volume-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: var(--text-md);
+}
+
+#master-volume-value {
+    font-variant-numeric: tabular-nums;
+}
+
+#master-volume-slider {
+    width: 100%;
+    accent-color: var(--skin-accent);
 }
 
 .auto-stop-label {
@@ -379,7 +409,9 @@ button {
 }
 
 .auto-stop:focus-visible,
-.auto-stop-choices button:focus-visible {
+.auto-stop-choices button:focus-visible,
+.volume-trigger:focus-visible,
+#master-volume-slider:focus-visible {
     outline: 1px solid var(--skin-accent);
     outline-offset: 1px;
 }

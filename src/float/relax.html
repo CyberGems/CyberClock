@@ -64,6 +64,9 @@
                     </div>
                     <div class="transport-meta">
                         <div class="playback-status" id="playback-status" role="status">Ready</div>
+                        <button type="button" class="volume-trigger" id="master-volume" popovertarget="master-volume-options" aria-expanded="false" aria-controls="master-volume-options" aria-label="Master volume" data-tooltip="Master volume" data-tooltip-align="right" data-i18n-attr="aria-label:relax.masterVolume, data-tooltip:relax.masterVolume" disabled>
+                            <span data-ico="volume-high" data-ico-size="13" aria-hidden="true"></span>
+                        </button>
                         <button type="button" class="auto-stop" id="auto-stop" popovertarget="auto-stop-options" aria-expanded="false" aria-controls="auto-stop-options" aria-label="Auto Stop" data-tooltip="Auto Stop" data-tooltip-align="right" data-i18n-attr="aria-label:relax.autoStop, data-tooltip:relax.autoStop" disabled>
                             <span data-ico="timer" data-ico-size="12" aria-hidden="true"></span>
                             <span id="auto-stop-time" role="timer" aria-label="Auto Stop" data-i18n-attr="aria-label:relax.autoStop" hidden></span>
@@ -72,7 +75,14 @@
                 </div>
             </div>
             <canvas class="spectrum" id="spectrum" aria-hidden="true"></canvas>
-            <div class="auto-stop-options" id="auto-stop-options" popover aria-labelledby="auto-stop-label" role="group">
+            <div class="relax-popover master-volume-options" id="master-volume-options" popover>
+                <div class="master-volume-heading">
+                    <label for="master-volume-slider" data-i18n="relax.masterVolume">Master volume</label>
+                    <span id="master-volume-value" aria-hidden="true"></span>
+                </div>
+                <input type="range" id="master-volume-slider" min="0" max="100" value="80">
+            </div>
+            <div class="relax-popover" id="auto-stop-options" popover aria-labelledby="auto-stop-label" role="group">
                 <div class="auto-stop-label" id="auto-stop-label" data-i18n="relax.autoStop">Auto Stop</div>
                 <div class="auto-stop-choices">
                     <button type="button" data-minutes="0" aria-pressed="true" data-i18n="relax.autoStopOff">Off</button>

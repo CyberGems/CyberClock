@@ -12,6 +12,10 @@
     const autoStopTime = document.getElementById("auto-stop-time");
     const autoStopOptions = document.getElementById("auto-stop-options");
     const autoStopChoices = Array.from(autoStopOptions.querySelectorAll("button"));
+    const volumeTrigger = document.getElementById("master-volume");
+    const volumeOptions = document.getElementById("master-volume-options");
+    const volumeSlider = document.getElementById("master-volume-slider");
+    const volumeValue = document.getElementById("master-volume-value");
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
@@ -26,6 +30,7 @@
     let cfg = {};
     let playback = {};
     let playbackStateRetry = null;
+    let pendingVolume = null;
     let spectrumData = [];
     let lastSpectrumRequest = 0;
     let spectrumRequestPending = false;
@@ -52,6 +57,13 @@
         if (trackLabel.textContent !== title) trackLabel.textContent = title;
         updateMarquee();
         updateAutoStop(Date.now());
+        if (Number.isFinite(playback.volume)) {
+            const percent = Math.round(playback.volume * 100);
+            if (pendingVolume === percent) pendingVolume = null;
+            const shown = String(pendingVolume ?? percent);
+            if (volumeSlider.value !== shown) volumeSlider.value = shown;
+            volumeValue.textContent = shown + "%";
+        }
         const minutes = playback.autoStopMinutes ?? 0;
         autoStopEl.classList.toggle("is-armed", minutes > 0);
         autoStopChoices.forEach(button => {
@@ -247,13 +259,27 @@
             (selected ?? autoStopChoices[0]).focus();
         }
     });
-    autoStopOptions.addEventListener("keydown", event => {
-        if (event.key !== "Escape") return;
-        event.preventDefault();
-        event.stopPropagation();
-        autoStopOptions.hidePopover();
-        autoStopEl.focus();
+    volumeOptions.addEventListener("toggle", event => {
+        const open = event.newState === "open";
+        volumeTrigger.setAttribute("aria-expanded", String(open));
+        if (open) volumeSlider.focus();
     });
+    for (const [popover, trigger] of [[autoStopOptions, autoStopEl], [volumeOptions, volumeTrigger]]) {
+        popover.addEventListener("keydown", event => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            event.stopPropagation();
+            popover.hidePopover();
+            trigger.focus();
+        });
+    }
+    function sendMasterVolume(commit) {
+        pendingVolume = volumeSlider.valueAsNumber;
+        volumeValue.textContent = volumeSlider.value + "%";
+        sendControl({ type: "volume", volume: pendingVolume / 100, commit });
+    }
+    volumeSlider.addEventListener("input", () => sendMasterVolume(false));
+    volumeSlider.addEventListener("change", () => sendMasterVolume(true));
     autoStopChoices.forEach(button => {
         button.addEventListener("click", () => {
             sendControl({ type: "auto-stop", minutes: Number(button.dataset.minutes) });
@@ -383,7 +409,7 @@
         shell.addEventListener("mousedown", (e) => {
             if (e.target.closest("#btn-menu")) return;
             if (window.cc && window.cc.closeMenuPopup) window.cc.closeMenuPopup().catch(() => {});
-            if (e.target.closest("button, #auto-stop-options")) return;
+            if (e.target.closest("button, .relax-popover")) return;
             if (e.button !== 0) return;
             if (cfg.relaxPositionLocked === true) return;
             e.preventDefault();
@@ -405,6 +431,12 @@
             e.preventDefault();
             sendControl("toggle");
         } else if (e.key === "Escape") {
+            if (volumeOptions.matches(":popover-open")) {
+                e.preventDefault();
+                volumeOptions.hidePopover();
+                volumeTrigger.focus();
+                return;
+            }
             if (autoStopOptions.matches(":popover-open")) {
                 e.preventDefault();
                 autoStopOptions.hidePopover();
@@ -430,6 +462,7 @@
             playback = state;
             clearInterval(playbackStateRetry);
             autoStopEl.disabled = false;
+            volumeTrigger.disabled = false;
             if (!state.playing || state.paused) {
                 spectrumData = [];
                 spectrumRequestPending = false;
