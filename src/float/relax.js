@@ -25,6 +25,7 @@
 
     let cfg = {};
     let playback = {};
+    let playbackStateRetry = null;
     let spectrumData = [];
     let lastSpectrumRequest = 0;
     let spectrumRequestPending = false;
@@ -427,6 +428,8 @@
     Promise.all([
         window.cc.onRelaxPlayback(state => {
             playback = state;
+            clearInterval(playbackStateRetry);
+            autoStopEl.disabled = false;
             if (!state.playing || state.paused) {
                 spectrumData = [];
                 spectrumRequestPending = false;
@@ -437,7 +440,11 @@
             spectrumData = data;
             spectrumRequestPending = false;
         })
-    ]).then(() => sendControl("state")).catch(console.error);
+    ]).then(() => {
+        if (!autoStopEl.disabled) return;
+        playbackStateRetry = setInterval(() => sendControl("state"), 500);
+        sendControl("state");
+    }).catch(console.error);
 
     refreshLabels();
     const trackObserver = new ResizeObserver(updateMarquee);

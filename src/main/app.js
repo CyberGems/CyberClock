@@ -2521,6 +2521,11 @@
             const savedLayers = Array.isArray(s.relaxMixLayers) ? s.relaxMixLayers : [];
             relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
         }
+        const autoStopMinutes = isRelaxAutoStopOption(s.relaxAutoTimer) ? s.relaxAutoTimer : 0;
+        if (!pendingAutoStop && autoStopMinutes !== preferredAutoStopMinutes) {
+            preferredAutoStopMinutes = autoStopMinutes;
+            applyRelaxAutoStop(autoStopMinutes);
+        }
         window.audioEngine.setMuted(s.audioMuted === true);
         // Quiet but unmissable hint while a global mute silences the
         // Relax engine (otherwise the module looks simply "broken").
@@ -6581,6 +6586,8 @@
     let relaxSettingsSave = Promise.resolve();
     let relaxMixLayers = [];
     let pendingRelaxMix = null;
+    let preferredAutoStopMinutes = 0;
+    let pendingAutoStop = null;
 
     let rSelected = null,
         rSesStart = null,
@@ -6779,6 +6786,7 @@
         rPaused = false;
         rStopSession();
         rClearAutoStop();
+        selectRelaxAutoStop(preferredAutoStopMinutes);
         updatePlayingTrackCardClass(false);
         updateMixStateUI();
     }
@@ -7193,7 +7201,7 @@
 
     window.cc.onRelaxControl(action => {
         if (action?.type === "auto-stop") {
-            if (relaxAutoStopButtons.some(button => Number(button.dataset.min) === action.minutes)) {
+            if (isRelaxAutoStopOption(action.minutes)) {
                 configureRelaxAutoStop(action.minutes);
             }
         } else if (action === "state") {
@@ -7277,6 +7285,23 @@
     });
 
     function configureRelaxAutoStop(minutes) {
+        if (minutes !== preferredAutoStopMinutes) {
+            preferredAutoStopMinutes = minutes;
+            const change = { relaxAutoTimer: minutes };
+            pendingAutoStop = change;
+            relaxSettingsSave = relaxSettingsSave.then(async () => {
+                await window.cc.saveSettings(change);
+                if (pendingAutoStop === change) pendingAutoStop = null;
+            }).catch(console.error);
+        }
+        applyRelaxAutoStop(minutes);
+    }
+
+    function isRelaxAutoStopOption(minutes) {
+        return relaxAutoStopButtons.some(button => Number(button.dataset.min) === minutes);
+    }
+
+    function applyRelaxAutoStop(minutes) {
         selectRelaxAutoStop(minutes);
         if (minutes > 0 && window.audioEngine.isPlaying) {
             if (!rPaused) {
