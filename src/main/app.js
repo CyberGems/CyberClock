@@ -2517,6 +2517,10 @@
             const level = pendingLayerVolumes.get(id) ?? s.relaxLayerVolumes?.[id] ?? 1;
             window.audioEngine.setLayerVolume(id, level);
         }
+        if (!pendingRelaxMix) {
+            const savedLayers = Array.isArray(s.relaxMixLayers) ? s.relaxMixLayers : [];
+            relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
+        }
         window.audioEngine.setMuted(s.audioMuted === true);
         // Quiet but unmissable hint while a global mute silences the
         // Relax engine (otherwise the module looks simply "broken").
@@ -6574,7 +6578,9 @@
 
     const ZEN_FLOW_TRACK_DURATION = 15 * 60 * 1000; // 15 minutes per track
     const pendingLayerVolumes = new Map();
-    let layerVolumeSave = Promise.resolve();
+    let relaxSettingsSave = Promise.resolve();
+    let relaxMixLayers = [];
+    let pendingRelaxMix = null;
 
     let rSelected = null,
         rSesStart = null,
@@ -6658,7 +6664,8 @@
         const iconName = isPlaying && !rPaused ? "pause" : "play";
         const track = (isPlaying && window.audioEngine.currentTrack) || rSelected;
         const title = document.getElementById("r-player-track");
-        const trackName = window.ccI18n.t(track ? `relax.track.${track}` : "relax.noTrack");
+        const mixReady = !isPlaying && relaxMixLayers.length > 0;
+        const trackName = window.ccI18n.t(mixReady ? "relax.savedMix" : track ? `relax.track.${track}` : "relax.noTrack");
         if (title.textContent !== trackName) title.textContent = trackName;
 
         // Tray sync: report what's playing (last track while paused) so
@@ -6677,7 +6684,7 @@
             labelKey = "relax.play";
             text = window.ccI18n.t("relax.play");
             tooltipKey = "relax.tooltip.unmute";
-        } else if (isPlaying && rPaused) {
+        } else if (mixReady || (isPlaying && rPaused)) {
             labelKey = "relax.resume";
             text = window.ccI18n.t("relax.resume");
             tooltipKey = "relax.tooltip.resume";
@@ -6761,6 +6768,8 @@
         if (cfg && cfg.audioMuted === true) return;
         if (window.audioEngine.isPlaying) {
             rPauseOrResume();
+        } else if (relaxMixLayers.length > 0) {
+            startRelaxMix(relaxMixLayers);
         } else if (rSelected) {
             rPlayTrack();
         } else {
@@ -6975,12 +6984,13 @@
     function playRelaxCard(track, event) {
         const engine = window.audioEngine;
         if (event.ctrlKey || event.metaKey) {
-            if (engine.isLayerActive(track)) removeRelaxLayer(track);
+            if (currentRelaxLayers().includes(track)) removeRelaxLayer(track);
             else addRelaxLayer(track);
             return;
         }
 
         if (cfg?.audioMuted) return;
+        rememberRelaxMix([]);
         stopZenFlow();
         if (engine.isPlaying && rSelected === track && engine.activeLayerIds().length === 0) {
             rPauseOrResume();
@@ -6999,12 +7009,24 @@
         }
     }
 
-    // Reflect active blend layers on the cards: layered cards get the
-    // active tint too (dot + border). The solo selection keeps its own
-    // highlight; the two sources can coexist (solo + layers).
+    function currentRelaxLayers() {
+        const engine = window.audioEngine;
+        return engine.isPlaying ? engine.activeLayerIds() : relaxMixLayers;
+    }
+
+    function rememberRelaxMix(layers) {
+        if (layers.join() === relaxMixLayers.join()) return;
+        relaxMixLayers = layers;
+        pendingRelaxMix = layers;
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
+            await window.cc.saveSettings({ relaxMixLayers: layers });
+            if (pendingRelaxMix === layers) pendingRelaxMix = null;
+        }).catch(console.error);
+    }
+
     function updateMixStateUI() {
         const engine = window.audioEngine;
-        const layered = engine.activeLayerIds();
+        const layered = currentRelaxLayers();
         document.querySelectorAll(".tcard").forEach(card => {
             const id = card.dataset.track;
             const inMix = layered.includes(id);
@@ -7071,7 +7093,7 @@
         if (level === undefined) return;
         // Keep completed edits in order and preserve any slider value
         // currently being dragged when another settings event arrives.
-        layerVolumeSave = layerVolumeSave.then(async () => {
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
             await window.cc.saveSettings({ relaxLayerVolumes: { [id]: level } });
             if (pendingLayerVolumes.get(id) === level) pendingLayerVolumes.delete(id);
         }).catch(console.error);
@@ -7079,24 +7101,44 @@
 
     function addRelaxLayer(id) {
         const engine = window.audioEngine;
-        if (cfg?.audioMuted || engine.isLayerActive(id)) return;
-        const starting = !engine.isPlaying;
+        const layers = currentRelaxLayers();
+        if (cfg?.audioMuted || layers.includes(id)) return;
+        if (!engine.isPlaying) {
+            const next = [...layers, id];
+            rememberRelaxMix(next);
+            if (layers.length === 0) startRelaxMix(next);
+            else updateMixStateUI();
+            return;
+        }
         stopZenFlow();
         engine.addLayer(id);
-        if (starting) {
-            rPaused = false;
-            rSelected = id;
-            engine.setVolume(cfg.relaxVolume ?? 0.8);
-            rStartSession();
-            startViz();
-            if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
-        }
+        rememberRelaxMix(engine.activeLayerIds());
+        updateMixStateUI();
+    }
+
+    function startRelaxMix(layers) {
+        const engine = window.audioEngine;
+        stopZenFlow();
+        rPaused = false;
+        for (const id of layers) engine.addLayer(id);
+        rSelected = engine.currentTrack;
+        engine.setVolume(cfg.relaxVolume ?? 0.8);
+        rStartSession();
+        startViz();
+        if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
+        updatePlayingTrackCardClass(true);
         updateMixStateUI();
     }
 
     function removeRelaxLayer(id) {
         const engine = window.audioEngine;
+        if (!engine.isPlaying) {
+            rememberRelaxMix(relaxMixLayers.filter(track => track !== id));
+            updateMixStateUI();
+            return;
+        }
         engine.removeLayer(id);
+        rememberRelaxMix(engine.activeLayerIds());
         if (engine.isPlaying) {
             rSelected = engine.currentTrack;
             updateMixStateUI();
@@ -7116,6 +7158,7 @@
             rStop(true);
         } else {
             if (cfg && cfg.audioMuted === true) return;
+            rememberRelaxMix([]);
             if (rSelected) preSelectRelaxTrack(null);
             startZenFlow();
         }
@@ -10161,15 +10204,7 @@
 
     // Tray quick toggle: play/pause the relax audio without navigating.
     if (window.cc && window.cc.onTrayRelaxToggle) {
-        window.cc.onTrayRelaxToggle(() => {
-            if (window.audioEngine.isPlaying) {
-                rPauseOrResume();
-            } else if (rSelected) {
-                rPlayTrack();
-            } else {
-                startZenFlow();
-            }
-        });
+        window.cc.onTrayRelaxToggle(rTogglePlay);
     }
 
     window.cc.onRelaxTrigger((p) => {
