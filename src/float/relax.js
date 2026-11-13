@@ -16,6 +16,9 @@
     const volumeOptions = document.getElementById("master-volume-options");
     const volumeSlider = document.getElementById("master-volume-slider");
     const volumeValue = document.getElementById("master-volume-value");
+    const layerVolumes = document.getElementById("layer-volumes");
+    const layerRows = document.getElementById("layer-volume-rows");
+    const pendingLayerVolumes = new Map();
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
@@ -64,6 +67,7 @@
             if (volumeSlider.value !== shown) volumeSlider.value = shown;
             volumeValue.textContent = shown + "%";
         }
+        refreshLayerVolumes();
         const minutes = playback.autoStopMinutes ?? 0;
         autoStopEl.classList.toggle("is-armed", minutes > 0);
         autoStopChoices.forEach(button => {
@@ -94,6 +98,51 @@
                 btnMute.setAttribute("data-tooltip", label);
                 btnMute.setAttribute("aria-label", label);
             }
+        }
+    }
+
+    function refreshLayerVolumes() {
+        const volumes = playback.layerVolumes ?? {};
+        const ids = Object.keys(volumes);
+        layerVolumes.hidden = ids.length === 0;
+        for (const row of layerRows.children) {
+            if (!Object.hasOwn(volumes, row.dataset.track)) {
+                pendingLayerVolumes.delete(row.dataset.track);
+            }
+        }
+        const rendered = Array.from(layerRows.children, row => row.dataset.track);
+        if (ids.join() !== rendered.join()) {
+            const hadFocus = layerRows.contains(document.activeElement);
+            layerRows.replaceChildren(...ids.map(id => {
+                const row = document.createElement("div");
+                row.className = "layer-volume-row";
+                row.dataset.track = id;
+                row.innerHTML = '<label></label><input type="range" min="0" max="100"><output aria-hidden="true"></output>';
+                const slider = row.querySelector("input");
+                slider.id = `layer-volume-${id}`;
+                row.querySelector("label").htmlFor = slider.id;
+                const send = commit => {
+                    pendingLayerVolumes.set(id, slider.valueAsNumber);
+                    row.querySelector("output").textContent = slider.value + "%";
+                    sendControl({ type: "layer-volume", track: id, volume: slider.valueAsNumber / 100, commit });
+                };
+                slider.addEventListener("input", () => send(false));
+                slider.addEventListener("change", () => send(true));
+                return row;
+            }));
+            if (hadFocus) volumeSlider.focus();
+        }
+        for (const row of layerRows.children) {
+            const id = row.dataset.track;
+            const percent = Math.round(volumes[id] * 100);
+            if (pendingLayerVolumes.get(id) === percent) pendingLayerVolumes.delete(id);
+            const shown = String(pendingLayerVolumes.get(id) ?? percent);
+            const track = t("relax.track." + id);
+            row.querySelector("label").textContent = track;
+            const slider = row.querySelector("input");
+            slider.setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track }));
+            if (slider.value !== shown) slider.value = shown;
+            row.querySelector("output").textContent = shown + "%";
         }
     }
 

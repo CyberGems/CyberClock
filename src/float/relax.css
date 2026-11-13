@@ -359,7 +359,9 @@ button {
 }
 
 .master-volume-options {
-    width: min(184px, calc(100% - 20px));
+    width: min(220px, calc(100% - 20px));
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
 }
 
 .master-volume-heading {
@@ -376,9 +378,34 @@ button {
     font-variant-numeric: tabular-nums;
 }
 
-#master-volume-slider {
+.master-volume-options input[type="range"] {
     width: 100%;
     accent-color: var(--skin-accent);
+}
+
+.layer-volumes {
+    margin-top: 7px;
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-md);
+}
+
+.layer-volume-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(46px, 0.8fr) 4ch;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+}
+
+.layer-volume-row label {
+    overflow-wrap: anywhere;
+}
+
+.layer-volume-row output {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
 .auto-stop-label {
@@ -411,7 +438,7 @@ button {
 .auto-stop:focus-visible,
 .auto-stop-choices button:focus-visible,
 .volume-trigger:focus-visible,
-#master-volume-slider:focus-visible {
+.master-volume-options input:focus-visible {
     outline: 1px solid var(--skin-accent);
     outline-offset: 1px;
 }

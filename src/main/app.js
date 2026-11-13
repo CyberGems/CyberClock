@@ -6727,6 +6727,7 @@
         window.cc.sendRelaxPlayback({
             track: (playing && engine.currentTrack) || rSelected,
             layers: playing ? engine.activeLayerIds() : [],
+            layerVolumes: Object.fromEntries(currentRelaxLayers().map(id => [id, engine.getLayerVolume(id)])),
             mixReady: !playing && relaxMixLayers.length > 0,
             playing,
             paused: playing && rPaused,
@@ -7082,14 +7083,8 @@
                     <button type="button"><span data-ico="x" data-ico-size="13"></span></button>
                 `;
                 const slider = item.querySelector("input");
-                const level = item.querySelector(".r-mix-level");
-                slider.addEventListener("input", () => {
-                    const volume = slider.valueAsNumber / 100;
-                    pendingLayerVolumes.set(id, volume);
-                    engine.setLayerVolume(id, volume);
-                    level.textContent = slider.value + "%";
-                });
-                slider.addEventListener("change", () => saveRelaxLayerVolume(id));
+                slider.addEventListener("input", () => updateRelaxLayerVolume(id, slider.valueAsNumber / 100));
+                slider.addEventListener("change", () => updateRelaxLayerVolume(id, slider.valueAsNumber / 100, true));
                 const remove = item.querySelector("button");
                 remove.addEventListener("click", () => {
                     const next = item.nextElementSibling || item.previousElementSibling;
@@ -7125,6 +7120,22 @@
             await window.cc.saveSettings({ relaxLayerVolumes: { [id]: level } });
             if (pendingLayerVolumes.get(id) === level) pendingLayerVolumes.delete(id);
         }).catch(console.error);
+    }
+
+    function updateRelaxLayerVolume(id, volume, commit = false) {
+        if (!Number.isFinite(volume) || !currentRelaxLayers().includes(id)) return;
+        const level = Math.max(0, Math.min(1, volume));
+        pendingLayerVolumes.set(id, level);
+        window.audioEngine.setLayerVolume(id, level);
+        const row = document.querySelector(`#r-mix-layers [data-track="${id}"]`);
+        if (row) {
+            const percent = String(Math.round(level * 100));
+            const slider = row.querySelector("input");
+            if (slider.value !== percent) slider.value = percent;
+            row.querySelector(".r-mix-level").textContent = percent + "%";
+        }
+        publishRelaxPlayback();
+        if (commit) saveRelaxLayerVolume(id);
     }
 
     function addRelaxLayer(id) {
@@ -7201,6 +7212,8 @@
             }
         } else if (action?.type === "volume" && Number.isFinite(action.volume)) {
             updateRelaxMasterVolume(action.volume, action.commit === true);
+        } else if (action?.type === "layer-volume") {
+            updateRelaxLayerVolume(action.track, action.volume, action.commit === true);
         } else if (action === "state") {
             publishRelaxPlayback();
         } else if (action === "spectrum") {

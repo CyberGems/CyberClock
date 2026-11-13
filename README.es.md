@@ -121,7 +121,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
-- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, un botón grande para reproducir o pausar, controles de siguiente y aleatorio, Volumen general, estado de reproducción, las capas activas, la cuenta regresiva y los controles de Parada Automática, un espectro pequeño y 10 diseños. El widget controla la sesión principal de Relax y puede reanudar la mezcla guardada con el modo completo oculto
+- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, un botón grande para reproducir o pausar, controles de siguiente y aleatorio, Volumen general y por capa, estado de reproducción, las capas activas, la cuenta regresiva y los controles de Parada Automática, un espectro pequeño y 10 diseños. El widget controla la sesión principal de Relax y puede reanudar la mezcla guardada con el modo completo oculto
 - **Tiempo de sesión:** tiempo transcurrido y cuenta regresiva de Parada Automática junto a la pista y los controles. La duración elegida se recupera en Relax y en el widget al reabrir CyberClock
 - **Programador automático:** programa horarios de reproducción automática
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
