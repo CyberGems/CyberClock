@@ -6578,9 +6578,7 @@
 
     let rSelected = null,
         rSesStart = null,
-        rSesInterval = null,
-        rTipInterval = null,
-        rTipIdx = 0;
+        rSesInterval = null;
     let rAstMins = 0,
         rAstRemain = 0,
         rAstTimer = null,
@@ -6606,7 +6604,6 @@
         
         rStartSession();
         startViz();
-        rStartTips();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
         
@@ -6633,7 +6630,6 @@
                 window.audioEngine.playTrack(track);
                 updatePlayButtonUI(true);
                 window.cc.saveSettings({ lastRelaxTrack: rSelected });
-                showNextTip();
                 
                 updatePlayingTrackCardClass(true);
                 scheduleNextZenFlowTrack();
@@ -6741,7 +6737,6 @@
         updateMixStateUI();
         rStartSession();
         startViz();
-        rStartTips();
         window.cc.saveSettings({ lastRelaxTrack: rSelected });
         if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
         updatePlayingTrackCardClass(true);
@@ -6757,7 +6752,6 @@
         window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
         rPaused = false;
         rStopSession();
-        rStopTips();
         rClearAutoStop();
         updatePlayingTrackCardClass(false);
         updateMixStateUI();
@@ -6776,22 +6770,16 @@
     }
 
     // Real pause: suspends the whole AudioContext (positions freeze in
-    // place) and freezes the session and tips clocks. Resume restores
+    // place) and freezes the session clock. Resume restores
     // everything without losing elapsed time.
     let rPaused = false;
     let rPauseResumedAt = 0;
-    let rPauseAccum = 0;
 
     function rPause() {
         if (!window.audioEngine.isPlaying || rPaused) return;
         rPaused = true;
         rPauseResumedAt = Date.now();
         window.audioEngine.suspend();
-        // Freeze the tips cycle; the session clock is time-offset on resume.
-        if (rTipInterval) {
-            clearInterval(rTipInterval);
-            rTipInterval = null;
-        }
         // Freeze the auto-stop countdown by stopping its interval; the
         // remaining seconds stay in rAstRemain until resume re-arms it.
         if (rAstTimer) {
@@ -6805,7 +6793,6 @@
         if (!rPaused) return;
         rPaused = false;
         const pauseMs = Date.now() - rPauseResumedAt;
-        rPauseAccum += pauseMs;
         window.audioEngine.resume();
         // Guard: if an auto-stop slow fade started before the pause, the
         // master gain may still be gliding toward 0 — pin it back to the
@@ -6813,7 +6800,6 @@
         window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
         // Session clock: shift the epoch so elapsed time skips the pause.
         if (rSesStart) rSesStart += pauseMs;
-        if (rSesStart) rStartTips(); // tips cycle resumes with the session
         if (rAstMins > 0 && rAstRemain > 0) rStartAutoStop(rAstRemain);
         updatePlayButtonUI(true);
     }
@@ -6844,92 +6830,6 @@
         rSesInterval = null;
         rSesStart = null;
         document.getElementById("r-ses").textContent = "00:00:00";
-    }
-
-    // Mindfulness Tips Shuffled progressive logic
-    let rTipsShufflePool = [];
-    let rCurrentTipPhase = null;
-    let rCurrentTipTrack = null;
-
-    function getCurrentPhase() {
-        if (!rSesStart) return "opening";
-        const elapsedMs = Date.now() - rSesStart;
-        
-        // If auto-stop is active, determine by remaining time and total duration
-        if (rAstMins > 0 && rAstRemain > 0) {
-            if (rAstRemain <= 60) {
-                return "closing";
-            }
-            const totalSecs = rAstMins * 60;
-            const elapsedSecs = totalSecs - rAstRemain;
-            if (elapsedSecs < totalSecs / 3) {
-                return "opening";
-            } else if (elapsedSecs < (2 * totalSecs) / 3) {
-                return "deepening";
-            } else {
-                return "closing";
-            }
-        }
-        
-        // Fallback (infinite session): use elapsed thresholds
-        if (elapsedMs < 120000) { // 2 minutes
-            return "opening";
-        } else if (elapsedMs < 420000) { // 7 minutes
-            return "deepening";
-        } else {
-            return "closing";
-        }
-    }
-
-    function getTipsPool(phase, track) {
-        let specificPool = window.ccI18n.t(`tips.${phase}.${track}`);
-        let defaultPool = window.ccI18n.t(`tips.${phase}.default`);
-        if (!Array.isArray(specificPool)) specificPool = [];
-        if (!Array.isArray(defaultPool)) defaultPool = [];
-        return [...specificPool, ...defaultPool];
-    }
-
-    function showNextTip() {
-        const phase = getCurrentPhase();
-        const track = rSelected || "default";
-        
-        if (phase !== rCurrentTipPhase || track !== rCurrentTipTrack || rTipsShufflePool.length === 0) {
-            rCurrentTipPhase = phase;
-            rCurrentTipTrack = track;
-            rTipsShufflePool = getTipsPool(phase, track);
-            // Shuffling
-            rTipsShufflePool.sort(() => Math.random() - 0.5);
-        }
-        
-        const tip = rTipsShufflePool.pop() || "Focus on your breath.";
-        const el = document.getElementById("r-tip");
-        if (el) {
-            el.classList.add("fade");
-            setTimeout(() => {
-                el.textContent = tip;
-                el.classList.remove("fade");
-            }, 400);
-        }
-    }
-
-    function rStartTips() {
-        if (rTipInterval) clearInterval(rTipInterval);
-        
-        // Reset shuffle state for the session
-        rTipsShufflePool = [];
-        rCurrentTipPhase = null;
-        rCurrentTipTrack = null;
-        
-        // Show first tip immediately
-        showNextTip();
-        
-        // Set cycle loop (30s)
-        rTipInterval = setInterval(showNextTip, 30000);
-    }
-
-    function rStopTips() {
-        if (rTipInterval) clearInterval(rTipInterval);
-        rTipInterval = null;
     }
 
     // Auto-stop: instead of a hard cut at 0, the master gain glides to
@@ -7189,7 +7089,6 @@
             engine.setVolume(cfg.relaxVolume ?? 0.8);
             rStartSession();
             startViz();
-            rStartTips();
             if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
         }
         updateMixStateUI();
@@ -10050,15 +9949,7 @@
         });
     });
 
-    document.getElementById("r-next-tip").addEventListener("click", showNextTip);
-
-    window.ccI18n.onChange((effective, configured) => {
-        if (!window.audioEngine.isPlaying) {
-            const el = document.getElementById("r-tip");
-            if (el) el.textContent = window.ccI18n.t("relax.startPrompt");
-        } else {
-            showNextTip();
-        }
+    window.ccI18n.onChange(() => {
         updateDialDesignUI(cfg.clockDesign || 1);
         renderUpdateNotice();
     });
@@ -10093,8 +9984,6 @@
 
     window.cc.onInit(async (s) => {
         applySettings(s);
-        const startPromptEl = document.getElementById("r-tip");
-        if (startPromptEl) startPromptEl.textContent = window.ccI18n.t("relax.startPrompt");
         let isActive = s && s.windowMode === "full";
         if (window.cc && window.cc.getActiveWindow) {
             try {

@@ -2616,19 +2616,6 @@
         color: var(--accent-a);
         border-color: var(--border-bright);
     }
-    #r-next-tip {
-        color: var(--accent-a);
-        background: var(--accent-dim);
-        border-color: var(--border-active);
-        font-size: calc(8.5px * var(--ui-scale));
-        letter-spacing: 1px;
-        padding: 3px 10px;
-        height: 20px;
-    }
-    #r-next-tip:hover {
-        border-color: var(--accent-a);
-        box-shadow: var(--glow-xs);
-    }
     .lap-col-hdr {
         display: grid;
         grid-template-columns: 40px 1fr 1fr 1fr;
@@ -3270,8 +3257,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         padding: 18px 16px;
-        flex: 1;
-        min-height: 0;
+        flex: 0 0 auto;
         display: flex;
         flex-direction: column;
     }
@@ -3290,51 +3276,6 @@
         letter-spacing: 0.3px;
         color: var(--text-lo);
         margin-top: 5px;
-        margin-bottom: 14px;
-    }
-    .ndiv {
-        height: 1px;
-        background: var(--border);
-        margin: 10px 0;
-    }
-    .tip-box {
-        padding: 12px;
-        background: var(--bg-02);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        /* Panel is a stretched flex column; the tip fills what's left
-           so the session block always reaches the bottom of the tab. */
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-    }
-    .tip-hdr {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .tip-lbl {
-        font-family: "Outfit", system-ui, sans-serif;
-        font-size: calc(12px * var(--ui-scale));
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        color: var(--text-lo);
-    }
-    .tip-text {
-        font-family: "Outfit", system-ui, sans-serif;
-        font-size: calc(13px * var(--ui-scale));
-        font-weight: 400;
-        color: var(--text-md);
-        line-height: 1.55;
-        transition: opacity 0.4s;
-        flex: 1;
-        display: flex;
-        align-items: center;
-    }
-    .tip-text.fade {
-        opacity: 0;
     }
     .r-notify {
         position: absolute;

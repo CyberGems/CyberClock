@@ -116,13 +116,13 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 ### 🧘 Módulo de relajación
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
 - **Audio ambiental grabado:** seis paisajes sonoros reales reproducidos con la Web Audio API, con síntesis procedural como respaldo si faltan los archivos
-- **Pausa real:** pausar congela el audio, el tiempo de sesión y el ciclo de consejos; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
+- **Pausa real:** pausar congela el audio y el tiempo de sesión; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
 - **Mezcla ambiental:** Usa el **+** de una tarjeta para añadir esa pista a la mezcla (Lluvia + Chimenea, Océano + Espacio Exterior…). Pulsa la tarjeta para reproducirla sola. Ajusta el volumen de cada capa o quítala desde el reproductor. Los volúmenes de las capas se conservan al reabrir la app. Volumen general controla toda la mezcla
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
 - **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, un botón grande para reproducir o pausar, controles de siguiente y aleatorio, estado de reproducción, un espectro pequeño y 10 diseños. El audio sigue sonando cuando el modo completo está oculto
-- **Tiempo de sesión:** con consejos de mindfulness y una cuenta regresiva de Parada Automática junto a la pista y los controles
+- **Tiempo de sesión:** tiempo transcurrido y cuenta regresiva de Parada Automática junto a la pista y los controles
 - **Programador automático:** programa horarios de reproducción automática
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
 

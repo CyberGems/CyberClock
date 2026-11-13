@@ -116,13 +116,13 @@ Most clock apps show you the time and nothing more. CyberClock transforms your d
 ### 🧘 Relaxation Module
 - **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
 - **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
-- **True Pause** — Pause freezes the audio, session timer and tips cycle in place; resume continues exactly where you left off (Space toggles play/pause)
+- **True Pause** — Pause freezes the audio and session timer in place; resume continues exactly where you left off (Space toggles play/pause)
 - **Ambient Blending** — Use the **+** on a track card to add it to the mix (Rain + Fireplace, Ocean + Space…). Click the card to play it solo. Adjust or remove each layer in the player. Layer volumes are remembered between launches. Master volume controls the whole mix
 - **Zen Flow Shuffle** — One-click shuffled playback through all tracks
 - **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
 - **Audio Spectrum Visualizer** — Real-time frequency visualization
 - **Floating Relax Widget** — Compact desktop session with the track name, a large play/pause button, next and shuffle controls, playback status, a small spectrum, and 10 designs. Audio keeps playing when full mode is hidden
-- **Session Timer** — With mindfulness tips and an auto-stop countdown alongside the track and playback controls
+- **Session Timer** — Elapsed session time and an auto-stop countdown alongside the track and playback controls
 - **Auto Scheduler** — Schedule automatic playback times
 - **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
 
