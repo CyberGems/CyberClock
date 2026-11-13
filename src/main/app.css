@@ -2884,6 +2884,38 @@
         display: grid;
         gap: 6px;
     }
+    .r-mix-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        padding: 5px 8px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-md);
+        font: 500 calc(11px * var(--ui-scale)) var(--font-ui);
+        text-align: left;
+        cursor: pointer;
+    }
+    .r-mix-toggle:hover {
+        border-color: var(--border-active);
+    }
+    .r-mix-summary {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: right;
+    }
+    .r-mix-chevron {
+        display: inline-flex;
+        flex-shrink: 0;
+    }
+    .r-mix-toggle[aria-expanded="true"] .r-mix-chevron {
+        transform: rotate(90deg);
+    }
     .r-mix-layers {
         display: grid;
         gap: 4px;
@@ -2893,6 +2925,10 @@
         max-height: calc(100px * var(--ui-scale));
         overflow-y: auto;
         scrollbar-width: thin;
+        scrollbar-color: var(--accent-a) var(--bg-01);
+    }
+    .r-mix-layers[hidden] {
+        display: none;
     }
     .r-mix-layer {
         display: grid;

@@ -7010,6 +7010,12 @@
 
     // Track cards
     buildTrackCards();
+    const mixToggle = document.getElementById("r-mix-toggle");
+    const mixList = document.getElementById("r-mix-layers");
+    mixToggle.addEventListener("click", () => {
+        mixList.hidden = !mixList.hidden;
+        mixToggle.setAttribute("aria-expanded", String(!mixList.hidden));
+    });
     function playRelaxCard(track, event) {
         const engine = window.audioEngine;
         if (event.ctrlKey || event.metaKey) {
@@ -7068,8 +7074,10 @@
             add.setAttribute("data-tooltip", cfg?.audioMuted ? window.ccI18n.t("relax.tooltip.unmute") : label);
             add.setAttribute("aria-disabled", String(inMix || !!cfg?.audioMuted));
         });
-        const list = document.getElementById("r-mix-layers");
+        const list = mixList;
         document.getElementById("r-mix").hidden = layered.length === 0;
+        document.getElementById("r-mix-summary").textContent =
+            layered.map(id => window.ccI18n.t(`relax.track.${id}`)).join(" · ");
         const rendered = Array.from(list.children, item => item.dataset.track);
         if (layered.join() !== rendered.join()) {
             list.replaceChildren(...layered.map(id => {

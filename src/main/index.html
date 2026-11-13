@@ -890,8 +890,12 @@
                                     </div>
                                 </div>
                                 <div class="r-mix" id="r-mix" hidden>
-                                    <span class="r-ast-lbl" id="r-mix-label" data-i18n="relax.mixLayers">Mix layers</span>
-                                    <ul class="r-mix-layers" id="r-mix-layers" aria-labelledby="r-mix-label"></ul>
+                                    <button type="button" id="r-mix-toggle" class="r-mix-toggle" aria-expanded="false" aria-controls="r-mix-layers" aria-labelledby="r-mix-label" aria-describedby="r-mix-summary">
+                                        <span id="r-mix-label" data-i18n="relax.mixLayers">Mix layers</span>
+                                        <span class="r-mix-summary" id="r-mix-summary"></span>
+                                        <span class="r-mix-chevron" data-ico="next" data-ico-size="12" aria-hidden="true"></span>
+                                    </button>
+                                    <ul class="r-mix-layers" id="r-mix-layers" aria-labelledby="r-mix-label" hidden></ul>
                                 </div>
                             </div>
                             <div class="r-sched" id="r-sched">

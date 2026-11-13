@@ -117,7 +117,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
 - **Audio ambiental grabado:** seis paisajes sonoros reales reproducidos con la Web Audio API, con síntesis procedural como respaldo si faltan los archivos
 - **Pausa real:** al pausar, el audio baja suavemente y se congela el tiempo de sesión. Al reanudar, el audio sube gradualmente desde el mismo punto (la barra espaciadora alterna reproducir/pausar)
-- **Mezcla ambiental:** Usa el **+** de una tarjeta para añadir esa pista a la mezcla (Lluvia + Chimenea, Océano + Espacio Exterior…). Pulsa la tarjeta para reproducirla sola. Ajusta el volumen de cada capa o quítala desde el reproductor. CyberClock recuerda la mezcla y el volumen de cada capa al reabrir la app. Usa Reanudar en Relax para volver a escucharla. Volumen general controla toda la mezcla
+- **Mezcla ambiental:** Usa el **+** de una tarjeta para añadir esa pista a la mezcla (Lluvia + Chimenea, Océano + Espacio Exterior…). Pulsa la tarjeta para reproducirla sola. Despliega **Capas de la mezcla** en el reproductor para ajustar el volumen de cada capa o quitarla. Al plegarla quedan visibles el resumen y **Volumen general**. CyberClock recuerda la mezcla y el volumen de cada capa al reabrir la app. Usa Reanudar en Relax para volver a escucharla. Volumen general controla toda la mezcla
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
