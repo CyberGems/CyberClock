@@ -2751,6 +2751,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         display: grid;
+        grid-template-rows: minmax(min-content, 1fr) auto;
         min-width: 0;
         position: relative;
         transition: border-color 0.2s, background 0.2s;
@@ -2812,6 +2813,33 @@
         outline: 2px solid var(--accent-a);
         outline-offset: -2px;
     }
+    .tcard-volume {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) 4ch;
+        align-items: center;
+        gap: 5px;
+        min-height: 24px;
+        margin: 0 8px 5px;
+        color: var(--text-md);
+        font: 500 9px var(--font-ui);
+        font-variant-numeric: tabular-nums;
+        opacity: 0.58;
+        transition: opacity 0.15s;
+    }
+    .tcard:hover .tcard-volume,
+    .tcard-volume:focus-within { opacity: 1; }
+    .tcard-volume:has(input:disabled) { visibility: hidden; }
+    .tcard-volume input {
+        width: 100%;
+        min-width: 0;
+        accent-color: var(--accent-a);
+        cursor: pointer;
+    }
+    .tcard-volume input:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 2px;
+    }
+    .tcard-level { text-align: end; }
     /* Active dot — quiet replacement for the old glow/wave bars */
     .tcard-dot {
         position: absolute;
@@ -2872,16 +2900,44 @@
     }
     .r-player-heading {
         display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        justify-content: space-between;
+        align-items: center;
         gap: 6px 12px;
     }
     .r-player-track {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         color: var(--text-hi);
         font-family: var(--font-ui);
         font-size: calc(16px * var(--ui-scale));
         font-weight: 600;
+    }
+    .r-saved-mixes {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 26px;
+        height: 26px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg-02);
+        color: var(--accent-a);
+        cursor: pointer;
+    }
+    .r-saved-mixes[data-tooltip]::after { content: none; }
+    .r-saved-mixes:hover,
+    .r-saved-mixes[aria-expanded="true"] {
+        border-color: var(--border-active);
+        background: var(--accent-dim);
+    }
+    #r-saved-mix-menu {
+        position: fixed;
+        inset: auto;
+        margin: 0;
+        width: min(276px, calc(100vw - 16px));
+        max-height: min(300px, calc(100vh - 16px));
     }
     .r-mix:not([hidden]) {
         display: grid;

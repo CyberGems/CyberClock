@@ -364,6 +364,10 @@ button {
     overflow-y: auto;
 }
 
+#saved-mix-menu {
+    max-height: calc(100% - 20px);
+}
+
 .master-volume-heading {
     display: flex;
     justify-content: space-between;

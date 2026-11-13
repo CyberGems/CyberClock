@@ -26,6 +26,14 @@
     const btnShuffle = document.getElementById("btn-shuffle");
     const btnMute = document.getElementById("btn-mute");
     const btnMenu = document.getElementById("btn-menu");
+    const mixTrigger = document.getElementById("saved-mixes");
+    const mixMenu = window.bindRelaxMixMenu(mixTrigger, {
+        save: name => window.cc.sendRelaxControl({ type: "save-mix", name }).catch(error => {
+            console.error(error);
+            mixMenu.finishSave("relax.mixSaveFailed");
+        }),
+        load: name => sendControl({ type: "load-mix", name }),
+    });
     const btnClose = document.getElementById("btn-close");
     const spectrum = document.getElementById("spectrum");
     const SPECTRUM_BARS = 48;
@@ -56,9 +64,9 @@
 
     function refreshLabels() {
         const {track, layers, mixReady, playing, paused} = playback;
-        const title = layers?.length
+        const title = playback.mixName ?? (layers?.length
             ? layers.map(id => t("relax.track." + id)).join(" · ")
-            : t(mixReady ? "relax.savedMix" : track ? "relax.track." + track : "relax.noTrack");
+            : t(mixReady ? "relax.savedMix" : track ? "relax.track." + track : "relax.noTrack"));
         if (trackLabel.textContent !== title) trackLabel.textContent = title;
         updateMarquee();
         updateAutoStop(Date.now());
@@ -70,6 +78,7 @@
             volumeValue.textContent = shown + "%";
         }
         refreshLayerVolumes();
+        mixMenu.render(playback.savedMixes ?? [], Object.keys(playback.layerVolumes ?? {}).length > 0, playback.mixName);
         const minutes = playback.autoStopMinutes ?? 0;
         autoStopEl.classList.toggle("is-armed", minutes > 0);
         autoStopChoices.forEach(button => {
@@ -129,7 +138,8 @@
                 const send = commit => {
                     pendingLayerVolumes.set(id, slider.valueAsNumber);
                     row.querySelector("output").textContent = slider.value + "%";
-                    sendControl({ type: "layer-volume", track: id, volume: slider.valueAsNumber / 100, commit });
+                    sendControl({ type: "layer-volume", track: id, volume: slider.valueAsNumber / 100,
+                        mixRevision: playback.mixRevision, commit });
                 };
                 slider.addEventListener("input", () => send(false));
                 slider.addEventListener("change", () => send(true));
@@ -542,10 +552,12 @@
 
     Promise.all([
         window.cc.onRelaxPlayback(state => {
+            if (state.mixRevision !== playback.mixRevision) pendingLayerVolumes.clear();
             playback = state;
             clearInterval(playbackStateRetry);
             autoStopEl.disabled = false;
             volumeTrigger.disabled = false;
+            mixTrigger.disabled = false;
             if (!state.playing || state.paused) {
                 spectrumData = [];
                 spectrumRequestPending = false;
@@ -555,7 +567,8 @@
         window.cc.onRelaxSpectrum(data => {
             spectrumData = data;
             spectrumRequestPending = false;
-        })
+        }),
+        window.cc.onRelaxMixSaveResult(({ error }) => mixMenu.finishSave(error))
     ]).then(() => {
         if (!autoStopEl.disabled) return;
         playbackStateRetry = setInterval(() => sendControl("state"), 500);

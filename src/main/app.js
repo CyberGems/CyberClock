@@ -2507,13 +2507,16 @@
         }
         applyRelaxMasterVolume(pendingMasterVolume?.relaxVolume ?? s.relaxVolume ?? 0.8);
         for (const { id } of RELAX_TRACKS) {
-            const level = pendingLayerVolumes.get(id) ?? s.relaxLayerVolumes?.[id] ?? 1;
+            const level = pendingLayerVolumes.get(id) ?? pendingPresetLoad?.relaxLayerVolumes[id]
+                ?? s.relaxLayerVolumes?.[id] ?? 1;
             window.audioEngine.setLayerVolume(id, level);
         }
-        if (!pendingRelaxMix) {
+        if (!pendingRelaxMix && !pendingPresetLoad) {
             const savedLayers = Array.isArray(s.relaxMixLayers) ? s.relaxMixLayers : [];
             relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
         }
+        if (!pendingPresetWrites) relaxSavedMixes = s.relaxSavedMixes ?? [];
+        relaxActiveMixName = pendingPresetLoad?.relaxActiveMixName ?? s.relaxActiveMixName ?? null;
         setRelaxMixExpanded(pendingRelaxDisclosures.get("relaxMixExpanded")?.expanded ?? (s.relaxMixExpanded === true));
         const autoStopMinutes = isRelaxAutoStopOption(s.relaxAutoTimer) ? s.relaxAutoTimer : 0;
         if (!pendingAutoStop && autoStopMinutes !== preferredAutoStopMinutes) {
@@ -6555,11 +6558,19 @@
                 <button type="button" class="tcard-add" data-tooltip-dir="bottom">
                     <span aria-hidden="true">+</span>
                 </button>
+                <div class="tcard-volume">
+                    <span data-ico="volume-low" data-ico-size="13" aria-hidden="true"></span>
+                    <input type="range" min="0" max="100" value="100" disabled>
+                    <span class="tcard-level" aria-hidden="true">100%</span>
+                </div>
             `;
             const play = card.querySelector(".tcard-play");
             const add = card.querySelector(".tcard-add");
+            const slider = card.querySelector("input");
             play.addEventListener("click", event => playRelaxCard(id, event));
             add.addEventListener("click", () => addRelaxLayer(id));
+            slider.addEventListener("input", () => updateRelaxLayerVolume(id, slider.valueAsNumber / 100));
+            slider.addEventListener("change", () => updateRelaxLayerVolume(id, slider.valueAsNumber / 100, true));
             // Native buttons generate clicks for keyboard activation.
             // Retain the existing modifier shortcut on the play button.
             play.addEventListener("keydown", event => {
@@ -6579,6 +6590,11 @@
     const pendingLayerVolumes = new Map();
     let relaxSettingsSave = Promise.resolve();
     let relaxMixLayers = [];
+    let relaxSavedMixes = [];
+    let relaxActiveMixName = null;
+    let pendingPresetLoad = null;
+    let pendingPresetWrites = 0;
+    let relaxMixRevision = 0;
     let pendingRelaxMix = null;
     const pendingRelaxDisclosures = new Map();
     let preferredAutoStopMinutes = 0;
@@ -6662,16 +6678,23 @@
         return zenFlowQueue.shift();
     }
 
+    function updateRelaxPlayerTitle(isPlaying) {
+        const track = (isPlaying && window.audioEngine.currentTrack) || rSelected;
+        const title = document.getElementById("r-player-track");
+        const key = !isPlaying && relaxMixLayers.length > 0 ? "relax.savedMix"
+            : track ? `relax.track.${track}` : "relax.noTrack";
+        const name = currentNamedRelaxMix() ?? window.ccI18n.t(key);
+        if (title.textContent !== name) title.textContent = name;
+    }
+
     function updatePlayButtonUI(isPlaying) {
         const playBtn = document.getElementById("r-play");
         if (!playBtn) return;
         document.getElementById("r-stop").disabled = !isPlaying;
         const iconName = isPlaying && !rPaused ? "pause" : "play";
         const track = (isPlaying && window.audioEngine.currentTrack) || rSelected;
-        const title = document.getElementById("r-player-track");
         const mixReady = !isPlaying && relaxMixLayers.length > 0;
-        const trackName = window.ccI18n.t(mixReady ? "relax.savedMix" : track ? `relax.track.${track}` : "relax.noTrack");
-        if (title.textContent !== trackName) title.textContent = trackName;
+        updateRelaxPlayerTitle(isPlaying);
 
         // Tray sync: report what's playing (last track while paused) so
         // the tray menu can show and toggle it from anywhere.
@@ -6727,11 +6750,17 @@
     function publishRelaxPlayback() {
         const engine = window.audioEngine;
         const playing = engine.isPlaying;
+        const layers = currentRelaxLayers();
+        const mixName = currentNamedRelaxMix();
+        savedMixMenu.render(relaxSavedMixes, layers.length > 0, mixName);
         window.cc.sendRelaxPlayback({
             track: (playing && engine.currentTrack) || rSelected,
             layers: playing ? engine.activeLayerIds() : [],
-            layerVolumes: Object.fromEntries(currentRelaxLayers().map(id => [id, engine.getLayerVolume(id)])),
+            layerVolumes: Object.fromEntries(layers.map(id => [id, engine.getLayerVolume(id)])),
             availableLayers: RELAX_TRACKS.map(track => track.id),
+            savedMixes: relaxSavedMixes.map(({ name }) => ({ name })),
+            mixName,
+            mixRevision: relaxMixRevision,
             mixReady: !playing && relaxMixLayers.length > 0,
             playing,
             paused: playing && rPaused,
@@ -7022,6 +7051,23 @@
     buildTrackCards();
     const mixToggle = document.getElementById("r-mix-toggle");
     const mixList = document.getElementById("r-mix-layers");
+    const savedMixMenu = window.bindRelaxMixMenu(document.getElementById("r-saved-mixes"), {
+        save: async name => savedMixMenu.finishSave(await saveNamedRelaxMix(name)),
+        load: loadNamedRelaxMix,
+        position: (panel, trigger) => {
+            const rect = trigger.getBoundingClientRect();
+            panel.style.left = Math.max(8, rect.right - 276) + "px";
+            if (innerHeight - rect.bottom >= 308 || rect.top < innerHeight / 2) {
+                panel.style.top = rect.bottom + 6 + "px";
+                panel.style.bottom = "auto";
+                panel.style.maxHeight = Math.min(300, innerHeight - rect.bottom - 14) + "px";
+            } else {
+                panel.style.top = "auto";
+                panel.style.bottom = innerHeight - rect.top + 6 + "px";
+                panel.style.maxHeight = Math.min(300, rect.top - 14) + "px";
+            }
+        },
+    });
     mixToggle.addEventListener("click", () => {
         const expanded = mixList.hidden;
         setRelaxMixExpanded(expanded);
@@ -7081,13 +7127,91 @@
         return engine.isPlaying ? engine.activeLayerIds() : relaxMixLayers;
     }
 
+    function currentNamedRelaxMix() {
+        const layers = currentRelaxLayers();
+        const engine = window.audioEngine;
+        const matches = mix => mix.layers.length === layers.length && layers.every(id =>
+            mix.layers.includes(id) && (mix.layerVolumes[id] ?? 1) === engine.getLayerVolume(id)
+        );
+        const selected = relaxSavedMixes.find(mix => mix.name === relaxActiveMixName);
+        return selected && matches(selected) ? selected.name : relaxSavedMixes.find(matches)?.name ?? null;
+    }
+
     function rememberRelaxMix(layers) {
         if (layers.join() === relaxMixLayers.join()) return;
         relaxMixLayers = layers;
         pendingRelaxMix = layers;
         relaxSettingsSave = relaxSettingsSave.then(async () => {
-            await window.cc.saveSettings({ relaxMixLayers: layers });
-            if (pendingRelaxMix === layers) pendingRelaxMix = null;
+            try {
+                await window.cc.saveSettings({ relaxMixLayers: layers });
+            } finally {
+                if (pendingRelaxMix === layers) pendingRelaxMix = null;
+            }
+        }).catch(console.error);
+    }
+
+    function saveNamedRelaxMix(name) {
+        name = typeof name === "string" ? Array.from(name.trim()).slice(0, 48).join("") : "";
+        if (!name) return Promise.resolve("relax.mixNameRequired");
+        const layers = currentRelaxLayers();
+        if (!layers.length) return Promise.resolve("relax.mixSaveEmpty");
+        const engine = window.audioEngine;
+        const mix = {
+            name, layers: [...layers],
+            layerVolumes: Object.fromEntries(layers.map(id => [id, engine.getLayerVolume(id)])),
+        };
+        pendingPresetWrites++;
+        const save = relaxSettingsSave.then(async () => {
+            if (relaxSavedMixes.some(saved => saved.name.toLowerCase() === name.toLowerCase())) {
+                return "relax.mixNameTaken";
+            }
+            const next = [...relaxSavedMixes, mix];
+            await window.cc.saveSettings({ relaxSavedMixes: next });
+            relaxSavedMixes = next;
+            updatePlayButtonUI(engine.isPlaying);
+            return null;
+        }).catch(error => {
+            console.error(error);
+            return "relax.mixSaveFailed";
+        }).finally(() => pendingPresetWrites--);
+        relaxSettingsSave = save;
+        return save;
+    }
+
+    function loadNamedRelaxMix(name) {
+        const mix = relaxSavedMixes.find(saved => saved.name === name);
+        if (!mix) return;
+        const layers = [...new Set(mix.layers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
+        if (!layers.length) return;
+        const engine = window.audioEngine;
+        const levels = Object.fromEntries(layers.map(id => {
+            const value = mix.layerVolumes[id];
+            return [id, Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 1];
+        }));
+        const change = { relaxMixLayers: layers, relaxLayerVolumes: levels, relaxActiveMixName: name };
+        pendingPresetLoad = change;
+        relaxActiveMixName = name;
+        relaxMixRevision++;
+        pendingLayerVolumes.clear();
+        relaxMixLayers = layers;
+        for (const id of layers) engine.setLayerVolume(id, levels[id]);
+        if (engine.isPlaying) {
+            stopZenFlow();
+            // Add first so switching between disjoint mixes keeps the session and pause state.
+            for (const id of layers) engine.addLayer(id);
+            for (const id of engine.activeLayerIds()) {
+                if (!layers.includes(id)) engine.removeLayer(id);
+            }
+            rSelected = engine.currentTrack;
+            updatePlayingTrackCardClass(true);
+        }
+        updateMixStateUI();
+        relaxSettingsSave = relaxSettingsSave.then(async () => {
+            try {
+                await window.cc.saveSettings(change);
+            } finally {
+                if (pendingPresetLoad === change) pendingPresetLoad = null;
+            }
         }).catch(console.error);
     }
 
@@ -7105,6 +7229,10 @@
             add.setAttribute("aria-label", label);
             add.setAttribute("data-tooltip", cfg?.audioMuted ? window.ccI18n.t("relax.tooltip.unmute") : label);
             add.setAttribute("aria-disabled", String(inMix || !!cfg?.audioMuted));
+            const slider = card.querySelector("input");
+            slider.disabled = !inMix;
+            slider.setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track }));
+            applyRelaxLayerSlider(card, ".tcard-level", engine.getLayerVolume(id));
         });
         const list = mixList;
         document.getElementById("r-mix").hidden = layered.length === 0;
@@ -7143,9 +7271,7 @@
             item.querySelector(".r-mix-name").textContent = name;
             const slider = item.querySelector("input");
             slider.setAttribute("aria-label", window.ccI18n.t("relax.layerVolume", { track: name }));
-            const value = String(Math.round(engine.getLayerVolume(id) * 100));
-            if (slider.value !== value) slider.value = value;
-            item.querySelector(".r-mix-level").textContent = value + "%";
+            applyRelaxLayerSlider(item, ".r-mix-level", engine.getLayerVolume(id));
             item.querySelector("button").setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track: name }));
         }
         updatePlayButtonUI(engine.isPlaying);
@@ -7157,9 +7283,20 @@
         // Keep completed edits in order and preserve any slider value
         // currently being dragged when another settings event arrives.
         relaxSettingsSave = relaxSettingsSave.then(async () => {
-            await window.cc.saveSettings({ relaxLayerVolumes: { [id]: level } });
-            if (pendingLayerVolumes.get(id) === level) pendingLayerVolumes.delete(id);
+            try {
+                await window.cc.saveSettings({ relaxLayerVolumes: { [id]: level } });
+            } finally {
+                if (pendingLayerVolumes.get(id) === level) pendingLayerVolumes.delete(id);
+            }
         }).catch(console.error);
+    }
+
+    function applyRelaxLayerSlider(container, levelSelector, level) {
+        if (!container) return;
+        const percent = String(Math.round(level * 100));
+        const slider = container.querySelector("input");
+        if (slider.value !== percent) slider.value = percent;
+        container.querySelector(levelSelector).textContent = percent + "%";
     }
 
     function updateRelaxLayerVolume(id, volume, commit = false) {
@@ -7167,13 +7304,9 @@
         const level = Math.max(0, Math.min(1, volume));
         pendingLayerVolumes.set(id, level);
         window.audioEngine.setLayerVolume(id, level);
-        const row = document.querySelector(`#r-mix-layers [data-track="${id}"]`);
-        if (row) {
-            const percent = String(Math.round(level * 100));
-            const slider = row.querySelector("input");
-            if (slider.value !== percent) slider.value = percent;
-            row.querySelector(".r-mix-level").textContent = percent + "%";
-        }
+        applyRelaxLayerSlider(document.querySelector(`.tcard[data-track="${id}"]`), ".tcard-level", level);
+        applyRelaxLayerSlider(mixList.querySelector(`[data-track="${id}"]`), ".r-mix-level", level);
+        updateRelaxPlayerTitle(window.audioEngine.isPlaying);
         publishRelaxPlayback();
         if (commit) saveRelaxLayerVolume(id);
     }
@@ -7258,7 +7391,13 @@
         } else if (action?.type === "volume" && Number.isFinite(action.volume)) {
             updateRelaxMasterVolume(action.volume, action.commit === true);
         } else if (action?.type === "layer-volume") {
-            updateRelaxLayerVolume(action.track, action.volume, action.commit === true);
+            if (action.mixRevision === relaxMixRevision) {
+                updateRelaxLayerVolume(action.track, action.volume, action.commit === true);
+            }
+        } else if (action?.type === "save-mix") {
+            saveNamedRelaxMix(action.name).then(error => window.cc.sendRelaxMixSaveResult({ error })).catch(console.error);
+        } else if (action?.type === "load-mix") {
+            loadNamedRelaxMix(action.name);
         } else if (action?.type === "add-layer" && RELAX_TRACKS.some(track => track.id === action.track)) {
             addRelaxLayer(action.track);
         } else if (action?.type === "remove-layer" && currentRelaxLayers().includes(action.track)) {
@@ -9524,7 +9663,9 @@
     });
 
     async function quitFromMainWindow() {
-        while (pendingRelaxDisclosures.size) await relaxSettingsSave;
+        while (pendingRelaxDisclosures.size || pendingPresetWrites || pendingPresetLoad) {
+            await relaxSettingsSave;
+        }
         if (window.cc && window.cc.closeWindow) window.cc.closeWindow();
         else window.close();
     }
@@ -9703,18 +9844,16 @@
         if (document.hidden) ttHide();
     });
 
-    ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-mini", "expanded-clock-back"].forEach((id) => {
+    ["tbar-brand", "tbar-mid", "tbar-btn-settings", "tbar-btn-more", "btn-minimize", "btn-mini", "btn-close", "expanded-clock-mini", "expanded-clock-back", "r-saved-mixes"].forEach((id) => {
         ttBind(document.getElementById(id));
     });
     document.querySelectorAll(".tcard-add").forEach(button => ttBind(button, false));
 
     // ══════════════════════════════════════════════════════════════
-    // CUSTOM CONTEXT MENUS (Full Mode & Text Inputs)
+    // CUSTOM CONTEXT MENUS (Full Mode & Alarms)
     // ══════════════════════════════════════════════════════════════
     const fullCtxMenu = document.getElementById("full-ctx-menu");
-    const textCtxMenu = document.getElementById("text-ctx-menu");
     const alarmCtxMenu = document.getElementById("alarm-ctx-menu");
-    let activeTextTarget = null;
     let alarmCtxId = null;
 
     function positionCtxMenu(menuEl, x, y) {
@@ -9732,34 +9871,8 @@
         if (fullCtxMenu) positionCtxMenu(fullCtxMenu, x, y);
     }
 
-    function showTextContextMenu(x, y, targetInput) {
-        hideAllContextMenus();
-        activeTextTarget = targetInput;
-        if (!textCtxMenu) return;
-
-        const hasSelection = typeof targetInput.selectionStart === "number" &&
-            targetInput.selectionStart !== targetInput.selectionEnd;
-        const hasValue = (targetInput.value || "").length > 0;
-        const isReadOnly = Boolean(targetInput.readOnly || targetInput.disabled);
-
-        const btnCut = document.getElementById("ctx-text-cut");
-        const btnCopy = document.getElementById("ctx-text-copy");
-        const btnPaste = document.getElementById("ctx-text-paste");
-        const btnSelectAll = document.getElementById("ctx-text-selectall");
-        const btnClear = document.getElementById("ctx-text-clear");
-
-        if (btnCut) btnCut.classList.toggle("disabled", !hasSelection || isReadOnly);
-        if (btnCopy) btnCopy.classList.toggle("disabled", !hasSelection);
-        if (btnPaste) btnPaste.classList.toggle("disabled", isReadOnly);
-        if (btnSelectAll) btnSelectAll.classList.toggle("disabled", !hasValue);
-        if (btnClear) btnClear.classList.toggle("disabled", !hasValue || isReadOnly);
-
-        positionCtxMenu(textCtxMenu, x, y);
-    }
-
     function hideAllContextMenus() {
         if (fullCtxMenu) fullCtxMenu.style.display = "none";
-        if (textCtxMenu) textCtxMenu.style.display = "none";
         if (alarmCtxMenu) alarmCtxMenu.style.display = "none";
         alarmCtxId = null;
     }
@@ -9788,20 +9901,13 @@
             e.preventDefault();
             return;
         }
-        const textTarget = e.target.closest("input[type='text'], input[type='search'], input:not([type]), textarea");
         const alarmCard = e.target.closest(".alarm-card");
         e.preventDefault();
-        if (e.target.closest("#alarm-editor-overlay")) {
-            if (textTarget) {
-                showTextContextMenu(e.clientX, e.clientY, textTarget);
-            } else {
-                hideAllContextMenus();
-            }
+        if (e.target.closest("#alarm-editor-overlay, .relax-mix-menu")) {
+            hideAllContextMenus();
             return;
         }
-        if (textTarget) {
-            showTextContextMenu(e.clientX, e.clientY, textTarget);
-        } else if (alarmCard?.dataset.alarmId) {
+        if (alarmCard?.dataset.alarmId) {
             showAlarmContextMenu(e.clientX, e.clientY, alarmCard.dataset.alarmId);
         } else if (clockStageIsOpen()) {
             // The stage covers the UI the full context menu targets;
@@ -9897,83 +10003,6 @@
     });
 
     // Wire text context menu actions
-    document.getElementById("ctx-text-cut")?.addEventListener("click", async () => {
-        if (!activeTextTarget || activeTextTarget.readOnly || activeTextTarget.disabled) {
-            hideAllContextMenus();
-            return;
-        }
-        const start = activeTextTarget.selectionStart;
-        const end = activeTextTarget.selectionEnd;
-        if (typeof start === "number" && typeof end === "number" && start !== end) {
-            const selectedText = activeTextTarget.value.substring(start, end);
-            try {
-                await navigator.clipboard.writeText(selectedText);
-            } catch (_) {}
-            activeTextTarget.setRangeText("", start, end, "end");
-            activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-        activeTextTarget.focus();
-        hideAllContextMenus();
-    });
-
-    document.getElementById("ctx-text-copy")?.addEventListener("click", async () => {
-        if (!activeTextTarget) {
-            hideAllContextMenus();
-            return;
-        }
-        const start = activeTextTarget.selectionStart;
-        const end = activeTextTarget.selectionEnd;
-        if (typeof start === "number" && typeof end === "number" && start !== end) {
-            const selectedText = activeTextTarget.value.substring(start, end);
-            try {
-                await navigator.clipboard.writeText(selectedText);
-            } catch (_) {}
-        }
-        activeTextTarget.focus();
-        hideAllContextMenus();
-    });
-
-    document.getElementById("ctx-text-paste")?.addEventListener("click", async () => {
-        if (!activeTextTarget || activeTextTarget.readOnly || activeTextTarget.disabled) {
-            hideAllContextMenus();
-            return;
-        }
-        activeTextTarget.focus();
-        try {
-            const clipText = await navigator.clipboard.readText();
-            if (clipText) {
-                const start = activeTextTarget.selectionStart ?? activeTextTarget.value.length;
-                const end = activeTextTarget.selectionEnd ?? activeTextTarget.value.length;
-                const maxLen = activeTextTarget.maxLength > 0 ? activeTextTarget.maxLength : Infinity;
-                const currentLen = activeTextTarget.value.length - (end - start);
-                const allowedText = clipText.slice(0, Math.max(0, maxLen - currentLen));
-                activeTextTarget.setRangeText(allowedText, start, end, "end");
-                activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
-            }
-        } catch (_) {
-            document.execCommand("paste");
-        }
-        hideAllContextMenus();
-    });
-
-    document.getElementById("ctx-text-selectall")?.addEventListener("click", () => {
-        if (activeTextTarget) {
-            activeTextTarget.focus();
-            activeTextTarget.select();
-        }
-        hideAllContextMenus();
-    });
-
-    document.getElementById("ctx-text-clear")?.addEventListener("click", () => {
-        if (activeTextTarget && !activeTextTarget.readOnly && !activeTextTarget.disabled) {
-            activeTextTarget.value = "";
-            activeTextTarget.dispatchEvent(new Event("input", { bubbles: true }));
-            activeTextTarget.focus();
-        }
-        hideAllContextMenus();
-    });
-
-
     // ═══════════════════════════════════════════════════════════
     // AUTO SCHEDULER (Backend Assisted)
     // ═══════════════════════════════════════════════════════════

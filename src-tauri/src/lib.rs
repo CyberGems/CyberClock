@@ -648,12 +648,22 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
 /// concurrent writers cannot clobber each other.
 #[tauri::command]
 fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSettings, String> {
-    let scheduler_disclosure_only = patch
-        .as_object()
-        .is_some_and(|fields| fields.len() == 1 && fields.contains_key("relaxSchedulerExpanded"));
+    let relax_preferences_only = patch.as_object().is_some_and(|fields| {
+        fields.keys().all(|key| {
+            matches!(
+                key.as_str(),
+                "relaxSchedulerExpanded"
+                    | "relaxMixExpanded"
+                    | "relaxSavedMixes"
+                    | "relaxActiveMixName"
+                    | "relaxMixLayers"
+                    | "relaxLayerVolumes"
+            )
+        })
+    });
     let merged = settings::patch_settings(&app, patch)?;
-    // Opening or closing the controls must not reset the next scheduled run.
-    if scheduler_disclosure_only {
+    // Editing a mix or its controls must not reset the next scheduled run.
+    if relax_preferences_only {
         return Ok(merged);
     }
     set_auto_update(merged.auto_update);

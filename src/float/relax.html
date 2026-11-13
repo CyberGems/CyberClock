@@ -12,6 +12,8 @@
         <script src="../shared/i18n.js"></script>
         <script src="../shared/icons.js"></script>
         <link rel="stylesheet" href="relax.css" />
+        <link rel="stylesheet" href="../shared/relax-mixes.css" />
+        <link rel="stylesheet" href="../shared/text-context-menu.css" />
     </head>
     <body data-tint="azure">
         <div class="relax-shell" id="relax-shell">
@@ -21,6 +23,11 @@
                     <div class="relax-kicker" data-i18n="float.relaxTitle">Relax</div>
                     <div class="relax-track" id="track-name"><span id="track-label"></span></div>
                 </div>
+                <button type="button" class="relax-icon-btn" id="saved-mixes" popovertarget="saved-mix-menu"
+                    aria-expanded="false" aria-controls="saved-mix-menu" data-tooltip-dir="bottom"
+                    data-i18n-attr="aria-label:relax.savedMixes, data-tooltip:relax.savedMixes" disabled>
+                    <span data-ico="list" data-ico-size="14" aria-hidden="true"></span>
+                </button>
                 <button type="button" class="relax-icon-btn" id="btn-menu" data-tooltip="Menu and settings" data-i18n-attr="data-tooltip:float.menuTooltip, aria-label:float.menuTooltip" data-tooltip-dir="bottom" data-tooltip-align="right" aria-label="Menu and settings">
                     <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
                         <circle cx="12" cy="5" r="1.6"></circle>
@@ -78,6 +85,7 @@
                 </div>
             </div>
             <canvas class="spectrum" id="spectrum" aria-hidden="true"></canvas>
+            <div class="relax-popover" id="saved-mix-menu" popover></div>
             <div class="relax-popover master-volume-options" id="master-volume-options" popover>
                 <div class="master-volume-heading">
                     <label for="master-volume-slider" data-i18n="relax.masterVolume">Master volume</label>
@@ -101,6 +109,8 @@
                 </div>
             </div>
         </div>
+        <script src="../shared/text-context-menu.js"></script>
+        <script src="../shared/relax-mixes.js"></script>
         <script src="relax.js"></script>
     </body>
 </html>

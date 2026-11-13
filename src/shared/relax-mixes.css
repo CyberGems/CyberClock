@@ -1,0 +1,64 @@
+.relax-mix-menu {
+    padding: 10px;
+    border: 1px solid var(--border-active);
+    border-radius: 9px;
+    background: var(--bg-02);
+    color: var(--text-hi);
+    box-shadow: 0 6px 20px var(--bg-00);
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-a) var(--bg-02);
+    text-align: left;
+    font: 500 12px var(--font-ui);
+}
+.relax-mix-menu-title {
+    color: var(--accent-a);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.relax-mix-empty, .relax-mix-message {
+    color: var(--text-md);
+    margin: 4px 0;
+}
+.relax-mix-choices {
+    list-style: none;
+    display: grid;
+    gap: 3px;
+    max-height: 8rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-a) var(--bg-02);
+}
+.relax-mix-menu button, .relax-mix-menu input {
+    min-width: 0;
+    min-height: 26px;
+    padding: 4px 7px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg-01);
+    color: var(--text-hi);
+    font: inherit;
+}
+.relax-mix-menu button:not(:disabled) { cursor: pointer; }
+.relax-mix-menu :disabled { opacity: 0.55; }
+.relax-mix-menu button:not(:disabled):hover,
+.relax-mix-menu button[aria-current="true"] {
+    background: var(--accent-dim);
+    color: var(--accent-a);
+    border-color: var(--border-active);
+}
+.relax-mix-choices button {
+    width: 100%;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.relax-mix-save {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px;
+    margin-top: 7px;
+}
+.relax-mix-save input { user-select: text; }
+.relax-mix-menu :focus-visible { outline: 2px solid var(--accent-a); outline-offset: -2px; }

@@ -236,6 +236,14 @@ impl Default for RelaxSchedulerSettings {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct RelaxSavedMix {
+    pub name: String,
+    pub layers: Vec<String>,
+    pub layer_volumes: HashMap<String, f64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
 pub struct VoiceAnnouncerSettings {
     pub enabled: bool,
@@ -414,6 +422,8 @@ pub struct AppSettings {
     pub relax_volume: f64,
     pub relax_layer_volumes: HashMap<String, f64>,
     pub relax_mix_layers: Vec<String>,
+    pub relax_saved_mixes: Vec<RelaxSavedMix>,
+    pub relax_active_mix_name: Option<String>,
     pub relax_mix_expanded: bool,
     pub audio_muted: bool,
     pub relax_auto_timer: u32,
@@ -608,6 +618,8 @@ impl Default for AppSettings {
             relax_volume: 0.8,
             relax_layer_volumes: HashMap::new(),
             relax_mix_layers: Vec::new(),
+            relax_saved_mixes: Vec::new(),
+            relax_active_mix_name: None,
             relax_mix_expanded: false,
             audio_muted: false,
             relax_auto_timer: 0,

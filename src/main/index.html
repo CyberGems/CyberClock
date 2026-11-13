@@ -12,6 +12,8 @@
         <script src="../shared/icons.js"></script>
         <link rel="stylesheet" href="app.css" />
         <link rel="stylesheet" href="../shared/selects.css" />
+        <link rel="stylesheet" href="../shared/relax-mixes.css" />
+        <link rel="stylesheet" href="../shared/text-context-menu.css" />
     </head>
     <body data-tint="azure" class="cc-inactive">
         <!-- Theme-aware gradients for the premium icon system -->
@@ -823,6 +825,12 @@
                                 <div class="r-player-heading">
                                     <div class="r-player-track" id="r-player-track" aria-live="polite" data-i18n="relax.noTrack">No track selected</div>
                                     <span class="ast-cd" id="r-ast-cd" role="timer" hidden></span>
+                                    <button type="button" class="r-saved-mixes" id="r-saved-mixes"
+                                        popovertarget="r-saved-mix-menu" aria-controls="r-saved-mix-menu" aria-expanded="false"
+                                        data-i18n-attr="aria-label:relax.savedMixes, data-tooltip:relax.savedMixes" data-tooltip-dir="left">
+                                        <span data-ico="list" data-ico-size="15" aria-hidden="true"></span>
+                                    </button>
+                                    <div id="r-saved-mix-menu" popover></div>
                                 </div>
                                 <div class="r-play-row">
                                     <div id="r-play-wrap" class="r-cta-wrap" data-tooltip="Play or pause the selected track" data-i18n-attr="data-tooltip:relax.tooltip.play">
@@ -2502,35 +2510,6 @@
                 <span class="label" data-i18n="alarms.card.delete">Delete alarm</span>
             </div>
         </div>
-        <!-- ═══ TEXT CONTEXT MENU (Inputs & Textareas) ═════════════════ -->
-        <div class="ctx-menu" id="text-ctx-menu">
-            <div class="ctx-item" id="ctx-text-cut">
-                <span class="ico"><span data-ico="scissors"></span></span>
-                <span class="label" data-i18n="ctx.cut">Cut</span>
-                <span class="shortcut">Ctrl+X</span>
-            </div>
-            <div class="ctx-item" id="ctx-text-copy">
-                <span class="ico"><span data-ico="copy"></span></span>
-                <span class="label" data-i18n="ctx.copy">Copy</span>
-                <span class="shortcut">Ctrl+C</span>
-            </div>
-            <div class="ctx-item" id="ctx-text-paste">
-                <span class="ico"><span data-ico="clipboard"></span></span>
-                <span class="label" data-i18n="ctx.paste">Paste</span>
-                <span class="shortcut">Ctrl+V</span>
-            </div>
-            <div class="ctx-sep"></div>
-            <div class="ctx-item" id="ctx-text-selectall">
-                <span class="ico"><span data-ico="select-all"></span></span>
-                <span class="label" data-i18n="ctx.selectAll">Select All</span>
-                <span class="shortcut">Ctrl+A</span>
-            </div>
-            <div class="ctx-item danger" id="ctx-text-clear">
-                <span class="ico"><span data-ico="trash"></span></span>
-                <span class="label" data-i18n="ctx.clear">Clear</span>
-            </div>
-        </div>
-
         <!-- ═══ FIRST CLOSE CONFIRMATION MODAL ═════════════════════════ -->
         <div class="first-close-overlay" id="first-close-overlay" hidden>
             <div class="first-close-modal" role="dialog" aria-modal="true" aria-labelledby="first-close-title">
@@ -2653,6 +2632,8 @@
         <script src="../shared/update-utils.js"></script>
         <script src="../shared/voice-announcer.js"></script>
         <script src="../shared/clock-led.js"></script>
+        <script src="../shared/text-context-menu.js"></script>
+        <script src="../shared/relax-mixes.js"></script>
         <script src="app.js"></script>
     </body>
 </html>
