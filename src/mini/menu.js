@@ -356,6 +356,8 @@
         updateAudioUi(currentCfg.audioMuted);
         updateClickThroughUi(ctpValueForCaller(currentCfg));
         updateAotState(currentCfg.alwaysOnTop || false);
+        window.cc.getOpenFloatLabels().then(labels => renderRelaxWidgetAction(labels.includes("float-relax-1")))
+            .catch(console.error);
 
         const timerView = document.getElementById("ctx-timer-view");
         const relaxView = document.getElementById("ctx-relax-view");
@@ -993,6 +995,17 @@
     }
 
     // Sync menu options with saved configurations
+    function renderRelaxWidgetAction(open) {
+        const key = open ? "relax.widgetOpen" : "float.newRelax";
+        document.querySelectorAll('.ctx-item[data-action="new_relax"]').forEach(item => {
+            item.setAttribute("aria-disabled", String(open));
+            const label = item.querySelector(".label");
+            label.dataset.i18n = key;
+            label.textContent = window.ccI18n.t(key);
+        });
+    }
+    window.cc.onRelaxWidgetOpen(renderRelaxWidgetAction).catch(console.error);
+
     if (window.cc && window.cc.getSettings) {
         window.cc.getSettings().then((cfg) => {
             currentCfg = cfg || {};
@@ -1034,9 +1047,6 @@
                     });
                     document.querySelectorAll('.ctx-item[data-action="new_analog"] .label').forEach((el) => {
                         el.textContent = window.ccI18n.t("float.newAnalog");
-                    });
-                    document.querySelectorAll('.ctx-item[data-action="new_relax"] .label').forEach((el) => {
-                        el.textContent = window.ccI18n.t("float.newRelax");
                     });
                     document.querySelectorAll('.ctx-item[data-action="new_alarm"] .label').forEach((el) => {
                         el.textContent = window.ccI18n.t("tray.newAlarm");
@@ -1555,6 +1565,7 @@
     document.querySelectorAll("[data-action]").forEach((el) => {
         el.addEventListener("click", () => {
             const action = el.dataset.action;
+            if (action === "new_relax" && el.getAttribute("aria-disabled") === "true") return;
             if (action === "toggle_audio") {
                 const nextMuted = currentCfg.audioMuted !== true;
                 currentCfg.audioMuted = nextMuted;

@@ -27,11 +27,9 @@
     const btnMute = document.getElementById("btn-mute");
     const btnMenu = document.getElementById("btn-menu");
     const mixTrigger = document.getElementById("saved-mixes");
+    let pendingMixRequest = null;
     const mixMenu = window.bindRelaxMixMenu(mixTrigger, {
-        save: name => window.cc.sendRelaxControl({ type: "save-mix", name }).catch(error => {
-            console.error(error);
-            mixMenu.finishSave("relax.mixSaveFailed");
-        }),
+        mutate: requestRelaxMixChange,
         load: name => sendControl({ type: "load-mix", name }),
     });
     const btnClose = document.getElementById("btn-close");
@@ -50,6 +48,21 @@
 
     function sendControl(action) {
         window.cc.sendRelaxControl(action).catch(console.error);
+    }
+
+    function requestRelaxMixChange(change) {
+        return new Promise((resolve, reject) => {
+            const id = crypto.randomUUID();
+            const finish = (callback, value) => {
+                if (pendingMixRequest?.id !== id) return;
+                clearTimeout(timeout);
+                pendingMixRequest = null;
+                callback(value);
+            };
+            const timeout = setTimeout(() => finish(reject, Error("Relax mix request timed out")), 10000);
+            pendingMixRequest = { id, resolve: result => finish(resolve, result) };
+            window.cc.sendRelaxControl({ type: "edit-mix", change, id }).catch(error => finish(reject, error));
+        });
     }
 
     function t(key) {
@@ -557,6 +570,7 @@
             clearInterval(playbackStateRetry);
             autoStopEl.disabled = false;
             volumeTrigger.disabled = false;
+            if (mixTrigger.disabled) window.cc.reportRelaxWidgetReady().catch(console.error);
             mixTrigger.disabled = false;
             if (!state.playing || state.paused) {
                 spectrumData = [];
@@ -568,7 +582,9 @@
             spectrumData = data;
             spectrumRequestPending = false;
         }),
-        window.cc.onRelaxMixSaveResult(({ error }) => mixMenu.finishSave(error))
+        window.cc.onRelaxMixResult(({ id, result }) => {
+            if (pendingMixRequest?.id === id) pendingMixRequest.resolve(result);
+        })
     ]).then(() => {
         if (!autoStopEl.disabled) return;
         playbackStateRetry = setInterval(() => sendControl("state"), 500);

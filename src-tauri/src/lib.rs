@@ -191,6 +191,7 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
 static MINI_TARGET_WIDTH: AtomicU32 = AtomicU32::new(260);
 static MINI_TARGET_HEIGHT: AtomicU32 = AtomicU32::new(48);
 static FLOAT_SPAWN_LOCK: Mutex<()> = Mutex::new(());
+const RELAX_WIDGET_LABEL: &str = "float-relax-1";
 static APP_EXITING: AtomicBool = AtomicBool::new(false);
 static EDGE_LIMITS_ENABLED: AtomicBool = AtomicBool::new(true);
 /// Top-level HWNDs of floating analog clocks. Their window is a square so the
@@ -1150,14 +1151,8 @@ fn spawn_float_window_with_slot(
         "relax" => "relax",
         _ => "sw",
     };
-    if kind == "relax" {
-        if let Some(existing) = app.get_webview_window("float-relax-1") {
-            let _ = existing.unminimize();
-            let _ = existing.show();
-            reapply_click_through(app, &existing);
-            let _ = existing.set_focus();
-            return Some(existing.label().to_string());
-        }
+    if kind == "relax" && app.get_webview_window(RELAX_WIDGET_LABEL).is_some() {
+        return None;
     }
     if float_window_count(app) >= MAX_FLOAT_WINDOWS {
         warn!(
@@ -1166,7 +1161,9 @@ fn spawn_float_window_with_slot(
         );
         return None;
     }
-    let (seq, label) = if let Some(lbl) = target_label {
+    let (seq, label) = if kind == "relax" {
+        (1, RELAX_WIDGET_LABEL.to_string())
+    } else if let Some(lbl) = target_label {
         if app.get_webview_window(lbl).is_some() {
             return None;
         }
@@ -1343,12 +1340,6 @@ fn spawn_float_window_with_slot(
                     s.float_analog_open = true;
                     Ok(())
                 });
-            } else if kind == "relax" {
-                let app_handle = app.clone();
-                let _ = update_settings(&app_handle, |s| {
-                    s.float_relax_open = true;
-                    Ok(())
-                });
             } else if kind == "timer" || kind == "sw" {
                 let app_handle = app.clone();
                 let l = label.clone();
@@ -1447,27 +1438,6 @@ fn spawn_float_window_with_slot(
                                     Ok(())
                                 });
                             }
-                        } else if kind_for_event == "relax" {
-                            let relax_count = app_for_event
-                                .webview_windows()
-                                .keys()
-                                .filter(|l| l.starts_with("float-relax-"))
-                                .count();
-                            if relax_count == 0 {
-                                let _ = update_settings(&app_for_event, |s| {
-                                    s.float_relax_open = false;
-                                    Ok(())
-                                });
-                            }
-                            // If this widget was the reported playback
-                            // source, its audio died with it: drop the
-                            // tray's relax state.
-                            let state = app_for_event.state::<AlarmState>();
-                            let mut source = lock_or_recover(&state.relax_playing_source);
-                            if source.as_deref() == Some(float_label.as_str()) {
-                                *source = None;
-                                *lock_or_recover(&state.relax_playing) = None;
-                            }
                         } else if kind_for_event == "timer" || kind_for_event == "sw" {
                             let _ = update_settings(&app_for_event, |s| {
                                 s.open_float_widgets.retain(|w| w.label != float_label);
@@ -1482,6 +1452,9 @@ fn spawn_float_window_with_slot(
                 }
                 _ => {}
             });
+            if kind == "relax" {
+                set_relax_widget_open(app, true);
+            }
             info!("spawn_float: {} opened ({})", label, kind);
             reapply_click_through(app, &win);
             let _ = win.set_focus();
@@ -1492,6 +1465,27 @@ fn spawn_float_window_with_slot(
             None
         }
     }
+}
+
+fn set_relax_widget_open(app: &AppHandle, open: bool) {
+    if !open {
+        let state = app.state::<AlarmState>();
+        let mut playing = lock_or_recover(&state.relax_playing);
+        let mut source = lock_or_recover(&state.relax_playing_source);
+        if source.as_deref() == Some(RELAX_WIDGET_LABEL) {
+            *playing = None;
+            *source = None;
+            *lock_or_recover(&state.relax_paused) = false;
+        }
+    }
+    if let Err(error) = update_settings(app, |s| {
+        s.float_relax_open = open;
+        Ok(())
+    }) {
+        warn!("Could not save Relax widget state: {}", error);
+    }
+    let _ = app.emit("relax:widget-open", open);
+    let _ = app.emit("tray-menu-state", collect_tray_menu_state(app));
 }
 
 // NOTE: These float/menu commands MUST be `async`. Sync commands run
@@ -5484,6 +5478,7 @@ pub struct TrayMenuState {
     /// disabled rows for the kinds with no open instance.
     pub click_through_windows: Vec<CtpWindowState>,
     pub relax_playing: Option<String>,
+    pub relax_widget_open: bool,
     /// True when the reported relax playback is paused; the tray then
     /// offers "resume" instead of "pause".
     pub relax_paused: bool,
@@ -5736,6 +5731,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         mini_click_through: settings.mini_click_through,
         click_through_windows,
         relax_playing,
+        relax_widget_open: app.get_webview_window(RELAX_WIDGET_LABEL).is_some(),
         relax_paused,
         hotkey: friendly_hotkey(&settings.hotkey_toggle),
         show_suite_recommendations: settings.show_suite_recommendations,
@@ -6544,7 +6540,18 @@ pub fn run() {
             }
         });
     }
-    app.run(|_, _| {});
+    app.run(|app, event| {
+        if let tauri::RunEvent::WindowEvent {
+            label,
+            event: WindowEvent::Destroyed,
+            ..
+        } = event
+        {
+            if label == RELAX_WIDGET_LABEL && !APP_EXITING.load(Ordering::SeqCst) {
+                set_relax_widget_open(app, app.get_webview_window(RELAX_WIDGET_LABEL).is_some());
+            }
+        }
+    });
 }
 
 #[cfg(test)]

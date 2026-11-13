@@ -3056,6 +3056,21 @@
     #r-stop:hover {
         box-shadow: none;
     }
+    #r-float[aria-pressed="true"] {
+        opacity: 1;
+        border-color: var(--border-active);
+        background: var(--accent-dim);
+        color: var(--accent-a);
+    }
+    #r-float[aria-pressed="true"] .cc-ico {
+        filter: none;
+    }
+    #r-float-wrap:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 2px;
+        border-radius: 8px;
+    }
+    #r-float-wrap[data-tooltip]::after { content: none; }
     #r-stop:hover::before {
         opacity: 0;
     }

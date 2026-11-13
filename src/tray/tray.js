@@ -123,7 +123,12 @@
         const lblAnalog = document.getElementById("lbl-analog");
         if (lblAnalog) lblAnalog.textContent = window.ccI18n ? window.ccI18n.t("float.newAnalog") : "New Analog Clock";
         const lblRelaxFloat = document.getElementById("lbl-relax-float");
-        if (lblRelaxFloat) lblRelaxFloat.textContent = window.ccI18n ? window.ccI18n.t("float.newRelax") : "New Relax";
+        const relaxWidgetOpen = state.relax_widget_open === true;
+        if (lblRelaxFloat) {
+            lblRelaxFloat.textContent = relaxWidgetOpen ? T("relax.widgetOpen", "Relax widget open")
+                : T("float.newRelax", "Open Relax widget");
+            lblRelaxFloat.closest("button").disabled = relaxWidgetOpen;
+        }
         const lblAlarm = document.getElementById("lbl-alarm");
         if (lblAlarm) lblAlarm.textContent = window.ccI18n ? window.ccI18n.t("tray.newAlarm") : "New Alarm";
 
@@ -799,11 +804,25 @@
 
     // Tauri event subscriptions
     if (window.cc) {
-        if (window.cc.onTrayMenuState) {
-            window.cc.onTrayMenuState((state) => {
-                renderState(state);
-            });
+        let stateVersion = 0;
+        async function refreshTrayState() {
+            if (!window.cc.getTrayMenuState) return;
+            const version = stateVersion;
+            const state = await window.cc.getTrayMenuState();
+            if (version === stateVersion) renderState(state);
         }
+        const stateSubscription = window.cc.onTrayMenuState
+            ? window.cc.onTrayMenuState((state) => {
+                stateVersion++;
+                renderState(state);
+            }) : Promise.resolve();
+        window.cc.onRelaxWidgetOpen?.(open => {
+            stateVersion++;
+            if (currentMenuState) currentMenuState.relax_widget_open = open;
+            const button = document.querySelector('.tray-item[data-action="new_relax"]');
+            button.disabled = open;
+            refreshTrayState().catch(console.error);
+        }).catch(console.error);
 
         if (window.cc.onTrayMenuShow) {
             window.cc.onTrayMenuShow(() => {
@@ -811,9 +830,7 @@
                 // The tray window is persistent (hidden, not destroyed), so
                 // any expanded submenu must collapse so it always opens clean.
                 collapseAllSubmenus();
-                if (window.cc.getTrayMenuState) {
-                    window.cc.getTrayMenuState().then(renderState).catch(console.error);
-                }
+                refreshTrayState().catch(console.error);
                 requestAnimationFrame(() => {
                     requestAnimationFrame(reportSize);
                 });
@@ -826,12 +843,9 @@
             });
         }
 
-        if (window.cc.getTrayMenuState) {
-            window.cc.getTrayMenuState().then((state) => {
-                renderState(state);
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(reportSize);
-                });
-            }).catch(console.error);
-        }
+        stateSubscription.then(refreshTrayState).then(() => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(reportSize);
+            });
+        }).catch(console.error);
     }

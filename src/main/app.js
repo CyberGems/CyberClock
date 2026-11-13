@@ -2516,7 +2516,7 @@
             relaxMixLayers = [...new Set(savedLayers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
         }
         if (!pendingPresetWrites) relaxSavedMixes = s.relaxSavedMixes ?? [];
-        relaxActiveMixName = pendingPresetLoad?.relaxActiveMixName ?? s.relaxActiveMixName ?? null;
+        if (!pendingPresetWrites && !pendingPresetLoad) relaxActiveMixName = s.relaxActiveMixName ?? null;
         setRelaxMixExpanded(pendingRelaxDisclosures.get("relaxMixExpanded")?.expanded ?? (s.relaxMixExpanded === true));
         const autoStopMinutes = isRelaxAutoStopOption(s.relaxAutoTimer) ? s.relaxAutoTimer : 0;
         if (!pendingAutoStop && autoStopMinutes !== preferredAutoStopMinutes) {
@@ -7052,7 +7052,7 @@
     const mixToggle = document.getElementById("r-mix-toggle");
     const mixList = document.getElementById("r-mix-layers");
     const savedMixMenu = window.bindRelaxMixMenu(document.getElementById("r-saved-mixes"), {
-        save: async name => savedMixMenu.finishSave(await saveNamedRelaxMix(name)),
+        mutate: editNamedRelaxMix,
         load: loadNamedRelaxMix,
         position: (panel, trigger) => {
             const rect = trigger.getBoundingClientRect();
@@ -7150,35 +7150,69 @@
         }).catch(console.error);
     }
 
-    function saveNamedRelaxMix(name) {
-        name = typeof name === "string" ? Array.from(name.trim()).slice(0, 48).join("") : "";
-        if (!name) return Promise.resolve("relax.mixNameRequired");
-        const layers = currentRelaxLayers();
-        if (!layers.length) return Promise.resolve("relax.mixSaveEmpty");
-        const engine = window.audioEngine;
-        const mix = {
-            name, layers: [...layers],
-            layerVolumes: Object.fromEntries(layers.map(id => [id, engine.getLayerVolume(id)])),
+    function editNamedRelaxMix({ type, target, name }) {
+        const snapshotNeeded = type === "save" || type === "update";
+        const nameNeeded = type === "save" || type === "rename";
+        const messages = {
+            save: "relax.mixSaved",
+            rename: "relax.mixRenamed",
+            update: "relax.mixUpdated",
+            delete: "relax.mixDeleted",
         };
+        if (!Object.hasOwn(messages, type)) return Promise.resolve({ error: "relax.mixSaveFailed" });
+        name = typeof name === "string" ? Array.from(name.trim()).slice(0, 48).join("") : "";
+        if (nameNeeded && !name) return Promise.resolve({ error: "relax.mixNameRequired" });
+        const layers = currentRelaxLayers();
+        if (snapshotNeeded && !layers.length) return Promise.resolve({ error: "relax.mixSaveEmpty" });
+        const engine = window.audioEngine;
+        const snapshot = snapshotNeeded ? {
+            layers: [...layers],
+            layerVolumes: Object.fromEntries(layers.map(id => [id, engine.getLayerVolume(id)])),
+        } : null;
         pendingPresetWrites++;
         const save = relaxSettingsSave.then(async () => {
-            if (relaxSavedMixes.some(saved => saved.name.toLowerCase() === name.toLowerCase())) {
-                return "relax.mixNameTaken";
+            const index = relaxSavedMixes.findIndex(mix => mix.name === target);
+            if (type !== "save" && index < 0) return { error: "relax.mixMissing" };
+            if (nameNeeded && relaxSavedMixes.some((mix, i) =>
+                (type === "save" || i !== index) && mix.name.toLowerCase() === name.toLowerCase()
+            )) {
+                return { error: "relax.mixNameTaken" };
             }
-            const next = [...relaxSavedMixes, mix];
-            await window.cc.saveSettings({ relaxSavedMixes: next });
-            relaxSavedMixes = next;
+            const mixes = [...relaxSavedMixes];
+            const patch = { relaxSavedMixes: mixes };
+            if (type === "save") {
+                mixes.push({ name, ...snapshot });
+                patch.relaxActiveMixName = name;
+            } else if (type === "update") {
+                mixes[index] = { name: target, ...snapshot };
+                patch.relaxActiveMixName = target;
+            } else if (type === "rename") {
+                mixes[index] = { ...mixes[index], name };
+                if (relaxActiveMixName === target) patch.relaxActiveMixName = name;
+            } else {
+                mixes.splice(index, 1);
+                if (relaxActiveMixName === target) patch.relaxActiveMixName = null;
+            }
+            const saved = await window.cc.saveSettings(patch);
+            relaxSavedMixes = saved.relaxSavedMixes ?? mixes;
+            if (!pendingPresetLoad && Object.hasOwn(patch, "relaxActiveMixName")) {
+                relaxActiveMixName = patch.relaxActiveMixName;
+            }
             updatePlayButtonUI(engine.isPlaying);
-            return null;
+            return { message: messages[type] };
         }).catch(error => {
             console.error(error);
-            return "relax.mixSaveFailed";
+            return { error: "relax.mixSaveFailed" };
         }).finally(() => pendingPresetWrites--);
         relaxSettingsSave = save;
         return save;
     }
 
     function loadNamedRelaxMix(name) {
+        if (pendingPresetWrites) {
+            relaxSettingsSave.then(() => loadNamedRelaxMix(name)).catch(console.error);
+            return;
+        }
         const mix = relaxSavedMixes.find(saved => saved.name === name);
         if (!mix) return;
         const layers = [...new Set(mix.layers)].filter(id => RELAX_TRACKS.some(track => track.id === id));
@@ -7394,8 +7428,10 @@
             if (action.mixRevision === relaxMixRevision) {
                 updateRelaxLayerVolume(action.track, action.volume, action.commit === true);
             }
-        } else if (action?.type === "save-mix") {
-            saveNamedRelaxMix(action.name).then(error => window.cc.sendRelaxMixSaveResult({ error })).catch(console.error);
+        } else if (action?.type === "edit-mix" && action.change && typeof action.id === "string") {
+            editNamedRelaxMix(action.change)
+                .then(result => window.cc.sendRelaxMixResult({ id: action.id, result }))
+                .catch(console.error);
         } else if (action?.type === "load-mix") {
             loadNamedRelaxMix(action.name);
         } else if (action?.type === "add-layer" && RELAX_TRACKS.some(track => track.id === action.track)) {
@@ -7441,11 +7477,55 @@
         rStop(true);
     }
     const rFloatBtn = document.getElementById("r-float");
-    if (rFloatBtn) {
-        rFloatBtn.addEventListener("click", () => {
-            if (window.cc && window.cc.spawnFloat) window.cc.spawnFloat("relax");
-        });
+    const rFloatWrap = document.getElementById("r-float-wrap");
+    let relaxWidgetOpen = false;
+    let openingRelaxWidget = true;
+    let relaxWidgetStateVersion = 0;
+
+    function renderRelaxWidgetButton() {
+        const key = relaxWidgetOpen ? "relax.widgetOpen" : "float.newRelax";
+        const label = window.ccI18n.t(key);
+        rFloatBtn.disabled = openingRelaxWidget || relaxWidgetOpen;
+        rFloatBtn.setAttribute("aria-pressed", String(relaxWidgetOpen));
+        rFloatBtn.setAttribute("aria-label", label);
+        rFloatBtn.dataset.i18nAttr = "aria-label:" + key;
+        rFloatWrap.dataset.tooltip = label;
+        rFloatWrap.dataset.i18nAttr = "data-tooltip:" + key;
+        rFloatWrap.tabIndex = relaxWidgetOpen ? 0 : -1;
     }
+
+    function updateRelaxWidgetOpen(open) {
+        relaxWidgetStateVersion++;
+        relaxWidgetOpen = open;
+        renderRelaxWidgetButton();
+    }
+
+    rFloatBtn.addEventListener("click", async () => {
+        if (openingRelaxWidget || relaxWidgetOpen) return;
+        const hadFocus = document.activeElement === rFloatBtn;
+        openingRelaxWidget = true;
+        renderRelaxWidgetButton();
+        try {
+            await window.cc.spawnFloat("relax");
+        } catch (error) {
+            console.error(error);
+        } finally {
+            openingRelaxWidget = false;
+            renderRelaxWidgetButton();
+            if (hadFocus && (document.activeElement === document.body || document.activeElement === rFloatBtn)) {
+                (relaxWidgetOpen ? rFloatWrap : rFloatBtn).focus();
+            }
+        }
+    });
+
+    window.cc.onRelaxWidgetOpen(updateRelaxWidgetOpen).then(async () => {
+        const version = relaxWidgetStateVersion;
+        const open = (await window.cc.getOpenFloatLabels()).includes("float-relax-1");
+        if (relaxWidgetStateVersion === version) updateRelaxWidgetOpen(open);
+    }).catch(console.error).finally(() => {
+        openingRelaxWidget = false;
+        renderRelaxWidgetButton();
+    });
 
     const relaxVolumeSlider = document.getElementById("r-vol");
     relaxVolumeSlider.addEventListener("input", () => updateRelaxMasterVolume(relaxVolumeSlider.valueAsNumber / 100));
@@ -9848,6 +9928,7 @@
         ttBind(document.getElementById(id));
     });
     document.querySelectorAll(".tcard-add").forEach(button => ttBind(button, false));
+    ttBind(rFloatWrap, false);
 
     // ══════════════════════════════════════════════════════════════
     // CUSTOM CONTEXT MENUS (Full Mode & Alarms)

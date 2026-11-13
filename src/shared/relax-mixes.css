@@ -47,12 +47,39 @@
     color: var(--accent-a);
     border-color: var(--border-active);
 }
-.relax-mix-choices button {
+.relax-mix-choices li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 28px;
+    gap: 4px;
+}
+.relax-mix-choices .relax-mix-load {
     width: 100%;
     text-align: start;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.relax-mix-options {
+    display: grid;
+    place-items: center;
+}
+.relax-mix-options[aria-expanded="true"] {
+    border-color: var(--border-active);
+    color: var(--accent-a);
+}
+.relax-mix-actions:not([hidden]),
+.relax-mix-confirm:not([hidden]) {
+    display: grid;
+    gap: 4px;
+    margin-top: 6px;
+}
+.relax-mix-actions button { text-align: start; }
+.relax-mix-confirm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.relax-mix-confirm p {
+    grid-column: 1 / -1;
+    overflow-wrap: anywhere;
 }
 .relax-mix-save {
     display: grid;
@@ -60,5 +87,7 @@
     gap: 5px;
     margin-top: 7px;
 }
+.relax-mix-save[hidden] { display: none; }
+.relax-mix-cancel { grid-column: 1 / -1; }
 .relax-mix-save input { user-select: text; }
 .relax-mix-menu :focus-visible { outline: 2px solid var(--accent-a); outline-offset: -2px; }

@@ -482,8 +482,10 @@
         onRelaxControl: (cb) => subscribeToWindow("relax:control", cb),
         sendRelaxPlayback: (state) => emitTo("float-relax-1", "relax:playback", state),
         onRelaxPlayback: (cb) => subscribeToWindow("relax:playback", cb),
-        sendRelaxMixSaveResult: (error) => emitTo("float-relax-1", "relax:mix-save-result", error),
-        onRelaxMixSaveResult: (cb) => subscribeToWindow("relax:mix-save-result", cb),
+        sendRelaxMixResult: (result) => emitTo("float-relax-1", "relax:mix-result", result),
+        onRelaxMixResult: (cb) => subscribeToWindow("relax:mix-result", cb),
+        onRelaxWidgetOpen: (cb) => subscribe("relax:widget-open", cb),
+        reportRelaxWidgetReady: () => emit("relax:widget-open", true),
         sendRelaxSpectrum: (bins) => emitTo("float-relax-1", "relax:spectrum", bins),
         onRelaxSpectrum: (cb) => subscribeToWindow("relax:spectrum", cb),
         onMiniContextMenu: (cb) => {

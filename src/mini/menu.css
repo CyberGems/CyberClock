@@ -280,6 +280,10 @@
         background: rgba(var(--rgb-accent), 0.12);
         color: #ffffff;
     }
+    .ctx-item[data-action="new_relax"][aria-disabled="true"] {
+        opacity: 0.5;
+        pointer-events: none;
+    }
     .ctx-item:active {
         background: rgba(var(--rgb-accent), 0.2);
     }
