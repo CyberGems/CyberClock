@@ -63,10 +63,13 @@
         user-select: none;
         padding: 3px 6px;
         border-radius: 6px;
-        transition: background 0.15s ease, transform 0.15s ease;
+        transition: background-color 0.15s ease;
     }
-    .tbar-brand:hover {
-        background: rgba(var(--rgb-accent), 0.12);
+    .tbar-brand:hover,
+    .tbar-mid:hover,
+    .wmbtn:hover,
+    .wmbtn.on {
+        background-color: rgba(var(--rgb-accent), 0.12);
     }
     .tbar-logo,
     .tbar-name-a {
@@ -194,11 +197,10 @@
         color: inherit;
         cursor: pointer;
         font: inherit;
-        transition: background 0.15s ease;
+        transition: background-color 0.15s ease;
     }
-    .tbar-mid:hover {
-        background: rgba(var(--rgb-accent), 0.09);
-    }
+    .tbar-brand:focus-visible,
+    .wmbtn:focus-visible,
     .tbar-mid:focus-visible {
         outline: 1px solid var(--accent-a);
         outline-offset: -1px;
@@ -247,18 +249,18 @@
         flex: 0 0 auto;
     }
     .wmbtn {
-        background: transparent;
-        border: 1px solid transparent;
+        background-color: transparent;
+        border: 0;
         color: var(--text-md);
         width: 28px;
         height: 28px;
-        border-radius: 4px;
+        border-radius: 6px;
         font-size: calc(12px * var(--ui-scale));
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.18s;
+        transition: background-color 0.15s ease, color 0.15s ease;
         font-variant-emoji: text;
     }
     /* On the mica-black bar a quiet wmbtn reads darker than the brand
@@ -266,20 +268,13 @@
     .wmbtn:not(.close) {
         color: #a8bfd0;
     }
-    .wmbtn:hover {
+    .wmbtn:hover,
+    .wmbtn.on {
         color: var(--accent-a);
-        border-color: var(--border-bright);
-        box-shadow: var(--glow-xs);
     }
     .wmbtn.close:hover {
         color: #ff4466;
-        border-color: #ff4466;
-        box-shadow: 0 0 8px rgba(255, 68, 102, 0.6);
-    }
-    .wmbtn.on {
-        color: var(--accent-a);
-        border-color: var(--border-bright);
-        box-shadow: var(--glow-xs);
+        background-color: rgba(255, 68, 102, 0.14);
     }
 
     /* ── Title Bar More Menu ── */
@@ -637,7 +632,6 @@
     }
     /* Hover: brighter + scale */
     .nav-item:hover .cc-ico,
-    .wmbtn:hover .cc-ico,
     .btn-mini-pill:hover .cc-ico,
     .abtn:hover .cc-ico,
     .s-close:hover .cc-ico,
@@ -668,7 +662,6 @@
     .s-fclr .cc-ico {
         filter: drop-shadow(0 0 3px rgba(255, 68, 102, 0.45));
     }
-    .wmbtn.close:hover .cc-ico,
     .s-close:hover .cc-ico,
     .s-fclr:hover .cc-ico {
         transform: scale(1.15);
