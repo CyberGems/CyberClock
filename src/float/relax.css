@@ -157,32 +157,36 @@ button {
     flex: 1;
 }
 
-.breathe {
+.relax-play {
     width: 58px;
     height: 58px;
     border: none;
     border-radius: 50%;
     background: radial-gradient(circle at 50% 42%, rgba(var(--skin-rgb), 0.16), rgba(0, 0, 0, 0.15) 70%);
     box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.28);
-    position: relative;
+    display: grid;
+    place-items: center;
+    color: var(--skin-accent);
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
     flex-shrink: 0;
     padding: 0;
 }
 
-.breathe-ring {
-    position: absolute;
-    inset: 9px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(var(--skin-rgb), 0.9);
-    box-shadow:
-        0 0 12px rgba(var(--skin-rgb), 0.4),
-        inset 0 0 8px rgba(var(--skin-rgb), 0.25);
-    transform: scale(var(--breath, 1));
-    transition: transform 0.08s linear;
+.relax-play:hover:not(:disabled),
+.relax-play.is-playing {
+    background-color: rgba(var(--skin-rgb), 0.12);
+    box-shadow: inset 0 0 0 1px rgba(var(--skin-rgb), 0.6);
 }
 
-.breathe.is-paused .breathe-ring {
-    opacity: 0.55;
+.relax-play:focus-visible {
+    outline: 2px solid var(--skin-accent);
+    outline-offset: 2px;
+}
+
+.relax-play:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .transport {
@@ -271,24 +275,18 @@ button {
     color: rgba(255, 255, 255, 0.55);
 }
 
-.phase {
+.playback-status {
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--skin-accent, #c8dce8);
+    color: var(--text-md);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity 0.35s ease;
 }
 
-.phase.is-paused {
-    opacity: 0.38;
-}
-
-body.breathe-off .breathe,
-body.breathe-off .phase {
-    display: none;
+.playback-status.is-playing {
+    color: var(--skin-accent);
 }
 
 /* Ten designs. Skin 1 keeps the user accent. The stroke stays inset
@@ -310,7 +308,7 @@ body.breathe-off .phase {
 }
 #relax-shell[data-skin="3"] .relax-track,
 #relax-shell[data-skin="3"] .elapsed,
-#relax-shell[data-skin="3"] .phase {
+#relax-shell[data-skin="3"] .playback-status {
     font-family: var(--font-mono, "JetBrains Mono", monospace);
 }
 #relax-shell[data-skin="3"] .relax-track {

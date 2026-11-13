@@ -339,8 +339,6 @@ pub struct AppSettings {
     pub float_relax_position: Option<(i32, i32)>,
     #[serde(default)]
     pub float_relax_opacity: Option<f64>,
-    #[serde(default = "default_true")]
-    pub float_relax_show_breathe: bool,
     #[serde(default)]
     pub float_relax_design: Option<u32>,
     #[serde(default)]
@@ -508,7 +506,6 @@ pub struct AppSettings {
     pub language: String,
     // Optional name used by the full-mode welcome greeting.
     pub display_name: String,
-    pub breathe_pattern: String,
     pub auto_update: bool,
 
     // Calendar day notes: ISO date key "YYYY-MM-DD" -> note text
@@ -560,7 +557,6 @@ impl Default for AppSettings {
             float_relax_open: false,
             float_relax_position: None,
             float_relax_opacity: None,
-            float_relax_show_breathe: true,
             float_relax_design: None,
             float_analog_zoom: None,
             float_cal_zoom: None,
@@ -643,7 +639,6 @@ impl Default for AppSettings {
             show_widget_hints: true,
             language: "auto".to_string(),
             display_name: String::new(),
-            breathe_pattern: "box".to_string(),
             auto_update: true,
             calendar_notes: HashMap::new(),
             clock_accuracy_enabled: true,

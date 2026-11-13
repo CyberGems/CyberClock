@@ -4,28 +4,14 @@
  */
 (function () {
     const TRACKS = ["night", "forest", "space", "ocean", "rain", "fireplace"];
-    const BOX = [
-        { name: "inhale", dur: 4000, from: 1, to: 1.42 },
-        { name: "hold", dur: 4000, from: 1.42, to: 1.42 },
-        { name: "exhale", dur: 4000, from: 1.42, to: 1 },
-        { name: "hold", dur: 4000, from: 1, to: 1 },
-    ];
-    const P478 = [
-        { name: "inhale", dur: 4000, from: 1, to: 1.42 },
-        { name: "hold", dur: 7000, from: 1.42, to: 1.42 },
-        { name: "exhale", dur: 8000, from: 1.42, to: 1 },
-    ];
-
     const shell = document.getElementById("relax-shell");
     const trackEl = document.getElementById("track-name");
-    const phaseEl = document.getElementById("phase");
+    const statusEl = document.getElementById("playback-status");
     const elapsedEl = document.getElementById("elapsed");
     const btnPlay = document.getElementById("btn-play");
     const btnNext = document.getElementById("btn-next");
     const btnShuffle = document.getElementById("btn-shuffle");
     const btnMute = document.getElementById("btn-mute");
-    const btnBreathe = document.getElementById("btn-breathe");
-    const ring = document.getElementById("breathe-ring");
     const btnMenu = document.getElementById("btn-menu");
     const btnClose = document.getElementById("btn-close");
     const spectrum = document.getElementById("spectrum");
@@ -39,12 +25,6 @@
     let paused = false;
     let sessionStart = 0;
     let sessionShown = 0;
-    let guideOn = false;
-    let guidePaused = false;
-    let guideStart = 0;
-    let guideElapsed = 0;
-    let phaseName = "";
-    let showBreathe = true;
     let shuffleOn = false;
     let shuffleTimer = null;
     let shuffleQueue = [];
@@ -56,25 +36,6 @@
         return window.ccI18n ? window.ccI18n.t(key) : key;
     }
 
-    function phases() {
-        return cfg.breathePattern === "478" ? P478 : BOX;
-    }
-
-    function sampleGuide(elapsed) {
-        const list = phases();
-        const total = list.reduce((sum, p) => sum + p.dur, 0);
-        let at = elapsed % total;
-        for (let i = 0; i < list.length; i++) {
-            const p = list[i];
-            if (at <= p.dur) {
-                const k = p.dur ? at / p.dur : 1;
-                return { name: p.name, scale: p.from + (p.to - p.from) * k };
-            }
-            at -= p.dur;
-        }
-        return { name: "inhale", scale: 1 };
-    }
-
     function fmt(ms) {
         const s = Math.max(0, Math.floor(ms / 1000));
         const m = Math.floor(s / 60);
@@ -84,12 +45,10 @@
     function refreshLabels() {
         const id = TRACKS[trackIndex];
         trackEl.textContent = t("relax.track." + id);
-        if (!guideOn) {
-            phaseEl.textContent = !playing
-                ? t("relax.breathe.start")
-                : paused ? t("relax.status.paused") : t("relax.status.playing");
-            phaseName = "";
-        }
+        const statusKey = !playing ? "relax.status.ready"
+            : paused ? "relax.status.paused" : "relax.status.playing";
+        statusEl.textContent = t(statusKey);
+        statusEl.classList.toggle("is-playing", playing && !paused);
         const isMuted = cfg && cfg.audioMuted === true;
         btnPlay.disabled = isMuted;
         if (isMuted) {
@@ -112,8 +71,6 @@
                 btnMute.setAttribute("aria-label", label);
             }
         }
-        btnBreathe.classList.toggle("is-paused", guideOn && guidePaused);
-        phaseEl.classList.toggle("is-paused", guideOn && guidePaused);
     }
 
     function applyAudioPrefs() {
@@ -125,7 +82,6 @@
 
     function applySettings(s) {
         if (!s) return;
-        const patternChanged = cfg.breathePattern && s.breathePattern !== cfg.breathePattern;
         cfg = s;
         if (s.theme && window.CCTint) window.CCTint.apply(s.theme);
         if (window.ccI18n) {
@@ -138,12 +94,6 @@
         if (shell) shell.style.opacity = String(ownCtp ? op * 0.88 : op);
         const skin = parseInt(s.floatRelaxDesign, 10);
         if (shell) shell.dataset.skin = String(skin >= 1 && skin <= 10 ? skin : 1);
-        showBreathe = s.floatRelaxShowBreathe !== false;
-        document.body.classList.toggle("breathe-off", !showBreathe);
-        if (patternChanged && guideOn) {
-            guideStart = performance.now();
-            phaseName = "";
-        }
         if (s.audioMuted === true && playing && !paused) {
             sessionShown = performance.now() - sessionStart;
             paused = true;
@@ -180,18 +130,16 @@
     }
 
     function startTrack(index) {
+        if (!engine || cfg.audioMuted === true) return;
         trackIndex = (index + TRACKS.length) % TRACKS.length;
-        if (!engine) return;
-        if (cfg && cfg.audioMuted === true) {
-            refreshLabels();
-            return;
-        }
+        const now = performance.now();
+        if (!playing) sessionStart = now;
+        else if (paused) sessionStart = now - sessionShown;
         engine.resume();
         applyAudioPrefs();
         engine.playTrack(TRACKS[trackIndex]);
         playing = true;
         paused = false;
-        if (!sessionStart) sessionStart = performance.now();
         refreshLabels();
         scheduleShuffle();
         reportPlayback();
@@ -250,36 +198,8 @@
         reportPlayback();
     }
 
-    function toggleGuide() {
-        if (!guideOn) {
-            guideOn = true;
-            guidePaused = false;
-            guideElapsed = 0;
-            guideStart = performance.now();
-            phaseName = "";
-        } else if (!guidePaused) {
-            guideElapsed = performance.now() - guideStart;
-            guidePaused = true;
-        } else {
-            guidePaused = false;
-            guideStart = performance.now() - guideElapsed;
-        }
-        refreshLabels();
-    }
-
     function frame(now) {
-        if (guideOn && !guidePaused && showBreathe && ring) {
-            const sample = sampleGuide(now - guideStart);
-            ring.style.setProperty("--breath", sample.scale.toFixed(3));
-            if (sample.name !== phaseName) {
-                phaseName = sample.name;
-                phaseEl.textContent = t("relax.breathe." + sample.name);
-            }
-        } else if (ring && !guideOn) {
-            ring.style.setProperty("--breath", "1");
-        }
-
-        drawSpectrum(now, playing && !cfg.audioMuted);
+        drawSpectrum(now, playing && !paused && !cfg.audioMuted);
 
         if (playing && !paused && sessionStart) {
             elapsedEl.textContent = fmt(now - sessionStart);
@@ -391,10 +311,6 @@
             }
         });
     }
-    btnBreathe.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleGuide();
-    });
     if (btnClose) {
         btnClose.addEventListener("click", (e) => {
             e.stopPropagation();

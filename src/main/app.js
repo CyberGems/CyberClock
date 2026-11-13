@@ -2435,10 +2435,6 @@
             loadScreensList();
         }
 
-        // Update the Play/Pause button text for the new language
-        if (typeof updatePlayButtonUI === "function") {
-            updatePlayButtonUI(window.audioEngine.isPlaying);
-        }
         const chimeMaster = document.getElementById("s-chimes-en");
         if (chimeMaster) chimeMaster.checked = !!s.hourlyChimesEnabled;
         const ah = s.alarmHalfHour || {};
@@ -2516,7 +2512,7 @@
             document.getElementById("r-vol-val").textContent = v + "%";
         }
 
-        window.audioEngine.setVolume(s.relaxVolume || 0.8);
+        window.audioEngine.setVolume(s.relaxVolume ?? 0.8);
         window.audioEngine.setMuted(s.audioMuted === true);
         // Quiet but unmissable hint while a global mute silences the
         // Relax engine (otherwise the module looks simply "broken").
@@ -2527,10 +2523,9 @@
         if (s.audioMuted === true && window.audioEngine.isPlaying && typeof rPause === "function" && !rPaused) {
             rPause();
         }
-        if (typeof updatePlayButtonUI === "function") {
-            updatePlayButtonUI(window.audioEngine.isPlaying);
-        }
-        if (s.lastRelaxTrack) preSelectRelaxTrack(s.lastRelaxTrack);
+        if (s.lastRelaxTrack && !window.audioEngine.isPlaying) preSelectRelaxTrack(s.lastRelaxTrack);
+        updateMixStateUI();
+        rAstUpdateDisplay();
         if (typeof updatePlayingTrackCardClass === "function") {
             updatePlayingTrackCardClass(window.audioEngine.isPlaying);
         }
@@ -6579,16 +6574,17 @@
 
     function startZenFlow() {
         if (cfg && cfg.audioMuted === true) return;
+        window.audioEngine.clearLayers();
+        rPaused = false;
         zenFlowActive = true;
         if (zenFlowTimer) clearTimeout(zenFlowTimer);
         
         const track = nextZenFlowTrack();
         preSelectRelaxTrack(track);
-        rSelected = track;
         
         window.audioEngine.playTrack(track);
-        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
-        updatePlayButtonUI(true);
+        window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
+        updateMixStateUI();
         
         rStartSession();
         startViz();
@@ -6615,9 +6611,9 @@
             if (zenFlowActive && window.audioEngine.isPlaying) {
                 const track = nextZenFlowTrack();
                 preSelectRelaxTrack(track);
-                rSelected = track;
                 
                 window.audioEngine.playTrack(track);
+                updatePlayButtonUI(true);
                 window.cc.saveSettings({ lastRelaxTrack: rSelected });
                 showNextTip();
                 
@@ -6646,14 +6642,15 @@
         const playBtn = document.getElementById("r-play");
         if (!playBtn) return;
         const iconName = isPlaying && !rPaused ? "pause" : "play";
+        const track = (isPlaying && window.audioEngine.currentTrack) || rSelected;
+        const title = document.getElementById("r-player-track");
+        const trackName = window.ccI18n.t(track ? `relax.track.${track}` : "relax.noTrack");
+        if (title.textContent !== trackName) title.textContent = trackName;
 
         // Tray sync: report what's playing (last track while paused) so
         // the tray menu can show and toggle it from anywhere.
         if (window.cc && window.cc.reportRelaxPlaying) {
-            const reported = isPlaying
-                ? (window.audioEngine.currentTrack || rSelected)
-                : null;
-            window.cc.reportRelaxPlaying(reported, rPaused);
+            window.cc.reportRelaxPlaying(isPlaying ? track : null, rPaused);
         }
 
         const isMuted = cfg && cfg.audioMuted === true;
@@ -6722,8 +6719,8 @@
         if (!rSelected || (cfg && cfg.audioMuted === true)) return;
         stopZenFlow();
         window.audioEngine.playTrack(rSelected);
-        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
-        updatePlayButtonUI(true);
+        window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
+        updateMixStateUI();
         rStartSession();
         startViz();
         rStartTips();
@@ -6739,9 +6736,8 @@
         window.audioEngine.stop(fade);
         // Undo any auto-stop slow fade so the next session starts at
         // the configured volume, not whatever the glide left behind.
-        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+        window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
         rPaused = false;
-        updatePlayButtonUI(false);
         rStopSession();
         rStopTips();
         rClearAutoStop();
@@ -6762,7 +6758,7 @@
     }
 
     // Real pause: suspends the whole AudioContext (positions freeze in
-    // place) and freezes the session/tips/pacer clocks. Resume restores
+    // place) and freezes the session and tips clocks. Resume restores
     // everything without losing elapsed time.
     let rPaused = false;
     let rPauseResumedAt = 0;
@@ -6773,7 +6769,7 @@
         rPaused = true;
         rPauseResumedAt = Date.now();
         window.audioEngine.suspend();
-        // Freeze the tips cycle; session/pacer clocks are time-offset on resume.
+        // Freeze the tips cycle; the session clock is time-offset on resume.
         if (rTipInterval) {
             clearInterval(rTipInterval);
             rTipInterval = null;
@@ -6796,7 +6792,7 @@
         // Guard: if an auto-stop slow fade started before the pause, the
         // master gain may still be gliding toward 0 — pin it back to the
         // configured volume so resuming is actually audible.
-        window.audioEngine.setVolume(cfg.relaxVolume || 0.8);
+        window.audioEngine.setVolume(cfg.relaxVolume ?? 0.8);
         // Session clock: shift the epoch so elapsed time skips the pause.
         if (rSesStart) rSesStart += pauseMs;
         if (rSesStart) rStartTips(); // tips cycle resumes with the session
@@ -6925,6 +6921,7 @@
         rClearAutoStop();
         rAstRemain = secs;
         rAstUpdateDisplay();
+        if (secs <= AUTO_STOP_FADE_SECS) window.audioEngine.beginSlowFade(secs);
         rAstTimer = setInterval(() => {
             if (!window.audioEngine.isPlaying) return;
             rAstRemain = Math.max(0, rAstRemain - 1);
@@ -6942,14 +6939,15 @@
     function rClearAutoStop() {
         if (rAstTimer) clearInterval(rAstTimer);
         rAstTimer = null;
-        document.getElementById("r-ast-cd").style.display = "none";
+        rAstRemain = 0;
+        rAstUpdateDisplay();
     }
     function rAstUpdateDisplay() {
         const m = Math.floor(rAstRemain / 60),
             s = rAstRemain % 60;
         const el = document.getElementById("r-ast-cd");
-        el.textContent = window.ccI18n.t("relax.stopsIn", { time: pad(m) + ":" + pad(s) });
-        el.style.display = "inline";
+        el.hidden = rAstRemain <= 0;
+        el.textContent = el.hidden ? "" : window.ccI18n.t("relax.stopsIn", { time: pad(m) + ":" + pad(s) });
     }
     function rShowNotify(msg) {
         const el = document.getElementById("r-notify");
@@ -7063,16 +7061,12 @@
             // Ctrl+Click blends tracks as layers (Rain + Fireplace, etc.)
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
-                if (window.audioEngine.isLayerActive(t)) {
-                    window.audioEngine.removeLayer(t);
-                } else {
-                    window.audioEngine.addLayer(t);
-                }
-                updateMixStateUI();
+                if (window.audioEngine.isLayerActive(t)) removeRelaxLayer(t);
+                else addRelaxLayer(t);
                 return;
             }
 
-            if (rPaused && rSelected === t) {
+            if (rPaused && rSelected === t && !window.audioEngine.activeLayerIds().length) {
                 // Same track while paused: just resume
                 if (cfg && cfg.audioMuted === true) return;
                 stopZenFlow();
@@ -7080,7 +7074,7 @@
                 return;
             }
             stopZenFlow();
-            if (rSelected === t && window.audioEngine.isPlaying) {
+            if (rSelected === t && window.audioEngine.isPlaying && !window.audioEngine.activeLayerIds().length) {
                 rPause(); // second click on the playing card pauses it
                 return;
             }
@@ -7094,8 +7088,8 @@
                     rPause();
                 } else {
                     window.audioEngine.playTrack(t);
-                    updatePlayButtonUI(true);
                     updatePlayingTrackCardClass(true);
+                    window.cc.saveSettings({ lastRelaxTrack: t });
                 }
             } else {
                 if (cfg && cfg.audioMuted !== true) {
@@ -7108,7 +7102,10 @@
         card.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                card.click();
+                card.dispatchEvent(new MouseEvent("click", {
+                    ctrlKey: e.ctrlKey,
+                    metaKey: e.metaKey
+                }));
             }
         });
     });
@@ -7121,10 +7118,69 @@
         document.querySelectorAll(".tcard").forEach((c) => {
             c.classList.toggle(
                 "on",
-                layered.includes(c.dataset.track) || c.dataset.track === rSelected,
+                layered.length ? layered.includes(c.dataset.track) : c.dataset.track === rSelected,
             );
         });
-        updatePlayButtonUI(window.audioEngine.isPlaying || layered.length > 0);
+        const list = document.getElementById("r-mix-layers");
+        document.getElementById("r-mix").hidden = layered.length === 0;
+        const rendered = Array.from(list.children, item => item.dataset.track);
+        if (layered.join() !== rendered.join()) {
+            list.replaceChildren(...layered.map(id => {
+                const item = document.createElement("li");
+                item.className = "r-mix-layer";
+                item.dataset.track = id;
+                const name = document.createElement("span");
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.innerHTML = '<span data-ico="x" data-ico-size="13"></span>';
+                remove.addEventListener("click", () => {
+                    const next = item.nextElementSibling || item.previousElementSibling;
+                    const nextId = next?.dataset.track;
+                    removeRelaxLayer(id);
+                    (nextId && list.querySelector(`[data-track="${nextId}"] button`)
+                        || document.getElementById("r-play")).focus();
+                });
+                item.append(name, remove);
+                return item;
+            }));
+            window.ccIcons.replaceIcons(list);
+        }
+        for (const item of list.children) {
+            const name = window.ccI18n.t(`relax.track.${item.dataset.track}`);
+            item.firstElementChild.textContent = name;
+            item.lastElementChild.setAttribute("aria-label", window.ccI18n.t("relax.removeLayer", { track: name }));
+        }
+        updatePlayButtonUI(window.audioEngine.isPlaying);
+    }
+
+    function addRelaxLayer(id) {
+        const engine = window.audioEngine;
+        if (cfg?.audioMuted) return;
+        const starting = !engine.isPlaying;
+        stopZenFlow();
+        engine.addLayer(id);
+        if (starting) {
+            rPaused = false;
+            rSelected = id;
+            engine.setVolume(cfg.relaxVolume ?? 0.8);
+            rStartSession();
+            startViz();
+            rStartTips();
+            if (rAstMins > 0) rStartAutoStop(rAstMins * 60);
+        }
+        updateMixStateUI();
+    }
+
+    function removeRelaxLayer(id) {
+        const engine = window.audioEngine;
+        engine.removeLayer(id);
+        if (engine.isPlaying) {
+            rSelected = engine.currentTrack;
+            updateMixStateUI();
+        } else {
+            rStop(true);
+        }
+        updatePlayingTrackCardClass(engine.isPlaying);
     }
 
     document
@@ -7193,20 +7249,26 @@
     document.querySelectorAll(".ast-btn").forEach((b) => {
         b.addEventListener("click", () => {
             const m = parseInt(b.dataset.min);
-            rAstMins = m;
-            document
-                .querySelectorAll(".ast-btn")
-                .forEach((x) =>
-                    x.classList.toggle(
-                        "on",
-                        parseInt(x.dataset.min) === m,
-                    ),
-                );
-            if (m > 0 && window.audioEngine.isPlaying)
+            selectRelaxAutoStop(m);
+            if (m > 0 && window.audioEngine.isPlaying && rPaused) {
+                rAstRemain = m * 60;
+                rAstUpdateDisplay();
+            } else if (m > 0 && window.audioEngine.isPlaying) {
                 rStartAutoStop(m * 60);
-            else rClearAutoStop();
+            } else {
+                rClearAutoStop();
+            }
         });
     });
+
+    function selectRelaxAutoStop(minutes) {
+        rAstMins = minutes;
+        document.querySelectorAll(".ast-btn").forEach(button => {
+            const selected = Number(button.dataset.min) === minutes;
+            button.classList.toggle("on", selected);
+            button.setAttribute("aria-checked", String(selected));
+        });
+    }
 
     // ══════════════════════════════════════════════════════════════
     // SETTINGS MODAL
@@ -10206,16 +10268,9 @@
         // whatever might still be fading out) and at the configured volume.
         window.audioEngine.clearLayers();
         rPaused = false;
+        selectRelaxAutoStop(Number(p.duration) || 0);
+        rClearAutoStop();
         preSelectRelaxTrack(track);
-        rSelected = track;
         rPlayTrack();
-        const dur = parseInt(p.duration);
-        if (dur > 0) {
-            rAstMins = dur;
-            rStartAutoStop(dur * 60);
-            document.querySelectorAll(".ast-btn").forEach((x) =>
-                x.classList.toggle("on", parseInt(x.dataset.min) === dur)
-            );
-        }
     });
 

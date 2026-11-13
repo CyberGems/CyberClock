@@ -2727,7 +2727,7 @@
         flex-direction: column;
         gap: 14px;
         border-right: 1px solid var(--border);
-        overflow: hidden;
+        overflow-y: auto;
     }
     .relax-R {
         flex: 1;
@@ -2756,7 +2756,7 @@
         grid-auto-rows: 1fr;
         gap: 10px;
         flex: 1;
-        min-height: 0;
+        min-height: calc(144px * var(--ui-scale));
     }
     .tcard {
         background: var(--bg-02);
@@ -2827,13 +2827,76 @@
         color: var(--accent-a);
     }
 
+    .r-player {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+        background: var(--bg-01);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        flex: 0 0 auto;
+    }
+    .r-player-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 6px 12px;
+    }
+    .r-player-track {
+        color: var(--text-hi);
+        font-family: var(--font-ui);
+        font-size: calc(16px * var(--ui-scale));
+        font-weight: 600;
+    }
+    .r-mix:not([hidden]) {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+    }
+    .r-mix-layers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .r-mix-layer {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 3px 2px 9px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg-02);
+        color: var(--text-hi);
+        font-size: calc(11px * var(--ui-scale));
+    }
+    .r-mix-layer button {
+        display: grid;
+        place-items: center;
+        width: 23px;
+        height: 23px;
+        padding: 0;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--text-md);
+        cursor: pointer;
+    }
+    .r-mix-layer button:hover {
+        background: var(--accent-dim);
+        color: var(--text-hi);
+    }
     .r-play-row {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
     }
     .r-cta-wrap {
         flex: 1;
-        min-width: 0;
+        min-width: max-content;
     }
     .r-cta-wrap .abtn {
         width: 100%;
@@ -2966,7 +3029,8 @@
     .ast-cd {
         font-family: "JetBrains Mono", monospace;
         font-size: calc(10px * var(--ui-scale));
-        color: var(--text-md);
+        color: var(--accent-a);
+        font-variant-numeric: tabular-nums;
     }
     /* Auto Scheduler: collapsible panel under the auto-stop row. Collapsed
        it is a single header line with the next-run summary; expanding it

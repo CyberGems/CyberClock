@@ -165,8 +165,6 @@
         if (badge) badge.textContent = relaxSkinLabel(skin);
         const lock = document.getElementById("toggle-relax-lock");
         if (lock) lock.classList.toggle("on", cfg.relaxPositionLocked === true);
-        const breathe = document.getElementById("toggle-relax-breathe");
-        if (breathe) breathe.classList.toggle("on", cfg.floatRelaxShowBreathe !== false);
         const aot = document.getElementById("toggle-relax-aot");
         if (aot) aot.classList.toggle("on", !!cfg.alwaysOnTop);
         const op = typeof cfg.floatRelaxOpacity === "number" ? cfg.floatRelaxOpacity : 1;
@@ -1715,15 +1713,6 @@
             if (!tgl) return;
             const on = tgl.classList.toggle("on");
             if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ relaxPositionLocked: on });
-        });
-    }
-    const tglRelaxBreatheRow = document.getElementById("ctx-relax-breathe");
-    if (tglRelaxBreatheRow) {
-        tglRelaxBreatheRow.addEventListener("click", () => {
-            const tgl = document.getElementById("toggle-relax-breathe");
-            if (!tgl) return;
-            const on = tgl.classList.toggle("on");
-            if (window.cc && window.cc.saveSettings) window.cc.saveSettings({ floatRelaxShowBreathe: on });
         });
     }
     document.querySelectorAll(".relax-op-chip").forEach((chip) => {

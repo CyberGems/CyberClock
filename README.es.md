@@ -117,12 +117,12 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **6 paisajes sonoros ambientales:** Noche, Bosque, Espacio Exterior, Océano, Lluvia, Chimenea
 - **Audio ambiental grabado:** seis paisajes sonoros reales reproducidos con la Web Audio API, con síntesis procedural como respaldo si faltan los archivos
 - **Pausa real:** pausar congela el audio, el tiempo de sesión y el ciclo de consejos; reanudar continúa exactamente donde lo dejaste (la barra espaciadora alterna reproducir/pausar)
-- **Mezcla ambiental:** Ctrl+Clic en cualquier tarjeta de pista para superponerla a la que suena (Lluvia + Chimenea, Océano + Espacio Exterior…); las capas se funden con entrada y salida independientes
+- **Mezcla ambiental:** Ctrl+Clic en cualquier tarjeta de pista para superponerla a la que suena (Lluvia + Chimenea, Océano + Espacio Exterior…); las capas activas aparecen en el reproductor y se pueden quitar individualmente
 - **Flujo Zen:** reproducción aleatoria de todas las pistas con un clic
 - **Parada Automática suave:** el temporizador de parada automática funde el audio suavemente durante el último minuto
 - **Visualizador de espectro de audio:** visualización de frecuencias en tiempo real
-- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, reproducir y siguiente, anillo de respiración, un espectro pequeño y 10 diseños. El audio sigue sonando cuando el modo completo está oculto
-- **Tiempo de sesión:** con consejos de mindfulness y parada automática (15m, 30m, 1h, 2h)
+- **Widget de relajación flotante:** sesión compacta de escritorio con el nombre de la pista, un botón grande para reproducir o pausar, controles de siguiente y aleatorio, estado de reproducción, un espectro pequeño y 10 diseños. El audio sigue sonando cuando el modo completo está oculto
+- **Tiempo de sesión:** con consejos de mindfulness y una cuenta regresiva de Parada Automática junto a la pista y los controles
 - **Programador automático:** programa horarios de reproducción automática
 - **Aviso de silencio:** un banner discreto con un botón de Activar con un clic si el audio global está silenciado
 
