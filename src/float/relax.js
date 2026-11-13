@@ -286,6 +286,13 @@
         }
     }
 
+    shell.querySelectorAll("button[data-tooltip]").forEach(button => {
+        const dismiss = () => button.classList.add("tooltip-dismissed");
+        button.addEventListener("pointerdown", dismiss);
+        button.addEventListener("click", dismiss);
+        button.addEventListener("pointerleave", () => button.classList.remove("tooltip-dismissed"));
+    });
+
     btnPlay.addEventListener("click", (e) => {
         e.stopPropagation();
         togglePlay();

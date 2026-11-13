@@ -143,10 +143,11 @@ button {
 }
 
 #btn-menu.is-open::after,
-#btn-menu.is-open:hover::after {
+.relax-shell button[data-tooltip].tooltip-dismissed::after {
     opacity: 0 !important;
     visibility: hidden !important;
     animation: none !important;
+    transition: none !important;
 }
 
 .relax-stage {
