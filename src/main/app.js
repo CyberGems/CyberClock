@@ -6591,6 +6591,7 @@
         rAstDeadline = null,
         rAstTimer = null,
         vizRaf = null;
+    let vizResizeObserver = null;
     let zenFlowActive = false,
         zenFlowTimer = null,
         zenFlowQueue = [];
@@ -6916,18 +6917,24 @@
     function startViz() {
         if (vizRaf || curView !== "relax") return;
         const canvas = document.getElementById("viz-canvas");
-        // The wrap is now flex-sized (fills the right column), so sync
-        // the bitmap to BOTH axes, not just the width.
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
         const ctx = canvas.getContext("2d");
-        const h = canvas.height,
-            w = canvas.width;
+        const bins = new Float32Array(128);
+        function resize() {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            if (canvas.width !== width) canvas.width = width;
+            if (canvas.height !== height) canvas.height = height;
+        }
+        resize();
+        vizResizeObserver = new ResizeObserver(resize);
+        vizResizeObserver.observe(canvas);
         function draw() {
             if (curView !== "relax") {
-                vizRaf = null;
+                stopViz();
                 return;
             }
+            const w = canvas.width;
+            const h = canvas.height;
             ctx.clearRect(0, 0, w, h);
             // Cache theme colors per frame (theme changes are rare;
             // reading getComputedStyle twice per bar per frame was
@@ -6936,9 +6943,11 @@
             const acc = bodyStyle.getPropertyValue("--accent-a").trim() || "#00d4ff";
             const rgb = bodyStyle.getPropertyValue("--rgb-accent").trim() || "0,212,255";
             if (window.audioEngine.isPlaying) {
-                const data = window.audioEngine.getAnalyserData();
+                window.audioEngine.readAnalyserDecibels(bins);
                 const bars = 56;
                 const gap = w / bars;
+                const maxActiveBin = Math.floor(bins.length * 0.32);
+                const usableHeight = Math.max(0, h - 6);
                 // One shared gradient per frame instead of one per bar:
                 // all bars span the same y range (0..h).
                 const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -6946,22 +6955,19 @@
                 g.addColorStop(1, `rgba(${rgb},.18)`);
                 for (let i = 0; i < bars; i++) {
                     const percent = i / (bars - 1 || 1);
-                    const maxActiveBin = Math.floor(data.length * 0.32);
                     const idx = Math.floor(Math.pow(percent, 1.8) * maxActiveBin);
-                    let v = (data[idx] || 0) / 255;
-                    // Boost higher frequencies slightly for visual balance
-                    v = Math.min(1.0, v * (1 + percent * 0.8));
-                    const bh = Math.max(2, v * h * 0.88),
+                    const level = Math.max(0, (bins[idx] + 100) / 70) * (1 + percent * 0.12);
+                    // Compress peaks smoothly so loud bins keep their shape.
+                    const v = level <= 0.8 ? level : 1 - 0.2 * Math.exp((0.8 - level) / 0.2);
+                    const bh = Math.max(2, v * usableHeight),
                         x = Math.floor(i * gap),
                         nextX = Math.floor((i + 1) * gap),
                         barW = Math.max(1, nextX - x - 1),
                         y = h - bh;
                     ctx.fillStyle = g;
                     ctx.fillRect(x, y, barW, bh);
-                    ctx.fillStyle = `rgba(${rgb},.07)`;
-                    ctx.fillRect(x, h, barW, bh * 0.28);
                     ctx.fillStyle = acc;
-                    ctx.fillRect(x, y - 2, barW, 2);
+                    ctx.fillRect(x, y, barW, 2);
                 }
             } else {
                 const time = Date.now() * 0.00065;
@@ -6997,6 +7003,8 @@
         draw();
     }
     function stopViz() {
+        vizResizeObserver?.disconnect();
+        vizResizeObserver = null;
         if (vizRaf) {
             cancelAnimationFrame(vizRaf);
             vizRaf = null;

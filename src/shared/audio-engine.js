@@ -224,6 +224,11 @@ class AudioEngine {
     return d;
   }
 
+  readAnalyserDecibels(bins) {
+    if (this._analyser) this._analyser.getFloatFrequencyData(bins);
+    else bins.fill(-Infinity);
+  }
+
   // ── Voice lifecycle ───────────────────────────────────────
   _startVoice(track) {
     const bus = this._ctx.createGain();
