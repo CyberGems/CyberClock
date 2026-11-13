@@ -6538,17 +6538,29 @@
             const card = document.createElement("div");
             card.className = "tcard";
             card.dataset.track = id;
-            card.setAttribute("role", "button");
-            card.tabIndex = 0;
-            card.setAttribute("data-tooltip-dir", "bottom");
-            card.setAttribute("data-tooltip", window.ccI18n ? window.ccI18n.t("relax.tooltip.tcardMix") : "Click to play · Ctrl+Click to blend");
-            card.setAttribute("data-i18n-attr", "data-tooltip:relax.tooltip.tcardMix");
             card.innerHTML = `
-                <div class="tcard-dot"></div>
-                <div class="tcard-ico"><span data-ico="${icon}" data-ico-size="26"></span></div>
-                <div class="tcard-name" data-i18n="relax.track.${id}"></div>
-                <div class="tcard-desc" data-i18n="relax.track.${id}.desc"></div>
+                <button type="button" class="tcard-play">
+                    <span class="tcard-dot" aria-hidden="true"></span>
+                    <span class="tcard-ico"><span data-ico="${icon}" data-ico-size="26"></span></span>
+                    <span class="tcard-name" data-i18n="relax.track.${id}"></span>
+                    <span class="tcard-desc" data-i18n="relax.track.${id}.desc"></span>
+                </button>
+                <button type="button" class="tcard-add" data-tooltip-dir="bottom">
+                    <span aria-hidden="true">+</span>
+                </button>
             `;
+            const play = card.querySelector(".tcard-play");
+            const add = card.querySelector(".tcard-add");
+            play.addEventListener("click", event => playRelaxCard(id, event));
+            add.addEventListener("click", () => addRelaxLayer(id));
+            // Native buttons generate clicks for keyboard activation.
+            // Retain the existing modifier shortcut on the play button.
+            play.addEventListener("keydown", event => {
+                if ((event.key === "Enter" || event.key === " ") && (event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    if (!event.repeat) playRelaxCard(id, event);
+                }
+            });
             grid.appendChild(card);
         });
         // i18n fills the name/desc placeholders; icons need the replacer.
@@ -7054,72 +7066,49 @@
 
     // Track cards
     buildTrackCards();
-    document.querySelectorAll(".tcard").forEach((card) => {
-        card.addEventListener("click", (e) => {
-            const t = card.dataset.track;
+    function playRelaxCard(track, event) {
+        const engine = window.audioEngine;
+        if (event.ctrlKey || event.metaKey) {
+            if (engine.isLayerActive(track)) removeRelaxLayer(track);
+            else addRelaxLayer(track);
+            return;
+        }
 
-            // Ctrl+Click blends tracks as layers (Rain + Fireplace, etc.)
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                if (window.audioEngine.isLayerActive(t)) removeRelaxLayer(t);
-                else addRelaxLayer(t);
-                return;
-            }
-
-            if (rPaused && rSelected === t && !window.audioEngine.activeLayerIds().length) {
-                // Same track while paused: just resume
-                if (cfg && cfg.audioMuted === true) return;
-                stopZenFlow();
-                rResume();
-                return;
-            }
-            stopZenFlow();
-            if (rSelected === t && window.audioEngine.isPlaying && !window.audioEngine.activeLayerIds().length) {
-                rPause(); // second click on the playing card pauses it
-                return;
-            }
-            rPaused = false;
-            // Switching to a solo track also clears any blend layers
-            window.audioEngine.clearLayers();
-            preSelectRelaxTrack(t);
-            rSelected = t;
-            if (window.audioEngine.isPlaying) {
-                if (cfg && cfg.audioMuted === true) {
-                    rPause();
-                } else {
-                    window.audioEngine.playTrack(t);
-                    updatePlayingTrackCardClass(true);
-                    window.cc.saveSettings({ lastRelaxTrack: t });
-                }
-            } else {
-                if (cfg && cfg.audioMuted !== true) {
-                    rPlayTrack();
-                }
-            }
+        if (cfg?.audioMuted) return;
+        stopZenFlow();
+        if (engine.isPlaying && rSelected === track && engine.activeLayerIds().length === 0) {
+            rPauseOrResume();
+            return;
+        }
+        rPaused = false;
+        engine.clearLayers();
+        preSelectRelaxTrack(track);
+        if (engine.isPlaying) {
+            engine.playTrack(track);
+            updatePlayingTrackCardClass(true);
+            window.cc.saveSettings({ lastRelaxTrack: track });
             updateMixStateUI();
-        });
-        // Keyboard parity for the role="button" cards
-        card.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                card.dispatchEvent(new MouseEvent("click", {
-                    ctrlKey: e.ctrlKey,
-                    metaKey: e.metaKey
-                }));
-            }
-        });
-    });
+        } else {
+            rPlayTrack();
+        }
+    }
 
     // Reflect active blend layers on the cards: layered cards get the
     // active tint too (dot + border). The solo selection keeps its own
     // highlight; the two sources can coexist (solo + layers).
     function updateMixStateUI() {
         const layered = window.audioEngine.activeLayerIds();
-        document.querySelectorAll(".tcard").forEach((c) => {
-            c.classList.toggle(
-                "on",
-                layered.length ? layered.includes(c.dataset.track) : c.dataset.track === rSelected,
-            );
+        document.querySelectorAll(".tcard").forEach(card => {
+            const id = card.dataset.track;
+            const inMix = layered.includes(id);
+            card.classList.toggle("on", layered.length ? inMix : id === rSelected);
+            const add = card.querySelector(".tcard-add");
+            const track = window.ccI18n.t(`relax.track.${id}`);
+            const key = inMix ? "relax.layerAdded" : "relax.addLayer";
+            const label = window.ccI18n.t(key, { track });
+            add.setAttribute("aria-label", label);
+            add.setAttribute("data-tooltip", cfg?.audioMuted ? window.ccI18n.t("relax.tooltip.unmute") : label);
+            add.setAttribute("aria-disabled", String(inMix || !!cfg?.audioMuted));
         });
         const list = document.getElementById("r-mix-layers");
         document.getElementById("r-mix").hidden = layered.length === 0;
@@ -7155,7 +7144,7 @@
 
     function addRelaxLayer(id) {
         const engine = window.audioEngine;
-        if (cfg?.audioMuted) return;
+        if (cfg?.audioMuted || engine.isLayerActive(id)) return;
         const starting = !engine.isPlaying;
         stopZenFlow();
         engine.addLayer(id);
@@ -7198,11 +7187,8 @@
         }
     });
     document.getElementById("r-stop").addEventListener("click", () => {
-        rStop(true);
-        document
-            .querySelectorAll(".tcard")
-            .forEach((c) => c.classList.remove("on"));
         rSelected = null;
+        rStop(true);
     });
     const rFloatBtn = document.getElementById("r-float");
     if (rFloatBtn) {
