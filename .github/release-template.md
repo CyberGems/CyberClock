@@ -38,9 +38,19 @@ Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por
 - 🕐 **Modo Mini**. Las animaciones más ligeras y el menor trabajo en segundo plano reducen el uso de CPU en reposo. El LED marca los segundos de forma sincronizada y el reloj recupera mejor el monitor y la posición guardados.
 - 🔔 **Locución de hora**. El anuncio se activa a tiempo, evita duplicados y da un poco más de espacio al timbre previo antes de hablar. En Hora eliges campanadas horarias o locución, en Voz ajustas la voz y su volumen, y en Alarmas controlas la lectura en voz alta.
 
+### ⚠️ Antes de instalar
+
+- **Windows:** esta versión aún no está firmada digitalmente. SmartScreen puede avisar antes de ejecutarla: **Más información › Ejecutar de todas formas**. Cuando Smart App Control está activado, Windows rechaza programas sin firmar; consulta la [política de firma de código](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verifica la descarga con los checksums SHA256 que aparecen más abajo.
+
 </details>
 
 --- 
+
+### ⚠️ Before you install
+
+- **Windows:** this release is not code-signed yet. SmartScreen may ask before it runs: **More info › Run anyway**. Where Smart App Control is on, Windows refuses unsigned programs; see the [code signing policy](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verify the download with the SHA256 checksums below.
+
+---
 
 ### 📦 Downloads & Packages
 
