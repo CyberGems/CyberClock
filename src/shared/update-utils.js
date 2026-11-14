@@ -27,6 +27,14 @@
             .trim();
     }
 
+    // The Before you install block is release-page furniture: the updater is
+    // automatic, so previews skip SmartScreen guidance.
+    function stripInstallBlock(text) {
+        return String(text || "")
+            .replace(/^#{1,6}\s*⚠️\s*(?:Before you install|Antes de instalar)[\s\S]*?\n---/gim, "")
+            .replace(/^#{1,6}\s*⚠️\s*(?:Before you install|Antes de instalar)[\s\S]*$/gim, "");
+    }
+
     function extractLanguageSection(markdown) {
         if (!markdown) return "";
         const lang = (window.ccI18n && typeof window.ccI18n.getEffectiveLang === "function")
@@ -37,7 +45,7 @@
         const commentRegex = new RegExp(`<!--\\s*lang:${lang}\\s*-->([\\s\\S]*?)<!--\\s*/lang:${lang}\\s*-->`, "i");
         const commentMatch = markdown.match(commentRegex);
         if (commentMatch && commentMatch[1]?.trim()) {
-            return commentMatch[1].trim();
+            return stripInstallBlock(commentMatch[1].trim());
         }
 
         // 2. Check for details summary block or header: <summary>...Español...</summary> or ### ...Español...
@@ -46,12 +54,12 @@
             const esMatch = markdown.match(esBlockRegex);
             const content = esMatch ? (esMatch[1] || esMatch[2]) : null;
             if (content && content.trim()) {
-                return content.trim();
+                return stripInstallBlock(content.trim());
             }
         }
 
         // 3. Fallback: if user is on English, or no Spanish block exists, exclude any Spanish details blocks so English remains clean
-        return markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, "");
+        return stripInstallBlock(markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, ""));
     }
 
     function parseChangelogPeek(markdown, limit = 4) {
