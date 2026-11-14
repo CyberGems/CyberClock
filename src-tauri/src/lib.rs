@@ -46,6 +46,7 @@ pub struct AlarmState {
     // Runtime-only snooze times keyed by alarm id. Snoozes intentionally
     // reset when the app exits; the alarm definition itself remains intact.
     pub snoozed_alarms: Mutex<HashMap<String, i64>>,
+    active_alarm: Mutex<Option<serde_json::Value>>,
     // Live relax playback state, reported by whichever window is engaged
     // (main relax view or the float relax widget) so the tray can show
     // what's playing without touching the audio engine itself.
@@ -118,11 +119,12 @@ fn emit_to_active(app: &AppHandle, event: &str, payload: serde_json::Value) {
         None => {
             // Hidden webviews still play audio. An app-wide emit would
             // make main and mini announce the same chime. One window is enough.
-            let label = if app.get_webview_window("main").is_some() {
-                "main"
-            } else {
-                "mini"
-            };
+            let label =
+                if load_settings(app).window_mode == "full" && MAIN_READY.load(Ordering::Acquire) {
+                    "main"
+                } else {
+                    "mini"
+                };
             let _ = app.emit_to(label, event, payload);
         }
     }
@@ -136,6 +138,7 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
 
     // If an alarm fires, make sure the target window for the current mode is restored/visible
     if is_custom_alarm {
+        *lock_or_recover(&app.state::<AlarmState>().active_alarm) = Some(payload.clone());
         if settings.window_mode == "full" {
             if let Some(main) = app.get_webview_window("main") {
                 let hidden =
@@ -159,27 +162,42 @@ fn emit_alarm_chime(app: &AppHandle, payload: serde_json::Value) {
     }
 
     let active = active_event_target(app);
+    let audible = active.as_deref().unwrap_or(
+        if settings.window_mode == "full" && MAIN_READY.load(Ordering::Acquire) {
+            "main"
+        } else {
+            "mini"
+        },
+    );
     for label in ["main", "mini"] {
         if app.get_webview_window(label).is_none() {
             continue;
         }
         let mut data = payload.clone();
-        let plays_sound = match active.as_deref() {
-            Some(current) => current == label,
-            None => {
-                label
-                    == if settings.window_mode == "full" {
-                        "main"
-                    } else {
-                        "mini"
-                    }
-            }
-        };
-        if !plays_sound {
+        if audible != label {
             data["silent"] = serde_json::Value::Bool(true);
         }
         let _ = app.emit_to(label, "alarm:chime", data);
     }
+}
+
+fn clear_active_alarm(app: &AppHandle, id: &str) {
+    let state = app.state::<AlarmState>();
+    let mut alarm = lock_or_recover(&state.active_alarm);
+    if alarm
+        .as_ref()
+        .and_then(|payload| payload["alarmId"].as_str())
+        == Some(id)
+    {
+        *alarm = None;
+        drop(alarm);
+        request_main_release(app);
+    }
+}
+
+#[tauri::command]
+fn get_active_alarm(app: AppHandle) -> Option<serde_json::Value> {
+    lock_or_recover(&app.state::<AlarmState>().active_alarm).clone()
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -564,6 +582,11 @@ fn show_clock_window(app: &AppHandle) {
     } else {
         "mini"
     };
+    if target_win == "main" && !MAIN_READY.load(Ordering::Acquire) {
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move { open_full_mode(&app, None).await });
+        return;
+    }
     if let Some(win) = app.get_webview_window(target_win) {
         // Automatic display: showing the full clock from the tray or
         // the hotkey also picks the monitor where the mouse is.
@@ -649,6 +672,7 @@ fn save_settings(app: AppHandle, settings: AppSettings) -> Result<AppSettings, S
 /// concurrent writers cannot clobber each other.
 #[tauri::command]
 fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSettings, String> {
+    let scheduler_changed = patch.get("relaxScheduler").is_some();
     let relax_preferences_only = patch.as_object().is_some_and(|fields| {
         fields.keys().all(|key| {
             matches!(
@@ -670,9 +694,10 @@ fn patch_settings(app: AppHandle, patch: serde_json::Value) -> Result<AppSetting
     set_auto_update(merged.auto_update);
     EDGE_LIMITS_ENABLED.store(merged.mini_edge_limits, Ordering::Release);
 
-    // Reset next run for relax scheduler
-    let state = app.state::<AlarmState>();
-    *lock_or_recover(&state.relax_next_run) = None;
+    if scheduler_changed {
+        let state = app.state::<AlarmState>();
+        *lock_or_recover(&state.relax_next_run) = None;
+    }
 
     apply_always_on_top(&app, merged.always_on_top);
     apply_all_click_through(&app);
@@ -727,6 +752,7 @@ fn snooze_alarm(app: AppHandle, alarm_id: String, minutes: u32) -> Result<(), St
     })?;
     let state = app.state::<AlarmState>();
     lock_or_recover(&state.snoozed_alarms).insert(id.clone(), until);
+    clear_active_alarm(&app, &id);
     let _ = app.emit("settings:updated", load_settings(&app));
     let _ = app.emit(
         "alarm:snoozed",
@@ -769,6 +795,7 @@ fn dismiss_alarm(app: AppHandle, alarm_id: String) -> Result<(), String> {
         }
         Ok(())
     })?;
+    clear_active_alarm(&app, &id);
     if deleted {
         let _ = app.emit("settings:updated", load_settings(&app));
     }
@@ -1497,7 +1524,34 @@ fn set_relax_widget_open(app: &AppHandle, open: bool) {
 // through the event loop instead.
 #[tauri::command]
 async fn spawn_float(app: AppHandle, kind: String) -> Option<String> {
+    if kind == "relax" {
+        let _lifecycle = MAIN_LIFECYCLE.lock().await;
+        let label = spawn_float_window(&app, "relax");
+        if label.is_some() {
+            MAIN_REQUESTED.fetch_add(1, Ordering::AcqRel);
+        }
+        return label;
+    }
     spawn_float_window(&app, kind.as_str())
+}
+
+#[tauri::command]
+async fn send_relax_control(app: AppHandle, action: serde_json::Value) -> Result<(), String> {
+    // Spectrum polling can stop immediately when the renderer is absent.
+    if action.as_str() == Some("spectrum") {
+        if MAIN_READY.load(Ordering::Acquire) {
+            app.emit_to("main", "relax:control", action)
+                .map_err(|error| error.to_string())?;
+        }
+        return Ok(());
+    }
+    let _lifecycle = MAIN_LIFECYCLE.lock().await;
+    MAIN_REQUESTED.fetch_add(1, Ordering::AcqRel);
+    load_main_window(&app).await?;
+    app.emit_to("main", "relax:control", action)
+        .map_err(|error| error.to_string())?;
+    request_main_release(&app);
+    Ok(())
 }
 
 #[tauri::command]
@@ -1731,6 +1785,135 @@ static AUXILIARY_WINDOW_GENERATIONS: Mutex<std::collections::BTreeMap<&'static s
     Mutex::new(std::collections::BTreeMap::new());
 static ABOUT_UPDATE_CHECK: AtomicBool = AtomicBool::new(false);
 
+// The native scheduler and widget can both ask for the same hidden renderer.
+// Serialize requests through startup and destruction to keep one audio engine.
+static MAIN_LIFECYCLE: tauri::async_runtime::Mutex<()> = tauri::async_runtime::Mutex::const_new(());
+static MAIN_READY: AtomicBool = AtomicBool::new(false);
+static MAIN_REQUESTED: AtomicU32 = AtomicU32::new(0);
+static MAIN_RELEASE_DELAY: std::time::Duration = std::time::Duration::from_secs(15);
+
+fn configure_main_window(main: &WebviewWindow) {
+    let _ = main.set_maximizable(false);
+    let win = main.clone();
+    main.on_window_event(move |event| match event {
+        WindowEvent::CloseRequested { api, .. } if !APP_EXITING.load(Ordering::SeqCst) => {
+            api.prevent_close();
+            let _ = win.emit("main:close-requested", ());
+        }
+        WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
+            if win.is_minimized().unwrap_or(true) {
+                return;
+            }
+            if let Ok(Some(monitor)) = win.current_monitor() {
+                let work_area = monitor.work_area();
+                if win.outer_position().ok() != Some(work_area.position)
+                    || win.outer_size().ok() != Some(work_area.size)
+                {
+                    let _ = win.set_position(tauri::Position::Physical(work_area.position));
+                    let _ = win.set_size(tauri::Size::Physical(work_area.size));
+                }
+            }
+        }
+        _ => {}
+    });
+}
+
+// The caller holds MAIN_LIFECYCLE until the window has been shown or its
+// message has been sent, so the idle timer cannot close it in between.
+async fn load_main_window(app: &AppHandle) -> Result<WebviewWindow, String> {
+    if APP_EXITING.load(Ordering::Acquire) {
+        return Err("CyberClock is exiting".into());
+    }
+    let window = if let Some(window) = app.get_webview_window("main") {
+        window
+    } else {
+        MAIN_READY.store(false, Ordering::Release);
+        let config = app
+            .config()
+            .app
+            .windows
+            .iter()
+            .find(|window| window.label == "main")
+            .ok_or("Missing Full Mode window configuration")?;
+        let window = WebviewWindowBuilder::from_config(app, config)
+            .and_then(|builder| builder.focused(false).build())
+            .map_err(|error| error.to_string())?;
+        configure_main_window(&window);
+        window
+    };
+    tokio::time::timeout(std::time::Duration::from_secs(10), async {
+        while !MAIN_READY.load(Ordering::Acquire) {
+            tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        }
+    })
+    .await
+    .map_err(|_| "Full Mode did not finish loading")?;
+    Ok(window)
+}
+
+#[tauri::command]
+fn main_ready(window: WebviewWindow) {
+    if window.label() == "main" {
+        MAIN_READY.store(true, Ordering::Release);
+    }
+}
+
+fn request_main_release(app: &AppHandle) {
+    if app.get_webview_window("main").is_none()
+        || load_settings(app).window_mode == "full"
+        || app.get_webview_window(RELAX_WIDGET_LABEL).is_some()
+    {
+        return;
+    }
+    let ticket = MAIN_REQUESTED
+        .fetch_add(1, Ordering::AcqRel)
+        .wrapping_add(1);
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(MAIN_RELEASE_DELAY).await;
+        let _lifecycle = MAIN_LIFECYCLE.lock().await;
+        if MAIN_REQUESTED.load(Ordering::Acquire) == ticket && can_release_main(&app) {
+            let _ = app.emit_to("main", "main:check-idle", ticket);
+        }
+    });
+}
+
+fn can_release_main(app: &AppHandle) -> bool {
+    let state = app.state::<AlarmState>();
+    MAIN_READY.load(Ordering::Acquire)
+        && !APP_EXITING.load(Ordering::Acquire)
+        && load_settings(app).window_mode != "full"
+        && app.get_webview_window(RELAX_WIDGET_LABEL).is_none()
+        && lock_or_recover(&state.relax_playing).is_none()
+        && lock_or_recover(&state.active_alarm).is_none()
+        && app
+            .get_webview_window("main")
+            .is_some_and(|window| matches!(window.is_visible(), Ok(false)))
+}
+
+#[tauri::command]
+async fn release_idle_main(
+    app: AppHandle,
+    window: WebviewWindow,
+    ticket: u32,
+) -> Result<(), String> {
+    let _lifecycle = MAIN_LIFECYCLE.lock().await;
+    if window.label() != "main"
+        || MAIN_REQUESTED.load(Ordering::Acquire) != ticket
+        || !can_release_main(&app)
+    {
+        return Ok(());
+    }
+    window.destroy().map_err(|error| error.to_string())?;
+    tokio::time::timeout(std::time::Duration::from_secs(5), async {
+        while app.get_webview_window("main").is_some() {
+            tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        }
+    })
+    .await
+    .map_err(|_| "Full Mode did not close".to_string())
+}
+
 fn touch_auxiliary_window(label: &'static str) -> u64 {
     let mut generations = lock_or_recover(&AUXILIARY_WINDOW_GENERATIONS);
     let current = generations.entry(label).or_default();
@@ -1831,6 +2014,9 @@ async fn open_window(app: AppHandle, name: String) -> bool {
     // show; plain show() would leave it at its stale (primary) position.
     if name == "about" {
         return show_about_window(&app).await;
+    }
+    if name == "main" {
+        return open_full_mode(&app, None).await;
     }
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.show();
@@ -3779,63 +3965,72 @@ fn relax_scheduler_loop(app: AppHandle) {
             continue;
         }
 
-        let state = app.state::<AlarmState>();
-        let now = Local::now();
-
-        let mut next_run_opt = lock_or_recover(&state.relax_next_run);
-
-        let next_run = match *next_run_opt {
-            Some(dt) => dt,
-            None => {
-                let dt = compute_next_relax_run(&settings.relax_scheduler.time);
-                *next_run_opt = Some(dt);
-                dt
-            }
+        let next_run = {
+            let state = app.state::<AlarmState>();
+            let mut next_run = lock_or_recover(&state.relax_next_run);
+            *next_run.get_or_insert_with(|| compute_next_relax_run(&settings.relax_scheduler.time))
         };
-
+        let now = Local::now();
         if now >= next_run {
-            // Master audio mute: never trigger relax playback while muted.
-            if load_settings(&app).audio_muted {
-                *next_run_opt = Some(now + chrono::Duration::minutes(1));
+            let result = tauri::async_runtime::block_on(trigger_scheduled_relax(
+                &app,
+                &settings.relax_scheduler,
+            ));
+            if let Err(error) = result {
+                warn!("Could not start scheduled Relax; will retry: {error}");
                 continue;
             }
 
-            // Trigger!
-            let trigger_data = serde_json::json!({
-                "track": settings.relax_scheduler.track,
-                "duration": settings.relax_scheduler.duration,
-            });
-
             let repeat = settings.relax_scheduler.repeat;
-            let next_dt = if repeat > 0 {
-                now + chrono::Duration::minutes(repeat as i64)
+            let state = app.state::<AlarmState>();
+            let mut pending = lock_or_recover(&state.relax_next_run);
+            if *pending != Some(next_run) {
+                continue;
+            }
+            let current = load_settings(&app);
+            if current.audio_muted {
+                *pending = Some(now + chrono::Duration::minutes(1));
+            } else if repeat > 0 {
+                *pending = Some(now + chrono::Duration::minutes(repeat as i64));
             } else {
-                // One-shot: disable scheduler in settings
-                let _ = update_settings(&app, |s| {
+                if let Err(error) = update_settings(&app, |s| {
                     s.relax_scheduler.enabled = false;
                     Ok(())
-                });
+                }) {
+                    warn!("Could not disable one-shot Relax schedule: {error}");
+                }
                 let updated = load_settings(&app);
                 let _ = app.emit("settings:updated", &updated);
-
-                // Fallback to one year from now
-                now + chrono::Duration::days(365)
-            };
-
-            // The relax engine lives in the main window (mini/menu have no
-            // audio). Emit to main specifically — its webview stays alive
-            // even when hidden, so the trigger lands regardless of which
-            // window happens to be visible.
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("relax:trigger", &trigger_data);
-            } else {
-                let _ = app.emit("relax:trigger", trigger_data);
+                *pending = Some(now + chrono::Duration::days(365));
             }
-            // Keep the visible window's settings UI in sync (one-shot
-            // disable above already broadcast app-wide in that branch).
-            *next_run_opt = Some(next_dt);
         }
     }
+}
+
+async fn trigger_scheduled_relax(
+    app: &AppHandle,
+    schedule: &settings::RelaxSchedulerSettings,
+) -> Result<(), String> {
+    if load_settings(app).audio_muted {
+        return Ok(());
+    }
+    let _lifecycle = MAIN_LIFECYCLE.lock().await;
+    MAIN_REQUESTED.fetch_add(1, Ordering::AcqRel);
+    load_main_window(app).await?;
+    let current = load_settings(app);
+    if current.relax_scheduler == *schedule && !current.audio_muted {
+        app.emit_to(
+            "main",
+            "relax:trigger",
+            serde_json::json!({
+                "track": schedule.track,
+                "duration": schedule.duration,
+            }),
+        )
+        .map_err(|error| error.to_string())?;
+    }
+    request_main_release(app);
+    Ok(())
 }
 
 fn watch_monitors(app: AppHandle) {
@@ -4022,6 +4217,10 @@ fn normalize_hotkey(input: &str) -> Option<String> {
 fn reveal_clock(app: &AppHandle) {
     let settings = load_settings(app);
     if settings.window_mode == "full" {
+        if !MAIN_READY.load(Ordering::Acquire) {
+            show_clock_window(app);
+            return;
+        }
         if let Some(main) = app.get_webview_window("main") {
             let hidden =
                 !main.is_visible().unwrap_or(false) || main.is_minimized().unwrap_or(false);
@@ -4150,32 +4349,50 @@ fn set_hotkey(app: AppHandle, hotkey: String) -> Result<String, String> {
 // Mode switching commands
 // ─────────────────────────────────────────────────────────────
 
-#[tauri::command]
-fn switch_to_full_mode(app: AppHandle) {
+async fn open_full_mode(app: &AppHandle, action: Option<&str>) -> bool {
+    let _lifecycle = MAIN_LIFECYCLE.lock().await;
+    let main = match load_main_window(app).await {
+        Ok(main) => main,
+        Err(error) => {
+            warn!("Could not open Full Mode: {error}");
+            request_main_release(app);
+            return false;
+        }
+    };
+    MAIN_REQUESTED.fetch_add(1, Ordering::AcqRel);
     if let Some(mini) = app.get_webview_window("mini") {
         let _ = mini.hide();
     }
 
-    if let Err(error) = update_settings(&app, |s| {
+    if let Err(error) = update_settings(app, |s| {
         s.window_mode = "full".to_string();
         Ok(())
     }) {
         warn!("Could not save Full mode: {error}");
     }
-    let settings = load_settings(&app);
-    if let Some(main) = app.get_webview_window("main") {
-        place_full_clock(&main, &settings);
-        let _ = main.show();
-        let _ = main.set_focus();
-        refresh_taskbar_tab(&main);
-    }
+    let settings = load_settings(app);
+    place_full_clock(&main, &settings);
+    let _ = main.unminimize();
+    let _ = main.show();
+    let _ = main.set_focus();
+    refresh_taskbar_tab(&main);
 
     let _ = app.emit("settings:updated", &settings);
-    broadcast_active_window(&app, "main");
+    broadcast_active_window(app, "main");
+    if let Some(action) = action {
+        let _ = app.emit_to("main", "mini:menu-action", action);
+    }
+    true
 }
 
 #[tauri::command]
-fn switch_to_mini_mode(app: AppHandle) {
+async fn switch_to_full_mode(app: AppHandle) -> bool {
+    open_full_mode(&app, None).await
+}
+
+#[tauri::command]
+async fn switch_to_mini_mode(app: AppHandle) {
+    let _lifecycle = MAIN_LIFECYCLE.lock().await;
     lock_or_recover(&MINI_PREVIEW).take();
     let settings = load_settings(&app);
     if let Some(main) = app.get_webview_window("main") {
@@ -4198,6 +4415,7 @@ fn switch_to_mini_mode(app: AppHandle) {
     }
     let _ = app.emit("settings:updated", load_settings(&app));
     broadcast_active_window(&app, "mini");
+    request_main_release(&app);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -4794,22 +5012,13 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             let next = !click_through_for(&app, &caller);
             set_click_through_state(&app, &caller, next)
         }
-        "full" => {
-            switch_to_full_mode(app);
-            true
-        }
+        "full" => open_full_mode(&app, None).await,
         "new_timer" => spawn_float_window(&app, "timer").is_some(),
         "new_stopwatch" => spawn_float_window(&app, "sw").is_some(),
         "new_calendar" => spawn_float_window(&app, "cal").is_some(),
         "new_analog" => spawn_float_window(&app, "analog").is_some(),
-        "new_relax" => spawn_float_window(&app, "relax").is_some(),
-        "new_alarm" => {
-            switch_to_full_mode(app.clone());
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("mini:menu-action", "new-alarm");
-            }
-            true
-        }
+        "new_relax" => spawn_float(app, "relax".into()).await.is_some(),
+        "new_alarm" => open_full_mode(&app, Some("new-alarm")).await,
         "close_other_timers" => {
             let caller = CURRENT_MENU_CALLER
                 .lock()
@@ -4874,11 +5083,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             true
         }
         "home" | "timer" | "stopwatch" | "relax" | "settings" | "calendar" => {
-            switch_to_full_mode(app.clone());
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("mini:menu-action", &action);
-            }
-            true
+            open_full_mode(&app, Some(&action)).await
         }
         "about" => show_about_window(&app).await,
         _ => {
@@ -4886,11 +5091,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
                 // Forward only well-formed ISO date note ids to the
                 // main window — arbitrary strings are never relayed.
                 if is_valid_note_id(note_id) {
-                    switch_to_full_mode(app.clone());
-                    if let Some(main) = app.get_webview_window("main") {
-                        let _ = main.emit("mini:menu-action", &action);
-                    }
-                    true
+                    open_full_mode(&app, Some(&action)).await
                 } else {
                     warn!("menu_action: rejected malformed open-note id {:?}", note_id);
                     false
@@ -5893,6 +6094,13 @@ fn report_relax_playing(
             }
         }
     }
+    let stopped = playing.is_none();
+    drop(is_paused);
+    drop(source);
+    drop(playing);
+    if stopped {
+        request_main_release(&app);
+    }
 }
 
 #[tauri::command]
@@ -6020,10 +6228,10 @@ async fn tray_menu_action(app: AppHandle, action: String) {
             broadcast_active_window(&app, "none");
         }
         "full" => {
-            switch_to_full_mode(app);
+            open_full_mode(&app, None).await;
         }
         "mini" => {
-            switch_to_mini_mode(app);
+            switch_to_mini_mode(app).await;
         }
         "new_timer_tray" => {
             spawn_float_window(&app, "timer");
@@ -6044,34 +6252,22 @@ async fn tray_menu_action(app: AppHandle, action: String) {
             spawn_float_window(&app, "analog");
         }
         "new_relax" | "new_relax_tray" => {
-            spawn_float_window(&app, "relax");
+            spawn_float(app, "relax".into()).await;
         }
         "new_alarm" => {
-            switch_to_full_mode(app.clone());
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("mini:menu-action", "new-alarm");
-            }
+            open_full_mode(&app, Some("new-alarm")).await;
         }
         "home" | "timer" | "stopwatch" | "relax" | "settings" => {
-            switch_to_full_mode(app.clone());
-            if let Some(main) = app.get_webview_window("main") {
-                let _ = main.emit("mini:menu-action", &action);
-            }
+            open_full_mode(&app, Some(&action)).await;
         }
         // Quick relax toggle from the tray: play/pause whichever window
         // reported playback (main relax view or the float widget) without
         // leaving the current view. Falls back to main when nothing is
         // reported, matching the pre-widget behavior.
         "relax_toggle" => {
-            let state = app.state::<AlarmState>();
-            let source = lock_or_recover(&state.relax_playing_source).clone();
-            let target = source
-                .and_then(|label| app.get_webview_window(&label).map(|_| label))
-                .unwrap_or_else(|| "main".to_string());
-            // Window::emit broadcasts to every target in Tauri 2; the
-            // toggle must reach only the reported source, otherwise the
-            // main window reacts too and hijacks the state.
-            let _ = app.emit_to(target.as_str(), "tray:relax-toggle", ());
+            if let Err(error) = send_relax_control(app, serde_json::json!("toggle")).await {
+                warn!("Could not toggle Relax: {error}");
+            }
         }
         "about" => {
             show_about_window(&app).await;
@@ -6240,17 +6436,16 @@ fn show_initial_window(app: &AppHandle) {
 
     // Show appropriate window based on mode
     if !is_mini {
-        if let Some(main) = app.get_webview_window("main") {
-            // Automatic selection: the monitor that holds the mouse
-            // pointer, else the preferred display. Full mode fills the
-            // monitor's work area (taskbars respected on every edge).
-            place_full_clock(&main, &settings);
-            let _ = main.show();
-            // Re-assert the taskbar tab: a boot-time start can beat the
-            // taskbar creation, losing the AddTab registration.
-            refresh_taskbar_tab(&main);
-        }
+        show_clock_window(app);
     } else if let Some(mini) = app.get_webview_window("mini") {
+        if settings.window_mode != "mini" {
+            if let Err(error) = update_settings(app, |s| {
+                s.window_mode = "mini".into();
+                Ok(())
+            }) {
+                warn!("Could not save startup in Mini Mode: {error}");
+            }
+        }
         restore_mini_position(&mini, &settings);
         #[cfg(windows)]
         attach_window_drag_subclass(&mini);
@@ -6263,7 +6458,9 @@ fn show_initial_window(app: &AppHandle) {
         reapply_click_through(app, &mini);
     }
 
-    broadcast_active_window(app, if is_mini { "mini" } else { "main" });
+    if is_mini {
+        broadcast_active_window(app, "mini");
+    }
 
     // Restore floating windows if they were open before closing
     if settings.restore_float_widgets {
@@ -6294,13 +6491,7 @@ pub fn run() {
             // Focus existing window when second instance is launched
             let settings = load_settings(app);
             if settings.window_mode == "full" {
-                if let Some(main) = app.get_webview_window("main") {
-                    place_full_clock(&main, &settings);
-                    let _ = main.unminimize();
-                    let _ = main.show();
-                    refresh_taskbar_tab(&main);
-                    let _ = main.set_focus();
-                }
+                show_clock_window(app);
             } else if let Some(mini) = app.get_webview_window("mini") {
                 let _ = mini.unminimize();
                 let _ = mini.show();
@@ -6308,14 +6499,9 @@ pub fn run() {
                 refresh_taskbar_tab(&mini);
                 let _ = mini.set_focus();
             }
-            broadcast_active_window(
-                app,
-                if settings.window_mode == "full" {
-                    "main"
-                } else {
-                    "mini"
-                },
-            );
+            if settings.window_mode != "full" {
+                broadcast_active_window(app, "mini");
+            }
         }))
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -6338,52 +6524,6 @@ pub fn run() {
         .setup(|app| {
             // Setup tray icon
             setup_tray(app.handle())?;
-
-            // Full mode is work-area sized by definition (CyberLauncher
-            // style): the clock fills its monitor's work area, only
-            // minimize is allowed. Any other resize (a stray caption
-            // double-click maximize/restore, mixed-DPI glitches) snaps
-            // back to the work area of the monitor the window is on.
-            if let Some(main) = app.get_webview_window("main") {
-                // No maximize box: without it a caption double-click can
-                // not toggle maximize/restore in the first place.
-                let _ = main.set_maximizable(false);
-                let main_for_resize = main.clone();
-                main.on_window_event(move |event| match event {
-                    WindowEvent::CloseRequested { api, .. }
-                        if !APP_EXITING.load(Ordering::SeqCst) =>
-                    {
-                        api.prevent_close();
-                        let _ = main_for_resize.emit("main:close-requested", ());
-                    }
-                    WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
-                        if main_for_resize.is_minimized().unwrap_or(true) {
-                            return;
-                        }
-                        if let Ok(Some(monitor)) = main_for_resize.current_monitor() {
-                            let work_area = monitor.work_area();
-                            let pos = work_area.position;
-                            let size = work_area.size;
-                            let in_place = main_for_resize
-                                .outer_position()
-                                .map(|p| p.x == pos.x && p.y == pos.y)
-                                .unwrap_or(false)
-                                && main_for_resize.outer_size().ok().is_some_and(|s| {
-                                    s.width == size.width && s.height == size.height
-                                });
-                            if !in_place {
-                                let _ = main_for_resize.set_position(tauri::Position::Physical(
-                                    tauri::PhysicalPosition::new(pos.x, pos.y),
-                                ));
-                                let _ = main_for_resize.set_size(tauri::Size::Physical(
-                                    tauri::PhysicalSize::new(size.width, size.height),
-                                ));
-                            }
-                        }
-                    }
-                    _ => {}
-                });
-            }
 
             // The mini window is non-resizable (tauri.conf.json). However,
             // moving between monitors with different DPI can still cause
@@ -6510,8 +6650,12 @@ pub fn run() {
             toggle_always_on_top,
             open_window,
             take_about_update_check,
+            main_ready,
+            release_idle_main,
+            get_active_alarm,
             hide_window,
             spawn_float,
+            send_relax_control,
             close_relax_widget,
             switch_to_full_mode,
             switch_to_mini_mode,
@@ -6601,6 +6745,9 @@ pub fn run() {
         {
             if label == RELAX_WIDGET_LABEL && !APP_EXITING.load(Ordering::SeqCst) {
                 set_relax_widget_open(app, app.get_webview_window(RELAX_WIDGET_LABEL).is_some());
+                request_main_release(app);
+            } else if label == "main" {
+                MAIN_READY.store(false, Ordering::Release);
             } else if label == "mini_tip" {
                 MINI_TIP_HWND.store(0, Ordering::Release);
             }

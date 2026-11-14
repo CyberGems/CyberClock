@@ -261,7 +261,7 @@ CyberClock/
 
 ### Multi-Window Architecture
 
-The app starts the Full Mode and Mini Mode windows. Full Mode stays loaded in the background so Relax can keep playing in Mini Mode. CyberClock opens the other four windows on demand and releases them after dismissal.
+CyberClock opens its auxiliary windows and floating widgets on demand. In Mini Mode, Full Mode loads in the background for scheduled Relax sessions and the Relax widget. After returning to Mini Mode or closing the widget, CyberClock releases Full Mode when it has no playback, timers, or edits to keep.
 
 | Window | Purpose | Size |
 |---|---|---|

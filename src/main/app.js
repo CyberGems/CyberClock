@@ -2228,9 +2228,7 @@
 
     function applySettings(s) {
         cfg = s;
-        // One-time restore of the expanded digital clock: the main webview
-        // stays alive in mini mode, so doing this on the first settings load
-        // covers both a full-mode launch and returning from a mini launch.
+        // Restore the expanded clock each time this window is created.
         if (!clockStageRestoredOnce) {
             clockStageRestoredOnce = true;
             if (s.clockStageOpen === true) openClockStage(false);
@@ -7417,7 +7415,7 @@
         }
     }
 
-    window.cc.onRelaxControl(action => {
+    const relaxControlReady = window.cc.onRelaxControl(action => {
         if (action?.type === "auto-stop") {
             if (isRelaxAutoStopOption(action.minutes)) {
                 configureRelaxAutoStop(action.minutes);
@@ -7468,7 +7466,7 @@
                 playRelaxCard(RELAX_TRACKS[(index + 1) % RELAX_TRACKS.length].id, {});
             }
         }
-    }).catch(console.error);
+    });
     document.getElementById("r-stop").addEventListener("click", stopRelaxManually);
 
     function stopRelaxManually() {
@@ -10311,10 +10309,17 @@
         }).catch(() => {});
     }
     if (window.cc && window.cc.onUpdateStatus) {
-        window.cc.onUpdateStatus(handleUpdateStatus);
+        let receivedStatus = false;
+        window.cc.onUpdateStatus(payload => {
+            receivedStatus = true;
+            handleUpdateStatus(payload);
+        }).then(async () => {
+            const savedStatus = await window.cc.getUpdateStatus();
+            if (!receivedStatus && savedStatus) handleUpdateStatus(savedStatus);
+        }).catch(console.error);
     }
 
-    window.cc.onInit(async (s) => {
+    const mainInitialized = window.cc.onInit(async (s) => {
         applySettings(s);
         let isActive = s && s.windowMode === "full";
         if (window.cc && window.cc.getActiveWindow) {
@@ -10416,7 +10421,7 @@
         }
     });
 
-    window.cc.onMiniMenuAction((action) => {
+    const miniMenuActionReady = window.cc.onMiniMenuAction((action) => {
         if (action === "settings") {
             openSettings();
         } else if (action.startsWith("open-note:")) {
@@ -10468,8 +10473,10 @@
         window.VoiceAnnouncer.announceAlarm(cfg, p);
     }
 
-    window.cc.onAlarmChime((p) => {
+    let receivedAlarm = false;
+    const alarmReady = window.cc.onAlarmChime((p) => {
         if (p.type === "custom") {
+            receivedAlarm = true;
             ttHide();
             showAlarmNotice(p);
             if (!p.silent && window.audioEngine?.playAlarmAlert) window.audioEngine.playAlarmAlert(p);
@@ -10483,20 +10490,13 @@
         }
     });
 
-    if (window.cc && window.cc.onVoiceAnnounceTime) {
-        window.cc.onVoiceAnnounceTime((p) => {
-            if (window.VoiceAnnouncer) {
-                window.VoiceAnnouncer.announce(cfg, p.hour, p.minute, { occurrence: p.occurrence });
-            }
-        });
-    }
+    const voiceReady = window.cc.onVoiceAnnounceTime?.((p) => {
+        if (window.VoiceAnnouncer) {
+            window.VoiceAnnouncer.announce(cfg, p.hour, p.minute, { occurrence: p.occurrence });
+        }
+    });
 
-    // Tray quick toggle: play/pause the relax audio without navigating.
-    if (window.cc && window.cc.onTrayRelaxToggle) {
-        window.cc.onTrayRelaxToggle(rTogglePlay);
-    }
-
-    window.cc.onRelaxTrigger((p) => {
+    const relaxTriggerReady = window.cc.onRelaxTrigger((p) => {
         const track = getSchedTrack(p.track);
         // Scheduled sessions always start from silence (not blended with
         // whatever might still be fading out) and at the configured volume.
@@ -10507,4 +10507,21 @@
         preSelectRelaxTrack(track);
         rPlayTrack();
     });
+
+    const idleCheckReady = window.cc.onMainIdleCheck(ticket => {
+        relaxSettingsSave.then(() => {
+            // Local timers and draft edits must survive Mini Mode.
+            const hasPendingWork = window.audioEngine.isPlaying || tRunning || tAcc > 0 || tGetInputSecs() > 0
+                || swRunning || swElapsed > 0
+                || document.querySelector(".note-overlay.open, .s-overlay.open, .alarm-editor-overlay.open, #t-done.vis");
+            if (!hasPendingWork) return window.cc.releaseIdleMain(ticket);
+        }).catch(console.error);
+    });
+
+    Promise.all([mainInitialized, relaxControlReady, relaxTriggerReady, miniMenuActionReady,
+        alarmReady, voiceReady, idleCheckReady]).then(async () => {
+        await window.cc.mainReady();
+        const activeAlarm = await window.cc.getActiveAlarm();
+        if (!receivedAlarm && activeAlarm) showAlarmNotice(activeAlarm);
+    }).catch(console.error);
 

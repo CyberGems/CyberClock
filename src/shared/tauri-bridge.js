@@ -433,12 +433,11 @@
         onInit: (cb) => {
             if (!HAS_TAURI) {
                 // Browser fallback: run with whatever the store has.
-                Promise.resolve()
+                return Promise.resolve()
                     .then(() => cb(browserSettings || (browserSettings = {})))
                     .catch((e) => console.error("onInit fallback failed:", e));
-                return;
             }
-            invoke("get_settings")
+            return invoke("get_settings")
                 .then((s) => cb(s))
                 .catch((e) => console.error("onInit: get_settings failed:", e));
         },
@@ -449,8 +448,9 @@
             return subscribe("theme:changed", cb);
         },
         onAlarmChime: (cb) => {
-            return subscribe("alarm:chime", cb);
+            return subscribeToWindow("alarm:chime", cb);
         },
+        getActiveAlarm: () => invoke("get_active_alarm"),
         onAlarmSnoozed: (cb) => {
             return subscribe("alarm:snoozed", cb);
         },
@@ -477,9 +477,9 @@
             }
         },
         onRelaxTrigger: (cb) => {
-            return subscribe("relax:trigger", cb);
+            return subscribeToWindow("relax:trigger", cb);
         },
-        sendRelaxControl: (action) => emitTo("main", "relax:control", action),
+        sendRelaxControl: (action) => invoke("send_relax_control", { action }),
         onRelaxControl: (cb) => subscribeToWindow("relax:control", cb),
         sendRelaxPlayback: (state) => emitTo("float-relax-1", "relax:playback", state),
         onRelaxPlayback: (cb) => subscribeToWindow("relax:playback", cb),
@@ -500,13 +500,11 @@
             return subscribe("menu:state", cb);
         },
         onMiniMenuAction: (cb) => {
-            return subscribe("mini:menu-action", cb);
+            return subscribeToWindow("mini:menu-action", cb);
         },
-        onTrayRelaxToggle: (cb) => {
-            // Directed event (emit_to the playing window): must be scoped
-            // or every window would react to each other's toggles.
-            return subscribeToWindow("tray:relax-toggle", cb);
-        },
+        mainReady: () => invoke("main_ready"),
+        onMainIdleCheck: (cb) => subscribeToWindow("main:check-idle", cb),
+        releaseIdleMain: (ticket) => invoke("release_idle_main", { ticket }),
         getActiveWindow: async () => {
             return await invokeOrFallback("get_active_window", {}, null);
         },

@@ -213,7 +213,7 @@ impl Default for AlarmSettings {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(default, rename_all = "camelCase")]
 pub struct RelaxSchedulerSettings {
     pub enabled: bool,

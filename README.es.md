@@ -261,7 +261,7 @@ CyberClock/
 
 ### Arquitectura multi-ventana
 
-La app carga las ventanas de Modo Completo y Modo Mini al iniciar. Modo Completo sigue cargado en segundo plano para que Relax pueda seguir reproduciendo en Modo Mini. CyberClock abre las otras cuatro ventanas bajo demanda y las libera al cerrarlas.
+CyberClock abre las ventanas auxiliares y los widgets flotantes bajo demanda. En Modo Mini, Modo Completo se carga en segundo plano para las sesiones programadas y el widget de Relax. Al volver al Modo Mini o cerrar el widget, CyberClock libera Modo Completo cuando no hay audio en curso ni temporizadores, cronómetros o ediciones pendientes.
 
 | Ventana | Propósito | Tamaño |
 |---|---|---|
