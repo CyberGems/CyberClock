@@ -921,7 +921,7 @@ fn apply_imported_settings(app: &AppHandle, imported: AppSettings) {
     apply_all_click_through(app);
 
     // Broadcast to all windows
-    let _ = app.emit("settings:updated", load_settings(&app));
+    let _ = app.emit("settings:updated", load_settings(app));
 }
 
 // ─────────────────────────────────────────────────────────────
