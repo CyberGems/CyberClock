@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.16.1]
+
+### Changed
+
+- Mini Mode loads its agenda and alert panel, context menu, system tray menu, and About window on demand. Dismissing them releases their memory.
+- Mini Mode releases the hidden Full Mode window when it is idle. Full Mode loads again for scheduled Relax sessions or the Relax widget. Alarms and spoken time announcements continue in Mini Mode.
+
+### Fixed
+
+- Update notice buttons use the selected language in Mini Mode. In Full Mode, the notice opens in the lower-right corner. In-app release notes omit the installation guidance shown on GitHub.
+
+### Español
+
+- El Modo Mini carga bajo demanda el panel de agenda y avisos, el menú contextual, el menú de la bandeja y la ventana Acerca de CyberClock. Al cerrarlos, libera su memoria.
+- El Modo Mini libera la ventana oculta del Modo Completo cuando queda inactiva. Vuelve a cargarla para las sesiones programadas y el widget de Relax. Las alarmas y la locución de hora siguen funcionando en Modo Mini.
+- Los botones del aviso de actualización en Modo Mini aparecen en el idioma elegido. En Modo Completo, el aviso se abre en la esquina inferior derecha. Las notas dentro de la app omiten las instrucciones de instalación de GitHub.
+
 ## [1.16.0]
 
 ### Added

@@ -8,7 +8,7 @@
 
 <!-- IMPORTANT FOR AGENTS & MAINTAINERS: Always rewrite this entire section and highlights with the ACTUAL release notes for this specific new version before tagging. NEVER leave or copy previous version notes! Use 25-45 words for the summary, lead with user-facing changes, and do not repeat the app name or version. Keep the Spanish mirror inside the details block in sync: translate the summary and rewrite the highlights. -->
 <!-- changelog-summary:start -->
-Save and manage named soundscape mixes in Relax or its widget, with independent layer volumes and smoother fades. Mini Mode uses less CPU in the background, and the time announcer starts on schedule with a little more room for the pre-chime.
+Mini Mode uses less memory by opening auxiliary windows on demand and releasing the hidden Full Mode window when idle. Scheduled Relax sessions still work, and update notices display translated buttons in Mini Mode and sit in the lower-right corner in Full Mode.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,17 +17,16 @@ Save and manage named soundscape mixes in Relax or its widget, with independent 
 
 ### ✨ Key Features & Highlights
 
-- 🧘 **Relax**. Save, load, rename, update or delete named mixes from Relax or its widget. Adjust each layer from its soundscape card, the mix panel or the widget. Pause and stop use smooth fades.
-- 🎛️ **Relax widget**. Open or close the single widget from Relax. Control playback, layers, volume and Auto Stop, and hide the spectrum for a more compact widget. CyberClock remembers the last mix, Auto Stop duration, and whether Mix layers and Auto Scheduler were expanded.
-- 🕐 **Mini Mode**. Lighter skin animations and less background work reduce idle CPU use. A synchronized LED marks the seconds, and the clock better restores its saved monitor and position.
-- 🔔 **Time announcements**. Speech starts on schedule with protection against duplicate announcements and a slightly longer pause after the pre-chime starts. Choose hourly chimes or spoken announcements under Time, choose the voice and volume under Voice, and configure read-aloud under Alarms.
+- 🕐 **Mini Mode windows**. The agenda and alert panel, context menu, system tray menu, and About window load on demand. CyberClock releases their memory after you dismiss them.
+- 🧘 **Full Mode in the background**. CyberClock releases the hidden window when idle and opens it again for scheduled Relax sessions or the Relax widget. Alarms and spoken time announcements continue to work in Mini Mode.
+- 🔔 **Update notice**. The buttons in Mini Mode use the selected language. In Full Mode, the notice opens in the lower-right corner. In-app release notes omit the installation guidance found on GitHub.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por capa y fundidos más suaves. El Modo Mini reduce el uso de CPU en segundo plano y la locución de hora se activa a tiempo, con más espacio para el timbre previo.
+El Modo Mini usa menos memoria al cargar ventanas auxiliares bajo demanda y liberar el Modo Completo cuando queda inactivo. Las sesiones programadas de Relax siguen funcionando. El aviso de actualización muestra botones traducidos y aparece abajo a la derecha en Modo Completo.
 
 > **¿Nuevo en CyberClock?** Un reloj Windows cyber-neón con vistas analógica y digital, notas de calendario, alarmas, temporizadores, herramientas de relax y modos flotantes compactos.
 
@@ -35,10 +34,9 @@ Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por
 
 ### ✨ Novedades destacadas
 
-- 🧘 **Relax**. Guarda, carga, renombra, actualiza o elimina mezclas con nombre desde Relax o su widget. Ajusta cada capa desde la tarjeta de su pista, el panel de capas o el widget. Pausar y detener aplican un fundido suave.
-- 🎛️ **Widget de Relax**. Abre o cierra el widget único desde Relax. Controla la reproducción, las capas, el volumen y la Parada Automática. Puedes ocultar el espectro para compactarlo. CyberClock recuerda la última mezcla, la duración de Parada Automática y si dejaste desplegados Capas de la mezcla y Programador automático.
-- 🕐 **Modo Mini**. Las animaciones más ligeras y el menor trabajo en segundo plano reducen el uso de CPU en reposo. El LED marca los segundos de forma sincronizada y el reloj recupera mejor el monitor y la posición guardados.
-- 🔔 **Locución de hora**. El anuncio se activa a tiempo, evita duplicados y da un poco más de espacio al timbre previo antes de hablar. En Hora eliges campanadas horarias o locución, en Voz ajustas la voz y su volumen, y en Alarmas controlas la lectura en voz alta.
+- 🕐 **Ventanas del Modo Mini**. El panel de agenda y avisos, el menú contextual, el menú de la bandeja y la ventana Acerca de CyberClock se cargan bajo demanda. CyberClock libera su memoria después de cerrarlos.
+- 🧘 **Modo Completo en segundo plano**. CyberClock libera la ventana oculta cuando queda inactiva y la vuelve a abrir para las sesiones programadas o el widget de Relax. Las alarmas y la locución de hora siguen funcionando en Modo Mini.
+- 🔔 **Aviso de actualización**. Los botones en Modo Mini aparecen en el idioma elegido. En Modo Completo, el aviso se abre en la esquina inferior derecha. Las notas dentro de la app omiten las instrucciones de instalación de GitHub.
 
 ### ⚠️ Antes de instalar
 
