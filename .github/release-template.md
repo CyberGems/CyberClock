@@ -46,7 +46,7 @@ Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por
 
 </details>
 
---- 
+---
 
 ### ⚠️ Before you install
 
