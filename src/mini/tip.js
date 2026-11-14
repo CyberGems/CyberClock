@@ -146,7 +146,7 @@
             const btnOpen = document.createElement("button");
             btnOpen.type = "button";
             btnOpen.className = "mini-tip-update-btn primary";
-            btnOpen.textContent = t("update.prompt.viewAndUpdate");
+            btnOpen.textContent = t("mini.update.view");
             btnOpen.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if (window.cc?.goFull) window.cc.goFull();
@@ -157,7 +157,7 @@
             const btnDismiss = document.createElement("button");
             btnDismiss.type = "button";
             btnDismiss.className = "mini-tip-update-btn";
-            btnDismiss.textContent = t("update.prompt.dismiss");
+            btnDismiss.textContent = t("mini.update.dismiss");
             btnDismiss.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if (window.cc?.skipUpdate) window.cc.skipUpdate(data.updateVersion);
