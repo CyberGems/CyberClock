@@ -13,7 +13,7 @@
     "installer-header": "python scripts/generate-installer-art.py src-tauri/icons/icon.png src-tauri/nsis installerHeader --header"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.2",
+    "@tauri-apps/cli": "^2.12.4",
     "sharp": "^0.35.5"
   }
 }
