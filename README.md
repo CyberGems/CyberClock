@@ -261,16 +261,17 @@ CyberClock/
 
 ### Multi-Window Architecture
 
-The app uses **5 fixed Tauri windows**, plus independently spawned floating timer and stopwatch windows:
+The app starts the Full Mode and Mini Mode windows. Full Mode stays loaded in the background so Relax can keep playing in Mini Mode. CyberClock opens the other four windows on demand and releases them after dismissal.
 
 | Window | Purpose | Size |
 |---|---|---|
 | `main` | Full application (clock, calendar, timer, stopwatch, relax) | 1024×768 |
 | `mini` | Compact clock bar | Skin-specific dimensions |
-| `menu` | Context menu for mini mode | 270×560 |
-| `tray_menu` | System tray popup | 290×510 |
-| `about` | About window | 740×590 |
-| `float-*` | Independent timer or stopwatch | Responsive per skin |
+| `menu` | Mini Mode and widget context menu | Adjusted to content |
+| `tray_menu` | System tray popup | Adjusted to content |
+| `about` | About CyberClock | 740×535 initially |
+| `mini_tip` | Mini Mode agenda, update notices, and alarm controls | Adjusted to content |
+| `float-*` | Floating widgets opened independently | Varies by widget |
 
 Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
 
