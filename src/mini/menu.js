@@ -3,6 +3,7 @@
     let activeCaller = { caller: "mini", kind: "mini" };
     let currentCfg = {};
     let menuShownTime = 0;
+    let callerIsReady = false;
     let isDraggingMenu = false;
     let lastDragEndTime = 0;
 
@@ -594,6 +595,7 @@
         }
         resetMenuScroll();
         setTimeout(resetMenuScroll, 20);
+        callerIsReady = true;
         reportMenuHeight();
         setTimeout(reportMenuHeight, 40);
     }
@@ -617,31 +619,32 @@
     }
 
     function reportMenuHeight() {
-        requestAnimationFrame(() => {
-            const el = document.getElementById("ctx-menu");
-            if (!el) return;
-            if (el.classList.contains("gallery-mode")) {
-                const grid = document.getElementById("gallery-grid");
-                const view = grid ? (grid.dataset.view || "both") : "both";
+        if (window.__TAURI__ && !callerIsReady) return;
+        // The first size report also shows the cold menu. A hidden WebView
+        // may throttle animation frames, so measure without waiting for one.
+        const el = document.getElementById("ctx-menu");
+        if (!el) return;
+        if (el.classList.contains("gallery-mode")) {
+            const grid = document.getElementById("gallery-grid");
+            const view = grid ? (grid.dataset.view || "both") : "both";
 
-                // Target heights for 20 skins in 2 columns (10 rows):
-                // 'both': 10 rows with stacked + inline previews (~1120px logical)
-                // 'stacked': 10 rows with stacked preview only (~860px logical)
-                // 'inline': 10 rows with inline preview only (~760px logical)
-                let targetH = 1120;
-                if (view === "stacked") targetH = 860;
-                else if (view === "inline") targetH = 760;
+            // Target heights for 20 skins in 2 columns (10 rows):
+            // 'both': 10 rows with stacked + inline previews (~1120px logical)
+            // 'stacked': 10 rows with stacked preview only (~860px logical)
+            // 'inline': 10 rows with inline preview only (~760px logical)
+            let targetH = 1120;
+            if (view === "stacked") targetH = 860;
+            else if (view === "inline") targetH = 760;
 
-                if (window.cc && window.cc.miniMenuReady) {
-                    window.cc.miniMenuReady(410, targetH);
-                }
-                return;
-            }
-            const h = Math.ceil(el.scrollHeight + 16);
             if (window.cc && window.cc.miniMenuReady) {
-                window.cc.miniMenuReady(292, h);
+                window.cc.miniMenuReady(410, targetH);
             }
-        });
+            return;
+        }
+        const h = Math.ceil(el.scrollHeight + 16);
+        if (window.cc && window.cc.miniMenuReady) {
+            window.cc.miniMenuReady(292, h);
+        }
     }
 
     function updateLayoutButtons(layout) {
@@ -1935,33 +1938,21 @@
     });
 
     // Listen for caller event and query current caller
+    async function loadMenuCaller(info) {
+        if (!info) return;
+        try {
+            const cfg = await window.cc.getSettings();
+            if (cfg) currentCfg = Object.assign(currentCfg || {}, cfg);
+        } catch (error) {
+            console.error(error);
+        }
+        setupMenuForCaller(info);
+    }
+
     if (window.__TAURI__ && window.__TAURI__.event) {
         window.__TAURI__.event.listen("menu:caller", (e) => {
-            if (e.payload) {
-                if (window.cc && window.cc.getSettings) {
-                    window.cc.getSettings().then((cfg) => {
-                        if (cfg) currentCfg = Object.assign(currentCfg || {}, cfg);
-                        setupMenuForCaller(e.payload);
-                    }).catch(() => setupMenuForCaller(e.payload));
-                } else {
-                    setupMenuForCaller(e.payload);
-                }
-            }
-        });
-    }
-    if (window.cc && window.cc.getMenuCaller) {
-        window.cc.getMenuCaller().then((info) => {
-            if (info) {
-                if (window.cc && window.cc.getSettings) {
-                    window.cc.getSettings().then((cfg) => {
-                        if (cfg) currentCfg = Object.assign(currentCfg || {}, cfg);
-                        setupMenuForCaller(info);
-                    }).catch(() => setupMenuForCaller(info));
-                } else {
-                    setupMenuForCaller(info);
-                }
-            }
-        }).catch(() => {});
+            loadMenuCaller(e.payload).catch(console.error);
+        }).then(() => window.cc.getMenuCaller()).then(loadMenuCaller).catch(console.error);
     }
 
     if (window.cc && window.cc.onSettingsUpdated) {

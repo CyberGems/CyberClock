@@ -390,16 +390,26 @@
     initUpdatePanelActions();
 
     if (window.cc && window.cc.onUpdateStatus) {
+        let receivedStatus = false;
         window.cc.onUpdateStatus((payload) => {
+            receivedStatus = true;
             updateStatus = payload || { state: "idle" };
             renderUpdateState();
-        });
+        }).then(async () => {
+            const savedStatus = await window.cc.getUpdateStatus();
+            if (!receivedStatus && savedStatus) {
+                updateStatus = savedStatus;
+                renderUpdateState();
+            }
+        }).catch(console.error);
     }
 
     if (window.cc && window.cc.onCheckUpdatesTrigger) {
-        window.cc.onCheckUpdatesTrigger(() => {
-            checkForUpdatesOnly();
-        });
+        const handleUpdateRequest = async () => {
+            if (await window.cc.takeAboutUpdateCheck()) await checkForUpdatesOnly();
+        };
+        window.cc.onCheckUpdatesTrigger(() => handleUpdateRequest().catch(console.error))
+            .then(handleUpdateRequest).catch(console.error);
     }
 
     // ── Auto-update toggle ──────────────────────────────────

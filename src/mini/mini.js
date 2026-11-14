@@ -395,15 +395,16 @@
         };
     }
 
-    async function openTip() {
-        if (isDragging || isPointerDown || popupMenuOpen) return;
-        if (document.body.classList.contains("click-through")) return;
+    async function openTip({ alarm = false } = {}) {
+        if (!alarm && (isDragging || isPointerDown || popupMenuOpen ||
+            document.body.classList.contains("click-through"))) return;
         const payload = buildTipPayload();
         isTipVisible = true;
         if (window.cc && window.cc.openMiniTip) {
             try {
-                await window.cc.openMiniTip(payload);
+                if (!await window.cc.openMiniTip(payload)) isTipVisible = false;
             } catch (err) {
+                isTipVisible = false;
                 console.error("Failed to open mini tip:", err);
             }
         }
@@ -448,7 +449,7 @@
 
     async function showMiniAlarm(payload) {
         activeAlarmNotice = payload || {};
-        openTip();
+        openTip({ alarm: true });
     }
 
     const controlsEl = document.querySelector(".controls");

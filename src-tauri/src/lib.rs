@@ -28,8 +28,8 @@ pub use settings::{
     SettingsStore,
 };
 use updater::{
-    check_for_updates, download_update, get_app_version, init_updater, install_update, is_msstore,
-    is_portable, pending_update_version, set_auto_update, UpdaterState,
+    check_for_updates, download_update, get_app_version, get_update_status, init_updater,
+    install_update, is_msstore, is_portable, pending_update_version, set_auto_update, UpdaterState,
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -1721,13 +1721,116 @@ fn open_external_url(url: String) -> bool {
     }
 }
 
+// Build from the configured window definitions, off the Windows UI thread.
+// Keep recently dismissed menus warm so moving between widgets doesn't
+// repeatedly pay WebView2's startup cost.
+static AUXILIARY_WINDOW_BUILD: tauri::async_runtime::Mutex<()> =
+    tauri::async_runtime::Mutex::const_new(());
+const AUXILIARY_WINDOW_IDLE: std::time::Duration = std::time::Duration::from_secs(15);
+static AUXILIARY_WINDOW_GENERATIONS: Mutex<std::collections::BTreeMap<&'static str, u64>> =
+    Mutex::new(std::collections::BTreeMap::new());
+static ABOUT_UPDATE_CHECK: AtomicBool = AtomicBool::new(false);
+
+fn touch_auxiliary_window(label: &'static str) -> u64 {
+    let mut generations = lock_or_recover(&AUXILIARY_WINDOW_GENERATIONS);
+    let current = generations.entry(label).or_default();
+    *current = current.wrapping_add(1);
+    *current
+}
+
+async fn load_auxiliary_window(app: &AppHandle, label: &'static str) -> Option<WebviewWindow> {
+    let _build = AUXILIARY_WINDOW_BUILD.lock().await;
+    touch_auxiliary_window(label);
+    if APP_EXITING.load(Ordering::SeqCst) {
+        return None;
+    }
+    if let Some(window) = app.get_webview_window(label) {
+        return Some(window);
+    }
+    let config = app
+        .config()
+        .app
+        .windows
+        .iter()
+        .find(|window| window.label == label)?;
+    match WebviewWindowBuilder::from_config(app, config)
+        .and_then(|builder| builder.focused(false).build())
+    {
+        Ok(window) => {
+            if label == "tray_menu" {
+                let win = window.clone();
+                let app = app.clone();
+                window.on_window_event(move |event| {
+                    if let WindowEvent::Focused(false) = event {
+                        let win = win.clone();
+                        let app = app.clone();
+                        tauri::async_runtime::spawn(async move {
+                            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                            if win.is_visible().unwrap_or(false)
+                                && !win.is_focused().unwrap_or(false)
+                            {
+                                hide_tray_menu(app);
+                            }
+                        });
+                    }
+                });
+            }
+            Some(window)
+        }
+        Err(error) => {
+            warn!("Could not open {}: {}", label, error);
+            None
+        }
+    }
+}
+
+fn hide_auxiliary_window(app: &AppHandle, label: &'static str) {
+    let generation = touch_auxiliary_window(label);
+    let Some(window) = app.get_webview_window(label) else {
+        return;
+    };
+    #[cfg(target_os = "windows")]
+    if label == "mini_tip" {
+        hide_mini_tip_hwnd();
+    }
+    let _ = window.hide();
+    release_auxiliary_window_later(app, label, generation);
+}
+
+fn release_auxiliary_window_later(app: &AppHandle, label: &'static str, generation: u64) {
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(AUXILIARY_WINDOW_IDLE).await;
+        let on_main = app.clone();
+        let _ = app.run_on_main_thread(move || {
+            let current = lock_or_recover(&AUXILIARY_WINDOW_GENERATIONS)
+                .get(label)
+                .copied();
+            if current != Some(generation) {
+                return;
+            }
+            let Ok(_build) = AUXILIARY_WINDOW_BUILD.try_lock() else {
+                release_auxiliary_window_later(&on_main, label, generation);
+                return;
+            };
+            if let Some(window) = on_main.get_webview_window(label) {
+                if window.is_visible().is_ok_and(|visible| !visible) {
+                    if label == "mini_tip" {
+                        MINI_TIP_HWND.store(0, Ordering::Release);
+                    }
+                    let _ = window.destroy();
+                }
+            }
+        });
+    });
+}
+
 #[tauri::command]
-fn open_window(app: AppHandle, name: String) -> bool {
+async fn open_window(app: AppHandle, name: String) -> bool {
     // The About dialog is repositioned onto the invoking monitor on every
     // show; plain show() would leave it at its stale (primary) position.
     if name == "about" {
-        show_about_window(&app);
-        return true;
+        return show_about_window(&app).await;
     }
     if let Some(window) = app.get_webview_window(&name) {
         let _ = window.show();
@@ -1743,9 +1846,9 @@ fn open_window(app: AppHandle, name: String) -> bool {
 /// from. Every entry point (main settings, mini menu, tray menu) is a pointer
 /// click, so the monitor under the cursor identifies the invoking display;
 /// fall back to the monitor holding a visible clock window, then primary.
-fn show_about_window(app: &AppHandle) {
-    let Some(win) = app.get_webview_window("about") else {
-        return;
+async fn show_about_window(app: &AppHandle) -> bool {
+    let Some(win) = load_auxiliary_window(app, "about").await else {
+        return false;
     };
     let reference = app
         .cursor_position()
@@ -1799,15 +1902,26 @@ fn show_about_window(app: &AppHandle) {
         let _ = win.set_size(tauri::Size::Physical(size));
         let _ = win.set_position(tauri::Position::Physical(center));
     }
+    let _ = win.unminimize();
     let _ = win.show();
     let _ = win.set_focus();
     let _ = app.emit("about:opened", ());
     refresh_taskbar_tab(&win);
+    true
+}
+
+#[tauri::command]
+fn take_about_update_check() -> bool {
+    ABOUT_UPDATE_CHECK.swap(false, Ordering::AcqRel)
 }
 
 #[tauri::command]
 fn hide_window(app: AppHandle, name: String) -> bool {
     if let Some(window) = app.get_webview_window(&name) {
+        if name == "about" {
+            let _ = window.close();
+            return true;
+        }
         let _ = window.hide();
         if name == "main" || name == "mini" {
             broadcast_active_window(&app, "none");
@@ -2487,12 +2601,8 @@ fn check_fullscreen_widgets(app: &AppHandle) {
                 drop(hidden);
 
                 if label == "mini" {
-                    if let Some(menu) = app.get_webview_window("menu") {
-                        let _ = menu.hide();
-                    }
-                    if let Some(tip) = app.get_webview_window("mini_tip") {
-                        let _ = tip.hide();
-                    }
+                    close_mini_context_menu(app.clone());
+                    hide_mini_tip(app.clone());
                 }
             }
         }
@@ -2866,15 +2976,7 @@ unsafe extern "system" fn window_drag_subclass_proc(
                 .map(|pos| (pos.x, pos.y));
         }
         show_widget_drag_cursor();
-        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
-        if tip_hwnd != 0 {
-            unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
-                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
-                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
-                );
-            }
-        }
+        hide_mini_tip_hwnd();
     }
     if msg == WM_EXITSIZEMOVE {
         WIDGET_DRAG_CURSOR.store(false, Ordering::Release);
@@ -2900,15 +3002,7 @@ unsafe extern "system" fn window_drag_subclass_proc(
     if msg == WM_MOVING {
         WIDGET_DRAG_CURSOR.store(true, Ordering::Release);
         show_widget_drag_cursor();
-        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
-        if tip_hwnd != 0 {
-            unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
-                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
-                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
-                );
-            }
-        }
+        hide_mini_tip_hwnd();
         if EDGE_LIMITS_ENABLED.load(Ordering::Acquire) {
             let rect = &mut *(lparam as *mut windows_sys::Win32::Foundation::RECT);
             let work_areas = get_all_work_areas();
@@ -4208,6 +4302,7 @@ fn set_mini_preview(app: AppHandle, on: bool) {
 static MINI_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
 static CURRENT_MENU_CALLER: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+static MINI_MENU_OPEN: AtomicBool = AtomicBool::new(false);
 static MINI_MENU_LAST_HEIGHT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(430);
 
 fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f64) {
@@ -4308,7 +4403,7 @@ fn position_mini_context_menu(menu: &WebviewWindow, logical_w: f64, logical_h: f
 }
 
 #[tauri::command]
-fn open_mini_context_menu(
+async fn open_mini_context_menu(
     app: AppHandle,
     window: WebviewWindow,
     _x: i32,
@@ -4316,70 +4411,50 @@ fn open_mini_context_menu(
     screen_x: i32,
     screen_y: i32,
 ) -> bool {
-    if let Some(menu) = app.get_webview_window("menu") {
-        let (clock_x, clock_y, clock_w, clock_h) =
-            match (window.outer_position(), window.outer_size()) {
-                (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
-                _ => (screen_x, screen_y, 0, 0),
-            };
+    let Some(menu) = load_auxiliary_window(&app, "menu").await else {
+        return false;
+    };
+    let (clock_x, clock_y, clock_w, clock_h) = match (window.outer_position(), window.outer_size())
+    {
+        (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
+        _ => (screen_x, screen_y, 0, 0),
+    };
 
-        if let Ok(mut g) = MINI_MENU_ANCHOR.lock() {
-            *g = Some((clock_x, clock_y, clock_w, clock_h, screen_x, screen_y));
-        }
-
-        let caller_label = window.label().to_string();
-        let same_caller = CURRENT_MENU_CALLER
-            .lock()
-            .ok()
-            .and_then(|c| c.clone())
-            .as_deref()
-            == Some(caller_label.as_str());
-        if menu.is_visible().unwrap_or(false) && same_caller {
-            let _ = menu.hide();
-            let _ = app.emit("menu:closed", ());
-            return false;
-        }
-
-        if let Ok(mut c) = CURRENT_MENU_CALLER.lock() {
-            *c = Some(caller_label.clone());
-        }
-
-        let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
-        position_mini_context_menu(&menu, 292.0, last_h);
-
-        let caller_kind = if caller_label.starts_with("float-timer-") {
-            "timer"
-        } else if caller_label.starts_with("float-sw-") {
-            "sw"
-        } else if caller_label.starts_with("float-relax-") {
-            "relax"
-        } else if caller_label.starts_with("float-analog-") {
-            "analog"
-        } else if caller_label.starts_with("float-cal-") {
-            "cal"
-        } else {
-            "mini"
-        };
-        let _ = menu.emit(
-            "menu:caller",
-            serde_json::json!({
-                "caller": caller_label,
-                "kind": caller_kind
-            }),
-        );
-
-        let _ = menu.show();
-        let _ = menu.set_focus();
-        refresh_taskbar_tab(&menu);
-        hide_mini_tip(app.clone());
-        return true;
+    if let Ok(mut g) = MINI_MENU_ANCHOR.lock() {
+        *g = Some((clock_x, clock_y, clock_w, clock_h, screen_x, screen_y));
     }
-    false
+
+    let caller_label = window.label().to_string();
+    let same_caller = CURRENT_MENU_CALLER
+        .lock()
+        .ok()
+        .and_then(|c| c.clone())
+        .as_deref()
+        == Some(caller_label.as_str());
+    if MINI_MENU_OPEN.swap(true, Ordering::AcqRel) && same_caller {
+        close_mini_context_menu(app);
+        return false;
+    }
+
+    if let Ok(mut c) = CURRENT_MENU_CALLER.lock() {
+        *c = Some(caller_label.clone());
+    }
+
+    let last_h = MINI_MENU_LAST_HEIGHT.load(std::sync::atomic::Ordering::Relaxed) as f64;
+    position_mini_context_menu(&menu, 292.0, last_h);
+
+    hide_mini_tip(app.clone());
+    let _ = menu.emit("menu:caller", menu_caller_info(caller_label));
+    true
 }
 
 #[tauri::command]
 fn get_menu_caller() -> Option<serde_json::Value> {
-    let caller = CURRENT_MENU_CALLER.lock().ok().and_then(|c| c.clone())?;
+    let caller = lock_or_recover(&CURRENT_MENU_CALLER).clone()?;
+    Some(menu_caller_info(caller))
+}
+
+fn menu_caller_info(caller: String) -> serde_json::Value {
     let kind = if caller.starts_with("float-timer-") {
         "timer"
     } else if caller.starts_with("float-sw-") {
@@ -4393,10 +4468,10 @@ fn get_menu_caller() -> Option<serde_json::Value> {
     } else {
         "mini"
     };
-    Some(serde_json::json!({
+    serde_json::json!({
         "caller": caller,
         "kind": kind
-    }))
+    })
 }
 
 #[tauri::command]
@@ -4420,16 +4495,18 @@ fn mini_menu_ready(app: AppHandle, width: f64, height: f64) {
     }
     if let Some(menu) = app.get_webview_window("menu") {
         position_mini_context_menu(&menu, width, height);
+        if MINI_MENU_OPEN.load(Ordering::Acquire) && !menu.is_visible().unwrap_or(false) {
+            let _ = menu.show();
+            let _ = menu.set_focus();
+            refresh_taskbar_tab(&menu);
+        }
     }
 }
 
 #[tauri::command]
 fn close_mini_context_menu(app: AppHandle) {
-    if let Some(menu) = app.get_webview_window("menu") {
-        if !menu.is_visible().unwrap_or(false) {
-            return;
-        }
-        let _ = menu.hide();
+    if MINI_MENU_OPEN.swap(false, Ordering::AcqRel) {
+        hide_auxiliary_window(&app, "menu");
         let _ = app.emit("menu:closed", ());
     }
 }
@@ -4439,6 +4516,7 @@ fn close_mini_context_menu(app: AppHandle) {
 // ─────────────────────────────────────────────────────────────
 
 static MINI_TIP_HOVERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static MINI_TIP_OPEN: AtomicBool = AtomicBool::new(false);
 static MINI_TIP_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
 static MINI_TIP_ANCHOR: std::sync::Mutex<Option<(i32, i32, i32, i32)>> =
     std::sync::Mutex::new(None);
@@ -4446,6 +4524,16 @@ static MINI_TIP_LAST_SIZE: std::sync::Mutex<(f64, f64)> = std::sync::Mutex::new(
 static MINI_TIP_LAST_PAYLOAD: std::sync::Mutex<Option<serde_json::Value>> =
     std::sync::Mutex::new(None);
 static MINI_TIP_LAST_PLACEMENT: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
+
+#[cfg(target_os = "windows")]
+fn hide_mini_tip_hwnd() {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_HIDE};
+
+    let hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
+    if hwnd != 0 {
+        unsafe { ShowWindow(hwnd as windows_sys::Win32::Foundation::HWND, SW_HIDE) };
+    }
+}
 
 fn position_mini_tip(
     tip: &WebviewWindow,
@@ -4550,64 +4638,53 @@ fn get_mini_tip_placement() -> String {
 }
 
 #[tauri::command]
-fn open_mini_tip(
+async fn open_mini_tip(
     app: AppHandle,
     window: WebviewWindow,
     payload: Option<serde_json::Value>,
 ) -> bool {
-    if let Some(tip) = app.get_webview_window("mini_tip") {
-        let (clock_x, clock_y, clock_w, clock_h) =
-            match (window.outer_position(), window.outer_size()) {
-                (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
-                _ => return false,
-            };
-
-        if let Ok(mut g) = MINI_TIP_ANCHOR.lock() {
-            *g = Some((clock_x, clock_y, clock_w, clock_h));
-        }
-
-        let (w, h) = MINI_TIP_LAST_SIZE
-            .lock()
-            .map(|s| *s)
-            .unwrap_or((280.0, 110.0));
-        let placement = position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
-
-        if let Some(mut data) = payload {
-            if let Some(obj) = data.as_object_mut() {
-                obj.insert(
-                    "placement".to_string(),
-                    serde_json::Value::String(placement),
-                );
-            }
-            if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
-                *p = Some(data.clone());
-            }
-            let _ = tip.emit("tip:payload", &data);
-            let _ = app.emit("tip:payload", data);
-        }
-
-        #[cfg(target_os = "windows")]
-        {
-            if let Ok(hwnd) = tip.hwnd() {
-                MINI_TIP_HWND.store(hwnd.0 as isize, Ordering::Release);
-                unsafe {
-                    windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
-                        hwnd.0 as windows_sys::Win32::Foundation::HWND,
-                        windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNOACTIVATE,
-                    );
-                }
-            } else {
-                let _ = tip.show();
-            }
-        }
-        #[cfg(not(target_os = "windows"))]
-        {
-            let _ = tip.show();
-        }
-        refresh_taskbar_tab(&tip);
-        return true;
+    MINI_TIP_OPEN.store(true, Ordering::Release);
+    let Some(tip) = load_auxiliary_window(&app, "mini_tip").await else {
+        MINI_TIP_OPEN.store(false, Ordering::Release);
+        return false;
+    };
+    if !MINI_TIP_OPEN.load(Ordering::Acquire) {
+        hide_auxiliary_window(&app, "mini_tip");
+        return false;
     }
-    false
+    let (clock_x, clock_y, clock_w, clock_h) = match (window.outer_position(), window.outer_size())
+    {
+        (Ok(p), Ok(s)) => (p.x, p.y, s.width as i32, s.height as i32),
+        _ => {
+            hide_mini_tip(app);
+            return false;
+        }
+    };
+
+    if let Ok(mut g) = MINI_TIP_ANCHOR.lock() {
+        *g = Some((clock_x, clock_y, clock_w, clock_h));
+    }
+
+    let (w, h) = MINI_TIP_LAST_SIZE
+        .lock()
+        .map(|s| *s)
+        .unwrap_or((280.0, 110.0));
+    let placement = position_mini_tip(&tip, clock_x, clock_y, clock_w, clock_h, w, h);
+
+    if let Some(mut data) = payload {
+        if let Some(obj) = data.as_object_mut() {
+            obj.insert(
+                "placement".to_string(),
+                serde_json::Value::String(placement),
+            );
+        }
+        if let Ok(mut p) = MINI_TIP_LAST_PAYLOAD.lock() {
+            *p = Some(data.clone());
+        }
+        let _ = app.emit("tip:payload", data);
+    }
+
+    true
 }
 
 #[tauri::command]
@@ -4621,43 +4698,43 @@ fn mini_tip_ready(app: AppHandle, width: f64, height: f64) {
         *s = (width, height);
     }
     if let Some(tip) = app.get_webview_window("mini_tip") {
+        if !MINI_TIP_OPEN.load(Ordering::Acquire) {
+            return;
+        }
         if let Ok(anchor) = MINI_TIP_ANCHOR.lock() {
             if let Some((cx, cy, cw, ch)) = *anchor {
                 position_mini_tip(&tip, cx, cy, cw, ch, width, height);
+                if !tip.is_visible().unwrap_or(false) {
+                    show_mini_tip_without_focus(&tip);
+                }
             }
         }
     }
 }
 
+fn show_mini_tip_without_focus(tip: &WebviewWindow) {
+    #[cfg(target_os = "windows")]
+    if let Ok(hwnd) = tip.hwnd() {
+        MINI_TIP_HWND.store(hwnd.0 as isize, Ordering::Release);
+        unsafe {
+            windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
+                hwnd.0 as windows_sys::Win32::Foundation::HWND,
+                windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNOACTIVATE,
+            );
+        }
+        refresh_taskbar_tab(tip);
+        return;
+    }
+    let _ = tip.show();
+    refresh_taskbar_tab(tip);
+}
+
 #[tauri::command]
 fn hide_mini_tip(app: AppHandle) {
+    MINI_TIP_OPEN.store(false, Ordering::Release);
     MINI_TIP_HOVERED.store(false, std::sync::atomic::Ordering::SeqCst);
-    #[cfg(target_os = "windows")]
-    {
-        let tip_hwnd = MINI_TIP_HWND.load(Ordering::Acquire);
-        if tip_hwnd != 0 {
-            unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
-                    tip_hwnd as windows_sys::Win32::Foundation::HWND,
-                    windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
-                );
-            }
-        }
-    }
-    if let Some(tip) = app.get_webview_window("mini_tip") {
-        #[cfg(target_os = "windows")]
-        {
-            if let Ok(hwnd) = tip.hwnd() {
-                unsafe {
-                    windows_sys::Win32::UI::WindowsAndMessaging::ShowWindow(
-                        hwnd.0 as windows_sys::Win32::Foundation::HWND,
-                        windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE,
-                    );
-                }
-            }
-        }
-        let _ = tip.hide();
-    }
+    *lock_or_recover(&MINI_TIP_LAST_PAYLOAD) = None;
+    hide_auxiliary_window(&app, "mini_tip");
 }
 
 #[tauri::command]
@@ -4668,11 +4745,21 @@ fn set_mini_tip_hovered(app: AppHandle, hovered: bool) {
 
 #[tauri::command]
 fn schedule_hide_mini_tip(app: AppHandle) {
-    let app_clone = app.clone();
-    std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_millis(350));
-        if !MINI_TIP_HOVERED.load(std::sync::atomic::Ordering::SeqCst) {
-            hide_mini_tip(app_clone);
+    let generation = lock_or_recover(&AUXILIARY_WINDOW_GENERATIONS)
+        .get("mini_tip")
+        .copied();
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(std::time::Duration::from_millis(350)).await;
+        let current = lock_or_recover(&AUXILIARY_WINDOW_GENERATIONS)
+            .get("mini_tip")
+            .copied();
+        if current == generation
+            && !MINI_TIP_HOVERED.load(Ordering::Acquire)
+            && !lock_or_recover(&MINI_TIP_LAST_PAYLOAD)
+                .as_ref()
+                .is_some_and(|data| data.get("alarm").is_some_and(|alarm| !alarm.is_null()))
+        {
+            hide_mini_tip(app);
         }
     });
 }
@@ -4683,12 +4770,7 @@ fn schedule_hide_mini_tip(app: AppHandle) {
 async fn menu_action(app: AppHandle, action: String) -> bool {
     // Hide menu first (except for "aot", "toggle_audio", and "toggle_click_through" which keep the menu open)
     if action != "aot" && action != "toggle_audio" && action != "toggle_click_through" {
-        if let Some(menu) = app.get_webview_window("menu") {
-            if menu.is_visible().unwrap_or(false) {
-                let _ = menu.hide();
-                let _ = app.emit("menu:closed", ());
-            }
-        }
+        close_mini_context_menu(app.clone());
     }
 
     match action.as_str() {
@@ -4798,10 +4880,7 @@ async fn menu_action(app: AppHandle, action: String) -> bool {
             }
             true
         }
-        "about" => {
-            show_about_window(&app);
-            true
-        }
+        "about" => show_about_window(&app).await,
         _ => {
             if let Some(note_id) = action.strip_prefix("open-note:") {
                 // Forward only well-formed ISO date note ids to the
@@ -5500,12 +5579,7 @@ static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex
 static TRAY_MENU_PENDING_SHOW: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 
-const TRAY_MENU_WIDTH: f64 = 250.0;
 const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
-// Collapsed help section baseline; the tray window re-reports its real
-// size via tray_menu_ready once rendered (help expands the menu, the
-// About modal resizes it further).
-const TRAY_MENU_EST_HEIGHT: f64 = 600.0;
 
 /// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
 /// region that EXCLUDES the taskbar. Clamping the tray menu to the full
@@ -5823,8 +5897,13 @@ fn report_relax_playing(
 
 #[tauri::command]
 fn hide_tray_menu(app: AppHandle) {
-    if let Some(win) = app.get_webview_window("tray_menu") {
-        let _ = win.hide();
+    let pending = TRAY_MENU_PENDING_SHOW.swap(false, Ordering::AcqRel);
+    if pending
+        || app
+            .get_webview_window("tray_menu")
+            .is_some_and(|win| win.is_visible().unwrap_or(false))
+    {
+        hide_auxiliary_window(&app, "tray_menu");
         let _ = app.emit("tray-menu-hide", ());
     }
 }
@@ -5995,14 +6074,18 @@ async fn tray_menu_action(app: AppHandle, action: String) {
             let _ = app.emit_to(target.as_str(), "tray:relax-toggle", ());
         }
         "about" => {
-            show_about_window(&app);
+            show_about_window(&app).await;
         }
         "center_widgets" | "center-widgets" => {
             center_open_widgets_on_active_monitor(&app);
         }
         "check-updates" | "check_updates" => {
-            show_about_window(&app);
-            let _ = app.emit("about:trigger-check", ());
+            ABOUT_UPDATE_CHECK.store(true, Ordering::Release);
+            if show_about_window(&app).await {
+                let _ = app.emit_to("about", "about:trigger-check", ());
+            } else {
+                ABOUT_UPDATE_CHECK.store(false, Ordering::Release);
+            }
         }
         "quit" => {
             exit_app(&app);
@@ -6011,51 +6094,31 @@ async fn tray_menu_action(app: AppHandle, action: String) {
     }
 }
 
-pub fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
+async fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
+    // Also treat a second click during the first WebView load as a dismissal.
+    if TRAY_MENU_PENDING_SHOW.swap(true, Ordering::AcqRel)
+        || app
+            .get_webview_window("tray_menu")
+            .is_some_and(|win| win.is_visible().unwrap_or(false))
+    {
+        hide_tray_menu(app);
+        return;
+    }
     if let Ok(mut slot) = TRAY_MENU_ANCHOR.lock() {
         *slot = Some((anchor_x, anchor_y));
     }
 
     focus_clock_for_tray_menu(&app);
 
-    // The flag must be up before the events reach the webview:
-    // tray_menu_ready performs the actual show and swaps it off.
-    TRAY_MENU_PENDING_SHOW.store(true, std::sync::atomic::Ordering::SeqCst);
-
-    let state = collect_tray_menu_state(&app);
-    let _ = app.emit("tray-menu-state", &state);
-    let _ = app.emit("tray-menu-show", ());
-
-    let window_label = "tray_menu";
-    let est_w = TRAY_MENU_WIDTH + 2.0 * TRAY_MENU_SHADOW_PAD;
-    let est_h = TRAY_MENU_EST_HEIGHT + 2.0 * TRAY_MENU_SHADOW_PAD;
-
-    let Some(win) = app.get_webview_window(window_label) else {
+    let Some(win) = load_auxiliary_window(&app, "tray_menu").await else {
+        TRAY_MENU_PENDING_SHOW.store(false, Ordering::Release);
         return;
     };
-
-    // Pre-position at the estimated size while still hidden. Showing here
-    // flashed the stale frame of the previous open and then jumped once
-    // tray_menu_ready resized the visible window to the real rendered
-    // size; that double paint is the flicker on every open. The webview
-    // re-renders the fresh state invisibly, reports the real size, and
-    // tray_menu_ready shows the window once at the final geometry.
-    let (x, y, w_px, h_px) = tray_menu_geometry(&win, anchor_x, anchor_y, est_w, est_h);
-    apply_tray_window_rect(&win, x, y, w_px, h_px);
-
-    // Safety net: if the ready report never arrives (slow or broken
-    // webview), show anyway at the estimated geometry.
-    let fallback = app.clone();
-    std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_millis(600));
-        if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
-            if let Some(win) = fallback.get_webview_window("tray_menu") {
-                let _ = win.show();
-                let _ = win.set_focus();
-                refresh_taskbar_tab(&win);
-            }
-        }
-    });
+    if TRAY_MENU_PENDING_SHOW.load(Ordering::Acquire) {
+        let _ = win.emit("tray-menu-show", ());
+    } else if !win.is_visible().unwrap_or(false) {
+        hide_auxiliary_window(&app, "tray_menu");
+    }
 }
 
 fn format_tray_tooltip(shortcut: Option<&str>) -> String {
@@ -6116,13 +6179,7 @@ fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
                             _ => (position.x.round() as i32, position.y.round() as i32),
                         }
                     };
-                    if let Some(win) = app.get_webview_window("tray_menu") {
-                        if win.is_visible().unwrap_or(false) {
-                            hide_tray_menu(app);
-                            return;
-                        }
-                    }
-                    show_tray_menu_at(app, x, y);
+                    tauri::async_runtime::spawn(show_tray_menu_at(app, x, y));
                 }
                 _ => {}
             }
@@ -6369,22 +6426,6 @@ pub fn run() {
                 });
             }
 
-            // Configure tray_menu window blur dismiss
-            if let Some(tray_menu) = app.get_webview_window("tray_menu") {
-                let tm_blur = tray_menu.clone();
-                tray_menu.on_window_event(move |event| {
-                    if let WindowEvent::Focused(false) = event {
-                        let win = tm_blur.clone();
-                        tauri::async_runtime::spawn(async move {
-                            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-                            if !win.is_focused().unwrap_or(false) {
-                                let _ = win.hide();
-                            }
-                        });
-                    }
-                });
-            }
-
             // Load settings and show initial window
             let settings = load_settings(app.handle());
             EDGE_LIMITS_ENABLED.store(settings.mini_edge_limits, Ordering::Release);
@@ -6468,6 +6509,7 @@ pub fn run() {
             set_window_size,
             toggle_always_on_top,
             open_window,
+            take_about_update_check,
             hide_window,
             spawn_float,
             close_relax_widget,
@@ -6504,6 +6546,7 @@ pub fn run() {
             is_msstore,
             check_for_updates,
             get_pending_update,
+            get_update_status,
             download_update,
             install_update,
             open_taskbar_settings,
@@ -6558,6 +6601,8 @@ pub fn run() {
         {
             if label == RELAX_WIDGET_LABEL && !APP_EXITING.load(Ordering::SeqCst) {
                 set_relax_widget_open(app, app.get_webview_window(RELAX_WIDGET_LABEL).is_some());
+            } else if label == "mini_tip" {
+                MINI_TIP_HWND.store(0, Ordering::Release);
             }
         }
     });

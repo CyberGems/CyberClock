@@ -377,15 +377,9 @@
         }
         tipEl.appendChild(statDiv);
 
-        // Notify backend of measured dimensions after render
-        requestAnimationFrame(() => {
-            const rect = tipEl.getBoundingClientRect();
-            const w = Math.ceil(rect.width + 32);
-            const h = Math.ceil(rect.height + 28);
-            if (window.cc?.miniTipReady) {
-                window.cc.miniTipReady(w, h);
-            }
-        });
+        // Measure while hidden, before the backend shows the window.
+        const rect = tipEl.getBoundingClientRect();
+        window.cc?.miniTipReady?.(Math.ceil(rect.width + 32), Math.ceil(rect.height + 28));
     }
 
     async function saveNote(text) {
@@ -452,14 +446,13 @@
     }
 
     // Listen for data payload
-    if (window.cc?.onTipPayload) {
-        window.cc.onTipPayload((data) => {
-            currentPayload = data;
-            if (!isEditingNote) {
-                renderTip(data);
-            }
-        });
-    }
+    const tipPayloadSubscription = window.cc?.onTipPayload?.((data) => {
+        currentPayload = data;
+        if (!isEditingNote || data.alarm) {
+            if (data.alarm) isEditingNote = false;
+            renderTip(data);
+        }
+    }) ?? Promise.resolve();
 
     function defaultPayload() {
         const now = new Date();
@@ -478,15 +471,13 @@
         };
     }
 
-    // Render immediately on load so the card is never blank
-    renderTip(defaultPayload());
-
-    // Also query initial/persisted payload
-    if (window.cc?.getMiniTipPayload) {
-        window.cc.getMiniTipPayload().then((data) => {
-            if (data) renderTip(data);
-        }).catch(() => {});
-    }
+    // Subscribe before querying so the first open works whichever side
+    // finishes initialization first.
+    tipPayloadSubscription.then(async () => {
+        const data = await window.cc?.getMiniTipPayload?.();
+        if (data && !currentPayload) renderTip(data);
+        else if (!currentPayload && !window.__TAURI__) renderTip(defaultPayload());
+    }).catch(console.error);
 
     // Also query initial placement
     if (window.cc?.getMiniTipPlacement) {

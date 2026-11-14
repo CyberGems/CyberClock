@@ -377,6 +377,7 @@
         onUpdateStatus: (cb) => {
             return subscribe("update:status", cb);
         },
+        getUpdateStatus: () => invoke("get_update_status"),
         onAboutOpened: (cb) => {
             return subscribe("about:opened", cb);
         },
@@ -527,6 +528,7 @@
         onCheckUpdatesTrigger: (cb) => {
             return subscribe("about:trigger-check", cb);
         },
+        takeAboutUpdateCheck: () => invoke("take_about_update_check"),
         onCloseRequested: (cb) => {
             return subscribe("main:close-requested", cb);
         },

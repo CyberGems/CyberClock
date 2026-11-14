@@ -14,6 +14,7 @@ use log::{error, info};
 
 pub struct UpdaterState {
     pending: Mutex<Option<PendingUpdate>>,
+    status: Mutex<Option<UpdateStatusPayload>>,
 }
 
 struct PendingUpdate {
@@ -25,6 +26,7 @@ impl Default for UpdaterState {
     fn default() -> Self {
         Self {
             pending: Mutex::new(None),
+            status: Mutex::new(None),
         }
     }
 }
@@ -38,7 +40,7 @@ static PENDING_VERSION: Mutex<Option<String>> = Mutex::new(None);
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-struct UpdateStatusPayload {
+pub struct UpdateStatusPayload {
     state: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     version: Option<String>,
@@ -49,7 +51,13 @@ struct UpdateStatusPayload {
 }
 
 fn emit_status(app: &AppHandle, payload: UpdateStatusPayload) {
+    *lock_or_recover(&app.state::<UpdaterState>().status) = Some(payload.clone());
     let _ = app.emit("update:status", payload);
+}
+
+#[tauri::command]
+pub fn get_update_status(app: AppHandle) -> Option<UpdateStatusPayload> {
+    lock_or_recover(&app.state::<UpdaterState>().status).clone()
 }
 
 /// Lock a mutex without panicking on poison: if another thread

@@ -261,16 +261,17 @@ CyberClock/
 
 ### Arquitectura multi-ventana
 
-La app usa **5 ventanas fijas de Tauri**, más las ventanas flotantes de temporizador y cronómetro generadas de forma independiente:
+La app carga las ventanas de Modo Completo y Modo Mini al iniciar. Modo Completo sigue cargado en segundo plano para que Relax pueda seguir reproduciendo en Modo Mini. CyberClock abre las otras cuatro ventanas bajo demanda y las libera al cerrarlas.
 
 | Ventana | Propósito | Tamaño |
 |---|---|---|
 | `main` | Aplicación completa (reloj, calendario, temporizador, cronómetro, relajación) | 1024×768 |
 | `mini` | Barra de reloj compacta | Dimensiones según la skin |
-| `menu` | Menú contextual del Modo Mini | 270×560 |
-| `tray_menu` | Emergente de la bandeja del sistema | 290×510 |
-| `about` | Ventana Acerca de | 740×590 |
-| `float-*` | Temporizador o cronómetro independiente | Responsivo según la skin |
+| `menu` | Menú contextual del Modo Mini y los widgets | Se ajusta al contenido |
+| `tray_menu` | Menú de la bandeja del sistema | Se ajusta al contenido |
+| `about` | Acerca de CyberClock | 740×535 al abrir |
+| `mini_tip` | Agenda, avisos de actualización y controles de alarma del Modo Mini | Se ajusta al contenido |
+| `float-*` | Widgets flotantes que se abren por separado | Depende del widget |
 
 La comunicación entre frontend y backend usa comandos de Tauri (`invoke()`) y eventos (`emit()`). Las actualizaciones de configuración se transmiten mediante el evento `settings:updated` en todas las ventanas.
 

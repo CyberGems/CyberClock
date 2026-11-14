@@ -491,7 +491,7 @@
     // ── Drill-down Views Navigation ────────────────────────────
     const trayDeck = document.getElementById("tray-deck");
 
-    // The window is persistent (hidden between opens). Keeping the card
+    // The window may be reused briefly (hidden between opens). Keeping the card
     // invisible while hidden means a frame the webview may still present
     // on the next show can never flash the old menu content. Layout is
     // kept, so size reports still measure the card.
@@ -824,28 +824,20 @@
             refreshTrayState().catch(console.error);
         }).catch(console.error);
 
-        if (window.cc.onTrayMenuShow) {
-            window.cc.onTrayMenuShow(() => {
-                setCardOffscreen(false);
-                // The tray window is persistent (hidden, not destroyed), so
-                // any expanded submenu must collapse so it always opens clean.
-                collapseAllSubmenus();
-                refreshTrayState().catch(console.error);
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(reportSize);
-                });
-            });
+        async function prepareTrayMenu() {
+            await refreshTrayState();
+            setCardOffscreen(false);
+            collapseAllSubmenus();
         }
 
+        const showSubscription = window.cc.onTrayMenuShow
+            ? window.cc.onTrayMenuShow(() => prepareTrayMenu().catch(console.error))
+            : Promise.resolve();
         if (window.cc.onTrayMenuHide) {
             window.cc.onTrayMenuHide(() => {
                 setCardOffscreen(true);
             });
         }
 
-        stateSubscription.then(refreshTrayState).then(() => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(reportSize);
-            });
-        }).catch(console.error);
+        Promise.all([stateSubscription, showSubscription]).then(prepareTrayMenu).catch(console.error);
     }
