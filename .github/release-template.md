@@ -81,4 +81,6 @@ El Modo Mini usa menos memoria al cargar ventanas auxiliares bajo demanda y libe
 
 ---
 
+📜 **Full changelog:** browse every version in [CHANGELOG.md](https://github.com/CyberGems/CyberClock/blob/master/CHANGELOG.md).
+
 *Crafted with precision by [CyberGems](https://cybergems.org)*
