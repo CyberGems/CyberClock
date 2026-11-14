@@ -63,21 +63,21 @@ Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por
 
 ---
 
-### 🔐 Checksums
+### 🔐 VirusTotal and SHA256
 
-- **`CyberClock_{{VERSION_NUM}}_x64-setup.exe`** — SHA256 (use the copy button on the block):
+> 🛡️ The report opens on VirusTotal and does not download anything.
 
-  ```
-  {{INSTALLER_HASH}}
-  ```
+**Installer**: [View VirusTotal report](https://www.virustotal.com/gui/file/{{INSTALLER_HASH}})
 
-- **`CyberClock_{{VERSION_NUM}}_x64-portable.zip`** — SHA256 (use the copy button on the block):
+```text
+{{INSTALLER_HASH}}
+```
 
-  ```
-  {{PORTABLE_HASH}}
-  ```
+**Portable**: [View VirusTotal report](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})
 
-- **`CyberClock_{{VERSION_NUM}}_x64-setup.exe.sig`** — Updater signature (minisign)
+```text
+{{PORTABLE_HASH}}
+```
 
 ---
 
