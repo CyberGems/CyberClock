@@ -29,6 +29,8 @@ Save and manage named soundscape mixes in Relax or its widget, with independent 
 
 Guarda y gestiona mezclas con nombre desde Relax o su widget, con volúmenes por capa y fundidos más suaves. El Modo Mini reduce el uso de CPU en segundo plano y la locución de hora se activa a tiempo, con más espacio para el timbre previo.
 
+> **¿Nuevo en CyberClock?** Un reloj Windows cyber-neón con vistas analógica y digital, notas de calendario, alarmas, temporizadores, herramientas de relax y modos flotantes compactos.
+
 ---
 
 ### ✨ Novedades destacadas
