@@ -9,6 +9,7 @@
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
+    "test": "node --test tests/update-utils.test.mjs",
     "installer-graphics": "node scripts/generate-installer-graphics.mjs",
     "installer-header": "python scripts/generate-installer-art.py src-tauri/icons/icon.png src-tauri/nsis installerHeader --header"
   },

@@ -62,26 +62,59 @@
         return stripInstallBlock(markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, ""));
     }
 
+    /**
+     * Nested-aware preview of the release notes. Top-level bullets absorb their
+     * indented sub-bullets and soft-wrapped continuation lines, so suite-standard
+     * release bodies (nested lists) do not leak orphan fragments into the peek.
+     */
     function parseChangelogPeek(markdown, limit = 4) {
         if (!markdown) return [];
         const targetedMarkdown = extractLanguageSection(markdown);
-        const lines = String(targetedMarkdown)
-            .split(/\r?\n/)
-            .map((line) => line.trim())
-            .filter(Boolean);
+        const lines = String(targetedMarkdown).split(/\r?\n/);
 
-        const bullets = lines
-            .filter((line) => /^[-*+]\s+/.test(line))
-            .map(cleanLine)
-            .filter(Boolean);
+        const bullets = [];
+        const paragraphs = [];
+        let current = null;
+        let inList = false;
 
-        const candidates = bullets.length
-            ? bullets
-            : lines
-                  .filter((line) => !/^#{1,6}\s+/.test(line))
-                  .map(cleanLine)
-                  .filter(Boolean);
+        const flush = () => {
+            if (current) bullets.push(current);
+            current = null;
+            inList = false;
+        };
 
+        for (const rawLine of lines) {
+            const trimmed = rawLine.trim();
+            // Blank lines, horizontal rules and headings close the current bullet.
+            if (!trimmed || /^---+$/.test(trimmed) || /^#{1,6}\s+/.test(trimmed)) {
+                flush();
+                continue;
+            }
+            const bulletMatch = trimmed.match(/^[-*+]\s+(.*)$/);
+            if (bulletMatch) {
+                const text = cleanLine(bulletMatch[1]);
+                if (!text) continue;
+                if (inList && current && /^\s/.test(rawLine)) {
+                    current += ` ${text}`;
+                } else {
+                    flush();
+                    current = text;
+                    inList = true;
+                }
+                continue;
+            }
+            if (inList && current) {
+                current += ` ${cleanLine(trimmed)}`;
+            } else {
+                const text = cleanLine(trimmed);
+                if (text && !/^<!--/.test(trimmed) && !/^\|/.test(trimmed) && !/^>/.test(trimmed)) {
+                    paragraphs.push(text);
+                }
+            }
+        }
+        flush();
+
+        const candidates = bullets.length ? bullets : paragraphs;
         return [...new Set(candidates)].slice(0, limit);
     }
 
