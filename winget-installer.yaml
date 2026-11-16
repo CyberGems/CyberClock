@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: CyberGems.CyberClock
+PackageVersion: {{VERSION}}
+InstallerType: nullsoft
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: /S
+  SilentWithProgress: /S
+UpgradeBehavior: install
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/CyberGems/CyberClock/releases/download/{{TAG}}/CyberClock_{{VERSION}}_x64-setup.exe
+  InstallerSha256: {{INSTALLER_HASH}}
+ManifestType: installer
+ManifestVersion: 1.6.0

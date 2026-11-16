@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: CyberGems.CyberClock
+PackageVersion: {{VERSION}}
+PackageLocale: en-US
+Publisher: CyberGems
+PackageName: CyberClock
+PackageUrl: https://cybergems.org/apps/cyberclock/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/CyberGems/CyberClock/blob/master/LICENSE
+Copyright: Copyright (C) 2026 CyberGems
+ShortDescription: Desktop clock, calendar, timers and soundscapes for Windows
+Description: A feature-rich desktop clock with a futuristic cyber-neon aesthetic. CyberClock combines an analog and digital clock, full calendar, timer, stopwatch, alarms, and independent floating widgets, plus an optional talking clock that announces the time and reads alarms aloud. Relax lets you save named mixes of recorded soundscapes and control the session from its widget, and automatic backups keep your alarms, notes and preferences safe in a folder you choose. Built with Tauri.
+Tags:
+- clock
+- calendar
+- timer
+- stopwatch
+- alarms
+Moniker: cyberclock
+ReleaseNotesUrl: https://github.com/CyberGems/CyberClock/releases/tag/{{TAG}}
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

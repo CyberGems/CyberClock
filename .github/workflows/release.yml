@@ -115,6 +115,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate and upload winget manifests
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          # winget versions carry no 'v' prefix (1.16.1, not v1.16.1); URLs keep the tag's.
+          $bareVersion = $tag.TrimStart('v')
+          $installer = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw "NSIS installer not found in src-tauri/target/release/bundle/nsis" }
+          $installerHash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
+          $manifestFiles = @{
+              "winget-version.yaml"   = "CyberGems.CyberClock.yaml"
+              "winget-locale.yaml"    = "CyberGems.CyberClock.locale.en-US.yaml"
+              "winget-installer.yaml" = "CyberGems.CyberClock.installer.yaml"
+          }
+          New-Item -ItemType Directory -Path winget-pkg -Force | Out-Null
+          foreach ($entry in $manifestFiles.GetEnumerator()) {
+              $manifestTemplate = [System.IO.File]::ReadAllText($entry.Key, [System.Text.Encoding]::UTF8)
+              $manifest = $manifestTemplate.Replace("{{VERSION}}", $bareVersion).Replace("{{TAG}}", $tag).Replace("{{INSTALLER_HASH}}", $installerHash)
+              [System.IO.File]::WriteAllText("winget-pkg/$($entry.Value)", $manifest, [System.Text.Encoding]::UTF8)
+          }
+          winget validate winget-pkg
+          if ($LASTEXITCODE -ne 0) { throw "winget manifest validation failed." }
+          gh release upload $tag winget-pkg/CyberGems.CyberClock.yaml winget-pkg/CyberGems.CyberClock.locale.en-US.yaml winget-pkg/CyberGems.CyberClock.installer.yaml --clobber
+          Write-Host "Generated, validated and uploaded winget manifests for $tag."
+
       # Upload the freshly built binaries to VirusTotal so the SHA256 links in
       # the release body resolve as soon as the release is published (new
       # builds are unknown to VirusTotal until someone submits them).
