@@ -36,7 +36,7 @@ Cada release publica ahora manifiestos winget validados para el Windows Package 
 - 📦 **Listo para el Windows Package Manager**: Cada release publica manifiestos winget validados junto al instalador y el archivo portable, y un workflow automatizado los envía cuando el pipeline se arme.
 - 🧰 **Solo mantenimiento**: Sin cambios en la aplicación en esta versión; incorpora el kit de envío winget y dependencias de Rust renovadas.
 
-### ⚠️ Antes de instalar
+### ℹ️ Antes de instalar
 
 - **Windows:** esta versión aún no está firmada digitalmente. SmartScreen puede avisar antes de ejecutarla: **Más información › Ejecutar de todas formas**. Cuando Smart App Control está activado, Windows rechaza programas sin firmar; consulta la [política de firma de código](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verifica la descarga con los checksums SHA256 que aparecen más abajo.
 
@@ -44,7 +44,7 @@ Cada release publica ahora manifiestos winget validados para el Windows Package 
 
 ---
 
-### ⚠️ Before you install
+### ℹ️ Before you install
 
 - **Windows:** this release is not code-signed yet. SmartScreen may ask before it runs: **More info › Run anyway**. Where Smart App Control is on, Windows refuses unsigned programs; see the [code signing policy](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verify the download with the SHA256 checksums below.
 
