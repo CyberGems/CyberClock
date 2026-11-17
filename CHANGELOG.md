@@ -2,6 +2,18 @@
 
 All notable changes to CyberClock are documented here.
 
+## [1.16.2] - 2026-11-17
+
+### 🇺🇸 English
+
+- Ship winget manifests with every release and automate Windows Package Manager submissions.
+- Update 13 Rust dependencies and @tauri-apps/cli.
+
+### 🇪🇸 Español
+
+- Publica manifiestos winget con cada release y automatiza los envíos al Windows Package Manager.
+- Actualiza 13 dependencias de Rust y @tauri-apps/cli.
+
 ## [1.16.1] - 2026-11-14
 
 ### 🇺🇸 English
