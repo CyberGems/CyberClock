@@ -2,6 +2,16 @@
 
 All notable changes to CyberClock are documented here.
 
+## [1.16.3] - 2026-11-18
+
+### 🇺🇸 English
+
+- Convert the tray submenus (`New...`, `Click-through`, `Help`, the tray pin tip, and `More from CyberGems`) into side-by-side flyout panels with dwell hover, click toggling, automatic left/right taskbar placement, and keyboard arrow navigation.
+
+### 🇪🇸 Español
+
+- Convierte los submenús de la bandeja (`Nuevo...`, `Click-through`, `Ayuda`, el aviso de fijar icono y `Más de CyberGems`) en paneles flyout laterales con apertura al pasar el cursor, alternancia por clic, colocación automática según la barra de tareas y navegación con flechas del teclado.
+
 ## [1.16.2] - 2026-11-17
 
 ### 🇺🇸 English

@@ -8,7 +8,7 @@
 
 <!-- IMPORTANT FOR AGENTS & MAINTAINERS: Always rewrite this entire section and highlights with the ACTUAL release notes for this specific new version before tagging. NEVER leave or copy previous version notes! Use 25-45 words for the summary, lead with user-facing changes, and do not repeat the app name or version. Keep the Spanish mirror inside the details block in sync: translate the summary and rewrite the highlights. -->
 <!-- changelog-summary:start -->
-Every release now ships validated winget manifests for the Windows Package Manager, with an automated submission workflow that keeps the catalog current. This maintenance release carries no application changes; dependencies and documentation stay current.
+The system tray submenus now open as side-by-side flyout panels beside the main menu card, with hover dwell, click toggling, keyboard arrow navigation, and automatic placement for any taskbar edge.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,15 +17,14 @@ Every release now ships validated winget manifests for the Windows Package Manag
 
 ### ✨ Key Features & Highlights
 
-- 📦 **Windows Package Manager ready**: Every release ships validated winget manifests alongside the installer and portable archive, and an automated workflow submits them once the submission pipeline is armed.
-- 🧰 **Maintenance only**: No application changes in this release; it packages the winget submission kit and refreshed Rust dependencies.
+- 🪟 **Side-by-side tray flyout panels**: `New...`, `Click-through`, `Help`, the tray pin tip, and `More from CyberGems` open beside the main tray card on hover or click, support Left/Right arrow navigation and `Escape`, and flip cleanly to match your taskbar position without shifting the main card.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Cada release publica ahora manifiestos winget validados para el Windows Package Manager, con un flujo de envío automatizado que mantiene el catálogo al día. Esta versión de mantenimiento no cambia la aplicación; las dependencias y la documentación siguen al día.
+Los submenús de la bandeja del sistema ahora se abren como paneles flyout laterales junto a la tarjeta principal, con retardo al pasar el cursor, alternancia por clic, navegación con flechas y ajuste automático a cualquier barra de tareas.
 
 > **¿Nuevo en CyberClock?** Un reloj Windows cyber-neón con vistas analógica y digital, notas de calendario, alarmas, temporizadores, herramientas de relax y modos flotantes compactos.
 
@@ -33,8 +32,7 @@ Cada release publica ahora manifiestos winget validados para el Windows Package 
 
 ### ✨ Novedades destacadas
 
-- 📦 **Listo para el Windows Package Manager**: Cada release publica manifiestos winget validados junto al instalador y el archivo portable, y un workflow automatizado los envía cuando el pipeline se arme.
-- 🧰 **Solo mantenimiento**: Sin cambios en la aplicación en esta versión; incorpora el kit de envío winget y dependencias de Rust renovadas.
+- 🪟 **Paneles flyout laterales en la bandeja**: `Nuevo...`, `Click-through`, `Ayuda`, el aviso para fijar el icono y `Más de CyberGems` se abren al lado de la tarjeta principal al pasar el cursor o hacer clic, responden a flechas izquierda/derecha y `Escape`, y se orientan según la posición de la barra de tareas sin mover el menú base.
 
 ### ℹ️ Antes de instalar
 
