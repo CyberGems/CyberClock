@@ -16,122 +16,180 @@
     </head>
     <body>
         <div class="tray-root" id="tray-root">
-            <div class="tray-card" role="menu">
-                <div class="tray-deck" id="tray-deck" data-view="main">
-                    <!-- ── MAIN VIEW ── -->
-                    <div class="tray-view" id="view-main">
-                        <!-- Header (suite-standard branding: icon + name, click -> About) -->
-                        <button type="button" class="tray-header" data-action="about-modal" data-tooltip="About CyberClock..." data-tooltip-dir="bottom" id="btn-about">
-                            <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
-                            <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.7.0</span></span>
-                            <span class="update-badge-led" id="tray-update-led" hidden></span>
+            <div class="tray-stage" id="tray-stage" data-flyout-side="left" data-vertical-align="bottom">
+                <div class="tray-card tray-card-main" id="card-main" role="menu">
+                    <!-- Header (suite-standard branding: icon + name, click -> About) -->
+                    <button type="button" class="tray-header" data-action="about-modal" data-tooltip="About CyberClock..." data-tooltip-dir="bottom" id="btn-about">
+                        <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
+                        <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.7.0</span></span>
+                        <span class="update-badge-led" id="tray-update-led" hidden></span>
+                    </button>
+
+                    <div class="tray-divider"></div>
+
+                    <div class="tray-group">
+                        <div class="tray-status" id="tray-clock-status" role="status">
+                            <span class="tray-status-dot" id="tray-status-dot" aria-hidden="true"></span>
+                            <span class="tray-status-text" id="lbl-clock-status">On screen · Mini Mode</span>
+                        </div>
+                        <button type="button" class="tray-item tray-mode" data-action="mode-full" id="btn-mode-full" role="menuitemradio" aria-checked="false">
+                            <span class="ico" data-ico="expand"></span>
+                            <span class="label" id="lbl-mode-full">Full Mode</span>
+                            <span class="mode-mark" data-ico="check" hidden></span>
+                        </button>
+                        <button type="button" class="tray-item tray-mode" data-action="mode-mini" id="btn-mode-mini" role="menuitemradio" aria-checked="true">
+                            <span class="ico" data-ico="compact"></span>
+                            <span class="label" id="lbl-mode-mini">Mini Mode</span>
+                            <span class="mode-mark" data-ico="check" hidden></span>
+                        </button>
+                        <button type="button" class="tray-item" data-action="show" id="btn-visibility">
+                            <span class="ico" data-ico="eye" id="ico-visibility"></span>
+                            <span class="label" id="lbl-visibility">Show</span>
+                            <span class="hotkey-hint" id="hint-visibility" hidden>Alt+Shift+C</span>
+                        </button>
+                    </div>
+
+                    <div class="tray-divider"></div>
+
+                    <!-- Navigation Group -->
+                    <div class="tray-group">
+                        <button type="button" class="tray-item tray-nav-item" id="btn-nav-new" data-flyout="new" aria-haspopup="menu" aria-expanded="false">
+                            <span class="ico" data-ico="spark"></span>
+                            <span class="label" id="lbl-new">New...</span>
+                            <span class="tray-nav-arrow" data-ico="back"></span>
                         </button>
 
-                        <div class="tray-divider"></div>
+                        <button type="button" class="tray-item tray-relax-toggle" id="btn-relax-toggle" hidden>
+                            <span class="ico" data-ico="pause" id="ico-relax-toggle"></span>
+                            <span class="label" id="lbl-relax-toggle">Pause relax</span>
+                        </button>
+                    </div>
 
-                        <!-- Clock state is information. Mode is a marked choice.
-                             Hide stays a separate, deliberate action. -->
-                        <div class="tray-group">
-                            <div class="tray-status" id="tray-clock-status" role="status">
-                                <span class="tray-status-dot" id="tray-status-dot" aria-hidden="true"></span>
-                                <span class="tray-status-text" id="lbl-clock-status">On screen · Mini Mode</span>
-                            </div>
-                            <button type="button" class="tray-item tray-mode" data-action="mode-full" id="btn-mode-full" role="menuitemradio" aria-checked="false">
-                                <span class="ico" data-ico="expand"></span>
-                                <span class="label" id="lbl-mode-full">Full Mode</span>
-                                <span class="mode-mark" data-ico="check" hidden></span>
-                            </button>
-                            <button type="button" class="tray-item tray-mode" data-action="mode-mini" id="btn-mode-mini" role="menuitemradio" aria-checked="true">
-                                <span class="ico" data-ico="compact"></span>
-                                <span class="label" id="lbl-mode-mini">Mini Mode</span>
-                                <span class="mode-mark" data-ico="check" hidden></span>
-                            </button>
-                            <button type="button" class="tray-item" data-action="show" id="btn-visibility">
-                                <span class="ico" data-ico="eye" id="ico-visibility"></span>
-                                <span class="label" id="lbl-visibility">Show</span>
-                                <span class="hotkey-hint" id="hint-visibility" hidden>Alt+Shift+C</span>
-                            </button>
-                        </div>
+                    <div class="tray-divider"></div>
 
-                        <div class="tray-divider"></div>
+                    <!-- Master Toggles (Click-through & Sound) -->
+                    <div class="tray-group">
+                        <button type="button" class="tray-item tray-nav-item" id="btn-nav-clickthrough" data-flyout="clickthrough" aria-haspopup="menu" aria-expanded="false">
+                            <span class="ico" data-ico="click"></span>
+                            <span class="label" id="lbl-clickthrough">Click-through</span>
+                            <span class="tray-nav-arrow" data-ico="back"></span>
+                        </button>
 
-                        <!-- Navigation Group -->
-                        <div class="tray-group">
-                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-new">
+                        <button type="button" class="tray-item" id="btn-audio" aria-pressed="false">
+                            <span class="ico" data-ico="volume-high" id="ico-audio"></span>
+                            <span class="label" id="lbl-audio">Sound</span>
+                            <span class="audio-dot" id="audio-dot" aria-hidden="true"></span>
+                        </button>
+                    </div>
+
+                    <div class="tray-divider"></div>
+
+                    <!-- Settings & Info Group -->
+                    <div class="tray-group">
+                        <button type="button" class="tray-item" data-action="settings">
+                            <span class="ico" data-ico="gear"></span>
+                            <span class="label" id="lbl-settings">Settings...</span>
+                        </button>
+
+                        <button type="button" class="tray-item tray-nav-item" id="btn-nav-help" data-flyout="help" aria-haspopup="menu" aria-expanded="false">
+                            <span class="ico" data-ico="help"></span>
+                            <span class="label" id="lbl-help">Help</span>
+                            <span class="tray-nav-arrow" data-ico="back"></span>
+                        </button>
+
+                        <button type="button" class="tray-item tray-nav-item" id="btn-nav-suite" data-flyout="suite" aria-haspopup="menu" aria-expanded="false">
+                            <span class="ico" data-ico="gem"></span>
+                            <span class="label" id="lbl-suite">More from CyberGems</span>
+                            <span class="tray-nav-arrow" data-ico="back"></span>
+                        </button>
+                    </div>
+
+                    <div class="tray-divider"></div>
+
+                    <!-- Exit Group -->
+                    <div class="tray-group tray-group-exit">
+                        <button type="button" class="tray-item tray-item-exit" data-action="quit">
+                            <span class="ico" data-ico="power"></span>
+                            <span class="label" id="lbl-quit">Exit</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── FLYOUT SUBMENUS SLOT ── -->
+                <div class="tray-flyout-slot" id="tray-flyout-slot">
+                    <!-- NEW FLYOUT -->
+                    <div class="tray-card tray-flyout" id="flyout-new" data-flyout-panel="new" role="menu" aria-hidden="true">
+                        <div class="tray-flyout-head">
+                            <span class="tray-flyout-title">
                                 <span class="ico" data-ico="spark"></span>
-                                <span class="label" id="lbl-new">New...</span>
-                                <span class="tray-nav-arrow" data-ico="back"></span>
-                            </button>
-
-                            <button type="button" class="tray-item tray-relax-toggle" id="btn-relax-toggle" hidden>
-                                <span class="ico" data-ico="pause" id="ico-relax-toggle"></span>
-                                <span class="label" id="lbl-relax-toggle">Pause relax</span>
-                            </button>
+                                <span id="lbl-new-title">New...</span>
+                            </span>
                         </div>
-
                         <div class="tray-divider"></div>
-
-                        <!-- Master Toggles (Click-through & Sound) -->
                         <div class="tray-group">
-                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-clickthrough">
-                                <span class="ico" data-ico="click"></span>
-                                <span class="label" id="lbl-clickthrough">Click-through</span>
-                                <span class="tray-nav-arrow" data-ico="back"></span>
+                            <button type="button" class="tray-item" data-action="new_timer">
+                                <span class="ico" data-ico="timer"></span>
+                                <span class="label" id="lbl-timer">New Timer</span>
                             </button>
-
-                            <button type="button" class="tray-item" id="btn-audio" aria-pressed="false">
-                                <span class="ico" data-ico="volume-high" id="ico-audio"></span>
-                                <span class="label" id="lbl-audio">Sound</span>
-                                <span class="audio-dot" id="audio-dot" aria-hidden="true"></span>
+                            <button type="button" class="tray-item" data-action="new_stopwatch">
+                                <span class="ico" data-ico="stopwatch"></span>
+                                <span class="label" id="lbl-stopwatch">New Stopwatch</span>
                             </button>
-                        </div>
-
-                        <div class="tray-divider"></div>
-
-                        <!-- Settings & Info Group -->
-                        <div class="tray-group">
-                            <button type="button" class="tray-item" data-action="settings">
-                                <span class="ico" data-ico="gear"></span>
-                                <span class="label" id="lbl-settings">Settings...</span>
+                            <button type="button" class="tray-item" data-action="new_calendar">
+                                <span class="ico" data-ico="calendar"></span>
+                                <span class="label" id="lbl-calendar">New Calendar</span>
                             </button>
-
-                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-help">
-                                <span class="ico" data-ico="help"></span>
-                                <span class="label" id="lbl-help">Help</span>
-                                <span class="tray-nav-arrow" data-ico="back"></span>
+                            <button type="button" class="tray-item" data-action="new_analog">
+                                <span class="ico" data-ico="clock"></span>
+                                <span class="label" id="lbl-analog">New Analog Clock</span>
                             </button>
-
-                            <button type="button" class="tray-item tray-nav-item" id="btn-nav-suite">
-                                <span class="ico" data-ico="gem"></span>
-                                <span class="label" id="lbl-suite">More from CyberGems</span>
-                                <span class="tray-nav-arrow" data-ico="back"></span>
+                            <button type="button" class="tray-item" data-action="new_relax" disabled>
+                                <span class="ico" data-ico="lotus"></span>
+                                <span class="label" id="lbl-relax-float">Open Relax widget</span>
                             </button>
                         </div>
-
                         <div class="tray-divider"></div>
-
-                        <!-- Exit Group -->
                         <div class="tray-group tray-group-exit">
-                            <button type="button" class="tray-item tray-item-exit" data-action="quit">
-                                <span class="ico" data-ico="power"></span>
-                                <span class="label" id="lbl-quit">Exit</span>
+                            <button type="button" class="tray-item" data-action="new_alarm">
+                                <span class="ico" data-ico="bell"></span>
+                                <span class="label" id="lbl-alarm">New Alarm</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- ── HELP SUB-VIEW ── -->
-                    <div class="tray-view tray-view-sub" id="view-help">
-                        <div class="tray-sub-header">
-                            <button type="button" class="tray-back-btn" id="btn-back-help">
-                                <span class="ico" data-ico="back"></span>
-                                <span class="label" id="lbl-back-help">Back</span>
-                            </button>
-                            <span class="tray-sub-title" id="lbl-help-title">Help</span>
+                    <!-- CLICK-THROUGH FLYOUT -->
+                    <div class="tray-card tray-flyout" id="flyout-clickthrough" data-flyout-panel="clickthrough" role="menu" aria-hidden="true">
+                        <div class="tray-flyout-head">
+                            <span class="tray-flyout-title">
+                                <span class="ico" data-ico="click"></span>
+                                <span id="lbl-clickthrough-title">Click-through</span>
+                            </span>
                         </div>
-
                         <div class="tray-divider"></div>
+                        <div class="tray-group" id="tray-ctp-list"></div>
+                        <div class="tray-divider"></div>
+                        <div class="tray-group tray-group-exit">
+                            <button type="button" class="tray-item" id="btn-ctp-all-on">
+                                <span class="ico" data-ico="check"></span>
+                                <span class="label" id="lbl-ctp-all-on">Enable all</span>
+                            </button>
+                            <button type="button" class="tray-item" id="btn-ctp-all-off">
+                                <span class="ico" data-ico="x"></span>
+                                <span class="label" id="lbl-ctp-all-off">Disable all</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div class="tray-group">
+                    <!-- HELP FLYOUT -->
+                    <div class="tray-card tray-flyout" id="flyout-help" data-flyout-panel="help" role="menu" aria-hidden="true">
+                        <div class="tray-flyout-head">
+                            <span class="tray-flyout-title">
+                                <span class="ico" data-ico="help"></span>
+                                <span id="lbl-help-title">Help</span>
+                            </span>
+                        </div>
+                        <div class="tray-divider"></div>
+                        <div class="tray-group tray-group-exit">
                             <button type="button" class="tray-item tray-sub-item" data-action="center-widgets" data-tooltip="Center open clock and widgets on the active screen" data-i18n-attr="data-tooltip:tray.centerWidgetsTip" data-tooltip-dir="left">
                                 <span class="ico" data-ico="target"></span>
                                 <span class="label" id="lbl-center-widgets">Center widgets on screen</span>
@@ -178,8 +236,8 @@
                         </div>
                     </div>
 
-                    <!-- ── TRAY PIN TIP VIEW ── -->
-                    <div class="tray-view tray-view-sub tray-pin-tip-view" id="view-pin-tip">
+                    <!-- TRAY PIN TIP FLYOUT -->
+                    <div class="tray-card tray-flyout tray-pin-tip-view" id="flyout-pin-tip" data-flyout-panel="pin-tip" role="dialog" aria-hidden="true">
                         <div class="tray-sub-header tray-pin-tip-header">
                             <button type="button" class="tray-back-btn" id="btn-back-pin-tip">
                                 <span class="ico" data-ico="back"></span>
@@ -187,9 +245,7 @@
                             </button>
                             <span class="tray-sub-title" id="lbl-pin-tip-title">Keep CyberClock visible in the tray</span>
                         </div>
-
                         <div class="tray-divider"></div>
-
                         <div class="tray-pin-tip-content">
                             <div class="tray-pin-tip-hero">
                                 <div class="tray-pin-tip-logo-wrap">
@@ -199,7 +255,6 @@
                                     Windows hides new tray icons behind the overflow (^). Drag CyberClock onto the taskbar, or pin it in Windows Settings.
                                 </p>
                             </div>
-
                             <div class="tray-pin-tip-actions">
                                 <button type="button" class="tray-pin-tip-btn tray-pin-tip-btn-secondary" id="btn-pin-tip-got-it">
                                     <span id="lbl-pin-tip-got-it">Got it</span>
@@ -211,118 +266,31 @@
                         </div>
                     </div>
 
-                    <!-- ── SUITE SUB-VIEW ── -->
-                    <div class="tray-view tray-view-sub" id="view-suite">
+                    <!-- SUITE FLYOUT -->
+                    <div class="tray-card tray-flyout" id="flyout-suite" data-flyout-panel="suite" role="menu" aria-hidden="true">
                         <div class="tray-sub-header">
-                            <button type="button" class="tray-back-btn" id="btn-back-suite">
-                                <span class="ico" data-ico="back"></span>
-                                <span class="label" id="lbl-back-suite">Back</span>
-                            </button>
+                            <span class="tray-flyout-title">
+                                <span class="ico" data-ico="gem"></span>
+                                <span id="lbl-suite-title">More from CyberGems</span>
+                            </span>
                             <button type="button" class="tray-brand-link" id="btn-suite-brand" aria-label="CyberGems">
                                 <img class="tray-brand-mark" src="../assets/images/cybergems-logo.svg" alt="" />
                                 <span class="tray-brand-name">CyberGems</span>
                             </button>
                         </div>
-
                         <div class="tray-divider"></div>
-
-                        <div class="tray-group tray-suite-list" id="tray-suite-list">
-                            <!-- Populated dynamically from suite-data.js -->
-                        </div>
-
+                        <div class="tray-group tray-suite-list" id="tray-suite-list"></div>
                         <div class="tray-divider"></div>
-
-                        <div class="tray-group">
+                        <div class="tray-group tray-group-exit">
                             <button type="button" class="tray-item tray-suite-all-btn" id="btn-suite-more">
                                 <span class="ico" data-ico="next"></span>
                                 <span class="label" id="lbl-suite-all">More details online...</span>
                             </button>
                         </div>
                     </div>
-
-                    <div class="tray-view tray-view-sub" id="view-clickthrough">
-                        <div class="tray-sub-header">
-                            <button type="button" class="tray-back-btn" id="btn-back-clickthrough">
-                                <span class="ico" data-ico="back"></span>
-                                <span class="label" id="lbl-back-clickthrough">Back</span>
-                            </button>
-                        </div>
-
-                        <div class="tray-divider"></div>
-
-                        <div class="tray-group" id="tray-ctp-list">
-                            <!-- Populated dynamically by tray.js: one toggle
-                                 per open widget, disabled rows for the kinds
-                                 with no open instance. -->
-                        </div>
-
-                        <div class="tray-divider"></div>
-
-                        <div class="tray-group">
-                            <button type="button" class="tray-item" id="btn-ctp-all-on">
-                                <span class="ico" data-ico="check"></span>
-                                <span class="label" id="lbl-ctp-all-on">Enable all</span>
-                            </button>
-                            <button type="button" class="tray-item" id="btn-ctp-all-off">
-                                <span class="ico" data-ico="x"></span>
-                                <span class="label" id="lbl-ctp-all-off">Disable all</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="tray-view tray-view-sub" id="view-new">
-                        <div class="tray-sub-header">
-                            <button type="button" class="tray-back-btn" id="btn-back-new">
-                                <span class="ico" data-ico="back"></span>
-                                <span class="label" id="lbl-back-new">Back</span>
-                            </button>
-                        </div>
-
-                        <div class="tray-divider"></div>
-
-                        <div class="tray-group">
-                            <button type="button" class="tray-item" data-action="new_timer">
-                                <span class="ico" data-ico="timer"></span>
-                                <span class="label" id="lbl-timer">New Timer</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_stopwatch">
-                                <span class="ico" data-ico="stopwatch"></span>
-                                <span class="label" id="lbl-stopwatch">New Stopwatch</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_calendar">
-                                <span class="ico" data-ico="calendar"></span>
-                                <span class="label" id="lbl-calendar">New Calendar</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_analog">
-                                <span class="ico" data-ico="clock"></span>
-                                <span class="label" id="lbl-analog">New Analog Clock</span>
-                            </button>
-
-                            <button type="button" class="tray-item" data-action="new_relax" disabled>
-                                <span class="ico" data-ico="lotus"></span>
-                                <span class="label" id="lbl-relax-float">Open Relax widget</span>
-                            </button>
-                        </div>
-
-                        <div class="tray-divider"></div>
-
-                        <div class="tray-group">
-                            <button type="button" class="tray-item" data-action="new_alarm">
-                                <span class="ico" data-ico="bell"></span>
-                                <span class="label" id="lbl-alarm">New Alarm</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
-            <!-- About opens the dedicated About window (backend routes the
-                 "about-modal" action) — the old 232px in-menu modal was too
-                 small for the content it carried. -->
         </div>
-        <!-- tray-card -->
 
         <script src="tray.js"></script>
     </body>

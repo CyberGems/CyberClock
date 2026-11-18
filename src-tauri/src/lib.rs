@@ -5774,6 +5774,8 @@ pub struct TrayMenuState {
     /// ("Alt+Shift+C"); empty when the shortcut is disabled.
     pub hotkey: String,
     pub show_suite_recommendations: bool,
+    pub flyout_side: String,
+    pub vertical_align: String,
 }
 
 static TRAY_MENU_ANCHOR: std::sync::Mutex<Option<(i32, i32)>> = std::sync::Mutex::new(None);
@@ -5781,6 +5783,7 @@ static TRAY_MENU_PENDING_SHOW: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 
 const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
+const TRAY_MENU_FLYOUT_EXTRA_W: f64 = 258.0; // 250px flyout card + 8px gap
 
 /// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
 /// region that EXCLUDES the taskbar. Clamping the tray menu to the full
@@ -5828,7 +5831,8 @@ fn tray_menu_geometry(
     anchor_y: i32,
     logical_w: f64,
     logical_h: f64,
-) -> (i32, i32, u32, u32) {
+    canvas_logical_h: f64,
+) -> (i32, i32, u32, u32, &'static str, &'static str) {
     let scale = win.scale_factor().unwrap_or(1.0);
     let width_px = (logical_w * scale).round() as i32;
     let height_px = (logical_h * scale).round() as i32;
@@ -5841,8 +5845,6 @@ fn tray_menu_geometry(
         .or_else(|| win.primary_monitor().ok().flatten())
         .or_else(|| win.current_monitor().ok().flatten());
 
-    // Prefer the taskbar-free work area when the anchor sits on the
-    // primary monitor; otherwise clamp to the monitor's full bounds.
     #[cfg(windows)]
     let work_area = work_area_containing(anchor_x, anchor_y);
     #[cfg(not(windows))]
@@ -5865,43 +5867,86 @@ fn tray_menu_geometry(
 
     let gap = (4.0 * scale).round() as i32;
     let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
+    let extra_w_px = (TRAY_MENU_FLYOUT_EXTRA_W * scale).round() as i32;
 
-    // Maximum card height must not exceed the available monitor work area
     let max_card_h = (max_y - min_y - 2 * gap).max(200);
     let card_w = (width_px - 2 * shadow_pad_px).max(1);
     let card_h = (height_px - 2 * shadow_pad_px).min(max_card_h).max(1);
-    let final_w_px = card_w + 2 * shadow_pad_px;
-    let final_h_px = card_h + 2 * shadow_pad_px;
+    let main_w_px = card_w + 2 * shadow_pad_px;
+    let main_h_px = card_h + 2 * shadow_pad_px;
 
-    // Vertical taskbar on the left edge: the icon sits inside the strip
-    // left of the work area. Open to the RIGHT of the icon, vertically
-    // centered on it. Any other edge keeps the classic above/below.
     let anchor_in_left_strip = anchor_x < min_x;
     let (mut card_x, mut card_y);
+    let is_taskbar_at_top = anchor_y < (min_y + max_y) / 2;
     if anchor_in_left_strip {
         card_x = anchor_x + gap;
         card_y = anchor_y - card_h / 2;
     } else {
         card_x = anchor_x - card_w / 2;
-        let is_taskbar_at_top = anchor_y < (min_y + max_y) / 2;
         if is_taskbar_at_top {
             card_y = anchor_y + gap;
         } else {
-            // Taskbar is at bottom (standard Windows):
-            // Card opens upwards above the taskbar, clamped to work area top.
             card_y = (anchor_y - card_h - gap).max(min_y);
         }
     }
 
-    // Clamp the CARD inside the work area (bleed overhangs are fine).
     card_x = card_x.clamp(min_x, (max_x - card_w).max(min_x));
     card_y = card_y.clamp(min_y, (max_y - card_h).max(min_y));
 
-    // Convert card back to window coordinates: shift by the bleed.
-    let x = card_x - shadow_pad_px;
-    let y = card_y - shadow_pad_px;
+    let main_win_x = card_x - shadow_pad_px;
+    let main_win_y = card_y - shadow_pad_px;
 
-    (x, y, final_w_px as u32, final_h_px as u32)
+    let space_left = card_x - min_x;
+    let space_right = max_x - (card_x + card_w);
+    let flyout_side = if space_left >= extra_w_px && space_right < extra_w_px {
+        "left"
+    } else if space_right >= extra_w_px && space_left < extra_w_px {
+        "right"
+    } else if anchor_x >= (min_x + max_x) / 2 {
+        "left"
+    } else {
+        "right"
+    };
+
+    let vertical_align = if is_taskbar_at_top { "top" } else { "bottom" };
+
+    let canvas_card_h = (((canvas_logical_h.max(logical_h) - 2.0 * TRAY_MENU_SHADOW_PAD) * scale)
+        .round() as i32)
+        .clamp(card_h, max_card_h);
+    let final_h_px = canvas_card_h + 2 * shadow_pad_px;
+    let final_w_px = main_w_px + extra_w_px;
+
+    let canvas_x = if flyout_side == "left" {
+        main_win_x - extra_w_px
+    } else {
+        main_win_x
+    };
+    let canvas_y = if vertical_align == "top" {
+        main_win_y
+    } else {
+        (main_win_y + main_h_px - final_h_px).max(min_y - shadow_pad_px)
+    };
+
+    (
+        canvas_x,
+        canvas_y,
+        final_w_px as u32,
+        final_h_px as u32,
+        flyout_side,
+        vertical_align,
+    )
+}
+
+fn current_tray_flyout_orientation(app: &AppHandle) -> (&'static str, &'static str) {
+    let Some(win) = app.get_webview_window("tray_menu") else {
+        return ("left", "bottom");
+    };
+    let Some((anchor_x, anchor_y)) = TRAY_MENU_ANCHOR.lock().ok().and_then(|g| *g) else {
+        return ("left", "bottom");
+    };
+    let (_, _, _, _, flyout_side, vertical_align) =
+        tray_menu_geometry(&win, anchor_x, anchor_y, 290.0, 420.0, 460.0);
+    (flyout_side, vertical_align)
 }
 
 /// Strip the keyboard-event prefixes ("KeyC" -> "C", "Digit5" -> "5")
@@ -6000,6 +6045,8 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
             .then(a.label.cmp(&b.label))
     });
 
+    let (flyout_side, vertical_align) = current_tray_flyout_orientation(app);
+
     TrayMenuState {
         version: app.package_info().version.to_string(),
         is_visible,
@@ -6018,6 +6065,8 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         relax_paused,
         hotkey: friendly_hotkey(&settings.hotkey_toggle),
         show_suite_recommendations: settings.show_suite_recommendations,
+        flyout_side: flyout_side.to_string(),
+        vertical_align: vertical_align.to_string(),
     }
 }
 
@@ -6176,26 +6225,26 @@ fn apply_tray_window_rect(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h:
 }
 
 #[tauri::command]
-fn tray_menu_ready(app: AppHandle, width: f64, height: f64) {
+fn tray_menu_ready(app: AppHandle, width: f64, height: f64, canvas_height: Option<f64>) {
     let Some(win) = app.get_webview_window("tray_menu") else {
         return;
     };
 
-    // Re-apply the window geometry on EVERY ready report — the menu grows
-    // when the Help section expands (or the About modal opens), and the
-    // size only becomes known once rendered. Anchoring to the tray click
-    // point and clamping to the monitor is handled by tray_menu_geometry;
-    // if no anchor is recorded yet (first show), use a safe fallback.
     let (anchor_x, anchor_y) = TRAY_MENU_ANCHOR
         .lock()
         .ok()
         .and_then(|g| *g)
         .unwrap_or((100, 100));
-    let (x, y, w, h) = tray_menu_geometry(&win, anchor_x, anchor_y, width, height);
+    let (x, y, w, h, _, _) = tray_menu_geometry(
+        &win,
+        anchor_x,
+        anchor_y,
+        width,
+        height,
+        canvas_height.unwrap_or(height),
+    );
     apply_tray_window_rect(&win, x, y, w, h);
 
-    // The show/focus sequence runs only for the first report after a
-    // pending show; later reports (Help expand/collapse) just resize.
     if TRAY_MENU_PENDING_SHOW.swap(false, std::sync::atomic::Ordering::SeqCst) {
         let _ = win.show();
         let _ = win.set_focus();

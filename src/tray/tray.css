@@ -22,7 +22,7 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
-        align-items: center;
+        align-items: stretch;
         background: transparent;
         padding: 20px;
         box-sizing: border-box;
@@ -32,8 +32,29 @@
         overflow: hidden;
     }
 
+    .tray-stage {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        width: 100%;
+        height: 100%;
+    }
+    .tray-stage[data-flyout-side="left"] {
+        flex-direction: row-reverse;
+    }
+    .tray-stage[data-flyout-side="right"] {
+        flex-direction: row;
+    }
+    .tray-stage[data-vertical-align="top"] {
+        align-items: flex-start;
+    }
+    .tray-stage[data-vertical-align="bottom"] {
+        align-items: flex-end;
+    }
+
     .tray-card {
         width: 250px;
+        flex-shrink: 0;
         box-sizing: border-box;
         max-height: calc(100vh - 40px);
         background: rgba(10, 14, 25, 0.96);
@@ -53,6 +74,42 @@
             0 2px 6px rgba(0, 0, 0, 0.22),
             0 0 12px rgba(var(--rgb-accent), 0.10),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .tray-flyout-slot {
+        position: relative;
+        width: 250px;
+        height: 100%;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    .tray-flyout {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 250px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(6px) scale(0.985);
+        transition: opacity 0.14s ease, transform 0.14s ease;
+    }
+    .tray-stage[data-flyout-side="right"] .tray-flyout {
+        transform: translateX(-6px) scale(0.985);
+    }
+    .tray-stage[data-vertical-align="top"] .tray-flyout {
+        bottom: auto;
+        top: 0;
+    }
+    .tray-flyout.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0) scale(1);
+    }
+    .tray-card.is-offscreen,
+    .tray-stage.is-offscreen {
+        visibility: hidden;
     }
     .tray-card::-webkit-scrollbar {
         width: 4px;
@@ -367,31 +424,7 @@
         cursor: default;
     }
 
-    /* ── Drill-down Sliding Views ───────────────────────────── */
-    .tray-deck {
-        width: 100%;
-        position: relative;
-    }
-    /* Views are hidden by default; the deck's data-view picks the one
-       that renders. Adding a view needs exactly one line below. */
-    .tray-view {
-        width: 100%;
-        box-sizing: border-box;
-        display: none;
-    }
-
-    .tray-deck[data-view="main"] #view-main {
-        display: block;
-    }
-    .tray-deck[data-view="help"] #view-help,
-    .tray-deck[data-view="pin-tip"] #view-pin-tip,
-    .tray-deck[data-view="suite"] #view-suite,
-    .tray-deck[data-view="clickthrough"] #view-clickthrough,
-    .tray-deck[data-view="new"] #view-new {
-        display: block;
-    }
-
-    /* Drill-down navigation items on main view */
+    /* Flyout navigation & active trigger states */
     .tray-nav-item .tray-nav-arrow {
         margin-left: auto;
         color: var(--text-lo);
@@ -403,9 +436,41 @@
         justify-content: center;
         transition: transform 0.15s ease, color 0.15s ease;
     }
-    .tray-nav-item:hover .tray-nav-arrow {
+    .tray-nav-item:hover .tray-nav-arrow,
+    .tray-nav-item.is-flyout-open .tray-nav-arrow {
         color: var(--accent-a);
         transform: rotate(180deg) translateX(-2px);
+    }
+    .tray-nav-item.is-flyout-open {
+        background: rgba(var(--rgb-accent), 0.12);
+        color: #ffffff;
+    }
+
+    .tray-flyout-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 12px 6px;
+        min-height: 34px;
+        box-sizing: border-box;
+    }
+    .tray-flyout-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-md);
+        letter-spacing: 0.25px;
+    }
+    .tray-flyout-title .ico {
+        width: 14px;
+        height: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-a);
+        flex-shrink: 0;
     }
 
     /* Sub-view header with back button */

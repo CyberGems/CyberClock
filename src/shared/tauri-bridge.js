@@ -419,7 +419,11 @@
             await invoke("hide_tray_menu");
         },
         trayMenuReady: async (size) => {
-            await invoke("tray_menu_ready", { width: size.width, height: size.height });
+            await invoke("tray_menu_ready", {
+                width: size.width,
+                height: size.height,
+                canvasHeight: typeof size.canvasHeight === "number" ? size.canvasHeight : null,
+            });
         },
         trayMenuAction: async (action) => {
             await invoke("tray_menu_action", { action });

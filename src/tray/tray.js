@@ -1,26 +1,46 @@
     let currentMenuState = null;
     const rootEl = document.getElementById("tray-root");
+    const stageEl = document.getElementById("tray-stage");
+    const mainCardEl = document.getElementById("card-main");
     let appVersion = "";
+    let activeFlyout = null;
+    let flyoutOpenTimer = null;
+    let flyoutCloseTimer = null;
 
+    function measureCardHeight(card) {
+        if (!card) return 0;
+        const borderY = card.offsetHeight - card.clientHeight;
+        return Math.ceil(card.scrollHeight + borderY + 40);
+    }
 
     function reportSize() {
-        if (!rootEl) return;
-        const card = rootEl.querySelector(".tray-card");
-        const borderY = card ? (card.offsetHeight - card.clientHeight) : 2;
-        const h = card ? Math.ceil(card.scrollHeight + borderY + 44) : Math.ceil(rootEl.getBoundingClientRect().height);
-        const w = card ? Math.ceil(card.offsetWidth + 40) : 290;
+        if (!rootEl || !mainCardEl) return;
+        const borderY = mainCardEl.offsetHeight - mainCardEl.clientHeight;
+        const h = Math.ceil(mainCardEl.scrollHeight + borderY + 40);
+        const w = Math.ceil(mainCardEl.offsetWidth + 40);
+        const flyouts = Array.from(document.querySelectorAll(".tray-flyout")).filter((el) => {
+            if (el.id === "flyout-suite" && currentMenuState && currentMenuState.show_suite_recommendations === false) {
+                return false;
+            }
+            return true;
+        });
+        let canvasH = h;
+        for (const f of flyouts) {
+            canvasH = Math.max(canvasH, measureCardHeight(f));
+        }
         if (w < 10 || h < 10) return;
         if (window.cc && window.cc.trayMenuReady) {
-            window.cc.trayMenuReady({ width: w, height: h });
+            window.cc.trayMenuReady({ width: w, height: h, canvasHeight: canvasH });
         }
     }
 
     function resetToMainView() {
-        switchView("main");
-        const card = document.querySelector(".tray-card");
-        if (card) card.scrollTop = 0;
+        cancelFlyoutTimers();
+        setActiveFlyout(null);
+        if (mainCardEl) mainCardEl.scrollTop = 0;
         const sList = document.getElementById("tray-suite-list");
         if (sList) sList.scrollTop = 0;
+        reportSize();
     }
 
     function collapseAllSubmenus() {
@@ -35,8 +55,12 @@
         if (!state) return;
         currentMenuState = state;
 
-        // Theme
+        // Theme and flyout orientation
         if (state.theme) applyTheme(state.theme);
+        if (stageEl) {
+            stageEl.dataset.flyoutSide = state.flyout_side === "right" ? "right" : "left";
+            stageEl.dataset.verticalAlign = state.vertical_align === "top" ? "top" : "bottom";
+        }
 
         // Language
         if (window.ccI18n) {
@@ -184,7 +208,10 @@
         renderClickThrough(state);
 
         setLbl("lbl-clickthrough", T("tray.clickThrough", "Click-through"));
+        setLbl("lbl-clickthrough-title", T("tray.clickThrough", "Click-through"));
         setLbl("lbl-new", T("tray.newMenu", "New..."));
+        setLbl("lbl-new-title", T("tray.newMenu", "New..."));
+        setLbl("lbl-suite-title", T("tray.suite", "More from CyberGems"));
         setLbl("lbl-back-new", T("tray.back", "Back"));
         setLbl("lbl-help", T("tray.help", "Help"));
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
@@ -381,23 +408,80 @@
         return btn;
     }
 
+    function cancelFlyoutTimers() {
+        if (flyoutOpenTimer) {
+            clearTimeout(flyoutOpenTimer);
+            flyoutOpenTimer = null;
+        }
+        if (flyoutCloseTimer) {
+            clearTimeout(flyoutCloseTimer);
+            flyoutCloseTimer = null;
+        }
+    }
+
+    function getFlyoutPanel(name) {
+        if (!name) return null;
+        return document.querySelector(`.tray-flyout[data-flyout-panel="${name}"]`);
+    }
+
+    function setActiveFlyout(name) {
+        activeFlyout = name || null;
+        document.querySelectorAll(".tray-flyout[data-flyout-panel]").forEach((panel) => {
+            const isOpen = panel.dataset.flyoutPanel === activeFlyout;
+            panel.classList.toggle("is-open", isOpen);
+            panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+        });
+        const activeTrigger = activeFlyout === "pin-tip" ? "help" : activeFlyout;
+        document.querySelectorAll(".tray-nav-item[data-flyout]").forEach((trigger) => {
+            const isOpen = trigger.dataset.flyout === activeTrigger;
+            trigger.classList.toggle("is-flyout-open", isOpen);
+            trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+        if (window.ccIcons) {
+            window.ccIcons.replaceIcons();
+        }
+    }
+
+    function scheduleFlyoutOpen(name) {
+        cancelFlyoutTimers();
+        if (activeFlyout === name) return;
+        const delay = activeFlyout !== null ? 60 : 120;
+        flyoutOpenTimer = setTimeout(() => {
+            flyoutOpenTimer = null;
+            setActiveFlyout(name);
+        }, delay);
+    }
+
+    function scheduleFlyoutClose() {
+        cancelFlyoutTimers();
+        if (activeFlyout === null) return;
+        flyoutCloseTimer = setTimeout(() => {
+            flyoutCloseTimer = null;
+            setActiveFlyout(null);
+        }, 220);
+    }
+
+    function openFlyoutAndFocusFirst(name) {
+        cancelFlyoutTimers();
+        setActiveFlyout(name);
+        requestAnimationFrame(() => {
+            const panel = getFlyoutPanel(name);
+            const firstBtn = panel && panel.querySelector("button:not(:disabled)");
+            if (firstBtn) firstBtn.focus();
+        });
+    }
+
+    function closeFlyoutAndReturnFocus() {
+        const prev = activeFlyout === "pin-tip" ? "help" : activeFlyout;
+        cancelFlyoutTimers();
+        setActiveFlyout(null);
+        if (prev) {
+            const trigger = document.querySelector(`.tray-nav-item[data-flyout="${prev}"]`);
+            if (trigger) trigger.focus();
+        }
+    }
+
     function wireClickThrough() {
-        const navBtn = document.getElementById("btn-nav-clickthrough");
-        if (navBtn) {
-            navBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                switchView("clickthrough");
-            });
-        }
-        const backBtn = document.getElementById("btn-back-clickthrough");
-        if (backBtn) {
-            backBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                switchView("main");
-            });
-        }
         const list = document.getElementById("tray-ctp-list");
         if (list) {
             list.addEventListener("click", (e) => {
@@ -456,26 +540,6 @@
     }
     wireClickThrough();
 
-    // "New..." drill-down: groups every create action one level deep to
-    // keep the main view light. The rows themselves are generic
-    // data-action items handled by the dispatcher below.
-    const btnNavNew = document.getElementById("btn-nav-new");
-    if (btnNavNew) {
-        btnNavNew.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchView("new");
-        });
-    }
-    const btnBackNew = document.getElementById("btn-back-new");
-    if (btnBackNew) {
-        btnBackNew.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchView("main");
-        });
-    }
-
     // Relax quick toggle: fires the backend action that asks the main
     // window to play/pause; the menu closes just like other actions.
     const relaxTgBtn = document.getElementById("btn-relax-toggle");
@@ -487,32 +551,9 @@
         });
     }
 
-    // ── Help section ────────────────────────────────────────────
-    // ── Drill-down Views Navigation ────────────────────────────
-    const trayDeck = document.getElementById("tray-deck");
-
-    // The window may be reused briefly (hidden between opens). Keeping the card
-    // invisible while hidden means a frame the webview may still present
-    // on the next show can never flash the old menu content. Layout is
-    // kept, so size reports still measure the card.
     function setCardOffscreen(off) {
-        const card = document.querySelector(".tray-card");
-        if (card) card.classList.toggle("is-offscreen", off);
-    }
-
-    function switchView(viewName) {
-        if (!trayDeck) return;
-        trayDeck.dataset.view = viewName || "main";
-        if (window.ccIcons) {
-            window.ccIcons.replaceIcons();
-        }
-        // Measure and report in the same task as the flip: the layout read
-        // in reportSize forces the new view's geometry at once, so the
-        // window resize lands with the first paint. Waiting two rAFs let
-        // the old window size show the taller view clipped under a
-        // transient scrollbar, which read as a flicker on every submenu
-        // entry.
-        reportSize();
+        if (stageEl) stageEl.classList.toggle("is-offscreen", off);
+        if (mainCardEl) mainCardEl.classList.toggle("is-offscreen", off);
     }
 
     function renderTrayPinTipBody(text) {
@@ -549,11 +590,13 @@
     }
 
     function openTrayPinTip() {
-        switchView("pin-tip");
+        cancelFlyoutTimers();
+        setActiveFlyout("pin-tip");
     }
 
     function closeTrayPinTip() {
-        switchView("help");
+        cancelFlyoutTimers();
+        setActiveFlyout("help");
     }
 
     function openTrayPinTipSettings() {
@@ -565,32 +608,29 @@
         setTimeout(() => hideMenu(), 250);
     }
 
-    const btnNavHelp = document.getElementById("btn-nav-help");
-    if (btnNavHelp) {
-        btnNavHelp.addEventListener("click", (e) => {
+    document.querySelectorAll(".tray-nav-item[data-flyout]").forEach((btn) => {
+        const target = btn.dataset.flyout;
+        btn.addEventListener("mouseenter", () => scheduleFlyoutOpen(target));
+        btn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            switchView("help");
+            cancelFlyoutTimers();
+            const isSame = activeFlyout === target || (target === "help" && activeFlyout === "pin-tip");
+            setActiveFlyout(isSame ? null : target);
         });
+    });
+
+    if (mainCardEl) {
+        mainCardEl.querySelectorAll(":scope > .tray-header, :scope > .tray-group > .tray-item:not([data-flyout]), :scope > .tray-group > .tray-status").forEach((el) => {
+            el.addEventListener("mouseenter", () => scheduleFlyoutClose());
+        });
+        mainCardEl.addEventListener("mouseleave", () => scheduleFlyoutClose());
     }
 
-    const btnNavSuite = document.getElementById("btn-nav-suite");
-    if (btnNavSuite) {
-        btnNavSuite.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchView("suite");
-        });
-    }
-
-    const btnBackHelp = document.getElementById("btn-back-help");
-    if (btnBackHelp) {
-        btnBackHelp.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchView("main");
-        });
-    }
+    document.querySelectorAll(".tray-flyout").forEach((panel) => {
+        panel.addEventListener("mouseenter", () => cancelFlyoutTimers());
+        panel.addEventListener("mouseleave", () => scheduleFlyoutClose());
+    });
 
     const btnBackPinTip = document.getElementById("btn-back-pin-tip");
     if (btnBackPinTip) {
@@ -616,15 +656,6 @@
             e.preventDefault();
             e.stopPropagation();
             openTrayPinTipSettings();
-        });
-    }
-
-    const btnBackSuite = document.getElementById("btn-back-suite");
-    if (btnBackSuite) {
-        btnBackSuite.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            switchView("main");
         });
     }
 
@@ -785,10 +816,63 @@
     // Prevent context menu
     document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    // Dismiss on Escape
+    // Click on transparent canvas outside cards dismisses the menu
+    document.addEventListener("mousedown", (e) => {
+        const target = e.target;
+        if (!(target instanceof Node)) return;
+        if (mainCardEl && mainCardEl.contains(target)) return;
+        const openPanel = getFlyoutPanel(activeFlyout);
+        if (openPanel && openPanel.contains(target)) return;
+        hideMenu();
+    });
+
+    // Keyboard navigation and Escape dismissal
     window.addEventListener("keydown", (e) => {
+        const openPanel = getFlyoutPanel(activeFlyout);
+        const activeEl = document.activeElement;
+        const inFlyout = Boolean(openPanel && activeEl && openPanel.contains(activeEl));
+        const flyoutSide = stageEl?.dataset.flyoutSide === "right" ? "right" : "left";
+        const openKey = flyoutSide === "left" ? "ArrowLeft" : "ArrowRight";
+        const closeKey = flyoutSide === "left" ? "ArrowRight" : "ArrowLeft";
+
         if (e.key === "Escape") {
-            hideMenu();
+            e.preventDefault();
+            if (activeFlyout === "pin-tip") {
+                closeTrayPinTip();
+            } else if (activeFlyout !== null) {
+                closeFlyoutAndReturnFocus();
+            } else {
+                hideMenu();
+            }
+            return;
+        }
+
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            const scope = (inFlyout && openPanel) ? openPanel : mainCardEl;
+            if (!scope) return;
+            const buttons = Array.from(scope.querySelectorAll("button.tray-item:not(:disabled), button.tray-pin-tip-btn:not(:disabled), button.tray-back-btn:not(:disabled)"));
+            if (!buttons.length) return;
+            e.preventDefault();
+            const idx = buttons.indexOf(activeEl);
+            const delta = e.key === "ArrowDown" ? 1 : -1;
+            const nextIdx = idx === -1 ? (delta > 0 ? 0 : buttons.length - 1) : (idx + delta + buttons.length) % buttons.length;
+            buttons[nextIdx]?.focus();
+            return;
+        }
+
+        if (e.key === openKey || (!inFlyout && e.key === closeKey)) {
+            const triggerTarget = activeEl && activeEl.dataset ? activeEl.dataset.flyout : null;
+            if (!inFlyout && triggerTarget) {
+                e.preventDefault();
+                openFlyoutAndFocusFirst(triggerTarget);
+                return;
+            }
+        }
+
+        if (e.key === closeKey && activeFlyout !== null) {
+            e.preventDefault();
+            if (activeFlyout === "pin-tip") closeTrayPinTip();
+            else closeFlyoutAndReturnFocus();
         }
     });
 
