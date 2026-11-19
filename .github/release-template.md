@@ -8,7 +8,7 @@
 
 <!-- IMPORTANT FOR AGENTS & MAINTAINERS: Always rewrite this entire section and highlights with the ACTUAL release notes for this specific new version before tagging. NEVER leave or copy previous version notes! Use 25-45 words for the summary, lead with user-facing changes, and do not repeat the app name or version. Keep the Spanish mirror inside the details block in sync: translate the summary and rewrite the highlights. -->
 <!-- changelog-summary:start -->
-The system tray submenus now open as side-by-side flyout panels beside the main menu card, with hover dwell, click toggling, keyboard arrow navigation, and automatic placement for any taskbar edge.
+Fixes system tray menu positioning, mixed-DPI scaling, and vertical taskbar anchoring across multi-monitor setups so menus and flyouts appear cleanly without initial position jumps or clipping, and tightens the flyout gap to 4px.
 <!-- changelog-summary:end -->
 
 > **New to CyberClock?** A cyber-neon Windows clock with analog and digital views, calendar notes, alarms, timers, relaxation tools, and compact floating modes.
@@ -17,14 +17,15 @@ The system tray submenus now open as side-by-side flyout panels beside the main 
 
 ### ✨ Key Features & Highlights
 
-- 🪟 **Side-by-side tray flyout panels**: `New...`, `Click-through`, `Help`, the tray pin tip, and `More from CyberGems` open beside the main tray card on hover or click, support Left/Right arrow navigation and `Escape`, and flip cleanly to match your taskbar position without shifting the main card.
+- 🪟 **Accurate multi-monitor and mixed-DPI tray placement**: Reworked tray positioning in physical coordinates with per-monitor DPI handling so menus open flush beside vertical or horizontal taskbars without jumping on first open or clipping flyouts at the screen bottom.
+- 🎯 **Unified `4px` tray flyout gap**: Tightened the horizontal spacing between the main tray card and its side-by-side flyout panels to `4px` to match the rest of the suite.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Los submenús de la bandeja del sistema ahora se abren como paneles flyout laterales junto a la tarjeta principal, con retardo al pasar el cursor, alternancia por clic, navegación con flechas y ajuste automático a cualquier barra de tareas.
+Corrige el posicionamiento del menú de bandeja, el escalado en monitores con DPI mixto y el anclaje en barras de tareas verticales para abrir sin saltos ni recortes, y ajusta el espacio de los flyouts a 4px.
 
 > **¿Nuevo en CyberClock?** Un reloj Windows cyber-neón con vistas analógica y digital, notas de calendario, alarmas, temporizadores, herramientas de relax y modos flotantes compactos.
 
@@ -32,7 +33,8 @@ Los submenús de la bandeja del sistema ahora se abren como paneles flyout later
 
 ### ✨ Novedades destacadas
 
-- 🪟 **Paneles flyout laterales en la bandeja**: `Nuevo...`, `Click-through`, `Ayuda`, el aviso para fijar el icono y `Más de CyberGems` se abren al lado de la tarjeta principal al pasar el cursor o hacer clic, responden a flechas izquierda/derecha y `Escape`, y se orientan según la posición de la barra de tareas sin mover el menú base.
+- 🪟 **Posicionamiento preciso en multimonitor y DPI mixto**: Se rehizo el cálculo de la bandeja en píxeles físicos con soporte DPI por monitor para que el menú abra junto a barras verticales u horizontales sin saltos en la primera apertura ni recortes inferiores en los submenús.
+- 🎯 **Espaciado unificado de `4px` en flyouts**: Se ajustó a `4px` la separación horizontal entre la tarjeta principal de la bandeja y los paneles laterales para igualar el resto de la suite.
 
 ### ℹ️ Antes de instalar
 

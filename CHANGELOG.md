@@ -2,6 +2,18 @@
 
 All notable changes to CyberClock are documented here.
 
+## [1.16.4] - 2026-11-19
+
+### 🇺🇸 English
+
+- Fix tray menu positioning, DPI scaling, and vertical taskbar anchoring across mixed-DPI multi-monitor setups so menus open cleanly beside left, right, top, or bottom taskbars without initial jumps or bottom clipping.
+- Tighten the horizontal spacing between the main tray card and its side-by-side flyout panels to `4px`.
+
+### 🇪🇸 Español
+
+- Corrige el posicionamiento, escalado DPI y anclaje con barras de tareas verticales del menú de la bandeja en configuraciones multimonitor con DPI mixto, evitando saltos iniciales y recortes inferiores.
+- Ajusta la separación horizontal entre la tarjeta principal de la bandeja y los paneles flyout laterales a `4px`.
+
 ## [1.16.3] - 2026-11-18
 
 ### 🇺🇸 English
