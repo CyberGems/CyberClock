@@ -5783,19 +5783,18 @@ static TRAY_MENU_PENDING_SHOW: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 
 const TRAY_MENU_SHADOW_PAD: f64 = 20.0;
-const TRAY_MENU_FLYOUT_EXTRA_W: f64 = 258.0; // 250px flyout card + 8px gap
+const TRAY_MENU_FLYOUT_EXTRA_W: f64 = 254.0; // 250px flyout card + 4px gap
 
-/// Work area of the monitor containing (anchor_x, anchor_y) — the desktop
-/// region that EXCLUDES the taskbar. Clamping the tray menu to the full
-/// monitor bounds lets it open behind/over a taskbar docked to any edge
-/// (e.g. a vertical taskbar on the left). GetMonitorInfoW gives the
-/// per-monitor work area, so this is correct on every screen.
+/// Query the target monitor's work area and effective DPI scale at `(anchor_x, anchor_y)`.
+/// Always resolves against the monitor under the anchor rather than `win.scale_factor()`,
+/// because the hidden tray window may still live on another monitor with a different DPI.
 #[cfg(windows)]
-fn work_area_containing(anchor_x: i32, anchor_y: i32) -> Option<(i32, i32, i32, i32)> {
+fn monitor_work_area_and_scale(anchor_x: i32, anchor_y: i32) -> Option<(i32, i32, i32, i32, f64)> {
     use windows_sys::Win32::Foundation::POINT;
     use windows_sys::Win32::Graphics::Gdi::{
         GetMonitorInfoW, MonitorFromPoint, MONITORINFO, MONITOR_DEFAULTTONEAREST,
     };
+    use windows_sys::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
 
     let monitor = unsafe {
         MonitorFromPoint(
@@ -5817,11 +5816,20 @@ fn work_area_containing(anchor_x: i32, anchor_y: i32) -> Option<(i32, i32, i32, 
     if ok == 0 {
         return None;
     }
+    let mut dpi_x: u32 = 0;
+    let mut dpi_y: u32 = 0;
+    let hr = unsafe { GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &mut dpi_x, &mut dpi_y) };
+    let scale = if hr == 0 && dpi_x > 0 {
+        dpi_x as f64 / 96.0
+    } else {
+        1.0
+    };
     Some((
         info.rcWork.left,
         info.rcWork.top,
         info.rcWork.right,
         info.rcWork.bottom,
+        scale,
     ))
 }
 
@@ -5832,11 +5840,7 @@ fn tray_menu_geometry(
     logical_w: f64,
     logical_h: f64,
     canvas_logical_h: f64,
-) -> (i32, i32, u32, u32, &'static str, &'static str) {
-    let scale = win.scale_factor().unwrap_or(1.0);
-    let width_px = (logical_w * scale).round() as i32;
-    let height_px = (logical_h * scale).round() as i32;
-
+) -> (i32, i32, u32, u32, &'static str, &'static str, f64) {
     let monitor = win
         .available_monitors()
         .unwrap_or_default()
@@ -5846,24 +5850,37 @@ fn tray_menu_geometry(
         .or_else(|| win.current_monitor().ok().flatten());
 
     #[cfg(windows)]
-    let work_area = work_area_containing(anchor_x, anchor_y);
+    let win_mon_info = monitor_work_area_and_scale(anchor_x, anchor_y);
     #[cfg(not(windows))]
-    let work_area: Option<(i32, i32, i32, i32)> = None;
+    let win_mon_info: Option<(i32, i32, i32, i32, f64)> = None;
 
-    let (min_x, min_y, max_x, max_y) = if let Some((wa_x0, wa_y0, wa_x1, wa_y1)) = work_area {
-        (wa_x0, wa_y0, wa_x1, wa_y1)
-    } else if let Some(m) = monitor {
-        let pos = m.position();
-        let size = m.size();
-        (
-            pos.x,
-            pos.y,
-            pos.x + size.width as i32,
-            pos.y + size.height as i32,
-        )
-    } else {
-        (0, 0, 1920, 1080)
-    };
+    let (min_x, min_y, max_x, max_y, scale) =
+        if let Some((wa_x0, wa_y0, wa_x1, wa_y1, dpi_scale)) = win_mon_info {
+            let resolved_scale = if dpi_scale > 0.0 {
+                dpi_scale
+            } else {
+                monitor
+                    .as_ref()
+                    .map(|m| m.scale_factor())
+                    .unwrap_or_else(|| win.scale_factor().unwrap_or(1.0))
+            };
+            (wa_x0, wa_y0, wa_x1, wa_y1, resolved_scale)
+        } else if let Some(m) = monitor {
+            let pos = m.position();
+            let size = m.size();
+            (
+                pos.x,
+                pos.y,
+                pos.x + size.width as i32,
+                pos.y + size.height as i32,
+                m.scale_factor(),
+            )
+        } else {
+            (0, 0, 1920, 1080, win.scale_factor().unwrap_or(1.0))
+        };
+
+    let width_px = (logical_w * scale).round() as i32;
+    let height_px = (logical_h * scale).round() as i32;
 
     let gap = (4.0 * scale).round() as i32;
     let shadow_pad_px = (TRAY_MENU_SHADOW_PAD * scale).round() as i32;
@@ -5876,10 +5893,14 @@ fn tray_menu_geometry(
     let main_h_px = card_h + 2 * shadow_pad_px;
 
     let anchor_in_left_strip = anchor_x < min_x;
+    let anchor_in_right_strip = anchor_x >= max_x;
     let (mut card_x, mut card_y);
     let is_taskbar_at_top = anchor_y < (min_y + max_y) / 2;
     if anchor_in_left_strip {
         card_x = anchor_x + gap;
+        card_y = anchor_y - card_h / 2;
+    } else if anchor_in_right_strip {
+        card_x = anchor_x - card_w - gap;
         card_y = anchor_y - card_h / 2;
     } else {
         card_x = anchor_x - card_w / 2;
@@ -5921,10 +5942,12 @@ fn tray_menu_geometry(
     } else {
         main_win_x
     };
+    let min_canvas_y = min_y - shadow_pad_px;
+    let max_canvas_y = (max_y + shadow_pad_px - final_h_px).max(min_canvas_y);
     let canvas_y = if vertical_align == "top" {
-        main_win_y
+        main_win_y.clamp(min_canvas_y, max_canvas_y)
     } else {
-        (main_win_y + main_h_px - final_h_px).max(min_y - shadow_pad_px)
+        (main_win_y + main_h_px - final_h_px).clamp(min_canvas_y, max_canvas_y)
     };
 
     (
@@ -5934,6 +5957,7 @@ fn tray_menu_geometry(
         final_h_px as u32,
         flyout_side,
         vertical_align,
+        scale,
     )
 }
 
@@ -5944,7 +5968,7 @@ fn current_tray_flyout_orientation(app: &AppHandle) -> (&'static str, &'static s
     let Some((anchor_x, anchor_y)) = TRAY_MENU_ANCHOR.lock().ok().and_then(|g| *g) else {
         return ("left", "bottom");
     };
-    let (_, _, _, _, flyout_side, vertical_align) =
+    let (_, _, _, _, flyout_side, vertical_align, _) =
         tray_menu_geometry(&win, anchor_x, anchor_y, 290.0, 420.0, 460.0);
     (flyout_side, vertical_align)
 }
@@ -6212,9 +6236,49 @@ fn set_window_rect_atomic(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h:
     true
 }
 
+#[cfg(windows)]
+fn disable_window_transitions(win: &tauri::WebviewWindow) {
+    let Ok(hwnd) = win.hwnd() else {
+        return;
+    };
+    #[link(name = "dwmapi")]
+    extern "system" {
+        fn DwmSetWindowAttribute(
+            hwnd: windows_sys::Win32::Foundation::HWND,
+            dw_attribute: u32,
+            pv_attribute: *const std::ffi::c_void,
+            cb_attribute: u32,
+        ) -> i32;
+    }
+    const DWMWA_TRANSITIONS_FORCEDISABLED: u32 = 3;
+    let disabled: i32 = 1;
+    unsafe {
+        let _ = DwmSetWindowAttribute(
+            hwnd.0 as windows_sys::Win32::Foundation::HWND,
+            DWMWA_TRANSITIONS_FORCEDISABLED,
+            &disabled as *const i32 as *const std::ffi::c_void,
+            std::mem::size_of::<i32>() as u32,
+        );
+    }
+}
+
 fn apply_tray_window_rect(win: &tauri::WebviewWindow, x: i32, y: i32, w: u32, h: u32) {
     #[cfg(windows)]
     if set_window_rect_atomic(win, x, y, w, h) {
+        // Crossing onto a monitor with a different DPI makes Windows dispatch WM_DPICHANGED
+        // during SetWindowPos, and tao's handler rescales via the OS suggested rect. Re-apply
+        // once the HWND sits on the destination monitor so the final physical rect holds.
+        let pos_mismatch = win
+            .outer_position()
+            .map(|p| p.x != x || p.y != y)
+            .unwrap_or(true);
+        let size_mismatch = win
+            .outer_size()
+            .map(|s| s.width != w || s.height != h)
+            .unwrap_or(true);
+        if pos_mismatch || size_mismatch {
+            let _ = set_window_rect_atomic(win, x, y, w, h);
+        }
         return;
     }
     let _ = win.set_size(tauri::Size::Physical(tauri::PhysicalSize {
@@ -6235,7 +6299,7 @@ fn tray_menu_ready(app: AppHandle, width: f64, height: f64, canvas_height: Optio
         .ok()
         .and_then(|g| *g)
         .unwrap_or((100, 100));
-    let (x, y, w, h, _, _) = tray_menu_geometry(
+    let (x, y, w, h, _, _, _) = tray_menu_geometry(
         &win,
         anchor_x,
         anchor_y,
@@ -6359,6 +6423,23 @@ async fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
         TRAY_MENU_PENDING_SHOW.store(false, Ordering::Release);
         return;
     };
+    #[cfg(windows)]
+    disable_window_transitions(&win);
+    // Move the hidden window onto the destination monitor before measuring in JS so WebView2
+    // adopts the target monitor's DPI before `reportSize()` runs and never flashes a stale scale.
+    let (stage_x, stage_y, stage_w, stage_h, _, _, target_scale) =
+        tray_menu_geometry(&win, anchor_x, anchor_y, 290.0, 460.0, 460.0);
+    if win
+        .scale_factor()
+        .map(|s| (s - target_scale).abs() > 0.01)
+        .unwrap_or(true)
+        || !win
+            .outer_position()
+            .map(|p| (p.x - stage_x).abs() <= 2 && (p.y - stage_y).abs() <= 2)
+            .unwrap_or(false)
+    {
+        apply_tray_window_rect(&win, stage_x, stage_y, stage_w, stage_h);
+    }
     if TRAY_MENU_PENDING_SHOW.load(Ordering::Acquire) {
         let _ = win.emit("tray-menu-show", ());
     } else if !win.is_visible().unwrap_or(false) {

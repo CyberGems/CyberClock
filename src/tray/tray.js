@@ -40,7 +40,6 @@
         if (mainCardEl) mainCardEl.scrollTop = 0;
         const sList = document.getElementById("tray-suite-list");
         if (sList) sList.scrollTop = 0;
-        reportSize();
     }
 
     function collapseAllSubmenus() {
@@ -908,17 +907,78 @@
             refreshTrayState().catch(console.error);
         }).catch(console.error);
 
-        async function prepareTrayMenu() {
-            await refreshTrayState();
-            setCardOffscreen(false);
-            collapseAllSubmenus();
+        let prepareSeq = 0;
+        let reportRaf1 = null;
+        let reportRaf2 = null;
+        let reportFallbackTimer = null;
+        function cancelPendingReport() {
+            if (reportRaf1 !== null) {
+                cancelAnimationFrame(reportRaf1);
+                reportRaf1 = null;
+            }
+            if (reportRaf2 !== null) {
+                cancelAnimationFrame(reportRaf2);
+                reportRaf2 = null;
+            }
+            if (reportFallbackTimer !== null) {
+                clearTimeout(reportFallbackTimer);
+                reportFallbackTimer = null;
+            }
         }
+        function schedulePaintedReport(seq) {
+            cancelPendingReport();
+            let sent = false;
+            const fire = () => {
+                if (sent || seq !== prepareSeq) return;
+                sent = true;
+                cancelPendingReport();
+                reportSize();
+            };
+            // Flush layout with the new data-flyout-side / DPI before scheduling paint.
+            if (stageEl) void stageEl.offsetWidth;
+            // Wait two animation frames so Chromium paints the updated side before win.show(),
+            // with a short timeout guard in case WebView2 throttles rAF while hidden.
+            reportFallbackTimer = setTimeout(fire, 60);
+            reportRaf1 = requestAnimationFrame(() => {
+                reportRaf1 = null;
+                reportRaf2 = requestAnimationFrame(() => {
+                    reportRaf2 = null;
+                    fire();
+                });
+            });
+        }
+
+        async function prepareTrayMenu() {
+            const seq = ++prepareSeq;
+            cancelPendingReport();
+            await refreshTrayState();
+            if (seq !== prepareSeq) return;
+            collapseAllSubmenus();
+            setCardOffscreen(false);
+            schedulePaintedReport(seq);
+        }
+
+        let dprMedia = null;
+        function watchDevicePixelRatio() {
+            if (dprMedia) dprMedia.removeEventListener("change", onDprChange);
+            dprMedia = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+            dprMedia.addEventListener("change", onDprChange, { once: true });
+        }
+        function onDprChange() {
+            if (mainCardEl && !mainCardEl.classList.contains("is-offscreen")) {
+                schedulePaintedReport(prepareSeq);
+            }
+            watchDevicePixelRatio();
+        }
+        watchDevicePixelRatio();
 
         const showSubscription = window.cc.onTrayMenuShow
             ? window.cc.onTrayMenuShow(() => prepareTrayMenu().catch(console.error))
             : Promise.resolve();
         if (window.cc.onTrayMenuHide) {
             window.cc.onTrayMenuHide(() => {
+                prepareSeq++;
+                cancelPendingReport();
                 setCardOffscreen(true);
             });
         }
