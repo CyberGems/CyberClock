@@ -6447,13 +6447,22 @@ async fn show_tray_menu_at(app: AppHandle, anchor_x: i32, anchor_y: i32) {
     }
 }
 
+fn clamp_tray_tooltip(text: String) -> String {
+    if text.chars().count() > 63 {
+        format!("{}…", text.chars().take(62).collect::<String>())
+    } else {
+        text
+    }
+}
+
 fn format_tray_tooltip(shortcut: Option<&str>) -> String {
     let clean = shortcut.unwrap_or("").trim();
-    if clean.is_empty() {
+    let text = if clean.is_empty() {
         "CyberClock".to_string()
     } else {
         format!("CyberClock · {clean}")
-    }
+    };
+    clamp_tray_tooltip(text)
 }
 
 fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
