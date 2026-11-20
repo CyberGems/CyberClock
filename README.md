@@ -1,433 +1,436 @@
-<p align="center">
-  English · <a href="./README.es.md">Español</a>
-</p>
-
-<p align="center">
-  <a href="https://cybergems.org/apps/cyberclock/">
-    <img src="https://cybergems.org/banners/cyberclock.png" alt="Clock, timer, stopwatch and calendar for your desktop" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Download%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Download Latest Release" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64-bit)" /></a>
-  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/All_releases-30363D?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" /></a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/License-GPL--3.0-1F2428.svg?style=flat-square&color=334155" alt="License" />&nbsp;
-  <img src="https://img.shields.io/badge/Platform-Windows_10%2F11-1F2428.svg?style=flat-square&color=334155" alt="Platform" />&nbsp;
-  <img src="https://img.shields.io/badge/Tauri-2-1F2428.svg?style=flat-square&logo=tauri&logoColor=white&color=334155" alt="Tauri" />&nbsp;
-  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>&nbsp;
-  <a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/Changelog-475569?style=flat-square" alt="Changelog" /></a>
-</p>
-
----
-
-<div align="center">
-
-### Your clock, calendar, timer, stopwatch and floating widgets, together in one lightweight Windows app
-
-</div>
-
----
-
-## 📑 Table of Contents
-
-- [👋 Introduction](#-introduction)
-- [🖼️ Screenshots](#️-screenshots)
-- [🕐 Why CyberClock?](#-why-cyberclock)
-- [✨ Key Features](#-key-features)
-- [⬇️ Installation](#️-installation)
-- [🧭 Using the App](#-using-the-app)
-- [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
-- [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
-- [❤️ Donate](#️-donate)
-- [📄 License](#-license)
-- [❓ FAQ](#-faq)
-- [🔗 See also](#-see-also)
-
-<details>
-<summary><strong>🔗 Related links (outside this README)</strong></summary>
-
-- 🌐 [CyberClock on the web](https://cybergems.org/apps/cyberclock/) — overview, download and SmartScreen guide
-- 📚 [Documentation & FAQ — Wiki](https://github.com/CyberGems/CyberClock/wiki) — troubleshooting and deep-dives
-- 💾 [Releases](https://github.com/CyberGems/CyberClock/releases) — installers, portable builds and changelog
-- 🟣 [CyberGems suite](https://github.com/CyberGems) — all open-source apps
-
-</details>
-
----
-
-## 👋 Introduction
-
-Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
-
-*Free and open source: no ads, no tracking, and no data collection. Just enjoy it.*
-
----
-
-<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
-
-## 🖼️ Screenshots
-
-> Coming soon...
-
----
-
-## 🕐 Why CyberClock?
-
-Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub**: Sleek timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
-
-| Need | Solution |
-|---|---|
-| Sleek timekeeping | Canvas-rendered analog clock + digital display with 10 selectable dial designs |
-| Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
-| Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
-| Relax and focus | 6 recorded ambient soundscapes with seamless layering |
-| Hear the time | Optional talking clock with Windows voices, three announcement styles, quiet hours and alarm read-aloud |
-| Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
-| Never lose your alarms | Automatic JSON snapshots on every launch and before each restore, with a custom folder and rotating retention |
-| Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
-
----
-
-## ✨ Key Features
-
-### 🕐 Clock & Calendar
-- **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
-- **Ten Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, Reactor Core, Circuit PCB, and the multicolor Gem Crown dial
-- **Digital Display** — Space Grotesk font with fixed-width digit cells (12H / 24H)
-- **Expanded Clock** — Click the titlebar clock or date to fill the whole screen with the digital clock: greeting, seconds progress bar, next alarm line, and the dial's editable brand name (click it to rename). It includes its own Mini Mode button and always shows seconds; Esc, the back arrow, or a background click returns to the panel, and the open state is remembered across restarts
-- **Full Calendar** — Month view with agenda, day notes, and statistics
-- **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
-- **Day Notes** — Attach notes to specific dates with an editor modal
-- **Floating Calendar Widget** — Standalone compact desktop calendar with 10 cyberpunk/neon skins, daily auto-rotation, date picker popover, quick note peeks, multi-month navigation, and dedicated context menu
-- **Floating Analog Clock Widget** — Desktop floating analog clock with customizable dial designs, always-on-top, and taskbar visibility
-
-### ⏱️ Timer & Stopwatch
-- **Countdown Timer** — Large digital display with milliseconds, preset buttons, visual progress bar, and warning state
-- **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
-- **Floating Desktop Widgets** — Open independent compact timer and stopwatch windows with multi-slot support; widgets are remembered and restored across application restarts
-- **Independent Skins & Renaming** — Choose distinct skins per widget type (Mini Clock, Timer, Stopwatch) and customize widget titles
-- **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, calendars, or a relax session from any active widget's context menu
-- **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown (can be hidden via context menu)
-- **Resting Digits & Enlarged Display** — Enhanced counter digits across all skins, with resting all-zero state dimmed until armed
-
-### 🧘 Relaxation Module
-- **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
-- **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
-- **True Pause** — Pause fades out the audio and freezes the session timer. Resume fades the audio back in from the same position (Space toggles play/pause)
-- **Ambient Blending** — Use the **+** on a track card to add it to the mix (Rain + Fireplace, Ocean + Space…). Click the card to play it solo. Expand **Mix layers** in the player to adjust or remove each layer. Collapse it to keep the mix summary and **Master volume** visible. CyberClock remembers the mix, each layer’s volume, and whether the layer list was expanded between launches. Use Resume in Relax to play the saved mix. Master volume controls the whole mix
-- **Zen Flow Shuffle** — One-click shuffled playback through all tracks
-- **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
-- **Audio Spectrum Visualizer** — Real-time frequency visualization
-- **Relax widget** — Compact desktop session with the track name, a large play/pause button, stop, next and shuffle controls, master volume and controls to add, remove, or adjust layers, playback status, the auto-stop countdown and duration controls, a small spectrum that can be hidden from the widget menu, and 10 designs. Use the **Relax widget** button to open or close it. The widget controls the main Relax session and can resume the saved mix while full mode is hidden
-- **Session Timer** — Elapsed session time and an auto-stop countdown alongside the track and playback controls. The selected duration is restored in Relax and the widget on the next launch
-- **Saved mixes** — Use the list icon in Relax or the widget to save, load, rename, or delete mixes. Choose **Update with current mix** to save the session’s layers and their individual volumes to an existing mix. Adjust active layers directly on their track cards in Relax
-- **Auto Scheduler** — Schedule automatic playback times. CyberClock remembers whether this section was expanded between launches
-- **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
-
-### 📌 Mini Mode
-- **20 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
-- **Native Note Popover** — Hover popover displays calendar notes and active alarms, with inline note creation, editing, and deletion directly on the desktop
-- **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
-- **Individual Widget Zoom** — Per-widget scale controls to size each floating tool independently
-- **Multi-Monitor Fullscreen Auto-Hide** — Mini clock and floating widgets intelligently hide when games or apps go fullscreen on any connected monitor
-- **Transparency Controls** — Background and content opacity sliders
-- **Always on Top** — Keep the clock visible over other windows
-- **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
-- **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
-- **Show Date & Show Seconds** — Toggles in the Mini Mode menu; hiding the date shortens the bar (both return on hover)
-- **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage
-- **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
-
-### 🔔 Alarms & Chimes
-- **Voice Time Announcer (Talking Clock)** — In **Time**, choose hourly chimes or spoken announcements every 15, 30 or 60 minutes. The optional pre-chime plays at 70% of the voice volume. Use **Voice** to choose or install Windows voices and select a style (Natural, Military / 24h, Concise). Enable **Read alarms aloud** in **Alarms** and override it in individual alarm editors
-- **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
-- **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
-- **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
-- **Custom Chime Support** — Load your own audio file for an hourly chime interval
-- **Schedule Window** — Silence chimes during specific hours
-- **Alarms** — An Alarms view with presets, cards, and a designer. Pick visual glyphs from a 24-icon catalog, configure sound repeat with pause presets (30s, 1m, 2m…), or schedule once, daily, weekdays, weekends, or custom days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm restores and focuses Full Mode. Delete after the alarm removes it when you dismiss the notice. Duplicate copies an alarm, and templates save a setup without scheduling it
-
-### 🖥️ Desktop Integration
-- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked. New Alarm opens the designer in Full Mode
-- **Minimize & Close Options** — Dedicated minimize button on the titlebar, flexible close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
-- **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
-- **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
-- **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
-- **Clock Accuracy Guard** — Periodic NTP drift check shown in Settings, with a Windows notification when the system time is off by more than a minute
-- **Multi-Monitor Support** — Choose which display CyberClock appears on; display changes are detected and the window repositions itself
-- **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
-- **Auto-Updates** — Built-in Tauri updater with GitHub Releases and in-app bilingual release notes
-- **Bilingual UI** — Full English and Spanish interface
-- **Backup & Data** — Export or import settings, alarms, notes and timers as JSON; automatic rotating snapshots on every launch and before each restore, with a custom folder and a keep count; restore any copy (a safety snapshot is saved first), open the local data folder, or factory-reset to defaults from a dedicated settings tab
-- **Accessible About Window** — Suite-standard About with links, donate options, suite app showcase, check-for-update, and an "About..." entry in all floating widget and mini mode context menus. Each of those menus opens with the widget name and CyberClock
-- **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
-
----
-
-## ⬇️ Installation
-
-### Install (Recommended)
-
-1. Download the latest installer from [Releases](https://github.com/CyberGems/CyberClock/releases/latest)
-2. Run the `.exe` installer and follow the setup wizard (it offers to start CyberClock with Windows)
-3. Launch CyberClock. No other requirements needed: you do **not** need Node.js, Rust, or any developer tool
-
-### Portable Version
-
-- Download `CyberClock_<version>_x64-portable.zip` from the [latest release](https://github.com/CyberGems/CyberClock/releases/latest)
-- Extract it to any folder and run `CyberClock.exe`
-- Settings and imported alarm sounds are stored in a `data/` folder beside the executable; portable copies are updated by downloading the next ZIP from the release page
-
-### 🛡️ Windows SmartScreen
-
-Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
-
-To continue:
-
-<details>
-<summary><strong>See how to run the installer (step by step)</strong></summary>
-
-Windows shows this warning for any installer without a paid code-signing certificate; it does not mean the file is unsafe. Do <strong>not</strong> click "Don't run":
-
-1. Run the `CyberClock-Setup.exe` installer. Windows may show the blue "Windows protected your PC" dialog.
-
-![Windows SmartScreen warning](https://cybergems.org/branding/smartscreen-warning.svg)
-
-2. Click the small **More info** link. The expanded dialog shows your installer: `CyberClock-Setup.exe`.
-
-![SmartScreen dialog after More info](https://cybergems.org/branding/smartscreen-runanyway.svg)
-
-3. Click **Run anyway**. The installer starts normally.
-
-You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
-
-</details>
-
----
-
-## 🧭 Using the App
-
-CyberClock opens to the full clock view; the tray icon keeps it reachable when hidden, and `Alt+Shift+C` shows or hides it in its current mode.
-
-1. Open **Timer** and press **25m** for a focus block, then **Start**.
-2. When it rings, take a 5 minute break. Repeat three or four times before a longer one.
-3. Right-click the tray icon and choose **New Timer** to keep a countdown floating above other apps.
-
-Settings, notes, alarms and timers stay on your PC and can be exported as JSON. Change or disable the global hotkey in **Settings > General > Show / Hide Clock**; the mini clock has no fixed shortcuts and uses its right-click menu instead.
-
-See [How Do You Use CyberClock?](https://github.com/CyberGems/CyberClock/wiki/How-Do-You-Use) for everyday examples and the full guides.
-
----
-
-## 🛠️ Tech Stack & Architecture
-
-- **Platform:** Windows 10 / 11
-- **Framework:** Tauri v2 (Rust backend + HTML/CSS/JS frontend)
-- **Audio:** Web Audio API — recorded soundscapes, crossfade layering and a synthesis fallback
-- **Styling:** CSS custom properties for dynamic theming
-- **Architecture:** Multi-window (main, mini, menu, tray_menu, about) plus dynamic floating timer/stopwatch windows, with Tauri commands/events
-
-```
-CyberClock/
-├── src/                    Frontend (HTML/CSS/JS)
-│   ├── main/              Main window (clock, calendar, timer, stopwatch, relax)
-│   ├── mini/              Mini mode clock bar + its context menu
-│   ├── tray/              System tray menu
-│   ├── about/             About window
-│   ├── shared/
-│   │   ├── themes.css     Design tokens (single sober base + derived accent layer)
-│   │   ├── tint.js        Accent tint engine (10 presets, normalized seeds)
-│   │   ├── base.css       Base styles
-│   │   ├── i18n.js        Internationalization
-│   │   ├── icons.js       SVG icon system
-│   │   ├── audio-engine.js Web Audio playback, layering & true pause
-│   │   └── tauri-bridge.js Tauri API bridge
-│   └── assets/
-│       ├── images/        Icons & artwork
-│       └── sounds/        Ambient audio files
-└── src-tauri/             Rust backend
-    ├── src/
-    │   ├── main.rs        Entry point
-    │   ├── lib.rs         Core logic (windows, tray, startup, scheduler)
-    │   ├── settings.rs    Atomic settings store
-    │   └── updater.rs     Update system
-    ├── bin/               Bundled helper executables
-    ├── capabilities/      Tauri permissions
-    └── icons/             App icons
-```
-
-### Multi-Window Architecture
-
-CyberClock opens its auxiliary windows and floating widgets on demand. In Mini Mode, Full Mode loads in the background for scheduled Relax sessions and the Relax widget. After returning to Mini Mode or closing the widget, CyberClock releases Full Mode when it has no playback, timers, or edits to keep.
-
-| Window | Purpose | Size |
-|---|---|---|
-| `main` | Full application (clock, calendar, timer, stopwatch, relax) | 1024×768 |
-| `mini` | Compact clock bar | Skin-specific dimensions |
-| `menu` | Mini Mode and widget context menu | Adjusted to content |
-| `tray_menu` | System tray popup | Adjusted to content |
-| `about` | About CyberClock | 740×535 initially |
-| `mini_tip` | Mini Mode agenda, update notices, and alarm controls | Adjusted to content |
-| `float-*` | Floating widgets opened independently | Varies by widget |
-
-Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
-
-### Building from Source (Developers)
-
-Only needed if you want to work on CyberClock or build it yourself; regular users can skip this section.
-
-#### Prerequisites
-
-- [Node.js](https://nodejs.org/) (Latest LTS)
-- [Rust](https://www.rust-lang.org/) 1.77.2+
-- [Tauri CLI](https://v2.tauri.app/start/prerequisites/)
-
-#### Development
-
-```bash
-npm install
-npm run dev
-```
-
-#### Build for Production
-
-```bash
-npm run build
-```
-
-The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
-
-### 🎨 Themes & Customization
-
-#### 10 Accent Tints
-One sober structural palette — deep navy surfaces, neutral text — with color
-entering only through the accent: glows, borders, highlights and a subtle
-ambient kiss on the panels. The interface never floods with color.
-
-- **Ice** *(default)* — pale ice over deep navy
-- **Cyan** — quiet tropical cyan
-- **Azure** — muted cornflower blue
-- **Mint** — soft spearmint green
-- **Sage** — gentle sage green
-- **Gold** — soft candlelight gold
-- **Amber** — warm sandy amber
-- **Coral** — muted coral
-- **Rose** — dusty pink
-- **Violet** — powdery lavender
-
-Tints are derived from a single seed color (normalized to a shared
-luminance/saturation band) by `src/shared/tint.js`, so every preset stays
-readable and no accent can wash out the interface. Settings saved with the
-old 5-skin themes migrate automatically to their heir tint.
-
-#### Display Options
-- Time format: 12H / 24H
-- Show/hide seconds
-- Mini mode: background opacity, content opacity
-- Welcome greeting: optional display name shown beside the brand in Full Mode
-
----
-
-## ⌨️ Keyboard Shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Alt+Shift+C` (default, global) | Show / hide the clock in its current mode |
-| `Enter` or `Space` | Open the focused calendar day |
-| `Ctrl+Enter` (note editor) | Save the open day note |
-| `Space` (Relax view) | Play / pause the soundscape |
-| `Escape` | Close the settings panel, dialogs and editors |
-
-Change or disable the global hotkey in **Settings > General > Show / Hide Clock**. The mini clock has no fixed shortcuts; everything is available from its right-click menu and the tray menu. Full reference: [Keyboard Shortcuts](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts).
-
----
-
-## ❤️ Donate
-
-**CyberClock** is 100% free and open source. If it helps you, please consider [donating](https://cybergems.org/donate) or [starring the repo on GitHub](https://github.com/CyberGems/CyberClock) to support continued development. [Read the full story](https://cybergems.org/about/) behind the project. Thank you! 🙏
-
-<p align="center">
-  <a href="https://www.paypal.com/donate/?hosted_button_id=M4PY3UPJA5Y6Q"><img src="https://img.shields.io/badge/Donate-PayPal-0070BA?style=for-the-badge&logo=paypal" alt="Donate via PayPal" /></a>
-</p>
-
-<p align="center">
-  <a href="https://ko-fi.com/cybergems"><img src="https://img.shields.io/badge/Support_me_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support me on Ko-fi" /></a>
-</p>
-
-<p align="center">
-  <a href="https://buymeacoffee.com/cybergems"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" /></a>
-</p>
-
-<div align="center">
-
-<details>
-<summary><b>Crypto donations (BTC, ETH, USDT, LTC) — click to view addresses</b></summary>
-
-| Asset | Address | QR |
-|---|---|---|
-| **BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="src/assets/donate/qr-btc.png" width="90" height="90" alt="BTC QR" /> |
-| **ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="ETH QR" /> |
-| **USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="USDT QR" /> |
-| **USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="src/assets/donate/qr-usdt-tron.png" width="90" height="90" alt="USDT TRC20 QR" /> |
-| **LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="src/assets/donate/qr-ltc.png" width="90" height="90" alt="LTC QR" /> |
-
-> ⚠️ Send only the selected asset on the indicated network. Using the wrong network will result in permanent loss of funds.
-
-</details>
-
-</div>
-
----
-
-## 📄 License
-
-CyberClock is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
-
-Copyright (C) 2026 CyberGems
-
----
-
-## ❓ FAQ
-
-For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberClock/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cyberclock/FAQ).
-
----
-
-<div align="center" style="background:#0D0F17; border:1px solid rgba(0,255,255,0.12); border-radius:12px; padding:28px 20px; margin-top:32px;">
-
-### Thanks for using CyberClock! 🎉
-
-Made by [**CyberGems**](https://cybergems.org)
-
-</div>
-<p align="center">
-  <a href="https://www.reddit.com/submit?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&title=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Reddit-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Share on Reddit" /></a>
-  &nbsp;<a href="https://twitter.com/intent/tweet?text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_X-1DA1F2?style=for-the-badge&logo=x&logoColor=white" alt="Share on X" /></a>
-  &nbsp;<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Share on Facebook" /></a>
-  &nbsp;<a href="mailto:?subject=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&body=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows%20https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_by_Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Share by Email" /></a>
-  &nbsp;<a href="https://t.me/share/url?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Share on Telegram" /></a>
-  &nbsp;<a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="Share on LinkedIn" /></a>
-</p>
-
----
-
-## 🔗 See also
-
-More free, open-source, privacy-first apps from [**CyberGems**](https://github.com/CyberGems):
-
-| App | Description |
-|:---:|---|
-| 📢&nbsp;[**CyberFeeds**](https://github.com/CyberGems/CyberFeeds#readme) | High-performance, local-first RSS and Atom reader built for speed, privacy and clean reading. |
-| 🚀&nbsp;[**CyberLauncher**](https://github.com/CyberGems/CyberLauncher#readme) | Windows application launcher with hot corners, scheduler, system monitor and integrated terminal. |
-| 💻&nbsp;[**CyberManager**](https://github.com/CyberGems/CyberManager#readme) | Lightweight, high-performance task manager, virtualized and NT-native, a powerful Task Manager alternative. |
-| 📝&nbsp;[**CyberNotes**](https://github.com/CyberGems/CyberNotes#readme) | Privacy-focused note-taking app with rich text, folders, tabs and bcrypt-protected local storage. |
-| ⚡&nbsp;[**CyberPaste**](https://github.com/CyberGems/CyberPaste#readme) | Privacy-first clipboard manager for text, code, images, HTML and files. |
-| 📸&nbsp;[**CyberSnap**](https://github.com/CyberGems/CyberSnap#readme) | Screen capture and annotation suite with vector tools, high-speed OCR, screen recording and color picker. |
-| ⭐&nbsp;[**CyberTray**](https://github.com/CyberGems/CyberTray#readme) | High-performance tray launcher with hotspots, system monitoring, process manager and PIN-protected file vault. |
-| 💫&nbsp;[**CyberViewer**](https://github.com/CyberGems/CyberViewer#readme) | Full-featured image viewer and editor engineered for casual and power users. |
-| 🛡️&nbsp;[**CyberWall**](https://github.com/CyberGems/CyberWall#readme) | User-friendly Windows firewall with real-time per-app rules powered by the WFP kernel engine. |
-
-➡️ **[Browse all apps at cybergems.org](https://cybergems.org)**
+<p align="center">
+  English · <a href="./README.es.md">Español</a>
+</p>
+
+<p align="center">
+  <a href="https://cybergems.org/apps/cyberclock/">
+    <img src="https://cybergems.org/banners/cyberclock.png" alt="Clock, timer, stopwatch and calendar for your desktop" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/CyberGems/CyberClock/releases/latest"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberClock%2Fmaster%2Fpackage.json&query=%24.version&prefix=%20Download%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Download Latest Release" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64-bit)" /></a>
+  &nbsp;<a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/All_releases-30363D?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/License-GPL--3.0-1F2428.svg?style=flat-square&color=334155" alt="License" />&nbsp;
+  <img src="https://img.shields.io/badge/Platform-Windows_10%2F11-1F2428.svg?style=flat-square&color=334155" alt="Platform" />&nbsp;
+  <img src="https://img.shields.io/badge/Tauri-2-1F2428.svg?style=flat-square&logo=tauri&logoColor=white&color=334155" alt="Tauri" />&nbsp;
+  <a href="https://github.com/CyberGems/CyberClock/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>&nbsp;
+  <a href="https://github.com/CyberGems/CyberClock/releases"><img src="https://img.shields.io/badge/Changelog-475569?style=flat-square" alt="Changelog" /></a>
+</p>
+
+---
+
+<div align="center">
+
+### Your clock, calendar, timer, stopwatch and floating widgets, together in one lightweight Windows app
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [👋 Introduction](#-introduction)
+- [🖼️ Screenshots](#️-screenshots)
+- [🕐 Why CyberClock?](#-why-cyberclock)
+- [✨ Key Features](#-key-features)
+- [⬇️ Installation](#️-installation)
+- [🧭 Using the App](#-using-the-app)
+- [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
+- [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
+- [❤️ Donate](#️-donate)
+- [📄 License](#-license)
+- [❓ FAQ](#-faq)
+- [🔗 See also](#-see-also)
+
+<details>
+<summary><strong>🔗 Related links (outside this README)</strong></summary>
+
+- 🌐 [CyberClock on the web](https://cybergems.org/apps/cyberclock/) — overview, download and SmartScreen guide
+- 📚 [Documentation & FAQ — Wiki](https://github.com/CyberGems/CyberClock/wiki) — troubleshooting and deep-dives
+- 💾 [Releases](https://github.com/CyberGems/CyberClock/releases) — installers, portable builds and changelog
+- 🟣 [CyberGems suite](https://github.com/CyberGems) — all open-source apps
+
+</details>
+
+---
+
+## 👋 Introduction
+
+Time on a desktop usually arrives in pieces: the clock in the taskbar, a separate calendar, a phone timer, a stopwatch you never remember where you put. CyberClock puts them in one window — analog and digital dials with 10 designs, a full calendar with agenda and day notes, countdown timer, precision stopwatch and alarms, plus an optional talking clock that speaks the time and reads alarms aloud — and lets the main tools break away as their own floating widget: clock, calendar, timer, stopwatch or relax session, each with its own design and always on top of your other windows. Mini Mode reduces the whole app to a slim bar with 20 skins, a wellness module adds recorded ambient soundscapes, and every accent, size and transparency setting stays local, with automatic snapshots of your alarms, notes and preferences saved to the folder you choose. Built with **Tauri v2** and **Rust**.
+
+*Free and open source: no ads, no tracking, no telemetry and no analytics SDK. Just enjoy it.*
+
+
+- **Privacy:** see [PRIVACY.md](PRIVACY.md). CyberClock does not send your data anywhere by itself. The only automatic connections are listed there, and none of them carries personal data.
+
+---
+
+<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
+
+## 🖼️ Screenshots
+
+> Coming soon...
+
+---
+
+## 🕐 Why CyberClock?
+
+Most clock apps show you the time and nothing more. CyberClock transforms your desktop into a **productivity and wellness hub**: Sleek timekeeping, precision tools for work and study, and a relaxation module to unwind. All wrapped in a lightweight, native-performance Tauri app.
+
+| Need | Solution |
+|---|---|
+| Sleek timekeeping | Canvas-rendered analog clock + digital display with 10 selectable dial designs |
+| Stay organized | Full calendar with agenda, day notes, statistics, moon phase, and floating calendar |
+| Time your work | Countdown timer, precision stopwatch, and persistent floating desktop widgets |
+| Relax and focus | 6 recorded ambient soundscapes with seamless layering |
+| Hear the time | Optional talking clock with Windows voices, three announcement styles, quiet hours and alarm read-aloud |
+| Save screen space | Mini mode — compact always-on-top clock bar with 20 unique skins |
+| Never lose your alarms | Automatic JSON snapshots on every launch and before each restore, with a custom folder and rotating retention |
+| Make it yours | 10 accent tints, text size scale, transparency controls, multi-monitor |
+
+---
+
+## ✨ Key Features
+
+### 🕐 Clock & Calendar
+- **Analog Clock** — Canvas-rendered with smooth animations and neon accents; can be hidden in full mode to give the calendar the whole width
+- **Ten Dial Designs**: Classic, Minimal, Segments, HUD, Quantum, Chrono, Hex Matrix, Reactor Core, Circuit PCB, and the multicolor Gem Crown dial
+- **Digital Display** — Space Grotesk font with fixed-width digit cells (12H / 24H)
+- **Expanded Clock** — Click the titlebar clock or date to fill the whole screen with the digital clock: greeting, seconds progress bar, next alarm line, and the dial's editable brand name (click it to rename). It includes its own Mini Mode button and always shows seconds; Esc, the back arrow, or a background click returns to the panel, and the open state is remembered across restarts
+- **Full Calendar** — Month view with agenda, day notes, and statistics
+- **Date Intelligence** — Day of year, ISO week, days remaining, moon phase
+- **Day Notes** — Attach notes to specific dates with an editor modal
+- **Floating Calendar Widget** — Standalone compact desktop calendar with 10 cyberpunk/neon skins, daily auto-rotation, date picker popover, quick note peeks, multi-month navigation, and dedicated context menu
+- **Floating Analog Clock Widget** — Desktop floating analog clock with customizable dial designs, always-on-top, and taskbar visibility
+
+### ⏱️ Timer & Stopwatch
+- **Countdown Timer** — Large digital display with milliseconds, preset buttons, visual progress bar, and warning state
+- **Stopwatch** — Precision timing with lap tracking, delta vs average, best/worst lap highlighting, and clipboard export
+- **Floating Desktop Widgets** — Open independent compact timer and stopwatch windows with multi-slot support; widgets are remembered and restored across application restarts
+- **Independent Skins & Renaming** — Choose distinct skins per widget type (Mini Clock, Timer, Stopwatch) and customize widget titles
+- **Cross-Widget Launching** — Easily spawn timers, stopwatches, analog clocks, calendars, or a relax session from any active widget's context menu
+- **Floating Timer Presets** — Add 30s, 1m, 5m, 10m, or 15m to the armed duration without starting the countdown (can be hidden via context menu)
+- **Resting Digits & Enlarged Display** — Enhanced counter digits across all skins, with resting all-zero state dimmed until armed
+
+### 🧘 Relaxation Module
+- **6 Ambient Soundscapes** — Night, Forest, Outer Space, Ocean, Rain, Fireplace
+- **Recorded Ambient Audio** — Six real soundscapes played through the Web Audio API, with procedural synthesis as a fallback when the files are unavailable
+- **True Pause** — Pause fades out the audio and freezes the session timer. Resume fades the audio back in from the same position (Space toggles play/pause)
+- **Ambient Blending** — Use the **+** on a track card to add it to the mix (Rain + Fireplace, Ocean + Space…). Click the card to play it solo. Expand **Mix layers** in the player to adjust or remove each layer. Collapse it to keep the mix summary and **Master volume** visible. CyberClock remembers the mix, each layer’s volume, and whether the layer list was expanded between launches. Use Resume in Relax to play the saved mix. Master volume controls the whole mix
+- **Zen Flow Shuffle** — One-click shuffled playback through all tracks
+- **Gentle Auto-Stop** — The auto-stop timer fades audio out smoothly over the final minute
+- **Audio Spectrum Visualizer** — Real-time frequency visualization
+- **Relax widget** — Compact desktop session with the track name, a large play/pause button, stop, next and shuffle controls, master volume and controls to add, remove, or adjust layers, playback status, the auto-stop countdown and duration controls, a small spectrum that can be hidden from the widget menu, and 10 designs. Use the **Relax widget** button to open or close it. The widget controls the main Relax session and can resume the saved mix while full mode is hidden
+- **Session Timer** — Elapsed session time and an auto-stop countdown alongside the track and playback controls. The selected duration is restored in Relax and the widget on the next launch
+- **Saved mixes** — Use the list icon in Relax or the widget to save, load, rename, or delete mixes. Choose **Update with current mix** to save the session’s layers and their individual volumes to an existing mix. Adjust active layers directly on their track cards in Relax
+- **Auto Scheduler** — Schedule automatic playback times. CyberClock remembers whether this section was expanded between launches
+- **Mute Awareness** — A quiet banner with a one-click Enable button if global audio is muted
+
+### 📌 Mini Mode
+- **20 Unique Skins** — Distinct designs for the compact clock bar, each with its own dimensions and optional zoom (0.5×–4×)
+- **Native Note Popover** — Hover popover displays calendar notes and active alarms, with inline note creation, editing, and deletion directly on the desktop
+- **Skin-aware Floating Tools** — Floating timer and stopwatch windows reuse selected designs with layouts sized for their controls
+- **Individual Widget Zoom** — Per-widget scale controls to size each floating tool independently
+- **Multi-Monitor Fullscreen Auto-Hide** — Mini clock and floating widgets intelligently hide when games or apps go fullscreen on any connected monitor
+- **Transparency Controls** — Background and content opacity sliders
+- **Always on Top** — Keep the clock visible over other windows
+- **Position Lock** — Contextual position lock per widget (Mini Clock, Timers, Stopwatches, Analog Clock, Calendar, Relax)
+- **Auto-Fade (Inactivity Dimming)** — Optional idle fading (70%, 50%, 30%, 15%) that restores full opacity instantly on hover
+- **Show Date & Show Seconds** — Toggles in the Mini Mode menu; hiding the date shortens the bar (both return on hover)
+- **Day Progress** — Optional line on the bottom edge of the mini bar. Hover shows how much of the day has passed, as a percentage
+- **Click-Through** — Let mouse events pass through the mini clock and floating widgets (toggled from context menus, the tray menu, or Settings)
+
+### 🔔 Alarms & Chimes
+- **Voice Time Announcer (Talking Clock)** — In **Time**, choose hourly chimes or spoken announcements every 15, 30 or 60 minutes. The optional pre-chime plays at 70% of the voice volume. Use **Voice** to choose or install Windows voices and select a style (Natural, Military / 24h, Concise). Enable **Read alarms aloud** in **Alarms** and override it in individual alarm editors
+- **Hourly Chimes & Alerts** — Quarter-hour (:15, :30, :45), half-hour (:30), and full-hour (:00) chimes with dedicated volume control, instant sound test previews, and quiet hours silence window
+- **Dedicated Chimes Volume** — Independent volume slider for hourly chimes and interval alerts, preserving master alarm volume
+- **6 Built-In Chime Sounds** — Crystal Bell, Soft Chime, Neon Arp, Zen Gong, Aurora, and Music Box for hourly chimes
+- **Custom Chime Support** — Load your own audio file for an hourly chime interval
+- **Schedule Window** — Silence chimes during specific hours
+- **Alarms** — An Alarms view with presets, cards, and a designer. Pick visual glyphs from a 24-icon catalog, configure sound repeat with pause presets (30s, 1m, 2m…), or schedule once, daily, weekdays, weekends, or custom days. New alarms start on No sound, with twenty synthesized tones or your own MP3 or WAV. Snooze shows its delay, and a firing alarm restores and focuses Full Mode. Delete after the alarm removes it when you dismiss the notice. Duplicate copies an alarm, and templates save a setup without scheduling it
+
+### 🖥️ Desktop Integration
+- **System Tray** — Custom HTML popup menu with drill-down sliding navigation, anchored flush to the tray icon (with vertical-taskbar support) and carrying a full Help submenu, including a shortcut to the Windows date and time dialog. A left click brings the clock forward and never hides it. The menu states whether it is on screen, and lists Full Mode and Mini Mode together with the current one marked. New Alarm opens the designer in Full Mode
+- **Minimize & Close Options** — Dedicated minimize button on the titlebar, flexible close behavior (minimize to tray, switch to Mini Mode, or quit) with first-close confirmation dialog, direct close button, and backdrop dismissal
+- **Global Hotkey** — Show/hide the clock from anywhere (Alt+Shift+C by default; record your own combination or disable it in Settings)
+- **Automatic Monitor** — Full mode opens on the monitor where the mouse is (CyberLauncher style), or lock it to a preferred display
+- **Work-Area Full Mode** — Full mode fills the selected display's work area and stays locked there: taskbars docked on any edge are respected, and dragging or double-click maximize/restore can't break the layout
+- **Clock Accuracy Guard** — Periodic NTP drift check shown in Settings, with a Windows notification when the system time is off by more than a minute
+- **Multi-Monitor Support** — Choose which display CyberClock appears on; display changes are detected and the window repositions itself
+- **Auto-Start with Windows** — Registry-based startup, offered as an option right in the installer and kept in sync with the Settings toggle (the app reconciles the two at every boot)
+- **Auto-Updates** — Built-in Tauri updater with GitHub Releases and in-app bilingual release notes
+- **Bilingual UI** — Full English and Spanish interface
+- **Backup & Data** — Export or import settings, alarms, notes and timers as JSON; automatic rotating snapshots on every launch and before each restore, with a custom folder and a keep count; restore any copy (a safety snapshot is saved first), open the local data folder, or factory-reset to defaults from a dedicated settings tab
+- **Accessible About Window** — Suite-standard About with links, donate options, suite app showcase, check-for-update, and an "About..." entry in all floating widget and mini mode context menus. Each of those menus opens with the widget name and CyberClock
+- **Personal Welcome** — Optional display name adds a time-aware greeting beside the CyberClock brand when Full Mode opens
+
+---
+
+## ⬇️ Installation
+
+### Install (Recommended)
+
+1. Download the latest installer from [Releases](https://github.com/CyberGems/CyberClock/releases/latest)
+2. Run the `.exe` installer and follow the setup wizard (it offers to start CyberClock with Windows)
+3. Launch CyberClock. No other requirements needed: you do **not** need Node.js, Rust, or any developer tool
+
+### Portable Version
+
+- Download `CyberClock_<version>_x64-portable.zip` from the [latest release](https://github.com/CyberGems/CyberClock/releases/latest)
+- Extract it to any folder and run `CyberClock.exe`
+- Settings and imported alarm sounds are stored in a `data/` folder beside the executable; portable copies are updated by downloading the next ZIP from the release page
+
+### 🛡️ Windows SmartScreen
+
+Windows may show a SmartScreen warning the first time you run the CyberClock installer: this is an unsigned hobby app, so Windows hasn't built reputation for the file yet. This is expected; the source is public so you can inspect exactly what it does.
+
+To continue:
+
+<details>
+<summary><strong>See how to run the installer (step by step)</strong></summary>
+
+Windows shows this warning for any installer without a paid code-signing certificate; it does not mean the file is unsafe. Do <strong>not</strong> click "Don't run":
+
+1. Run the `CyberClock-Setup.exe` installer. Windows may show the blue "Windows protected your PC" dialog.
+
+![Windows SmartScreen warning](https://cybergems.org/branding/smartscreen-warning.svg)
+
+2. Click the small **More info** link. The expanded dialog shows your installer: `CyberClock-Setup.exe`.
+
+![SmartScreen dialog after More info](https://cybergems.org/branding/smartscreen-runanyway.svg)
+
+3. Click **Run anyway**. The installer starts normally.
+
+You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
+
+</details>
+
+---
+
+## 🧭 Using the App
+
+CyberClock opens to the full clock view; the tray icon keeps it reachable when hidden, and `Alt+Shift+C` shows or hides it in its current mode.
+
+1. Open **Timer** and press **25m** for a focus block, then **Start**.
+2. When it rings, take a 5 minute break. Repeat three or four times before a longer one.
+3. Right-click the tray icon and choose **New Timer** to keep a countdown floating above other apps.
+
+Settings, notes, alarms and timers stay on your PC and can be exported as JSON. Change or disable the global hotkey in **Settings > General > Show / Hide Clock**; the mini clock has no fixed shortcuts and uses its right-click menu instead.
+
+See [How Do You Use CyberClock?](https://github.com/CyberGems/CyberClock/wiki/How-Do-You-Use) for everyday examples and the full guides.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Platform:** Windows 10 / 11
+- **Framework:** Tauri v2 (Rust backend + HTML/CSS/JS frontend)
+- **Audio:** Web Audio API — recorded soundscapes, crossfade layering and a synthesis fallback
+- **Styling:** CSS custom properties for dynamic theming
+- **Architecture:** Multi-window (main, mini, menu, tray_menu, about) plus dynamic floating timer/stopwatch windows, with Tauri commands/events
+
+```
+CyberClock/
+├── src/                    Frontend (HTML/CSS/JS)
+│   ├── main/              Main window (clock, calendar, timer, stopwatch, relax)
+│   ├── mini/              Mini mode clock bar + its context menu
+│   ├── tray/              System tray menu
+│   ├── about/             About window
+│   ├── shared/
+│   │   ├── themes.css     Design tokens (single sober base + derived accent layer)
+│   │   ├── tint.js        Accent tint engine (10 presets, normalized seeds)
+│   │   ├── base.css       Base styles
+│   │   ├── i18n.js        Internationalization
+│   │   ├── icons.js       SVG icon system
+│   │   ├── audio-engine.js Web Audio playback, layering & true pause
+│   │   └── tauri-bridge.js Tauri API bridge
+│   └── assets/
+│       ├── images/        Icons & artwork
+│       └── sounds/        Ambient audio files
+└── src-tauri/             Rust backend
+    ├── src/
+    │   ├── main.rs        Entry point
+    │   ├── lib.rs         Core logic (windows, tray, startup, scheduler)
+    │   ├── settings.rs    Atomic settings store
+    │   └── updater.rs     Update system
+    ├── bin/               Bundled helper executables
+    ├── capabilities/      Tauri permissions
+    └── icons/             App icons
+```
+
+### Multi-Window Architecture
+
+CyberClock opens its auxiliary windows and floating widgets on demand. In Mini Mode, Full Mode loads in the background for scheduled Relax sessions and the Relax widget. After returning to Mini Mode or closing the widget, CyberClock releases Full Mode when it has no playback, timers, or edits to keep.
+
+| Window | Purpose | Size |
+|---|---|---|
+| `main` | Full application (clock, calendar, timer, stopwatch, relax) | 1024×768 |
+| `mini` | Compact clock bar | Skin-specific dimensions |
+| `menu` | Mini Mode and widget context menu | Adjusted to content |
+| `tray_menu` | System tray popup | Adjusted to content |
+| `about` | About CyberClock | 740×535 initially |
+| `mini_tip` | Mini Mode agenda, update notices, and alarm controls | Adjusted to content |
+| `float-*` | Floating widgets opened independently | Varies by widget |
+
+Communication between frontend and backend uses Tauri commands (`invoke()`) and events (`emit()`). Settings updates broadcast via `settings:updated` event across all windows.
+
+### Building from Source (Developers)
+
+Only needed if you want to work on CyberClock or build it yourself; regular users can skip this section.
+
+#### Prerequisites
+
+- [Node.js](https://nodejs.org/) (Latest LTS)
+- [Rust](https://www.rust-lang.org/) 1.77.2+
+- [Tauri CLI](https://v2.tauri.app/start/prerequisites/)
+
+#### Development
+
+```bash
+npm install
+npm run dev
+```
+
+#### Build for Production
+
+```bash
+npm run build
+```
+
+The built executable is `CyberClock.exe` and the NSIS installer lands in `src-tauri/target/release/bundle/nsis/`.
+
+### 🎨 Themes & Customization
+
+#### 10 Accent Tints
+One sober structural palette — deep navy surfaces, neutral text — with color
+entering only through the accent: glows, borders, highlights and a subtle
+ambient kiss on the panels. The interface never floods with color.
+
+- **Ice** *(default)* — pale ice over deep navy
+- **Cyan** — quiet tropical cyan
+- **Azure** — muted cornflower blue
+- **Mint** — soft spearmint green
+- **Sage** — gentle sage green
+- **Gold** — soft candlelight gold
+- **Amber** — warm sandy amber
+- **Coral** — muted coral
+- **Rose** — dusty pink
+- **Violet** — powdery lavender
+
+Tints are derived from a single seed color (normalized to a shared
+luminance/saturation band) by `src/shared/tint.js`, so every preset stays
+readable and no accent can wash out the interface. Settings saved with the
+old 5-skin themes migrate automatically to their heir tint.
+
+#### Display Options
+- Time format: 12H / 24H
+- Show/hide seconds
+- Mini mode: background opacity, content opacity
+- Welcome greeting: optional display name shown beside the brand in Full Mode
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Alt+Shift+C` (default, global) | Show / hide the clock in its current mode |
+| `Enter` or `Space` | Open the focused calendar day |
+| `Ctrl+Enter` (note editor) | Save the open day note |
+| `Space` (Relax view) | Play / pause the soundscape |
+| `Escape` | Close the settings panel, dialogs and editors |
+
+Change or disable the global hotkey in **Settings > General > Show / Hide Clock**. The mini clock has no fixed shortcuts; everything is available from its right-click menu and the tray menu. Full reference: [Keyboard Shortcuts](https://github.com/CyberGems/CyberClock/wiki/Keyboard-Shortcuts).
+
+---
+
+## ❤️ Donate
+
+**CyberClock** is 100% free and open source. If it helps you, please consider [donating](https://cybergems.org/donate) or [starring the repo on GitHub](https://github.com/CyberGems/CyberClock) to support continued development. [Read the full story](https://cybergems.org/about/) behind the project. Thank you! 🙏
+
+<p align="center">
+  <a href="https://www.paypal.com/donate/?hosted_button_id=M4PY3UPJA5Y6Q"><img src="https://img.shields.io/badge/Donate-PayPal-0070BA?style=for-the-badge&logo=paypal" alt="Donate via PayPal" /></a>
+</p>
+
+<p align="center">
+  <a href="https://ko-fi.com/cybergems"><img src="https://img.shields.io/badge/Support_me_on_Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support me on Ko-fi" /></a>
+</p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/cybergems"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" /></a>
+</p>
+
+<div align="center">
+
+<details>
+<summary><b>Crypto donations (BTC, ETH, USDT, LTC) — click to view addresses</b></summary>
+
+| Asset | Address | QR |
+|---|---|---|
+| **BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="src/assets/donate/qr-btc.png" width="90" height="90" alt="BTC QR" /> |
+| **ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="ETH QR" /> |
+| **USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="USDT QR" /> |
+| **USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="src/assets/donate/qr-usdt-tron.png" width="90" height="90" alt="USDT TRC20 QR" /> |
+| **LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="src/assets/donate/qr-ltc.png" width="90" height="90" alt="LTC QR" /> |
+
+> ⚠️ Send only the selected asset on the indicated network. Using the wrong network will result in permanent loss of funds.
+
+</details>
+
+</div>
+
+---
+
+## 📄 License
+
+CyberClock is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
+
+Copyright (C) 2026 CyberGems
+
+---
+
+## ❓ FAQ
+
+For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberClock/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cyberclock/FAQ).
+
+---
+
+<div align="center" style="background:#0D0F17; border:1px solid rgba(0,255,255,0.12); border-radius:12px; padding:28px 20px; margin-top:32px;">
+
+### Thanks for using CyberClock! 🎉
+
+Made by [**CyberGems**](https://cybergems.org)
+
+</div>
+<p align="center">
+  <a href="https://www.reddit.com/submit?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&title=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Reddit-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Share on Reddit" /></a>
+  &nbsp;<a href="https://twitter.com/intent/tweet?text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_X-1DA1F2?style=for-the-badge&logo=x&logoColor=white" alt="Share on X" /></a>
+  &nbsp;<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Share on Facebook" /></a>
+  &nbsp;<a href="mailto:?subject=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows&body=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows%20https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_by_Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Share by Email" /></a>
+  &nbsp;<a href="https://t.me/share/url?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F&text=CyberClock%3A%20free%20%26%20open-source%20desktop%20tool%20for%20Windows"><img src="https://img.shields.io/badge/Share_on_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Share on Telegram" /></a>
+  &nbsp;<a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcybergems.org%2Fapps%2Fcyberclock%2F"><img src="https://img.shields.io/badge/Share_on_LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="Share on LinkedIn" /></a>
+</p>
+
+---
+
+## 🔗 See also
+
+More free, open-source, privacy-first apps from [**CyberGems**](https://github.com/CyberGems):
+
+| App | Description |
+|:---:|---|
+| 📢&nbsp;[**CyberFeeds**](https://github.com/CyberGems/CyberFeeds#readme) | High-performance, local-first RSS and Atom reader built for speed, privacy and clean reading. |
+| 🚀&nbsp;[**CyberLauncher**](https://github.com/CyberGems/CyberLauncher#readme) | Windows application launcher with hot corners, scheduler, system monitor and integrated terminal. |
+| 💻&nbsp;[**CyberManager**](https://github.com/CyberGems/CyberManager#readme) | Lightweight, high-performance task manager, virtualized and NT-native, a powerful Task Manager alternative. |
+| 📝&nbsp;[**CyberNotes**](https://github.com/CyberGems/CyberNotes#readme) | Privacy-focused note-taking app with rich text, folders, tabs and bcrypt-protected local storage. |
+| ⚡&nbsp;[**CyberPaste**](https://github.com/CyberGems/CyberPaste#readme) | Privacy-first clipboard manager for text, code, images, HTML and files. |
+| 📸&nbsp;[**CyberSnap**](https://github.com/CyberGems/CyberSnap#readme) | Screen capture and annotation suite with vector tools, high-speed OCR, screen recording and color picker. |
+| ⭐&nbsp;[**CyberTray**](https://github.com/CyberGems/CyberTray#readme) | High-performance tray launcher with hotspots, system monitoring, process manager and PIN-protected file vault. |
+| 💫&nbsp;[**CyberViewer**](https://github.com/CyberGems/CyberViewer#readme) | Full-featured image viewer and editor engineered for casual and power users. |
+| 🛡️&nbsp;[**CyberWall**](https://github.com/CyberGems/CyberWall#readme) | User-friendly Windows firewall with real-time per-app rules powered by the WFP kernel engine. |
+
+➡️ **[Browse all apps at cybergems.org](https://cybergems.org)**
