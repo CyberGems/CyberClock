@@ -9682,7 +9682,9 @@
             e.preventDefault();
             e.stopPropagation();
             ttHide();
-            requestWindowClose();
+            // Alt+F4 is the close shortcut even when the X is configured to
+            // minimize, hide to the tray or switch to mini mode.
+            void quitFromMainWindow();
             return;
         }
 
@@ -9723,10 +9725,9 @@
             return;
         }
 
-        // 5. Ctrl+M or Alt+N -> Switch to Mini Mode
-        const isCtrlM = e.ctrlKey && !e.altKey && !e.shiftKey && (e.key === "m" || e.key === "M" || e.code === "KeyM");
-        const isAltN = e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "n" || e.key === "N" || e.code === "KeyN");
-        if (isCtrlM || isAltN) {
+        // 5. Alt+C -> Switch to Mini Mode
+        const isAltC = e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "c" || e.key === "C" || e.code === "KeyC");
+        if (isAltC) {
             const tag = (e.target && e.target.tagName) || "";
             if (tag === "INPUT" || tag === "TEXTAREA") return;
             e.preventDefault();
