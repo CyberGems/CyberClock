@@ -14,7 +14,7 @@ Estas son todas las conexiones que CyberClock hace por su cuenta. Ninguna envía
 | Al iniciar y cada 6 horas con la precisión del reloj activada | `pool.ntp.org`, `time.windows.com`, `time.google.com` (UDP/123) y, como respaldo, `www.cloudflare.com` o `www.google.com` (TCP/80) | Medir la desviación del reloj. La hora solo se cambia si está activada la sincronización automática | Comprobación periódica: `clockAccuracyEnabled`. La ráfaga inicial de hasta 10 comprobaciones no tiene ajuste específico |
 | Solo durante la instalación | `go.microsoft.com` | Descargar WebView2 si Windows no lo tiene | Sin ajuste; solo en el instalador |
 
-Los enlaces que abres tú no están en esta lista.
+Un enlace que pulsas dentro de la app o una página web que abres en tu navegador es una acción tuya, no una conexión que la app haga por su cuenta.
 
 ## Qué lee CyberClock de tu PC
 

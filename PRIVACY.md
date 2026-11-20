@@ -14,7 +14,7 @@ These are all the connections CyberClock makes by itself. None of them sends you
 | On startup and every 6 hours when clock accuracy is on | `pool.ntp.org`, `time.windows.com`, `time.google.com` (UDP/123), then `www.cloudflare.com` or `www.google.com` (TCP/80) | Measure clock drift. The clock is only changed when automatic time sync is enabled | Recurring check: `clockAccuracyEnabled`. The startup burst of up to 10 checks has no dedicated setting |
 | Only during installation | `go.microsoft.com` | Download the WebView2 runtime if Windows does not have it | No setting; installer only |
 
-Links you open yourself are not part of this list.
+A link you click inside the app, or a web page you open in your browser, is your own action and is not a connection the app makes by itself.
 
 ## What CyberClock reads on your PC
 
