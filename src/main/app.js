@@ -2357,6 +2357,7 @@
         if (aotEl) aotEl.checked = !!s.alwaysOnTop;
         const suEl = document.getElementById("s-startup");
         if (suEl) suEl.checked = s.startWithWindows !== false;
+        document.getElementById("s-update-notifications").checked = s.autoUpdate !== false;
         const tooltipsEl = document.getElementById("s-tooltips");
         if (tooltipsEl) tooltipsEl.checked = s.showTooltips !== false;
         const widgetHintsEl = document.getElementById("s-widget-hints");
@@ -8258,6 +8259,14 @@
                 startWithWindows: checked,
             });
         });
+    const updateNotifications = document.getElementById("s-update-notifications");
+    updateNotifications.addEventListener("change", (e) => {
+        window.cc.saveSettings({ autoUpdate: e.target.checked });
+    });
+    window.cc.isMsStore().then((isStore) => {
+        if (!isStore) document.getElementById("s-update-notifications-row").style.display = "";
+    }).catch(console.error);
+
     const sTooltips = document.getElementById("s-tooltips");
     if (sTooltips) {
         sTooltips.addEventListener("change", (e) => {
