@@ -1128,6 +1128,19 @@ fn close_window(window: WebviewWindow) {
 // that class still exist, producing:
 //   "Failed to unregister class Chrome_WidgetWin_0. Error = 1412"
 // (ERROR_CLASS_HAS_WINDOWS) in the terminal on exit.
+// The renderer also sees Alt+F4, but Windows can process the native close first.
+// Reading the physical key keeps both paths on the same explicit-quit gesture.
+#[cfg(target_os = "windows")]
+fn alt_is_down() -> bool {
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_MENU};
+    unsafe { GetAsyncKeyState(i32::from(VK_MENU)) < 0 }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn alt_is_down() -> bool {
+    false
+}
+
 fn exit_app(app: &AppHandle) {
     APP_EXITING.store(true, Ordering::SeqCst);
     for window in app.webview_windows().values() {
@@ -1798,7 +1811,13 @@ fn configure_main_window(main: &WebviewWindow) {
     main.on_window_event(move |event| match event {
         WindowEvent::CloseRequested { api, .. } if !APP_EXITING.load(Ordering::SeqCst) => {
             api.prevent_close();
-            let _ = win.emit("main:close-requested", ());
+            // Alt+F4 is the suite-wide quit gesture: it leaves even when the X is
+            // configured to hide to the tray, switch to Mini or ask.
+            if alt_is_down() {
+                exit_app(win.app_handle());
+            } else {
+                let _ = win.emit("main:close-requested", ());
+            }
         }
         WindowEvent::Resized(_) | WindowEvent::ScaleFactorChanged { .. } => {
             if win.is_minimized().unwrap_or(true) {
