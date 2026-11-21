@@ -59,13 +59,13 @@
                     <div class="ab-setting-row">
                         <div class="ab-setting-icon" data-ico="gear"></div>
                         <div class="ab-setting-text">
-                            <div class="ab-setting-title" data-i18n="about.autoUpdatesTitle">Check for updates on startup</div>
+                            <div class="ab-setting-title" id="ab-autoup-title" data-i18n="about.autoUpdatesTitle">Update notifications</div>
                             <div class="ab-setting-desc" id="ab-autoup-desc" data-i18n="about.autoUpdatesDesc">
-                                Automatically check for new versions when CyberClock starts.
+                                Checks for new versions at startup and notifies you when one is available.
                             </div>
                         </div>
                         <label class="ab-tog">
-                            <input type="checkbox" id="ab-autoup" />
+                            <input type="checkbox" id="ab-autoup" aria-labelledby="ab-autoup-title" aria-describedby="ab-autoup-desc" />
                             <div class="ab-tog-tr"><div class="ab-tog-th"></div></div>
                         </label>
                     </div>
