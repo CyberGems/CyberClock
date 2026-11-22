@@ -126,6 +126,7 @@
         const state = updateStatus.state;
         if (
             updateNoticeDismissed ||
+            (state === "available" && cfg.autoUpdate !== true) ||
             state === "idle" ||
             state === "checking" ||
             state === "not-available"
@@ -247,6 +248,7 @@
     function handleUpdateStatus(payload) {
         const next = payload || { state: "idle" };
         if (next.state === "available") {
+            if (cfg.autoUpdate === false) return;
             // Only reset the dismissed flag when a genuinely new version
             // is discovered. Re-checks that find the same version (e.g.
             // from the About window) must not resurface the popup.
@@ -2227,7 +2229,11 @@
     }
 
     function applySettings(s) {
+        const wasAutoUpdateEnabled = cfg.autoUpdate === true;
         cfg = s;
+        if (updateStatus.state === "available" && wasAutoUpdateEnabled !== (cfg.autoUpdate === true)) {
+            renderUpdateNotice();
+        }
         // Restore the expanded clock each time this window is created.
         if (!clockStageRestoredOnce) {
             clockStageRestoredOnce = true;

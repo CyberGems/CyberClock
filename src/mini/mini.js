@@ -262,7 +262,13 @@
         lastCollapse = s.miniCollapseDate;
         lastZoom = s.miniZoom;
 
+        const wasAutoUpdateEnabled = cfg.autoUpdate === true;
         cfg = s;
+        if (!wasAutoUpdateEnabled && cfg.autoUpdate === true) {
+            window.cc?.getPendingUpdate?.().then(setAvailableUpdate).catch(() => {});
+        } else if (wasAutoUpdateEnabled && cfg.autoUpdate !== true) {
+            clearAvailableUpdate();
+        }
         if (s.showWidgetHints === false && typeof hideActionTicker === "function") hideActionTicker();
         calNotes = s.calendarNotes || {};
         window.CCTint.apply(s.theme || "azure");
@@ -1109,28 +1115,17 @@
         } catch (_) {}
     }
 
-    function showUpdateTip() {
-        // Automatically surface the tip panel when an update is available,
-        // without waiting for a hover. The panel stays visible until the
-        // user picks "Ver y actualizar" or "Descartar".
-        if (!tipEl || !shellEl) return;
-        refreshTipContent();
-        positionTip();
-        isTipVisible = true;
-        tipEl.classList.add("show");
-        syncWindowSize();
+    function clearAvailableUpdate() {
+        if (!availableUpdateVersion) return;
+        availableUpdateVersion = null;
+        if (activeAlarmNotice) void openTip({ alarm: true });
+        else hideTipNow();
     }
 
     function setAvailableUpdate(ver) {
-        if (!ver || isUpdateSkipped(ver)) return;
+        if (cfg.autoUpdate !== true || !ver || isUpdateSkipped(ver)) return;
         availableUpdateVersion = ver;
-        showUpdateTip();
-    }
-
-    if (window.cc && window.cc.getPendingUpdate) {
-        window.cc.getPendingUpdate().then((ver) => {
-            if (ver) setAvailableUpdate(ver);
-        }).catch(() => {});
+        void openTip({ alarm: Boolean(activeAlarmNotice) });
     }
 
     if (window.cc && window.cc.onUpdateStatus) {
@@ -1138,8 +1133,7 @@
             if (payload && payload.state === "available" && payload.version) {
                 setAvailableUpdate(payload.version);
             } else if (payload && (payload.state === "idle" || payload.state === "not-found")) {
-                availableUpdateVersion = null;
-                refreshTipContent();
+                clearAvailableUpdate();
             }
         });
     }

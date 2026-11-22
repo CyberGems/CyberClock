@@ -284,7 +284,11 @@ async fn perform_background_check(app: &AppHandle) {
         }
     };
 
-    match updater.check().await {
+    let result = updater.check().await;
+    if !AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
+        return;
+    }
+    match result {
         Ok(Some(update)) => {
             let version = update.version.clone();
             {
