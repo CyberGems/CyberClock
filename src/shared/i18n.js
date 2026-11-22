@@ -760,6 +760,7 @@
             "updates.downloaded": "Update downloaded and ready to install.",
             "updates.portableHint": "Portable builds are updated from the release page.",
             "updates.errorTitle": "Update failed",
+            "updates.installError": "Could not start the installer. Try again.",
             "updates.networkError": "Could not connect to the update server. Check your internet connection.",
             "updates.retry": "Retry",
 
@@ -1810,6 +1811,7 @@
             "updates.downloaded": "Actualización descargada y lista para instalar.",
             "updates.portableHint": "Las versiones portables se actualizan desde la página del release.",
             "updates.errorTitle": "Error de actualización",
+            "updates.installError": "No se pudo iniciar el instalador. Inténtalo de nuevo.",
             "updates.networkError": "No se pudo conectar con el servidor de actualizaciones. Revisa tu conexión a internet.",
             "updates.retry": "Reintentar",
 

@@ -408,11 +408,18 @@ fn perform_install(app: &AppHandle) -> Result<(), String> {
         return Err("No downloaded update".into());
     };
 
-    let bytes = pending
-        .bytes
-        .ok_or_else(|| "Update has not been downloaded yet".to_string())?;
+    let result = match pending.bytes.as_deref() {
+        Some(bytes) => pending.update.install(bytes).map_err(|error| error.to_string()),
+        None => Err("Update has not been downloaded yet".into()),
+    };
+    if let Err(message) = result {
+        // Keep the verified download for a retry unless a newer check has replaced it.
+        let state = app.state::<UpdaterState>();
+        lock_or_recover(&state.pending).get_or_insert(pending);
+        error!("Updater: installation failed: {}", message);
+        return Err(message);
+    }
 
-    pending.update.install(&bytes).map_err(|e| e.to_string())?;
     app.request_restart();
     Ok(())
 }

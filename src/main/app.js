@@ -188,7 +188,9 @@
         summaryEl.textContent = isError
             ? errorMessage
             : isDownloaded
-                ? updateText("updates.downloaded", "Update downloaded and ready to install.")
+                ? updateStatus.message
+                    ? updateText("updates.installError", "Could not start the installer. Try again.")
+                    : updateText("updates.downloaded", "Update downloaded and ready to install.")
                 : isDownloading
                     ? updateText("updates.downloading", "Downloading update ({pct}%)…", {
                         pct: Math.round(updateStatus.percent ?? 0),
@@ -285,6 +287,7 @@
     async function handleUpdateNoticeAction() {
         const actionBtn = document.getElementById("update-notice-action");
         if (actionBtn) actionBtn.disabled = true;
+        const installing = updateStatus.state === "downloaded";
         try {
             // Retry from error: re-check then download if an update is found.
             if (updateStatus.state === "error") {
@@ -295,7 +298,7 @@
                 }
                 return;
             }
-            if (updateStatus.state === "downloaded") {
+            if (installing) {
                 await window.cc.installUpdate();
                 return;
             }
@@ -309,7 +312,7 @@
             // Preserve version so a subsequent re-check for the same
             // version does not resurface the popup (issue #2 fix).
             updateStatus = {
-                state: "error",
+                state: installing ? "downloaded" : "error",
                 version: updateStatus.version,
                 message: String(error?.message || error),
             };

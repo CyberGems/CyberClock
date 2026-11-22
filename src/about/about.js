@@ -220,13 +220,12 @@
                 }
             }
         } else if (s.state === "downloaded") {
-            desc.classList.add("is-available");
+            desc.classList.add(s.message ? "is-error" : "is-available");
             btn.textContent = T("about.checkUpdates", "Check Now");
             setTip(T("about.checkLatest", "Check for the latest version"));
-            desc.textContent = "✓ " + T(
-                "about.statuses.downloaded",
-                "Update ready: click Install & Restart.",
-            );
+            desc.textContent = s.message
+                ? T("updates.installError", "Could not start the installer. Try again.")
+                : "✓ " + T("about.statuses.downloaded", "Update ready: click Install & Restart.");
             if (updatePanel) {
                 updatePanel.hidden = false;
                 if (downloadBtn) {
@@ -298,11 +297,15 @@
             downloadBtn._hasListener = true;
             downloadBtn.addEventListener("click", async () => {
                 if (updateStatus.state === "downloaded") {
+                    const downloaded = updateStatus;
+                    downloadBtn.disabled = true;
                     try {
                         await window.cc.installUpdate();
                     } catch (e) {
-                        updateStatus = { state: "error", message: String(e?.message || e) };
-                        renderUpdateState();
+                        if (updateStatus === downloaded) {
+                            updateStatus = { ...downloaded, message: String(e?.message || e) };
+                            renderUpdateState();
+                        }
                     }
                     return;
                 }
