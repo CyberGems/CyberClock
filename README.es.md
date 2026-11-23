@@ -387,6 +387,8 @@ Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocu
 
 CyberClock se distribuye bajo los términos de la Licencia Pública General GNU v3.0. Consulta [LICENSE](LICENSE) para el texto completo de la licencia.
 
+Este proyecto usa asistentes de programación con IA. Consulta la [declaración de uso de IA](AI-DISCLOSURE.es.md).
+
 Copyright (C) 2026 CyberGems
 
 ---
