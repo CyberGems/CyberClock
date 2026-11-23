@@ -3447,7 +3447,7 @@
         color: var(--text-hi);
         background:
             linear-gradient(145deg, rgba(var(--rgb-accent), 0.12), transparent 46%),
-            linear-gradient(180deg, rgba(17, 21, 28, 0.98), rgba(7, 10, 15, 0.98));
+            linear-gradient(180deg, var(--bg-02), var(--bg-00));
         border: 1px solid var(--border-bright);
         border-radius: 12px;
         box-shadow:
@@ -3591,24 +3591,42 @@
     .update-notice-progress {
         margin-top: 12px;
     }
-    .update-notice-progress-label {
+    .update-notice-progress-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
         margin-bottom: 6px;
         color: var(--text-md);
         font-family: var(--font-mono);
         font-size: calc(10px * var(--ui-scale));
     }
     .update-notice-progress-bar {
-        height: 5px;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.08);
+        width: 100%;
+        height: 6px;
+        display: block;
+        appearance: none;
+    }
+    .update-notice-progress-bar::-webkit-progress-bar {
+        background: var(--bg-04);
         border-radius: 999px;
     }
-    .update-notice-progress-fill {
-        width: 0%;
-        height: 100%;
+    .update-notice-progress-bar::-webkit-progress-value {
         background: var(--accent-a);
-        box-shadow: 0 0 9px rgba(var(--rgb-accent), 0.7);
+        border-radius: 999px;
         transition: width 0.2s ease;
+    }
+    .update-notice-feedback {
+        margin: 8px 0 0;
+        color: var(--hand-sec);
+        font-size: calc(11px * var(--ui-scale));
+        line-height: 1.4;
+    }
+    .update-notice:focus-visible {
+        outline: 2px solid var(--accent-a);
+        outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .update-notice, .update-notice-progress-bar::-webkit-progress-value { transition: none; }
     }
     .update-notice-actions {
         justify-content: flex-end;

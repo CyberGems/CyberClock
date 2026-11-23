@@ -86,257 +86,189 @@
     // ══════════════════════════════════════════════════════════════
     // UPDATE NOTIFICATION
     // ══════════════════════════════════════════════════════════════
-    const UPDATE_SKIP_KEY = "cyberclock_skipped_update_version";
-    let updateStatus = { state: "idle" };
-    let updateDetails = { version: "", bullets: [], url: "" };
-    let updateDetailsToken = 0;
-    let updateNoticeDismissed = false;
-    let updateNoticeShownVersion = "";
-    let updatePortable = false;
-    let updateCurrentVersion = ""; // installed version, populated by getAppVersion()
-
-    function updateText(key, fallback, vars = {}) {
-        let value = window.ccI18n ? window.ccI18n.t(key) : fallback;
-        if (!value || value === key) value = fallback;
-        Object.entries(vars).forEach(([name, replacement]) => {
-            value = value.replace(`{${name}}`, String(replacement ?? ""));
-        });
-        return value;
-    }
-
-    function updateReleaseUrl() {
-        return updateStatus.releaseUrl ||
-            updateDetails.url ||
-            (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version));
-    }
-
-    function hideUpdateNotice() {
-        const notice = document.getElementById("update-notice");
-        if (!notice) return;
-        notice.classList.remove("open");
-        window.setTimeout(() => {
-            if (!notice.classList.contains("open")) notice.hidden = true;
-        }, 260);
-    }
+    const updateElement = (name) => document.getElementById("update-notice" + (name ? "-" + name : ""));
+    const updateText = (key) => window.ccI18n.t("updates." + key);
+    let updateStatus = null;
+    let updateDetails = null;
+    let updateActionError = "";
+    let renderedNotes = null;
+    let renderedNotesLanguage = "";
+    let hidingUpdateTimer = null;
 
     function renderUpdateNotice() {
-        const notice = document.getElementById("update-notice");
-        if (!notice) return;
-
-        const state = updateStatus.state;
-        if (
-            updateNoticeDismissed ||
-            (state === "available" && cfg.autoUpdate !== true) ||
-            state === "idle" ||
-            state === "checking" ||
-            state === "not-available"
-        ) {
-            hideUpdateNotice();
+        const notice = updateElement();
+        const status = updateStatus;
+        const skipped = status && window.ccUpdates.isSkipped(status.version, cfg.skippedUpdateVersion);
+        if (!status || status.dismissed ||
+            (status.state === "available" && !status.manual && (cfg.autoUpdate !== true || skipped))) {
+            notice.classList.remove("open");
+            notice.inert = true;
+            clearTimeout(hidingUpdateTimer);
+            hidingUpdateTimer = setTimeout(() => { notice.hidden = true; }, 250);
             return;
         }
 
-        const versionEl = document.getElementById("update-notice-version");
-        const summaryEl = document.getElementById("update-notice-summary");
-        const listEl = document.getElementById("update-notice-changelog-list");
-        const emptyEl = document.getElementById("update-notice-empty");
-        const progressEl = document.getElementById("update-notice-progress");
-        const progressLabel = document.getElementById("update-notice-progress-label");
-        const progressFill = document.getElementById("update-notice-progress-fill");
-        const actionBtn = document.getElementById("update-notice-action");
-        const skipBtn = document.getElementById("update-notice-skip");
-        const releaseBtn = document.getElementById("update-notice-release");
-        if (!versionEl || !summaryEl || !listEl || !emptyEl || !progressEl || !actionBtn) return;
+        const { state, version, cancelling, isPortable } = status;
+        const available = state === "available";
+        const downloading = state === "downloading";
+        const installing = state === "installing";
+        const lang = window.ccI18n.getEffectiveLang();
+        const notes = updateDetails?.notes || status.releaseNotes || "";
 
-        const version = updateStatus.version || updateDetails.version || "";
-        const isDownloaded = state === "downloaded";
-        const isDownloading = state === "downloading";
-        const isError = state === "error";
-        const titleEl = document.getElementById("update-notice-title");
-        versionEl.textContent = version ? `v${version}` : "";
-        if (titleEl) {
-            titleEl.textContent = isError
-                ? updateText("updates.errorTitle", "Update failed")
-                : isDownloaded
-                    ? updateText("updates.readyTitle", "Update ready to install")
-                    : isDownloading
-                        ? updateText("updates.downloadingTitle", "Downloading CyberClock")
-                        : updateText("updates.availableTitle", "A new version is ready");
-        }
-        listEl.replaceChildren();
-        if (!isError) {
-            for (const bullet of updateDetails.bullets || []) {
+        updateElement("title").textContent = updateText({
+            available: "availableTitle",
+            downloading: cancelling ? "cancelling" : "downloadingTitle",
+            downloaded: "readyTitle",
+            installing: "installing",
+        }[state]);
+        updateElement("version").textContent = "v" + version;
+
+        const list = updateElement("changelog-list");
+        if (renderedNotes !== notes || renderedNotesLanguage !== lang) {
+            renderedNotes = notes;
+            renderedNotesLanguage = lang;
+            list.replaceChildren(...window.ccUpdates.parseChangelogPeek(notes).map((bullet) => {
                 const item = document.createElement("li");
                 item.textContent = bullet;
-                listEl.appendChild(item);
+                return item;
+            }));
+        }
+        const empty = updateElement("empty");
+        empty.hidden = list.children.length > 0;
+        empty.textContent = updateText(updateDetails?.loading ? "notesLoading" : "notesUnavailable");
+
+        updateElement("progress").hidden = !downloading;
+        if (downloading) {
+            const { transferred = 0, total } = status;
+            const bar = updateElement("progress-fill");
+            const format = new Intl.NumberFormat(lang, {
+                style: "unit", unit: "megabyte", maximumFractionDigits: 1,
+            });
+            const size = (bytes) => format.format(bytes / 1_000_000);
+            if (total > 0) {
+                bar.value = Math.min(100, transferred / total * 100);
+                updateElement("progress-size").textContent = size(transferred) + " / " + size(total);
+            } else {
+                bar.removeAttribute("value");
+                updateElement("progress-size").textContent = size(transferred);
             }
         }
-        emptyEl.hidden = isError || listEl.children.length > 0;
 
-        const isAvailable = state === "available";
-        let errorMessage = updateStatus.message || "";
-        const isTechnicalOrUrl =
-            errorMessage.includes("error sending request") ||
-            errorMessage.includes("http") ||
-            errorMessage.includes("tcp") ||
-            errorMessage.includes("connection");
-        if (!errorMessage || isTechnicalOrUrl) {
-            errorMessage = updateText(
-                "updates.networkError",
-                "Could not connect to the update server. Check your internet connection."
-            );
-        }
-        summaryEl.textContent = isError
-            ? errorMessage
-            : isDownloaded
-                ? updateStatus.message
-                    ? updateText("updates.installError", "Could not start the installer. Try again.")
-                    : updateText("updates.downloaded", "Update downloaded and ready to install.")
-                : isDownloading
-                    ? updateText("updates.downloading", "Downloading update ({pct}%)…", {
-                        pct: Math.round(updateStatus.percent ?? 0),
-                    })
-                    : updatePortable
-                        ? updateText("updates.portableHint", "Portable builds are updated from the release page.")
-                        : updateCurrentVersion
-                            ? updateText("updates.availableSummaryFrom", "Update from {current} to {version} is available.", {
-                                current: updateCurrentVersion.startsWith("v") ? updateCurrentVersion : "v" + updateCurrentVersion,
-                                version: version ? (version.startsWith("v") ? version : "v" + version) : "",
-                            })
-                            : updateText("updates.availableSummary", "CyberClock {version} is available with fresh improvements.", {
-                                version: version ? (version.startsWith("v") ? version : "v" + version) : "",
-                            });
+        const error = updateActionError || (status.failed ? (available ? "downloadError" : "installError") : "");
+        const feedback = updateElement("feedback");
+        feedback.hidden = !error;
+        feedback.textContent = error ? updateText(error) : "";
+        const hint = updateElement("summary");
+        hint.hidden = !isPortable;
+        updateElement("release").hidden = !available;
+        updateElement("skip").hidden = !available;
+        const later = updateElement("later");
+        const close = updateElement("close");
+        const cancel = updateElement("cancel");
+        const action = updateElement("action");
+        const laterLabel = updateText(downloading ? "background" : "later");
+        later.textContent = laterLabel;
+        later.disabled = installing;
+        close.setAttribute("aria-label", laterLabel);
+        close.disabled = installing;
+        cancel.hidden = !downloading;
+        cancel.disabled = cancelling;
+        action.hidden = downloading;
+        action.disabled = installing;
+        action.textContent = updateText(available ? (isPortable ? "downloadPortable" : "download") : "install");
 
-        progressEl.hidden = !isDownloading;
-        if (isDownloading) {
-            const pct = Math.max(0, Math.min(100, Math.round(updateStatus.percent ?? 0)));
-            progressLabel.textContent = updateText("updates.downloading", "Downloading update ({pct}%)…", { pct });
-            progressFill.style.width = `${pct}%`;
-        }
-
-        actionBtn.textContent = isError
-            ? updateText("updates.retry", "Retry")
-            : isDownloaded
-                ? updateText("updates.install", "Install & restart")
-                : updatePortable
-                    ? updateText("updates.downloadPortable", "Open download page")
-                    : updateText("updates.download", "Download update");
-        actionBtn.disabled = isDownloading;
-        skipBtn.hidden = isError || !isAvailable;
-        releaseBtn.hidden = !version;
-
-        updateNoticeShownVersion = version;
+        clearTimeout(hidingUpdateTimer);
         notice.hidden = false;
-        requestAnimationFrame(() => notice.classList.add("open"));
+        notice.inert = false;
+        requestAnimationFrame(() => {
+            if (!notice.hidden && !notice.inert) notice.classList.add("open");
+        });
     }
 
-    async function loadUpdateDetails(payload) {
-        const version = payload.version || "";
-        const token = ++updateDetailsToken;
-        updateDetails = {
-            version,
-            bullets: window.ccUpdates
-                ? window.ccUpdates.parseChangelogPeek(payload.releaseNotes)
-                : [],
-            url: payload.releaseUrl || "",
-        };
-        renderUpdateNotice();
-        if (!window.ccUpdates || !version) return;
-        const details = await window.ccUpdates.fetchReleaseDetails(version, payload.releaseNotes || "");
-        if (token !== updateDetailsToken || updateStatus.version !== version) return;
-        updateDetails = { version, ...details };
-        renderUpdateNotice();
-    }
+    function handleUpdateStatus(status) {
+        const previous = updateStatus;
+        updateStatus = status;
+        if (status?.state !== previous?.state || status?.version !== previous?.version) updateActionError = "";
 
-    function handleUpdateStatus(payload) {
-        const next = payload || { state: "idle" };
-        if (next.state === "available") {
-            if (cfg.autoUpdate === false) return;
-            // Only reset the dismissed flag when a genuinely new version
-            // is discovered. Re-checks that find the same version (e.g.
-            // from the About window) must not resurface the popup.
-            if (next.version && next.version !== updateNoticeShownVersion) {
-                updateNoticeDismissed = false;
+        if (status?.version !== previous?.version) {
+            const notes = status?.releaseNotes || "";
+            const loading = Boolean(status && !/<details\b|<!--\s*lang:es\s*-->/i.test(notes));
+            const details = { notes, loading };
+            updateDetails = details;
+            if (loading) {
+                window.ccUpdates.fetchReleaseNotes(status.version, notes).then((body) => {
+                    if (updateDetails !== details) return;
+                    updateDetails = { notes: body, loading: false };
+                    renderUpdateNotice();
+                });
             }
-            updateStatus = next;
-            const skipped = !next.version || localStorage.getItem(UPDATE_SKIP_KEY) === next.version;
-            if (skipped) {
-                updateNoticeDismissed = true;
-                hideUpdateNotice();
-                return;
-            }
-            loadUpdateDetails(next);
-            return;
         }
 
-        updateStatus = next;
-        if (next.state === "downloading" || next.state === "downloaded") {
-            updateNoticeDismissed = false;
-            renderUpdateNotice();
-        } else if (next.state === "error") {
-            // Only render an error if the notice is ALREADY open (e.g. active download failed).
-            // Background checks must never pop up an error modal unprompted.
-            const notice = document.getElementById("update-notice");
-            if (notice && notice.classList.contains("open")) {
-                renderUpdateNotice();
-            }
-        } else if (next.state !== "checking") {
-            renderUpdateNotice();
-        }
+        renderUpdateNotice();
+        const notice = updateElement();
+        if (status?.manual && (!previous?.manual || previous.dismissed) && !notice.inert) notice.focus();
     }
 
-    async function handleUpdateNoticeAction() {
-        const actionBtn = document.getElementById("update-notice-action");
-        if (actionBtn) actionBtn.disabled = true;
-        const installing = updateStatus.state === "downloaded";
+    async function runUpdateAction(action, errorKey) {
+        if (!updateStatus) return;
+        const { version, state } = updateStatus;
+        updateActionError = "";
+        renderUpdateNotice();
         try {
-            // Retry from error: re-check then download if an update is found.
-            if (updateStatus.state === "error") {
-                const res = await window.cc.checkForUpdates();
-                if (res?.ok && res.version) {
-                    updateStatus = { state: "available", version: res.version };
-                    await window.cc.downloadUpdate();
-                }
-                return;
-            }
-            if (installing) {
-                await window.cc.installUpdate();
-                return;
-            }
-            if (updatePortable) {
-                await window.cc.openExternalUrl(updateReleaseUrl());
-                return;
-            }
-            await window.cc.downloadUpdate();
+            await action();
         } catch (error) {
             console.error("Update action failed:", error);
-            // Preserve version so a subsequent re-check for the same
-            // version does not resurface the popup (issue #2 fix).
-            updateStatus = {
-                state: installing ? "downloaded" : "error",
-                version: updateStatus.version,
-                message: String(error?.message || error),
-            };
-            updateNoticeDismissed = false;
-            renderUpdateNotice();
-        } finally {
-            if (actionBtn && updateStatus.state !== "downloading") actionBtn.disabled = false;
+            if (updateStatus?.version === version && updateStatus.state === state) {
+                updateActionError = errorKey;
+                renderUpdateNotice();
+            }
+        }
+    }
+
+    function dismissUpdateNotice() {
+        const status = updateStatus;
+        if (!status || status.state === "installing") return;
+        return window.cc.dismissUpdateNotice(status.version, status.state);
+    }
+
+    async function clearSkippedUpdate(version) {
+        window.ccUpdates.clearLegacySkip(version);
+        if (window.ccUpdates.sameVersion(version, cfg.skippedUpdateVersion)) {
+            await window.cc.saveSettings({ skippedUpdateVersion: null });
+        }
+    }
+
+    async function openUpdateLink(url) {
+        if (!await window.cc.openExternalUrl(url)) throw new Error("Could not open the update link");
+    }
+
+    function handleUpdateNoticeAction() {
+        if (!updateStatus) return;
+        const { version, state, isPortable } = updateStatus;
+        if (state === "downloaded") {
+            void runUpdateAction(() => window.cc.installUpdate(version), "installError");
+        } else if (state === "available" && isPortable) {
+            void runUpdateAction(() => openUpdateLink(window.ccUpdates.portableUrl(version)), "linkError");
+        } else if (state === "available") {
+            void runUpdateAction(async () => {
+                await clearSkippedUpdate(version);
+                await window.cc.downloadUpdate(version);
+            }, "downloadError");
         }
     }
 
     function skipCurrentUpdate() {
-        if (updateStatus.version) {
-            localStorage.setItem(UPDATE_SKIP_KEY, updateStatus.version);
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ skippedUpdateVersion: updateStatus.version }).catch(console.error);
-            }
-        }
-        updateNoticeDismissed = true;
-        hideUpdateNotice();
+        if (updateStatus?.state !== "available") return;
+        const version = updateStatus.version;
+        void runUpdateAction(async () => {
+            await window.cc.saveSettings({ skippedUpdateVersion: version });
+            await window.cc.dismissUpdateNotice(version, "available");
+        }, "skipError");
     }
 
     function openCurrentRelease() {
-        const url = updateReleaseUrl();
-        if (url && window.cc && window.cc.openExternalUrl) window.cc.openExternalUrl(url);
+        if (!updateStatus) return;
+        void runUpdateAction(() => openUpdateLink(window.ccUpdates.releaseUrl(updateStatus.version)), "linkError");
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -2232,11 +2164,8 @@
     }
 
     function applySettings(s) {
-        const wasAutoUpdateEnabled = cfg.autoUpdate === true;
         cfg = s;
-        if (updateStatus.state === "available" && wasAutoUpdateEnabled !== (cfg.autoUpdate === true)) {
-            renderUpdateNotice();
-        }
+        renderUpdateNotice();
         // Restore the expanded clock each time this window is created.
         if (!clockStageRestoredOnce) {
             clockStageRestoredOnce = true;
@@ -8343,7 +8272,6 @@
 
     window.cc.getAppVersion().then((v) => {
         appVersion = v;
-        updateCurrentVersion = v; // feed into update notice summary
 
         renderBrandVersion();
     });
@@ -10306,27 +10234,25 @@
     // ══════════════════════════════════════════════════════════════
     // IPC
     // ══════════════════════════════════════════════════════════════
-    const updateActionBtn = document.getElementById("update-notice-action");
-    if (updateActionBtn) updateActionBtn.addEventListener("click", handleUpdateNoticeAction);
-    const updateSkipBtn = document.getElementById("update-notice-skip");
-    if (updateSkipBtn) updateSkipBtn.addEventListener("click", skipCurrentUpdate);
-    const updateReleaseBtn = document.getElementById("update-notice-release");
-    if (updateReleaseBtn) updateReleaseBtn.addEventListener("click", openCurrentRelease);
-    const updateCloseBtn = document.getElementById("update-notice-close");
-    if (updateCloseBtn) {
-        updateCloseBtn.addEventListener("click", () => {
-            updateNoticeDismissed = true;
-            hideUpdateNotice();
+    updateElement("action").addEventListener("click", handleUpdateNoticeAction);
+    updateElement("skip").addEventListener("click", skipCurrentUpdate);
+    updateElement("release").addEventListener("click", openCurrentRelease);
+    for (const control of ["close", "later"]) {
+        updateElement(control).addEventListener("click", () => {
+            void runUpdateAction(dismissUpdateNotice, "dismissError");
         });
     }
-    if (window.cc && window.cc.isPortable) {
-        window.cc.isPortable().then((value) => {
-            updatePortable = !!value;
-            if (updateStatus.state === "available" || updateStatus.state === "downloaded") {
-                renderUpdateNotice();
-            }
-        }).catch(() => {});
-    }
+    updateElement("cancel").addEventListener("click", () => {
+        if (updateStatus?.state === "downloading") {
+            void runUpdateAction(() => window.cc.cancelUpdateDownload(updateStatus.version), "cancelError");
+        }
+    });
+    updateElement().addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (updateStatus) void runUpdateAction(dismissUpdateNotice, "dismissError");
+    });
     if (window.cc && window.cc.onUpdateStatus) {
         let receivedStatus = false;
         window.cc.onUpdateStatus(payload => {

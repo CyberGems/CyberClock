@@ -1,107 +1,131 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
-use std::time::Duration;
-
-use serde::Serialize;
-use tauri::{AppHandle, Emitter, Manager};
-#[cfg(not(feature = "msstore"))]
-use tauri_plugin_updater::UpdaterExt;
-#[cfg(all(not(feature = "msstore"), not(debug_assertions)))]
-use tokio::time::sleep;
-use tokio::time::timeout;
+use std::time::{Duration, Instant};
 
 use log::{error, info};
+use serde::{Deserialize, Serialize};
+use tauri::async_runtime::Mutex as AsyncMutex;
+use tauri::{AppHandle, Emitter, Manager};
+use tauri_plugin_updater::Update;
+#[cfg(not(feature = "msstore"))]
+use tauri_plugin_updater::UpdaterExt;
+use tokio::task::AbortHandle;
+use tokio::time::timeout;
 
+#[derive(Default)]
 pub struct UpdaterState {
     pending: Mutex<Option<PendingUpdate>>,
-    status: Mutex<Option<UpdateStatusPayload>>,
+    check: AsyncMutex<()>,
 }
 
 struct PendingUpdate {
-    update: tauri_plugin_updater::Update,
+    update: Update,
+    status: UpdateStatusPayload,
+    abort: Option<AbortHandle>,
     bytes: Option<Vec<u8>>,
 }
 
-impl Default for UpdaterState {
-    fn default() -> Self {
-        Self {
-            pending: Mutex::new(None),
-            status: Mutex::new(None),
-        }
-    }
+#[derive(Clone, Copy, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Phase {
+    Available,
+    Downloading,
+    Downloaded,
+    Installing,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateStatusPayload {
+    state: Phase,
+    version: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    release_notes: Option<String>,
+    is_portable: bool,
+    transferred: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    total: Option<u64>,
+    cancelling: bool,
+    failed: bool,
+    manual: bool,
+    dismissed: bool,
 }
 
 static AUTO_UPDATE_ENABLED: AtomicBool = AtomicBool::new(true);
 
-/// Version of the pending update, if any has been found. Read by
-/// the tray menu state so it can show the real "update available"
-/// badge instead of a hardcoded value.
-static PENDING_VERSION: Mutex<Option<String>> = Mutex::new(None);
-
-#[derive(Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct UpdateStatusPayload {
-    state: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    version: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    percent: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    message: Option<String>,
+fn lock_or_recover<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-fn emit_status(app: &AppHandle, payload: UpdateStatusPayload) {
-    *lock_or_recover(&app.state::<UpdaterState>().status) = Some(payload.clone());
-    let _ = app.emit("update:status", payload);
+fn emit_status(app: &AppHandle, status: Option<&UpdateStatusPayload>) {
+    let _ = app.emit("update:status", status);
 }
 
 #[tauri::command]
 pub fn get_update_status(app: AppHandle) -> Option<UpdateStatusPayload> {
-    lock_or_recover(&app.state::<UpdaterState>().status).clone()
+    let state = app.state::<UpdaterState>();
+    let pending = lock_or_recover(&state.pending);
+    pending.as_ref().map(|p| p.status.clone())
 }
 
-/// Lock a mutex without panicking on poison: if another thread
-/// panicked while holding it, we recover the inner value and keep
-/// working instead of killing this thread too.
-fn lock_or_recover<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    m.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+pub fn pending_update_version(app: &AppHandle) -> Option<String> {
+    let state = app.state::<UpdaterState>();
+    let pending = lock_or_recover(&state.pending);
+    pending.as_ref().map(|p| p.status.version.clone())
+}
+
+pub fn reveal_update_notice(app: &AppHandle) -> bool {
+    let state = app.state::<UpdaterState>();
+    let mut pending = lock_or_recover(&state.pending);
+    let Some(pending) = pending.as_mut() else {
+        return false;
+    };
+    pending.status.manual = true;
+    pending.status.dismissed = false;
+    emit_status(app, Some(&pending.status));
+    true
+}
+
+#[tauri::command]
+pub fn dismiss_update_notice(app: AppHandle, version: String, phase: Phase) {
+    let state = app.state::<UpdaterState>();
+    let mut pending = lock_or_recover(&state.pending);
+    if let Some(pending) = pending.as_mut().filter(|p| {
+        p.status.version == version && p.status.state == phase && phase != Phase::Installing
+    }) {
+        pending.status.dismissed = true;
+        emit_status(&app, Some(&pending.status));
+    }
 }
 
 pub fn set_auto_update(enabled: bool) {
     AUTO_UPDATE_ENABLED.store(enabled, Ordering::SeqCst);
 }
 
-pub fn pending_update_version() -> Option<String> {
-    lock_or_recover(&PENDING_VERSION).clone()
-}
-
 pub fn init_updater(app: &AppHandle, auto_update: bool) {
     #[cfg(feature = "msstore")]
     {
-        // Microsoft Store build: updates are distributed by the Store,
-        // so no self-update checks are ever scheduled (Store policy).
         let _ = (app, auto_update);
         info!("Updater: disabled (Microsoft Store build)");
-        return;
     }
 
-    #[cfg(not(feature = "msstore"))]
+    #[cfg(all(not(feature = "msstore"), debug_assertions))]
+    {
+        let _ = (app, auto_update);
+        info!("Updater: background auto-check disabled in debug mode");
+    }
+
+    #[cfg(all(not(feature = "msstore"), not(debug_assertions)))]
     {
         set_auto_update(auto_update);
-
-        #[cfg(debug_assertions)]
-        {
-            let _ = (app, auto_update);
-            info!("Updater: background auto-check disabled in debug mode");
-        }
-
-        #[cfg(not(debug_assertions))]
         if auto_update {
             let app = app.clone();
             tauri::async_runtime::spawn(async move {
-                sleep(Duration::from_secs(8)).await;
+                tokio::time::sleep(Duration::from_secs(8)).await;
                 if AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
-                    perform_background_check(&app).await;
+                    if let Err(error) = timed_check(&app, true).await {
+                        info!("Updater: background check skipped/failed: {error}");
+                    }
                 }
             });
         }
@@ -120,303 +144,240 @@ pub fn is_portable() -> bool {
 
 #[tauri::command]
 pub fn is_msstore() -> bool {
-    // Compile-time flag: true only in Microsoft Store builds. The About
-    // window uses it to hide the self-update UI (the Store distributes
-    // updates in that channel).
     cfg!(feature = "msstore")
 }
 
-#[tauri::command]
-pub async fn check_for_updates(app: AppHandle) -> Result<serde_json::Value, String> {
-    let app_clone = app.clone();
-    match timeout(Duration::from_secs(20), perform_check(&app_clone)).await {
-        Ok(result) => result,
-        Err(_) => {
-            emit_status(
-                &app,
-                UpdateStatusPayload {
-                    state: "error".into(),
-                    version: None,
-                    percent: None,
-                    message: Some("Update check timed out".into()),
-                },
-            );
-            Err("Update check timed out".into())
-        }
-    }
+#[derive(Serialize)]
+pub struct CheckResult {
+    available: bool,
 }
 
 #[tauri::command]
-pub async fn download_update(app: AppHandle) -> Result<serde_json::Value, String> {
-    if cfg!(feature = "msstore") {
-        // Store build: updates come from the Store, never from GitHub.
-        return Err("Updates are handled by the Microsoft Store.".into());
-    }
-    if crate::settings::is_portable() {
-        // A portable executable cannot be replaced safely while it is
-        // running. The UI sends the user to the release page instead.
-        return Ok(serde_json::json!({ "ok": true, "isPortable": true }));
-    }
-    perform_download(&app)
+pub async fn check_for_updates(app: AppHandle) -> Result<CheckResult, String> {
+    timed_check(&app, false).await.inspect_err(|message| {
+        error!("Updater: check failed: {message}");
+    })
+}
+
+async fn timed_check(app: &AppHandle, background: bool) -> Result<CheckResult, String> {
+    timeout(Duration::from_secs(20), perform_check(app, background))
         .await
-        .map(|_| serde_json::json!({ "ok": true }))
-}
-
-#[tauri::command]
-pub async fn install_update(app: AppHandle) -> Result<serde_json::Value, String> {
-    if cfg!(feature = "msstore") {
-        return Err("Updates are handled by the Microsoft Store.".into());
-    }
-    if crate::settings::is_portable() {
-        return Ok(serde_json::json!({ "ok": true, "isPortable": true }));
-    }
-    perform_install(&app).map(|_| serde_json::json!({ "ok": true }))
+        .map_err(|_| "Update check timed out".to_string())?
 }
 
 #[cfg(feature = "msstore")]
-async fn perform_check(_app: &AppHandle) -> Result<serde_json::Value, String> {
-    // Microsoft Store build: never contact the GitHub endpoint; updates
-    // are distributed through the Store itself (Store policy).
+async fn perform_check(_app: &AppHandle, _background: bool) -> Result<CheckResult, String> {
     Err("Updates are handled by the Microsoft Store.".into())
 }
 
 #[cfg(not(feature = "msstore"))]
-async fn perform_check(app: &AppHandle) -> Result<serde_json::Value, String> {
-    emit_status(
-        app,
-        UpdateStatusPayload {
-            state: "checking".into(),
-            version: None,
-            percent: None,
-            message: None,
-        },
-    );
-
-    let updater = match app.updater() {
-        Ok(u) => u,
-        Err(e) => {
-            let msg = e.to_string();
-            error!("Updater: {}", msg);
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "error".into(),
-                    version: None,
-                    percent: None,
-                    message: Some(msg.clone()),
-                },
-            );
-            return Err(msg);
-        }
-    };
-
-    match updater.check().await {
-        Ok(Some(update)) => {
-            let version = update.version.clone();
-            {
-                let state = app.state::<UpdaterState>();
-                *lock_or_recover(&state.pending) = Some(PendingUpdate {
-                    update,
-                    bytes: None,
-                });
-            }
-            *lock_or_recover(&PENDING_VERSION) = Some(version.clone());
-
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "available".into(),
-                    version: Some(version.clone()),
-                    percent: None,
-                    message: None,
-                },
-            );
-
-            info!("Updater: update available -> v{}", version);
-            Ok(serde_json::json!({
-                "ok": true,
-                "version": version,
-                "isPortable": crate::settings::is_portable()
-            }))
-        }
-        Ok(None) => {
-            let version = app.package_info().version.to_string();
-            *lock_or_recover(&PENDING_VERSION) = None;
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "not-available".into(),
-                    version: Some(version.clone()),
-                    percent: None,
-                    message: None,
-                },
-            );
-            Ok(serde_json::json!({
-                "ok": true,
-                "version": version,
-                "isPortable": crate::settings::is_portable()
-            }))
-        }
-        Err(e) => {
-            let msg = e.to_string();
-            error!("Updater: check failed: {}", msg);
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "error".into(),
-                    version: None,
-                    percent: None,
-                    message: Some(msg.clone()),
-                },
-            );
-            Err(msg)
-        }
+async fn perform_check(app: &AppHandle, background: bool) -> Result<CheckResult, String> {
+    let state = app.state::<UpdaterState>();
+    let _check = state.check.lock().await;
+    if lock_or_recover(&state.pending)
+        .as_ref()
+        .is_some_and(|p| p.status.state != Phase::Available)
+    {
+        return Ok(CheckResult { available: true });
     }
+
+    let updater = app.updater().map_err(|error| error.to_string())?;
+    let release = updater.check().await.map_err(|error| error.to_string())?;
+    let mut pending = lock_or_recover(&state.pending);
+    if background && !AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
+        return Ok(CheckResult {
+            available: pending.is_some(),
+        });
+    }
+
+    if let Some(update) = release {
+        if pending
+            .as_ref()
+            .is_some_and(|p| p.status.version == update.version)
+        {
+            return Ok(CheckResult { available: true });
+        }
+        let status = UpdateStatusPayload {
+            state: Phase::Available,
+            version: update.version.clone(),
+            release_notes: update.body.clone(),
+            is_portable: is_portable(),
+            transferred: 0,
+            total: None,
+            cancelling: false,
+            failed: false,
+            manual: false,
+            dismissed: false,
+        };
+        emit_status(app, Some(&status));
+        *pending = Some(PendingUpdate {
+            update,
+            status,
+            abort: None,
+            bytes: None,
+        });
+    } else if pending.take().is_some() {
+        emit_status(app, None);
+    }
+    Ok(CheckResult {
+        available: pending.is_some(),
+    })
 }
 
-#[cfg(all(not(feature = "msstore"), not(debug_assertions)))]
-async fn perform_background_check(app: &AppHandle) {
-    let updater = match app.updater() {
-        Ok(u) => u,
-        Err(e) => {
-            info!("Updater: background check unavailable: {}", e);
-            return;
-        }
-    };
+#[tauri::command]
+pub async fn download_update(app: AppHandle, version: String) -> Result<(), String> {
+    if is_msstore() || is_portable() {
+        return Err("In-app downloads are unavailable for this edition.".into());
+    }
 
-    let result = updater.check().await;
-    if !AUTO_UPDATE_ENABLED.load(Ordering::SeqCst) {
+    let state = app.state::<UpdaterState>();
+    let _check = state.check.lock().await;
+    let mut pending = lock_or_recover(&state.pending);
+    let pending = pending
+        .as_mut()
+        .filter(|p| p.status.version == version && p.status.state == Phase::Available)
+        .ok_or("This update is no longer available to download.")?;
+
+    let update = pending.update.clone();
+    let progress_app = app.clone();
+    let progress_version = version.clone();
+    let download = tauri::async_runtime::spawn(async move {
+        let mut transferred = 0_u64;
+        let mut last_tick = None::<Instant>;
+        update
+            .download(
+                move |chunk, total| {
+                    transferred = transferred.saturating_add(chunk as u64);
+                    let now = Instant::now();
+                    if last_tick
+                        .is_some_and(|tick| now.duration_since(tick) < Duration::from_millis(120))
+                        && total != Some(transferred)
+                    {
+                        return;
+                    }
+                    last_tick = Some(now);
+                    let state = progress_app.state::<UpdaterState>();
+                    let mut pending = lock_or_recover(&state.pending);
+                    if let Some(p) = pending.as_mut().filter(|p| {
+                        p.status.version == progress_version
+                            && p.status.state == Phase::Downloading
+                            && !p.status.cancelling
+                    }) {
+                        p.status.transferred = transferred;
+                        p.status.total = total;
+                        emit_status(&progress_app, Some(&p.status));
+                    }
+                },
+                || {},
+            )
+            .await
+            .map_err(|error| error.to_string())
+    });
+
+    pending.status.state = Phase::Downloading;
+    pending.status.failed = false;
+    pending.status.manual = true;
+    pending.status.dismissed = false;
+    pending.status.transferred = 0;
+    pending.status.total = None;
+    pending.abort = Some(download.inner().abort_handle());
+    emit_status(&app, Some(&pending.status));
+
+    // Keep the completion task independent of the webview. Full Mode can be
+    // unloaded while the download continues in the background.
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let result = download
+            .await
+            .map_err(|error| error.to_string())
+            .and_then(|result| result);
+        finish_download(&app, &version, result);
+    });
+    Ok(())
+}
+
+fn finish_download(app: &AppHandle, version: &str, result: Result<Vec<u8>, String>) {
+    let state = app.state::<UpdaterState>();
+    let mut pending = lock_or_recover(&state.pending);
+    let Some(pending) = pending
+        .as_mut()
+        .filter(|p| p.status.version == version && p.status.state == Phase::Downloading)
+    else {
         return;
-    }
-    match result {
-        Ok(Some(update)) => {
-            let version = update.version.clone();
-            {
-                let state = app.state::<UpdaterState>();
-                *lock_or_recover(&state.pending) = Some(PendingUpdate {
-                    update,
-                    bytes: None,
-                });
+    };
+    let cancelled = pending.status.cancelling;
+    pending.abort = None;
+    pending.status.cancelling = false;
+    pending.status.state = Phase::Available;
+    pending.status.dismissed = false;
+    if !cancelled {
+        match result {
+            Ok(bytes) => {
+                pending.bytes = Some(bytes);
+                pending.status.state = Phase::Downloaded;
             }
-            *lock_or_recover(&PENDING_VERSION) = Some(version.clone());
-
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "available".into(),
-                    version: Some(version.clone()),
-                    percent: None,
-                    message: None,
-                },
-            );
-
-            info!("Updater: background update available -> v{}", version);
-        }
-        Ok(None) => {
-            *lock_or_recover(&PENDING_VERSION) = None;
-            info!("Updater: background check finished (up to date)");
-        }
-        Err(e) => {
-            // Background check failures (offline, rate limit, timeout, etc.)
-            // must NOT emit error status or display error popups to the user.
-            info!("Updater: background check skipped/failed: {}", e);
+            Err(message) => {
+                pending.status.failed = true;
+                error!("Updater: download failed: {message}");
+            }
         }
     }
+    emit_status(app, Some(&pending.status));
 }
 
-async fn perform_download(app: &AppHandle) -> Result<(), String> {
-    let pending = {
+#[tauri::command]
+pub fn cancel_update_download(app: AppHandle, version: String) -> Result<(), String> {
+    let state = app.state::<UpdaterState>();
+    let mut pending = lock_or_recover(&state.pending);
+    let pending = pending
+        .as_mut()
+        .filter(|p| p.status.version == version)
+        .ok_or("This update is no longer downloading.")?;
+    let abort = pending
+        .abort
+        .as_ref()
+        .ok_or("This update is no longer downloading.")?;
+    pending.status.cancelling = true;
+    emit_status(&app, Some(&pending.status));
+    abort.abort();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn install_update(app: AppHandle, version: String) -> Result<(), String> {
+    if is_msstore() || is_portable() {
+        return Err("In-app installation is unavailable for this edition.".into());
+    }
+
+    let (update, bytes) = {
         let state = app.state::<UpdaterState>();
-        let taken = lock_or_recover(&state.pending).take();
-        taken
+        let mut pending = lock_or_recover(&state.pending);
+        let pending = pending
+            .as_mut()
+            .filter(|p| p.status.version == version && p.status.state == Phase::Downloaded)
+            .ok_or("This update is not ready to install.")?;
+        let bytes = pending
+            .bytes
+            .take()
+            .ok_or("The verified package is missing.")?;
+        pending.status.state = Phase::Installing;
+        pending.status.failed = false;
+        emit_status(&app, Some(&pending.status));
+        (pending.update.clone(), bytes)
     };
 
-    let Some(mut pending) = pending else {
-        return Err("No update pending".into());
-    };
-
-    let version = pending.update.version.clone();
-    let version_for_progress = version.clone();
-    let app_progress = app.clone();
-    let mut downloaded: u64 = 0;
-
-    let download_result = pending
-        .update
-        .download(
-            move |chunk_length, content_length| {
-                downloaded += chunk_length as u64;
-                let percent = content_length
-                    .and_then(|total| (downloaded * 100).checked_div(total).map(|p| p as u32));
-                emit_status(
-                    &app_progress,
-                    UpdateStatusPayload {
-                        state: "downloading".into(),
-                        version: Some(version_for_progress.clone()),
-                        percent,
-                        message: None,
-                    },
-                );
-            },
-            || {},
-        )
-        .await;
-
-    match download_result {
-        Ok(bytes) => {
+    // On Windows the verified installer closes the app and handles relaunch.
+    if let Err(error) = update.install(&bytes) {
+        let state = app.state::<UpdaterState>();
+        let mut pending = lock_or_recover(&state.pending);
+        if let Some(pending) = pending.as_mut() {
             pending.bytes = Some(bytes);
-            let state = app.state::<UpdaterState>();
-            *lock_or_recover(&state.pending) = Some(pending);
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "downloaded".into(),
-                    version: Some(version),
-                    percent: None,
-                    message: None,
-                },
-            );
-            Ok(())
+            pending.status.state = Phase::Downloaded;
+            pending.status.failed = true;
+            emit_status(&app, Some(&pending.status));
         }
-        Err(e) => {
-            pending.bytes = None;
-            let state = app.state::<UpdaterState>();
-            *lock_or_recover(&state.pending) = Some(pending);
-            let msg = e.to_string();
-            error!("Updater: download failed: {}", msg);
-            emit_status(
-                app,
-                UpdateStatusPayload {
-                    state: "error".into(),
-                    version: None,
-                    percent: None,
-                    message: Some(msg.clone()),
-                },
-            );
-            Err(msg)
-        }
-    }
-}
-
-fn perform_install(app: &AppHandle) -> Result<(), String> {
-    let pending = {
-        let state = app.state::<UpdaterState>();
-        let taken = lock_or_recover(&state.pending).take();
-        taken
-    };
-
-    let Some(pending) = pending else {
-        return Err("No downloaded update".into());
-    };
-
-    let result = match pending.bytes.as_deref() {
-        Some(bytes) => pending.update.install(bytes).map_err(|error| error.to_string()),
-        None => Err("Update has not been downloaded yet".into()),
-    };
-    if let Err(message) = result {
-        // Keep the verified download for a retry unless a newer check has replaced it.
-        let state = app.state::<UpdaterState>();
-        lock_or_recover(&state.pending).get_or_insert(pending);
-        error!("Updater: installation failed: {}", message);
+        let message = error.to_string();
+        error!("Updater: installation failed: {message}");
         return Err(message);
     }
 

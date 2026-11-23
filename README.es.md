@@ -162,7 +162,7 @@ La mayoría de las apps de reloj te muestran la hora y nada más. CyberClock tra
 - **Guardián de precisión del reloj:** comprobación periódica de desfase NTP mostrada en Configuración, con notificación de Windows cuando la hora del sistema se desvía más de un minuto
 - **Soporte multi-monitor:** elige en qué pantalla aparece CyberClock; los cambios de pantalla se detectan y la ventana se reposiciona sola
 - **Inicio automático con Windows:** inicio basado en el registro, ofrecido como opción en el propio instalador y sincronizado con el interruptor de Configuración (la app reconcilia ambos en cada arranque)
-- **Actualizaciones automáticas:** actualizador integrado de Tauri con GitHub Releases y notas de la versión bilingües en la app
+- **Avisos de actualización:** búsqueda opcional al iniciar. Un aviso flotante muestra una vista previa de las notas bilingües y permite iniciar, cancelar o completar la actualización cuando quieras.
 - **Interfaz bilingüe:** interfaz completa en inglés y español
 - **Respaldo y Datos:** exporta o importa alarmas, notas, temporizadores y preferencias como JSON; copias automáticas rotatorias en cada inicio y antes de cada restauración, con carpeta propia y número de copias a conservar; restaura cualquier copia (antes se guarda una instantánea de seguridad), abre la carpeta de datos local o restablece los valores de fábrica desde una pestaña dedicada
 - **Ventana Acerca de accesible:** Acerca de estándar de la suite con enlaces, opciones de donación, apps destacadas de la suite, búsqueda de actualizaciones y entrada "Acerca de..." en todos los menús contextuales de widgets flotantes y Modo Mini. Cada uno de esos menús abre con el nombre del widget y CyberClock

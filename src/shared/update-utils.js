@@ -2,19 +2,46 @@
  * CyberClock shared update presentation helpers.
  *
  * The updater knows whether a release exists, while this small browser-side
- * helper turns GitHub's Markdown notes into a safe, short preview for the
- * main window and the About window.
+ * helper turns GitHub's Markdown notes into a short preview for the notice.
  */
 (function () {
     "use strict";
 
     const REPO_URL = "https://github.com/CyberGems/CyberClock";
     const API_URL = "https://api.github.com/repos/CyberGems/CyberClock";
+    const LEGACY_SKIP_KEYS = ["cyberclock_skipped_update_version", "cc_update_skip_version", "cyberclock_skip_update_version"];
+    const cleanVersion = (value) => String(value || "").trim().replace(/^v+/i, "");
 
     function releaseUrl(version) {
         if (!version) return `${REPO_URL}/releases`;
-        const clean = String(version).replace(/^v+/i, "");
+        const clean = cleanVersion(version);
         return `${REPO_URL}/releases/tag/v${encodeURIComponent(clean)}`;
+    }
+
+    function portableUrl(version) {
+        const number = encodeURIComponent(cleanVersion(version));
+        return `${REPO_URL}/releases/download/v${number}/CyberClock_${number}_x64-portable.zip`;
+    }
+
+    function sameVersion(first, second) {
+        return Boolean(first && second && cleanVersion(first) === cleanVersion(second));
+    }
+
+    function isSkipped(version, configured) {
+        if (sameVersion(version, configured)) return true;
+        try {
+            return LEGACY_SKIP_KEYS.some((key) => sameVersion(version, localStorage.getItem(key)));
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function clearLegacySkip(version) {
+        try {
+            for (const key of LEGACY_SKIP_KEYS) {
+                if (sameVersion(version, localStorage.getItem(key))) localStorage.removeItem(key);
+            }
+        } catch (_) { /* Settings still hold the current skip preference. */ }
     }
 
     function cleanLine(line) {
@@ -27,14 +54,6 @@
             .trim();
     }
 
-    // The Before you install block is release-page furniture: the updater is
-    // automatic, so previews skip SmartScreen guidance.
-    function stripInstallBlock(text) {
-        return String(text || "")
-            .replace(/^#{1,6}\s*⚠️\s*(?:Before you install|Antes de instalar)[\s\S]*?\n---/gim, "")
-            .replace(/^#{1,6}\s*⚠️\s*(?:Before you install|Antes de instalar)[\s\S]*$/gim, "");
-    }
-
     function extractLanguageSection(markdown) {
         if (!markdown) return "";
         const lang = (window.ccI18n && typeof window.ccI18n.getEffectiveLang === "function")
@@ -45,7 +64,7 @@
         const commentRegex = new RegExp(`<!--\\s*lang:${lang}\\s*-->([\\s\\S]*?)<!--\\s*/lang:${lang}\\s*-->`, "i");
         const commentMatch = markdown.match(commentRegex);
         if (commentMatch && commentMatch[1]?.trim()) {
-            return stripInstallBlock(commentMatch[1].trim());
+            return commentMatch[1].trim();
         }
 
         // 2. Check for details summary block or header: <summary>...Español...</summary> or ### ...Español...
@@ -54,12 +73,12 @@
             const esMatch = markdown.match(esBlockRegex);
             const content = esMatch ? (esMatch[1] || esMatch[2]) : null;
             if (content && content.trim()) {
-                return stripInstallBlock(content.trim());
+                return content.trim();
             }
         }
 
         // 3. Fallback: if user is on English, or no Spanish block exists, exclude any Spanish details blocks so English remains clean
-        return stripInstallBlock(markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, ""));
+        return markdown.replace(/<details>[\s\S]*?<summary>[\s\S]*?(?:español|spanish)[\s\S]*?<\/summary>[\s\S]*?<\/details>/gi, "");
     }
 
     /**
@@ -70,12 +89,13 @@
     function parseChangelogPeek(markdown, limit = 4) {
         if (!markdown) return [];
         const targetedMarkdown = extractLanguageSection(markdown);
-        const lines = String(targetedMarkdown).split(/\r?\n/);
+        const lines = targetedMarkdown.replace(/<!--[\s\S]*?-->|```[\s\S]*?```/g, "").split(/\r?\n/);
 
         const bullets = [];
         const paragraphs = [];
         let current = null;
         let inList = false;
+        let releaseMetadata = false;
 
         const flush = () => {
             if (current) bullets.push(current);
@@ -85,8 +105,15 @@
 
         for (const rawLine of lines) {
             const trimmed = rawLine.trim();
-            // Blank lines, horizontal rules and headings close the current bullet.
-            if (!trimmed || /^---+$/.test(trimmed) || /^#{1,6}\s+/.test(trimmed)) {
+            if (/^#{1,6}\s+/.test(trimmed)) {
+                flush();
+                const heading = trimmed.replace(/^#{1,6}\s+[^a-z]*/i, "");
+                releaseMetadata = /^(?:before you install|antes de instalar|downloads|descargas|packages|paquetes|checksums|virustotal|sha256)\b/i.test(heading);
+                continue;
+            }
+            if (releaseMetadata) continue;
+            // Blank lines, horizontal rules and HTML section markers close the bullet.
+            if (!trimmed || /^---+$/.test(trimmed) || /^<\/?(?:p|img|section|details|summary)\b/i.test(trimmed)) {
                 flush();
                 continue;
             }
@@ -118,42 +145,36 @@
         return [...new Set(candidates)].slice(0, limit);
     }
 
-    async function fetchReleaseDetails(version, fallbackNotes = "") {
-        const details = {
-            notes: fallbackNotes || "",
-            bullets: parseChangelogPeek(fallbackNotes),
-            url: releaseUrl(version),
-        };
-
-        if (!version) return details;
-        const cleanVersion = String(version).replace(/^v+/i, "");
-
+    async function fetchReleaseNotes(version, fallbackNotes = "") {
         try {
             const response = await fetch(
-                `${API_URL}/releases/tags/v${encodeURIComponent(cleanVersion)}`,
+                `${API_URL}/releases/tags/v${encodeURIComponent(cleanVersion(version))}`,
                 {
+                    signal: AbortSignal.timeout(10_000),
                     headers: {
                         Accept: "application/vnd.github+json",
                     },
                 },
             );
-            if (!response.ok) return details;
+            if (!response.ok) return fallbackNotes;
             const release = await response.json();
-            details.notes = release.body || details.notes;
-            details.bullets = parseChangelogPeek(details.notes);
-            details.url = release.html_url || details.url;
+            return typeof release.body === "string" && release.body.trim() ? release.body : fallbackNotes;
         } catch (error) {
             // The update itself is independent from the optional preview.
             // Keep the release card useful when GitHub's API is unavailable.
             console.debug("Update notes unavailable:", error);
         }
 
-        return details;
+        return fallbackNotes;
     }
 
     window.ccUpdates = {
-        fetchReleaseDetails,
+        clearLegacySkip,
+        fetchReleaseNotes,
+        isSkipped,
         parseChangelogPeek,
+        portableUrl,
         releaseUrl,
+        sameVersion,
     };
 })();

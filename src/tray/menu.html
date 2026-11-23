@@ -19,11 +19,15 @@
             <div class="tray-stage is-offscreen" id="tray-stage" data-flyout-side="left" data-vertical-align="bottom">
                 <div class="tray-card tray-card-main" id="card-main" role="menu">
                     <!-- Header (suite-standard branding: icon + name, click -> About) -->
-                    <button type="button" class="tray-header" data-action="about-modal" data-tooltip="About CyberClock..." data-tooltip-dir="bottom" id="btn-about">
-                        <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
-                        <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.7.0</span></span>
-                        <span class="update-badge-led" id="tray-update-led" hidden></span>
-                    </button>
+                    <div class="tray-header-row">
+                        <button type="button" class="tray-header" data-action="about-modal" data-tooltip="About CyberClock..." data-tooltip-dir="bottom" id="btn-about">
+                            <img class="tray-head-ico" src="../assets/images/icon.png" alt="" />
+                            <span class="app-title">Cyber<span class="app-title-accent">Clock</span> <span class="app-ver" id="app-ver">v1.7.0</span></span>
+                        </button>
+                        <button type="button" class="tray-item tray-update-trigger" id="tray-update-led" data-action="open-update" data-tooltip-dir="bottom" aria-label="Open update notice" hidden>
+                            <span class="update-badge-led" aria-hidden="true"></span>
+                        </button>
+                    </div>
 
                     <div class="tray-divider"></div>
 

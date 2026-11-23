@@ -28,8 +28,9 @@ pub use settings::{
     SettingsStore,
 };
 use updater::{
-    check_for_updates, download_update, get_app_version, get_update_status, init_updater,
-    install_update, is_msstore, is_portable, pending_update_version, set_auto_update, UpdaterState,
+    cancel_update_download, check_for_updates, dismiss_update_notice, download_update,
+    get_app_version, get_update_status, init_updater, install_update, is_msstore, is_portable,
+    pending_update_version, reveal_update_notice, set_auto_update, UpdaterState,
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -4712,8 +4713,20 @@ fn menu_caller_info(caller: String) -> serde_json::Value {
 }
 
 #[tauri::command]
-fn get_pending_update() -> Option<String> {
-    pending_update_version()
+async fn open_update_notice(app: AppHandle) -> bool {
+    if pending_update_version(&app).is_none() {
+        return false;
+    }
+    let visible_main = app
+        .get_webview_window("main")
+        .filter(|win| win.is_visible().unwrap_or(false) && !win.is_minimized().unwrap_or(false));
+    if let Some(main) = visible_main {
+        let _ = main.set_focus();
+    } else if !open_full_mode(&app, None).await {
+        return false;
+    }
+    hide_mini_tip(app.clone());
+    reveal_update_notice(&app)
 }
 
 #[tauri::command]
@@ -6034,7 +6047,7 @@ pub fn collect_tray_menu_state(app: &AppHandle) -> TrayMenuState {
         .and_then(|g| g.clone());
     let relax_paused = *lock_or_recover(&app.state::<AlarmState>().relax_paused);
 
-    let pending_ver = pending_update_version();
+    let pending_ver = pending_update_version(app);
     let is_skipped = match (&settings.skipped_update_version, &pending_ver) {
         (Some(skipped), Some(pending)) => skipped == pending,
         _ => false,
@@ -6403,6 +6416,9 @@ async fn tray_menu_action(app: AppHandle, action: String) {
         }
         "about" => {
             show_about_window(&app).await;
+        }
+        "open-update" => {
+            open_update_notice(app).await;
         }
         "center_widgets" | "center-widgets" => {
             center_open_widgets_on_active_monitor(&app);
@@ -6847,9 +6863,11 @@ pub fn run() {
             is_portable,
             is_msstore,
             check_for_updates,
-            get_pending_update,
             get_update_status,
+            open_update_notice,
+            dismiss_update_notice,
             download_update,
+            cancel_update_download,
             install_update,
             open_taskbar_settings,
             open_datetime_properties,

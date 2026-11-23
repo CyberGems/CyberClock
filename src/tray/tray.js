@@ -254,19 +254,17 @@
         }
 
         const updateLed = document.getElementById("tray-update-led");
-        const hasUpdate = Boolean(state.update_available);
         if (updateLed) {
-            updateLed.hidden = !hasUpdate;
+            const label = T("tray.updateBadgeTooltip", "Open update notice");
+            updateLed.hidden = !state.update_available;
+            updateLed.setAttribute("aria-label", label);
+            updateLed.setAttribute("data-tooltip", label);
         }
         const btnAbout = document.getElementById("btn-about");
         if (btnAbout) {
-            if (hasUpdate) {
-                btnAbout.setAttribute("data-tooltip", T("tray.updateBadgeTooltip", "New update available — click to view"));
-                btnAbout.setAttribute("data-tooltip-dir", "bottom");
-            } else {
-                btnAbout.setAttribute("data-tooltip", T("tray.brandAboutTooltip", "About CyberClock..."));
-                btnAbout.setAttribute("data-tooltip-dir", "bottom");
-            }
+            const label = T("tray.brandAboutTooltip", "About CyberClock...");
+            btnAbout.setAttribute("aria-label", label);
+            btnAbout.setAttribute("data-tooltip", label);
         }
 
         // Re-render icons if data-ico changed

@@ -137,6 +137,9 @@
     }
 
     /* Header — suite-standard branding (icon + centered name, click = About) */
+    .tray-header-row {
+        position: relative;
+    }
     .tray-header {
         display: flex;
         align-items: center;
@@ -187,18 +190,25 @@
         transition: color 0.15s;
     }
 
-    .tray-header .update-badge-led {
-        display: inline-block;
+    .tray-item.tray-update-trigger {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 29px;
+        height: 29px;
+        padding: 0;
+    }
+    .tray-update-trigger .update-badge-led {
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #00f0ff;
-        box-shadow: 0 0 6px #00f0ff, 0 0 12px rgba(0, 240, 255, 0.7);
-        margin-left: 6px;
-        vertical-align: middle;
-        flex-shrink: 0;
+        background: var(--accent-a);
+        box-shadow: var(--glow-sm);
     }
-    .tray-header .update-badge-led[hidden] {
+    .tray-update-trigger[hidden] {
         display: none !important;
     }
 

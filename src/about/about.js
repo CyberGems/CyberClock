@@ -1,8 +1,7 @@
 /**
  * CyberClock — About Window (CyberSnap standard behavior)
  * Title-bar driven window: minimize + close (donate heart shortcut),
- * "Updates & Maintenance" card with the auto-check toggle and a
- * stateful check/download/install button, muted footer links.
+ * Update check and result, with the maintenance actions in Full Mode.
  * CyberGems © 2026
  */
 (() => {
@@ -46,12 +45,11 @@
     }
 
     let appVersion = "";
-    let updateStatus = { state: "idle" };
+    let updateStatus = "idle";
     let currentSettings = {};
-    let updatePortable = false;
     let updateMsStore = false;
 
-    // ── Theme / language / auto-update toggle / suite showcase ──
+    // ── Theme / language / suite showcase ──
     function applySettings(s) {
         currentSettings = s || {};
         window.CCTint.apply(s.theme || "azure");
@@ -59,9 +57,6 @@
             window.ccI18n.setLang(s.language || "auto");
             window.ccI18n.apply(document);
         }
-        const autoEl = document.getElementById("ab-autoup");
-        if (autoEl) autoEl.checked = s.autoUpdate !== false;
-
         const showSuite = s.showSuiteRecommendations !== false;
         const suiteLabel = document.getElementById("ab-suite-label");
         const suiteCard = document.getElementById("ab-suite-card");
@@ -69,10 +64,6 @@
         if (suiteCard) suiteCard.style.display = showSuite ? "" : "none";
         if (showSuite) {
             initSuiteShowcase();
-        }
-
-        if (s.skippedUpdateVersion && updateStatus.version === s.skippedUpdateVersion && updateStatus.state === "available") {
-            updateStatus = { state: "skipped", version: updateStatus.version };
         }
 
         renderUpdateState();
@@ -89,11 +80,6 @@
             appVersion = v || "dev";
             const el = document.getElementById("ab-version");
             if (el) el.textContent = "Version v" + appVersion;
-        }).catch(() => {});
-    }
-    if (window.cc && window.cc.isPortable) {
-        window.cc.isPortable().then((value) => {
-            updatePortable = !!value;
             renderUpdateState();
         }).catch(() => {});
     }
@@ -104,308 +90,34 @@
         }).catch(() => {});
     }
 
-    // ── Update flow (CyberSnap state matrix) ─────────────────
-    // idle/up-to-date: "Check Now" — available: "Update Now" —
-    // downloading: progress % + disabled — downloaded: "Install & Restart".
     function renderUpdateState() {
-        const btn = document.getElementById("ab-update-btn");
+        const button = document.getElementById("ab-update-btn");
         const desc = document.getElementById("ab-update-desc");
-        const progress = document.getElementById("ab-progress");
-        const progressText = document.getElementById("ab-progress-text");
-        const progressFill = document.getElementById("ab-progress-fill");
-        if (!btn || !desc) return;
-
-        const s = updateStatus;
-
-        if (updateMsStore) {
-            // Microsoft Store build: updates are distributed by the Store,
-            // so the self-update button and the startup-check toggle make
-            // no sense here.
-            btn.style.display = "none";
-            progress.hidden = true;
-            desc.textContent = T(
-                "about.statuses.msStore",
-                "Updates are handled by the Microsoft Store.",
-            );
-            const autoRow = document.getElementById("ab-autoup")?.closest(".ab-setting-row");
-            if (autoRow) autoRow.style.display = "none";
-            return;
-        }
-
-        btn.style.display = "";
-        btn.disabled = false;
-        progress.hidden = s.state !== "downloading";
-        const idleDesc = T(
-            "about.updateDesc",
-            "Check for the latest version and download updates directly.",
-        );
-
-        function setTip(text) {
-            btn.removeAttribute("title");
-            if (text) {
-                btn.setAttribute("data-tooltip", text);
-            } else {
-                btn.removeAttribute("data-tooltip");
-            }
-        }
-
-        desc.classList.remove("is-up-to-date", "is-available", "is-error", "is-checking");
-
-        const updatePanel = document.getElementById("ab-update-panel");
-        const updateNewVer = document.getElementById("ab-update-new-ver");
-        const downloadBtn = document.getElementById("ab-download-btn");
-
-        if (s.state === "idle") {
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            desc.textContent = idleDesc;
-            if (updatePanel) updatePanel.hidden = true;
-        } else if (s.state === "not-available") {
-            desc.classList.add("is-up-to-date");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            const ver = s.version || appVersion || "";
-            desc.textContent = "✓ " + T("about.statuses.latest", "You're up to date on {version}").replace(
-                "{version}",
-                ver ? "v" + ver : "",
-            );
-            if (updatePanel) updatePanel.hidden = true;
-        } else if (s.state === "checking") {
-            desc.classList.add("is-checking");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            btn.disabled = true;
-            setTip("");
-            desc.textContent = "⏳ " + T("about.statuses.checking", "Checking for updates…");
-        } else if (s.state === "available") {
-            desc.classList.add("is-available");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            const ver = s.version || "";
-            const cleanVer = ver ? (ver.startsWith("v") ? ver : "v" + ver) : "";
-            desc.textContent =
-                "★ " + T("about.updateAvailable", "Update {0} available").replace(
-                    "{0}",
-                    cleanVer,
-                );
-            if (updatePanel) {
-                updatePanel.hidden = false;
-                if (updateNewVer) updateNewVer.textContent = cleanVer || "v…";
-                if (downloadBtn) {
-                    downloadBtn.disabled = false;
-                    const dText = updatePortable
-                        ? T("updates.downloadPortable", "Open download page")
-                        : T("updates.download", "Download update");
-                    downloadBtn.textContent = dText;
-                    downloadBtn.setAttribute("data-tooltip", dText);
-                }
-                loadChangelogBullets(ver, s.releaseNotes);
-            }
-        } else if (s.state === "downloading") {
-            desc.classList.add("is-checking");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            btn.disabled = true;
-            setTip("");
-            const pct = Math.round(s.percent ?? 0);
-            desc.textContent = T(
-                "about.statuses.downloading",
-                "Downloading update ({pct}%)…",
-            ).replace("{pct}", String(pct));
-            progressText.textContent = desc.textContent;
-            progressFill.style.width = pct + "%";
-            if (updatePanel) {
-                updatePanel.hidden = false;
-                if (downloadBtn) {
-                    downloadBtn.disabled = true;
-                    downloadBtn.textContent = T("about.statuses.downloading", "Downloading update ({pct}%)…").replace("{pct}", String(pct));
-                }
-            }
-        } else if (s.state === "downloaded") {
-            desc.classList.add(s.message ? "is-error" : "is-available");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            desc.textContent = s.message
-                ? T("updates.installError", "Could not start the installer. Try again.")
-                : "✓ " + T("about.statuses.downloaded", "Update ready: click Install & Restart.");
-            if (updatePanel) {
-                updatePanel.hidden = false;
-                if (downloadBtn) {
-                    downloadBtn.disabled = false;
-                    const iText = T("about.installBtn", "Install & Restart");
-                    downloadBtn.textContent = iText;
-                    downloadBtn.setAttribute("data-tooltip", T("about.installTooltip", "Install the update and restart"));
-                }
-            }
-        } else if (s.state === "skipped") {
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            const cleanVer = s.version ? (s.version.startsWith("v") ? s.version : "v" + s.version) : "";
-            desc.textContent = T("about.updateSkipped", "Update {version} skipped").replace("{version}", cleanVer);
-            if (updatePanel) updatePanel.hidden = true;
-        } else if (s.state === "error") {
-            desc.classList.add("is-error");
-            btn.textContent = T("about.checkUpdates", "Check Now");
-            setTip(T("about.checkLatest", "Check for the latest version"));
-            const rawMsg = s.message || "";
-            const isRawUrl = rawMsg.includes("error sending request") || rawMsg.includes("http");
-            const errText = isRawUrl
-                ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
-                : (rawMsg || T("about.statuses.error", "Could not check for updates. Check your internet connection."));
-            desc.textContent = "✕ " + errText;
-            if (updatePanel) updatePanel.hidden = true;
-        }
-    }
-
-    let cachedChangelogVersion = null;
-    async function loadChangelogBullets(version, fallbackNotes = "") {
-        const listEl = document.getElementById("ab-changelog-list");
-        if (!listEl) return;
-        if (cachedChangelogVersion === version && listEl.children.length > 0) return;
-        cachedChangelogVersion = version;
-
-        listEl.replaceChildren();
-        let bullets = [];
-        if (window.ccUpdates && window.ccUpdates.fetchReleaseDetails) {
-            try {
-                const details = await window.ccUpdates.fetchReleaseDetails(version, fallbackNotes);
-                bullets = details.bullets || [];
-            } catch (_) {}
-        }
-        if (!bullets.length && fallbackNotes) {
-            bullets = (window.ccUpdates && window.ccUpdates.parseChangelogPeek)
-                ? window.ccUpdates.parseChangelogPeek(fallbackNotes)
-                : [];
-        }
-        if (!bullets.length) {
-            const empty = document.createElement("li");
-            empty.textContent = T("updates.notesUnavailable", "Release notes are not available right now.");
-            listEl.appendChild(empty);
-            return;
-        }
-        for (const bullet of bullets) {
-            const li = document.createElement("li");
-            li.textContent = bullet;
-            listEl.appendChild(li);
-        }
-    }
-
-    function initUpdatePanelActions() {
-        const downloadBtn = document.getElementById("ab-download-btn");
-        const skipBtn = document.getElementById("ab-skip-btn");
-        const releaseBtn = document.getElementById("ab-release-btn");
-
-        if (downloadBtn && !downloadBtn._hasListener) {
-            downloadBtn._hasListener = true;
-            downloadBtn.addEventListener("click", async () => {
-                if (updateStatus.state === "downloaded") {
-                    const downloaded = updateStatus;
-                    downloadBtn.disabled = true;
-                    try {
-                        await window.cc.installUpdate();
-                    } catch (e) {
-                        if (updateStatus === downloaded) {
-                            updateStatus = { ...downloaded, message: String(e?.message || e) };
-                            renderUpdateState();
-                        }
-                    }
-                    return;
-                }
-                if (updatePortable) {
-                    openUrl(
-                        updateStatus.releaseUrl ||
-                        (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version)),
-                    );
-                    return;
-                }
-                try {
-                    downloadBtn.disabled = true;
-                    await window.cc.downloadUpdate();
-                } catch (e) {
-                    updateStatus = { state: "error", message: String(e?.message || e) };
-                    renderUpdateState();
-                }
-            });
-        }
-
-        if (skipBtn && !skipBtn._hasListener) {
-            skipBtn._hasListener = true;
-            skipBtn.addEventListener("click", () => {
-                if (updateStatus.version && window.cc && window.cc.saveSettings) {
-                    window.cc.saveSettings({ skippedUpdateVersion: updateStatus.version }).catch(console.error);
-                }
-                updateStatus = { state: "skipped", version: updateStatus.version };
-                renderUpdateState();
-            });
-        }
-
-        if (releaseBtn && !releaseBtn._hasListener) {
-            releaseBtn._hasListener = true;
-            releaseBtn.addEventListener("click", () => {
-                const url = updateStatus.releaseUrl ||
-                    (window.ccUpdates && window.ccUpdates.releaseUrl(updateStatus.version));
-                if (url) openUrl(url);
-            });
-        }
+        const state = updateMsStore ? "msStore" : updateStatus;
+        button.hidden = updateMsStore;
+        button.disabled = state === "checking";
+        desc.dataset.status = state;
+        desc.textContent = state === "idle"
+            ? T("about.updateDesc")
+            : T("about.statuses." + state).replace("{version}", "v" + appVersion);
     }
 
     async function checkForUpdatesOnly() {
-        if (updateStatus.state === "checking" || updateStatus.state === "downloading") {
-            return;
-        }
-
-        updateStatus = { state: "checking" };
+        if (updateMsStore || updateStatus === "checking") return;
+        updateStatus = "checking";
         renderUpdateState();
         try {
-            const res = await window.cc.checkForUpdates();
-            if (typeof res?.isPortable === "boolean") updatePortable = res.isPortable;
-            if (!res?.ok) {
-                updateStatus = {
-                    state: "error",
-                    message: res?.error || T(
-                        "about.statuses.error",
-                        "Could not check for updates. Check your internet connection.",
-                    ),
-                };
-            } else if (res.version && appVersion && res.version !== appVersion) {
-                updateStatus = {
-                    state: "available",
-                    version: res.version,
-                    releaseNotes: res.releaseNotes,
-                    releaseUrl: res.releaseUrl,
-                };
-            } else {
-                updateStatus = { state: "not-available", version: res.version || appVersion };
-            }
-        } catch (e) {
-            const raw = String(e?.message || e || "");
-            const isRawUrl = raw.includes("error sending request") || raw.includes("http");
-            updateStatus = {
-                state: "error",
-                message: isRawUrl
-                    ? T("about.statuses.error", "Could not check for updates. Check your internet connection.")
-                    : raw,
-            };
+            const result = await window.cc.checkForUpdates();
+            updateStatus = result.available ? "available" : "latest";
+        } catch (error) {
+            console.error("Update check failed:", error);
+            updateStatus = "error";
         }
         renderUpdateState();
+        if (updateStatus === "available") await window.cc.openUpdateNotice().catch(console.error);
     }
 
-    const updateBtn = document.getElementById("ab-update-btn");
-    if (updateBtn) updateBtn.addEventListener("click", checkForUpdatesOnly);
-    initUpdatePanelActions();
-
-    if (window.cc && window.cc.onUpdateStatus) {
-        let receivedStatus = false;
-        window.cc.onUpdateStatus((payload) => {
-            receivedStatus = true;
-            updateStatus = payload || { state: "idle" };
-            renderUpdateState();
-        }).then(async () => {
-            const savedStatus = await window.cc.getUpdateStatus();
-            if (!receivedStatus && savedStatus) {
-                updateStatus = savedStatus;
-                renderUpdateState();
-            }
-        }).catch(console.error);
-    }
+    document.getElementById("ab-update-btn").addEventListener("click", checkForUpdatesOnly);
 
     if (window.cc && window.cc.onCheckUpdatesTrigger) {
         const handleUpdateRequest = async () => {
@@ -413,16 +125,6 @@
         };
         window.cc.onCheckUpdatesTrigger(() => handleUpdateRequest().catch(console.error))
             .then(handleUpdateRequest).catch(console.error);
-    }
-
-    // ── Auto-update toggle ──────────────────────────────────
-    const autoUp = document.getElementById("ab-autoup");
-    if (autoUp) {
-        autoUp.addEventListener("change", (e) => {
-            if (window.cc && window.cc.saveSettings) {
-                window.cc.saveSettings({ autoUpdate: e.target.checked });
-            }
-        });
     }
 
     // ── CyberGems Suite Showcase ──────────────────────────────
@@ -574,7 +276,7 @@
             `- **Display:** ${window.screen.width}x${window.screen.height} (DPR: ${window.devicePixelRatio || 1})`,
             `- **Language:** ${currentSettings.language || "auto"} (Effective: ${effectiveLang})`,
             `- **Theme:** ${theme}`,
-            `- **Startup Auto-Update:** ${autoUp ? "Enabled" : "Disabled"}`,
+            `- **Startup Update Check:** ${autoUp ? "Enabled" : "Disabled"}`,
             `- **Chimes Enabled:** ${currentSettings.chimes_enabled !== false ? "Yes" : "No"}`,
             `- **Voice Announcer:** ${currentSettings.voice_enabled ? "Yes" : "No"}`,
             `- **Audio Muted:** ${currentSettings.mute_audio ? "Yes" : "No"}`,

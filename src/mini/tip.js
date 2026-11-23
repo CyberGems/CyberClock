@@ -149,23 +149,10 @@
             btnOpen.textContent = t("mini.update.view");
             btnOpen.addEventListener("click", (e) => {
                 e.stopPropagation();
-                if (window.cc?.goFull) window.cc.goFull();
-                if (window.cc?.menuAction) window.cc.menuAction("open-update");
-                if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
-            });
-
-            const btnDismiss = document.createElement("button");
-            btnDismiss.type = "button";
-            btnDismiss.className = "mini-tip-update-btn";
-            btnDismiss.textContent = t("mini.update.dismiss");
-            btnDismiss.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (window.cc?.skipUpdate) window.cc.skipUpdate(data.updateVersion);
-                if (window.cc?.hideMiniTip) window.cc.hideMiniTip();
+                window.cc?.openUpdateNotice().catch(console.error);
             });
 
             updActions.appendChild(btnOpen);
-            updActions.appendChild(btnDismiss);
             updBlock.appendChild(updActions);
             tipEl.appendChild(updBlock);
             tipEl.appendChild(document.createElement("div")).className = "mini-tip-divider";

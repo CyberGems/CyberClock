@@ -1,6 +1,7 @@
     let cfg = {};
     let calNotes = {};
     let availableUpdateVersion = null; // declared early — used by hideTipNow guard
+    let miniUpdateStatus = null;
     let activeAlarmNotice = null;
 
     function getDays() {
@@ -262,13 +263,10 @@
         lastCollapse = s.miniCollapseDate;
         lastZoom = s.miniZoom;
 
-        const wasAutoUpdateEnabled = cfg.autoUpdate === true;
+        const updatePrefsChanged = cfg.autoUpdate !== s.autoUpdate || cfg.windowMode !== s.windowMode
+            || cfg.skippedUpdateVersion !== s.skippedUpdateVersion;
         cfg = s;
-        if (!wasAutoUpdateEnabled && cfg.autoUpdate === true) {
-            window.cc?.getPendingUpdate?.().then(setAvailableUpdate).catch(() => {});
-        } else if (wasAutoUpdateEnabled && cfg.autoUpdate !== true) {
-            clearAvailableUpdate();
-        }
+        if (updatePrefsChanged) syncMiniUpdate();
         if (s.showWidgetHints === false && typeof hideActionTicker === "function") hideActionTicker();
         calNotes = s.calendarNotes || {};
         window.CCTint.apply(s.theme || "azure");
@@ -380,7 +378,7 @@
         }
 
         let updateVer = null;
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
+        if (availableUpdateVersion) {
             updateVer = availableUpdateVersion;
         }
 
@@ -419,7 +417,7 @@
     function hideTipNow() {
         // Keep the tip visible while an alarm or an update notice is pending.
         if (activeAlarmNotice) return;
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) return;
+        if (availableUpdateVersion) return;
         clearTimeout(tipTimer);
         clearTimeout(tipHideTimer);
         tipTimer = null;
@@ -435,7 +433,7 @@
         if (window.audioEngine && window.audioEngine.stopAlarmAlert) {
             window.audioEngine.stopAlarmAlert();
         }
-        if (availableUpdateVersion && !isUpdateSkipped(availableUpdateVersion)) {
+        if (availableUpdateVersion) {
             openTip();
             return;
         }
@@ -1097,45 +1095,30 @@
     // UPDATE NOTIFICATIONS
     // ═══════════════════════════════════════════════════════
 
-    function isUpdateSkipped(ver) {
-        if (!ver) return true;
-        try {
-            return localStorage.getItem("cc_update_skip_version") === ver ||
-                   localStorage.getItem("cyberclock_skip_update_version") === ver;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    function skipUpdate(ver) {
-        if (!ver) return;
-        try {
-            localStorage.setItem("cc_update_skip_version", ver);
-            localStorage.setItem("cyberclock_skip_update_version", ver);
-        } catch (_) {}
-    }
-
-    function clearAvailableUpdate() {
-        if (!availableUpdateVersion) return;
-        availableUpdateVersion = null;
-        if (activeAlarmNotice) void openTip({ alarm: true });
+    function syncMiniUpdate() {
+        const status = miniUpdateStatus;
+        const version = status && !status.dismissed && cfg.windowMode === "mini"
+            && (status.state === "downloaded" || (status.state === "available" && cfg.autoUpdate === true))
+            && !window.ccUpdates.isSkipped(status.version, cfg.skippedUpdateVersion)
+            ? status.version : null;
+        if (version === availableUpdateVersion) return;
+        availableUpdateVersion = version;
+        if (version || activeAlarmNotice) void openTip({ alarm: Boolean(activeAlarmNotice) });
         else hideTipNow();
     }
 
-    function setAvailableUpdate(ver) {
-        if (cfg.autoUpdate !== true || !ver || isUpdateSkipped(ver)) return;
-        availableUpdateVersion = ver;
-        void openTip({ alarm: Boolean(activeAlarmNotice) });
-    }
-
     if (window.cc && window.cc.onUpdateStatus) {
+        let receivedStatus = false;
         window.cc.onUpdateStatus((payload) => {
-            if (payload && payload.state === "available" && payload.version) {
-                setAvailableUpdate(payload.version);
-            } else if (payload && (payload.state === "idle" || payload.state === "not-found")) {
-                clearAvailableUpdate();
-            }
-        });
+            receivedStatus = true;
+            miniUpdateStatus = payload;
+            syncMiniUpdate();
+        }).then(async () => {
+            const status = await window.cc.getUpdateStatus();
+            if (receivedStatus) return;
+            miniUpdateStatus = status;
+            syncMiniUpdate();
+        }).catch(console.error);
     }
 
     // Safety clamp: ensure mini window starts safely within monitor work area

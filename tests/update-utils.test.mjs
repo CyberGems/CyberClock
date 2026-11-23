@@ -9,7 +9,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 // so the test harness provides a minimal window global before importing it.
 globalThis.window = { ccI18n: { getEffectiveLang: () => 'en' } };
 await import(pathToFileURL(path.join(here, '../src/shared/update-utils.js')).href);
-const { parseChangelogPeek, releaseUrl } = globalThis.window.ccUpdates;
+const { clearLegacySkip, isSkipped, parseChangelogPeek, portableUrl, releaseUrl } = globalThis.window.ccUpdates;
 
 const nestedBody = `## 📋 CyberClock v1.17.0: Release Notes
 
@@ -93,4 +93,46 @@ test('parseChangelogPeek respects the limit and dedupes', () => {
 test('releaseUrl handles missing and prefixed versions', () => {
   assert.match(releaseUrl(null), /releases$/);
   assert.match(releaseUrl('v1.2.3'), /releases\/tag\/v1\.2\.3$/);
+});
+
+test('the peek excludes installer, package and checksums sections from the release template', () => {
+    const body = `### Highlights
+- Faster timers
+
+### ℹ️ Before you install
+- Installer documentation
+
+### 📦 Downloads & Packages
+- Installer and portable ZIP
+
+### 🔐 VirusTotal and SHA256
+- Checksum details`;
+    assert.deepEqual(parseChangelogPeek(body), ['Faster timers']);
+    assert.deepEqual(parseChangelogPeek(body.replace('Before you install', 'Antes de instalar')), ['Faster timers']);
+});
+
+test('the portable action links directly to the versioned ZIP', () => {
+    assert.equal(portableUrl('v1.2.3'),
+        'https://github.com/CyberGems/CyberClock/releases/download/v1.2.3/CyberClock_1.2.3_x64-portable.zip');
+});
+
+test('existing Full Mode and Mini skips still apply to the matching version', () => {
+    const storage = new Map([
+        ['cyberclock_skipped_update_version', 'v1.1.0'],
+        ['cc_update_skip_version', '1.2.3'],
+    ]);
+    globalThis.localStorage = {
+        getItem: (key) => storage.get(key),
+        removeItem: (key) => storage.delete(key),
+    };
+    try {
+        assert.equal(isSkipped('1.1.0'), true);
+        assert.equal(isSkipped('v1.2.3'), true);
+        assert.equal(isSkipped('1.2.4', 'v1.2.4'), true);
+        clearLegacySkip('1.2.3');
+        assert.equal(isSkipped('1.2.3'), false);
+        assert.equal(isSkipped('1.1.0'), true);
+    } finally {
+        delete globalThis.localStorage;
+    }
 });

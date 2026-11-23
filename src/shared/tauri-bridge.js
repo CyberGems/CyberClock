@@ -365,15 +365,11 @@
         checkForUpdates: async () => {
             return await invoke("check_for_updates");
         },
-        downloadUpdate: async () => {
-            return await invoke("download_update");
-        },
-        installUpdate: async () => {
-            return await invoke("install_update");
-        },
-        getPendingUpdate: async () => {
-            return await invoke("get_pending_update");
-        },
+        downloadUpdate: (version) => invoke("download_update", { version }),
+        cancelUpdateDownload: (version) => invoke("cancel_update_download", { version }),
+        installUpdate: (version) => invoke("install_update", { version }),
+        openUpdateNotice: () => invoke("open_update_notice"),
+        dismissUpdateNotice: (version, phase) => invoke("dismiss_update_notice", { version, phase }),
         onUpdateStatus: (cb) => {
             return subscribe("update:status", cb);
         },
@@ -528,7 +524,7 @@
             return subscribe("tray-menu-hide", cb);
         },
         onCheckUpdatesTrigger: (cb) => {
-            return subscribe("about:trigger-check", cb);
+            return subscribeToWindow("about:trigger-check", cb);
         },
         takeAboutUpdateCheck: () => invoke("take_about_update_check"),
         onCloseRequested: (cb) => {
