@@ -28,7 +28,7 @@
       },
       {
         "label": "mini",
-        "title": "CyberClock Mini",
+        "title": "CyberClock · Mini",
         "width": 260,
         "height": 48,
         "resizable": false,
@@ -44,7 +44,7 @@
       {
         "label": "menu",
         "create": false,
-        "title": "CyberClock Menu",
+        "title": "CyberClock · Menu",
         "width": 292,
         "height": 430,
         "resizable": false,
@@ -60,7 +60,7 @@
       {
         "label": "tray_menu",
         "create": false,
-        "title": "CyberClock Tray Menu",
+        "title": "CyberClock · Tray menu",
         "width": 290,
         "height": 600,
         "resizable": false,
@@ -76,7 +76,7 @@
       {
         "label": "about",
         "create": false,
-        "title": "About CyberClock",
+        "title": "CyberClock · About",
         "width": 740,
         "height": 535,
         "minWidth": 600,
@@ -94,7 +94,7 @@
       {
         "label": "mini_tip",
         "create": false,
-        "title": "CyberClock Mini Tip",
+        "title": "CyberClock · Mini tip",
         "width": 280,
         "height": 180,
         "resizable": false,

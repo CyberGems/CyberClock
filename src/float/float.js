@@ -206,7 +206,7 @@
         const str = swFmt(swElapsed);
         setDigits(timeEl(), str);
         const sec = Math.floor(swElapsed / 1000);
-        if (sec !== swTitleSec) { swTitleSec = sec; document.title = str + " · CyberClock"; }
+        if (sec !== swTitleSec) { swTitleSec = sec; document.title = "CyberClock · " + str; }
     }
 
     function swLoop() { swPaint(); if (swRunning) swRaf = requestAnimationFrame(swLoop); }
@@ -293,7 +293,7 @@
         const c = Math.ceil(tAcc);
         if (c !== tTitleSec) {
             tTitleSec = c;
-            document.title = tTotal > 0 ? str + " · CyberClock" : window.ccI18n.t("float.timerTitle");
+            document.title = tTotal > 0 ? "CyberClock · " + str : window.ccI18n.t("float.timerTitle");
         }
     }
 
@@ -405,7 +405,7 @@
             }
         } catch (e) { /* audio must never break the widget */ }
         const name = getWidgetName();
-        document.title = `${window.ccI18n.t("float.timesUp")} · ${name}`;
+        document.title = `CyberClock · ${name} (${window.ccI18n.t("float.timesUp")})`;
 
         if (cfg.timerAutoRestart === true && tTotal > 0) {
             setTimeout(() => {
@@ -422,10 +422,10 @@
         subEl().textContent = name.toUpperCase();
         setStartIcon(KIND === "sw" ? swRunning : tRunning);
         if (KIND === "sw" && swElapsed === 0 && !swRunning) {
-            document.title = `${name} · CyberClock`;
+            document.title = `CyberClock · ${name}`;
         }
         if (KIND === "timer" && tTotal === 0) {
-            document.title = `${name} · CyberClock`;
+            document.title = `CyberClock · ${name}`;
             if (!document.getElementById("float-done").hidden) {
                 document.getElementById("float-done-txt").textContent = window.ccI18n.t("float.timesUp");
             }

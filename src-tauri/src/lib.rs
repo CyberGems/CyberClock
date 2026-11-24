@@ -1240,11 +1240,11 @@ fn spawn_float_window_with_slot(
     };
     // Compact size per float kind
     let (title, wide, tall) = match kind {
-        "timer" => ("Timer · CyberClock", 286.0 * zoom, 92.0 * zoom),
-        "cal" => ("Calendar · CyberClock", 286.0 * zoom, 268.0 * zoom),
+        "timer" => ("CyberClock · Timer", 286.0 * zoom, 92.0 * zoom),
+        "cal" => ("CyberClock · Calendar", 286.0 * zoom, 268.0 * zoom),
         "analog" => {
             let sz = (320.0 * zoom).max(380.0);
-            ("Analog Clock · CyberClock", sz, sz)
+            ("CyberClock · Analog clock", sz, sz)
         }
         "relax" => {
             let height = if settings.float_relax_show_spectrum {
@@ -1252,9 +1252,9 @@ fn spawn_float_window_with_slot(
             } else {
                 144.0
             };
-            ("Relax · CyberClock", 300.0 * zoom, height * zoom)
+            ("CyberClock · Relax", 300.0 * zoom, height * zoom)
         }
-        _ => ("Stopwatch · CyberClock", 286.0 * zoom, 52.0 * zoom),
+        _ => ("CyberClock · Stopwatch", 286.0 * zoom, 52.0 * zoom),
     };
     let cascade = ((seq - 1) % 8) as f64 * 30.0;
     let url = if kind == "cal" {
