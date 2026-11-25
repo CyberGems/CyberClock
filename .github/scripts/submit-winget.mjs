@@ -11,8 +11,8 @@ const sourceRepository = 'CyberGems/CyberClock';
 const manifestNames = [
   `${packageId}.installer.yaml`, `${packageId}.locale.en-US.yaml`, `${packageId}.yaml`,
 ];
-const startMarker = '<!-- cybersnap-winget:start -->';
-const endMarker = '<!-- cybersnap-winget:end -->';
+const startMarker = '<!-- cyberclock-winget:start -->';
+const endMarker = '<!-- cyberclock-winget:end -->';
 const packageMention = /(?:^|[^A-Za-z0-9_.])CyberGems\.CyberClock(?=$|[^A-Za-z0-9_.])/;
 
 export function compareVersions(left, right) {
