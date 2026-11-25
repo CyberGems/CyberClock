@@ -373,11 +373,11 @@ Cambia o desactiva el atajo global en **Configuración > General > Mostrar u ocu
 
 | Activo | Dirección | QR |
 |---|---|---|
-| **BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="src/assets/donate/qr-btc.png" width="90" height="90" alt="QR de BTC" /> |
-| **ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="QR de ETH" /> |
-| **USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="QR de USDT" /> |
-| **USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="src/assets/donate/qr-usdt-tron.png" width="90" height="90" alt="QR de USDT TRC20" /> |
-| **LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="src/assets/donate/qr-ltc.png" width="90" height="90" alt="QR de LTC" /> |
+| **<img src="src/assets/donate/btc.svg" width="18" height="18" alt="" />&nbsp;&nbsp;BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="src/assets/donate/qr-btc.png" width="90" height="90" alt="QR de BTC" /> |
+| **<img src="src/assets/donate/eth.svg" width="18" height="18" alt="" />&nbsp;&nbsp;ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="QR de ETH" /> |
+| **<img src="src/assets/donate/usdt.svg" width="18" height="18" alt="" />&nbsp;&nbsp;USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="src/assets/donate/qr-eth.png" width="90" height="90" alt="QR de USDT" /> |
+| **<img src="src/assets/donate/usdt.svg" width="18" height="18" alt="" />&nbsp;&nbsp;USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="src/assets/donate/qr-usdt-tron.png" width="90" height="90" alt="QR de USDT TRC20" /> |
+| **<img src="src/assets/donate/ltc.svg" width="18" height="18" alt="" />&nbsp;&nbsp;LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="src/assets/donate/qr-ltc.png" width="90" height="90" alt="QR de LTC" /> |
 
 > ⚠️ Envía solo el activo seleccionado en la red indicada. Usar la red incorrecta provocará la pérdida permanente de fondos.
 
