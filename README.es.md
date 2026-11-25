@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Tu reloj, calendario, temporizador, cronómetro y widgets flotantes, juntos en una sola app ligera para Windows
+### Reloj, calendario, temporizadores, paisajes sonoros y reloj parlante opcional en una app ligera.
 
 </div>
 

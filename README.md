@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://cybergems.org/apps/cyberclock/">
-    <img src="https://cybergems.org/banners/cyberclock.png" alt="Clock, timer, stopwatch and calendar for your desktop" />
+    <img src="https://cybergems.org/banners/cyberclock.png" alt="Clock, timer, stopwatch and calendar" />
   </a>
 </p>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Your clock, calendar, timer, stopwatch and floating widgets, together in one lightweight Windows app
+### Clock, calendar, timers, soundscapes and an optional talking clock in one lightweight app.
 
 </div>
 
