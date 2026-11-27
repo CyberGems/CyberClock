@@ -5,3 +5,7 @@ artifacts/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Native build output
+src-tauri/target/
+src-tauri/.tauri/
