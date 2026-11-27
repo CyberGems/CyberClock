@@ -231,6 +231,7 @@ jobs:
               -e "s/{{INSTALLER_HASH}}/$INSTALLER_HASH/g" \
               -e "s/{{PORTABLE_HASH}}/$PORTABLE_HASH/g" \
               .github/release-template.md > FINAL_RELEASE_NOTES.md
+              sed -i '/<!--.*-->/d' FINAL_RELEASE_NOTES.md
 
           # Update the draft release body in place (keeps draft state)
           gh release edit "$TAG" --notes-file FINAL_RELEASE_NOTES.md
