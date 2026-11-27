@@ -69,11 +69,11 @@ Time on a desktop usually arrives in pieces: the clock in the taskbar, a separat
 
 ---
 
-<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
-
 ## 🖼️ Screenshots
 
-> Coming soon...
+![CyberClock main window showing the analog dial, digital header clock, three-month calendar ribbon, upcoming notes, and today summary](docs/screenshots/main-en.png)
+
+*Full mode view with the Quantum dial design, three-month calendar, upcoming agenda notes, and date summary.*
 
 ---
 

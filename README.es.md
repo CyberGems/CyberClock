@@ -69,11 +69,11 @@ El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tare
 
 ---
 
-<!-- Capturas: pendiente de la galería bilingüe ES/EN del plan en https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — sustituir la cita, conservar este título y su entrada en el índice. -->
-
 ## 🖼️ Capturas
 
-> Próximamente...
+![Ventana principal de CyberClock con reloj analógico, reloj digital superior, calendario de tres meses, agenda de próximos días y resumen de hoy](docs/screenshots/main-es.png)
+
+*Vista en modo completo con esfera Quantum, calendario trimestral, notas próximas y resumen de la fecha actual.*
 
 ---
 
