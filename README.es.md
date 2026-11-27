@@ -75,6 +75,10 @@ El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tare
 
 *Vista en modo completo con esfera Quantum, calendario trimestral, notas próximas y resumen de la fecha actual.*
 
+![Barras flotantes del Modo Mini de CyberClock mostrando las skins Deep Space apilada, Quantum en línea y Emerald Terminal en línea con barra de progreso diario](docs/screenshots/mini-es.png)
+
+*Modo Mini en formato barra compacta siempre visible, con diseño apilado o en línea sobre tres de las 20 skins disponibles.*
+
 ---
 
 ## 🕐 ¿Por qué CyberClock?

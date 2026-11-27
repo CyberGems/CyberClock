@@ -75,6 +75,10 @@ Time on a desktop usually arrives in pieces: the clock in the taskbar, a separat
 
 *Full mode view with the Quantum dial design, three-month calendar, upcoming agenda notes, and date summary.*
 
+![CyberClock Mini Mode floating bars showcasing Deep Space stacked, Quantum inline, and Emerald Terminal inline skins with day progress bar](docs/screenshots/mini-en.png)
+
+*Mini Mode compact always-on-top desktop bars in stacked and inline layouts across three of the 20 selectable skins.*
+
 ---
 
 ## 🕐 Why CyberClock?
