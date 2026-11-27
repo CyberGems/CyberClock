@@ -79,6 +79,10 @@ El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tare
 
 *Modo Mini en formato barra compacta siempre visible, con diseño apilado o en línea sobre tres de las 20 skins disponibles.*
 
+![Widgets flotantes de CyberClock mostrando el reloj analógico Corona de Gemas, calendario flotante con notas, reproductor Relax con espectro en vivo, temporizador flotante y cronómetro Quantum](docs/screenshots/widgets-es.png)
+
+*Widgets flotantes independientes: esfera Corona de Gemas, calendario con notas, mezclador ambiental Relax, temporizador con preajustes rápidos y cronómetro Quantum.*
+
 ---
 
 ## 🕐 ¿Por qué CyberClock?

@@ -79,6 +79,10 @@ Time on a desktop usually arrives in pieces: the clock in the taskbar, a separat
 
 *Mini Mode compact always-on-top desktop bars in stacked and inline layouts across three of the 20 selectable skins.*
 
+![CyberClock floating widgets showing the Gem Crown analog clock, floating calendar with day notes, Relax soundscape player with live spectrum, floating timer, and Quantum stopwatch](docs/screenshots/widgets-en.png)
+
+*Independent floating widgets: Gem Crown analog dial, calendar with notes, Relax ambient mixer, timer with quick-add presets, and Quantum stopwatch.*
+
 ---
 
 ## 🕐 Why CyberClock?
