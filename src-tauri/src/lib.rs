@@ -1,3 +1,5 @@
+mod github_star;
+mod github_star_cli;
 use chrono::{Datelike, TimeZone};
 use chrono::{Local, Timelike};
 use std::collections::{HashMap, HashSet};
@@ -6808,6 +6810,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            github_star::star_repository,
             get_settings,
             get_active_window,
             speak_announcement,

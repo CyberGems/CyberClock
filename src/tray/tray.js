@@ -213,6 +213,7 @@
         setLbl("lbl-suite-title", T("tray.suite", "More from CyberGems"));
         setLbl("lbl-back-new", T("tray.back", "Back"));
         setLbl("lbl-help", T("tray.help", "Help"));
+        setLbl("lbl-star", T("github.star", "Star on GitHub"));
         setLbl("lbl-center-widgets", T("tray.centerWidgets", "Center widgets on screen"));
         setLbl("lbl-pin-tray", T("tray.pinTrayIcon", "Pin icon to taskbar..."));
         setLbl("lbl-datetime", T("tray.datetimeProperties", "Date and time properties..."));
@@ -754,7 +755,10 @@
             e.preventDefault();
             e.stopPropagation();
             const action = btn.dataset.action;
-            if (action === "center-widgets") {
+            if (action === "github-star") {
+                hideMenu();
+                void window.cc.starRepository().catch(console.error);
+            } else if (action === "center-widgets") {
                 runAction("center_widgets");
             } else if (action === "pin-tray-icon") {
                 openTrayPinTip();

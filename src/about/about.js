@@ -20,6 +20,32 @@
     const T = (key, fallback) =>
         window.ccI18n ? window.ccI18n.t(key) : fallback || key;
 
+    const starButton = document.getElementById("ab-link-star");
+    if (starButton) {
+        starButton.addEventListener("click", async () => {
+            starButton.disabled = true;
+            const setLabel = (key) => {
+                starButton.dataset.i18nAttr = `data-tooltip:${key}, aria-label:${key}`;
+                starButton.dataset.tooltip = T(key);
+                starButton.setAttribute("aria-label", T(key));
+            };
+            setLabel("github.busy");
+            starButton.setAttribute("aria-busy", "true");
+            try {
+                const result = await window.cc.starRepository();
+                setLabel(`github.${result}`);
+                if (result === "starred") starButton.querySelector("svg").style.fill = "currentColor";
+                else starButton.disabled = false;
+            } catch (error) {
+                console.error("GitHub star failed", error);
+                setLabel("github.error");
+                starButton.disabled = false;
+            } finally {
+                starButton.setAttribute("aria-busy", "false");
+            }
+        });
+    }
+
     function openUrl(url) {
         if (window.cc && window.cc.openExternalUrl) {
             window.cc.openExternalUrl(url);

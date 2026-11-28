@@ -94,6 +94,14 @@
                                 <span class="lbl" data-i18n="tooltip.hideCalendar">Hide calendar</span>
                             </button>
                             <div class="tbar-more-divider"></div>
+                            <button type="button" class="tbar-more-item" data-action="help" aria-haspopup="menu" aria-expanded="false">
+                                <span class="ico" data-ico="help"></span><span class="lbl" data-i18n="tray.help">Help</span><span aria-hidden="true" data-help-chevron>›</span>
+                            </button>
+                            <div id="tbar-help-menu" role="menu" hidden>
+                                <button type="button" class="tbar-more-item" data-action="github-star">
+                                    <span class="ico" data-ico="star"></span><span class="lbl" data-i18n="github.star">Star on GitHub</span>
+                                </button>
+                                <div role="separator" class="tbar-more-divider"></div>
                             <button type="button" class="tbar-more-item" data-action="docs">
                                 <span class="ico" data-ico="book"></span>
                                 <span class="lbl" data-i18n="tray.docs">Online Documentation</span>
@@ -119,6 +127,7 @@
                                 <span class="ico" data-ico="info"></span>
                                 <span class="lbl" data-i18n="about.title">About CyberClock</span>
                             </button>
+                            </div>
                             <div class="tbar-more-divider"></div>
                             <button type="button" class="tbar-more-item close-item" data-action="exit">
                                 <span class="ico" data-ico="power"></span>

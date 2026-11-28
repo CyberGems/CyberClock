@@ -354,6 +354,11 @@
             // Pushed after every automatic or manual check.
             return subscribe("clock:accuracy", cb);
         },
+        starRepository: async () => {
+            if (HAS_TAURI) return await invoke("star_repository");
+            window.open("https://github.com/CyberGems/CyberClock", "_blank", "noopener,noreferrer");
+            return "opened";
+        },
         openExternalUrl: async (url) => {
             // Opens an https/ms-settings URL with the OS default handler.
             if (!HAS_TAURI) {

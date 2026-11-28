@@ -9391,7 +9391,7 @@
     let lastMenuPointerY = -1;
 
     function getMoreMenuItems() {
-        return Array.from(tbarMoreMenu ? tbarMoreMenu.querySelectorAll(".tbar-more-item") : []);
+        return Array.from(tbarMoreMenu ? tbarMoreMenu.querySelectorAll(".tbar-more-item") : []).filter(item => item.getClientRects().length > 0);
     }
 
     function focusMoreMenuItem(index) {
@@ -9405,6 +9405,8 @@
     function hideTbarMoreMenu(returnFocus = false) {
         if (!tbarMoreMenu || tbarMoreMenu.hidden) return;
         tbarMoreMenu.hidden = true;
+        document.getElementById("tbar-help-menu").hidden = true;
+        tbarMoreMenu.querySelector('[data-action="help"]').setAttribute("aria-expanded", "false");
         tbarMoreMenu.classList.remove("keyboard-nav");
         if (tbarBtnMore) {
             tbarBtnMore.setAttribute("aria-expanded", "false");
@@ -9501,9 +9503,18 @@
         tbarMoreMenu.querySelectorAll(".tbar-more-item").forEach((btn) => {
             btn.addEventListener("click", async (e) => {
                 e.stopPropagation();
-                hideTbarMoreMenu(false);
                 const action = btn.dataset.action;
-                if (action === "donate") {
+                if (action === "help") {
+                    const help = document.getElementById("tbar-help-menu");
+                    help.hidden = !help.hidden;
+                    btn.setAttribute("aria-expanded", String(!help.hidden));
+                    btn.querySelector("[data-help-chevron]").textContent = help.hidden ? "›" : "⌄";
+                    return;
+                }
+                hideTbarMoreMenu(false);
+                if (action === "github-star") {
+                    void window.cc.starRepository().catch(console.error);
+                } else if (action === "donate") {
                     window.cc.openExternalUrl("https://github.com/CyberGems/CyberClock#%EF%B8%8F-donate");
                 } else if (action === "center_widgets") {
                     if (window.cc && window.cc.trayMenuAction) {

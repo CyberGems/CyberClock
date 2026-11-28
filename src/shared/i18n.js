@@ -6,6 +6,12 @@
 (function () {
     const LOCALES = {
         en: {
+            "github.star": "Star on GitHub",
+            "github.busy": "Starring…",
+            "github.starred": "Starred, thank you",
+            "github.opened": "Complete your star on GitHub",
+            "github.error": "Could not open GitHub. Retry",
+
             "relax.audioSpectrum": "Audio Spectrum",
             "relax.autoStop": "Auto Stop",
             "relax.autoStopOff": "Off",
@@ -1057,6 +1063,12 @@
             "about.updateSkipped": "Update {version} skipped"
         },
         es: {
+            "github.star": "Dar una estrella en GitHub",
+            "github.busy": "Enviando estrella…",
+            "github.starred": "Estrella añadida, gracias",
+            "github.opened": "Completa la estrella en GitHub",
+            "github.error": "No se pudo abrir GitHub. Reintentar",
+
             "relax.audioSpectrum": "Espectro de Audio",
             "relax.autoStop": "Parada Automática",
             "relax.autoStopOff": "No",
