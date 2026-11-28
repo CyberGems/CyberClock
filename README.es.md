@@ -83,6 +83,10 @@ El tiempo en un escritorio suele llegar por partes: el reloj de la barra de tare
 
 *Widgets flotantes independientes: esfera Corona de Gemas, calendario con notas, mezclador ambiental Relax, temporizador con preajustes rápidos y cronómetro Quantum.*
 
+![Menú en la bandeja del sistema de CyberClock con selector de Modo completo y Modo Mini, submenú Nuevo, pausa de Relax, clic transparente y sonido](docs/screenshots/tray-menu-es.png)
+
+*Menú de bandeja personalizado para alternar entre Modo completo y Modo Mini, abrir widgets flotantes, pausar Relax y controlar el clic transparente.*
+
 ---
 
 ## 🕐 ¿Por qué CyberClock?

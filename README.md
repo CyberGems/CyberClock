@@ -83,6 +83,10 @@ Time on a desktop usually arrives in pieces: the clock in the taskbar, a separat
 
 *Independent floating widgets: Gem Crown analog dial, calendar with notes, Relax ambient mixer, timer with quick-add presets, and Quantum stopwatch.*
 
+![CyberClock system tray menu with Full and Mini Mode toggles, New widgets flyout, Relax playback pause, click-through, and audio toggle](docs/screenshots/tray-menu-en.png)
+
+*Custom themed system tray menu for switching between Full and Mini Mode, launching widgets, controlling Relax audio, and toggling click-through.*
+
 ---
 
 ## 🕐 Why CyberClock?
